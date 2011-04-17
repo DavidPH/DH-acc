@@ -1,0 +1,43 @@
+/* Copyright (C) 2011 David Hill
+**
+** This program is free software: you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/* SourcePosition.cpp
+**
+** SourcePosition methods.
+*/
+
+#include "SourcePosition.hpp"
+
+
+
+SourcePosition::SourcePosition() : filename(), line(0)
+{
+
+}
+SourcePosition::SourcePosition(std::string const & filename_, long const line_) : filename(filename_), line(line_)
+{
+
+}
+
+
+
+std::ostream & operator << (std::ostream & out, SourcePosition const & in)
+{
+	return out << in.filename << ':' << in.line;
+}
+
+
+
