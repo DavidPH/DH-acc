@@ -62,6 +62,7 @@ public:
 		BCODE_ENDPRINT          =  86,
 		BCODE_PRINTNUMBER       =  88,
 
+		BCODE_PRINTFIXED        = 157,
 		BCODE_DUP               = 216,
 		BCODE_PUSHGLOBALARRAY   = 235,
 		BCODE_ASSIGNGLOBALARRAY = 236,

@@ -24,6 +24,7 @@
 
 #include "SourcePosition.hpp"
 
+#include <map>
 #include <stdint.h>
 #include <vector>
 
@@ -64,6 +65,7 @@ public:
 		OCODE_ASSIGNGLOBALARRAY,
 		OCODE_DUP,
 		OCODE_ENDLOG,
+		OCODE_PRINTFIXED,
 		OCODE_PUSHGLOBALARRAY,
 
 		OCODE_NONE
@@ -79,10 +81,21 @@ public:
 
 	SourcePosition const & getPosition() const;
 
+
+
+	static void add_symbol(std::string const & symbol, int32_t const value);
+
+	static int32_t get_symbol(std::string const & symbol, SourcePosition const & position);
+
 private:
 	std::vector<int32_t> _args;
 	ObjectCode _code;
 	SourcePosition _position;
+
+
+
+	static std::map<std::string, int32_t> _label_table;
+	static std::map<std::string, int32_t> _symbol_table;
 };
 
 

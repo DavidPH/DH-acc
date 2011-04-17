@@ -77,6 +77,13 @@ private:
 
 	static bool isexprc(char const c);
 
+	static int32_t char_to_int(char const c, int32_t const base, SourcePosition const & position);
+
+	static int32_t resolve_expression(std::string const & expr, SourcePosition const & position);
+
+	// Returns -1 for number 0.
+	static int32_t string_to_base(std::string const & s, SourcePosition const & position);
+	static int32_t string_to_fixed(std::string const & s, SourcePosition const & position);
 	static int32_t string_to_int(std::string const & s, SourcePosition const & position);
 
 	static std::map<std::string, std::pair<ObjectToken::ObjectCode, int> > _arg_counts;

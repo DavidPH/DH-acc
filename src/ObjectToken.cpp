@@ -21,11 +21,23 @@
 
 #include "ObjectToken.hpp"
 
+#include "SourceException.hpp"
+
+
+
+std::map<std::string, int32_t> ObjectToken::_label_table;
+std::map<std::string, int32_t> ObjectToken::_symbol_table;
+
 
 
 ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<int32_t> const & args) : _args(args), _code(code), _position(position)
 {
 
+}
+
+void ObjectToken::add_symbol(std::string const & symbol, int32_t const value)
+{
+	_symbol_table[symbol] = value;
 }
 
 int32_t ObjectToken::getArgInt32(uintptr_t const index) const
@@ -44,6 +56,16 @@ ObjectToken::ObjectCode ObjectToken::getCode() const
 SourcePosition const & ObjectToken::getPosition() const
 {
 	return _position;
+}
+
+int32_t ObjectToken::get_symbol(std::string const & symbol, SourcePosition const & position)
+{
+	std::map<std::string, int32_t>::iterator valueIt(_symbol_table.find(symbol));
+
+	if (valueIt == _symbol_table.end())
+		throw SourceException("unknown symbol", position, "ObjectToken");
+
+	return valueIt->second;
 }
 
 

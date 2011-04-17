@@ -97,6 +97,41 @@ SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name()
 	}
 }
 
+int32_t SourceTokenASMPLX::char_to_int(char const c, int32_t const base, SourcePosition const & position)
+{
+	switch (base)
+	{
+	case 2:
+		if (c >= '0' && c <= '1')
+			return c - '0';
+		else
+			throw SourceException("invalid bin number", position, "SourceTokenASMPLX");
+
+	case 8:
+		if (c >= '0' && c <= '7')
+			return c - '0';
+		else
+			throw SourceException("invalid oct number", position, "SourceTokenASMPLX");
+
+	case 10:
+		if (c >= '0' && c <= '9')
+			return c - '0';
+		else
+			throw SourceException("invalid dec number", position, "SourceTokenASMPLX");
+
+	case 16:
+		if (c >= '0' && c <= '9')
+			return c - '0';
+		else if (c >= 'A' && c <= 'F')
+			return (c - 'A') + 10;
+		else
+			throw SourceException("invalid hex number", position, "SourceTokenASMPLX");
+
+	default:
+		throw SourceException("invalid base number", position, "SourceTokenASMPLX");
+	}
+}
+
 std::string const & SourceTokenASMPLX::getData(uintptr_t const index) const
 {
 	static std::string const s;
@@ -107,7 +142,7 @@ std::string const & SourceTokenASMPLX::getData(uintptr_t const index) const
 }
 int32_t SourceTokenASMPLX::getDataInt32(uintptr_t const index) const
 {
-	return string_to_int(getData(index), _position);
+	return resolve_expression(getData(index), _position);
 }
 
 uintptr_t SourceTokenASMPLX::getDataSize() const
@@ -165,6 +200,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(ASSIGNGLOBALARRAY, 1);
 	DO_INIT(DUP,               0);
 	DO_INIT(ENDLOG,            0);
+	DO_INIT(PRINTFIXED,        0);
 	DO_INIT(PUSHGLOBALARRAY,   1);
 
 	#undef DO_INIT
@@ -177,26 +213,33 @@ void SourceTokenASMPLX::initObject() const
 
 void SourceTokenASMPLX::makeObject(std::vector<ObjectToken> * const objects) const
 {
-	std::map<std::string, std::pair<ObjectToken::ObjectCode, int> >::iterator argIt(_arg_counts.find(_name));
-
-	if (argIt == _arg_counts.end())
-		throw SourceException("unknown name", _position, "SourceTokenASMPLX");
-
-	ObjectToken::ObjectCode const & code(argIt->second.first);
-	int const & argC(argIt->second.second);
-
-	if (argC == -1)
+	if (_type == ' ')
 	{
+		std::map<std::string, std::pair<ObjectToken::ObjectCode, int> >::iterator argIt(_arg_counts.find(_name));
 
+		if (argIt == _arg_counts.end())
+			throw SourceException("unknown name", _position, "SourceTokenASMPLX");
+
+		ObjectToken::ObjectCode const & code(argIt->second.first);
+		int const & argC(argIt->second.second);
+
+		if (argC == -1)
+		{
+
+		}
+		else
+		{
+			std::vector<int32_t> args;
+
+			for (int i(0); i < argC; ++i)
+				args.push_back(getDataInt32(i));
+
+			objects->push_back(ObjectToken(code, _position, args));
+		}
 	}
-	else
+	else if (_type == '=')
 	{
-		std::vector<int32_t> args;
-
-		for (int i(0); i < argC; ++i)
-			args.push_back(getDataInt32(i));
-
-		objects->push_back(ObjectToken(code, _position, args));
+		ObjectToken::add_symbol(_name, getDataInt32(0));
 	}
 }
 
@@ -235,77 +278,133 @@ void SourceTokenASMPLX::read_tokens(SourceStream * const in, std::vector<SourceT
 	}
 }
 
-int32_t SourceTokenASMPLX::string_to_int(std::string const & s, SourcePosition const & position)
+int32_t SourceTokenASMPLX::resolve_expression(std::string const & expr, SourcePosition const & position)
 {
-	if (s.empty() || s == "0") return 0;
+	if (expr.empty()) return 0;
+
+	// Start with the last operator because the last op found is the first
+	// one evaluated.
+	uintptr_t index = expr.find_last_of("*/%+-&|^");
+
+	if (index == std::string::npos)
+	{
+		if (expr[0] == '0')
+		{
+			if (expr.find_first_of('.') == std::string::npos)
+				return string_to_int(expr, position);
+			else
+				return string_to_fixed(expr, position);
+		}
+		else
+		{
+			return ObjectToken::get_symbol(expr, position);
+		}
+	}
+	else if (index == 0)
+	{
+		switch (expr[0])
+		{
+		case '+':
+		case '-':
+			if (expr[1] == '0')
+			{
+				if (expr.find_first_of('.') == std::string::npos)
+					return string_to_int(expr, position);
+				else
+					return string_to_fixed(expr, position);
+			}
+			else
+			{
+				if (expr[0] == '-')
+					return -ObjectToken::get_symbol(expr.substr(1), position);
+				else
+					return  ObjectToken::get_symbol(expr.substr(1), position);
+			}
+
+		default: throw SourceException("unknown prefix operator", position, "SourceTokenASMPLX");
+		}
+	}
+	else
+	{
+		// Check for any prefix operators.
+		if
+		(
+			expr[index-1] == '*' || expr[index-1] == '/' ||
+			expr[index-1] == '%' || expr[index-1] == '+' ||
+			expr[index-1] == '-' || expr[index-1] == '&' ||
+			expr[index-1] == '|' || expr[index-1] == '^'
+		)
+		{
+			--index;
+		}
+
+		switch (expr[index])
+		{
+		case '*': return resolve_expression(expr.substr(0, index), position) * resolve_expression(expr.substr(index+1), position);
+		case '/': return resolve_expression(expr.substr(0, index), position) / resolve_expression(expr.substr(index+1), position);
+		case '%': return resolve_expression(expr.substr(0, index), position) % resolve_expression(expr.substr(index+1), position);
+		case '+': return resolve_expression(expr.substr(0, index), position) + resolve_expression(expr.substr(index+1), position);
+		case '-': return resolve_expression(expr.substr(0, index), position) - resolve_expression(expr.substr(index+1), position);
+		case '&': return resolve_expression(expr.substr(0, index), position) & resolve_expression(expr.substr(index+1), position);
+		case '|': return resolve_expression(expr.substr(0, index), position) | resolve_expression(expr.substr(index+1), position);
+		case '^': return resolve_expression(expr.substr(0, index), position) ^ resolve_expression(expr.substr(index+1), position);
+		default: return (int32_t)0xDEADBEEFU; // This should never happen.
+		}
+	}
+}
+
+int32_t SourceTokenASMPLX::string_to_base(std::string const & s, SourcePosition const & position)
+{
+	if (s.empty() || s == "0") return -1;
 
 	if (s.size() < 2 || s[0] != '0')
 		throw SourceException("invalid number", position, "SourceTokenASMPLX");
 
-	int32_t i(0);
-
 	switch (s[1])
 	{
-	case 'b':
-		for (uintptr_t index(2); index < s.size(); ++index)
-		{
-			char const & c(s[index]);
+	case 'b': return  2;
+	case 'o': return  8;
+	case 'd': return 10;
+	case 'x': return 16;
 
-			i *= 2;
+	default: throw SourceException("invalid base", position, "SourceTokenASMPLX");
+	}
+}
+int32_t SourceTokenASMPLX::string_to_fixed(std::string const & s, SourcePosition const & position)
+{
+	int32_t base(string_to_base(s, position));
 
-			if (c >= '0' && c <= '1')
-				i += c - '0';
-			else
-				throw SourceException("invalid binary number", position, "SourceTokenASMPLX");
-		}
-		break;
+	if (base == -1) return 0;
 
-	case 'o':
-		for (uintptr_t index(2); index < s.size(); ++index)
-		{
-			char const & c(s[index]);
+	uintptr_t index(2);
 
-			i *= 8;
+	int32_t fInt(0);
+	for (; index < s.size() && s[index] != '.'; ++index)
+	{
+		fInt *= base;
+		fInt += char_to_int(s[index], base, position);
+	}
 
-			if (c >= '0' && c <= '7')
-				i += c - '0';
-			else
-				throw SourceException("invalid octal number", position, "SourceTokenASMPLX");
-		}
-		break;
+	int32_t fFrac(0);
+	for (++index; index < s.size(); ++index)
+	{
+		fFrac += char_to_int(s[index], base, position) << 16;
+		fFrac /= base;
+	}
 
-	case 'd':
-		for (uintptr_t index(2); index < s.size(); ++index)
-		{
-			char const & c(s[index]);
+	return (fInt << 16) + fFrac;
+}
+int32_t SourceTokenASMPLX::string_to_int(std::string const & s, SourcePosition const & position)
+{
+	int32_t base(string_to_base(s, position));
 
-			i *= 10;
+	if (base == -1) return 0;
 
-			if (c >= '0' && c <= '9')
-				i += c - '0';
-			else
-				throw SourceException("invalid decimal number", position, "SourceTokenASMPLX");
-		}
-		break;
-
-	case 'x':
-		for (uintptr_t index(2); index < s.size(); ++index)
-		{
-			char const & c(s[index]);
-
-			i *= 16;
-
-			if (c >= '0' && c <= '9')
-				i += c - '0';
-			else if (c >= 'A' && c <= 'F')
-				i += (c - 'A') + 10;
-			else
-				throw SourceException("invalid hex number", position, "SourceTokenASMPLX");
-		}
-		break;
-
-	default:
-		throw SourceException("invalid number", position, "SourceTokenASMPLX");
+	int32_t i(0);
+	for (uintptr_t index(2); index < s.size(); ++index)
+	{
+		i *= base;
+		i += char_to_int(s[index], base, position);
 	}
 
 	return i;
