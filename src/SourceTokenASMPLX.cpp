@@ -21,6 +21,7 @@
 
 #include "SourceTokenASMPLX.hpp"
 
+#include "BinaryTokenZDACS.hpp"
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
 
@@ -132,6 +133,33 @@ int32_t SourceTokenASMPLX::char_to_int(char const c, int32_t const base, SourceP
 	}
 }
 
+int32_t SourceTokenASMPLX::getAddressCount() const
+{
+	if (_type == ' ')
+	{
+		std::map<std::string, std::pair<ObjectToken::ObjectCode, int> >::iterator argIt(_arg_counts.find(_name));
+
+		if (argIt == _arg_counts.end())
+			throw SourceException("unknown name", _position, "SourceTokenASMPLX");
+
+		ObjectToken::ObjectCode const & code(argIt->second.first);
+		int const & argC(argIt->second.second);
+
+		if (argC == -1)
+		{
+			return 0;
+		}
+		else
+		{
+			return BinaryTokenZDACS::get_address_count(code, _position);
+		}
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 std::string const & SourceTokenASMPLX::getData(uintptr_t const index) const
 {
 	static std::string const s;
@@ -177,6 +205,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(DELAY,           0);
 	DO_INIT(DELAYDIRECT,     1);
 	DO_INIT(DROP,            0);
+	DO_INIT(GOTO,            1);
 	DO_INIT(ENDPRINT,        0);
 	DO_INIT(LSPEC1,          1);
 	DO_INIT(LSPEC1DIRECT,    2);
@@ -206,25 +235,6 @@ void SourceTokenASMPLX::init()
 	DO_INIT(PUSHGLOBALARRAY,   1);
 
 	#undef DO_INIT
-}
-
-void SourceTokenASMPLX::initObject() const
-{
-	if (_type == ':')
-	{
-		if (_data.empty())
-		{
-
-		}
-		else
-		{
-			std::string value;
-			for (uintptr_t index(0); index < _data.size(); ++index)
-				value += (char)string_to_int(_data[index], _position);
-
-			ObjectToken::add_string(_name, value);
-		}
-	}
 }
 
 bool SourceTokenASMPLX::isexprc(char const c)
@@ -263,6 +273,48 @@ void SourceTokenASMPLX::makeObject(std::vector<ObjectToken> * const objects) con
 	else if (_type == '=')
 	{
 		ObjectToken::add_symbol(_name, getDataInt32(0));
+	}
+}
+
+void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & tokens, std::vector<ObjectToken> * const objects)
+{
+	for (uintptr_t index(0); index < tokens.size(); ++index)
+	{
+		SourceTokenASMPLX const & token(tokens[index]);
+
+		if (token._type == ':')
+		{
+			if (!token._data.empty())
+			{
+				std::string value;
+				for (uintptr_t index(0); index < token._data.size(); ++index)
+					value += (char)string_to_int(token._data[index], token._position);
+
+				ObjectToken::add_string(token._name, value);
+			}
+		}
+	}
+
+	for (uintptr_t index(0); index < tokens.size(); ++index)
+	{
+		SourceTokenASMPLX const & token(tokens[index]);
+
+		if (token._type == ' ')
+		{
+			ObjectToken::add_address_count(token.getAddressCount());
+		}
+		else if (token._type == ':')
+		{
+			if (token._data.empty())
+			{
+				ObjectToken::add_label(token._name);
+			}
+		}
+	}
+
+	for (uintptr_t index(0); index < tokens.size(); ++index)
+	{
+		tokens[index].makeObject(objects);
 	}
 }
 

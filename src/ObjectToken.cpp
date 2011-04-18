@@ -25,6 +25,7 @@
 
 
 
+int32_t ObjectToken::_address_count(8+4+4+12);
 std::vector<std::pair<std::string, int32_t> > ObjectToken::_string_table;
 std::map<std::string, int32_t> ObjectToken::_symbol_table;
 
@@ -35,10 +36,21 @@ ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position,
 
 }
 
+void ObjectToken::add_address_count(int32_t const addressCount)
+{
+	_address_count += addressCount;
+}
+
+void ObjectToken::add_label(std::string const & symbol)
+{
+	add_symbol(symbol, _address_count);
+}
+
 void ObjectToken::add_string(std::string const & symbol, std::string const & value)
 {
 	// TODO: Option for string folding.
 
+	add_address_count(4 + (int32_t)value.size());
 	add_symbol(symbol, (int32_t)_string_table.size());
 
 	_string_table.push_back(std::pair<std::string, int32_t>(value, get_string_length()));

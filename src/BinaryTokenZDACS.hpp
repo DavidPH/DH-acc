@@ -22,13 +22,12 @@
 #ifndef HPP_BinaryTokenZDACS_
 #define HPP_BinaryTokenZDACS_
 
+#include "ObjectToken.hpp"
 #include "SourcePosition.hpp"
 
 #include <ostream>
 #include <stdint.h>
 #include <vector>
-
-class ObjectToken;
 
 
 
@@ -54,6 +53,7 @@ public:
 		BCODE_ADD               =  14,
 		BCODE_ASSIGNSCRIPTVAR   =  25,
 		BCODE_PUSHSCRIPTVAR     =  28,
+		BCODE_GOTO              =  52,
 		BCODE_DROP              =  54,
 		BCODE_DELAY             =  55,
 		BCODE_DELAYDIRECT       =  56,
@@ -86,6 +86,8 @@ public:
 	void write(std::ostream * const out) const;
 
 
+
+	static int32_t get_address_count(ObjectToken::ObjectCode const code, SourcePosition const & position);
 
 	static void init();
 

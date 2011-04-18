@@ -55,19 +55,20 @@ public:
 
 	TokenType getType() const;
 
-	// Applies any compiler state change indicated by this token.
-	void initObject() const;
-
-	// Creates an ObjectToken from this token.
-	void makeObject(std::vector<ObjectToken> * const objects) const;
-
 
 
 	static void init();
 
+	static void make_objects(std::vector<SourceTokenASMPLX> const & tokens, std::vector<ObjectToken> * const objects);
+
 	static void read_tokens(SourceStream * const in, std::vector<SourceTokenASMPLX> * const tokens);
 
 private:
+	int32_t getAddressCount() const;
+
+	// Creates an ObjectToken from this token.
+	void makeObject(std::vector<ObjectToken> * const objects) const;
+
 	std::vector<std::string> _data;
 	std::string _name;
 	SourcePosition _position;

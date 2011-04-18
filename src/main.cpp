@@ -42,18 +42,12 @@ static inline int _main(int const argc, char const * const * const argv)
 	SourceStream in(&ifs, argv[1], SourceStream::ST_ASMPLX);
 
 	std::vector<SourceTokenASMPLX> tokens;
-
 	SourceTokenASMPLX::read_tokens(&in, &tokens);
 
 	std::vector<ObjectToken> objects;
-
-	for (std::vector<SourceTokenASMPLX>::iterator it(tokens.begin()); it != tokens.end(); ++it)
-		it->initObject();
-	for (std::vector<SourceTokenASMPLX>::iterator it(tokens.begin()); it != tokens.end(); ++it)
-		it->makeObject(&objects);
+	SourceTokenASMPLX::make_objects(tokens, &objects);
 
 	std::vector<BinaryTokenZDACS> instructions;
-
 	BinaryTokenZDACS::make_tokens(objects, &instructions);
 
 	int32_t scriptCount(1);

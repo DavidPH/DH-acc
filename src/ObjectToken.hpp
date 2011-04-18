@@ -44,6 +44,7 @@ public:
 		OCODE_DELAYDIRECT,
 		OCODE_DROP,
 		OCODE_ENDPRINT,
+		OCODE_GOTO,
 		OCODE_LSPEC1,
 		OCODE_LSPEC1DIRECT,
 		OCODE_LSPEC2,
@@ -86,6 +87,11 @@ public:
 
 
 
+	static void add_address_count(int32_t const addressCount);
+
+	// Adds a label for the current address count.
+	static void add_label(std::string const & symbol);
+
 	static void add_string(std::string const & symbol, std::string const & value);
 
 	static void add_symbol(std::string const & symbol, int32_t const value);
@@ -108,6 +114,7 @@ private:
 
 
 
+	static int32_t _address_count;
 	// {string, offset} Yes, signed. If it's a problem, I'll change it.
 	static std::vector<std::pair<std::string, int32_t> > _string_table;
 	static std::map<std::string, int32_t> _symbol_table;

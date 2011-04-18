@@ -21,7 +21,6 @@
 
 #include "BinaryTokenZDACS.hpp"
 
-#include "ObjectToken.hpp"
 #include "SourceException.hpp"
 
 
@@ -74,6 +73,67 @@ BinaryTokenZDACS::BinaryTokenZDACS(BinaryCode const code, SourcePosition const &
 	_args[5] = arg5;
 }
 
+int32_t BinaryTokenZDACS::get_address_count(ObjectToken::ObjectCode const code, SourcePosition const & position)
+{
+	#define CASE_DIRECTMAP0(NAME) case ObjectToken::OCODE_##NAME: return 1*4
+	#define CASE_DIRECTMAP1(NAME) case ObjectToken::OCODE_##NAME: return 2*4
+	#define CASE_DIRECTMAP2(NAME) case ObjectToken::OCODE_##NAME: return 3*4
+	#define CASE_DIRECTMAP3(NAME) case ObjectToken::OCODE_##NAME: return 4*4
+	#define CASE_DIRECTMAP4(NAME) case ObjectToken::OCODE_##NAME: return 5*4
+	#define CASE_DIRECTMAP5(NAME) case ObjectToken::OCODE_##NAME: return 6*4
+	#define CASE_DIRECTMAP6(NAME) case ObjectToken::OCODE_##NAME: return 7*4
+
+	switch (code)
+	{
+	CASE_DIRECTMAP0(ADD);
+	CASE_DIRECTMAP1(ASSIGNSCRIPTVAR);
+	CASE_DIRECTMAP0(BEGINPRINT);
+	CASE_DIRECTMAP0(DELAY);
+	CASE_DIRECTMAP1(DELAYDIRECT);
+	CASE_DIRECTMAP0(DROP);
+	CASE_DIRECTMAP0(ENDPRINT);
+	CASE_DIRECTMAP1(GOTO);
+	CASE_DIRECTMAP1(LSPEC1);
+	CASE_DIRECTMAP2(LSPEC1DIRECT);
+	CASE_DIRECTMAP1(LSPEC2);
+	CASE_DIRECTMAP3(LSPEC2DIRECT);
+	CASE_DIRECTMAP1(LSPEC3);
+	CASE_DIRECTMAP4(LSPEC3DIRECT);
+	CASE_DIRECTMAP1(LSPEC4);
+	CASE_DIRECTMAP5(LSPEC4DIRECT);
+	CASE_DIRECTMAP1(LSPEC5);
+	CASE_DIRECTMAP6(LSPEC5DIRECT);
+	CASE_DIRECTMAP0(NOP);
+	CASE_DIRECTMAP0(PRINTCHARACTER);
+	CASE_DIRECTMAP0(PRINTNUMBER);
+	CASE_DIRECTMAP0(PRINTSTRING);
+	CASE_DIRECTMAP1(PUSHNUMBER);
+	CASE_DIRECTMAP1(PUSHSCRIPTVAR);
+	CASE_DIRECTMAP0(RESTART);
+	CASE_DIRECTMAP0(SUSPEND);
+	CASE_DIRECTMAP0(TERMINATE);
+
+	CASE_DIRECTMAP1(ASSIGNGLOBALARRAY);
+	CASE_DIRECTMAP0(DUP);
+	CASE_DIRECTMAP0(ENDLOG);
+	CASE_DIRECTMAP0(PRINTFIXED);
+	CASE_DIRECTMAP1(PUSHGLOBALARRAY);
+
+	case ObjectToken::OCODE_NONE:
+		throw SourceException("unknown OCODE", position, "BinaryTokenZDACS");
+	}
+
+	throw SourceException("invalid OCODE", position, "BinaryTokenZDACS");
+
+	#undef CASE_DIRECTMAP6
+	#undef CASE_DIRECTMAP5
+	#undef CASE_DIRECTMAP4
+	#undef CASE_DIRECTMAP3
+	#undef CASE_DIRECTMAP2
+	#undef CASE_DIRECTMAP1
+	#undef CASE_DIRECTMAP0
+}
+
 void BinaryTokenZDACS::init()
 {
 	#define DO_INIT(NAME,ARGC)\
@@ -87,6 +147,7 @@ void BinaryTokenZDACS::init()
 	DO_INIT(DELAYDIRECT,     1);
 	DO_INIT(DROP,            0);
 	DO_INIT(ENDPRINT,        0);
+	DO_INIT(GOTO,            1);
 	DO_INIT(LSPEC1,          1);
 	DO_INIT(LSPEC1DIRECT,    2);
 	DO_INIT(LSPEC2,          1);
@@ -121,79 +182,77 @@ void BinaryTokenZDACS::make_tokens(std::vector<ObjectToken> const & objects, std
 {
 	#define CASE_DIRECTMAP0(NAME)\
 	case ObjectToken::OCODE_##NAME:\
-		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, object->getPosition()));\
+		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, objects[index].getPosition()));\
 		break
 
 	#define CASE_DIRECTMAP1(NAME)\
 	case ObjectToken::OCODE_##NAME:\
-		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, object->getPosition(), object->getArgInt32(0)));\
+		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, objects[index].getPosition(), objects[index].getArgInt32(0)));\
 		break
 
 	#define CASE_DIRECTMAP2(NAME)\
 	case ObjectToken::OCODE_##NAME:\
-		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, object->getPosition(), object->getArgInt32(0), object->getArgInt32(1)));\
+		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, objects[index].getPosition(), objects[index].getArgInt32(0), objects[index].getArgInt32(1)));\
 		break
 
 	#define CASE_DIRECTMAP3(NAME)\
 	case ObjectToken::OCODE_##NAME:\
-		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, object->getPosition(), object->getArgInt32(0), object->getArgInt32(1), object->getArgInt32(2)));\
+		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, objects[index].getPosition(), objects[index].getArgInt32(0), objects[index].getArgInt32(1), objects[index].getArgInt32(2)));\
 		break
 
 	#define CASE_DIRECTMAP4(NAME)\
 	case ObjectToken::OCODE_##NAME:\
-		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, object->getPosition(), object->getArgInt32(0), object->getArgInt32(1), object->getArgInt32(2), object->getArgInt32(3)));\
+		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, objects[index].getPosition(), objects[index].getArgInt32(0), objects[index].getArgInt32(1), objects[index].getArgInt32(2), objects[index].getArgInt32(3)));\
 		break
 
 	#define CASE_DIRECTMAP5(NAME)\
 	case ObjectToken::OCODE_##NAME:\
-		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, object->getPosition(), object->getArgInt32(0), object->getArgInt32(1), object->getArgInt32(2), object->getArgInt32(3), object->getArgInt32(4)));\
+		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, objects[index].getPosition(), objects[index].getArgInt32(0), objects[index].getArgInt32(1), objects[index].getArgInt32(2), objects[index].getArgInt32(3), objects[index].getArgInt32(4)));\
 		break
 
 	#define CASE_DIRECTMAP6(NAME)\
 	case ObjectToken::OCODE_##NAME:\
-		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, object->getPosition(), object->getArgInt32(0), object->getArgInt32(1), object->getArgInt32(2), object->getArgInt32(3), object->getArgInt32(4), object->getArgInt32(5)));\
+		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, objects[index].getPosition(), objects[index].getArgInt32(0), objects[index].getArgInt32(1), objects[index].getArgInt32(2), objects[index].getArgInt32(3), objects[index].getArgInt32(4), objects[index].getArgInt32(5)));\
 		break
 
-	for (std::vector<ObjectToken>::const_iterator object(objects.begin()); object != objects.end(); ++object)
+	for (uintptr_t index(0); index < objects.size(); ++index) switch (objects[index].getCode())
 	{
-		switch (object->getCode())
-		{
-		CASE_DIRECTMAP0(ADD);
-		CASE_DIRECTMAP1(ASSIGNSCRIPTVAR);
-		CASE_DIRECTMAP0(BEGINPRINT);
-		CASE_DIRECTMAP0(DELAY);
-		CASE_DIRECTMAP1(DELAYDIRECT);
-		CASE_DIRECTMAP0(DROP);
-		CASE_DIRECTMAP0(ENDPRINT);
-		CASE_DIRECTMAP1(LSPEC1);
-		CASE_DIRECTMAP2(LSPEC1DIRECT);
-		CASE_DIRECTMAP1(LSPEC2);
-		CASE_DIRECTMAP3(LSPEC2DIRECT);
-		CASE_DIRECTMAP1(LSPEC3);
-		CASE_DIRECTMAP4(LSPEC3DIRECT);
-		CASE_DIRECTMAP1(LSPEC4);
-		CASE_DIRECTMAP5(LSPEC4DIRECT);
-		CASE_DIRECTMAP1(LSPEC5);
-		CASE_DIRECTMAP6(LSPEC5DIRECT);
-		CASE_DIRECTMAP0(NOP);
-		CASE_DIRECTMAP0(PRINTCHARACTER);
-		CASE_DIRECTMAP0(PRINTNUMBER);
-		CASE_DIRECTMAP0(PRINTSTRING);
-		CASE_DIRECTMAP1(PUSHNUMBER);
-		CASE_DIRECTMAP1(PUSHSCRIPTVAR);
-		CASE_DIRECTMAP0(RESTART);
-		CASE_DIRECTMAP0(SUSPEND);
-		CASE_DIRECTMAP0(TERMINATE);
+	CASE_DIRECTMAP0(ADD);
+	CASE_DIRECTMAP1(ASSIGNSCRIPTVAR);
+	CASE_DIRECTMAP0(BEGINPRINT);
+	CASE_DIRECTMAP0(DELAY);
+	CASE_DIRECTMAP1(DELAYDIRECT);
+	CASE_DIRECTMAP0(DROP);
+	CASE_DIRECTMAP0(ENDPRINT);
+	CASE_DIRECTMAP1(GOTO);
+	CASE_DIRECTMAP1(LSPEC1);
+	CASE_DIRECTMAP2(LSPEC1DIRECT);
+	CASE_DIRECTMAP1(LSPEC2);
+	CASE_DIRECTMAP3(LSPEC2DIRECT);
+	CASE_DIRECTMAP1(LSPEC3);
+	CASE_DIRECTMAP4(LSPEC3DIRECT);
+	CASE_DIRECTMAP1(LSPEC4);
+	CASE_DIRECTMAP5(LSPEC4DIRECT);
+	CASE_DIRECTMAP1(LSPEC5);
+	CASE_DIRECTMAP6(LSPEC5DIRECT);
+	CASE_DIRECTMAP0(NOP);
+	CASE_DIRECTMAP0(PRINTCHARACTER);
+	CASE_DIRECTMAP0(PRINTNUMBER);
+	CASE_DIRECTMAP0(PRINTSTRING);
+	CASE_DIRECTMAP1(PUSHNUMBER);
+	CASE_DIRECTMAP1(PUSHSCRIPTVAR);
+	CASE_DIRECTMAP0(RESTART);
+	CASE_DIRECTMAP0(SUSPEND);
+	CASE_DIRECTMAP0(TERMINATE);
 
-		CASE_DIRECTMAP1(ASSIGNGLOBALARRAY);
-		CASE_DIRECTMAP0(DUP);
-		CASE_DIRECTMAP0(ENDLOG);
-		CASE_DIRECTMAP0(PRINTFIXED);
-		CASE_DIRECTMAP1(PUSHGLOBALARRAY);
+	CASE_DIRECTMAP1(ASSIGNGLOBALARRAY);
+	CASE_DIRECTMAP0(DUP);
+	CASE_DIRECTMAP0(ENDLOG);
+	CASE_DIRECTMAP0(PRINTFIXED);
+	CASE_DIRECTMAP1(PUSHGLOBALARRAY);
 
-		case ObjectToken::OCODE_NONE:
-			throw SourceException("unknown OCODE", object->getPosition(), "BinaryTokenZDACS");
-		}
+	case ObjectToken::OCODE_NONE:
+		throw SourceException("unknown OCODE", objects[index].getPosition(), "BinaryTokenZDACS");
 	}
 
 	#undef CASE_DIRECTMAP6
