@@ -189,7 +189,9 @@ void SourceTokenASMPLX::init()
 	DO_INIT(LSPEC5,          1);
 	DO_INIT(LSPEC5DIRECT,    6);
 	DO_INIT(NOP,             0);
+	DO_INIT(PRINTCHARACTER,  0);
 	DO_INIT(PRINTNUMBER,     0);
+	DO_INIT(PRINTSTRING,     0);
 	DO_INIT(PUSHNUMBER,      1);
 	DO_INIT(PUSHSCRIPTVAR,   1);
 	DO_INIT(RESTART,         0);
@@ -208,7 +210,28 @@ void SourceTokenASMPLX::init()
 
 void SourceTokenASMPLX::initObject() const
 {
+	if (_type == ':')
+	{
+		if (_data.empty())
+		{
 
+		}
+		else
+		{
+			std::string value;
+			for (uintptr_t index(0); index < _data.size(); ++index)
+				value += (char)string_to_int(_data[index], _position);
+
+			ObjectToken::add_string(_name, value);
+		}
+	}
+}
+
+bool SourceTokenASMPLX::isexprc(char const c)
+{
+	return isalnum(c) || c == '_' || c == '.' ||
+		c == '*' || c == '/' || c == '%' || c == '+' ||
+		c == '-' || c == '&' || c == '|' || c == '^';
 }
 
 void SourceTokenASMPLX::makeObject(std::vector<ObjectToken> * const objects) const
@@ -241,13 +264,6 @@ void SourceTokenASMPLX::makeObject(std::vector<ObjectToken> * const objects) con
 	{
 		ObjectToken::add_symbol(_name, getDataInt32(0));
 	}
-}
-
-bool SourceTokenASMPLX::isexprc(char const c)
-{
-	return isalnum(c) || c == '_' || c == '.' ||
-		c == '*' || c == '/' || c == '%' || c == '+' ||
-		c == '-' || c == '&' || c == '|' || c == '^';
 }
 
 void SourceTokenASMPLX::read_tokens(SourceStream * const in, std::vector<SourceTokenASMPLX> * const tokens)

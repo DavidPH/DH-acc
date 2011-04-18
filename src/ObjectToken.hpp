@@ -25,6 +25,7 @@
 #include "SourcePosition.hpp"
 
 #include <map>
+#include <ostream>
 #include <stdint.h>
 #include <vector>
 
@@ -54,7 +55,9 @@ public:
 		OCODE_LSPEC5,
 		OCODE_LSPEC5DIRECT,
 		OCODE_NOP,
+		OCODE_PRINTCHARACTER,
 		OCODE_PRINTNUMBER,
+		OCODE_PRINTSTRING,
 		OCODE_PUSHNUMBER,
 		OCODE_PUSHSCRIPTVAR,
 		OCODE_RESTART,
@@ -83,7 +86,18 @@ public:
 
 
 
+	static void add_string(std::string const & symbol, std::string const & value);
+
 	static void add_symbol(std::string const & symbol, int32_t const value);
+
+	static std::string const & get_string(int32_t const index);
+
+	static int32_t get_string_count();
+
+	// Returns length of all strings combined.
+	static int32_t get_string_length();
+
+	static int32_t get_string_offset(int32_t const index);
 
 	static int32_t get_symbol(std::string const & symbol, SourcePosition const & position);
 
@@ -94,7 +108,8 @@ private:
 
 
 
-	static std::map<std::string, int32_t> _label_table;
+	// {string, offset} Yes, signed. If it's a problem, I'll change it.
+	static std::vector<std::pair<std::string, int32_t> > _string_table;
 	static std::map<std::string, int32_t> _symbol_table;
 };
 

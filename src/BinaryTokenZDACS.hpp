@@ -60,7 +60,9 @@ public:
 		BCODE_RESTART           =  69,
 		BCODE_BEGINPRINT        =  85,
 		BCODE_ENDPRINT          =  86,
+		BCODE_PRINTSTRING       =  87,
 		BCODE_PRINTNUMBER       =  88,
+		BCODE_PRINTCHARACTER    =  89,
 
 		BCODE_PRINTFIXED        = 157,
 		BCODE_DUP               = 216,
@@ -89,14 +91,15 @@ public:
 
 	static void make_tokens(std::vector<ObjectToken> const & objects, std::vector<BinaryTokenZDACS> * const instructions);
 
+	static void write_32(std::ostream * const out, uint32_t const i);
+	static void write_string(std::ostream * const out, std::string const & s);
+
 private:
 	int32_t _args[6];
 	BinaryCode _code;
 	SourcePosition _position;
 
 
-
-	static void write_32(std::ostream * const out, uint32_t const i);
 
 	static int _arg_counts[BCODE_NONE];
 };

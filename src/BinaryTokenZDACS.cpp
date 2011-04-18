@@ -98,7 +98,9 @@ void BinaryTokenZDACS::init()
 	DO_INIT(LSPEC5,          1);
 	DO_INIT(LSPEC5DIRECT,    6);
 	DO_INIT(NOP,             0);
+	DO_INIT(PRINTCHARACTER,  0);
 	DO_INIT(PRINTNUMBER,     0);
+	DO_INIT(PRINTSTRING,     0);
 	DO_INIT(PUSHNUMBER,      1);
 	DO_INIT(PUSHSCRIPTVAR,   1);
 	DO_INIT(RESTART,         0);
@@ -174,7 +176,9 @@ void BinaryTokenZDACS::make_tokens(std::vector<ObjectToken> const & objects, std
 		CASE_DIRECTMAP1(LSPEC5);
 		CASE_DIRECTMAP6(LSPEC5DIRECT);
 		CASE_DIRECTMAP0(NOP);
+		CASE_DIRECTMAP0(PRINTCHARACTER);
 		CASE_DIRECTMAP0(PRINTNUMBER);
+		CASE_DIRECTMAP0(PRINTSTRING);
 		CASE_DIRECTMAP1(PUSHNUMBER);
 		CASE_DIRECTMAP1(PUSHSCRIPTVAR);
 		CASE_DIRECTMAP0(RESTART);
@@ -215,6 +219,11 @@ void BinaryTokenZDACS::write_32(std::ostream * const out, uint32_t const i)
 	out->put((i >>  8) & 0xFF);
 	out->put((i >> 16) & 0xFF);
 	out->put((i >> 24) & 0xFF);
+}
+
+void BinaryTokenZDACS::write_string(std::ostream * const out, std::string const & s)
+{
+	*out << s;
 }
 
 

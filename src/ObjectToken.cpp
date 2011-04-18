@@ -25,7 +25,7 @@
 
 
 
-std::map<std::string, int32_t> ObjectToken::_label_table;
+std::vector<std::pair<std::string, int32_t> > ObjectToken::_string_table;
 std::map<std::string, int32_t> ObjectToken::_symbol_table;
 
 
@@ -33,6 +33,15 @@ std::map<std::string, int32_t> ObjectToken::_symbol_table;
 ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<int32_t> const & args) : _args(args), _code(code), _position(position)
 {
 
+}
+
+void ObjectToken::add_string(std::string const & symbol, std::string const & value)
+{
+	// TODO: Option for string folding.
+
+	add_symbol(symbol, (int32_t)_string_table.size());
+
+	_string_table.push_back(std::pair<std::string, int32_t>(value, get_string_length()));
 }
 
 void ObjectToken::add_symbol(std::string const & symbol, int32_t const value)
@@ -56,6 +65,28 @@ ObjectToken::ObjectCode ObjectToken::getCode() const
 SourcePosition const & ObjectToken::getPosition() const
 {
 	return _position;
+}
+
+std::string const & ObjectToken::get_string(int32_t const index)
+{
+	return _string_table[index].first;
+}
+
+int32_t ObjectToken::get_string_count()
+{
+	return (int32_t)_string_table.size();
+}
+
+int32_t ObjectToken::get_string_length()
+{
+	if (_string_table.empty()) return 0;
+
+	return _string_table.back().second + _string_table.back().first.size();
+}
+
+int32_t ObjectToken::get_string_offset(int32_t const index)
+{
+	return _string_table[index].second;
 }
 
 int32_t ObjectToken::get_symbol(std::string const & symbol, SourcePosition const & position)

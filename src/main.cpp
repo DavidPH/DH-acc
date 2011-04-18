@@ -56,41 +56,35 @@ static inline int _main(int const argc, char const * const * const argv)
 
 	BinaryTokenZDACS::make_tokens(objects, &instructions);
 
-	#if 0
-	// 0
-	ofs << 'A' << 'C' << 'S' << 'E';
-	ofs << '\x08' << '\x00' << '\x00' << '\x00';
+	int32_t scriptCount(1);
 
-	// 8
-	ofs << 'S' << 'P' << 'T' << 'R';
-	ofs << '\x0C' << '\x00' << '\x00' << '\x00';
+	int32_t stringLength(ObjectToken::get_string_length());
+	int32_t stringCount(ObjectToken::get_string_count());
 
-	// 16
-	ofs << '\x08' << '\x00';
-	ofs << '\x04' << '\x00';
-	ofs << '\x1C' << '\x00' << '\x00' << '\x00';
-	ofs << '\x00' << '\x00' << '\x00' << '\x00';
-
-	// 28
-	#else
 	// 0
 	ofs << 'A' << 'C' << 'S' << '\0';
 	ofs << '\x08' << '\x00' << '\x00' << '\x00';
 
 	// 8
-	ofs << '\x01' << '\x00' << '\x00' << '\x00';
+	BinaryTokenZDACS::write_32(&ofs, scriptCount);
 
 	// 12
-	ofs << '\xA8' << '\x0F' << '\x00' << '\x00';
-	ofs << '\x1C' << '\x00' << '\x00' << '\x00';
-	ofs << '\x00' << '\x00' << '\x00' << '\x00';
+	BinaryTokenZDACS::write_32(&ofs, 4008);
+	BinaryTokenZDACS::write_32(&ofs, 12 + (scriptCount*12) + 4 + (stringCount*4) + stringLength);
+	BinaryTokenZDACS::write_32(&ofs, 0);
 
-	// 24
-	ofs << '\x00' << '\x00' << '\x00' << '\x00';
+	// 12+(scriptCount*12)
+	BinaryTokenZDACS::write_32(&ofs, stringCount);
 
-	// 28
-	#endif
+	// 12+(scriptCount*12)+4
+	for (int32_t index(0); index < ObjectToken::get_string_count(); ++index)
+		BinaryTokenZDACS::write_32(&ofs, 12 + (scriptCount*12) + 4 + (stringCount*4) + ObjectToken::get_string_offset(index));
 
+	// 12+(scriptCount*12)+4+(stringCount*4)
+	for (int32_t index(0); index < ObjectToken::get_string_count(); ++index)
+		BinaryTokenZDACS::write_string(&ofs, ObjectToken::get_string(index));
+
+	// 12+(scriptCount*12)+4+(stringCount*4)+stringLength
 	for (std::vector<BinaryTokenZDACS>::iterator it(instructions.begin()); it != instructions.end(); ++it)
 		it->write(&ofs);
 
