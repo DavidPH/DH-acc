@@ -24,10 +24,10 @@
 
 #include "SourcePosition.hpp"
 
-#include <map>
-#include <ostream>
 #include <stdint.h>
 #include <vector>
+
+class ObjectExpression;
 
 
 
@@ -77,47 +77,20 @@ public:
 
 
 
-	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<int32_t> const & args);
+	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args);
 
-	int32_t getArgInt32(uintptr_t const index) const;
+	ObjectExpression const & getArg(uintptr_t const index) const;
 
 	ObjectCode getCode() const;
 
+	std::vector<std::string> const & getLabels() const;
 	SourcePosition const & getPosition() const;
 
-
-
-	static void add_address_count(int32_t const addressCount);
-
-	// Adds a label for the current address count.
-	static void add_label(std::string const & symbol);
-
-	static void add_string(std::string const & symbol, std::string const & value);
-
-	static void add_symbol(std::string const & symbol, int32_t const value);
-
-	static std::string const & get_string(int32_t const index);
-
-	static int32_t get_string_count();
-
-	// Returns length of all strings combined.
-	static int32_t get_string_length();
-
-	static int32_t get_string_offset(int32_t const index);
-
-	static int32_t get_symbol(std::string const & symbol, SourcePosition const & position);
-
 private:
-	std::vector<int32_t> _args;
+	std::vector<ObjectExpression> _args;
 	ObjectCode _code;
+	std::vector<std::string> _labels;
 	SourcePosition _position;
-
-
-
-	static int32_t _address_count;
-	// {string, offset} Yes, signed. If it's a problem, I'll change it.
-	static std::vector<std::pair<std::string, int32_t> > _string_table;
-	static std::map<std::string, int32_t> _symbol_table;
 };
 
 

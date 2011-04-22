@@ -1,0 +1,126 @@
+/* Copyright (C) 2011 David Hill
+**
+** This program is free software: you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/* ObjectExpression.cpp
+**
+** ObjectExpression methods.
+*/
+
+#include "ObjectExpression.hpp"
+
+#include "SourceException.hpp"
+
+
+
+int32_t ObjectExpression::_address_count(8+4+4+12);
+std::vector<std::pair<std::string, int32_t> > ObjectExpression::_string_table;
+std::map<std::string, int32_t> ObjectExpression::_symbol_table;
+
+
+
+ObjectExpression::ObjectExpression() : _expr(NULL)
+{
+
+}
+ObjectExpression::ObjectExpression(ObjectExpression const & expr) : _expr(expr._expr->clone())
+{
+
+}
+ObjectExpression::ObjectExpression(ObjectExpressionBase * const expr) : _expr(expr)
+{
+
+}
+ObjectExpression::~ObjectExpression()
+{
+	delete _expr;
+}
+
+void ObjectExpression::add_address_count(int32_t const addressCount)
+{
+	_address_count += addressCount;
+}
+
+void ObjectExpression::add_label(std::string const & symbol)
+{
+	add_symbol(symbol, _address_count);
+}
+
+void ObjectExpression::add_string(std::string const & symbol, std::string const & value)
+{
+	// TODO: Option for string folding.
+
+	add_address_count(4 + (int32_t)value.size());
+	add_symbol(symbol, (int32_t)_string_table.size());
+
+	_string_table.push_back(std::pair<std::string, int32_t>(value, get_string_length()));
+}
+
+void ObjectExpression::add_symbol(std::string const & symbol, int32_t const value)
+{
+	_symbol_table[symbol] = value;
+}
+
+std::string const & ObjectExpression::get_string(int32_t const index)
+{
+	return _string_table[index].first;
+}
+
+int32_t ObjectExpression::get_string_count()
+{
+	return (int32_t)_string_table.size();
+}
+
+int32_t ObjectExpression::get_string_length()
+{
+	if (_string_table.empty()) return 0;
+
+	return _string_table.back().second + _string_table.back().first.size();
+}
+
+int32_t ObjectExpression::get_string_offset(int32_t const index)
+{
+	return _string_table[index].second;
+}
+
+int32_t ObjectExpression::get_symbol(std::string const & symbol, SourcePosition const & position)
+{
+	std::map<std::string, int32_t>::iterator valueIt(_symbol_table.find(symbol));
+
+	if (valueIt == _symbol_table.end())
+		throw SourceException("unknown symbol", position, "ObjectToken");
+
+	return valueIt->second;
+}
+
+SourcePosition const & ObjectExpression::getPosition() const
+{
+	return _expr->getPosition();
+}
+
+ObjectExpression & ObjectExpression::operator = (ObjectExpression const & expr)
+{
+	delete _expr;
+	_expr = expr._expr->clone();
+	return *this;
+}
+
+int32_t ObjectExpression::resolveInt32() const
+{
+	return _expr ? _expr->resolveInt32() : 0;
+}
+
+
+

@@ -22,6 +22,7 @@
 #include "SourceTokenASMPLX.hpp"
 
 #include "BinaryTokenZDACS.hpp"
+#include "ObjectExpression.hpp"
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
 
@@ -133,33 +134,6 @@ int32_t SourceTokenASMPLX::char_to_int(char const c, int32_t const base, SourceP
 	}
 }
 
-int32_t SourceTokenASMPLX::getAddressCount() const
-{
-	if (_type == ' ')
-	{
-		std::map<std::string, std::pair<ObjectToken::ObjectCode, int> >::iterator argIt(_arg_counts.find(_name));
-
-		if (argIt == _arg_counts.end())
-			throw SourceException("unknown name", _position, "SourceTokenASMPLX");
-
-		ObjectToken::ObjectCode const & code(argIt->second.first);
-		int const & argC(argIt->second.second);
-
-		if (argC == -1)
-		{
-			return 0;
-		}
-		else
-		{
-			return BinaryTokenZDACS::get_address_count(code, _position);
-		}
-	}
-	else
-	{
-		return 0;
-	}
-}
-
 std::string const & SourceTokenASMPLX::getData(uintptr_t const index) const
 {
 	static std::string const s;
@@ -244,56 +218,73 @@ bool SourceTokenASMPLX::isexprc(char const c)
 		c == '-' || c == '&' || c == '|' || c == '^';
 }
 
-void SourceTokenASMPLX::makeObject(std::vector<ObjectToken> * const objects) const
+ObjectExpression SourceTokenASMPLX::make_expression(std::string const & expr, SourcePosition const & position)
 {
-	if (_type == ' ')
+	if (expr.empty()) return ObjectExpression();
+
+	// Start with the last operator because the last op found is the first
+	// one evaluated.
+	uintptr_t index = expr.find_last_of("*/%+-&|^");
+
+	if (index == std::string::npos)
 	{
-		std::map<std::string, std::pair<ObjectToken::ObjectCode, int> >::iterator argIt(_arg_counts.find(_name));
-
-		if (argIt == _arg_counts.end())
-			throw SourceException("unknown name", _position, "SourceTokenASMPLX");
-
-		ObjectToken::ObjectCode const & code(argIt->second.first);
-		int const & argC(argIt->second.second);
-
-		if (argC == -1)
+		if (expr[0] == '0')
 		{
-
+			if (expr.find_first_of('.') == std::string::npos)
+				return ObjectExpression::create_value_int32(string_to_int(expr, position), position);
+			else
+				return ObjectExpression::create_value_int32(string_to_fixed(expr, position), position);
 		}
 		else
 		{
-			std::vector<int32_t> args;
-
-			for (int i(0); i < argC; ++i)
-				args.push_back(getDataInt32(i));
-
-			objects->push_back(ObjectToken(code, _position, args));
+			return ObjectExpression::create_value_symbol(expr, position);
 		}
 	}
-	else if (_type == '=')
+	else if (index == 0)
 	{
-		ObjectToken::add_symbol(_name, getDataInt32(0));
+		switch (expr[0])
+		{
+		case '+': return ObjectExpression::create_unary_add(make_expression(expr.substr(1), position));
+		case '-': return ObjectExpression::create_unary_sub(make_expression(expr.substr(1), position));
+
+		default: throw SourceException("unknown prefix operator", position, "SourceTokenASMPLX");
+		}
+	}
+	else
+	{
+		// Check for any prefix operators.
+		if
+		(
+			expr[index-1] == '*' || expr[index-1] == '/' ||
+			expr[index-1] == '%' || expr[index-1] == '+' ||
+			expr[index-1] == '-' || expr[index-1] == '&' ||
+			expr[index-1] == '|' || expr[index-1] == '^'
+		)
+		{
+			--index;
+		}
+
+		std::string exprL(expr, 0,index);
+		std::string exprR(expr, index+1);
+
+		switch (expr[index])
+		{
+		case '*': return ObjectExpression::create_binary_mul(make_expression(exprL, position), make_expression(exprR, position));
+		case '/': return ObjectExpression::create_binary_div(make_expression(exprL, position), make_expression(exprR, position));
+		case '%': return ObjectExpression::create_binary_mod(make_expression(exprL, position), make_expression(exprR, position));
+		case '+': return ObjectExpression::create_binary_add(make_expression(exprL, position), make_expression(exprR, position));
+		case '-': return ObjectExpression::create_binary_sub(make_expression(exprL, position), make_expression(exprR, position));
+		case '&': return ObjectExpression::create_binary_and(make_expression(exprL, position), make_expression(exprR, position));
+		case '|': return ObjectExpression::create_binary_ior(make_expression(exprL, position), make_expression(exprR, position));
+		case '^': return ObjectExpression::create_binary_xor(make_expression(exprL, position), make_expression(exprR, position));
+		default: throw SourceException("unknown operator", position, "SourceTokenASMPLX");
+		}
 	}
 }
 
 void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & tokens, std::vector<ObjectToken> * const objects)
 {
-	for (uintptr_t index(0); index < tokens.size(); ++index)
-	{
-		SourceTokenASMPLX const & token(tokens[index]);
-
-		if (token._type == ':')
-		{
-			if (!token._data.empty())
-			{
-				std::string value;
-				for (uintptr_t index(0); index < token._data.size(); ++index)
-					value += (char)string_to_int(token._data[index], token._position);
-
-				ObjectToken::add_string(token._name, value);
-			}
-		}
-	}
+	std::vector<std::string> labels;
 
 	for (uintptr_t index(0); index < tokens.size(); ++index)
 	{
@@ -301,20 +292,49 @@ void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & toke
 
 		if (token._type == ' ')
 		{
-			ObjectToken::add_address_count(token.getAddressCount());
+			std::map<std::string, std::pair<ObjectToken::ObjectCode, int> >::iterator argIt(_arg_counts.find(token._name));
+
+			if (argIt == _arg_counts.end())
+				throw SourceException("unknown name", token._position, "SourceTokenASMPLX");
+
+			ObjectToken::ObjectCode const & code(argIt->second.first);
+			int const & argC(argIt->second.second);
+
+			if (argC == -1)
+			{
+
+			}
+			else
+			{
+				std::vector<ObjectExpression> args;
+
+				for (uintptr_t i(0); i < (uintptr_t)argC; ++i)
+					args.push_back(make_expression(token._data[i], token._position));
+
+				objects->push_back(ObjectToken(code, token._position, labels, args));
+
+				labels.clear();
+			}
+		}
+		else if (token._type == '=')
+		{
+			ObjectExpression::add_symbol(token._name, token.getDataInt32(0));
 		}
 		else if (token._type == ':')
 		{
 			if (token._data.empty())
 			{
-				ObjectToken::add_label(token._name);
+				labels.push_back(token._name);
+			}
+			else
+			{
+				std::string value;
+				for (uintptr_t index(0); index < token._data.size(); ++index)
+					value += (char)string_to_int(token._data[index], token._position);
+
+				ObjectExpression::add_string(token._name, value);
 			}
 		}
-	}
-
-	for (uintptr_t index(0); index < tokens.size(); ++index)
-	{
-		tokens[index].makeObject(objects);
 	}
 }
 
@@ -365,7 +385,7 @@ int32_t SourceTokenASMPLX::resolve_expression(std::string const & expr, SourcePo
 		}
 		else
 		{
-			return ObjectToken::get_symbol(expr, position);
+			return ObjectExpression::get_symbol(expr, position);
 		}
 	}
 	else if (index == 0)
@@ -384,9 +404,9 @@ int32_t SourceTokenASMPLX::resolve_expression(std::string const & expr, SourcePo
 			else
 			{
 				if (expr[0] == '-')
-					return -ObjectToken::get_symbol(expr.substr(1), position);
+					return -ObjectExpression::get_symbol(expr.substr(1), position);
 				else
-					return  ObjectToken::get_symbol(expr.substr(1), position);
+					return  ObjectExpression::get_symbol(expr.substr(1), position);
 			}
 
 		default: throw SourceException("unknown prefix operator", position, "SourceTokenASMPLX");

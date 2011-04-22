@@ -75,35 +75,29 @@ public:
 
 
 
-	BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position);
-	BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, int32_t const arg0);
-	BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, int32_t const arg0, int32_t const arg1);
-	BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, int32_t const arg0, int32_t const arg1, int32_t const arg2);
-	BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, int32_t const arg0, int32_t const arg1, int32_t const arg2, int32_t const arg3);
-	BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, int32_t const arg0, int32_t const arg1, int32_t const arg2, int32_t const arg3, int32_t const arg4);
-	BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, int32_t const arg0, int32_t const arg1, int32_t const arg2, int32_t const arg3, int32_t const arg4, int32_t const arg5);
+	BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args);
 
 	void write(std::ostream * const out) const;
 
 
-
-	static int32_t get_address_count(ObjectToken::ObjectCode const code, SourcePosition const & position);
 
 	static void init();
 
 	static void make_tokens(std::vector<ObjectToken> const & objects, std::vector<BinaryTokenZDACS> * const instructions);
 
 	static void write_32(std::ostream * const out, uint32_t const i);
+	static void write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions);
 	static void write_string(std::ostream * const out, std::string const & s);
 
 private:
-	int32_t _args[6];
+	std::vector<ObjectExpression> _args;
 	BinaryCode _code;
+	std::vector<std::string> _labels;
 	SourcePosition _position;
 
 
 
-	static int _arg_counts[BCODE_NONE];
+	static uintptr_t _arg_counts[BCODE_NONE];
 };
 
 

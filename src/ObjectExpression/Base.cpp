@@ -14,43 +14,25 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* ObjectToken.cpp
+/* ObjectExpression/Base.cpp
 **
-** ObjectToken methods.
+** ObjectExpressionBase methods.
 */
 
-#include "ObjectToken.hpp"
-
-#include "ObjectExpression.hpp"
+#include "../ObjectExpression.hpp"
 
 
 
-ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args) : _args(args), _code(code), _labels(labels), _position(position)
+ObjectExpressionBase::ObjectExpressionBase(SourcePosition const & position) : _position(position)
+{
+
+}
+ObjectExpressionBase::~ObjectExpressionBase()
 {
 
 }
 
-ObjectExpression const & ObjectToken::getArg(uintptr_t const index) const
-{
-	static ObjectExpression expr;
-
-	if (index < _args.size())
-		return _args[index];
-	else
-		return expr;
-}
-
-ObjectToken::ObjectCode ObjectToken::getCode() const
-{
-	return _code;
-}
-
-std::vector<std::string> const & ObjectToken::getLabels() const
-{
-	return _labels;
-}
-
-SourcePosition const & ObjectToken::getPosition() const
+SourcePosition const & ObjectExpressionBase::getPosition() const
 {
 	return _position;
 }

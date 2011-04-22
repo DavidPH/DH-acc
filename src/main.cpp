@@ -20,6 +20,7 @@
 */
 
 #include "BinaryTokenZDACS.hpp"
+#include "ObjectExpression.hpp"
 #include "ObjectToken.hpp"
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
@@ -52,8 +53,8 @@ static inline int _main(int const argc, char const * const * const argv)
 
 	int32_t scriptCount(1);
 
-	int32_t stringLength(ObjectToken::get_string_length());
-	int32_t stringCount(ObjectToken::get_string_count());
+	int32_t stringLength(ObjectExpression::get_string_length());
+	int32_t stringCount(ObjectExpression::get_string_count());
 
 	// 0
 	ofs << 'A' << 'C' << 'S' << '\0';
@@ -71,16 +72,15 @@ static inline int _main(int const argc, char const * const * const argv)
 	BinaryTokenZDACS::write_32(&ofs, stringCount);
 
 	// 12+(scriptCount*12)+4
-	for (int32_t index(0); index < ObjectToken::get_string_count(); ++index)
-		BinaryTokenZDACS::write_32(&ofs, 12 + (scriptCount*12) + 4 + (stringCount*4) + ObjectToken::get_string_offset(index));
+	for (int32_t index(0); index < ObjectExpression::get_string_count(); ++index)
+		BinaryTokenZDACS::write_32(&ofs, 12 + (scriptCount*12) + 4 + (stringCount*4) + ObjectExpression::get_string_offset(index));
 
 	// 12+(scriptCount*12)+4+(stringCount*4)
-	for (int32_t index(0); index < ObjectToken::get_string_count(); ++index)
-		BinaryTokenZDACS::write_string(&ofs, ObjectToken::get_string(index));
+	for (int32_t index(0); index < ObjectExpression::get_string_count(); ++index)
+		BinaryTokenZDACS::write_string(&ofs, ObjectExpression::get_string(index));
 
 	// 12+(scriptCount*12)+4+(stringCount*4)+stringLength
-	for (std::vector<BinaryTokenZDACS>::iterator it(instructions.begin()); it != instructions.end(); ++it)
-		it->write(&ofs);
+	BinaryTokenZDACS::write_all(&ofs, instructions);
 
 	return 0;
 }

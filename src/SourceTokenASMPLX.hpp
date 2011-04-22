@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 
+class ObjectExpression;
 class SourceStream;
 
 
@@ -64,11 +65,6 @@ public:
 	static void read_tokens(SourceStream * const in, std::vector<SourceTokenASMPLX> * const tokens);
 
 private:
-	int32_t getAddressCount() const;
-
-	// Creates an ObjectToken from this token.
-	void makeObject(std::vector<ObjectToken> * const objects) const;
-
 	std::vector<std::string> _data;
 	std::string _name;
 	SourcePosition _position;
@@ -79,6 +75,8 @@ private:
 	static bool isexprc(char const c);
 
 	static int32_t char_to_int(char const c, int32_t const base, SourcePosition const & position);
+
+	static ObjectExpression make_expression(std::string const & expr, SourcePosition const & position);
 
 	static int32_t resolve_expression(std::string const & expr, SourcePosition const & position);
 
