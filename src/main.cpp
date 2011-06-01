@@ -22,9 +22,13 @@
 #include "BinaryTokenZDACS.hpp"
 #include "ObjectExpression.hpp"
 #include "ObjectToken.hpp"
+#include "print_debug.hpp"
+#include "SourceBlockC.hpp"
 #include "SourceException.hpp"
+#include "SourceExpressionACS.hpp"
 #include "SourceStream.hpp"
 #include "SourceTokenASMPLX.hpp"
+#include "SourceTokenizerC.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -40,6 +44,21 @@ static inline int _main(int const argc, char const * const * const argv)
 	std::ifstream ifs(argv[1]);
 	std::ofstream ofs(argv[2]);
 
+	#if 0
+	SourceStream in(&ifs, argv[1], SourceStream::ST_C);
+
+	SourceTokenizerC tokenizer(&in);
+
+	SourceBlockC block(&tokenizer);
+	print_debug(&ofs, block); return 0;
+
+	std::vector<SourceExpressionACS> expressions;
+	SourceExpressionACS::make_expressions(block, &expressions);
+	print_debug(&ofs, expressions); return 0;
+
+	std::vector<ObjectToken> objects;
+	SourceExpressionACS::make_objects(expressions, &objects);
+	#else
 	SourceStream in(&ifs, argv[1], SourceStream::ST_ASMPLX);
 
 	std::vector<SourceTokenASMPLX> tokens;
@@ -47,6 +66,7 @@ static inline int _main(int const argc, char const * const * const argv)
 
 	std::vector<ObjectToken> objects;
 	SourceTokenASMPLX::make_objects(tokens, &objects);
+	#endif
 
 	std::vector<BinaryTokenZDACS> instructions;
 	BinaryTokenZDACS::make_tokens(objects, &instructions);

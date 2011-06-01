@@ -30,11 +30,22 @@ _filename(filename),
 
 _countLine(1),
 
+_depthComment(0),
+
 _inComment(false)
 {
 	switch (type)
 	{
 	case ST_ASMPLX:
+		_doCommentASM = true;
+		_doCommentC   = false;
+		_doCommentCPP = false;
+		break;
+
+	case ST_C:
+		_doCommentASM = false;
+		_doCommentC   = true;
+		_doCommentCPP = true;
 		break;
 	}
 }
@@ -74,7 +85,12 @@ long SourceStream::getLineCount() const
 
 bool SourceStream::isInComment() const
 {
-	return _inComment;
+	return _inComment && !_depthComment;
+}
+
+bool SourceStream::isInQuote() const
+{
+	return _inQuoteDouble || _inQuoteSingle;
 }
 
 void SourceStream::prepareC()
@@ -103,9 +119,39 @@ void SourceStream::prepareC()
 		}
 
 		// ; line comment start
-		if (_curC == ';')
+		if (_curC == ';' && _doCommentASM && !isInComment() && !isInQuote())
 		{
 			_inComment = true;
+		}
+
+		// // line comment start?
+		if (_curC == '/' && _newC == '/' && _doCommentCPP && !isInComment() && !isInQuote())
+		{
+			_inComment = true;
+		}
+
+		// /* comment start?
+		if (_curC == '/' && _newC == '*' && _doCommentC && !isInComment() && !isInQuote())
+		{
+			++_depthComment;
+		}
+
+		// */ commend end?
+		if (_curC == '*' && _newC == '/' && _doCommentC && !_inComment && _depthComment && !isInQuote())
+		{
+			--_depthComment;
+		}
+
+		// " double quote
+		if (_curC == '"' && _doQuoteDouble && !isInComment() && !_inQuoteSingle)
+		{
+			_inQuoteDouble = !_inQuoteDouble;
+		}
+
+		// " single quote
+		if (_curC == '\'' && _doQuoteSingle && !isInComment() && !_inQuoteDouble)
+		{
+			_inQuoteSingle = !_inQuoteSingle;
 		}
 
 

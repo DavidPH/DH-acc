@@ -17,10 +17,17 @@ add_executable(DH-acc
 	ObjectExpression/ValueInt32.cpp
 	ObjectExpression/ValueSymbol.cpp
 	ObjectToken.cpp
+	print_debug.cpp
 	SourceException.cpp
+	SourceExpressionACS.cpp
+	SourceExpressionACS/Base.cpp
+	SourceExpressionACS/BinaryAdd.cpp
+	SourceBlockC.cpp
 	SourcePosition.cpp
 	SourceStream.cpp
 	SourceTokenASMPLX.cpp
+	SourceTokenC.cpp
+	SourceTokenizerC.cpp
 )
 
 

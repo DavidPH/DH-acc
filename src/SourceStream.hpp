@@ -39,7 +39,8 @@ public:
 
 	enum SourceType
 	{
-		ST_ASMPLX
+		ST_ASMPLX,
+		ST_C
 	};
 
 
@@ -53,6 +54,7 @@ public:
 	long getLineCount() const;
 
 	bool isInComment() const;
+	bool isInQuote() const;
 
 	// Skips horizontal whitespace, returning true if any found.
 	bool skipHWS();
@@ -71,7 +73,19 @@ private:
 
 	long _countLine;
 
+	long _depthComment;
+
 	unsigned _inComment : 1; // Single-line comment.
+
+	unsigned _inQuoteDouble : 1; // "
+	unsigned _inQuoteSingle : 1; // '
+
+	unsigned _doCommentASM : 1; // ;
+	unsigned _doCommentC   : 1; // /* */
+	unsigned _doCommentCPP : 1; // //
+
+	unsigned _doQuoteDouble : 1; // "
+	unsigned _doQuoteSingle : 1; // '
 };
 
 
