@@ -35,6 +35,10 @@ public:
 
 	std::string filename;
 	long line;
+
+
+
+	static SourcePosition const none;
 };
 
 

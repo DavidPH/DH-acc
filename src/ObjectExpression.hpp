@@ -70,7 +70,7 @@ public:
 
 	static void add_string(std::string const & symbol, std::string const & value);
 
-	static void add_symbol(std::string const & symbol, int32_t const value);
+	static void add_symbol(std::string const & symbol, ObjectExpression const & value);
 
 	static ObjectExpression create_binary_add(ObjectExpression const & exprL, ObjectExpression const & exprR);
 	static ObjectExpression create_binary_and(ObjectExpression const & exprL, ObjectExpression const & exprR);
@@ -96,7 +96,7 @@ public:
 
 	static int32_t get_string_offset(int32_t const index);
 
-	static int32_t get_symbol(std::string const & symbol, SourcePosition const & position);
+	static ObjectExpression get_symbol(std::string const & symbol, SourcePosition const & position);
 
 private:
 	ObjectExpressionBase * _expr;
@@ -106,7 +106,7 @@ private:
 	static int32_t _address_count;
 	// {string, offset} Yes, signed. If it's a problem, I'll change it.
 	static std::vector<std::pair<std::string, int32_t> > _string_table;
-	static std::map<std::string, int32_t> _symbol_table;
+	static std::map<std::string, ObjectExpression> _symbol_table;
 };
 
 

@@ -27,7 +27,7 @@
 
 int32_t ObjectExpression::_address_count(8+4+4+12);
 std::vector<std::pair<std::string, int32_t> > ObjectExpression::_string_table;
-std::map<std::string, int32_t> ObjectExpression::_symbol_table;
+std::map<std::string, ObjectExpression> ObjectExpression::_symbol_table;
 
 
 
@@ -55,7 +55,7 @@ void ObjectExpression::add_address_count(int32_t const addressCount)
 
 void ObjectExpression::add_label(std::string const & symbol)
 {
-	add_symbol(symbol, _address_count);
+	add_symbol(symbol, create_value_int32(_address_count, SourcePosition::none));
 }
 
 void ObjectExpression::add_string(std::string const & symbol, std::string const & value)
@@ -63,12 +63,12 @@ void ObjectExpression::add_string(std::string const & symbol, std::string const 
 	// TODO: Option for string folding.
 
 	add_address_count(4 + (int32_t)value.size());
-	add_symbol(symbol, (int32_t)_string_table.size());
+	add_symbol(symbol, create_value_int32((int32_t)_string_table.size(), SourcePosition::none));
 
 	_string_table.push_back(std::pair<std::string, int32_t>(value, get_string_length()));
 }
 
-void ObjectExpression::add_symbol(std::string const & symbol, int32_t const value)
+void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression const & value)
 {
 	_symbol_table[symbol] = value;
 }
@@ -95,12 +95,12 @@ int32_t ObjectExpression::get_string_offset(int32_t const index)
 	return _string_table[index].second;
 }
 
-int32_t ObjectExpression::get_symbol(std::string const & symbol, SourcePosition const & position)
+ObjectExpression ObjectExpression::get_symbol(std::string const & symbol, SourcePosition const & position)
 {
-	std::map<std::string, int32_t>::iterator valueIt(_symbol_table.find(symbol));
+	std::map<std::string, ObjectExpression>::iterator valueIt(_symbol_table.find(symbol));
 
 	if (valueIt == _symbol_table.end())
-		throw SourceException("unknown symbol", position, "ObjectToken");
+		throw SourceException("unknown symbol", position, "ObjectExpression");
 
 	return valueIt->second;
 }
@@ -113,7 +113,7 @@ SourcePosition const & ObjectExpression::getPosition() const
 ObjectExpression & ObjectExpression::operator = (ObjectExpression const & expr)
 {
 	delete _expr;
-	_expr = expr._expr->clone();
+	_expr = expr._expr ? expr._expr->clone() : NULL;
 	return *this;
 }
 

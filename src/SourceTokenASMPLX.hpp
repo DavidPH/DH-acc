@@ -46,7 +46,6 @@ public:
 	SourceTokenASMPLX(SourceStream * const in);
 
 	std::string const & getData(uintptr_t const index) const;
-	int32_t getDataInt32(uintptr_t const index) const;
 
 	uintptr_t getDataSize() const;
 
@@ -77,8 +76,6 @@ private:
 	static int32_t char_to_int(char const c, int32_t const base, SourcePosition const & position);
 
 	static ObjectExpression make_expression(std::string const & expr, SourcePosition const & position);
-
-	static int32_t resolve_expression(std::string const & expr, SourcePosition const & position);
 
 	// Returns -1 for number 0.
 	static int32_t string_to_base(std::string const & s, SourcePosition const & position);

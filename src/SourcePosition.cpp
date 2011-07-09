@@ -23,6 +23,10 @@
 
 
 
+SourcePosition const SourcePosition::none;
+
+
+
 SourcePosition::SourcePosition() : filename(), line(0)
 {
 

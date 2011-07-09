@@ -57,7 +57,7 @@ ObjectExpressionValueSymbol * ObjectExpressionValueSymbol::clone() const
 
 int32_t ObjectExpressionValueSymbol::resolveInt32() const
 {
-	return ObjectExpression::get_symbol(_value, _position);
+	return ObjectExpression::get_symbol(_value, _position).resolveInt32();
 }
 
 

@@ -142,10 +142,6 @@ std::string const & SourceTokenASMPLX::getData(uintptr_t const index) const
 
 	return s;
 }
-int32_t SourceTokenASMPLX::getDataInt32(uintptr_t const index) const
-{
-	return resolve_expression(getData(index), _position);
-}
 
 uintptr_t SourceTokenASMPLX::getDataSize() const
 {
@@ -318,7 +314,7 @@ void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & toke
 		}
 		else if (token._type == '=')
 		{
-			ObjectExpression::add_symbol(token._name, token.getDataInt32(0));
+			ObjectExpression::add_symbol(token._name, make_expression(token.getData(0), token._position));
 		}
 		else if (token._type == ':')
 		{
@@ -363,81 +359,6 @@ void SourceTokenASMPLX::read_tokens(SourceStream * const in, std::vector<SourceT
 		if (token.getType() == '#' && token.getName() == "EOF") break;
 
 		tokens->push_back(token);
-	}
-}
-
-int32_t SourceTokenASMPLX::resolve_expression(std::string const & expr, SourcePosition const & position)
-{
-	if (expr.empty()) return 0;
-
-	// Start with the last operator because the last op found is the first
-	// one evaluated.
-	uintptr_t index = expr.find_last_of("*/%+-&|^");
-
-	if (index == std::string::npos)
-	{
-		if (expr[0] == '0')
-		{
-			if (expr.find_first_of('.') == std::string::npos)
-				return string_to_int(expr, position);
-			else
-				return string_to_fixed(expr, position);
-		}
-		else
-		{
-			return ObjectExpression::get_symbol(expr, position);
-		}
-	}
-	else if (index == 0)
-	{
-		switch (expr[0])
-		{
-		case '+':
-		case '-':
-			if (expr[1] == '0')
-			{
-				if (expr.find_first_of('.') == std::string::npos)
-					return string_to_int(expr, position);
-				else
-					return string_to_fixed(expr, position);
-			}
-			else
-			{
-				if (expr[0] == '-')
-					return -ObjectExpression::get_symbol(expr.substr(1), position);
-				else
-					return  ObjectExpression::get_symbol(expr.substr(1), position);
-			}
-
-		default: throw SourceException("unknown prefix operator", position, "SourceTokenASMPLX");
-		}
-	}
-	else
-	{
-		// Check for any prefix operators.
-		if
-		(
-			expr[index-1] == '*' || expr[index-1] == '/' ||
-			expr[index-1] == '%' || expr[index-1] == '+' ||
-			expr[index-1] == '-' || expr[index-1] == '&' ||
-			expr[index-1] == '|' || expr[index-1] == '^'
-		)
-		{
-			--index;
-		}
-
-		switch (expr[index])
-		{
-		case '*': return resolve_expression(expr.substr(0, index), position) * resolve_expression(expr.substr(index+1), position);
-		case '/': return resolve_expression(expr.substr(0, index), position) / resolve_expression(expr.substr(index+1), position);
-		case '%': return resolve_expression(expr.substr(0, index), position) % resolve_expression(expr.substr(index+1), position);
-		case '+': return resolve_expression(expr.substr(0, index), position) + resolve_expression(expr.substr(index+1), position);
-		case '-': return resolve_expression(expr.substr(0, index), position) - resolve_expression(expr.substr(index+1), position);
-		case '&': return resolve_expression(expr.substr(0, index), position) & resolve_expression(expr.substr(index+1), position);
-		case '|': return resolve_expression(expr.substr(0, index), position) | resolve_expression(expr.substr(index+1), position);
-		case '^': return resolve_expression(expr.substr(0, index), position) ^ resolve_expression(expr.substr(index+1), position);
-		default: return (int32_t)0xDEADBEEFU; // This should never happen.
-		}
 	}
 }
 
