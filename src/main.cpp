@@ -26,9 +26,11 @@
 #include "SourceBlockC.hpp"
 #include "SourceException.hpp"
 #include "SourceExpressionACS.hpp"
+#include "SourceExpressionDS.hpp"
 #include "SourceStream.hpp"
 #include "SourceTokenASMPLX.hpp"
 #include "SourceTokenizerC.hpp"
+#include "SourceTokenizerDS.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -58,6 +60,16 @@ static inline int _main(int const argc, char const * const * const argv)
 
 	std::vector<ObjectToken> objects;
 	SourceExpressionACS::make_objects(expressions, &objects);
+	#elif 1
+	SourceStream in(&ifs, argv[1], SourceStream::ST_C);
+
+	SourceTokenizerDS tokenizer(&in);
+
+	std::vector<SourceExpressionDS> expressions;
+	SourceExpressionDS::make_expressions(&tokenizer, &expressions);
+
+	std::vector<ObjectToken> objects;
+	SourceExpressionDS::make_objects(expressions, &objects);
 	#else
 	SourceStream in(&ifs, argv[1], SourceStream::ST_ASMPLX);
 

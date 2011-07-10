@@ -25,6 +25,7 @@
 #include "SourcePosition.hpp"
 
 #include <map>
+#include <ostream>
 #include <stdint.h>
 #include <string>
 #include <vector>
@@ -62,6 +63,8 @@ public:
 	int32_t resolveInt32() const;
 
 
+
+	friend void print_debug(std::ostream * const out, ObjectExpression const & in);
 
 	static void add_address_count(int32_t const addressCount);
 

@@ -173,20 +173,21 @@ void SourceTokenASMPLX::init()
 	DO_INIT(ASSIGNSCRIPTVAR, 1);
 	DO_INIT(BEGINPRINT,      0);
 	DO_INIT(DELAY,           0);
-	DO_INIT(DELAYDIRECT,     1);
+	DO_INIT(DELAY_IMM,       1);
 	DO_INIT(DROP,            0);
-	DO_INIT(GOTO,            1);
 	DO_INIT(ENDPRINT,        0);
+	DO_INIT(GOTO,            1);
 	DO_INIT(LSPEC1,          1);
-	DO_INIT(LSPEC1DIRECT,    2);
+	DO_INIT(LSPEC1_IMM,      2);
 	DO_INIT(LSPEC2,          1);
-	DO_INIT(LSPEC2DIRECT,    3);
+	DO_INIT(LSPEC2_IMM,      3);
 	DO_INIT(LSPEC3,          1);
-	DO_INIT(LSPEC3DIRECT,    4);
+	DO_INIT(LSPEC3_IMM,      4);
 	DO_INIT(LSPEC4,          1);
-	DO_INIT(LSPEC4DIRECT,    5);
+	DO_INIT(LSPEC4_IMM,      5);
 	DO_INIT(LSPEC5,          1);
-	DO_INIT(LSPEC5DIRECT,    6);
+	DO_INIT(LSPEC5_IMM,      6);
+	DO_INIT(MUL,             0);
 	DO_INIT(NOP,             0);
 	DO_INIT(PRINTCHARACTER,  0);
 	DO_INIT(PRINTNUMBER,     0);
@@ -194,6 +195,8 @@ void SourceTokenASMPLX::init()
 	DO_INIT(PUSHNUMBER,      1);
 	DO_INIT(PUSHSCRIPTVAR,   1);
 	DO_INIT(RESTART,         0);
+	DO_INIT(SHIFTL,          0);
+	DO_INIT(SHIFTR,          0);
 	DO_INIT(SUSPEND,         0);
 	DO_INIT(TERMINATE,       0);
 
@@ -201,6 +204,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(ASSIGNGLOBALARRAY, 1);
 	DO_INIT(DUP,               0);
 	DO_INIT(ENDLOG,            0);
+	DO_INIT(MULFIXED,          0);
 	DO_INIT(PRINTFIXED,        0);
 	DO_INIT(PUSHGLOBALARRAY,   1);
 

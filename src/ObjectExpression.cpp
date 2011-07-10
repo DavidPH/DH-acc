@@ -124,3 +124,18 @@ int32_t ObjectExpression::resolveInt32() const
 
 
 
+void print_debug(std::ostream * const out, ObjectExpression const & in)
+{
+	*out << "ObjectExpression(";
+
+	if (in._expr)
+		//in._expr->printDebug(out);
+		*out << "TODO";
+	else
+		*out << "NULL";
+
+	*out << ")";
+}
+
+
+

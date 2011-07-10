@@ -14,42 +14,47 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourcePosition.hpp
+/* SourceTokenizerDS.hpp
 **
-** SourcePosition class.
+** Defines the SourceTokenizerDS class.
 */
 
-#ifndef HPP_SourcePosition_
-#define HPP_SourcePosition_
+#ifndef HPP_SourceTokenizerDS_
+#define HPP_SourceTokenizerDS_
 
-#include <ostream>
-#include <string>
+#include "SourceTokenC.hpp"
+
+#include <stack>
+
+class SourceStream;
 
 
 
-class SourcePosition
+class SourceTokenizerDS
 {
 public:
-	SourcePosition();
-	SourcePosition(std::string const & filename, long const line);
+	SourceTokenizerDS(SourceStream * const in);
+	~SourceTokenizerDS();
 
-	std::string filename;
-	long line;
+	SourceTokenC get();
+	SourceTokenC get(SourceTokenC::TokenType const type);
 
+	SourceTokenC peek();
 
+	void unget(SourceTokenC const & token);
 
-	friend void print_debug(std::ostream * const out, SourcePosition const & in);
+private:
+	SourceTokenizerDS(SourceTokenizerDS const & tokenizer)/* = delete*/;
 
-	static SourcePosition const none;
+	SourceTokenizerDS & operator = (SourceTokenizerDS const & tokenizer)/* = delete*/;
+
+	std::stack<SourceStream *> _in;
+	std::stack<SourceTokenC> _ungetStack;
 };
 
 
 
-std::ostream & operator << (std::ostream & out, SourcePosition const & in);
-
-
-
-#endif /* HPP_SourcePosition_ */
+#endif /* HPP_SourceTokenizerDS_ */
 
 
 

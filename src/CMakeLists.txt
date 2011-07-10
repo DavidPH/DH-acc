@@ -22,12 +22,25 @@ add_executable(DH-acc
 	SourceExpressionACS.cpp
 	SourceExpressionACS/Base.cpp
 	SourceExpressionACS/BinaryAdd.cpp
+	SourceExpressionDS.cpp
+	SourceExpressionDS/Base.cpp
+	SourceExpressionDS/Binary.cpp
+	SourceExpressionDS/BinaryAdd.cpp
+	SourceExpressionDS/BinaryMul.cpp
+	SourceExpressionDS/CastFixed.cpp
+	SourceExpressionDS/CastInt.cpp
+	SourceExpressionDS/RootOut.cpp
+	SourceExpressionDS/RootTerm.cpp
+	SourceExpressionDS/RootVoid.cpp
+	SourceExpressionDS/ValueFixed.cpp
+	SourceExpressionDS/ValueInt.cpp
 	SourceBlockC.cpp
 	SourcePosition.cpp
 	SourceStream.cpp
 	SourceTokenASMPLX.cpp
 	SourceTokenC.cpp
 	SourceTokenizerC.cpp
+	SourceTokenizerDS.cpp
 )
 
 

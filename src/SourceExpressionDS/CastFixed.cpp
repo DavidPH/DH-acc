@@ -1,0 +1,108 @@
+/* Copyright (C) 2011 David Hill
+**
+** This program is free software: you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/* SourceExpressionDS/CastFixed.cpp
+**
+** Defines the SourceExpressionDS_CastFixed class and methods.
+*/
+
+#include "Base.hpp"
+
+#include "../ObjectToken.hpp"
+
+
+
+class SourceExpressionDS_CastFixed : public SourceExpressionDS_Base
+{
+public:
+	SourceExpressionDS_CastFixed(SourceExpressionDS const & expr, SourcePosition const & position);
+
+	virtual SourceExpressionDS_CastFixed * clone() const;
+
+	virtual SourceExpressionDS::ExpressionType getType() const;
+
+	virtual bool isConstant() const;
+
+	virtual void makeObjects(std::vector<ObjectToken> * const objects) const;
+
+	virtual void printDebug(std::ostream * const out) const;
+
+private:
+	SourceExpressionDS _expr;
+};
+
+
+
+SourceExpressionDS SourceExpressionDS::make_expression_cast_fixed(SourceExpressionDS const & expr, SourcePosition const & position)
+{
+	return new SourceExpressionDS_CastFixed(expr, position);
+}
+
+
+
+SourceExpressionDS_CastFixed::SourceExpressionDS_CastFixed(SourceExpressionDS const & expr, SourcePosition const & position) : SourceExpressionDS_Base(position), _expr(expr)
+{
+
+}
+
+SourceExpressionDS_CastFixed * SourceExpressionDS_CastFixed::clone() const
+{
+	return new SourceExpressionDS_CastFixed(*this);
+}
+
+SourceExpressionDS::ExpressionType SourceExpressionDS_CastFixed::getType() const
+{
+	return SourceExpressionDS::ET_FIXED;
+}
+
+bool SourceExpressionDS_CastFixed::isConstant() const
+{
+	return _expr.isConstant();
+}
+
+void SourceExpressionDS_CastFixed::makeObjects(std::vector<ObjectToken> * const objects) const
+{
+	_expr.makeObjects(objects);
+
+	switch (_expr.getType())
+	{
+	case SourceExpressionDS::ET_FIXED:
+		break;
+
+	case SourceExpressionDS::ET_INT:
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(16, getPosition())));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_SHIFTL, getPosition()));
+		break;
+
+	case SourceExpressionDS::ET_VOID:
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(0, getPosition())));
+		break;
+	}
+}
+
+void SourceExpressionDS_CastFixed::printDebug(std::ostream * const out) const
+{
+	*out << "SourceExpressionDS_CastFixed(";
+	SourceExpressionDS_Base::printDebug(out);
+	*out << " ";
+		*out << "expr=(";
+		print_debug(out, _expr);
+		*out << ")";
+	*out << ")";
+}
+
+
+

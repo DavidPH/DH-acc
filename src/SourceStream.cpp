@@ -32,7 +32,10 @@ _countLine(1),
 
 _depthComment(0),
 
-_inComment(false)
+_inComment(false),
+
+_inQuoteDouble(false),
+_inQuoteSingle(false)
 {
 	switch (type)
 	{
@@ -40,12 +43,18 @@ _inComment(false)
 		_doCommentASM = true;
 		_doCommentC   = false;
 		_doCommentCPP = false;
+
+		_doQuoteDouble = false;
+		_doQuoteSingle = false;
 		break;
 
 	case ST_C:
 		_doCommentASM = false;
 		_doCommentC   = true;
 		_doCommentCPP = true;
+
+		_doQuoteDouble = true;
+		_doQuoteSingle = true;
 		break;
 	}
 }

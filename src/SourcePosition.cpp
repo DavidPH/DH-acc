@@ -43,5 +43,10 @@ std::ostream & operator << (std::ostream & out, SourcePosition const & in)
 	return out << in.filename << ':' << in.line;
 }
 
+void print_debug(std::ostream * const out, SourcePosition const & in)
+{
+	*out << in;
+}
+
 
 

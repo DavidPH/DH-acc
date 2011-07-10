@@ -22,8 +22,10 @@
 #ifndef HPP_ObjectToken_
 #define HPP_ObjectToken_
 
+#include "ObjectExpression.hpp"
 #include "SourcePosition.hpp"
 
+#include <ostream>
 #include <stdint.h>
 #include <vector>
 
@@ -41,20 +43,21 @@ public:
 		OCODE_ASSIGNSCRIPTVAR,
 		OCODE_BEGINPRINT,
 		OCODE_DELAY,
-		OCODE_DELAYDIRECT,
+		OCODE_DELAY_IMM,
 		OCODE_DROP,
 		OCODE_ENDPRINT,
 		OCODE_GOTO,
 		OCODE_LSPEC1,
-		OCODE_LSPEC1DIRECT,
+		OCODE_LSPEC1_IMM,
 		OCODE_LSPEC2,
-		OCODE_LSPEC2DIRECT,
+		OCODE_LSPEC2_IMM,
 		OCODE_LSPEC3,
-		OCODE_LSPEC3DIRECT,
+		OCODE_LSPEC3_IMM,
 		OCODE_LSPEC4,
-		OCODE_LSPEC4DIRECT,
+		OCODE_LSPEC4_IMM,
 		OCODE_LSPEC5,
-		OCODE_LSPEC5DIRECT,
+		OCODE_LSPEC5_IMM,
+		OCODE_MUL,
 		OCODE_NOP,
 		OCODE_PRINTCHARACTER,
 		OCODE_PRINTNUMBER,
@@ -62,6 +65,8 @@ public:
 		OCODE_PUSHNUMBER,
 		OCODE_PUSHSCRIPTVAR,
 		OCODE_RESTART,
+		OCODE_SHIFTL,
+		OCODE_SHIFTR,
 		OCODE_SUSPEND,
 		OCODE_TERMINATE,
 
@@ -69,6 +74,7 @@ public:
 		OCODE_ASSIGNGLOBALARRAY,
 		OCODE_DUP,
 		OCODE_ENDLOG,
+		OCODE_MULFIXED,
 		OCODE_PRINTFIXED,
 		OCODE_PUSHGLOBALARRAY,
 
@@ -77,6 +83,8 @@ public:
 
 
 
+	ObjectToken(ObjectCode const code, SourcePosition const & position);
+	ObjectToken(ObjectCode const code, SourcePosition const & position, ObjectExpression const & arg);
 	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args);
 
 	ObjectExpression const & getArg(uintptr_t const index) const;
@@ -85,6 +93,11 @@ public:
 
 	std::vector<std::string> const & getLabels() const;
 	SourcePosition const & getPosition() const;
+
+
+
+	friend void print_debug(std::ostream * const out, ObjectToken const & in);
+	friend void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in);
 
 private:
 	std::vector<ObjectExpression> _args;
