@@ -29,6 +29,7 @@ add_executable(DH-acc
 	SourceExpressionDS/BinaryMul.cpp
 	SourceExpressionDS/CastFixed.cpp
 	SourceExpressionDS/CastInt.cpp
+	SourceExpressionDS/RootLSpec.cpp
 	SourceExpressionDS/RootOut.cpp
 	SourceExpressionDS/RootTerm.cpp
 	SourceExpressionDS/RootVoid.cpp

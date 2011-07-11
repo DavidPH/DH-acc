@@ -21,7 +21,9 @@
 
 #include "Base.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../print_debug.hpp"
+#include "../SourceException.hpp"
 
 
 
@@ -32,6 +34,11 @@ SourceExpressionDS_Base::SourceExpressionDS_Base(SourcePosition const & position
 SourceExpressionDS_Base::~SourceExpressionDS_Base()
 {
 
+}
+
+ObjectExpression SourceExpressionDS_Base::createObject() const
+{
+	throw SourceException("attempted to create object on invalid expression", _position, "SourceExpressionDS_Base");
 }
 
 std::vector<std::string> const & SourceExpressionDS_Base::getLabels() const

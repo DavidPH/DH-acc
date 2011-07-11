@@ -35,6 +35,8 @@ public:
 
 	virtual SourceExpressionDS_Base * clone() const = 0;
 
+	virtual ObjectExpression createObject() const;
+
 	std::vector<std::string> const & getLabels() const;
 	SourcePosition const & getPosition() const;
 

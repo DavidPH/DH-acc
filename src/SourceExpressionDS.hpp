@@ -25,6 +25,7 @@
 #include <ostream>
 #include <vector>
 
+class ObjectExpression;
 class ObjectToken;
 class SourceExpressionDS_Base;
 class SourcePosition;
@@ -47,6 +48,8 @@ public:
 	SourceExpressionDS(SourceExpressionDS const & expr);
 	SourceExpressionDS(SourceExpressionDS_Base * const expr);
 	~SourceExpressionDS();
+
+	ObjectExpression createObject() const;
 
 	SourcePosition const & getPosition() const;
 
@@ -78,7 +81,7 @@ private:
 
 
 
-	static SourceExpressionDS make_expression(SourceTokenizerDS * const tokenizer, bool const base);
+	static SourceExpressionDS make_expression(SourceTokenizerDS * const tokenizer, int const level);
 	static SourceExpressionDS make_expression_single(SourceTokenizerDS * const in);
 
 	static SourceExpressionDS make_expression_binary_add(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
@@ -87,6 +90,7 @@ private:
 	static SourceExpressionDS make_expression_cast_fixed(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_int(SourceExpressionDS const & expr, SourcePosition const & position);
 
+	static SourceExpressionDS make_expression_root_lspec(SourceExpressionDS const & spec, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_out(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_term(SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_void(SourceExpressionDS const & expr, SourcePosition const & position);

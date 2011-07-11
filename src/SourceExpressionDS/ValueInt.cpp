@@ -21,6 +21,7 @@
 
 #include "Base.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectToken.hpp"
 #include "../SourceTokenC.hpp"
 
@@ -35,6 +36,8 @@ public:
 	SourceExpressionDS_ValueInt(SourceTokenC const & token);
 
 	virtual SourceExpressionDS_ValueInt * clone() const;
+
+	virtual ObjectExpression createObject() const;
 
 	virtual SourceExpressionDS::ExpressionType getType() const;
 
@@ -65,6 +68,11 @@ SourceExpressionDS_ValueInt::SourceExpressionDS_ValueInt(SourceTokenC const & to
 SourceExpressionDS_ValueInt * SourceExpressionDS_ValueInt::clone() const
 {
 	return new SourceExpressionDS_ValueInt(*this);
+}
+
+ObjectExpression SourceExpressionDS_ValueInt::createObject() const
+{
+	return ObjectExpression::create_value_int32(_value, getPosition());
 }
 
 SourceExpressionDS::ExpressionType SourceExpressionDS_ValueInt::getType() const
