@@ -28,7 +28,7 @@
 
 class ObjectToken;
 class SourceBlockC;
-class SourceContextC;
+class SourceContext;
 class SourceTokenC;
 
 
@@ -103,7 +103,7 @@ private:
 
 
 
-	static SourceExpressionACS make_expression(std::vector<SourceTokenC> const & tokens, SourceContextC const & context);
+	static SourceExpressionACS make_expression(std::vector<SourceTokenC> const & tokens, SourceContext const & context);
 
 	static SourceExpressionACS make_expression_binary_add(SourceExpressionACS const & exprL, SourceExpressionACS const & exprR);
 };

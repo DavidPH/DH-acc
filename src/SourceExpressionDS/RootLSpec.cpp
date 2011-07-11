@@ -35,11 +35,13 @@ public:
 
 	virtual SourceExpressionDS_RootLSpec * clone() const;
 
+	virtual char const * getName() const;
+
 	virtual SourceExpressionDS::ExpressionType getType() const;
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjects(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -67,6 +69,11 @@ SourceExpressionDS_RootLSpec * SourceExpressionDS_RootLSpec::clone() const
 	return new SourceExpressionDS_RootLSpec(*this);
 }
 
+char const * SourceExpressionDS_RootLSpec::getName() const
+{
+	return "SourceExpressionDS_RootLSpec";
+}
+
 SourceExpressionDS::ExpressionType SourceExpressionDS_RootLSpec::getType() const
 {
 	return SourceExpressionDS::ET_VOID;
@@ -77,14 +84,14 @@ bool SourceExpressionDS_RootLSpec::isConstant() const
 	return false;
 }
 
-void SourceExpressionDS_RootLSpec::makeObjects(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_RootLSpec::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	if (_spec.isConstant())
 	{
-		ObjectExpression specObj(_spec.createObject());
+		ObjectExpression specObj(_spec.makeObject());
 
 		for (size_t i(0); i < _args.size() && i < 5; ++i)
-			_args[i].makeObjects(objects);
+			_args[i].makeObjectsGet(objects);
 
 		switch (_args.size())
 		{

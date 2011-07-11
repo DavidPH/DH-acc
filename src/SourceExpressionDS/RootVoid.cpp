@@ -32,11 +32,13 @@ public:
 
 	virtual SourceExpressionDS_RootVoid * clone() const;
 
+	virtual char const * getName() const;
+
 	virtual SourceExpressionDS::ExpressionType getType() const;
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjects(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -63,6 +65,11 @@ SourceExpressionDS_RootVoid * SourceExpressionDS_RootVoid::clone() const
 	return new SourceExpressionDS_RootVoid(*this);
 }
 
+char const * SourceExpressionDS_RootVoid::getName() const
+{
+	return "SourceExpressionDS_RootVoid";
+}
+
 SourceExpressionDS::ExpressionType SourceExpressionDS_RootVoid::getType() const
 {
 	return SourceExpressionDS::ET_VOID;
@@ -73,9 +80,9 @@ bool SourceExpressionDS_RootVoid::isConstant() const
 	return _expr.isConstant();
 }
 
-void SourceExpressionDS_RootVoid::makeObjects(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_RootVoid::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
-	_expr.makeObjects(objects);
+	_expr.makeObjectsGet(objects);
 
 	switch (_expr.getType())
 	{

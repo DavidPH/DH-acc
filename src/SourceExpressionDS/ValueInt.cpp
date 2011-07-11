@@ -37,13 +37,14 @@ public:
 
 	virtual SourceExpressionDS_ValueInt * clone() const;
 
-	virtual ObjectExpression createObject() const;
+	virtual char const * getName() const;
 
 	virtual SourceExpressionDS::ExpressionType getType() const;
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjects(std::vector<ObjectToken> * const objects) const;
+	virtual ObjectExpression makeObject() const;
+	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -70,9 +71,9 @@ SourceExpressionDS_ValueInt * SourceExpressionDS_ValueInt::clone() const
 	return new SourceExpressionDS_ValueInt(*this);
 }
 
-ObjectExpression SourceExpressionDS_ValueInt::createObject() const
+char const * SourceExpressionDS_ValueInt::getName() const
 {
-	return ObjectExpression::create_value_int32(_value, getPosition());
+	return "SourceExpressionDS_ValueInt";
 }
 
 SourceExpressionDS::ExpressionType SourceExpressionDS_ValueInt::getType() const
@@ -85,7 +86,11 @@ bool SourceExpressionDS_ValueInt::isConstant() const
 	return true;
 }
 
-void SourceExpressionDS_ValueInt::makeObjects(std::vector<ObjectToken> * const objects) const
+ObjectExpression SourceExpressionDS_ValueInt::makeObject() const
+{
+	return ObjectExpression::create_value_int32(_value, getPosition());
+}
+void SourceExpressionDS_ValueInt::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	std::vector<ObjectExpression> args;
 

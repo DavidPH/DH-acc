@@ -32,11 +32,13 @@ public:
 
 	virtual SourceExpressionDS_CastFixed * clone() const;
 
+	virtual char const * getName() const;
+
 	virtual SourceExpressionDS::ExpressionType getType() const;
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjects(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -63,6 +65,11 @@ SourceExpressionDS_CastFixed * SourceExpressionDS_CastFixed::clone() const
 	return new SourceExpressionDS_CastFixed(*this);
 }
 
+char const * SourceExpressionDS_CastFixed::getName() const
+{
+	return "SourceExpressionDS_CastFixed";
+}
+
 SourceExpressionDS::ExpressionType SourceExpressionDS_CastFixed::getType() const
 {
 	return SourceExpressionDS::ET_FIXED;
@@ -73,9 +80,9 @@ bool SourceExpressionDS_CastFixed::isConstant() const
 	return _expr.isConstant();
 }
 
-void SourceExpressionDS_CastFixed::makeObjects(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_CastFixed::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
-	_expr.makeObjects(objects);
+	_expr.makeObjectsGet(objects);
 
 	switch (_expr.getType())
 	{

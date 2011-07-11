@@ -35,16 +35,19 @@ public:
 
 	virtual SourceExpressionDS_Base * clone() const = 0;
 
-	virtual ObjectExpression createObject() const;
-
 	std::vector<std::string> const & getLabels() const;
+
+	virtual char const * getName() const = 0;
+
 	SourcePosition const & getPosition() const;
 
 	virtual SourceExpressionDS::ExpressionType getType() const = 0;
 
 	virtual bool isConstant() const = 0;
 
-	virtual void makeObjects(std::vector<ObjectToken> * const objects) const = 0;
+	virtual ObjectExpression makeObject() const;
+	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const = 0;
+	virtual void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 

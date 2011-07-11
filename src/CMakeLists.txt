@@ -18,6 +18,7 @@ add_executable(DH-acc
 	ObjectExpression/ValueSymbol.cpp
 	ObjectToken.cpp
 	print_debug.cpp
+	SourceContext.cpp
 	SourceException.cpp
 	SourceExpressionACS.cpp
 	SourceExpressionACS/Base.cpp
@@ -26,6 +27,7 @@ add_executable(DH-acc
 	SourceExpressionDS/Base.cpp
 	SourceExpressionDS/Binary.cpp
 	SourceExpressionDS/BinaryAdd.cpp
+	SourceExpressionDS/BinaryAssign.cpp
 	SourceExpressionDS/BinaryMul.cpp
 	SourceExpressionDS/CastFixed.cpp
 	SourceExpressionDS/CastInt.cpp
@@ -35,6 +37,7 @@ add_executable(DH-acc
 	SourceExpressionDS/RootVoid.cpp
 	SourceExpressionDS/ValueFixed.cpp
 	SourceExpressionDS/ValueInt.cpp
+	SourceExpressionDS/ValueVariable.cpp
 	SourceBlockC.cpp
 	SourcePosition.cpp
 	SourceStream.cpp
@@ -42,6 +45,7 @@ add_executable(DH-acc
 	SourceTokenC.cpp
 	SourceTokenizerC.cpp
 	SourceTokenizerDS.cpp
+	SourceVariable.cpp
 )
 
 

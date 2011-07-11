@@ -14,33 +14,42 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourceContextC.hpp
+/* SourceContext.hpp
 **
-** SourceContextC class.
+** Defines the SourceContext class.
 */
 
-#ifndef HPP_SourceContextC_
-#define HPP_SourceContextC_
+#ifndef HPP_SourceContext_
+#define HPP_SourceContext_
 
+#include "SourceVariable.hpp"
+
+#include <map>
 #include <string>
-#include <vector>
 
-class SourceVariableC;
-
+class SourceTokenC;
 
 
-class SourceContextC
+
+class SourceContext
 {
 public:
+	SourceContext();
+
+	void addVariable(SourceVariable const & var);
+
+	int getAddress(SourceVariable::StorageClass const sc);
+
+	SourceVariable const & getVariable(SourceTokenC const & token) const;
 
 private:
-	std::string _name;
-	std::vector<SourceVariableC> _vars;
+	int _addressRegister;
+	std::map<std::string, SourceVariable> _vars;
 };
 
 
 
-#endif /* HPP_SourceContextC_ */
+#endif /* HPP_SourceContext_ */
 
 
 

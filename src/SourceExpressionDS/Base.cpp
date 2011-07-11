@@ -36,11 +36,6 @@ SourceExpressionDS_Base::~SourceExpressionDS_Base()
 
 }
 
-ObjectExpression SourceExpressionDS_Base::createObject() const
-{
-	throw SourceException("attempted to create object on invalid expression", _position, "SourceExpressionDS_Base");
-}
-
 std::vector<std::string> const & SourceExpressionDS_Base::getLabels() const
 {
 	return _labels;
@@ -49,6 +44,16 @@ std::vector<std::string> const & SourceExpressionDS_Base::getLabels() const
 SourcePosition const & SourceExpressionDS_Base::getPosition() const
 {
 	return _position;
+}
+
+ObjectExpression SourceExpressionDS_Base::makeObject() const
+{
+	throw SourceException("attempted to makeObject on invalid expression", _position, getName());
+}
+
+void SourceExpressionDS_Base::makeObjectsSet(std::vector<ObjectToken> * const objects) const
+{
+	throw SourceException("attempted to makeObjectsSet on invalid expression", _position, getName());
 }
 
 void SourceExpressionDS_Base::printDebug(std::ostream * const out) const

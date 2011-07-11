@@ -32,11 +32,13 @@ public:
 
 	virtual SourceExpressionDS_RootTerm * clone() const;
 
+	virtual char const * getName() const;
+
 	virtual SourceExpressionDS::ExpressionType getType() const;
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjects(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -62,6 +64,11 @@ SourceExpressionDS_RootTerm * SourceExpressionDS_RootTerm::clone() const
 	return new SourceExpressionDS_RootTerm(*this);
 }
 
+char const * SourceExpressionDS_RootTerm::getName() const
+{
+	return "SourceExpressionDS_RootTerm";
+}
+
 SourceExpressionDS::ExpressionType SourceExpressionDS_RootTerm::getType() const
 {
 	return SourceExpressionDS::ET_VOID;
@@ -72,7 +79,7 @@ bool SourceExpressionDS_RootTerm::isConstant() const
 	return false;
 }
 
-void SourceExpressionDS_RootTerm::makeObjects(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_RootTerm::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	objects->push_back(ObjectToken(ObjectToken::OCODE_TERMINATE, getPosition()));
 }

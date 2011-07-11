@@ -28,10 +28,23 @@ SourceExpressionDS_Binary::SourceExpressionDS_Binary(SourceExpressionDS const & 
 	SourceExpressionDS::ExpressionType type(getType());
 
 	if (_exprL.getType() != type)
-		_exprL = SourceExpressionDS::make_expression_cast(_exprL, type, _exprL.getPosition());
+		_exprL = SourceExpressionDS::make_expression_cast(_exprL, type, getPosition());
 
 	if (_exprR.getType() != type)
-		_exprR = SourceExpressionDS::make_expression_cast(_exprR, type, _exprL.getPosition());
+		_exprR = SourceExpressionDS::make_expression_cast(_exprR, type, getPosition());
+}
+SourceExpressionDS_Binary::SourceExpressionDS_Binary(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, bool const castL, SourcePosition const & position) : SourceExpressionDS_Base(position), _exprL(exprL), _exprR(exprR)
+{
+	if (castL)
+	{
+		if (_exprL.getType() != _exprR.getType())
+			_exprL = SourceExpressionDS::make_expression_cast(_exprL, _exprR.getType(), getPosition());
+	}
+	else
+	{
+		if (_exprR.getType() != _exprL.getType())
+			_exprR = SourceExpressionDS::make_expression_cast(_exprR, _exprL.getType(), getPosition());
+	}
 }
 
 SourceExpressionDS::ExpressionType SourceExpressionDS_Binary::getType() const
@@ -44,10 +57,10 @@ bool SourceExpressionDS_Binary::isConstant() const
 	return _exprL.isConstant() && _exprR.isConstant();
 }
 
-void SourceExpressionDS_Binary::makeObjects(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_Binary::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
-	_exprL.makeObjects(objects);
-	_exprR.makeObjects(objects);
+	_exprL.makeObjectsGet(objects);
+	_exprR.makeObjectsGet(objects);
 }
 
 void SourceExpressionDS_Binary::printDebug(std::ostream * const out) const

@@ -32,7 +32,9 @@ public:
 
 	virtual SourceExpressionDS_BinaryAdd * clone() const;
 
-	virtual void makeObjects(std::vector<ObjectToken> * const objects) const;
+	virtual char const * getName() const;
+
+	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 };
@@ -56,9 +58,14 @@ SourceExpressionDS_BinaryAdd * SourceExpressionDS_BinaryAdd::clone() const
 	return new SourceExpressionDS_BinaryAdd(*this);
 }
 
-void SourceExpressionDS_BinaryAdd::makeObjects(std::vector<ObjectToken> * const objects) const
+char const * SourceExpressionDS_BinaryAdd::getName() const
 {
-	SourceExpressionDS_Binary::makeObjects(objects);
+	return "SourceExpressionDS_BinaryAdd";
+}
+
+void SourceExpressionDS_BinaryAdd::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+{
+	SourceExpressionDS_Binary::makeObjectsGet(objects);
 
 	switch (getType())
 	{

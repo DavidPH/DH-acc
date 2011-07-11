@@ -27,10 +27,12 @@
 
 class ObjectExpression;
 class ObjectToken;
+class SourceContext;
 class SourceExpressionDS_Base;
 class SourcePosition;
 class SourceTokenC;
 class SourceTokenizerDS;
+class SourceVariable;
 
 
 
@@ -49,15 +51,15 @@ public:
 	SourceExpressionDS(SourceExpressionDS_Base * const expr);
 	~SourceExpressionDS();
 
-	ObjectExpression createObject() const;
-
 	SourcePosition const & getPosition() const;
 
 	ExpressionType getType() const;
 
 	bool isConstant() const;
 
-	void makeObjects(std::vector<ObjectToken> * const objects) const;
+	ObjectExpression makeObject() const;
+	void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
 
 	SourceExpressionDS & operator = (SourceExpressionDS const & expr);
 
@@ -81,10 +83,11 @@ private:
 
 
 
-	static SourceExpressionDS make_expression(SourceTokenizerDS * const tokenizer, int const level);
-	static SourceExpressionDS make_expression_single(SourceTokenizerDS * const in);
+	static SourceExpressionDS make_expression(SourceTokenizerDS * const tokenizer, SourceContext & context);
+	static SourceExpressionDS make_expression_single(SourceTokenizerDS * const in, SourceContext & context);
 
 	static SourceExpressionDS make_expression_binary_add(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
+	static SourceExpressionDS make_expression_binary_assign(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 	static SourceExpressionDS make_expression_binary_mul(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 
 	static SourceExpressionDS make_expression_cast_fixed(SourceExpressionDS const & expr, SourcePosition const & position);
@@ -98,6 +101,7 @@ private:
 	static SourceExpressionDS make_expression_value_fixed(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_int(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_number(SourceTokenC const & token);
+	static SourceExpressionDS make_expression_value_variable(SourceVariable const & var, SourcePosition const & position);
 };
 
 

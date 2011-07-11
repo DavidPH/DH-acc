@@ -22,9 +22,8 @@
 #include "SourceExpressionACS.hpp"
 
 #include "SourceBlockC.hpp"
-#include "SourceContextC.hpp"
+#include "SourceContext.hpp"
 #include "SourceTokenC.hpp"
-#include "SourceVariableC.hpp"
 
 #include <stdint.h>
 
@@ -66,7 +65,7 @@ bool SourceExpressionACS::isConstant() const
 	return _expr->isConstant();
 }
 
-SourceExpressionACS SourceExpressionACS::make_expression(std::vector<SourceTokenC> const & tokens, SourceContextC const & context)
+SourceExpressionACS SourceExpressionACS::make_expression(std::vector<SourceTokenC> const & tokens, SourceContext const & context)
 {
 	for (uintptr_t index(0); index < tokens.size(); ++index)
 	{
@@ -87,7 +86,7 @@ SourceExpressionACS SourceExpressionACS::make_expression(std::vector<SourceToken
 
 void SourceExpressionACS::make_expressions(SourceBlockC const & block, std::vector<SourceExpressionACS> * const expressions)
 {
-	SourceContextC context;
+	SourceContext context;
 
 	SourceTokenC const & token(block.getToken(0));
 

@@ -30,6 +30,7 @@ class SourceExpressionDS_Binary : public SourceExpressionDS_Base
 {
 public:
 	SourceExpressionDS_Binary(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
+	SourceExpressionDS_Binary(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, bool const castL, SourcePosition const & position);
 
 	virtual SourceExpressionDS_Binary * clone() const = 0;
 
@@ -37,11 +38,11 @@ public:
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjects(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
-private:
+protected:
 	SourceExpressionDS _exprL;
 	SourceExpressionDS _exprR;
 };
