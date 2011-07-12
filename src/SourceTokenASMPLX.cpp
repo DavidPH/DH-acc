@@ -174,6 +174,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(BEGINPRINT,      0);
 	DO_INIT(DELAY,           0);
 	DO_INIT(DELAY_IMM,       1);
+	DO_INIT(DIV,             0);
 	DO_INIT(DROP,            0);
 	DO_INIT(ENDPRINT,        0);
 	DO_INIT(GOTO,            1);
@@ -188,6 +189,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(LSPEC5,          1);
 	DO_INIT(LSPEC5_IMM,      6);
 	DO_INIT(MUL,             0);
+	DO_INIT(MOD,             0);
 	DO_INIT(NOP,             0);
 	DO_INIT(PRINTCHARACTER,  0);
 	DO_INIT(PRINTNUMBER,     0);
@@ -197,11 +199,13 @@ void SourceTokenASMPLX::init()
 	DO_INIT(RESTART,         0);
 	DO_INIT(SHIFTL,          0);
 	DO_INIT(SHIFTR,          0);
+	DO_INIT(SUB,             0);
 	DO_INIT(SUSPEND,         0);
 	DO_INIT(TERMINATE,       0);
 
 	// BinaryTokenZDACS
 	DO_INIT(ASSIGNGLOBALARRAY, 1);
+	DO_INIT(DIVFIXED,          0);
 	DO_INIT(DUP,               0);
 	DO_INIT(ENDLOG,            0);
 	DO_INIT(MULFIXED,          0);

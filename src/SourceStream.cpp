@@ -94,7 +94,7 @@ long SourceStream::getLineCount() const
 
 bool SourceStream::isInComment() const
 {
-	return _inComment && !_depthComment;
+	return _inComment || _depthComment;
 }
 
 bool SourceStream::isInQuote() const
@@ -167,6 +167,10 @@ void SourceStream::prepareC()
 
 		// Comments are stripped.
 		if (isInComment())
+			continue;
+
+		// End of multi-line comments are stripped, unless quoted.
+		if (((_curC == '*' && _newC == '/') || (_oldC == '*' && _curC == '/')) && !isInQuote())
 			continue;
 
 

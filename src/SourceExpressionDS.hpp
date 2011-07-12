@@ -83,16 +83,21 @@ private:
 
 
 
-	static SourceExpressionDS make_expression(SourceTokenizerDS * const tokenizer, SourceContext & context);
-	static SourceExpressionDS make_expression_single(SourceTokenizerDS * const in, SourceContext & context);
+	static SourceExpressionDS make_expression(SourceTokenizerDS * const tokenizer, SourceContext * const context);
+	static SourceExpressionDS make_expression_single(SourceTokenizerDS * const in, SourceContext * const context);
+	static void make_expressions(SourceTokenizerDS * const tokenizer, std::vector<SourceExpressionDS> * const expressions, SourceContext * const context);
 
 	static SourceExpressionDS make_expression_binary_add(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 	static SourceExpressionDS make_expression_binary_assign(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
+	static SourceExpressionDS make_expression_binary_div(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
+	static SourceExpressionDS make_expression_binary_mod(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 	static SourceExpressionDS make_expression_binary_mul(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
+	static SourceExpressionDS make_expression_binary_sub(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 
 	static SourceExpressionDS make_expression_cast_fixed(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_int(SourceExpressionDS const & expr, SourcePosition const & position);
 
+	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_lspec(SourceExpressionDS const & spec, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_out(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_term(SourcePosition const & position);

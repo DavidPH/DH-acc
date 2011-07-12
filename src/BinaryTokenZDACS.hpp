@@ -51,7 +51,10 @@ public:
 		BCODE_LSPEC4_IMM        =  12,
 		BCODE_LSPEC5_IMM        =  13,
 		BCODE_ADD               =  14,
+		BCODE_SUB               =  15,
 		BCODE_MUL               =  16,
+		BCODE_DIV               =  17,
+		BCODE_MOD               =  18,
 		BCODE_ASSIGNSCRIPTVAR   =  25,
 		BCODE_PUSHSCRIPTVAR     =  28,
 		BCODE_GOTO              =  52,
@@ -68,6 +71,7 @@ public:
 		BCODE_PRINTCHARACTER    =  89,
 
 		BCODE_MULFIXED          = 136,
+		BCODE_DIVFIXED          = 137,
 		BCODE_PRINTFIXED        = 157,
 		BCODE_DUP               = 216,
 		BCODE_PUSHGLOBALARRAY   = 235,

@@ -101,6 +101,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_BEGINPRINT:        *out << "OCODE_BEGINPRINT";        break;
 	case ObjectToken::OCODE_DELAY:             *out << "OCODE_DELAY";             break;
 	case ObjectToken::OCODE_DELAY_IMM:         *out << "OCODE_DELAY_IMM";         break;
+	case ObjectToken::OCODE_DIV:               *out << "OCODE_DIV";               break;
 	case ObjectToken::OCODE_DROP:              *out << "OCODE_DROP";              break;
 	case ObjectToken::OCODE_ENDPRINT:          *out << "OCODE_NOP";               break;
 	case ObjectToken::OCODE_GOTO:              *out << "OCODE_GOTO";              break;
@@ -115,6 +116,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_LSPEC5:            *out << "OCODE_LSPEC5";            break;
 	case ObjectToken::OCODE_LSPEC5_IMM:        *out << "OCODE_LSPEC5_IMM";        break;
 	case ObjectToken::OCODE_MUL:               *out << "OCODE_MUL";               break;
+	case ObjectToken::OCODE_MOD:               *out << "OCODE_MOD";               break;
 	case ObjectToken::OCODE_NOP:               *out << "OCODE_NOP";               break;
 	case ObjectToken::OCODE_PRINTCHARACTER:    *out << "OCODE_PRINTCHARACTER";    break;
 	case ObjectToken::OCODE_PRINTNUMBER:       *out << "OCODE_PRINTNUMBER";       break;
@@ -124,10 +126,12 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_RESTART:           *out << "OCODE_RESTART";           break;
 	case ObjectToken::OCODE_SHIFTL:            *out << "OCODE_SHIFTL";            break;
 	case ObjectToken::OCODE_SHIFTR:            *out << "OCODE_SHIFTR";            break;
+	case ObjectToken::OCODE_SUB:               *out << "OCODE_SUB";               break;
 	case ObjectToken::OCODE_SUSPEND:           *out << "OCODE_SUSPEND";           break;
 	case ObjectToken::OCODE_TERMINATE:         *out << "OCODE_TERMINATE";         break;
 
 	case ObjectToken::OCODE_ASSIGNGLOBALARRAY: *out << "OCODE_ASSIGNGLOBALARRAY"; break;
+	case ObjectToken::OCODE_DIVFIXED:          *out << "OCODE_DIVFIXED";          break;
 	case ObjectToken::OCODE_DUP:               *out << "OCODE_DUP";               break;
 	case ObjectToken::OCODE_ENDLOG:            *out << "OCODE_ENDLOG";            break;
 	case ObjectToken::OCODE_MULFIXED:          *out << "OCODE_MULFIXED";          break;
