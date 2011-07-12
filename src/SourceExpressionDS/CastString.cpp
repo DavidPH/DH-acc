@@ -14,9 +14,9 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourceExpressionDS/CastInt.cpp
+/* SourceExpressionDS/CastString.cpp
 **
-** Defines the SourceExpressionDS_CastInt class and methods.
+** Defines the SourceExpressionDS_CastString class and methods.
 */
 
 #include "Base.hpp"
@@ -25,12 +25,12 @@
 
 
 
-class SourceExpressionDS_CastInt : public SourceExpressionDS_Base
+class SourceExpressionDS_CastString : public SourceExpressionDS_Base
 {
 public:
-	SourceExpressionDS_CastInt(SourceExpressionDS const & expr, SourcePosition const & position);
+	SourceExpressionDS_CastString(SourceExpressionDS const & expr, SourcePosition const & position);
 
-	virtual SourceExpressionDS_CastInt * clone() const;
+	virtual SourceExpressionDS_CastString * clone() const;
 
 	virtual char const * getName() const;
 
@@ -48,39 +48,39 @@ private:
 
 
 
-SourceExpressionDS SourceExpressionDS::make_expression_cast_int(SourceExpressionDS const & expr, SourcePosition const & position)
+SourceExpressionDS SourceExpressionDS::make_expression_cast_string(SourceExpressionDS const & expr, SourcePosition const & position)
 {
-	return new SourceExpressionDS_CastInt(expr, position);
+	return new SourceExpressionDS_CastString(expr, position);
 }
 
 
 
-SourceExpressionDS_CastInt::SourceExpressionDS_CastInt(SourceExpressionDS const & expr, SourcePosition const & position) : SourceExpressionDS_Base(position), _expr(expr)
+SourceExpressionDS_CastString::SourceExpressionDS_CastString(SourceExpressionDS const & expr, SourcePosition const & position) : SourceExpressionDS_Base(position), _expr(expr)
 {
 
 }
 
-SourceExpressionDS_CastInt * SourceExpressionDS_CastInt::clone() const
+SourceExpressionDS_CastString * SourceExpressionDS_CastString::clone() const
 {
-	return new SourceExpressionDS_CastInt(*this);
+	return new SourceExpressionDS_CastString(*this);
 }
 
-char const * SourceExpressionDS_CastInt::getName() const
+char const * SourceExpressionDS_CastString::getName() const
 {
-	return "SourceExpressionDS_CastInt";
+	return "SourceExpressionDS_CastString";
 }
 
-SourceExpressionDS::ExpressionType SourceExpressionDS_CastInt::getType() const
+SourceExpressionDS::ExpressionType SourceExpressionDS_CastString::getType() const
 {
-	return SourceExpressionDS::ET_INT;
+	return SourceExpressionDS::ET_STRING;
 }
 
-bool SourceExpressionDS_CastInt::isConstant() const
+bool SourceExpressionDS_CastString::isConstant() const
 {
 	return _expr.isConstant();
 }
 
-void SourceExpressionDS_CastInt::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_CastString::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	_expr.makeObjectsGet(objects);
 
@@ -101,9 +101,9 @@ void SourceExpressionDS_CastInt::makeObjectsGet(std::vector<ObjectToken> * const
 	}
 }
 
-void SourceExpressionDS_CastInt::printDebug(std::ostream * const out) const
+void SourceExpressionDS_CastString::printDebug(std::ostream * const out) const
 {
-	*out << "SourceExpressionDS_CastInt(";
+	*out << "SourceExpressionDS_CastString(";
 	SourceExpressionDS_Base::printDebug(out);
 	*out << " ";
 		*out << "expr=(";

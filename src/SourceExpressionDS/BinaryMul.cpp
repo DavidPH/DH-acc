@@ -74,6 +74,7 @@ void SourceExpressionDS_BinaryMul::makeObjectsGet(std::vector<ObjectToken> * con
 		break;
 
 	case SourceExpressionDS::ET_INT:
+	case SourceExpressionDS::ET_STRING:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_MUL, getPosition()));
 		break;
 

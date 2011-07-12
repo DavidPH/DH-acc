@@ -54,6 +54,9 @@ SourceVariable::VariableType SourceVariable::get_VariableType(SourceTokenC const
 	if (token.getData() == "int")
 		return VT_INT;
 
+	if (token.getData() == "string")
+		return VT_STRING;
+
 	throw SourceException("invalid variable-type", token.getPosition(), "SourceVariable");
 }
 
@@ -76,6 +79,7 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects) co
 		{
 		case VT_FIXED:
 		case VT_INT:
+		case VT_STRING:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHSCRIPTVAR, _position, ObjectExpression::create_value_int32(_address, _position)));
 			break;
 		}
@@ -92,6 +96,7 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects) co
 		{
 		case VT_FIXED:
 		case VT_INT:
+		case VT_STRING:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_DUP, _position));
 			objects->push_back(ObjectToken(ObjectToken::OCODE_ASSIGNSCRIPTVAR, _position, ObjectExpression::create_value_int32(_address, _position)));
 			break;
@@ -151,8 +156,9 @@ void print_debug(std::ostream * const out, SourceVariable::VariableType const in
 {
 	switch (in)
 	{
-	case SourceVariable::VT_FIXED: *out << "VT_FIXED"; break;
-	case SourceVariable::VT_INT:   *out << "VT_INT";   break;
+	case SourceVariable::VT_FIXED:  *out << "VT_FIXED";  break;
+	case SourceVariable::VT_INT:    *out << "VT_INT";    break;
+	case SourceVariable::VT_STRING: *out << "VT_STRING"; break;
 	}
 }
 

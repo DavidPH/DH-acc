@@ -81,8 +81,9 @@ SourceExpressionDS::ExpressionType SourceExpressionDS_ValueVariable::getType() c
 {
 	switch (_var.getType())
 	{
-	case SourceVariable::VT_FIXED: return SourceExpressionDS::ET_FIXED;
-	case SourceVariable::VT_INT:   return SourceExpressionDS::ET_INT;
+	case SourceVariable::VT_FIXED:  return SourceExpressionDS::ET_FIXED;
+	case SourceVariable::VT_INT:    return SourceExpressionDS::ET_INT;
+	case SourceVariable::VT_STRING: return SourceExpressionDS::ET_STRING;
 	}
 
 	return SourceExpressionDS::ET_VOID;

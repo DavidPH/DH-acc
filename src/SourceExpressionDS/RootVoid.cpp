@@ -88,6 +88,7 @@ void SourceExpressionDS_RootVoid::makeObjectsGet(std::vector<ObjectToken> * cons
 	{
 	case SourceExpressionDS::ET_FIXED:
 	case SourceExpressionDS::ET_INT:
+	case SourceExpressionDS::ET_STRING:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_DROP, getPosition()));
 		break;
 

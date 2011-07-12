@@ -44,7 +44,8 @@ public:
 	enum VariableType
 	{
 		VT_FIXED,
-		VT_INT
+		VT_INT,
+		VT_STRING
 	};
 
 

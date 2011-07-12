@@ -98,6 +98,12 @@ void SourceExpressionDS_RootOut::makeObjectsGet(std::vector<ObjectToken> * const
 		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
 		break;
 
+	case SourceExpressionDS::ET_STRING:
+		objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTSTRING, getPosition()));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
+		break;
+
 	case SourceExpressionDS::ET_VOID:
 		break;
 	}

@@ -175,6 +175,36 @@ void SourceStream::prepareC()
 
 
 
+		// Quoted string escape sequences.
+		if (isInQuote() && _curC == '\\')
+		{
+			int newC(_newC);
+			_newC = -2;
+
+			switch (newC)
+			{
+			case 'r': _curC = '\r'; break;
+			case 'n': _curC = '\n'; break;
+			case 't': _curC = '\t'; break;
+			case '\n': ++_countLine;
+			case '\t':
+			case '\\':
+			case '\'':
+			case '"':
+			case ' ':
+				_curC = newC;
+				break;
+
+			// TODO: \xXX
+
+			default:
+				_newC = newC;
+				break;
+			}
+		}
+
+
+
 		return;
 	}
 }

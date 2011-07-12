@@ -71,6 +71,7 @@ void SourceExpressionDS_BinaryMod::makeObjectsGet(std::vector<ObjectToken> * con
 	{
 	case SourceExpressionDS::ET_FIXED:
 	case SourceExpressionDS::ET_INT:
+	case SourceExpressionDS::ET_STRING:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_MOD, getPosition()));
 		break;
 

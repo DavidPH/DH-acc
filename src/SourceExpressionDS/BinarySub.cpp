@@ -71,6 +71,7 @@ void SourceExpressionDS_BinarySub::makeObjectsGet(std::vector<ObjectToken> * con
 	{
 	case SourceExpressionDS::ET_FIXED:
 	case SourceExpressionDS::ET_INT:
+	case SourceExpressionDS::ET_STRING:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_SUB, getPosition()));
 		break;
 

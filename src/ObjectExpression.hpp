@@ -71,6 +71,8 @@ public:
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
 
+	// Adds a string using an auto-generated symbol and returns that symbol.
+	static std::string add_string(std::string const & value);
 	static void add_string(std::string const & symbol, std::string const & value);
 
 	static void add_symbol(std::string const & symbol, ObjectExpression const & value);

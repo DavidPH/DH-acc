@@ -90,6 +90,7 @@ void SourceExpressionDS_CastFixed::makeObjectsGet(std::vector<ObjectToken> * con
 		break;
 
 	case SourceExpressionDS::ET_INT:
+	case SourceExpressionDS::ET_STRING:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(16, getPosition())));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_SHIFTL, getPosition()));
 		break;

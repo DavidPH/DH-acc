@@ -43,6 +43,7 @@ public:
 	{
 		ET_FIXED,
 		ET_INT,
+		ET_STRING,
 		ET_VOID
 	};
 
@@ -96,6 +97,7 @@ private:
 
 	static SourceExpressionDS make_expression_cast_fixed(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_int(SourceExpressionDS const & expr, SourcePosition const & position);
+	static SourceExpressionDS make_expression_cast_string(SourceExpressionDS const & expr, SourcePosition const & position);
 
 	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_lspec(SourceExpressionDS const & spec, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
@@ -106,6 +108,7 @@ private:
 	static SourceExpressionDS make_expression_value_fixed(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_int(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_number(SourceTokenC const & token);
+	static SourceExpressionDS make_expression_value_string(ObjectExpression const & symbol, SourcePosition const & position);
 	static SourceExpressionDS make_expression_value_variable(SourceVariable const & var, SourcePosition const & position);
 };
 

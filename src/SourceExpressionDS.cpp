@@ -59,9 +59,10 @@ SourceExpressionDS::ExpressionType SourceExpressionDS::get_promoted_type(Express
 {
 	if (type1 == type2) return type1;
 
-	if (type1 == ET_VOID || type2 == ET_VOID) return ET_VOID;
-
-	if (type1 == ET_FIXED || type2 == ET_FIXED) return ET_FIXED;
+	if (type1 == ET_VOID   || type2 == ET_VOID)   return ET_VOID;
+	if (type1 == ET_FIXED  || type2 == ET_FIXED)  return ET_FIXED;
+	if (type1 == ET_INT    || type2 == ET_INT)    return ET_INT;
+	if (type1 == ET_STRING || type2 == ET_STRING) return ET_STRING;
 
 	return ET_INT;
 }
@@ -137,9 +138,10 @@ SourceExpressionDS SourceExpressionDS::make_expression_cast(SourceExpressionDS c
 {
 	switch (type)
 	{
-	case ET_FIXED: return make_expression_cast_fixed(expr, position);
-	case ET_INT:   return make_expression_cast_int(expr, position);
-	case ET_VOID:  throw SourceException("attempt to cast to ET_VOID", position, "SourceExpressionDS");
+	case ET_FIXED:  return make_expression_cast_fixed(expr, position);
+	case ET_INT:    return make_expression_cast_int(expr, position);
+	case ET_STRING: return make_expression_cast_string(expr, position);
+	case ET_VOID: throw SourceException("attempt to cast to ET_VOID", position, "SourceExpressionDS");
 	}
 
 	throw SourceException("attempt to cast to unknown", position, "SourceExpressionDS");
@@ -209,6 +211,9 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 	case SourceTokenC::TT_NUMBER:
 		return make_expression_value_number(token);
+
+	case SourceTokenC::TT_STRING:
+		return make_expression_value_string(ObjectExpression::create_value_symbol(ObjectExpression::add_string(token.getData() + '\0'), token.getPosition()), token.getPosition());
 
 	case SourceTokenC::TT_OP_BRACE_O:
 	{
@@ -306,9 +311,10 @@ void print_debug(std::ostream * const out, SourceExpressionDS::ExpressionType co
 {
 	switch (in)
 	{
-	case SourceExpressionDS::ET_FIXED: *out << "ET_FIXED"; break;
-	case SourceExpressionDS::ET_INT:   *out << "ET_INT";   break;
-	case SourceExpressionDS::ET_VOID:  *out << "ET_VOID";  break;
+	case SourceExpressionDS::ET_FIXED:  *out << "ET_FIXED";  break;
+	case SourceExpressionDS::ET_INT:    *out << "ET_INT";    break;
+	case SourceExpressionDS::ET_STRING: *out << "ET_STRING"; break;
+	case SourceExpressionDS::ET_VOID:   *out << "ET_VOID";   break;
 	}
 }
 

@@ -23,6 +23,8 @@
 
 #include "SourceException.hpp"
 
+#include <sstream>
+
 
 
 int32_t ObjectExpression::_address_count(8+4+4+12);
@@ -35,7 +37,7 @@ ObjectExpression::ObjectExpression() : _expr(NULL)
 {
 
 }
-ObjectExpression::ObjectExpression(ObjectExpression const & expr) : _expr(expr._expr->clone())
+ObjectExpression::ObjectExpression(ObjectExpression const & expr) : _expr(expr._expr ? expr._expr->clone() : NULL)
 {
 
 }
@@ -58,6 +60,15 @@ void ObjectExpression::add_label(std::string const & symbol)
 	add_symbol(symbol, create_value_int32(_address_count, SourcePosition::none));
 }
 
+std::string ObjectExpression::add_string(std::string const & value)
+{
+	std::ostringstream oss;
+	oss << "__string_" << _string_table.size();
+	std::string symbol(oss.str());
+
+	add_string(symbol, value);
+	return symbol;
+}
 void ObjectExpression::add_string(std::string const & symbol, std::string const & value)
 {
 	// TODO: Option for string folding.
