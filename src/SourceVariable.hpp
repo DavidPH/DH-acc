@@ -41,24 +41,39 @@ public:
 		SC_REGISTER
 	};
 
-	enum VariableType
+	enum VariableTypeInternal
 	{
 		VT_FIXED,
 		VT_INT,
-		VT_STRING
+		VT_STRING,
+
+		VT_VOID,
+
+		VT_STRUCT
+	};
+
+	struct VariableType
+	{
+		int size() const;
+
+		VariableTypeInternal type;
+
+		// VT_STRUCT members or VT_FUNCTION/VT_SCRIPT args.
+		std::vector<std::string>          names;
+		std::vector<VariableType const *> types;
 	};
 
 
 
 	SourceVariable();
-	SourceVariable(std::string const & nameObject, std::string const & nameSource, int const address, StorageClass const sc, VariableType const type, SourcePosition const & position);
+	SourceVariable(std::string const & nameObject, std::string const & nameSource, int const address, StorageClass const sc, VariableType const * const type, SourcePosition const & position);
 
 	StorageClass getClass() const;
 
 	std::string const & getNameObject() const;
 	std::string const & getNameSource() const;
 
-	VariableType getType() const;
+	VariableType const * getType() const;
 
 	void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 	void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
@@ -67,11 +82,18 @@ public:
 
 	friend void print_debug(std::ostream * const out, SourceVariable const & in);
 	friend void print_debug(std::ostream * const out, SourceVariable::StorageClass const in);
-	friend void print_debug(std::ostream * const out, SourceVariable::VariableType const in);
+	friend void print_debug(std::ostream * const out, SourceVariable::VariableType const & in);
+	friend void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal const in);
+
+	static void add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types);
 
 	static StorageClass get_StorageClass(SourceTokenC const & token);
 
-	static VariableType get_VariableType(SourceTokenC const & token);
+	static VariableType const * get_VariableType(SourceTokenC const & token);
+	static VariableType const * get_VariableType(VariableTypeInternal const type);
+	static VariableType const * get_VariableType_null(std::string const & name);
+
+	static void init();
 
 private:
 	int _address;
@@ -79,7 +101,15 @@ private:
 	std::string _nameSource;
 	SourcePosition _position;
 	StorageClass _sc;
-	VariableType _type;
+	VariableType const * _type;
+
+	void makeObjectsGet(std::vector<ObjectToken> * const objects, VariableType const * const type, int * const address) const;
+	void makeObjectsSet(std::vector<ObjectToken> * const objects, VariableType const * const type, int * const address) const;
+
+
+
+	static std::vector<std::string>    _names;
+	static std::vector<VariableType *> _types;
 };
 
 

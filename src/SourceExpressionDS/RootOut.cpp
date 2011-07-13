@@ -34,7 +34,7 @@ public:
 
 	virtual char const * getName() const;
 
-	virtual SourceExpressionDS::ExpressionType getType() const;
+	virtual SourceVariable::VariableType const * getType() const;
 
 	virtual bool isConstant() const;
 
@@ -44,6 +44,8 @@ public:
 
 private:
 	SourceExpressionDS _expr;
+
+	void doOut(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * const type) const;
 };
 
 
@@ -65,14 +67,46 @@ SourceExpressionDS_RootOut * SourceExpressionDS_RootOut::clone() const
 	return new SourceExpressionDS_RootOut(*this);
 }
 
+void SourceExpressionDS_RootOut::doOut(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * const type) const
+{
+	switch (type->type)
+	{
+	case SourceVariable::VT_FIXED:
+		objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTFIXED, getPosition()));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
+		break;
+
+	case SourceVariable::VT_INT:
+		objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTNUMBER, getPosition()));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
+		break;
+
+	case SourceVariable::VT_STRING:
+		objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTSTRING, getPosition()));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
+		break;
+
+	case SourceVariable::VT_VOID:
+		break;
+
+	case SourceVariable::VT_STRUCT:
+		for (size_t i(type->types.size()); i--;)
+			doOut(objects, type->types[i]);
+		break;
+	}
+}
+
 char const * SourceExpressionDS_RootOut::getName() const
 {
 	return "SourceExpressionDS_RootOut";
 }
 
-SourceExpressionDS::ExpressionType SourceExpressionDS_RootOut::getType() const
+SourceVariable::VariableType const * SourceExpressionDS_RootOut::getType() const
 {
-	return SourceExpressionDS::ET_VOID;
+	return SourceVariable::get_VariableType(SourceVariable::VT_VOID);
 }
 
 bool SourceExpressionDS_RootOut::isConstant() const
@@ -83,30 +117,7 @@ bool SourceExpressionDS_RootOut::isConstant() const
 void SourceExpressionDS_RootOut::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	_expr.makeObjectsGet(objects);
-
-	switch (_expr.getType())
-	{
-	case SourceExpressionDS::ET_FIXED:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
-		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTFIXED, getPosition()));
-		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
-		break;
-
-	case SourceExpressionDS::ET_INT:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
-		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTNUMBER, getPosition()));
-		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
-		break;
-
-	case SourceExpressionDS::ET_STRING:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
-		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTSTRING, getPosition()));
-		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
-		break;
-
-	case SourceExpressionDS::ET_VOID:
-		break;
-	}
+	doOut(objects, _expr.getType());
 }
 
 void SourceExpressionDS_RootOut::printDebug(std::ostream * const out) const

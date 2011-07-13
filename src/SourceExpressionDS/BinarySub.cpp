@@ -22,6 +22,7 @@
 #include "Binary.hpp"
 
 #include "../ObjectToken.hpp"
+#include "../SourceException.hpp"
 
 
 
@@ -67,16 +68,17 @@ void SourceExpressionDS_BinarySub::makeObjectsGet(std::vector<ObjectToken> * con
 {
 	SourceExpressionDS_Binary::makeObjectsGet(objects);
 
-	switch (getType())
+	switch (getType()->type)
 	{
-	case SourceExpressionDS::ET_FIXED:
-	case SourceExpressionDS::ET_INT:
-	case SourceExpressionDS::ET_STRING:
+	case SourceVariable::VT_FIXED:
+	case SourceVariable::VT_INT:
+	case SourceVariable::VT_STRING:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_SUB, getPosition()));
 		break;
 
-	case SourceExpressionDS::ET_VOID:
-		break;
+	case SourceVariable::VT_VOID:
+	case SourceVariable::VT_STRUCT:
+		throw SourceException("invalid VT", getPosition(), getName());
 	}
 }
 

@@ -34,7 +34,7 @@ public:
 
 	virtual char const * getName() const;
 
-	virtual SourceExpressionDS::ExpressionType getType() const;
+	virtual SourceVariable::VariableType const * getType() const;
 
 	virtual bool isConstant() const;
 
@@ -44,10 +44,16 @@ public:
 
 private:
 	SourceExpressionDS _expr;
+
+	void doVoid(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * const type) const;
 };
 
 
 
+SourceExpressionDS SourceExpressionDS::make_expression_cast_void(SourceExpressionDS const & expr, SourcePosition const & position)
+{
+	return new SourceExpressionDS_RootVoid(expr, position);
+}
 SourceExpressionDS SourceExpressionDS::make_expression_root_void(SourceExpressionDS const & expr, SourcePosition const & position)
 {
 	return new SourceExpressionDS_RootVoid(expr, position);
@@ -65,14 +71,34 @@ SourceExpressionDS_RootVoid * SourceExpressionDS_RootVoid::clone() const
 	return new SourceExpressionDS_RootVoid(*this);
 }
 
+void SourceExpressionDS_RootVoid::doVoid(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * const type) const
+{
+	switch (type->type)
+	{
+	case SourceVariable::VT_FIXED:
+	case SourceVariable::VT_INT:
+	case SourceVariable::VT_STRING:
+		objects->push_back(ObjectToken(ObjectToken::OCODE_DROP, getPosition()));
+		break;
+
+	case SourceVariable::VT_VOID:
+		break;
+
+	case SourceVariable::VT_STRUCT:
+		for (size_t i(type->types.size()); i--;)
+			doVoid(objects, type->types[i]);
+		break;
+	}
+}
+
 char const * SourceExpressionDS_RootVoid::getName() const
 {
 	return "SourceExpressionDS_RootVoid";
 }
 
-SourceExpressionDS::ExpressionType SourceExpressionDS_RootVoid::getType() const
+SourceVariable::VariableType const * SourceExpressionDS_RootVoid::getType() const
 {
-	return SourceExpressionDS::ET_VOID;
+	return SourceVariable::get_VariableType(SourceVariable::VT_VOID);
 }
 
 bool SourceExpressionDS_RootVoid::isConstant() const
@@ -83,18 +109,7 @@ bool SourceExpressionDS_RootVoid::isConstant() const
 void SourceExpressionDS_RootVoid::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	_expr.makeObjectsGet(objects);
-
-	switch (_expr.getType())
-	{
-	case SourceExpressionDS::ET_FIXED:
-	case SourceExpressionDS::ET_INT:
-	case SourceExpressionDS::ET_STRING:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_DROP, getPosition()));
-		break;
-
-	case SourceExpressionDS::ET_VOID:
-		break;
-	}
+	doVoid(objects, _expr.getType());
 }
 
 void SourceExpressionDS_RootVoid::printDebug(std::ostream * const out) const

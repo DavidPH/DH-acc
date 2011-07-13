@@ -34,7 +34,7 @@ public:
 
 	virtual SourceExpressionDS_Binary * clone() const = 0;
 
-	virtual SourceExpressionDS::ExpressionType getType() const;
+	virtual SourceVariable::VariableType const * getType() const;
 
 	virtual bool isConstant() const;
 

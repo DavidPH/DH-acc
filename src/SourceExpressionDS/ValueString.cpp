@@ -35,7 +35,7 @@ public:
 
 	virtual char const * getName() const;
 
-	virtual SourceExpressionDS::ExpressionType getType() const;
+	virtual SourceVariable::VariableType const * getType() const;
 
 	virtual bool isConstant() const;
 
@@ -72,9 +72,9 @@ char const * SourceExpressionDS_ValueString::getName() const
 	return "SourceExpressionDS_ValueString";
 }
 
-SourceExpressionDS::ExpressionType SourceExpressionDS_ValueString::getType() const
+SourceVariable::VariableType const * SourceExpressionDS_ValueString::getType() const
 {
-	return SourceExpressionDS::ET_STRING;
+	return SourceVariable::get_VariableType(SourceVariable::VT_STRING);
 }
 
 bool SourceExpressionDS_ValueString::isConstant() const

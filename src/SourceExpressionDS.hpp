@@ -22,6 +22,8 @@
 #ifndef HPP_SourceExpressionDS_
 #define HPP_SourceExpressionDS_
 
+#include "SourceVariable.hpp"
+
 #include <ostream>
 #include <vector>
 
@@ -32,21 +34,12 @@ class SourceExpressionDS_Base;
 class SourcePosition;
 class SourceTokenC;
 class SourceTokenizerDS;
-class SourceVariable;
 
 
 
 class SourceExpressionDS
 {
 public:
-	enum ExpressionType
-	{
-		ET_FIXED,
-		ET_INT,
-		ET_STRING,
-		ET_VOID
-	};
-
 	SourceExpressionDS();
 	SourceExpressionDS(SourceExpressionDS const & expr);
 	SourceExpressionDS(SourceExpressionDS_Base * const expr);
@@ -56,7 +49,9 @@ public:
 
 	SourcePosition const & getPosition() const;
 
-	ExpressionType getType() const;
+	SourceVariable::VariableType const * getType() const;
+
+	std::vector<SourceExpressionDS> getVector() const;
 
 	bool isConstant() const;
 
@@ -69,11 +64,10 @@ public:
 
 
 	friend void print_debug(std::ostream * const out, SourceExpressionDS const & in);
-	friend void print_debug(std::ostream * const out, SourceExpressionDS::ExpressionType const in);
 
-	static ExpressionType get_promoted_type(ExpressionType const type1, ExpressionType const type2);
+	static SourceVariable::VariableType const * get_promoted_type(SourceVariable::VariableType const * const type1, SourceVariable::VariableType const * const type2);
 
-	static SourceExpressionDS make_expression_cast(SourceExpressionDS const & expr, ExpressionType const type, SourcePosition const & position);
+	static SourceExpressionDS make_expression_cast(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
 
 	static SourceExpressionDS make_expressions(SourceTokenizerDS * const tokenizer);
 
@@ -100,6 +94,8 @@ private:
 	static SourceExpressionDS make_expression_cast_fixed(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_int(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_string(SourceExpressionDS const & expr, SourcePosition const & position);
+	static SourceExpressionDS make_expression_cast_struct(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
+	static SourceExpressionDS make_expression_cast_void(SourceExpressionDS const & expr, SourcePosition const & position);
 
 	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, std::vector<std::string> const & labels, SourcePosition const & position);

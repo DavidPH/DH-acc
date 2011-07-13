@@ -35,7 +35,9 @@ public:
 
 	virtual char const * getName() const;
 
-	virtual SourceExpressionDS::ExpressionType getType() const;
+	virtual SourceVariable::VariableType const * getType() const;
+
+	virtual std::vector<SourceExpressionDS> getVector() const;
 
 	virtual bool isConstant() const;
 
@@ -75,9 +77,14 @@ char const * SourceExpressionDS_RootBlock::getName() const
 	return "SourceExpressionDS_RootBlock";
 }
 
-SourceExpressionDS::ExpressionType SourceExpressionDS_RootBlock::getType() const
+SourceVariable::VariableType const * SourceExpressionDS_RootBlock::getType() const
 {
-	return _expressions.empty() ? SourceExpressionDS::ET_VOID : _expressions.back().getType();
+	return _expressions.empty() ? SourceVariable::get_VariableType(SourceVariable::VT_VOID) : _expressions.back().getType();
+}
+
+std::vector<SourceExpressionDS> SourceExpressionDS_RootBlock::getVector() const
+{
+	return _expressions;
 }
 
 bool SourceExpressionDS_RootBlock::isConstant() const

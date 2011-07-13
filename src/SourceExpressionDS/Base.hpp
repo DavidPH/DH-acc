@@ -44,7 +44,9 @@ public:
 
 	SourcePosition const & getPosition() const;
 
-	virtual SourceExpressionDS::ExpressionType getType() const = 0;
+	virtual SourceVariable::VariableType const * getType() const = 0;
+
+	virtual std::vector<SourceExpressionDS> getVector() const;
 
 	virtual bool isConstant() const = 0;
 

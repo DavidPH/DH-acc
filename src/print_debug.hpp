@@ -29,6 +29,10 @@
 
 
 void print_debug(std::ostream * const out, std::string const & s);
+template<typename T> void print_debug(std::ostream * const out, T const * const in)
+{
+	print_debug(out, *in);
+}
 template<typename T> void print_debug(std::ostream * const out, std::vector<T> const & in)
 {
 	*out << "std::vector({";

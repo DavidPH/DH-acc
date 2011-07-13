@@ -26,7 +26,6 @@
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 #include "SourceTokenizerDS.hpp"
-#include "SourceVariable.hpp"
 
 #include "SourceExpressionDS/Base.hpp"
 
@@ -61,16 +60,23 @@ void SourceExpressionDS::addLabel(std::string const & label)
 	if (_expr) _expr->addLabel(label);
 }
 
-SourceExpressionDS::ExpressionType SourceExpressionDS::get_promoted_type(ExpressionType const type1, ExpressionType const type2)
+SourceVariable::VariableType const * SourceExpressionDS::get_promoted_type(SourceVariable::VariableType const * const type1, SourceVariable::VariableType const * const type2)
 {
 	if (type1 == type2) return type1;
 
-	if (type1 == ET_VOID   || type2 == ET_VOID)   return ET_VOID;
-	if (type1 == ET_FIXED  || type2 == ET_FIXED)  return ET_FIXED;
-	if (type1 == ET_INT    || type2 == ET_INT)    return ET_INT;
-	if (type1 == ET_STRING || type2 == ET_STRING) return ET_STRING;
+	if (type1->type == SourceVariable::VT_VOID) return type1;
+	if (type2->type == SourceVariable::VT_VOID) return type2;
 
-	return ET_INT;
+	if (type1->type == SourceVariable::VT_FIXED) return type1;
+	if (type2->type == SourceVariable::VT_FIXED) return type2;
+
+	if (type1->type == SourceVariable::VT_INT) return type1;
+	if (type2->type == SourceVariable::VT_INT) return type2;
+
+	if (type1->type == SourceVariable::VT_STRING) return type1;
+	if (type2->type == SourceVariable::VT_STRING) return type2;
+
+	return SourceVariable::get_VariableType(SourceVariable::VT_VOID);
 }
 
 SourcePosition const & SourceExpressionDS::getPosition() const
@@ -78,9 +84,14 @@ SourcePosition const & SourceExpressionDS::getPosition() const
 	return _expr ? _expr->getPosition() : SourcePosition::none;
 }
 
-SourceExpressionDS::ExpressionType SourceExpressionDS::getType() const
+SourceVariable::VariableType const * SourceExpressionDS::getType() const
 {
-	return _expr ? _expr->getType() : ET_VOID;
+	return _expr ? _expr->getType() : SourceVariable::get_VariableType(SourceVariable::VT_VOID);
+}
+
+std::vector<SourceExpressionDS> SourceExpressionDS::getVector() const
+{
+	return _expr ? _expr->getVector() : std::vector<SourceExpressionDS>();
 }
 
 bool SourceExpressionDS::isConstant() const
@@ -140,14 +151,15 @@ SourceExpressionDS SourceExpressionDS::make_expression(SourceTokenizerDS * const
 	}
 }
 
-SourceExpressionDS SourceExpressionDS::make_expression_cast(SourceExpressionDS const & expr, ExpressionType const type, SourcePosition const & position)
+SourceExpressionDS SourceExpressionDS::make_expression_cast(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position)
 {
-	switch (type)
+	switch (type->type)
 	{
-	case ET_FIXED:  return make_expression_cast_fixed(expr, position);
-	case ET_INT:    return make_expression_cast_int(expr, position);
-	case ET_STRING: return make_expression_cast_string(expr, position);
-	case ET_VOID: throw SourceException("attempt to cast to ET_VOID", position, "SourceExpressionDS");
+	case SourceVariable::VT_FIXED: return make_expression_cast_fixed(expr, position);
+	case SourceVariable::VT_INT: return make_expression_cast_int(expr, position);
+	case SourceVariable::VT_STRING: return make_expression_cast_string(expr, position);
+	case SourceVariable::VT_VOID: return make_expression_cast_void(expr, position);
+	case SourceVariable::VT_STRUCT: return make_expression_cast_struct(expr, type, position);
 	}
 
 	throw SourceException("attempt to cast to unknown", position, "SourceExpressionDS");
@@ -167,7 +179,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 			SourceExpressionDS spec(make_expression(in, blocks, context));
 
-			if (spec.getType() != ET_INT)
+			if (spec.getType()->type != SourceVariable::VT_INT)
 				spec = make_expression_cast_int(spec, token.getPosition());
 
 			std::vector<SourceExpressionDS> args;
@@ -244,6 +256,32 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			return make_expression_value_int(scriptNumberToken);
 		}
 
+		if (token.getData() == "struct")
+		{
+			std::string structName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+
+			in->get(SourceTokenC::TT_OP_BRACE_O);
+
+			std::vector<std::string> structNames;
+			std::vector<SourceVariable::VariableType const *> structTypes;
+			while (true)
+			{
+				if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_C)
+					break;
+
+				structTypes.push_back(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+				structNames.push_back(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+
+				in->get(SourceTokenC::TT_OP_SEMICOLON);
+			}
+
+			in->get(SourceTokenC::TT_OP_BRACE_C);
+
+			SourceVariable::add_struct(structName, structNames, structTypes);
+
+			return NULL;
+		}
+
 		if (token.getData() == "term")
 		{
 			in->unget(in->get(SourceTokenC::TT_OP_SEMICOLON));
@@ -252,8 +290,8 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 		if (token.getData() == "var")
 		{
-			SourceVariable::StorageClass sc  (SourceVariable::get_StorageClass(in->get(SourceTokenC::TT_IDENTIFIER)));
-			SourceVariable::VariableType type(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+			SourceVariable::StorageClass sc(SourceVariable::get_StorageClass(in->get(SourceTokenC::TT_IDENTIFIER)));
+			SourceVariable::VariableType const * type(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
 			std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
 			SourceVariable var(name, name, context->getAddress(sc), sc, type, token.getPosition());
@@ -265,6 +303,13 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 		if (token.getData() == "void")
 			return make_expression_root_void(make_expression(in, blocks, context), token.getPosition());
+
+		{
+			SourceVariable::VariableType const * type(SourceVariable::get_VariableType_null(token.getData()));
+
+			if (type)
+				return make_expression_cast(make_expression_single(in, blocks, context), type, token.getPosition());
+		}
 
 		return make_expression_value_variable(context->getVariable(token), token.getPosition());
 
@@ -373,16 +418,6 @@ void print_debug(std::ostream * const out, SourceExpressionDS const & in)
 		*out << "NULL";
 
 	*out << ")";
-}
-void print_debug(std::ostream * const out, SourceExpressionDS::ExpressionType const in)
-{
-	switch (in)
-	{
-	case SourceExpressionDS::ET_FIXED:  *out << "ET_FIXED";  break;
-	case SourceExpressionDS::ET_INT:    *out << "ET_INT";    break;
-	case SourceExpressionDS::ET_STRING: *out << "ET_STRING"; break;
-	case SourceExpressionDS::ET_VOID:   *out << "ET_VOID";   break;
-	}
 }
 
 

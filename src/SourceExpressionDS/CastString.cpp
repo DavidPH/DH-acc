@@ -22,6 +22,7 @@
 #include "Base.hpp"
 
 #include "../ObjectToken.hpp"
+#include "../SourceException.hpp"
 
 
 
@@ -34,7 +35,7 @@ public:
 
 	virtual char const * getName() const;
 
-	virtual SourceExpressionDS::ExpressionType getType() const;
+	virtual SourceVariable::VariableType const * getType() const;
 
 	virtual bool isConstant() const;
 
@@ -70,9 +71,9 @@ char const * SourceExpressionDS_CastString::getName() const
 	return "SourceExpressionDS_CastString";
 }
 
-SourceExpressionDS::ExpressionType SourceExpressionDS_CastString::getType() const
+SourceVariable::VariableType const * SourceExpressionDS_CastString::getType() const
 {
-	return SourceExpressionDS::ET_STRING;
+	return SourceVariable::get_VariableType(SourceVariable::VT_STRING);
 }
 
 bool SourceExpressionDS_CastString::isConstant() const
@@ -84,20 +85,20 @@ void SourceExpressionDS_CastString::makeObjectsGet(std::vector<ObjectToken> * co
 {
 	_expr.makeObjectsGet(objects);
 
-	switch (_expr.getType())
+	switch (_expr.getType()->type)
 	{
-	case SourceExpressionDS::ET_FIXED:
+	case SourceVariable::VT_FIXED:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(16, getPosition())));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_SHIFTR, getPosition()));
 		break;
 
-	case SourceExpressionDS::ET_INT:
-	case SourceExpressionDS::ET_STRING:
+	case SourceVariable::VT_INT:
+	case SourceVariable::VT_STRING:
 		break;
 
-	case SourceExpressionDS::ET_VOID:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(0, getPosition())));
-		break;
+	case SourceVariable::VT_VOID:
+	case SourceVariable::VT_STRUCT:
+		throw SourceException("invalid VT", getPosition(), getName());
 	}
 }
 

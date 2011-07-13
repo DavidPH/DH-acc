@@ -25,7 +25,7 @@
 
 SourceExpressionDS_Binary::SourceExpressionDS_Binary(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position) : SourceExpressionDS_Base(position), _exprL(exprL), _exprR(exprR)
 {
-	SourceExpressionDS::ExpressionType type(getType());
+	SourceVariable::VariableType const * type(getType());
 
 	if (_exprL.getType() != type)
 		_exprL = SourceExpressionDS::make_expression_cast(_exprL, type, getPosition());
@@ -47,7 +47,7 @@ SourceExpressionDS_Binary::SourceExpressionDS_Binary(SourceExpressionDS const & 
 	}
 }
 
-SourceExpressionDS::ExpressionType SourceExpressionDS_Binary::getType() const
+SourceVariable::VariableType const * SourceExpressionDS_Binary::getType() const
 {
 	return SourceExpressionDS::get_promoted_type(_exprL.getType(), _exprR.getType());
 }
