@@ -55,6 +55,11 @@ SourceExpressionDS::~SourceExpressionDS()
 	delete _expr;
 }
 
+void SourceExpressionDS::addLabel(std::string const & label)
+{
+	if (_expr) _expr->addLabel(label);
+}
+
 SourceExpressionDS::ExpressionType SourceExpressionDS::get_promoted_type(ExpressionType const type1, ExpressionType const type2)
 {
 	if (type1 == type2) return type1;
@@ -243,11 +248,15 @@ SourceExpressionDS SourceExpressionDS::make_expression_value_number(SourceTokenC
 		return make_expression_value_fixed(token);
 }
 
-void SourceExpressionDS::make_expressions(SourceTokenizerDS * const in, std::vector<SourceExpressionDS> * const expressions)
+SourceExpressionDS SourceExpressionDS::make_expressions(SourceTokenizerDS * const in)
 {
+	SourcePosition position(in->peek().getPosition());
+	std::vector<SourceExpressionDS> expressions;
 	SourceContext context;
 
-	make_expressions(in, expressions, &context);
+	make_expressions(in, &expressions, &context);
+
+	return make_expression_root_block(expressions, position);
 }
 void SourceExpressionDS::make_expressions(SourceTokenizerDS * const in, std::vector<SourceExpressionDS> * const expressions, SourceContext * const context)
 {

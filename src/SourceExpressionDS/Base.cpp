@@ -31,9 +31,18 @@ SourceExpressionDS_Base::SourceExpressionDS_Base(SourcePosition const & position
 {
 
 }
+SourceExpressionDS_Base::SourceExpressionDS_Base(std::vector<std::string> const & labels, SourcePosition const & position) : _labels(labels), _position(position)
+{
+
+}
 SourceExpressionDS_Base::~SourceExpressionDS_Base()
 {
 
+}
+
+void SourceExpressionDS_Base::addLabel(std::string const & label)
+{
+	_labels.push_back(label);
 }
 
 std::vector<std::string> const & SourceExpressionDS_Base::getLabels() const

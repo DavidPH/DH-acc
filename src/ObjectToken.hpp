@@ -91,6 +91,8 @@ public:
 	ObjectToken(ObjectCode const code, SourcePosition const & position, ObjectExpression const & arg);
 	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args);
 
+	void addLabel(std::string const & label);
+
 	ObjectExpression const & getArg(uintptr_t const index) const;
 
 	ObjectCode getCode() const;

@@ -21,7 +21,7 @@
 
 #include "BinaryTokenZDACS.hpp"
 
-#include "ObjectExpression.hpp"
+#include "ObjectToken.hpp"
 #include "SourceException.hpp"
 
 
@@ -33,6 +33,11 @@ uintptr_t BinaryTokenZDACS::_arg_counts[BCODE_NONE];
 BinaryTokenZDACS::BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args) : _args(args), _code(code), _labels(labels), _position(position)
 {
 
+}
+
+void BinaryTokenZDACS::addLabel(std::string const & label)
+{
+	_labels.push_back(label);
 }
 
 void BinaryTokenZDACS::init()
@@ -150,6 +155,17 @@ void BinaryTokenZDACS::make_tokens(std::vector<ObjectToken> const & objects, std
 	#undef CASE_DIRECTMAP
 }
 
+void BinaryTokenZDACS::prepare_all(std::vector<BinaryTokenZDACS> const & instructions)
+{
+	for (uintptr_t index(0); index < instructions.size(); ++index)
+	{
+		for (uintptr_t i(0); i < instructions[index]._labels.size(); ++i)
+			ObjectExpression::add_label(instructions[index]._labels[i]);
+
+		ObjectExpression::add_address_count(_arg_counts[instructions[index]._code]*4 + 4);
+	}
+}
+
 void BinaryTokenZDACS::write(std::ostream * const out) const
 {
 	write_32(out, _code);
@@ -170,16 +186,15 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 {
 	for (uintptr_t index(0); index < instructions.size(); ++index)
 	{
-		for (uintptr_t i(0); i < instructions[index]._labels.size(); ++i)
-			ObjectExpression::add_label(instructions[index]._labels[i]);
-
-		ObjectExpression::add_address_count(_arg_counts[instructions[index]._code]*4 + 4);
-	}
-
-	for (uintptr_t index(0); index < instructions.size(); ++index)
-	{
 		instructions[index].write(out);
 	}
+}
+
+void BinaryTokenZDACS::write_script(std::ostream * const out, ObjectExpression::Script const & s)
+{
+	write_32(out, (int32_t)(s.type * 1000) + s.number);
+	write_32(out, ObjectExpression::get_symbol(s.label, SourcePosition::none).resolveInt32());
+	write_32(out, s.args);
 }
 
 void BinaryTokenZDACS::write_string(std::ostream * const out, std::string const & s)

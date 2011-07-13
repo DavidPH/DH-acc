@@ -31,7 +31,10 @@ class SourceExpressionDS_Base
 {
 public:
 	SourceExpressionDS_Base(SourcePosition const & position);
+	SourceExpressionDS_Base(std::vector<std::string> const & labels, SourcePosition const & position);
 	virtual ~SourceExpressionDS_Base();
+
+	void addLabel(std::string const & label);
 
 	virtual SourceExpressionDS_Base * clone() const = 0;
 

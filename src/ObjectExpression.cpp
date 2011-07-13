@@ -27,8 +27,9 @@
 
 
 
-int32_t ObjectExpression::_address_count(8+4+4+12);
-std::vector<std::pair<std::string, int32_t> > ObjectExpression::_string_table;
+int32_t ObjectExpression::_address_count(8+4+4);
+std::vector<ObjectExpression::Script> ObjectExpression::_script_table;
+std::vector<ObjectExpression::String> ObjectExpression::_string_table;
 std::map<std::string, ObjectExpression> ObjectExpression::_symbol_table;
 
 
@@ -60,6 +61,14 @@ void ObjectExpression::add_label(std::string const & symbol)
 	add_symbol(symbol, create_value_int32(_address_count, SourcePosition::none));
 }
 
+void ObjectExpression::add_script(std::string const & label, int32_t const number, ScriptType const type, int32_t const args)
+{
+	add_address_count(12);
+
+	Script s = {args, label, number, type};
+	_script_table.push_back(s);
+}
+
 std::string ObjectExpression::add_string(std::string const & value)
 {
 	std::ostringstream oss;
@@ -76,7 +85,8 @@ void ObjectExpression::add_string(std::string const & symbol, std::string const 
 	add_address_count(4 + (int32_t)value.size());
 	add_symbol(symbol, create_value_int32((int32_t)_string_table.size(), SourcePosition::none));
 
-	_string_table.push_back(std::pair<std::string, int32_t>(value, get_string_length()));
+	String s = {get_string_length(), value};
+	_string_table.push_back(s);
 }
 
 void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression const & value)
@@ -84,9 +94,19 @@ void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression c
 	_symbol_table[symbol] = value;
 }
 
-std::string const & ObjectExpression::get_string(int32_t const index)
+ObjectExpression::Script const & ObjectExpression::get_script(int32_t const index)
 {
-	return _string_table[index].first;
+	return _script_table[index];
+}
+
+int32_t ObjectExpression::get_script_count()
+{
+	return (int32_t)_script_table.size();
+}
+
+ObjectExpression::String const & ObjectExpression::get_string(int32_t const index)
+{
+	return _string_table[index];
 }
 
 int32_t ObjectExpression::get_string_count()
@@ -98,12 +118,7 @@ int32_t ObjectExpression::get_string_length()
 {
 	if (_string_table.empty()) return 0;
 
-	return _string_table.back().second + _string_table.back().first.size();
-}
-
-int32_t ObjectExpression::get_string_offset(int32_t const index)
-{
-	return _string_table[index].second;
+	return _string_table.back().offset + _string_table.back().string.size();
 }
 
 ObjectExpression ObjectExpression::get_symbol(std::string const & symbol, SourcePosition const & position)

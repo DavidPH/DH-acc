@@ -52,6 +52,8 @@ public:
 	SourceExpressionDS(SourceExpressionDS_Base * const expr);
 	~SourceExpressionDS();
 
+	void addLabel(std::string const & label);
+
 	SourcePosition const & getPosition() const;
 
 	ExpressionType getType() const;
@@ -73,7 +75,7 @@ public:
 
 	static SourceExpressionDS make_expression_cast(SourceExpressionDS const & expr, ExpressionType const type, SourcePosition const & position);
 
-	static void make_expressions(SourceTokenizerDS * const tokenizer, std::vector<SourceExpressionDS> * const expressions);
+	static SourceExpressionDS make_expressions(SourceTokenizerDS * const tokenizer);
 
 	static void make_objects(std::vector<SourceExpressionDS> const & expressions, std::vector<ObjectToken> * const objects);
 
@@ -100,6 +102,7 @@ private:
 	static SourceExpressionDS make_expression_cast_string(SourceExpressionDS const & expr, SourcePosition const & position);
 
 	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, SourcePosition const & position);
+	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, std::vector<std::string> const & labels, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_lspec(SourceExpressionDS const & spec, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_out(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_term(SourcePosition const & position);

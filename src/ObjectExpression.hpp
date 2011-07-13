@@ -51,6 +51,28 @@ public:
 class ObjectExpression
 {
 public:
+	enum ScriptType
+	{
+		ST_NONE = 0,
+		ST_OPEN = 4
+	};
+
+	struct Script
+	{
+		int32_t args;
+		std::string label;
+		int32_t number;
+		ScriptType type;
+	};
+
+	struct String
+	{
+		int32_t offset;
+		std::string string;
+	};
+
+
+
 	ObjectExpression();
 	ObjectExpression(ObjectExpression const & expr);
 	ObjectExpression(ObjectExpressionBase * const expr);
@@ -70,6 +92,8 @@ public:
 
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
+
+	static void add_script(std::string const & label, int32_t const number, ScriptType const type = ST_NONE, int32_t const args = 0);
 
 	// Adds a string using an auto-generated symbol and returns that symbol.
 	static std::string add_string(std::string const & value);
@@ -92,14 +116,16 @@ public:
 	static ObjectExpression create_value_int32(int32_t const value, SourcePosition const & position);
 	static ObjectExpression create_value_symbol(std::string const & symbol, SourcePosition const & position);
 
-	static std::string const & get_string(int32_t const index);
+	static Script const & get_script(int32_t const index);
+
+	static int32_t get_script_count();
+
+	static String const & get_string(int32_t const index);
 
 	static int32_t get_string_count();
 
 	// Returns length of all strings combined.
 	static int32_t get_string_length();
-
-	static int32_t get_string_offset(int32_t const index);
 
 	static ObjectExpression get_symbol(std::string const & symbol, SourcePosition const & position);
 
@@ -109,8 +135,8 @@ private:
 
 
 	static int32_t _address_count;
-	// {string, offset} Yes, signed. If it's a problem, I'll change it.
-	static std::vector<std::pair<std::string, int32_t> > _string_table;
+	static std::vector<Script> _script_table;
+	static std::vector<String> _string_table;
 	static std::map<std::string, ObjectExpression> _symbol_table;
 };
 

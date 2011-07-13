@@ -39,6 +39,11 @@ ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position,
 
 }
 
+void ObjectToken::addLabel(std::string const & label)
+{
+	_labels.push_back(label);
+}
+
 ObjectExpression const & ObjectToken::getArg(uintptr_t const index) const
 {
 	static ObjectExpression expr;

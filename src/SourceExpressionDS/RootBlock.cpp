@@ -21,6 +21,7 @@
 
 #include "Base.hpp"
 
+#include "../ObjectToken.hpp"
 #include "../print_debug.hpp"
 
 
@@ -28,7 +29,7 @@
 class SourceExpressionDS_RootBlock : public SourceExpressionDS_Base
 {
 public:
-	SourceExpressionDS_RootBlock(std::vector<SourceExpressionDS> const & expressions, SourcePosition const & position);
+	SourceExpressionDS_RootBlock(std::vector<SourceExpressionDS> const & expressions, std::vector<std::string> const & labels, SourcePosition const & position);
 
 	virtual SourceExpressionDS_RootBlock * clone() const;
 
@@ -50,12 +51,16 @@ private:
 
 SourceExpressionDS SourceExpressionDS::make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, SourcePosition const & position)
 {
-	return new SourceExpressionDS_RootBlock(expressions, position);
+	return new SourceExpressionDS_RootBlock(expressions, std::vector<std::string>(), position);
+}
+SourceExpressionDS SourceExpressionDS::make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, std::vector<std::string> const & labels, SourcePosition const & position)
+{
+	return new SourceExpressionDS_RootBlock(expressions, labels, position);
 }
 
 
 
-SourceExpressionDS_RootBlock::SourceExpressionDS_RootBlock(std::vector<SourceExpressionDS> const & expressions, SourcePosition const & position) : SourceExpressionDS_Base(position), _expressions(expressions)
+SourceExpressionDS_RootBlock::SourceExpressionDS_RootBlock(std::vector<SourceExpressionDS> const & expressions, std::vector<std::string> const & labels, SourcePosition const & position) : SourceExpressionDS_Base(labels, position), _expressions(expressions)
 {
 
 }
@@ -83,8 +88,14 @@ bool SourceExpressionDS_RootBlock::isConstant() const
 
 void SourceExpressionDS_RootBlock::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
+	size_t index(objects->size());
+
 	for (size_t i(0); i < _expressions.size(); ++i)
 		_expressions[i].makeObjectsGet(objects);
+
+	std::vector<std::string> const & labels(getLabels());
+	if (index < objects->size()) for (size_t i(0); i < labels.size(); ++i)
+		(*objects)[index].addLabel(labels[i]);
 }
 
 void SourceExpressionDS_RootBlock::printDebug(std::ostream * const out) const
