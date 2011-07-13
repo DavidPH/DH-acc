@@ -61,11 +61,11 @@ void ObjectExpression::add_label(std::string const & symbol)
 	add_symbol(symbol, create_value_int32(_address_count, SourcePosition::none));
 }
 
-void ObjectExpression::add_script(std::string const & label, int32_t const number, ScriptType const type, int32_t const args)
+void ObjectExpression::add_script(std::string const & label, int32_t const number, ScriptType const type, int32_t const args, int const flags)
 {
 	add_address_count(12);
 
-	Script s = {args, label, number, type};
+	Script s = {args, flags, label, number, type};
 	_script_table.push_back(s);
 }
 
@@ -92,6 +92,49 @@ void ObjectExpression::add_string(std::string const & symbol, std::string const 
 void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression const & value)
 {
 	_symbol_table[symbol] = value;
+}
+
+ObjectExpression::ScriptFlag ObjectExpression::get_ScriptFlag(std::string const & value, SourcePosition const & position)
+{
+	if (value == "net")
+		return SF_NET;
+
+	if (value == "clientside")
+		return SF_CLIENTSIDE;
+
+	throw SourceException("invalid script-flag", position, "ObjectExpression");
+}
+
+ObjectExpression::ScriptType ObjectExpression::get_ScriptType(std::string const & value, SourcePosition const & position)
+{
+	if (value == "closed")
+		return ST_CLOSED;
+
+	if (value == "open")
+		return ST_OPEN;
+
+	if (value == "respawn")
+		return ST_RESPAWN;
+
+	if (value == "death")
+		return ST_DEATH;
+
+	if (value == "enter")
+		return ST_ENTER;
+
+	if (value == "lightning")
+		return ST_LIGHTNING;
+
+	if (value == "unloading")
+		return ST_UNLOADING;
+
+	if (value == "disconnect")
+		return ST_DISCONNECT;
+
+	if (value == "return")
+		return ST_RETURN;
+
+	throw SourceException("invalid script-type", position, "ObjectExpression");
 }
 
 ObjectExpression::Script const & ObjectExpression::get_script(int32_t const index)

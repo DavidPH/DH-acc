@@ -86,9 +86,9 @@ private:
 
 
 
-	static SourceExpressionDS make_expression(SourceTokenizerDS * const tokenizer, SourceContext * const context);
-	static SourceExpressionDS make_expression_single(SourceTokenizerDS * const in, SourceContext * const context);
-	static void make_expressions(SourceTokenizerDS * const tokenizer, std::vector<SourceExpressionDS> * const expressions, SourceContext * const context);
+	static SourceExpressionDS make_expression(SourceTokenizerDS * const tokenizer, std::vector<SourceExpressionDS> * const blocks, SourceContext * const context);
+	static SourceExpressionDS make_expression_single(SourceTokenizerDS * const in, std::vector<SourceExpressionDS> * const blocks, SourceContext * const context);
+	static void make_expressions(SourceTokenizerDS * const tokenizer, std::vector<SourceExpressionDS> * const expressions, std::vector<SourceExpressionDS> * const blocks, SourceContext * const context);
 
 	static SourceExpressionDS make_expression_binary_add(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 	static SourceExpressionDS make_expression_binary_assign(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);

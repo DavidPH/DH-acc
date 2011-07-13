@@ -30,6 +30,7 @@
 
 #include "SourceExpressionDS/Base.hpp"
 
+#include <sstream>
 #include <stdint.h>
 
 
@@ -87,9 +88,9 @@ bool SourceExpressionDS::isConstant() const
 	return _expr ? _expr->isConstant() : true;
 }
 
-SourceExpressionDS SourceExpressionDS::make_expression(SourceTokenizerDS * const in, SourceContext * const context)
+SourceExpressionDS SourceExpressionDS::make_expression(SourceTokenizerDS * const in, std::vector<SourceExpressionDS> * const blocks, SourceContext * const context)
 {
-	SourceExpressionDS expr(make_expression_single(in, context));
+	SourceExpressionDS expr(make_expression_single(in, blocks, context));
 
 	while (true)
 	{
@@ -98,11 +99,11 @@ SourceExpressionDS SourceExpressionDS::make_expression(SourceTokenizerDS * const
 		switch (token.getType())
 		{
 		case SourceTokenC::TT_OP_ASTERISK:
-			expr = make_expression_binary_mul(expr, make_expression_single(in, context), token.getPosition());
+			expr = make_expression_binary_mul(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
 		case SourceTokenC::TT_OP_MINUS:
-			expr = make_expression_binary_sub(expr, make_expression_single(in, context), token.getPosition());
+			expr = make_expression_binary_sub(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
 		case SourceTokenC::TT_OP_COMMA:
@@ -110,18 +111,18 @@ SourceExpressionDS SourceExpressionDS::make_expression(SourceTokenizerDS * const
 			return expr;
 
 		case SourceTokenC::TT_OP_EQUALS:
-			return make_expression_binary_assign(expr, make_expression(in, context), token.getPosition());
+			return make_expression_binary_assign(expr, make_expression(in, blocks, context), token.getPosition());
 
 		case SourceTokenC::TT_OP_PARENTHESIS_C:
 			in->unget(token);
 			return expr;
 
 		case SourceTokenC::TT_OP_PERCENT:
-			expr = make_expression_binary_mod(expr, make_expression_single(in, context), token.getPosition());
+			expr = make_expression_binary_mod(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
 		case SourceTokenC::TT_OP_PLUS:
-			expr = make_expression_binary_add(expr, make_expression_single(in, context), token.getPosition());
+			expr = make_expression_binary_add(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
 		case SourceTokenC::TT_OP_SEMICOLON:
@@ -129,7 +130,7 @@ SourceExpressionDS SourceExpressionDS::make_expression(SourceTokenizerDS * const
 			return expr;
 
 		case SourceTokenC::TT_OP_SLASH:
-			expr = make_expression_binary_div(expr, make_expression_single(in, context), token.getPosition());
+			expr = make_expression_binary_div(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
 		default:
@@ -152,7 +153,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_cast(SourceExpressionDS c
 	throw SourceException("attempt to cast to unknown", position, "SourceExpressionDS");
 }
 
-SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS * const in, SourceContext * const context)
+SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS * const in, std::vector<SourceExpressionDS> * const blocks, SourceContext * const context)
 {
 	SourceExpressionDS expr;
 	SourceTokenC token(in->get());
@@ -164,7 +165,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		{
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
-			SourceExpressionDS spec(make_expression(in, context));
+			SourceExpressionDS spec(make_expression(in, blocks, context));
 
 			if (spec.getType() != ET_INT)
 				spec = make_expression_cast_int(spec, token.getPosition());
@@ -181,14 +182,67 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 				if (token.getType() != SourceTokenC::TT_OP_COMMA)
 					throw SourceException("expected TT_OP_PARENTHESIS_C or TT_OP_COMMA", token.getPosition(), "SourceExpressionDS");
 
-				args.push_back(make_expression(in, context));
+				args.push_back(make_expression(in, blocks, context));
 			}
 
 			return make_expression_root_lspec(spec, args, token.getPosition());
 		}
 
 		if (token.getData() == "out")
-			return make_expression_root_out(make_expression(in, context), token.getPosition());
+			return make_expression_root_out(make_expression(in, blocks, context), token.getPosition());
+
+		if (token.getData() == "script")
+		{
+			SourceTokenC scriptNumberToken(in->get(SourceTokenC::TT_NUMBER));
+			int32_t scriptNumber;
+			{
+				std::istringstream iss(scriptNumberToken.getData());
+				iss >> scriptNumber;
+			}
+
+			SourceTokenC scriptTypeToken(in->get(SourceTokenC::TT_IDENTIFIER));
+			ObjectExpression::ScriptType scriptType(ObjectExpression::get_ScriptType(scriptTypeToken.getData(), scriptTypeToken.getPosition()));
+
+			int scriptFlags(0);
+			while (true)
+			{
+				SourceTokenC token(in->get());
+
+				if (token.getType() == SourceTokenC::TT_IDENTIFIER)
+				{
+					scriptFlags |= ObjectExpression::get_ScriptFlag(token.getData(), token.getPosition());
+				}
+				else if (token.getType() == SourceTokenC::TT_OP_PARENTHESIS_O)
+				{
+					in->unget(token);
+					break;
+				}
+				else
+				{
+					throw SourceException("expected TT_IDENTIFIER or TT_OP_PARENTHESIS_O", token.getPosition(), "SourceExpressionDS");
+				}
+			}
+
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+			// TODO: scriptArgs
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+			SourceContext scriptContext;
+			SourceExpressionDS scriptExpression(make_expression_single(in, blocks, &scriptContext));
+
+			std::string scriptLabel;
+			{
+				std::ostringstream oss;
+				oss << "script" << scriptNumber;
+				scriptLabel = oss.str();
+			}
+
+			scriptExpression.addLabel(scriptLabel);
+			blocks->push_back(scriptExpression);
+			ObjectExpression::add_script(scriptLabel, scriptNumber, scriptType, 0, scriptFlags);
+
+			return make_expression_value_int(scriptNumberToken);
+		}
 
 		if (token.getData() == "term")
 		{
@@ -210,7 +264,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		}
 
 		if (token.getData() == "void")
-			return make_expression_root_void(make_expression(in, context), token.getPosition());
+			return make_expression_root_void(make_expression(in, blocks, context), token.getPosition());
 
 		return make_expression_value_variable(context->getVariable(token), token.getPosition());
 
@@ -225,12 +279,12 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		in->unget(token);
 		std::vector<SourceExpressionDS> expressions;
 		SourceContext blockContext(*context);
-		make_expressions(in, &expressions, &blockContext);
+		make_expressions(in, &expressions, blocks, &blockContext);
 		return make_expression_root_block(expressions, token.getPosition());
 	}
 
 	case SourceTokenC::TT_OP_PARENTHESIS_O:
-		expr = make_expression(in, context);
+		expr = make_expression(in, blocks, context);
 		in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 		return expr;
 
@@ -252,13 +306,17 @@ SourceExpressionDS SourceExpressionDS::make_expressions(SourceTokenizerDS * cons
 {
 	SourcePosition position(in->peek().getPosition());
 	std::vector<SourceExpressionDS> expressions;
+	std::vector<SourceExpressionDS> blocks;
 	SourceContext context;
 
-	make_expressions(in, &expressions, &context);
+	make_expressions(in, &expressions, &blocks, &context);
+
+	for (size_t i(0); i < blocks.size(); ++i)
+		expressions.push_back(blocks[i]);
 
 	return make_expression_root_block(expressions, position);
 }
-void SourceExpressionDS::make_expressions(SourceTokenizerDS * const in, std::vector<SourceExpressionDS> * const expressions, SourceContext * const context)
+void SourceExpressionDS::make_expressions(SourceTokenizerDS * const in, std::vector<SourceExpressionDS> * const expressions, std::vector<SourceExpressionDS> * const blocks, SourceContext * const context)
 {
 	in->get(SourceTokenC::TT_OP_BRACE_O);
 
@@ -267,7 +325,7 @@ void SourceExpressionDS::make_expressions(SourceTokenizerDS * const in, std::vec
 		if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_C)
 			break;
 
-		expressions->push_back(make_expression(in, context));
+		expressions->push_back(make_expression(in, blocks, context));
 		in->get(SourceTokenC::TT_OP_SEMICOLON);
 	}
 

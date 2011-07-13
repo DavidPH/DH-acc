@@ -51,15 +51,29 @@ public:
 class ObjectExpression
 {
 public:
+	enum ScriptFlag
+	{
+		SF_NET        = 1,
+		SF_CLIENTSIDE = 2
+	};
+
 	enum ScriptType
 	{
-		ST_NONE = 0,
-		ST_OPEN = 4
+		ST_CLOSED     =  0,
+		ST_OPEN       =  1,
+		ST_RESPAWN    =  2,
+		ST_DEATH      =  3,
+		ST_ENTER      =  4,
+		ST_LIGHTNING  = 12,
+		ST_UNLOADING  = 13,
+		ST_DISCONNECT = 14,
+		ST_RETURN     = 15
 	};
 
 	struct Script
 	{
 		int32_t args;
+		int flags;
 		std::string label;
 		int32_t number;
 		ScriptType type;
@@ -93,7 +107,7 @@ public:
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
 
-	static void add_script(std::string const & label, int32_t const number, ScriptType const type = ST_NONE, int32_t const args = 0);
+	static void add_script(std::string const & label, int32_t const number, ScriptType const type = ST_CLOSED, int32_t const args = 0, int const flags = 0);
 
 	// Adds a string using an auto-generated symbol and returns that symbol.
 	static std::string add_string(std::string const & value);
@@ -115,6 +129,10 @@ public:
 
 	static ObjectExpression create_value_int32(int32_t const value, SourcePosition const & position);
 	static ObjectExpression create_value_symbol(std::string const & symbol, SourcePosition const & position);
+
+	static ScriptFlag get_ScriptFlag(std::string const & value, SourcePosition const & position);
+
+	static ScriptType get_ScriptType(std::string const & value, SourcePosition const & position);
 
 	static Script const & get_script(int32_t const index);
 
