@@ -43,6 +43,7 @@ add_executable(DH-acc
 	SourceExpressionDS/RootVoid.cpp
 	SourceExpressionDS/ValueFixed.cpp
 	SourceExpressionDS/ValueInt.cpp
+	SourceExpressionDS/ValueMember.cpp
 	SourceExpressionDS/ValueString.cpp
 	SourceExpressionDS/ValueVariable.cpp
 	SourceBlockC.cpp

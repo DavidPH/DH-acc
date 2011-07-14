@@ -44,6 +44,15 @@ static struct _SourceVariable_init_c
 
 
 
+SourceVariable::VariableType const * SourceVariable::VariableType::getType(std::string const & name, SourcePosition const & position) const
+{
+	for (size_t i(0); i < names.size(); ++i)
+		if (name == names[i])
+			return types[i];
+
+	throw SourceException("invalid member-variable-type", position, "SourceVariable::VariableType");
+}
+
 int SourceVariable::VariableType::size() const
 {
 	switch (type)
@@ -161,6 +170,49 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects) co
 	int address(_address);
 	makeObjectsGet(objects, _type, &address);
 }
+void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+{
+	int address(_address);
+	makeObjectsGet(objects, names, _type, &address);
+}
+void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, VariableType const * const type, int * const address) const
+{
+	if (names->empty())
+	{
+		makeObjectsGet(objects, type, address);
+		return;
+	}
+
+	switch (_sc)
+	{
+	case SC_REGISTER:
+		switch (type->type)
+		{
+		case VT_FIXED:
+		case VT_INT:
+		case VT_STRING:
+		case VT_VOID:
+			throw SourceException("attempt to get member from non-struct", _position, "SourceVariable");
+
+		case VT_STRUCT:
+			for (size_t i(0); i < type->types.size(); ++i)
+			{
+				if (type->names[i] == names->back())
+				{
+					names->pop_back();
+					makeObjectsGet(objects, names, type->types[i], address);
+					return;
+				}
+				else
+				{
+					makeObjectsGet(type->types[i], address);
+				}
+			}
+			break;
+		}
+		break;
+	}
+}
 void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, VariableType const * const type, int * const address) const
 {
 	switch (_sc)
@@ -185,12 +237,81 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, Va
 		break;
 	}
 }
+void SourceVariable::makeObjectsGet(VariableType const * const type, int * const address) const
+{
+	switch (_sc)
+	{
+	case SC_REGISTER:
+		switch (type->type)
+		{
+		case VT_FIXED:
+		case VT_INT:
+		case VT_STRING:
+			++*address;
+			break;
+
+		case VT_VOID:
+			break;
+
+		case VT_STRUCT:
+			for (size_t i(0); i < type->types.size(); ++i)
+				makeObjectsGet(type->types[i], address);
+			break;
+		}
+		break;
+	}
+}
 
 void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects) const
 {
 	int address(_address + _type->size() - 1);
 	makeObjectsSet(objects, _type, &address);
 	makeObjectsGet(objects);
+}
+void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+{
+	int address(_address + _type->size() - 1);
+	std::vector<std::string> namesOriginal(*names);
+	makeObjectsSet(objects, names, _type, &address);
+	makeObjectsGet(objects, &namesOriginal);
+}
+void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, VariableType const * const type, int * const address) const
+{
+	if (names->empty())
+	{
+		makeObjectsSet(objects, type, address);
+		return;
+	}
+
+	switch (_sc)
+	{
+	case SC_REGISTER:
+		switch (type->type)
+		{
+		case VT_FIXED:
+		case VT_INT:
+		case VT_STRING:
+		case VT_VOID:
+			throw SourceException("attempt to set member from non-struct", _position, "SourceVariable");
+
+		case VT_STRUCT:
+			for (size_t i(0); i < type->types.size(); ++i)
+			{
+				if (type->names[i] == names->back())
+				{
+					names->pop_back();
+					makeObjectsSet(objects, names, type->types[i], address);
+					return;
+				}
+				else
+				{
+					makeObjectsSet(type->types[i], address);
+				}
+			}
+			break;
+		}
+		break;
+	}
 }
 void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, VariableType const * const type, int * const address) const
 {
@@ -211,6 +332,30 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, Va
 		case VT_STRUCT:
 			for (size_t i(type->types.size()); i--;)
 				makeObjectsSet(objects, type->types[i], address);
+			break;
+		}
+		break;
+	}
+}
+void SourceVariable::makeObjectsSet(VariableType const * const type, int * const address) const
+{
+	switch (_sc)
+	{
+	case SC_REGISTER:
+		switch (type->type)
+		{
+		case VT_FIXED:
+		case VT_INT:
+		case VT_STRING:
+			--*address;
+			break;
+
+		case VT_VOID:
+			break;
+
+		case VT_STRUCT:
+			for (size_t i(type->types.size()); i--;)
+				makeObjectsSet(type->types[i], address);
 			break;
 		}
 		break;

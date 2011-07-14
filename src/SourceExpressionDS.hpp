@@ -57,7 +57,9 @@ public:
 
 	ObjectExpression makeObject() const;
 	void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
 	void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
+	void makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
 
 	SourceExpressionDS & operator = (SourceExpressionDS const & expr);
 
@@ -106,6 +108,7 @@ private:
 
 	static SourceExpressionDS make_expression_value_fixed(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_int(SourceTokenC const & token);
+	static SourceExpressionDS make_expression_value_member(SourceExpressionDS const & expr, SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_number(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_string(ObjectExpression const & symbol, SourcePosition const & position);
 	static SourceExpressionDS make_expression_value_variable(SourceVariable const & var, SourcePosition const & position);

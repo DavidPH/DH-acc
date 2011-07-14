@@ -21,13 +21,9 @@
 
 #include "Base.hpp"
 
-#include "../ObjectExpression.hpp"
 #include "../ObjectToken.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceVariable.hpp"
-
-#include <sstream>
-#include <stdint.h>
 
 
 
@@ -45,7 +41,9 @@ public:
 	virtual bool isConstant() const;
 
 	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
 	virtual void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -91,9 +89,17 @@ void SourceExpressionDS_ValueVariable::makeObjectsGet(std::vector<ObjectToken> *
 {
 	_var.makeObjectsGet(objects);
 }
+void SourceExpressionDS_ValueVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+{
+	_var.makeObjectsGet(objects, names);
+}
 void SourceExpressionDS_ValueVariable::makeObjectsSet(std::vector<ObjectToken> * const objects) const
 {
 	_var.makeObjectsSet(objects);
+}
+void SourceExpressionDS_ValueVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+{
+	_var.makeObjectsSet(objects, names);
 }
 
 void SourceExpressionDS_ValueVariable::printDebug(std::ostream * const out) const

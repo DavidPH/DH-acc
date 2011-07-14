@@ -41,6 +41,7 @@ public:
 	virtual bool isConstant() const;
 
 	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -98,6 +99,24 @@ void SourceExpressionDS_CastStruct::makeObjectsGet(std::vector<ObjectToken> * co
 {
 	for (size_t i(0); i < _expressions.size(); ++i)
 		_expressions[i].makeObjectsGet(objects);
+}
+void SourceExpressionDS_CastStruct::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+{
+	if (names->empty())
+	{
+		makeObjectsGet(objects);
+		return;
+	}
+
+	for (size_t i(0); i < _type->names.size(); ++i)
+	{
+		if (_type->names[i] == names->back())
+		{
+			names->pop_back();
+			_expressions[i].makeObjectsGet(objects, names);
+			return;
+		}
+	}
 }
 
 void SourceExpressionDS_CastStruct::printDebug(std::ostream * const out) const

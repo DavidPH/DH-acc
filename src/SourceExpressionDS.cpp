@@ -113,10 +113,6 @@ SourceExpressionDS SourceExpressionDS::make_expression(SourceTokenizerDS * const
 			expr = make_expression_binary_mul(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
-		case SourceTokenC::TT_OP_MINUS:
-			expr = make_expression_binary_sub(expr, make_expression_single(in, blocks, context), token.getPosition());
-			break;
-
 		case SourceTokenC::TT_OP_COMMA:
 			in->unget(token);
 			return expr;
@@ -124,12 +120,20 @@ SourceExpressionDS SourceExpressionDS::make_expression(SourceTokenizerDS * const
 		case SourceTokenC::TT_OP_EQUALS:
 			return make_expression_binary_assign(expr, make_expression(in, blocks, context), token.getPosition());
 
+		case SourceTokenC::TT_OP_MINUS:
+			expr = make_expression_binary_sub(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
 		case SourceTokenC::TT_OP_PARENTHESIS_C:
 			in->unget(token);
 			return expr;
 
 		case SourceTokenC::TT_OP_PERCENT:
 			expr = make_expression_binary_mod(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
+		case SourceTokenC::TT_OP_PERIOD:
+			expr = make_expression_value_member(expr, in->get(SourceTokenC::TT_IDENTIFIER));
 			break;
 
 		case SourceTokenC::TT_OP_PLUS:
@@ -394,9 +398,17 @@ void SourceExpressionDS::makeObjectsGet(std::vector<ObjectToken> * const objects
 {
 	if (_expr) _expr->makeObjectsGet(objects);
 }
+void SourceExpressionDS::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+{
+	if (_expr) _expr->makeObjectsGet(objects, names);
+}
 void SourceExpressionDS::makeObjectsSet(std::vector<ObjectToken> * const objects) const
 {
 	if (_expr) _expr->makeObjectsSet(objects);
+}
+void SourceExpressionDS::makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+{
+	if (_expr) _expr->makeObjectsSet(objects, names);
 }
 
 SourceExpressionDS & SourceExpressionDS::operator = (SourceExpressionDS const & expr)

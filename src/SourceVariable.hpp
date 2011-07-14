@@ -54,6 +54,8 @@ public:
 
 	struct VariableType
 	{
+		VariableType const * getType(std::string const & name, SourcePosition const & position) const;
+
 		int size() const;
 
 		VariableTypeInternal type;
@@ -76,7 +78,9 @@ public:
 	VariableType const * getType() const;
 
 	void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
 	void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
+	void makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
 
 
 
@@ -104,7 +108,11 @@ private:
 	VariableType const * _type;
 
 	void makeObjectsGet(std::vector<ObjectToken> * const objects, VariableType const * const type, int * const address) const;
+	void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, VariableType const * const type, int * const address) const;
+	void makeObjectsGet(VariableType const * const type, int * const address) const;
 	void makeObjectsSet(std::vector<ObjectToken> * const objects, VariableType const * const type, int * const address) const;
+	void makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, VariableType const * const type, int * const address) const;
+	void makeObjectsSet(VariableType const * const type, int * const address) const;
 
 
 
