@@ -147,6 +147,8 @@ public:
 
 	static ObjectExpression get_symbol(std::string const & symbol, SourcePosition const & position);
 
+	static void set_address_count(int32_t addressCount);
+
 private:
 	ObjectExpressionBase * _expr;
 

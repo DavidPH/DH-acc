@@ -97,8 +97,7 @@ public:
 
 	static void make_tokens(std::vector<ObjectToken> const & objects, std::vector<BinaryTokenZDACS> * const instructions);
 
-	static void prepare_all(std::vector<BinaryTokenZDACS> const & instructions);
-
+	static void write_16(std::ostream * const out, uint16_t const i);
 	static void write_32(std::ostream * const out, uint32_t const i);
 	static void write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions);
 	static void write_script(std::ostream * const out, ObjectExpression::Script const & s);

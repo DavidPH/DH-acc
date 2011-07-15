@@ -321,14 +321,14 @@ void option_print(std::ostream * out, option const & opt)
 {
 	switch (opt.type)
 	{
-	case option::OPT_B:  option_print(out, opt.data.b ); break;
-	case option::OPT_F:  option_print(out, opt.data.f ); break;
-	case option::OPT_I:  option_print(out, opt.data.i ); break;
-	case option::OPT_S:  option_print(out, opt.data.s ); break;
-	case option::OPT_BV: option_print(out, opt.data.bv); break;
-	case option::OPT_FV: option_print(out, opt.data.fv); break;
-	case option::OPT_IV: option_print(out, opt.data.iv); break;
-	case option::OPT_SV: option_print(out, opt.data.sv); break;
+	case option::OPT_B:  if (opt.data.b ) option_print(out, opt.data.b ); break;
+	case option::OPT_F:  if (opt.data.f ) option_print(out, opt.data.f ); break;
+	case option::OPT_I:  if (opt.data.i ) option_print(out, opt.data.i ); break;
+	case option::OPT_S:  if (opt.data.s ) option_print(out, opt.data.s ); break;
+	case option::OPT_BV: if (opt.data.bv) option_print(out, opt.data.bv); break;
+	case option::OPT_FV: if (opt.data.fv) option_print(out, opt.data.fv); break;
+	case option::OPT_IV: if (opt.data.iv) option_print(out, opt.data.iv); break;
+	case option::OPT_SV: if (opt.data.sv) option_print(out, opt.data.sv); break;
 	}
 }
 void option_print(std::ostream * out, option_b data)

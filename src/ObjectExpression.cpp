@@ -191,6 +191,11 @@ int32_t ObjectExpression::resolveInt32() const
 	return _expr ? _expr->resolveInt32() : 0;
 }
 
+void ObjectExpression::set_address_count(int32_t addressCount)
+{
+	_address_count = addressCount;
+}
+
 
 
 void print_debug(std::ostream * const out, ObjectExpression const & in)

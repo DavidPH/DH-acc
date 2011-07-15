@@ -35,8 +35,8 @@ namespace option
 class option_exception : public std::exception
 {
 public:
-	option_exception(char const * option, char const * arg, char const * description);
-	option_exception(char const * option, char const * description);
+	option_exception(char const * name, char const * arg, char const * description);
+	option_exception(char const * name, char const * description);
 	virtual ~option_exception() throw();
 
 	virtual char const * what();

@@ -22,9 +22,12 @@
 #include "BinaryTokenZDACS.hpp"
 
 #include "ObjectToken.hpp"
+#include "ost_type.hpp"
 #include "SourceException.hpp"
 
 
+
+static int32_t directory_offset;
 
 uintptr_t BinaryTokenZDACS::_arg_counts[BCODE_NONE];
 
@@ -155,17 +158,6 @@ void BinaryTokenZDACS::make_tokens(std::vector<ObjectToken> const & objects, std
 	#undef CASE_DIRECTMAP
 }
 
-void BinaryTokenZDACS::prepare_all(std::vector<BinaryTokenZDACS> const & instructions)
-{
-	for (uintptr_t index(0); index < instructions.size(); ++index)
-	{
-		for (uintptr_t i(0); i < instructions[index]._labels.size(); ++i)
-			ObjectExpression::add_label(instructions[index]._labels[i]);
-
-		ObjectExpression::add_address_count(_arg_counts[instructions[index]._code]*4 + 4);
-	}
-}
-
 void BinaryTokenZDACS::write(std::ostream * const out) const
 {
 	write_32(out, _code);
@@ -174,6 +166,11 @@ void BinaryTokenZDACS::write(std::ostream * const out) const
 		write_32(out, i < _args.size() ? _args[i].resolveInt32() : 0);
 }
 
+void BinaryTokenZDACS::write_16(std::ostream * const out, uint16_t const i)
+{
+	out->put((i >> 0) & 0xFF);
+	out->put((i >> 8) & 0xFF);
+}
 void BinaryTokenZDACS::write_32(std::ostream * const out, uint32_t const i)
 {
 	out->put((i >>  0) & 0xFF);
@@ -184,17 +181,121 @@ void BinaryTokenZDACS::write_32(std::ostream * const out, uint32_t const i)
 
 void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions)
 {
+	directory_offset = 8;
+	ObjectExpression::set_address_count(8);
+
 	for (uintptr_t index(0); index < instructions.size(); ++index)
 	{
-		instructions[index].write(out);
+		for (uintptr_t i(0); i < instructions[index]._labels.size(); ++i)
+			ObjectExpression::add_label(instructions[index]._labels[i]);
+
+		int32_t size(_arg_counts[instructions[index]._code]*4 + 4);
+
+		directory_offset += size;
+		ObjectExpression::add_address_count(size);
+	}
+
+	switch (output_type)
+	{
+	case OUTPUT_ACS0:
+	{
+		int32_t const scriptCount(ObjectExpression::get_script_count());
+		int32_t const stringCount(ObjectExpression::get_string_count());
+
+		// 0
+		*out << 'A' << 'C' << 'S' << '\0';
+		write_32(out, directory_offset);
+
+		// 8
+		for (uintptr_t index(0); index < instructions.size(); ++index)
+			instructions[index].write(out);
+
+		// directory_offset
+		write_32(out, scriptCount);
+
+		// directory_offset+4
+		for (int32_t index(0); index < scriptCount; ++index)
+			write_script(out, ObjectExpression::get_script(index));
+
+		// directory_offset+4+(scriptCount*12)
+		write_32(out, stringCount);
+
+		// directory_offset+4+(scriptCount*12)+4
+		for (int32_t index(0); index < stringCount; ++index)
+			write_32(out, directory_offset + 4 + (scriptCount*12) + 4 + (stringCount*4) + ObjectExpression::get_string(index).offset);
+
+		// directory_offset+4+(scriptCount*12)+4+(stringCount*4)
+		for (int32_t index(0); index < stringCount; ++index)
+			write_string(out, ObjectExpression::get_string(index).string);
+	}
+		break;
+
+	case OUTPUT_ACSE:
+	{
+		int32_t const scriptCount(ObjectExpression::get_script_count());
+		int32_t const stringCount(ObjectExpression::get_string_count());
+
+		*out << 'A' << 'C' << 'S' << 'E';
+		write_32(out, directory_offset);
+
+		for (uintptr_t index(0); index < instructions.size(); ++index)
+			instructions[index].write(out);
+
+		if (scriptCount)
+		{
+			*out << 'S' << 'P' << 'T' << 'R';
+			write_32(out, scriptCount*12);
+
+			for (int32_t index(0); index < scriptCount; ++index)
+				write_script(out, ObjectExpression::get_script(index));
+		}
+
+		if (stringCount)
+		{
+			int32_t const stringLength(ObjectExpression::get_string_length());
+
+			*out << 'S' << 'T' << 'R' << 'L';
+			write_32(out, 12 + (stringCount*4) + stringLength);
+
+			write_32(out, 0);
+			write_32(out, stringCount);
+			write_32(out, 0);
+
+			for (int32_t index(0); index < stringCount; ++index)
+				write_32(out, 12 + (stringCount*4) + ObjectExpression::get_string(index).offset);
+
+			for (int32_t index(0); index < stringCount; ++index)
+				write_string(out, ObjectExpression::get_string(index).string);
+		}
+	}
+		break;
+
+	default:
+		throw SourceException("unonown output type", SourcePosition::none, "BinaryTokenZDACS");
 	}
 }
 
 void BinaryTokenZDACS::write_script(std::ostream * const out, ObjectExpression::Script const & s)
 {
-	write_32(out, (int32_t)(s.type * 1000) + s.number);
-	write_32(out, ObjectExpression::get_symbol(s.label, SourcePosition::none).resolveInt32());
-	write_32(out, s.args);
+	switch (output_type)
+	{
+	case OUTPUT_ACS0:
+		write_32(out, (int32_t)(s.type * 1000) + (int32_t)s.number);
+		write_32(out, ObjectExpression::get_symbol(s.label, SourcePosition::none).resolveInt32());
+		write_32(out, s.args);
+		break;
+
+	case OUTPUT_ACSE:
+		write_16(out, (int16_t)s.number);
+		write_16(out, (int16_t)s.type);
+		write_32(out, ObjectExpression::get_symbol(s.label, SourcePosition::none).resolveInt32());
+		write_32(out, s.args);
+		break;
+
+	default:
+		throw SourceException("unonown output type for script", SourcePosition::none, "BinaryTokenZDACS");
+	}
+
 }
 
 void BinaryTokenZDACS::write_string(std::ostream * const out, std::string const & s)

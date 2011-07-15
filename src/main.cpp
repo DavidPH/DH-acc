@@ -23,6 +23,7 @@
 #include "ObjectExpression.hpp"
 #include "ObjectToken.hpp"
 #include "option.hpp"
+#include "ost_type.hpp"
 #include "print_debug.hpp"
 #include "SourceBlockC.hpp"
 #include "SourceException.hpp"
@@ -40,30 +41,26 @@
 
 
 
-enum SourceType
+SourceType divine_source_type(std::string const & name)
 {
-	SOURCE_UNKNOWN,
-	SOURCE_ASMPLX,
-	SOURCE_DS
-};
+	std::ifstream in(name.c_str());
 
-SourceType divine_source_type(std::istream * in)
-{
+
 	// DS source?
-	in->seekg(0);
+	in.seekg(0);
 
-	if (in->get() == '/' && in->get() == '*' && in->get() == 'D' && in->get() == 'S')
+	if (in.get() == '/' && in.get() == '*' && in.get() == 'D' && in.get() == 'S')
 		return SOURCE_DS;
 
 
 	// ASMPLX source?
-	in->seekg(0);
+	in.seekg(0);
 
 	// Can have empty lines before the header.
-	while (in->get() == '\n');
-	in->unget();
+	while (in.get() == '\n');
+	in.unget();
 
-	if (in->get() == 'A' && in->get() == 'S' && in->get() == 'M' && in->get() == 'P' && in->get() == 'L' && in->get() == 'X' && in->get() == '\n')
+	if (in.get() == 'A' && in.get() == 'S' && in.get() == 'M' && in.get() == 'P' && in.get() == 'L' && in.get() == 'X' && in.get() == '\n')
 		return SOURCE_ASMPLX;
 
 
@@ -72,6 +69,8 @@ SourceType divine_source_type(std::istream * in)
 
 static inline void _init(int argc, char const * const * argv)
 {
+	ost_init();
+
 	BinaryTokenZDACS::init();
 	SourceTokenASMPLX::init();
 
@@ -90,31 +89,19 @@ static inline int _main()
 {
 	if (option::option_args.size() != 2) return 1;
 
-	std::ifstream ifs(option::option_args[0].c_str());
-	std::ofstream ofs(option::option_args[1].c_str());
-
 	ObjectExpression::add_script("main", 0, ObjectExpression::ST_OPEN);
 
-	SourceType sourceType(divine_source_type(&ifs));
-	ifs.seekg(0);
+	if (source_type == SOURCE_UNKNOWN)
+		source_type = divine_source_type(option::option_args[0]);
+
+	std::ifstream ifs(option::option_args[0].c_str());
 
 	std::vector<ObjectToken> objects;
 
-	switch (sourceType)
+	switch (source_type)
 	{
-	case SOURCE_ASMPLX:
-	{
-		SourceStream in(&ifs, option::option_args[0], SourceStream::ST_ASMPLX);
-
-		std::vector<SourceTokenASMPLX> tokens;
-		SourceTokenASMPLX::read_tokens(&in, &tokens);
-
-		SourceTokenASMPLX::make_objects(tokens, &objects);
-	}
-		break;
-
 	#if 0
-	case SOURCE_C:
+	case SOURCE_ACS:
 	{
 		SourceStream in(&ifs, option::option_args[0], SourceStream::ST_C);
 
@@ -131,6 +118,17 @@ static inline int _main()
 	}
 		break;
 	#endif
+
+	case SOURCE_ASMPLX:
+	{
+		SourceStream in(&ifs, option::option_args[0], SourceStream::ST_ASMPLX);
+
+		std::vector<SourceTokenASMPLX> tokens;
+		SourceTokenASMPLX::read_tokens(&in, &tokens);
+
+		SourceTokenASMPLX::make_objects(tokens, &objects);
+	}
+		break;
 
 	case SOURCE_DS:
 	{
@@ -150,38 +148,32 @@ static inline int _main()
 		return 1;
 	}
 
-	std::vector<BinaryTokenZDACS> instructions;
-	BinaryTokenZDACS::make_tokens(objects, &instructions);
+	if (target_type == TARGET_UNKNOWN)
+		target_type = TARGET_ZDOOM;
 
-	int32_t scriptCount(ObjectExpression::get_script_count());
-	int32_t stringCount(ObjectExpression::get_string_count());
+	if (output_type == OUTPUT_UNKNOWN) switch (target_type)
+	{
+	case TARGET_HEXEN: output_type = OUTPUT_ACS0; break;
+	case TARGET_ZDOOM: output_type = OUTPUT_ACSE; break;
+	case TARGET_UNKNOWN: break;
+	}
 
-	BinaryTokenZDACS::prepare_all(instructions);
+	std::ofstream ofs(option::option_args[1].c_str());
 
-	// 0
-	ofs << 'A' << 'C' << 'S' << '\0';
-	ofs << '\x08' << '\x00' << '\x00' << '\x00';
+	switch (target_type)
+	{
+	case TARGET_ZDOOM:
+	{
+		std::vector<BinaryTokenZDACS> instructions;
+		BinaryTokenZDACS::make_tokens(objects, &instructions);
+		BinaryTokenZDACS::write_all(&ofs, instructions);
+	}
+		break;
 
-	// 8
-	BinaryTokenZDACS::write_32(&ofs, scriptCount);
-
-	// 12
-	for (int32_t index(0); index < ObjectExpression::get_script_count(); ++index)
-		BinaryTokenZDACS::write_script(&ofs, ObjectExpression::get_script(index));
-
-	// 12+(scriptCount*12)
-	BinaryTokenZDACS::write_32(&ofs, stringCount);
-
-	// 12+(scriptCount*12)+4
-	for (int32_t index(0); index < ObjectExpression::get_string_count(); ++index)
-		BinaryTokenZDACS::write_32(&ofs, 12 + (scriptCount*12) + 4 + (stringCount*4) + ObjectExpression::get_string(index).offset);
-
-	// 12+(scriptCount*12)+4+(stringCount*4)
-	for (int32_t index(0); index < ObjectExpression::get_string_count(); ++index)
-		BinaryTokenZDACS::write_string(&ofs, ObjectExpression::get_string(index).string);
-
-	// 12+(scriptCount*12)+4+(stringCount*4)+stringLength
-	BinaryTokenZDACS::write_all(&ofs, instructions);
+	default:
+		std::cerr << "Unknown target type.\n";
+		return 1;
+	}
 
 	return 0;
 }
