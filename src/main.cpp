@@ -40,6 +40,36 @@
 
 
 
+enum SourceType
+{
+	SOURCE_UNKNOWN,
+	SOURCE_ASMPLX,
+	SOURCE_DS
+};
+
+SourceType divine_source_type(std::istream * in)
+{
+	// DS source?
+	in->seekg(0);
+
+	if (in->get() == '/' && in->get() == '*' && in->get() == 'D' && in->get() == 'S')
+		return SOURCE_DS;
+
+
+	// ASMPLX source?
+	in->seekg(0);
+
+	// Can have empty lines before the header.
+	while (in->get() == '\n');
+	in->unget();
+
+	if (in->get() == 'A' && in->get() == 'S' && in->get() == 'M' && in->get() == 'P' && in->get() == 'L' && in->get() == 'X' && in->get() == '\n')
+		return SOURCE_ASMPLX;
+
+
+	return SOURCE_UNKNOWN;
+}
+
 static inline void _init(int argc, char const * const * argv)
 {
 	BinaryTokenZDACS::init();
@@ -64,38 +94,61 @@ static inline int _main()
 	std::ofstream ofs(option::option_args[1].c_str());
 
 	ObjectExpression::add_script("main", 0, ObjectExpression::ST_OPEN);
+
+	SourceType sourceType(divine_source_type(&ifs));
+	ifs.seekg(0);
+
 	std::vector<ObjectToken> objects;
 
+	switch (sourceType)
+	{
+	case SOURCE_ASMPLX:
+	{
+		SourceStream in(&ifs, option::option_args[0], SourceStream::ST_ASMPLX);
+
+		std::vector<SourceTokenASMPLX> tokens;
+		SourceTokenASMPLX::read_tokens(&in, &tokens);
+
+		SourceTokenASMPLX::make_objects(tokens, &objects);
+	}
+		break;
+
 	#if 0
-	SourceStream in(&ifs, option::option_args[0], SourceStream::ST_C);
+	case SOURCE_C:
+	{
+		SourceStream in(&ifs, option::option_args[0], SourceStream::ST_C);
 
-	SourceTokenizerC tokenizer(&in);
+		SourceTokenizerC tokenizer(&in);
 
-	SourceBlockC block(&tokenizer);
-	print_debug(&ofs, block); return 0;
+		SourceBlockC block(&tokenizer);
+		print_debug(&ofs, block); return 0;
 
-	std::vector<SourceExpressionACS> expressions;
-	SourceExpressionACS::make_expressions(block, &expressions);
-	print_debug(&ofs, expressions); return 0;
+		std::vector<SourceExpressionACS> expressions;
+		SourceExpressionACS::make_expressions(block, &expressions);
+		print_debug(&ofs, expressions); return 0;
 
-	SourceExpressionACS::make_objects(expressions, &objects);
-	#elif 1
-	SourceStream in(&ifs, option::option_args[0], SourceStream::ST_C);
-
-	SourceTokenizerDS tokenizer(&in);
-
-	SourceExpressionDS expressions(SourceExpressionDS::make_expressions(&tokenizer));
-	expressions.addLabel("main");
-
-	expressions.makeObjectsGet(&objects);
-	#else
-	SourceStream in(&ifs, option::option_args[0], SourceStream::ST_ASMPLX);
-
-	std::vector<SourceTokenASMPLX> tokens;
-	SourceTokenASMPLX::read_tokens(&in, &tokens);
-
-	SourceTokenASMPLX::make_objects(tokens, &objects);
+		SourceExpressionACS::make_objects(expressions, &objects);
+	}
+		break;
 	#endif
+
+	case SOURCE_DS:
+	{
+		SourceStream in(&ifs, option::option_args[0], SourceStream::ST_C);
+
+		SourceTokenizerDS tokenizer(&in);
+
+		SourceExpressionDS expressions(SourceExpressionDS::make_expressions(&tokenizer));
+		expressions.addLabel("main");
+
+		expressions.makeObjectsGet(&objects);
+	}
+		break;
+
+	default:
+		std::cerr << "Unknown source type.\n";
+		return 1;
+	}
 
 	std::vector<BinaryTokenZDACS> instructions;
 	BinaryTokenZDACS::make_tokens(objects, &instructions);
