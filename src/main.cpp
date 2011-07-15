@@ -22,6 +22,7 @@
 #include "BinaryTokenZDACS.hpp"
 #include "ObjectExpression.hpp"
 #include "ObjectToken.hpp"
+#include "option.hpp"
 #include "print_debug.hpp"
 #include "SourceBlockC.hpp"
 #include "SourceException.hpp"
@@ -39,18 +40,34 @@
 
 
 
-static inline int _main(int const argc, char const * const * const argv)
+static inline void _init(int argc, char const * const * argv)
 {
-	if (argc != 3) return 1;
+	BinaryTokenZDACS::init();
+	SourceTokenASMPLX::init();
 
-	std::ifstream ifs(argv[1]);
-	std::ofstream ofs(argv[2]);
+	option::option_set_name(argv[0]);
+
+	if (argc == 1)
+	{
+		option::option_print_help(&std::cout);
+		throw 0;
+	}
+
+	option::option_process(argc-1, argv+1);
+}
+
+static inline int _main()
+{
+	if (option::option_args.size() != 2) return 1;
+
+	std::ifstream ifs(option::option_args[0].c_str());
+	std::ofstream ofs(option::option_args[1].c_str());
 
 	ObjectExpression::add_script("main", 0, ObjectExpression::ST_OPEN);
 	std::vector<ObjectToken> objects;
 
 	#if 0
-	SourceStream in(&ifs, argv[1], SourceStream::ST_C);
+	SourceStream in(&ifs, option::option_args[0], SourceStream::ST_C);
 
 	SourceTokenizerC tokenizer(&in);
 
@@ -63,7 +80,7 @@ static inline int _main(int const argc, char const * const * const argv)
 
 	SourceExpressionACS::make_objects(expressions, &objects);
 	#elif 1
-	SourceStream in(&ifs, argv[1], SourceStream::ST_C);
+	SourceStream in(&ifs, option::option_args[0], SourceStream::ST_C);
 
 	SourceTokenizerDS tokenizer(&in);
 
@@ -72,7 +89,7 @@ static inline int _main(int const argc, char const * const * const argv)
 
 	expressions.makeObjectsGet(&objects);
 	#else
-	SourceStream in(&ifs, argv[1], SourceStream::ST_ASMPLX);
+	SourceStream in(&ifs, option::option_args[0], SourceStream::ST_ASMPLX);
 
 	std::vector<SourceTokenASMPLX> tokens;
 	SourceTokenASMPLX::read_tokens(&in, &tokens);
@@ -120,18 +137,26 @@ int main(int argc, char * * argv)
 {
 	try
 	{
-		BinaryTokenZDACS::init();
-		SourceTokenASMPLX::init();
+		_init(argc, argv);
 
-		return _main(argc, argv);
+		return _main();
 	}
 	catch (SourceException & e)
 	{
 		std::cerr << e.where() << " (" << e.who() << "): " << e.what() << std::endl;
 	}
+	catch (option::option_exception & e)
+	{
+		std::cerr << "(option_exception): " << e.what() << std::endl;
+		option::option_print_help(&std::cout);
+	}
 	catch (std::exception & e)
 	{
 		std::cerr << "(std::exception): " << e.what() << std::endl;
+	}
+	catch (int & e)
+	{
+		return e;
 	}
 	catch (...)
 	{

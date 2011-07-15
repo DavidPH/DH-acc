@@ -17,6 +17,7 @@ add_executable(DH-acc
 	ObjectExpression/ValueInt32.cpp
 	ObjectExpression/ValueSymbol.cpp
 	ObjectToken.cpp
+	option.cpp
 	print_debug.cpp
 	SourceContext.cpp
 	SourceException.cpp
