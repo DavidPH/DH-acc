@@ -61,11 +61,9 @@ void ObjectExpression::add_label(std::string const & symbol)
 	add_symbol(symbol, create_value_int32(_address_count, SourcePosition::none));
 }
 
-void ObjectExpression::add_script(std::string const & label, int32_t const number, ScriptType const type, int32_t const args, int const flags)
+void ObjectExpression::add_script(std::string const & label, int32_t number, ScriptType type, int32_t args, int vars, int flags)
 {
-	add_address_count(12);
-
-	Script s = {args, flags, label, number, type};
+	Script s = {args, flags, label, number, type, vars};
 	_script_table.push_back(s);
 }
 
@@ -82,7 +80,6 @@ void ObjectExpression::add_string(std::string const & symbol, std::string const 
 {
 	// TODO: Option for string folding.
 
-	add_address_count(4 + (int32_t)value.size());
 	add_symbol(symbol, create_value_int32((int32_t)_string_table.size(), SourcePosition::none));
 
 	String s = {get_string_length(), value};

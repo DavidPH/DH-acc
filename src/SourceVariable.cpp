@@ -132,6 +132,11 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::
 	return NULL;
 }
 
+SourceVariable::StorageClass SourceVariable::getClass() const
+{
+	return _sc;
+}
+
 std::string const & SourceVariable::getNameSource() const
 {
 	return _nameSource;

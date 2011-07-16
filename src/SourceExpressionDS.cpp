@@ -243,7 +243,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			// TODO: scriptArgs
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-			SourceContext scriptContext;
+			SourceContext scriptContext(context, false);
 			SourceExpressionDS scriptExpression(make_expression_single(in, blocks, &scriptContext));
 
 			std::string scriptLabel;
@@ -255,7 +255,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 			scriptExpression.addLabel(scriptLabel);
 			blocks->push_back(scriptExpression);
-			ObjectExpression::add_script(scriptLabel, scriptNumber, scriptType, 0, scriptFlags);
+			ObjectExpression::add_script(scriptLabel, scriptNumber, scriptType, 0, scriptContext.getLimit(SourceVariable::SC_REGISTER), scriptFlags);
 
 			return make_expression_value_int(scriptNumberToken);
 		}
@@ -298,7 +298,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			SourceVariable::VariableType const * type(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
 			std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
-			SourceVariable var(name, name, context->getAddress(sc), sc, type, token.getPosition());
+			SourceVariable var(name, name, context->getCount(sc), sc, type, token.getPosition());
 
 			context->addVariable(var);
 
@@ -327,7 +327,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 	{
 		in->unget(token);
 		std::vector<SourceExpressionDS> expressions;
-		SourceContext blockContext(*context);
+		SourceContext blockContext(context, true);
 		make_expressions(in, &expressions, blocks, &blockContext);
 		return make_expression_root_block(expressions, token.getPosition());
 	}
@@ -356,7 +356,7 @@ SourceExpressionDS SourceExpressionDS::make_expressions(SourceTokenizerDS * cons
 	SourcePosition position(in->peek().getPosition());
 	std::vector<SourceExpressionDS> expressions;
 	std::vector<SourceExpressionDS> blocks;
-	SourceContext context;
+	SourceContext context(&SourceContext::global_context, true);
 
 	make_expressions(in, &expressions, &blocks, &context);
 

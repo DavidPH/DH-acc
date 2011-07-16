@@ -27,34 +27,92 @@
 
 
 
-SourceContext::SourceContext() : _addressRegister(0)
+SourceContext SourceContext::global_context;
+
+
+
+SourceContext::SourceContext() : _countRegister(0), _limitRegister(0), _parent(NULL), _inheritLocals(false)
 {
 
+}
+SourceContext::SourceContext(SourceContext * parent, bool inheritLocals) : _countRegister(0), _limitRegister(0), _parent(parent), _inheritLocals(inheritLocals)
+{
+
+}
+
+void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
+{
+	switch (sc)
+	{
+	case SourceVariable::SC_REGISTER:
+		addLimit(_countRegister += count, sc);
+		break;
+	}
+}
+
+void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
+{
+	switch (sc)
+	{
+	case SourceVariable::SC_REGISTER:
+		if (limit > _limitRegister)
+			_limitRegister = limit;
+
+		if (_inheritLocals && _parent)
+			_parent->addLimit(limit, sc);
+
+		break;
+	}
 }
 
 void SourceContext::addVariable(SourceVariable const & var)
 {
-	_vars[var.getNameSource()] = var;
+	_vars.push_back(var);
+	_varnames.push_back(var.getNameSource());
+
+	addCount(var.getType()->size(), var.getClass());
 }
 
-int SourceContext::getAddress(SourceVariable::StorageClass const sc)
+int SourceContext::getCount(SourceVariable::StorageClass sc) const
 {
 	switch (sc)
 	{
-	case SourceVariable::SC_REGISTER: return _addressRegister++;
+	case SourceVariable::SC_REGISTER:
+		if (_inheritLocals && _parent)
+			return _parent->getCount(sc) + _countRegister;
+		else
+			return _countRegister;
 	}
 
-	throw SourceException("getAddress", SourcePosition::none, "SourceContext");
+	throw SourceException("getCount", SourcePosition::none, "SourceContext");
+}
+
+int SourceContext::getLimit(SourceVariable::StorageClass sc) const
+{
+	switch (sc)
+	{
+	case SourceVariable::SC_REGISTER:
+		return _limitRegister;
+	}
+
+	throw SourceException("getCount", SourcePosition::none, "SourceContext");
 }
 
 SourceVariable const & SourceContext::getVariable(SourceTokenC const & token) const
 {
-	std::map<std::string, SourceVariable>::const_iterator var(_vars.find(token.getData()));
+	return getVariable(token.getData(), token.getPosition(), true);
+}
+SourceVariable const & SourceContext::getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const
+{
+	for (size_t i(_vars.size()); i--;)
+	{
+		if (name == _varnames[i])
+			return _vars[i];
+	}
 
-	if (var == _vars.end())
-		throw SourceException("no such variable", token.getPosition(), "SourceContext");
+	if (_parent) return _parent->getVariable(name, position, canLocal && _inheritLocals);
 
-	return var->second;
+	throw SourceException("no such variable", position, "SourceContext");
 }
 
 

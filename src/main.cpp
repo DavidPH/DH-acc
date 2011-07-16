@@ -26,6 +26,7 @@
 #include "ost_type.hpp"
 #include "print_debug.hpp"
 #include "SourceBlockC.hpp"
+#include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "SourceExpressionACS.hpp"
 #include "SourceExpressionDS.hpp"
@@ -89,8 +90,6 @@ static inline int _main()
 {
 	if (option::option_args.size() != 2) return 1;
 
-	ObjectExpression::add_script("main", 0, ObjectExpression::ST_OPEN);
-
 	if (source_type == SOURCE_UNKNOWN)
 		source_type = divine_source_type(option::option_args[0]);
 
@@ -126,6 +125,8 @@ static inline int _main()
 		std::vector<SourceTokenASMPLX> tokens;
 		SourceTokenASMPLX::read_tokens(&in, &tokens);
 
+		ObjectExpression::add_script("main", 0, ObjectExpression::ST_OPEN, 0, 0, 0);
+
 		SourceTokenASMPLX::make_objects(tokens, &objects);
 	}
 		break;
@@ -138,6 +139,8 @@ static inline int _main()
 
 		SourceExpressionDS expressions(SourceExpressionDS::make_expressions(&tokenizer));
 		expressions.addLabel("main");
+
+		ObjectExpression::add_script("main", 0, ObjectExpression::ST_OPEN, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER), 0);
 
 		expressions.makeObjectsGet(&objects);
 	}

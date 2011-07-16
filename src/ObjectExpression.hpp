@@ -77,6 +77,7 @@ public:
 		std::string label;
 		int32_t number;
 		ScriptType type;
+		int vars;
 	};
 
 	struct String
@@ -107,7 +108,7 @@ public:
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
 
-	static void add_script(std::string const & label, int32_t const number, ScriptType const type = ST_CLOSED, int32_t const args = 0, int const flags = 0);
+	static void add_script(std::string const & label, int32_t number, ScriptType type, int32_t args, int vars, int flags);
 
 	// Adds a string using an auto-generated symbol and returns that symbol.
 	static std::string add_string(std::string const & value);

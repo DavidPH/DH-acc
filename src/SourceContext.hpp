@@ -24,8 +24,8 @@
 
 #include "SourceVariable.hpp"
 
-#include <map>
 #include <string>
+#include <vector>
 
 class SourceTokenC;
 
@@ -35,16 +35,36 @@ class SourceContext
 {
 public:
 	SourceContext();
+	SourceContext(SourceContext * parent, bool inheritLocals);
 
 	void addVariable(SourceVariable const & var);
 
-	int getAddress(SourceVariable::StorageClass const sc);
+	int getCount(SourceVariable::StorageClass sc) const;
+
+	int getLimit(SourceVariable::StorageClass sc) const;
 
 	SourceVariable const & getVariable(SourceTokenC const & token) const;
 
+
+
+	static SourceContext global_context;
+
 private:
-	int _addressRegister;
-	std::map<std::string, SourceVariable> _vars;
+	void addCount(int count, SourceVariable::StorageClass sc);
+	void addLimit(int limit, SourceVariable::StorageClass sc);
+
+	SourceVariable const & getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
+
+	int _countRegister;
+
+	int _limitRegister;
+
+	SourceContext * _parent;
+
+	std::vector<SourceVariable> _vars;
+	std::vector<std::string> _varnames;
+
+	unsigned _inheritLocals : 1;
 };
 
 
