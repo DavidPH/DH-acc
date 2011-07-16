@@ -209,6 +209,9 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 		if (token.getData() == "script")
 		{
+			SourceContext scriptContext(context, false);
+
+			// scriptNumber
 			SourceTokenC scriptNumberToken(in->get(SourceTokenC::TT_NUMBER));
 			int32_t scriptNumber;
 			{
@@ -216,36 +219,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 				iss >> scriptNumber;
 			}
 
-			SourceTokenC scriptTypeToken(in->get(SourceTokenC::TT_IDENTIFIER));
-			ObjectExpression::ScriptType scriptType(ObjectExpression::get_ScriptType(scriptTypeToken.getData(), scriptTypeToken.getPosition()));
-
-			int scriptFlags(0);
-			while (true)
-			{
-				SourceTokenC token(in->get());
-
-				if (token.getType() == SourceTokenC::TT_IDENTIFIER)
-				{
-					scriptFlags |= ObjectExpression::get_ScriptFlag(token.getData(), token.getPosition());
-				}
-				else if (token.getType() == SourceTokenC::TT_OP_PARENTHESIS_O)
-				{
-					in->unget(token);
-					break;
-				}
-				else
-				{
-					throw SourceException("expected TT_IDENTIFIER or TT_OP_PARENTHESIS_O", token.getPosition(), "SourceExpressionDS");
-				}
-			}
-
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
-			// TODO: scriptArgs
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-			SourceContext scriptContext(context, false);
-			SourceExpressionDS scriptExpression(make_expression_single(in, blocks, &scriptContext));
-
+			// scriptLabel
 			std::string scriptLabel;
 			{
 				std::ostringstream oss;
@@ -253,9 +227,56 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 				scriptLabel = oss.str();
 			}
 
+			// scriptType
+			SourceTokenC scriptTypeToken(in->get(SourceTokenC::TT_IDENTIFIER));
+			ObjectExpression::ScriptType scriptType(ObjectExpression::get_ScriptType(scriptTypeToken.getData(), scriptTypeToken.getPosition()));
+
+			// scriptFlags
+			int scriptFlags(0);
+			while (true)
+			{
+				SourceTokenC token(in->get());
+
+				if (token.getType() != SourceTokenC::TT_IDENTIFIER)
+				{
+					in->unget(token);
+					break;
+				}
+
+				scriptFlags |= ObjectExpression::get_ScriptFlag(token.getData(), token.getPosition());
+			}
+
+			// scriptArgs
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+			while (true)
+			{
+				SourceTokenC token(in->get());
+
+				if (token.getType() != SourceTokenC::TT_IDENTIFIER)
+				{
+					in->unget(token);
+					break;
+				}
+
+				SourceVariable::StorageClass sc(SourceVariable::SC_REGISTER);
+				SourceVariable::VariableType const * type(SourceVariable::get_VariableType(token));
+				std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+				int addr(scriptContext.getCount(sc));
+
+				scriptContext.addVariable(SourceVariable(name, name, addr, sc, type, token.getPosition()));
+			}
+			int scriptArgs(scriptContext.getLimit(SourceVariable::SC_REGISTER));
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+			// scriptExpression
+			SourceExpressionDS scriptExpression(make_expression_single(in, blocks, &scriptContext));
 			scriptExpression.addLabel(scriptLabel);
 			blocks->push_back(scriptExpression);
-			ObjectExpression::add_script(scriptLabel, scriptNumber, scriptType, 0, scriptContext.getLimit(SourceVariable::SC_REGISTER), scriptFlags);
+
+			// scriptVars
+			int scriptVars(scriptContext.getLimit(SourceVariable::SC_REGISTER));
+
+			ObjectExpression::add_script(scriptLabel, scriptNumber, scriptType, scriptArgs, scriptVars, scriptFlags);
 
 			return make_expression_value_int(scriptNumberToken);
 		}
@@ -297,8 +318,9 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			SourceVariable::StorageClass sc(SourceVariable::get_StorageClass(in->get(SourceTokenC::TT_IDENTIFIER)));
 			SourceVariable::VariableType const * type(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
 			std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+			int addr(context->getCount(sc));
 
-			SourceVariable var(name, name, context->getCount(sc), sc, type, token.getPosition());
+			SourceVariable var(name, name, addr, sc, type, token.getPosition());
 
 			context->addVariable(var);
 
