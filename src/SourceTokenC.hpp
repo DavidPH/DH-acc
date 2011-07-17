@@ -62,6 +62,7 @@ public:
 		TT_OP_HASH,               // #
 		TT_OP_MINUS,              // -
 		TT_OP_MINUS_EQUALS,       // -=
+		TT_OP_MINUS_GT,           // ->
 		TT_OP_MINUS2,             // --
 		TT_OP_NOT,                // !
 		TT_OP_PARENTHESIS_C,      // )

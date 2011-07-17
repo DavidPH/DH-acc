@@ -25,6 +25,7 @@
 #include "ObjectToken.hpp"
 #include "print_debug.hpp"
 #include "SourceException.hpp"
+#include "SourceExpressionDS.hpp"
 #include "SourceTokenC.hpp"
 
 
@@ -59,6 +60,7 @@ int SourceVariable::VariableType::size() const
 	{
 	case VT_FIXED:
 	case VT_INT:
+	case VT_SCRIPT:
 	case VT_STRING:
 		return 1;
 
@@ -94,12 +96,19 @@ void SourceVariable::add_struct(std::string const & name, std::vector<std::strin
 {
 	VariableType * type(new VariableType);
 
-	type->type = VT_STRUCT;
-	type->names = names;
-	type->types = types;
+	type->type     = VT_STRUCT;
+	type->callType = _types[VT_VOID];
+	type->names    = names;
+	type->types    = types;
 
 	_names.push_back(name);
 	_types.push_back(type);
+}
+
+void SourceVariable::add_typedef(std::string const & name, VariableType const * type)
+{
+	_names.push_back(name);
+	_types.push_back((VariableType*)type);
 }
 
 SourceVariable::StorageClass SourceVariable::get_StorageClass(SourceTokenC const & token)
@@ -132,6 +141,40 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::
 	return NULL;
 }
 
+SourceVariable::VariableType const * SourceVariable::get_VariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	for (size_t i(0); i < _types.size(); ++i)
+	{
+		if (_types[i]->callType == callType && _types[i]->types.size() == types.size())
+		{
+			bool matched(true);
+
+			for (size_t j(0); j < _types[i]->types.size(); ++j)
+			{
+				if (_types[i]->types[j] != types[j])
+				{
+					matched = false;
+					break;
+				}
+			}
+
+			if (matched) return _types[i];
+		}
+	}
+
+	VariableType * type(new VariableType);
+
+	type->type     = VT_SCRIPT;
+	type->callType = callType;
+	type->names    = std::vector<std::string>(types.size(), "");
+	type->types    = types;
+
+	_names.push_back("");
+	_types.push_back(type);
+
+	return type;
+}
+
 SourceVariable::StorageClass SourceVariable::getClass() const
 {
 	return _sc;
@@ -153,6 +196,11 @@ void SourceVariable::init()
 	_types.resize(VT_VOID+1);
 	VariableType type;
 
+	type.type = VT_VOID;
+	_names[VT_VOID] = "void";
+	_types[VT_VOID] = new VariableType(type);
+	_types[VT_VOID]->callType = type.callType = _types[VT_VOID];
+
 	type.type = VT_FIXED;
 	_names[VT_FIXED] = "fixed";
 	_types[VT_FIXED] = new VariableType(type);
@@ -164,10 +212,12 @@ void SourceVariable::init()
 	type.type = VT_STRING;
 	_names[VT_STRING] = "string";
 	_types[VT_STRING] = new VariableType(type);
+}
 
-	type.type = VT_VOID;
-	_names[VT_VOID] = "void";
-	_types[VT_VOID] = new VariableType(type);
+void SourceVariable::makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const
+{
+	makeObjectsGet(objects);
+	SourceExpressionDS::make_objects_call_script(objects, _type, args, _position);
 }
 
 void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects) const
@@ -195,6 +245,7 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, st
 		{
 		case VT_FIXED:
 		case VT_INT:
+		case VT_SCRIPT:
 		case VT_STRING:
 		case VT_VOID:
 			throw SourceException("attempt to get member from non-struct", _position, "SourceVariable");
@@ -227,6 +278,7 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, Va
 		{
 		case VT_FIXED:
 		case VT_INT:
+		case VT_SCRIPT:
 		case VT_STRING:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHSCRIPTVAR, _position, ObjectExpression::create_value_int32((*address)++, _position)));
 			break;
@@ -251,6 +303,7 @@ void SourceVariable::makeObjectsGet(VariableType const * const type, int * const
 		{
 		case VT_FIXED:
 		case VT_INT:
+		case VT_SCRIPT:
 		case VT_STRING:
 			++*address;
 			break;
@@ -295,6 +348,7 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, st
 		{
 		case VT_FIXED:
 		case VT_INT:
+		case VT_SCRIPT:
 		case VT_STRING:
 		case VT_VOID:
 			throw SourceException("attempt to set member from non-struct", _position, "SourceVariable");
@@ -327,6 +381,7 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, Va
 		{
 		case VT_FIXED:
 		case VT_INT:
+		case VT_SCRIPT:
 		case VT_STRING:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_ASSIGNSCRIPTVAR, _position, ObjectExpression::create_value_int32((*address)--, _position)));
 			break;
@@ -351,6 +406,7 @@ void SourceVariable::makeObjectsSet(VariableType const * const type, int * const
 		{
 		case VT_FIXED:
 		case VT_INT:
+		case VT_SCRIPT:
 		case VT_STRING:
 			--*address;
 			break;
@@ -442,6 +498,7 @@ void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal 
 	case SourceVariable::VT_INT:    *out << "VT_INT";    break;
 	case SourceVariable::VT_STRING: *out << "VT_STRING"; break;
 	case SourceVariable::VT_VOID:   *out << "VT_VOID";   break;
+	case SourceVariable::VT_SCRIPT: *out << "VT_SCRIPT"; break;
 	case SourceVariable::VT_STRUCT: *out << "VT_STRUCT"; break;
 	}
 }

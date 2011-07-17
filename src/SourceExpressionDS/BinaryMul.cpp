@@ -80,6 +80,7 @@ void SourceExpressionDS_BinaryMul::makeObjectsGet(std::vector<ObjectToken> * con
 		break;
 
 	case SourceVariable::VT_VOID:
+	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRUCT:
 		throw SourceException("invalid VT", getPosition(), getName());
 	}

@@ -132,6 +132,7 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 		c = in->get();
 
 		if (c == '=') {_type = TT_OP_MINUS_EQUALS; return;}
+		if (c == '>') {_type = TT_OP_MINUS_GT;     return;}
 		if (c == '-') {_type = TT_OP_MINUS2;       return;}
 
 		in->unget(c);

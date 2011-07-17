@@ -78,6 +78,7 @@ void SourceExpressionDS_RootOut::doOut(std::vector<ObjectToken> * const objects,
 		break;
 
 	case SourceVariable::VT_INT:
+	case SourceVariable::VT_SCRIPT:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTNUMBER, getPosition()));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));

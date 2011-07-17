@@ -22,6 +22,7 @@
 #include "SourceExpressionDS.hpp"
 
 #include "ObjectExpression.hpp"
+#include "ObjectToken.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
@@ -128,6 +129,28 @@ SourceExpressionDS SourceExpressionDS::make_expression(SourceTokenizerDS * const
 			in->unget(token);
 			return expr;
 
+		case SourceTokenC::TT_OP_PARENTHESIS_O:
+		{
+			std::vector<SourceExpressionDS> args;
+
+			if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
+			{
+				args.push_back(make_expression(in, blocks, context));
+
+				SourceTokenC token(in->get());
+
+				if (token.getType() != SourceTokenC::TT_OP_COMMA)
+				{
+					in->unget(token);
+					break;
+				}
+			}
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+			expr = make_expression_root_call(expr, args, token.getPosition());
+		}
+			break;
+
 		case SourceTokenC::TT_OP_PERCENT:
 			expr = make_expression_binary_mod(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
@@ -163,6 +186,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_cast(SourceExpressionDS c
 	case SourceVariable::VT_INT: return make_expression_cast_int(expr, position);
 	case SourceVariable::VT_STRING: return make_expression_cast_string(expr, position);
 	case SourceVariable::VT_VOID: return make_expression_cast_void(expr, position);
+	case SourceVariable::VT_SCRIPT: return make_expression_cast_script(expr, type, position);
 	case SourceVariable::VT_STRUCT: return make_expression_cast_struct(expr, type, position);
 	}
 
@@ -248,25 +272,32 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 			// scriptArgs
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
-			while (true)
+			std::vector<SourceVariable::VariableType const *> scriptArgTypes;
+			if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
 			{
-				SourceTokenC token(in->get());
-
-				if (token.getType() != SourceTokenC::TT_IDENTIFIER)
-				{
-					in->unget(token);
-					break;
-				}
-
 				SourceVariable::StorageClass sc(SourceVariable::SC_REGISTER);
-				SourceVariable::VariableType const * type(SourceVariable::get_VariableType(token));
+				SourceVariable::VariableType const * type(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
 				std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 				int addr(scriptContext.getCount(sc));
 
+				scriptArgTypes.push_back(type);
 				scriptContext.addVariable(SourceVariable(name, name, addr, sc, type, token.getPosition()));
+
+				if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
+					break;
+
+				in->get(SourceTokenC::TT_OP_COMMA);
 			}
 			int scriptArgs(scriptContext.getLimit(SourceVariable::SC_REGISTER));
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+			// scriptReturn
+			in->get(SourceTokenC::TT_OP_MINUS_GT);
+			SourceTokenC scriptReturnToken(in->get(SourceTokenC::TT_IDENTIFIER));
+			SourceVariable::VariableType const * scriptReturn(SourceVariable::get_VariableType(scriptReturnToken));
+
+			// scriptVarType
+			SourceVariable::VariableType const * scriptVarType(SourceVariable::get_VariableType_script(scriptReturn, scriptArgTypes));
 
 			// scriptExpression
 			SourceExpressionDS scriptExpression(make_expression_single(in, blocks, &scriptContext));
@@ -278,7 +309,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 			ObjectExpression::add_script(scriptLabel, scriptNumber, scriptType, scriptArgs, scriptVars, scriptFlags);
 
-			return make_expression_value_int(scriptNumberToken);
+			return make_expression_value_script(scriptNumber, scriptVarType, token.getPosition());
 		}
 
 		if (token.getData() == "struct")
@@ -308,9 +339,38 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		}
 
 		if (token.getData() == "term")
-		{
-			in->unget(in->get(SourceTokenC::TT_OP_SEMICOLON));
 			return make_expression_root_term(token.getPosition());
+
+		if (token.getData() == "typedef")
+		{
+			SourceTokenC typeToken(in->get(SourceTokenC::TT_IDENTIFIER));
+
+			if (typeToken.getData() == "script")
+			{
+				in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+				std::vector<SourceVariable::VariableType const *> scriptArgTypes;
+				if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
+				{
+					scriptArgTypes.push_back(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+
+					if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
+						break;
+
+					in->get(SourceTokenC::TT_OP_COMMA);
+				}
+				in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+				in->get(SourceTokenC::TT_OP_MINUS_GT);
+				SourceVariable::VariableType const * scriptReturn(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+
+				SourceVariable::add_typedef(in->get(SourceTokenC::TT_IDENTIFIER).getData(), SourceVariable::get_VariableType_script(scriptReturn, scriptArgTypes));
+			}
+			else
+			{
+				SourceVariable::add_typedef(in->get(SourceTokenC::TT_IDENTIFIER).getData(), SourceVariable::get_VariableType(typeToken));
+			}
+
+			return NULL;
 		}
 
 		if (token.getData() == "var")
@@ -409,12 +469,54 @@ void SourceExpressionDS::make_objects(std::vector<SourceExpressionDS> const & ex
 		expressions[index].makeObjectsGet(objects);
 }
 
+void SourceExpressionDS::make_objects_call_script(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
+{
+	if (args.size() != type->types.size())
+		throw SourceException("incorrect arg count to call script", position, "SourceExpressionDS");
+
+	if (args.size() > 3)
+		throw SourceException("too many args to call script", position, "SourceExpressionDS");
+
+	for (size_t i(0); i < args.size(); ++i)
+	{
+		if (args[i].getType() != type->types[i])
+			throw SourceException("incorrect arg type to call script", position, "SourceExpressionDS");
+
+		args[i].makeObjectsGet(objects);
+	}
+
+	ObjectToken::ObjectCode code(ObjectToken::OCODE_LSPEC5RESULT);
+	ObjectExpression lspec(ObjectExpression::create_value_int32(84, position));
+
+	if (type->callType->type == SourceVariable::VT_VOID)
+	{
+		switch (args.size())
+		{
+		case 0: code = ObjectToken::OCODE_LSPEC1; break;
+		case 1: code = ObjectToken::OCODE_LSPEC2; break;
+		case 2: code = ObjectToken::OCODE_LSPEC3; break;
+		case 3: code = ObjectToken::OCODE_LSPEC4; break;
+		}
+	}
+	else
+	{
+		for (size_t i(args.size()); i < 4; ++i)
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int32(0, position)));
+	}
+
+	objects->push_back(ObjectToken(code, position, lspec));
+}
+
 ObjectExpression SourceExpressionDS::makeObject() const
 {
 	if (_expr)
 		return _expr->makeObject();
 	else
 		throw SourceException("attempted to create object from NULL expression", SourcePosition::none, "SourceExpressionDS");
+}
+void SourceExpressionDS::makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const
+{
+	if (_expr) _expr->makeObjectsCall(objects, args);
 }
 void SourceExpressionDS::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {

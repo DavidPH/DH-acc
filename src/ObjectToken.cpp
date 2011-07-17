@@ -139,6 +139,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_DIVFIXED:          *out << "OCODE_DIVFIXED";          break;
 	case ObjectToken::OCODE_DUP:               *out << "OCODE_DUP";               break;
 	case ObjectToken::OCODE_ENDLOG:            *out << "OCODE_ENDLOG";            break;
+	case ObjectToken::OCODE_LSPEC5RESULT:      *out << "OCODE_LSPEC5RESULT";      break;
 	case ObjectToken::OCODE_MULFIXED:          *out << "OCODE_MULFIXED";          break;
 	case ObjectToken::OCODE_PRINTFIXED:        *out << "OCODE_PRINTFIXED";        break;
 	case ObjectToken::OCODE_PUSHGLOBALARRAY:   *out << "OCODE_PUSHGLOBALARRAY";   break;

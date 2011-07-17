@@ -51,6 +51,7 @@ public:
 	virtual bool isConstant() const = 0;
 
 	virtual ObjectExpression makeObject() const;
+	virtual void makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const;
 	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const = 0;
 	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
 	virtual void makeObjectsSet(std::vector<ObjectToken> * const objects) const;

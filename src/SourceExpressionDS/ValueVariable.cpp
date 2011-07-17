@@ -40,6 +40,7 @@ public:
 
 	virtual bool isConstant() const;
 
+	virtual void makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const;
 	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
 	virtual void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
@@ -85,6 +86,10 @@ bool SourceExpressionDS_ValueVariable::isConstant() const
 	return false;
 }
 
+void SourceExpressionDS_ValueVariable::makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const
+{
+	_var.makeObjectsCall(objects, args);
+}
 void SourceExpressionDS_ValueVariable::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	_var.makeObjectsGet(objects);

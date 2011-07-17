@@ -25,6 +25,7 @@
 #include "SourceVariable.hpp"
 
 #include <ostream>
+#include <stdint.h>
 #include <vector>
 
 class ObjectExpression;
@@ -56,6 +57,7 @@ public:
 	bool isConstant() const;
 
 	ObjectExpression makeObject() const;
+	void makeObjectsCall(std::vector<ObjectToken> * objects, std::vector<SourceExpressionDS> const & args) const;
 	void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 	void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
 	void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
@@ -74,6 +76,8 @@ public:
 	static SourceExpressionDS make_expressions(SourceTokenizerDS * const tokenizer);
 
 	static void make_objects(std::vector<SourceExpressionDS> const & expressions, std::vector<ObjectToken> * const objects);
+
+	static void make_objects_call_script(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 
 	static SourceExpressionDS const nop;
 
@@ -95,12 +99,14 @@ private:
 
 	static SourceExpressionDS make_expression_cast_fixed(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_int(SourceExpressionDS const & expr, SourcePosition const & position);
+	static SourceExpressionDS make_expression_cast_script(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_string(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_struct(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_void(SourceExpressionDS const & expr, SourcePosition const & position);
 
 	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, std::vector<std::string> const & labels, SourcePosition const & position);
+	static SourceExpressionDS make_expression_root_call(SourceExpressionDS const & expr, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_lspec(SourceExpressionDS const & spec, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_out(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_term(SourcePosition const & position);
@@ -110,6 +116,7 @@ private:
 	static SourceExpressionDS make_expression_value_int(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_member(SourceExpressionDS const & expr, SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_number(SourceTokenC const & token);
+	static SourceExpressionDS make_expression_value_script(int32_t number, SourceVariable::VariableType const * type, SourcePosition const & position);
 	static SourceExpressionDS make_expression_value_string(ObjectExpression const & symbol, SourcePosition const & position);
 	static SourceExpressionDS make_expression_value_variable(SourceVariable const & var, SourcePosition const & position);
 };

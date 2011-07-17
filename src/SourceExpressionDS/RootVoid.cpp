@@ -77,6 +77,7 @@ void SourceExpressionDS_RootVoid::doVoid(std::vector<ObjectToken> * const object
 	{
 	case SourceVariable::VT_FIXED:
 	case SourceVariable::VT_INT:
+	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_DROP, getPosition()));
 		break;

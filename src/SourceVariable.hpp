@@ -29,6 +29,7 @@
 #include <vector>
 
 class ObjectToken;
+class SourceExpressionDS;
 class SourceTokenC;
 
 
@@ -49,6 +50,7 @@ public:
 
 		VT_VOID,
 
+		VT_SCRIPT,
 		VT_STRUCT
 	};
 
@@ -59,6 +61,9 @@ public:
 		int size() const;
 
 		VariableTypeInternal type;
+
+		// Type returned when called.
+		VariableType const * callType;
 
 		// VT_STRUCT members or VT_FUNCTION/VT_SCRIPT args.
 		std::vector<std::string>          names;
@@ -77,6 +82,7 @@ public:
 
 	VariableType const * getType() const;
 
+	void makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const;
 	void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 	void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
 	void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
@@ -91,11 +97,16 @@ public:
 
 	static void add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types);
 
+	static void add_typedef(std::string const & name, VariableType const * type);
+
 	static StorageClass get_StorageClass(SourceTokenC const & token);
 
 	static VariableType const * get_VariableType(SourceTokenC const & token);
 	static VariableType const * get_VariableType(VariableTypeInternal const type);
 	static VariableType const * get_VariableType_null(std::string const & name);
+	// Script types are identified by their associated types.
+	// If there is no such script type defined, it will be added.
+	static VariableType const * get_VariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types);
 
 	static void init();
 

@@ -93,6 +93,7 @@ void SourceExpressionDS_CastInt::makeObjectsGet(std::vector<ObjectToken> * const
 		break;
 
 	case SourceVariable::VT_INT:
+	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
 		break;
 
