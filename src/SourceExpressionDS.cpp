@@ -236,12 +236,28 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			SourceContext scriptContext(context, false);
 
 			// scriptNumber
-			SourceTokenC scriptNumberToken(in->get(SourceTokenC::TT_NUMBER));
+			SourceTokenC scriptNumberToken(in->get());
 			int32_t scriptNumber;
+			if (scriptNumberToken.getType() == SourceTokenC::TT_NUMBER)
 			{
-				std::istringstream iss(scriptNumberToken.getData());
-				iss >> scriptNumber;
+				scriptNumber = ObjectExpression::get_int32(scriptNumberToken);
 			}
+			else if (scriptNumberToken.getType() == SourceTokenC::TT_IDENTIFIER)
+			{
+				if (scriptNumberToken.getData() == "auto")
+				{
+					scriptNumber = ObjectExpression::get_script_number();
+				}
+				else
+				{
+					throw SourceException("expected 'auto'", token.getPosition(), "SourceExpressionDS");
+				}
+			}
+			else
+			{
+				throw SourceException("expected TT_NUMBER of TT_IDENTIFIER", token.getPosition(), "SourceExpressionDS");
+			}
+			ObjectExpression::reserve_script_number(scriptNumber);
 
 			// scriptLabel
 			std::string scriptLabel;

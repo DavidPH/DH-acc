@@ -137,6 +137,8 @@ static inline int _main()
 
 		SourceTokenizerDS tokenizer(&in);
 
+		ObjectExpression::reserve_script_number(0);
+
 		SourceExpressionDS expressions(SourceExpressionDS::make_expressions(&tokenizer));
 		expressions.addLabel("main");
 

@@ -22,6 +22,7 @@
 #include "ObjectExpression.hpp"
 
 #include "SourceException.hpp"
+#include "SourceTokenC.hpp"
 
 #include <sstream>
 
@@ -29,6 +30,8 @@
 
 int32_t ObjectExpression::_address_count(8+4+4);
 std::vector<ObjectExpression::Script> ObjectExpression::_script_table;
+std::map<int32_t, bool> ObjectExpression::_script_used;
+int32_t ObjectExpression::_script_used_last(0);
 std::vector<ObjectExpression::String> ObjectExpression::_string_table;
 std::map<std::string, ObjectExpression> ObjectExpression::_symbol_table;
 
@@ -63,6 +66,7 @@ void ObjectExpression::add_label(std::string const & symbol)
 
 void ObjectExpression::add_script(std::string const & label, int32_t number, ScriptType type, int32_t args, int vars, int flags)
 {
+	reserve_script_number(number);
 	Script s = {args, flags, label, number, type, vars};
 	_script_table.push_back(s);
 }
@@ -89,6 +93,14 @@ void ObjectExpression::add_string(std::string const & symbol, std::string const 
 void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression const & value)
 {
 	_symbol_table[symbol] = value;
+}
+
+int32_t ObjectExpression::get_int32(SourceTokenC const & token)
+{
+	int32_t i;
+	std::istringstream iss(token.getData());
+	iss >> i;
+	return i;
 }
 
 ObjectExpression::ScriptFlag ObjectExpression::get_ScriptFlag(std::string const & value, SourcePosition const & position)
@@ -144,6 +156,15 @@ int32_t ObjectExpression::get_script_count()
 	return (int32_t)_script_table.size();
 }
 
+int32_t ObjectExpression::get_script_number()
+{
+	while (_script_used.find(_script_used_last) != _script_used.end() && _script_used_last < 1000) ++_script_used_last;
+
+	if (_script_used_last == 1000) throw SourceException("no more script numbers", SourcePosition::none, "ObjectExpression");
+
+	return _script_used_last;
+}
+
 ObjectExpression::String const & ObjectExpression::get_string(int32_t const index)
 {
 	return _string_table[index];
@@ -181,6 +202,11 @@ ObjectExpression & ObjectExpression::operator = (ObjectExpression const & expr)
 	delete _expr;
 	_expr = expr._expr ? expr._expr->clone() : NULL;
 	return *this;
+}
+
+void ObjectExpression::reserve_script_number(int32_t number)
+{
+	_script_used[number] = true;
 }
 
 int32_t ObjectExpression::resolveInt32() const

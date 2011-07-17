@@ -30,6 +30,8 @@
 #include <string>
 #include <vector>
 
+class SourceTokenC;
+
 
 
 class ObjectExpressionBase
@@ -131,6 +133,8 @@ public:
 	static ObjectExpression create_value_int32(int32_t const value, SourcePosition const & position);
 	static ObjectExpression create_value_symbol(std::string const & symbol, SourcePosition const & position);
 
+	static int32_t get_int32(SourceTokenC const & token);
+
 	static ScriptFlag get_ScriptFlag(std::string const & value, SourcePosition const & position);
 
 	static ScriptType get_ScriptType(std::string const & value, SourcePosition const & position);
@@ -138,6 +142,8 @@ public:
 	static Script const & get_script(int32_t const index);
 
 	static int32_t get_script_count();
+
+	static int32_t get_script_number();
 
 	static String const & get_string(int32_t const index);
 
@@ -148,6 +154,8 @@ public:
 
 	static ObjectExpression get_symbol(std::string const & symbol, SourcePosition const & position);
 
+	static void reserve_script_number(int32_t number);
+
 	static void set_address_count(int32_t addressCount);
 
 private:
@@ -157,6 +165,8 @@ private:
 
 	static int32_t _address_count;
 	static std::vector<Script> _script_table;
+	static std::map<int32_t, bool> _script_used;
+	static int32_t _script_used_last;
 	static std::vector<String> _string_table;
 	static std::map<std::string, ObjectExpression> _symbol_table;
 };
