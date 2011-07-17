@@ -39,6 +39,7 @@ class SourceVariable
 public:
 	enum StorageClass
 	{
+		SC_CONSTANT,
 		SC_REGISTER
 	};
 
@@ -70,10 +71,22 @@ public:
 		std::vector<VariableType const *> types;
 	};
 
+	struct VariableData_Script
+	{
+		int number;
+		VariableType const * type;
+	};
+
+	union VariableData
+	{
+		VariableData_Script vdScript;
+	};
+
 
 
 	SourceVariable();
 	SourceVariable(std::string const & nameObject, std::string const & nameSource, int const address, StorageClass const sc, VariableType const * const type, SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position);
 
 	StorageClass getClass() const;
 
@@ -112,6 +125,7 @@ public:
 
 private:
 	int _address;
+	VariableData _data;
 	std::string _nameObject;
 	std::string _nameSource;
 	SourcePosition _position;

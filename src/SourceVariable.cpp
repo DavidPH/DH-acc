@@ -91,6 +91,10 @@ SourceVariable::SourceVariable(std::string const & nameObject, std::string const
 {
 
 }
+SourceVariable::SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdScript.type)
+{
+	_data.vdScript = vdScript;
+}
 
 void SourceVariable::add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types)
 {
@@ -216,8 +220,20 @@ void SourceVariable::init()
 
 void SourceVariable::makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const
 {
-	makeObjectsGet(objects);
-	SourceExpressionDS::make_objects_call_script(objects, _type, args, _position);
+	switch (_type->type)
+	{
+	case VT_FIXED:
+	case VT_INT:
+	case VT_STRING:
+	case VT_STRUCT:
+	case VT_VOID:
+		throw SourceException("attempt to call uncallable", _position, "SourceVariable");
+
+	case VT_SCRIPT:
+		makeObjectsGet(objects);
+		SourceExpressionDS::make_objects_call_script(objects, _type, args, _position);
+		break;
+	}
 }
 
 void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects) const
@@ -240,6 +256,9 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, st
 
 	switch (_sc)
 	{
+	case SC_CONSTANT:
+		throw SourceException("SC_CONSTANT VT_STRUCT unsupported", _position, "SourceVariable");
+
 	case SC_REGISTER:
 		switch (type->type)
 		{
@@ -273,6 +292,22 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, Va
 {
 	switch (_sc)
 	{
+	case SC_CONSTANT:
+		switch (type->type)
+		{
+		case VT_FIXED:
+		case VT_INT:
+		case VT_STRING:
+		case VT_STRUCT:
+		case VT_VOID:
+			throw SourceException("unsupported SC_CONSTANT VT", _position, "SourceVariable");
+
+		case VT_SCRIPT:
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, _position, ObjectExpression::create_value_int32(_data.vdScript.number, _position)));
+			break;
+		}
+		break;
+
 	case SC_REGISTER:
 		switch (type->type)
 		{
@@ -298,6 +333,7 @@ void SourceVariable::makeObjectsGet(VariableType const * const type, int * const
 {
 	switch (_sc)
 	{
+	case SC_CONSTANT:
 	case SC_REGISTER:
 		switch (type->type)
 		{
@@ -343,6 +379,9 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, st
 
 	switch (_sc)
 	{
+	case SC_CONSTANT:
+		throw SourceException("attempt to set SC_CONSTANT", _position, "SourceVariable");
+
 	case SC_REGISTER:
 		switch (type->type)
 		{
@@ -376,6 +415,9 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, Va
 {
 	switch (_sc)
 	{
+	case SC_CONSTANT:
+		throw SourceException("attempt to set SC_CONSTANT", _position, "SourceVariable");
+
 	case SC_REGISTER:
 		switch (type->type)
 		{
@@ -401,6 +443,9 @@ void SourceVariable::makeObjectsSet(VariableType const * const type, int * const
 {
 	switch (_sc)
 	{
+	case SC_CONSTANT:
+		throw SourceException("attempt to set SC_CONSTANT", _position, "SourceVariable");
+
 	case SC_REGISTER:
 		switch (type->type)
 		{
@@ -467,6 +512,7 @@ void print_debug(std::ostream * const out, SourceVariable::StorageClass const in
 {
 	switch (in)
 	{
+	case SourceVariable::SC_CONSTANT: *out << "SC_CONSTANT"; break;
 	case SourceVariable::SC_REGISTER: *out << "SC_REGISTER"; break;
 	}
 }

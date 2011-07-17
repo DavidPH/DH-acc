@@ -44,6 +44,9 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 {
 	switch (sc)
 	{
+	case SourceVariable::SC_CONSTANT:
+		break;
+
 	case SourceVariable::SC_REGISTER:
 		addLimit(_countRegister += count, sc);
 		break;
@@ -54,6 +57,9 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 {
 	switch (sc)
 	{
+	case SourceVariable::SC_CONSTANT:
+		break;
+
 	case SourceVariable::SC_REGISTER:
 		if (limit > _limitRegister)
 			_limitRegister = limit;
@@ -77,6 +83,9 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
 {
 	switch (sc)
 	{
+	case SourceVariable::SC_CONSTANT:
+		return 0;
+
 	case SourceVariable::SC_REGISTER:
 		if (_inheritLocals && _parent)
 			return _parent->getCount(sc) + _countRegister;
@@ -91,6 +100,9 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 {
 	switch (sc)
 	{
+	case SourceVariable::SC_CONSTANT:
+		return 0;
+
 	case SourceVariable::SC_REGISTER:
 		return _limitRegister;
 	}

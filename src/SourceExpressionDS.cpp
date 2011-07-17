@@ -235,6 +235,9 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		{
 			SourceContext scriptContext(context, false);
 
+			// scriptName
+			std::string scriptName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+
 			// scriptNumber
 			SourceTokenC scriptNumberToken(in->get());
 			int32_t scriptNumber;
@@ -259,13 +262,22 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			}
 			ObjectExpression::reserve_script_number(scriptNumber);
 
-			// scriptLabel
-			std::string scriptLabel;
+			// scriptName special cases
+			if (scriptName == "auto")
 			{
 				std::ostringstream oss;
 				oss << "script" << scriptNumber;
-				scriptLabel = oss.str();
+				scriptName = oss.str();
 			}
+			else if (scriptName == "void")
+			{
+				std::ostringstream oss;
+				oss << "___script__" << scriptNumber << "__void___";
+				scriptName = oss.str();
+			}
+
+			// scriptLabel
+			std::string scriptLabel("script_" + scriptName);
 
 			// scriptType
 			SourceTokenC scriptTypeToken(in->get(SourceTokenC::TT_IDENTIFIER));
@@ -315,6 +327,9 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			// scriptVarType
 			SourceVariable::VariableType const * scriptVarType(SourceVariable::get_VariableType_script(scriptReturn, scriptArgTypes));
 
+			// scriptVarData
+			SourceVariable::VariableData_Script scriptVarData = {scriptNumber, scriptVarType};
+
 			// scriptExpression
 			SourceExpressionDS scriptExpression(make_expression_single(in, blocks, &scriptContext));
 			scriptExpression.addLabel(scriptLabel);
@@ -322,6 +337,8 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 			// scriptVars
 			int scriptVars(scriptContext.getLimit(SourceVariable::SC_REGISTER));
+
+			context->addVariable(SourceVariable(scriptName, scriptVarData, token.getPosition()));
 
 			ObjectExpression::add_script(scriptLabel, scriptNumber, scriptType, scriptArgs, scriptVars, scriptFlags);
 
