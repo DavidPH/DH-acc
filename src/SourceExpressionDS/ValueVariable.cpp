@@ -88,23 +88,23 @@ bool SourceExpressionDS_ValueVariable::isConstant() const
 
 void SourceExpressionDS_ValueVariable::makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const
 {
-	_var.makeObjectsCall(objects, args);
+	_var.makeObjectsCall(objects, args, getPosition());
 }
 void SourceExpressionDS_ValueVariable::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
-	_var.makeObjectsGet(objects);
+	_var.makeObjectsGet(objects, getPosition());
 }
 void SourceExpressionDS_ValueVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
 {
-	_var.makeObjectsGet(objects, names);
+	_var.makeObjectsGet(objects, names, getPosition());
 }
 void SourceExpressionDS_ValueVariable::makeObjectsSet(std::vector<ObjectToken> * const objects) const
 {
-	_var.makeObjectsSet(objects);
+	_var.makeObjectsSet(objects, getPosition());
 }
 void SourceExpressionDS_ValueVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
 {
-	_var.makeObjectsSet(objects, names);
+	_var.makeObjectsSet(objects, names, getPosition());
 }
 
 void SourceExpressionDS_ValueVariable::printDebug(std::ostream * const out) const

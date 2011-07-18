@@ -107,8 +107,10 @@ private:
 	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, std::vector<std::string> const & labels, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_call(SourceExpressionDS const & expr, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+	static SourceExpressionDS make_expression_root_delay(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_lspec(SourceExpressionDS const & spec, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_out(SourceExpressionDS const & expr, SourcePosition const & position);
+	static SourceExpressionDS make_expression_root_return(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_term(SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_void(SourceExpressionDS const & expr, SourcePosition const & position);
 

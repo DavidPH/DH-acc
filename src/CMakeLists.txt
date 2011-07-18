@@ -41,8 +41,10 @@ add_executable(DH-acc
 	SourceExpressionDS/CastStruct.cpp
 	SourceExpressionDS/RootBlock.cpp
 	SourceExpressionDS/RootCall.cpp
+	SourceExpressionDS/RootDelay.cpp
 	SourceExpressionDS/RootLSpec.cpp
 	SourceExpressionDS/RootOut.cpp
+	SourceExpressionDS/RootReturn.cpp
 	SourceExpressionDS/RootTerm.cpp
 	SourceExpressionDS/RootVoid.cpp
 	SourceExpressionDS/ValueFixed.cpp

@@ -143,6 +143,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_MULFIXED:          *out << "OCODE_MULFIXED";          break;
 	case ObjectToken::OCODE_PRINTFIXED:        *out << "OCODE_PRINTFIXED";        break;
 	case ObjectToken::OCODE_PUSHGLOBALARRAY:   *out << "OCODE_PUSHGLOBALARRAY";   break;
+	case ObjectToken::OCODE_SETRESULTVALUE:    *out << "OCODE_SETRESULTVALUE";    break;
 	case ObjectToken::OCODE_NONE:              *out << "OCODE_NONE";              break;
 	}
 }

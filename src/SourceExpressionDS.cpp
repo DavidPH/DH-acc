@@ -201,6 +201,9 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 	switch (token.getType())
 	{
 	case SourceTokenC::TT_IDENTIFIER:
+		if (token.getData() == "delay")
+			return make_expression_root_delay(make_expression(in, blocks, context), token.getPosition());
+
 		if (token.getData() == "lspec")
 		{
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
@@ -231,8 +234,19 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		if (token.getData() == "out")
 			return make_expression_root_out(make_expression(in, blocks, context), token.getPosition());
 
+		if (token.getData() == "return")
+		{
+			SourceExpressionDS expr(make_expression(in, blocks, context));
+
+			if (expr.getType() != context->getReturnType())
+				expr = make_expression_cast(expr, context->getReturnType(), token.getPosition());
+
+			return make_expression_root_return(expr, token.getPosition());
+		}
+
 		if (token.getData() == "script")
 		{
+			// scriptContext
 			SourceContext scriptContext(context, false);
 
 			// scriptName
@@ -323,6 +337,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			in->get(SourceTokenC::TT_OP_MINUS_GT);
 			SourceTokenC scriptReturnToken(in->get(SourceTokenC::TT_IDENTIFIER));
 			SourceVariable::VariableType const * scriptReturn(SourceVariable::get_VariableType(scriptReturnToken));
+			scriptContext.setReturnType(scriptReturn);
 
 			// scriptVarType
 			SourceVariable::VariableType const * scriptVarType(SourceVariable::get_VariableType_script(scriptReturn, scriptArgTypes));
@@ -518,7 +533,7 @@ void SourceExpressionDS::make_objects_call_script(std::vector<ObjectToken> * con
 		args[i].makeObjectsGet(objects);
 	}
 
-	ObjectToken::ObjectCode code(ObjectToken::OCODE_LSPEC5RESULT);
+	ObjectToken::ObjectCode code;
 	ObjectExpression lspec(ObjectExpression::create_value_int32(84, position));
 
 	if (type->callType->type == SourceVariable::VT_VOID)
@@ -529,10 +544,14 @@ void SourceExpressionDS::make_objects_call_script(std::vector<ObjectToken> * con
 		case 1: code = ObjectToken::OCODE_LSPEC2; break;
 		case 2: code = ObjectToken::OCODE_LSPEC3; break;
 		case 3: code = ObjectToken::OCODE_LSPEC4; break;
+		default:
+			throw SourceException("unexpected arg count to call script", position, "SourceExpressionDS");
 		}
 	}
 	else
 	{
+		code = ObjectToken::OCODE_LSPEC5RESULT;
+
 		for (size_t i(args.size()); i < 4; ++i)
 			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int32(0, position)));
 	}

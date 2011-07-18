@@ -208,10 +208,11 @@ void SourceTokenASMPLX::init()
 	DO_INIT(DIVFIXED,          0);
 	DO_INIT(DUP,               0);
 	DO_INIT(ENDLOG,            0);
-	DO_INIT(LSPEC5RESULT,      0);
+	DO_INIT(LSPEC5RESULT,      1);
 	DO_INIT(MULFIXED,          0);
 	DO_INIT(PRINTFIXED,        0);
 	DO_INIT(PUSHGLOBALARRAY,   1);
+	DO_INIT(SETRESULTVALUE,    0);
 
 	#undef DO_INIT
 }

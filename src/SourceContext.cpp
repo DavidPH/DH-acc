@@ -31,11 +31,11 @@ SourceContext SourceContext::global_context;
 
 
 
-SourceContext::SourceContext() : _countRegister(0), _limitRegister(0), _parent(NULL), _inheritLocals(false)
+SourceContext::SourceContext() : _countRegister(0), _limitRegister(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _inheritLocals(false)
 {
 
 }
-SourceContext::SourceContext(SourceContext * parent, bool inheritLocals) : _countRegister(0), _limitRegister(0), _parent(parent), _inheritLocals(inheritLocals)
+SourceContext::SourceContext(SourceContext * parent, bool inheritLocals) : _countRegister(0), _limitRegister(0), _parent(parent), _returnType(NULL), _inheritLocals(inheritLocals)
 {
 
 }
@@ -110,6 +110,11 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 	throw SourceException("getCount", SourcePosition::none, "SourceContext");
 }
 
+SourceVariable::VariableType const * SourceContext::getReturnType() const
+{
+	return _returnType ? _returnType : _parent->getReturnType();
+}
+
 SourceVariable const & SourceContext::getVariable(SourceTokenC const & token) const
 {
 	return getVariable(token.getData(), token.getPosition(), true);
@@ -125,6 +130,11 @@ SourceVariable const & SourceContext::getVariable(std::string const & name, Sour
 	if (_parent) return _parent->getVariable(name, position, canLocal && _inheritLocals);
 
 	throw SourceException("no such variable", position, "SourceContext");
+}
+
+void SourceContext::setReturnType(SourceVariable::VariableType const * returnType)
+{
+	_returnType = returnType;
 }
 
 

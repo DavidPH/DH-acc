@@ -43,7 +43,11 @@ public:
 
 	int getLimit(SourceVariable::StorageClass sc) const;
 
+	SourceVariable::VariableType const * getReturnType() const;
+
 	SourceVariable const & getVariable(SourceTokenC const & token) const;
+
+	void setReturnType(SourceVariable::VariableType const * returnType);
 
 
 
@@ -60,6 +64,8 @@ private:
 	int _limitRegister;
 
 	SourceContext * _parent;
+
+	SourceVariable::VariableType const * _returnType;
 
 	std::vector<SourceVariable> _vars;
 	std::vector<std::string> _varnames;
