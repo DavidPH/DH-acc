@@ -24,6 +24,7 @@
 
 #include "SourceTokenC.hpp"
 
+#include <istream>
 #include <stack>
 
 class SourceStream;
@@ -46,9 +47,13 @@ public:
 private:
 	SourceTokenizerDS(SourceTokenizerDS const & tokenizer)/* = delete*/;
 
+	void doCommand(SourceTokenC const & token);
+	void doCommandInclude();
+
 	SourceTokenizerDS & operator = (SourceTokenizerDS const & tokenizer)/* = delete*/;
 
 	std::stack<SourceStream *> _in;
+	std::stack<std::istream *> _is;
 	std::stack<SourceTokenC> _ungetStack;
 };
 

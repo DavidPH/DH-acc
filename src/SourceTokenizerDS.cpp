@@ -24,11 +24,14 @@
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
 
+#include <fstream>
+
 
 
 SourceTokenizerDS::SourceTokenizerDS(SourceStream * const in)
 {
 	_in.push(in);
+	_is.push(NULL);
 }
 SourceTokenizerDS::~SourceTokenizerDS()
 {
@@ -37,7 +40,45 @@ SourceTokenizerDS::~SourceTokenizerDS()
 	{
 		delete _in.top();
 		_in.pop();
+
+		delete _is.top();
+		_is.pop();
 	}
+}
+
+void SourceTokenizerDS::doCommand(SourceTokenC const & token)
+{
+	if (token.getType() != SourceTokenC::TT_IDENTIFIER)
+		throw SourceException("expected TT_IDENTIFIER", token.getPosition(), "SourceTokenizerDS");
+
+	std::string const & command(token.getData());
+
+	if (command == "include") doCommandInclude();
+
+	else throw SourceException("unknown command", token.getPosition(), "SourceTokenizerDS");
+}
+void SourceTokenizerDS::doCommandInclude()
+{
+	SourceTokenC includeToken(_in.top());
+
+	if (includeToken.getType() != SourceTokenC::TT_STRING)
+		throw SourceException("expected TT_STRING", includeToken.getPosition(), "SourceTokenizerDS");
+
+	std::string const & include(includeToken.getData());
+
+	std::ifstream * is;
+	try
+	{
+		is = new std::ifstream(include.c_str());
+	}
+	catch (std::exception & e)
+	{
+		throw SourceException("file not found", includeToken.getPosition(), "SourceTokenizerDS");
+	}
+	SourceStream  * in(new SourceStream(is, include, SourceStream::ST_C));
+
+	_is.push(is);
+	_in.push(in);
 }
 
 SourceTokenC SourceTokenizerDS::get()
@@ -49,7 +90,34 @@ SourceTokenC SourceTokenizerDS::get()
 		return token;
 	}
 
-	return SourceTokenC(_in.top());
+	SourceTokenC token;
+
+	try
+	{
+		token = SourceTokenC(_in.top());
+	}
+	catch (SourceStream::EndOfStream & e)
+	{
+		if (_in.size() == 1) throw;
+
+		delete _in.top();
+		_in.pop();
+
+		delete _is.top();
+		_is.pop();
+
+		return get();
+	}
+
+	// Preprocessor directive.
+	if (token.getType() == SourceTokenC::TT_OP_HASH)
+	{
+		doCommand(SourceTokenC(_in.top()));
+
+		return get();
+	}
+
+	return token;
 }
 SourceTokenC SourceTokenizerDS::get(SourceTokenC::TokenType const type)
 {
