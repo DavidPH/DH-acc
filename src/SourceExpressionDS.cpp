@@ -74,6 +74,9 @@ SourceVariable::VariableType const * SourceExpressionDS::get_promoted_type(Sourc
 	if (type1->type == SourceVariable::VT_INT) return type1;
 	if (type2->type == SourceVariable::VT_INT) return type2;
 
+	if (type1->type == SourceVariable::VT_CHAR) return type1;
+	if (type2->type == SourceVariable::VT_CHAR) return type2;
+
 	if (type1->type == SourceVariable::VT_STRING) return type1;
 	if (type2->type == SourceVariable::VT_STRING) return type2;
 
