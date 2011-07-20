@@ -70,18 +70,21 @@ void SourceExpressionDS_BinaryDiv::makeObjectsGet(std::vector<ObjectToken> * con
 
 	switch (getType()->type)
 	{
+	case SourceVariable::VT_CHAR:
+	case SourceVariable::VT_INT:
+		objects->push_back(ObjectToken(ObjectToken::OCODE_DIV, getPosition()));
+		break;
+
 	case SourceVariable::VT_FIXED:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_DIVFIXED, getPosition()));
 		break;
 
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_STRING:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_DIV, getPosition()));
-		break;
-
-	case SourceVariable::VT_VOID:
+	case SourceVariable::VT_LNSPEC:
+	case SourceVariable::VT_NATIVE:
 	case SourceVariable::VT_SCRIPT:
+	case SourceVariable::VT_STRING:
 	case SourceVariable::VT_STRUCT:
+	case SourceVariable::VT_VOID:
 		throw SourceException("invalid VT", getPosition(), getName());
 	}
 }

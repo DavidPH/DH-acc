@@ -75,19 +75,22 @@ void SourceExpressionDS_RootVoid::doVoid(std::vector<ObjectToken> * const object
 {
 	switch (type->type)
 	{
+	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_FIXED:
 	case SourceVariable::VT_INT:
+	case SourceVariable::VT_LNSPEC:
+	case SourceVariable::VT_NATIVE:
 	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_DROP, getPosition()));
 		break;
 
-	case SourceVariable::VT_VOID:
-		break;
-
 	case SourceVariable::VT_STRUCT:
 		for (size_t i(type->types.size()); i--;)
 			doVoid(objects, type->types[i]);
+		break;
+
+	case SourceVariable::VT_VOID:
 		break;
 	}
 }

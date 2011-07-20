@@ -34,6 +34,10 @@ ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position,
 {
 
 }
+ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<ObjectExpression> const & args) : _args(args), _code(code), _labels(), _position(position)
+{
+
+}
 ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args) : _args(args), _code(code), _labels(labels), _position(position)
 {
 
@@ -136,6 +140,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_TERMINATE:         *out << "OCODE_TERMINATE";         break;
 
 	case ObjectToken::OCODE_ASSIGNGLOBALARRAY: *out << "OCODE_ASSIGNGLOBALARRAY"; break;
+	case ObjectToken::OCODE_CALLFUNC:          *out << "OCODE_CALLFUNC";          break;
 	case ObjectToken::OCODE_DIVFIXED:          *out << "OCODE_DIVFIXED";          break;
 	case ObjectToken::OCODE_DUP:               *out << "OCODE_DUP";               break;
 	case ObjectToken::OCODE_ENDLOG:            *out << "OCODE_ENDLOG";            break;

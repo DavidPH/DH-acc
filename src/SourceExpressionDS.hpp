@@ -77,6 +77,10 @@ public:
 
 	static void make_objects(std::vector<SourceExpressionDS> const & expressions, std::vector<ObjectToken> * const objects);
 
+	static void make_objects_call_lnspec(std::vector<ObjectToken> * objects, int number, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+
+	static void make_objects_call_native(std::vector<ObjectToken> * objects, int number, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+
 	static void make_objects_call_script(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 
 	static SourceExpressionDS const nop;
@@ -97,8 +101,11 @@ private:
 	static SourceExpressionDS make_expression_binary_mul(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 	static SourceExpressionDS make_expression_binary_sub(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 
+	static SourceExpressionDS make_expression_cast_char(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_fixed(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_int(SourceExpressionDS const & expr, SourcePosition const & position);
+	static SourceExpressionDS make_expression_cast_lnspec(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
+	static SourceExpressionDS make_expression_cast_native(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_script(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_string(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_struct(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);

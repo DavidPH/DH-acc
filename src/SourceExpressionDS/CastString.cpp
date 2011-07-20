@@ -87,18 +87,21 @@ void SourceExpressionDS_CastString::makeObjectsGet(std::vector<ObjectToken> * co
 
 	switch (_expr.getType()->type)
 	{
+	case SourceVariable::VT_CHAR:
+	case SourceVariable::VT_INT:
+	case SourceVariable::VT_LNSPEC:
+	case SourceVariable::VT_NATIVE:
+	case SourceVariable::VT_SCRIPT:
+	case SourceVariable::VT_STRING:
+		break;
+
 	case SourceVariable::VT_FIXED:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(16, getPosition())));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_SHIFTR, getPosition()));
 		break;
 
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_SCRIPT:
-	case SourceVariable::VT_STRING:
-		break;
-
-	case SourceVariable::VT_VOID:
 	case SourceVariable::VT_STRUCT:
+	case SourceVariable::VT_VOID:
 		throw SourceException("invalid VT", getPosition(), getName());
 	}
 }

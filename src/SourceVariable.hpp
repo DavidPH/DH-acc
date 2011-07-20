@@ -45,12 +45,15 @@ public:
 
 	enum VariableTypeInternal
 	{
+		VT_CHAR,
 		VT_FIXED,
 		VT_INT,
 		VT_STRING,
 
 		VT_VOID,
 
+		VT_LNSPEC,
+		VT_NATIVE,
 		VT_SCRIPT,
 		VT_STRUCT
 	};
@@ -71,6 +74,16 @@ public:
 		std::vector<VariableType const *> types;
 	};
 
+	struct VariableData_LnSpec
+	{
+		int number;
+		VariableType const * type;
+	};
+	struct VariableData_Native
+	{
+		int number;
+		VariableType const * type;
+	};
 	struct VariableData_Script
 	{
 		int number;
@@ -79,6 +92,8 @@ public:
 
 	union VariableData
 	{
+		VariableData_LnSpec vdLnSpec;
+		VariableData_Native vdNative;
 		VariableData_Script vdScript;
 	};
 
@@ -86,6 +101,8 @@ public:
 
 	SourceVariable();
 	SourceVariable(std::string const & nameObject, std::string const & nameSource, int const address, StorageClass const sc, VariableType const * const type, SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_LnSpec const & vdLnSpec, SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Native const & vdNative, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position);
 
 	StorageClass getClass() const;
@@ -116,6 +133,11 @@ public:
 
 	static VariableType const * get_VariableType(SourceTokenC const & token);
 	static VariableType const * get_VariableType(VariableTypeInternal const type);
+	// LnSpec types work like script types (see below).
+	static VariableType const * get_VariableType_lnspec(VariableType const * callType, std::vector<VariableType const *> const & types);
+	// Native types work like script types (see below).
+	static VariableType const * get_VariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types);
+	// Returns NULL if type not found.
 	static VariableType const * get_VariableType_null(std::string const & name);
 	// Script types are identified by their associated types.
 	// If there is no such script type defined, it will be added.
@@ -131,6 +153,8 @@ private:
 	SourcePosition _position;
 	StorageClass _sc;
 	VariableType const * _type;
+
+	static VariableType const * get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, std::vector<VariableType const *> const & types);
 
 	void makeObjectsGet(std::vector<ObjectToken> * const objects, SourcePosition const & position, VariableType const * const type, int * const address) const;
 	void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const;

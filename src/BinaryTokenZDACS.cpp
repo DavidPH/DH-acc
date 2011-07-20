@@ -83,6 +83,7 @@ void BinaryTokenZDACS::init()
 
 	// BinaryTokenZDACS
 	DO_INIT(ASSIGNGLOBALARRAY, 1);
+	DO_INIT(CALLFUNC,          2);
 	DO_INIT(DIVFIXED,          0);
 	DO_INIT(DUP,               0);
 	DO_INIT(ENDLOG,            0);
@@ -144,6 +145,7 @@ void BinaryTokenZDACS::make_tokens(std::vector<ObjectToken> const & objects, std
 	CASE_DIRECTMAP(TERMINATE);
 
 	CASE_DIRECTMAP(ASSIGNGLOBALARRAY);
+	CASE_DIRECTMAP(CALLFUNC);
 	CASE_DIRECTMAP(DIVFIXED);
 	CASE_DIRECTMAP(DUP);
 	CASE_DIRECTMAP(ENDLOG);

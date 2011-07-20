@@ -75,6 +75,7 @@ public:
 
 		// BinaryTokenZDACS
 		OCODE_ASSIGNGLOBALARRAY,
+		OCODE_CALLFUNC,
 		OCODE_DIVFIXED,
 		OCODE_DUP,
 		OCODE_ENDLOG,
@@ -91,6 +92,7 @@ public:
 
 	ObjectToken(ObjectCode const code, SourcePosition const & position);
 	ObjectToken(ObjectCode const code, SourcePosition const & position, ObjectExpression const & arg);
+	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<ObjectExpression> const & args);
 	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args);
 
 	void addLabel(std::string const & label);

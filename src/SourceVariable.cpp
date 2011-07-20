@@ -58,8 +58,11 @@ int SourceVariable::VariableType::size() const
 {
 	switch (type)
 	{
+	case VT_CHAR:
 	case VT_FIXED:
 	case VT_INT:
+	case VT_LNSPEC:
+	case VT_NATIVE:
 	case VT_SCRIPT:
 	case VT_STRING:
 		return 1;
@@ -90,6 +93,14 @@ SourceVariable::SourceVariable() : _address(-1), _nameObject(), _nameSource(), _
 SourceVariable::SourceVariable(std::string const & nameObject, std::string const & nameSource, int const address, StorageClass const sc, VariableType const * const type, SourcePosition const & position) : _address(address), _nameObject(nameObject), _nameSource(nameSource), _position(position), _sc(sc), _type(type)
 {
 
+}
+SourceVariable::SourceVariable(std::string const & name, VariableData_LnSpec const & vdLnSpec, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdLnSpec.type)
+{
+	_data.vdLnSpec = vdLnSpec;
+}
+SourceVariable::SourceVariable(std::string const & name, VariableData_Native const & vdNative, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdNative.type)
+{
+	_data.vdNative = vdNative;
 }
 SourceVariable::SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdScript.type)
 {
@@ -136,20 +147,11 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType(VariableTy
 	return _types[(type <= VT_VOID) ? type : VT_VOID];
 }
 
-SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::string const & name)
-{
-	for (size_t i(0); i < _names.size(); ++i)
-		if (name == _names[i])
-			return _types[i];
-
-	return NULL;
-}
-
-SourceVariable::VariableType const * SourceVariable::get_VariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types)
+SourceVariable::VariableType const * SourceVariable::get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, std::vector<VariableType const *> const & types)
 {
 	for (size_t i(0); i < _types.size(); ++i)
 	{
-		if (_types[i]->type == VT_SCRIPT && _types[i]->callType == callType && _types[i]->types.size() == types.size())
+		if (_types[i]->type == itype && _types[i]->callType == callType && _types[i]->types.size() == types.size())
 		{
 			bool matched(true);
 
@@ -168,7 +170,7 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_script(Var
 
 	VariableType * type(new VariableType);
 
-	type->type     = VT_SCRIPT;
+	type->type     = itype;
 	type->callType = callType;
 	type->names    = std::vector<std::string>(types.size(), "");
 	type->types    = types;
@@ -177,6 +179,30 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_script(Var
 	_types.push_back(type);
 
 	return type;
+}
+
+SourceVariable::VariableType const * SourceVariable::get_VariableType_lnspec(VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	return get_VariableType_auto(VT_LNSPEC, callType, types);
+}
+
+SourceVariable::VariableType const * SourceVariable::get_VariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	return get_VariableType_auto(VT_NATIVE, callType, types);
+}
+
+SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::string const & name)
+{
+	for (size_t i(0); i < _names.size(); ++i)
+		if (name == _names[i])
+			return _types[i];
+
+	return NULL;
+}
+
+SourceVariable::VariableType const * SourceVariable::get_VariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	return get_VariableType_auto(VT_SCRIPT, callType, types);
 }
 
 SourceVariable::StorageClass SourceVariable::getClass() const
@@ -205,6 +231,10 @@ void SourceVariable::init()
 	_types[VT_VOID] = new VariableType(type);
 	_types[VT_VOID]->callType = type.callType = _types[VT_VOID];
 
+	type.type = VT_CHAR;
+	_names[VT_CHAR] = "char";
+	_types[VT_CHAR] = new VariableType(type);
+
 	type.type = VT_FIXED;
 	_names[VT_FIXED] = "fixed";
 	_types[VT_FIXED] = new VariableType(type);
@@ -222,12 +252,27 @@ void SourceVariable::makeObjectsCall(std::vector<ObjectToken> * const objects, s
 {
 	switch (_type->type)
 	{
+	case VT_CHAR:
 	case VT_FIXED:
 	case VT_INT:
 	case VT_STRING:
 	case VT_STRUCT:
 	case VT_VOID:
 		throw SourceException("attempt to call uncallable", position, "SourceVariable");
+
+	case VT_LNSPEC:
+		if (_sc == SC_CONSTANT)
+			SourceExpressionDS::make_objects_call_lnspec(objects, _data.vdLnSpec.number, _type, args, position);
+		else
+			throw SourceException("non-constant lnspecs not yet supported", position, "SourceVariable");
+		break;
+
+	case VT_NATIVE:
+		if (_sc == SC_CONSTANT)
+			SourceExpressionDS::make_objects_call_native(objects, _data.vdNative.number, _type, args, position);
+		else
+			throw SourceException("non-constant natives not yet supported", position, "SourceVariable");
+		break;
 
 	case VT_SCRIPT:
 		makeObjectsGet(objects, position);
@@ -262,8 +307,11 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, st
 	case SC_REGISTER:
 		switch (type->type)
 		{
+		case VT_CHAR:
 		case VT_FIXED:
 		case VT_INT:
+		case VT_LNSPEC:
+		case VT_NATIVE:
 		case VT_SCRIPT:
 		case VT_STRING:
 		case VT_VOID:
@@ -295,12 +343,21 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 	case SC_CONSTANT:
 		switch (type->type)
 		{
+		case VT_CHAR:
 		case VT_FIXED:
 		case VT_INT:
 		case VT_STRING:
 		case VT_STRUCT:
 		case VT_VOID:
 			throw SourceException("unsupported SC_CONSTANT VT", position, "SourceVariable");
+
+		case VT_LNSPEC:
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int32(_data.vdLnSpec.number, position)));
+			break;
+
+		case VT_NATIVE:
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int32(_data.vdNative.number, position)));
+			break;
 
 		case VT_SCRIPT:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int32(_data.vdScript.number, position)));
@@ -311,8 +368,11 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 	case SC_REGISTER:
 		switch (type->type)
 		{
+		case VT_CHAR:
 		case VT_FIXED:
 		case VT_INT:
+		case VT_LNSPEC:
+		case VT_NATIVE:
 		case VT_SCRIPT:
 		case VT_STRING:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHSCRIPTVAR, position, ObjectExpression::create_value_int32((*address)++, position)));
@@ -337,8 +397,11 @@ void SourceVariable::makeObjectsGet(VariableType const * const type, int * const
 	case SC_REGISTER:
 		switch (type->type)
 		{
+		case VT_CHAR:
 		case VT_FIXED:
 		case VT_INT:
+		case VT_LNSPEC:
+		case VT_NATIVE:
 		case VT_SCRIPT:
 		case VT_STRING:
 			++*address;
@@ -385,8 +448,11 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, st
 	case SC_REGISTER:
 		switch (type->type)
 		{
+		case VT_CHAR:
 		case VT_FIXED:
 		case VT_INT:
+		case VT_LNSPEC:
+		case VT_NATIVE:
 		case VT_SCRIPT:
 		case VT_STRING:
 		case VT_VOID:
@@ -421,8 +487,11 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, So
 	case SC_REGISTER:
 		switch (type->type)
 		{
+		case VT_CHAR:
 		case VT_FIXED:
 		case VT_INT:
+		case VT_LNSPEC:
+		case VT_NATIVE:
 		case VT_SCRIPT:
 		case VT_STRING:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_ASSIGNSCRIPTVAR, position, ObjectExpression::create_value_int32((*address)--, position)));
@@ -447,8 +516,11 @@ void SourceVariable::makeObjectsSet(VariableType const * const type, int * const
 	case SC_REGISTER:
 		switch (type->type)
 		{
+		case VT_CHAR:
 		case VT_FIXED:
 		case VT_INT:
+		case VT_LNSPEC:
+		case VT_NATIVE:
 		case VT_SCRIPT:
 		case VT_STRING:
 			--*address;
@@ -538,12 +610,15 @@ void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal 
 {
 	switch (in)
 	{
+	case SourceVariable::VT_CHAR:   *out << "VT_CHAR";   break;
 	case SourceVariable::VT_FIXED:  *out << "VT_FIXED";  break;
 	case SourceVariable::VT_INT:    *out << "VT_INT";    break;
-	case SourceVariable::VT_STRING: *out << "VT_STRING"; break;
-	case SourceVariable::VT_VOID:   *out << "VT_VOID";   break;
+	case SourceVariable::VT_LNSPEC: *out << "VT_LNSPEC"; break;
+	case SourceVariable::VT_NATIVE: *out << "VT_NATIVE"; break;
 	case SourceVariable::VT_SCRIPT: *out << "VT_SCRIPT"; break;
+	case SourceVariable::VT_STRING: *out << "VT_STRING"; break;
 	case SourceVariable::VT_STRUCT: *out << "VT_STRUCT"; break;
+	case SourceVariable::VT_VOID:   *out << "VT_VOID";   break;
 	}
 }
 

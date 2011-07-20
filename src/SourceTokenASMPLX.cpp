@@ -205,6 +205,7 @@ void SourceTokenASMPLX::init()
 
 	// BinaryTokenZDACS
 	DO_INIT(ASSIGNGLOBALARRAY, 1);
+	DO_INIT(CALLFUNC,          2);
 	DO_INIT(DIVFIXED,          0);
 	DO_INIT(DUP,               0);
 	DO_INIT(ENDLOG,            0);

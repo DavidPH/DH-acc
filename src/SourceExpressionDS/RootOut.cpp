@@ -71,33 +71,51 @@ void SourceExpressionDS_RootOut::doOut(std::vector<ObjectToken> * const objects,
 {
 	switch (type->type)
 	{
+	case SourceVariable::VT_CHAR:
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTCHARACTER, getPosition()));
+		break;
+
 	case SourceVariable::VT_FIXED:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTFIXED, getPosition()));
-		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
 		break;
 
 	case SourceVariable::VT_INT:
+	case SourceVariable::VT_LNSPEC:
+	case SourceVariable::VT_NATIVE:
 	case SourceVariable::VT_SCRIPT:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTNUMBER, getPosition()));
-		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
 		break;
 
 	case SourceVariable::VT_STRING:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTSTRING, getPosition()));
-		objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
+		break;
+
+	case SourceVariable::VT_STRUCT:
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32('{', getPosition())));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTCHARACTER, getPosition()));
+
+		for (size_t i(type->types.size()); i--;)
+		{
+			doOut(objects, type->types[i]);
+
+			if (i)
+			{
+				objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(' ', getPosition())));
+				objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTCHARACTER, getPosition()));
+			}
+		}
+
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32('}', getPosition())));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTCHARACTER, getPosition()));
+
 		break;
 
 	case SourceVariable::VT_VOID:
 		break;
-
-	case SourceVariable::VT_STRUCT:
-		for (size_t i(type->types.size()); i--;)
-			doOut(objects, type->types[i]);
-		break;
 	}
+
+	objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(';', getPosition())));
+	objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTCHARACTER, getPosition()));
 }
 
 char const * SourceExpressionDS_RootOut::getName() const
@@ -118,7 +136,10 @@ bool SourceExpressionDS_RootOut::isConstant() const
 void SourceExpressionDS_RootOut::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	_expr.makeObjectsGet(objects);
+
+	objects->push_back(ObjectToken(ObjectToken::OCODE_BEGINPRINT, getPosition()));
 	doOut(objects, _expr.getType());
+	objects->push_back(ObjectToken(ObjectToken::OCODE_ENDLOG, getPosition()));
 }
 
 void SourceExpressionDS_RootOut::printDebug(std::ostream * const out) const

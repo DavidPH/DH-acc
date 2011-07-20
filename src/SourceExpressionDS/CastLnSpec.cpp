@@ -14,24 +14,25 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourceExpressionDS/CastInt.cpp
+/* SourceExpressionDS/CastLnSpec.cpp
 **
-** Defines the SourceExpressionDS_CastInt class and methods.
+** Defines the SourceExpressionDS_CastLnSpec class and methods.
 */
 
 #include "Base.hpp"
 
 #include "../ObjectToken.hpp"
+#include "../print_debug.hpp"
 #include "../SourceException.hpp"
 
 
 
-class SourceExpressionDS_CastInt : public SourceExpressionDS_Base
+class SourceExpressionDS_CastLnSpec : public SourceExpressionDS_Base
 {
 public:
-	SourceExpressionDS_CastInt(SourceExpressionDS const & expr, SourcePosition const & position);
+	SourceExpressionDS_CastLnSpec(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
 
-	virtual SourceExpressionDS_CastInt * clone() const;
+	virtual SourceExpressionDS_CastLnSpec * clone() const;
 
 	virtual char const * getName() const;
 
@@ -45,43 +46,44 @@ public:
 
 private:
 	SourceExpressionDS _expr;
+	SourceVariable::VariableType const * _type;
 };
 
 
 
-SourceExpressionDS SourceExpressionDS::make_expression_cast_int(SourceExpressionDS const & expr, SourcePosition const & position)
+SourceExpressionDS SourceExpressionDS::make_expression_cast_lnspec(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position)
 {
-	return new SourceExpressionDS_CastInt(expr, position);
+	return new SourceExpressionDS_CastLnSpec(expr, type, position);
 }
 
 
 
-SourceExpressionDS_CastInt::SourceExpressionDS_CastInt(SourceExpressionDS const & expr, SourcePosition const & position) : SourceExpressionDS_Base(position), _expr(expr)
+SourceExpressionDS_CastLnSpec::SourceExpressionDS_CastLnSpec(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position) : SourceExpressionDS_Base(position), _expr(expr), _type(type)
 {
 
 }
 
-SourceExpressionDS_CastInt * SourceExpressionDS_CastInt::clone() const
+SourceExpressionDS_CastLnSpec * SourceExpressionDS_CastLnSpec::clone() const
 {
-	return new SourceExpressionDS_CastInt(*this);
+	return new SourceExpressionDS_CastLnSpec(*this);
 }
 
-char const * SourceExpressionDS_CastInt::getName() const
+char const * SourceExpressionDS_CastLnSpec::getName() const
 {
-	return "SourceExpressionDS_CastInt";
+	return "SourceExpressionDS_CastLnSpec";
 }
 
-SourceVariable::VariableType const * SourceExpressionDS_CastInt::getType() const
+SourceVariable::VariableType const * SourceExpressionDS_CastLnSpec::getType() const
 {
-	return SourceVariable::get_VariableType(SourceVariable::VT_INT);
+	return _type;
 }
 
-bool SourceExpressionDS_CastInt::isConstant() const
+bool SourceExpressionDS_CastLnSpec::isConstant() const
 {
 	return _expr.isConstant();
 }
 
-void SourceExpressionDS_CastInt::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_CastLnSpec::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	_expr.makeObjectsGet(objects);
 
@@ -106,13 +108,19 @@ void SourceExpressionDS_CastInt::makeObjectsGet(std::vector<ObjectToken> * const
 	}
 }
 
-void SourceExpressionDS_CastInt::printDebug(std::ostream * const out) const
+void SourceExpressionDS_CastLnSpec::printDebug(std::ostream * const out) const
 {
-	*out << "SourceExpressionDS_CastInt(";
+	*out << "SourceExpressionDS_CastLnSpec(";
 	SourceExpressionDS_Base::printDebug(out);
 	*out << " ";
 		*out << "expr=(";
 		print_debug(out, _expr);
+		*out << ")";
+
+		*out << ", ";
+
+		*out << "type=(";
+		print_debug(out, _type);
 		*out << ")";
 	*out << ")";
 }
