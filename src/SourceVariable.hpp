@@ -22,13 +22,13 @@
 #ifndef HPP_SourceVariable_
 #define HPP_SourceVariable_
 
+#include "ObjectToken.hpp"
 #include "SourcePosition.hpp"
 
 #include <ostream>
 #include <string>
 #include <vector>
 
-class ObjectToken;
 class SourceExpressionDS;
 class SourceTokenC;
 
@@ -52,6 +52,7 @@ public:
 
 		VT_VOID,
 
+		VT_ASMFUNC,
 		VT_LNSPEC,
 		VT_NATIVE,
 		VT_SCRIPT,
@@ -74,24 +75,31 @@ public:
 		std::vector<VariableType const *> types;
 	};
 
+	struct VariableData_AsmFunc
+	{
+		VariableType const * type;
+		ObjectToken::ObjectCode ocode;
+		ObjectToken::ObjectCode ocode_imm;
+	};
 	struct VariableData_LnSpec
 	{
-		int number;
 		VariableType const * type;
+		int number;
 	};
 	struct VariableData_Native
 	{
-		int number;
 		VariableType const * type;
+		int number;
 	};
 	struct VariableData_Script
 	{
-		int number;
 		VariableType const * type;
+		int number;
 	};
 
 	union VariableData
 	{
+		VariableData_AsmFunc vdAsmFunc;
 		VariableData_LnSpec vdLnSpec;
 		VariableData_Native vdNative;
 		VariableData_Script vdScript;
@@ -101,6 +109,7 @@ public:
 
 	SourceVariable();
 	SourceVariable(std::string const & nameObject, std::string const & nameSource, int const address, StorageClass const sc, VariableType const * const type, SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_AsmFunc const & vdAsmFunc, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_LnSpec const & vdLnSpec, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Native const & vdNative, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position);
@@ -133,6 +142,8 @@ public:
 
 	static VariableType const * get_VariableType(SourceTokenC const & token);
 	static VariableType const * get_VariableType(VariableTypeInternal const type);
+	// AsmFunc types work like script types (see below).
+	static VariableType const * get_VariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
 	// LnSpec types work like script types (see below).
 	static VariableType const * get_VariableType_lnspec(VariableType const * callType, std::vector<VariableType const *> const & types);
 	// Native types work like script types (see below).

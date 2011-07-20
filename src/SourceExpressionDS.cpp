@@ -185,15 +185,16 @@ SourceExpressionDS SourceExpressionDS::make_expression_cast(SourceExpressionDS c
 {
 	switch (type->type)
 	{
-	case SourceVariable::VT_CHAR:   return make_expression_cast_char  (expr,       position);
-	case SourceVariable::VT_FIXED:  return make_expression_cast_fixed (expr,       position);
-	case SourceVariable::VT_INT:    return make_expression_cast_int   (expr,       position);
-	case SourceVariable::VT_LNSPEC: return make_expression_cast_lnspec(expr, type, position);
-	case SourceVariable::VT_NATIVE: return make_expression_cast_native(expr, type, position);
-	case SourceVariable::VT_SCRIPT: return make_expression_cast_script(expr, type, position);
-	case SourceVariable::VT_STRING: return make_expression_cast_string(expr,       position);
-	case SourceVariable::VT_STRUCT: return make_expression_cast_struct(expr, type, position);
-	case SourceVariable::VT_VOID:   return make_expression_cast_void  (expr,       position);
+	case SourceVariable::VT_ASMFUNC: return make_expression_cast_void  (expr,       position);
+	case SourceVariable::VT_CHAR:    return make_expression_cast_char  (expr,       position);
+	case SourceVariable::VT_FIXED:   return make_expression_cast_fixed (expr,       position);
+	case SourceVariable::VT_INT:     return make_expression_cast_int   (expr,       position);
+	case SourceVariable::VT_LNSPEC:  return make_expression_cast_lnspec(expr, type, position);
+	case SourceVariable::VT_NATIVE:  return make_expression_cast_native(expr, type, position);
+	case SourceVariable::VT_SCRIPT:  return make_expression_cast_script(expr, type, position);
+	case SourceVariable::VT_STRING:  return make_expression_cast_string(expr,       position);
+	case SourceVariable::VT_STRUCT:  return make_expression_cast_struct(expr, type, position);
+	case SourceVariable::VT_VOID:    return make_expression_cast_void  (expr,       position);
 	}
 
 	throw SourceException("attempt to cast to unknown", position, "SourceExpressionDS");
@@ -207,6 +208,51 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 	switch (token.getType())
 	{
 	case SourceTokenC::TT_IDENTIFIER:
+		if (token.getData() == "asmfunc")
+		{
+			// asmfuncName
+			std::string asmfuncName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+
+			// asmfuncOCode
+			ObjectToken::ObjectCode asmfuncOCode(ObjectToken::get_code(in->get(SourceTokenC::TT_IDENTIFIER)));
+
+			// asmfuncOCodeImmediate
+			ObjectToken::ObjectCode asmfuncOCodeImmediate(ObjectToken::get_code(in->get(SourceTokenC::TT_IDENTIFIER)));
+
+			// asmfuncArgs
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+			std::vector<SourceVariable::VariableType const *> asmfuncArgs;
+			if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
+			{
+				asmfuncArgs.push_back(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+
+				if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
+					in->get(SourceTokenC::TT_IDENTIFIER);
+
+				if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
+					break;
+
+				in->get(SourceTokenC::TT_OP_COMMA);
+			}
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+			// asmfuncReturn
+			in->get(SourceTokenC::TT_OP_MINUS_GT);
+			SourceVariable::VariableType const * asmfuncReturn(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+
+			// asmfuncVarType
+			SourceVariable::VariableType const * asmfuncVarType(SourceVariable::get_VariableType_asmfunc(asmfuncReturn, asmfuncArgs));
+
+			// asmfuncVarData
+			SourceVariable::VariableData_AsmFunc asmfuncVarData = {asmfuncVarType, asmfuncOCode, asmfuncOCodeImmediate};
+
+			// asmfuncVariable
+			SourceVariable asmfuncVariable(asmfuncName, asmfuncVarData, token.getPosition());
+
+			context->addVariable(asmfuncVariable);
+			return make_expression_value_variable(asmfuncVariable, token.getPosition());
+		}
+
 		if (token.getData() == "delay")
 			return make_expression_root_delay(make_expression(in, blocks, context), token.getPosition());
 
@@ -243,7 +289,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			SourceVariable::VariableType const * lnspecVarType(SourceVariable::get_VariableType_lnspec(lnspecReturn, lnspecArgs));
 
 			// lnspecVarData
-			SourceVariable::VariableData_LnSpec lnspecVarData = {lnspecNumber, lnspecVarType};
+			SourceVariable::VariableData_LnSpec lnspecVarData = {lnspecVarType, lnspecNumber};
 
 			// lnspecVariable
 			SourceVariable lnspecVariable(lnspecName, lnspecVarData, token.getPosition());
@@ -285,7 +331,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			SourceVariable::VariableType const * nativeVarType(SourceVariable::get_VariableType_native(nativeReturn, nativeArgs));
 
 			// nativeVarData
-			SourceVariable::VariableData_Native nativeVarData = {nativeNumber, nativeVarType};
+			SourceVariable::VariableData_Native nativeVarData = {nativeVarType, nativeNumber};
 
 			// nativeVariable
 			SourceVariable nativeVariable(nativeName, nativeVarData, token.getPosition());
@@ -406,7 +452,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			SourceVariable::VariableType const * scriptVarType(SourceVariable::get_VariableType_script(scriptReturn, scriptArgTypes));
 
 			// scriptVarData
-			SourceVariable::VariableData_Script scriptVarData = {scriptNumber, scriptVarType};
+			SourceVariable::VariableData_Script scriptVarData = {scriptVarType, scriptNumber};
 
 			// scriptExpression
 			SourceExpressionDS scriptExpression(make_expression_single(in, blocks, &scriptContext));
@@ -583,9 +629,45 @@ void SourceExpressionDS::make_objects(std::vector<SourceExpressionDS> const & ex
 		expressions[index].makeObjectsGet(objects);
 }
 
-void SourceExpressionDS::make_objects_call_lnspec(std::vector<ObjectToken> * objects, int number, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
+void SourceExpressionDS::make_objects_call_asmfunc(std::vector<ObjectToken> * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
 {
-	if (args.size() != type->types.size())
+	if (args.size() != data.type->types.size())
+		throw SourceException("incorrect arg count to call asmfunc", position, "SourceExpressionDS");
+
+	bool immediate(data.ocode_imm != ObjectToken::OCODE_NONE);
+
+	for (size_t i(0); i < args.size(); ++i)
+	{
+		if (args[i].getType() != data.type->types[i])
+			throw SourceException("incorrect arg type to call asmfunc", args[i].getPosition(), "SourceExpressionDS");
+
+		immediate = immediate && args[i].isConstant();
+	}
+
+	if (immediate)
+	{
+		std::vector<ObjectExpression> oargs;
+
+		for (size_t i(0); i < args.size(); ++i)
+			oargs.push_back(args[i].makeObject());
+
+		objects->push_back(ObjectToken(data.ocode_imm, position, oargs));
+	}
+	else
+	{
+		if (data.ocode == ObjectToken::OCODE_NONE)
+			throw SourceException("no ocode", position, "SourceExpressionDS");
+
+		for (size_t i(0); i < args.size(); ++i)
+			args[i].makeObjectsGet(objects);
+
+		objects->push_back(ObjectToken(data.ocode, position));
+	}
+}
+
+void SourceExpressionDS::make_objects_call_lnspec(std::vector<ObjectToken> * objects, SourceVariable::VariableData_LnSpec const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
+{
+	if (args.size() != data.type->types.size())
 		throw SourceException("incorrect arg count to call lnspec", position, "SourceExpressionDS");
 
 	if (args.size() > 5)
@@ -593,7 +675,7 @@ void SourceExpressionDS::make_objects_call_lnspec(std::vector<ObjectToken> * obj
 
 	for (size_t i(0); i < args.size(); ++i)
 	{
-		if (args[i].getType() != type->types[i])
+		if (args[i].getType() != data.type->types[i])
 			throw SourceException("incorrect arg type to call lnpsec", args[i].getPosition(), "SourceExpressionDS");
 
 		args[i].makeObjectsGet(objects);
@@ -602,11 +684,11 @@ void SourceExpressionDS::make_objects_call_lnspec(std::vector<ObjectToken> * obj
 	ObjectToken::ObjectCode ocode;
 
 	ObjectExpression oarg0(ObjectExpression::create_value_int32(0, position));
-	ObjectExpression ospec(ObjectExpression::create_value_int32(number, position));
+	ObjectExpression ospec(ObjectExpression::create_value_int32(data.number, position));
 
 	ObjectToken otok0(ObjectToken::OCODE_PUSHNUMBER, position, oarg0);
 
-	if (type->callType->type == SourceVariable::VT_VOID)
+	if (data.type->callType->type == SourceVariable::VT_VOID)
 	{
 		switch (args.size())
 		{
@@ -630,14 +712,14 @@ void SourceExpressionDS::make_objects_call_lnspec(std::vector<ObjectToken> * obj
 	objects->push_back(ObjectToken(ocode, position, ospec));
 }
 
-void SourceExpressionDS::make_objects_call_native(std::vector<ObjectToken> * objects, int number, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
+void SourceExpressionDS::make_objects_call_native(std::vector<ObjectToken> * objects, SourceVariable::VariableData_Native const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
 {
-	if (args.size() != type->types.size())
+	if (args.size() != data.type->types.size())
 		throw SourceException("incorrect arg count to call native", position, "SourceExpressionDS");
 
 	for (size_t i(0); i < args.size(); ++i)
 	{
-		if (args[i].getType() != type->types[i])
+		if (args[i].getType() != data.type->types[i])
 			throw SourceException("incorrect arg type to call native", args[i].getPosition(), "SourceExpressionDS");
 
 		args[i].makeObjectsGet(objects);
@@ -645,7 +727,7 @@ void SourceExpressionDS::make_objects_call_native(std::vector<ObjectToken> * obj
 
 	ObjectToken::ObjectCode ocode(ObjectToken::OCODE_CALLFUNC);
 	ObjectExpression oargc(ObjectExpression::create_value_int32(args.size(), position));
-	ObjectExpression ofunc(ObjectExpression::create_value_int32(number, position));
+	ObjectExpression ofunc(ObjectExpression::create_value_int32(data.number, position));
 
 	std::vector<ObjectExpression> oargs;
 	oargs.push_back(oargc);

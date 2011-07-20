@@ -25,11 +25,14 @@
 #include "ObjectExpression.hpp"
 #include "SourcePosition.hpp"
 
+#include <map>
 #include <ostream>
 #include <stdint.h>
+#include <string>
 #include <vector>
 
 class ObjectExpression;
+class SourceTokenC;
 
 
 
@@ -66,6 +69,8 @@ public:
 		OCODE_PRINTSTRING,
 		OCODE_PUSHNUMBER,
 		OCODE_PUSHSCRIPTVAR,
+		OCODE_RANDOM,
+		OCODE_RANDOM_IMM,
 		OCODE_RESTART,
 		OCODE_SHIFTL,
 		OCODE_SHIFTR,
@@ -84,6 +89,7 @@ public:
 		OCODE_PRINTFIXED,
 		OCODE_PUSHGLOBALARRAY,
 		OCODE_SETRESULTVALUE,
+		OCODE_STRLEN,
 
 		OCODE_NONE
 	};
@@ -109,11 +115,19 @@ public:
 	friend void print_debug(std::ostream * const out, ObjectToken const & in);
 	friend void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in);
 
+	static ObjectCode get_code(SourceTokenC const & token);
+
+	static void init();
+
 private:
 	std::vector<ObjectExpression> _args;
 	ObjectCode _code;
 	std::vector<std::string> _labels;
 	SourcePosition _position;
+
+
+
+	static std::map<std::string, ObjectCode> _codes;
 };
 
 

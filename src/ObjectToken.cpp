@@ -23,6 +23,12 @@
 
 #include "ObjectExpression.hpp"
 #include "print_debug.hpp"
+#include "SourceException.hpp"
+#include "SourceTokenC.hpp"
+
+
+
+std::map<std::string, ObjectToken::ObjectCode> ObjectToken::_codes;
 
 
 
@@ -48,6 +54,16 @@ void ObjectToken::addLabel(std::string const & label)
 	_labels.push_back(label);
 }
 
+ObjectToken::ObjectCode ObjectToken::get_code(SourceTokenC const & token)
+{
+	std::map<std::string, ObjectCode>::iterator codeIt(_codes.find(token.getData()));
+
+	if (codeIt == _codes.end())
+		throw SourceException("no such OCODE", token.getPosition(), "ObjectToken");
+
+	return codeIt->second;
+}
+
 ObjectExpression const & ObjectToken::getArg(uintptr_t const index) const
 {
 	static ObjectExpression expr;
@@ -71,6 +87,66 @@ std::vector<std::string> const & ObjectToken::getLabels() const
 SourcePosition const & ObjectToken::getPosition() const
 {
 	return _position;
+}
+
+void ObjectToken::init()
+{
+	#define DO_INIT(NAME,ARGC)\
+	_codes[#NAME] = OCODE_##NAME
+
+	// BinaryTokenACS
+	DO_INIT(ADD,             0);
+	DO_INIT(ASSIGNSCRIPTVAR, 1);
+	DO_INIT(BEGINPRINT,      0);
+	DO_INIT(DELAY,           0);
+	DO_INIT(DELAY_IMM,       1);
+	DO_INIT(DIV,             0);
+	DO_INIT(DROP,            0);
+	DO_INIT(ENDPRINT,        0);
+	DO_INIT(GOTO,            1);
+	DO_INIT(LSPEC1,          1);
+	DO_INIT(LSPEC1_IMM,      2);
+	DO_INIT(LSPEC2,          1);
+	DO_INIT(LSPEC2_IMM,      3);
+	DO_INIT(LSPEC3,          1);
+	DO_INIT(LSPEC3_IMM,      4);
+	DO_INIT(LSPEC4,          1);
+	DO_INIT(LSPEC4_IMM,      5);
+	DO_INIT(LSPEC5,          1);
+	DO_INIT(LSPEC5_IMM,      6);
+	DO_INIT(MUL,             0);
+	DO_INIT(MOD,             0);
+	DO_INIT(NOP,             0);
+	DO_INIT(PRINTCHARACTER,  0);
+	DO_INIT(PRINTNUMBER,     0);
+	DO_INIT(PRINTSTRING,     0);
+	DO_INIT(PUSHNUMBER,      1);
+	DO_INIT(PUSHSCRIPTVAR,   1);
+	DO_INIT(RANDOM,          0);
+	DO_INIT(RANDOM_IMM,      2);
+	DO_INIT(RESTART,         0);
+	DO_INIT(SHIFTL,          0);
+	DO_INIT(SHIFTR,          0);
+	DO_INIT(SUB,             0);
+	DO_INIT(SUSPEND,         0);
+	DO_INIT(TERMINATE,       0);
+
+	// BinaryTokenZDACS
+	DO_INIT(ASSIGNGLOBALARRAY, 1);
+	DO_INIT(CALLFUNC,          2);
+	DO_INIT(DIVFIXED,          0);
+	DO_INIT(DUP,               0);
+	DO_INIT(ENDLOG,            0);
+	DO_INIT(LSPEC5RESULT,      1);
+	DO_INIT(MULFIXED,          0);
+	DO_INIT(PRINTFIXED,        0);
+	DO_INIT(PUSHGLOBALARRAY,   1);
+	DO_INIT(SETRESULTVALUE,    0);
+	DO_INIT(STRLEN,            0);
+
+	DO_INIT(NONE, 0);
+
+	#undef DO_INIT
 }
 
 
@@ -132,6 +208,8 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_PRINTSTRING:       *out << "OCODE_PRINTSTRING";       break;
 	case ObjectToken::OCODE_PUSHNUMBER:        *out << "OCODE_PUSHNUMBER";        break;
 	case ObjectToken::OCODE_PUSHSCRIPTVAR:     *out << "OCODE_PUSHSCRIPTVAR";     break;
+	case ObjectToken::OCODE_RANDOM:            *out << "OCODE_RANDOM";            break;
+	case ObjectToken::OCODE_RANDOM_IMM:        *out << "OCODE_RANDOM_IMM";        break;
 	case ObjectToken::OCODE_RESTART:           *out << "OCODE_RESTART";           break;
 	case ObjectToken::OCODE_SHIFTL:            *out << "OCODE_SHIFTL";            break;
 	case ObjectToken::OCODE_SHIFTR:            *out << "OCODE_SHIFTR";            break;
@@ -149,6 +227,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_PRINTFIXED:        *out << "OCODE_PRINTFIXED";        break;
 	case ObjectToken::OCODE_PUSHGLOBALARRAY:   *out << "OCODE_PUSHGLOBALARRAY";   break;
 	case ObjectToken::OCODE_SETRESULTVALUE:    *out << "OCODE_SETRESULTVALUE";    break;
+	case ObjectToken::OCODE_STRLEN:            *out << "OCODE_STRLEN";            break;
 	case ObjectToken::OCODE_NONE:              *out << "OCODE_NONE";              break;
 	}
 }

@@ -70,6 +70,15 @@ void SourceExpressionDS_BinaryMul::makeObjectsGet(std::vector<ObjectToken> * con
 
 	switch (getType()->type)
 	{
+	case SourceVariable::VT_ASMFUNC:
+	case SourceVariable::VT_LNSPEC:
+	case SourceVariable::VT_NATIVE:
+	case SourceVariable::VT_SCRIPT:
+	case SourceVariable::VT_STRING:
+	case SourceVariable::VT_STRUCT:
+	case SourceVariable::VT_VOID:
+		throw SourceException("invalid VT", getPosition(), getName());
+
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_MUL, getPosition()));
@@ -78,14 +87,6 @@ void SourceExpressionDS_BinaryMul::makeObjectsGet(std::vector<ObjectToken> * con
 	case SourceVariable::VT_FIXED:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_MULFIXED, getPosition()));
 		break;
-
-	case SourceVariable::VT_LNSPEC:
-	case SourceVariable::VT_NATIVE:
-	case SourceVariable::VT_SCRIPT:
-	case SourceVariable::VT_STRING:
-	case SourceVariable::VT_STRUCT:
-	case SourceVariable::VT_VOID:
-		throw SourceException("invalid VT", getPosition(), getName());
 	}
 }
 

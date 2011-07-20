@@ -42,6 +42,7 @@ public:
 
 	virtual bool isConstant() const;
 
+	virtual ObjectExpression makeObject() const;
 	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
@@ -86,6 +87,10 @@ bool SourceExpressionDS_ValueFixed::isConstant() const
 	return true;
 }
 
+ObjectExpression SourceExpressionDS_ValueFixed::makeObject() const
+{
+	return ObjectExpression::create_value_int32(_value, getPosition());
+}
 void SourceExpressionDS_ValueFixed::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	std::vector<ObjectExpression> args;

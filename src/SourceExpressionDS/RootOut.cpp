@@ -71,6 +71,10 @@ void SourceExpressionDS_RootOut::doOut(std::vector<ObjectToken> * const objects,
 {
 	switch (type->type)
 	{
+	case SourceVariable::VT_ASMFUNC:
+	case SourceVariable::VT_VOID:
+		break;
+
 	case SourceVariable::VT_CHAR:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTCHARACTER, getPosition()));
 		break;
@@ -108,9 +112,6 @@ void SourceExpressionDS_RootOut::doOut(std::vector<ObjectToken> * const objects,
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32('}', getPosition())));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTCHARACTER, getPosition()));
 
-		break;
-
-	case SourceVariable::VT_VOID:
 		break;
 	}
 

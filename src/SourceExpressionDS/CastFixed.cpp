@@ -87,6 +87,11 @@ void SourceExpressionDS_CastFixed::makeObjectsGet(std::vector<ObjectToken> * con
 
 	switch (_expr.getType()->type)
 	{
+	case SourceVariable::VT_ASMFUNC:
+	case SourceVariable::VT_STRUCT:
+	case SourceVariable::VT_VOID:
+		throw SourceException("invalid VT", getPosition(), getName());
+
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_LNSPEC:
@@ -99,10 +104,6 @@ void SourceExpressionDS_CastFixed::makeObjectsGet(std::vector<ObjectToken> * con
 
 	case SourceVariable::VT_FIXED:
 		break;
-
-	case SourceVariable::VT_STRUCT:
-	case SourceVariable::VT_VOID:
-		throw SourceException("invalid VT", getPosition(), getName());
 	}
 }
 

@@ -77,9 +77,11 @@ public:
 
 	static void make_objects(std::vector<SourceExpressionDS> const & expressions, std::vector<ObjectToken> * const objects);
 
-	static void make_objects_call_lnspec(std::vector<ObjectToken> * objects, int number, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+	static void make_objects_call_asmfunc(std::vector<ObjectToken> * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 
-	static void make_objects_call_native(std::vector<ObjectToken> * objects, int number, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+	static void make_objects_call_lnspec(std::vector<ObjectToken> * objects, SourceVariable::VariableData_LnSpec const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+
+	static void make_objects_call_native(std::vector<ObjectToken> * objects, SourceVariable::VariableData_Native const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 
 	static void make_objects_call_script(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 

@@ -196,6 +196,8 @@ void SourceTokenASMPLX::init()
 	DO_INIT(PRINTSTRING,     0);
 	DO_INIT(PUSHNUMBER,      1);
 	DO_INIT(PUSHSCRIPTVAR,   1);
+	DO_INIT(RANDOM,          0);
+	DO_INIT(RANDOM_IMM,      2);
 	DO_INIT(RESTART,         0);
 	DO_INIT(SHIFTL,          0);
 	DO_INIT(SHIFTR,          0);
@@ -214,6 +216,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(PRINTFIXED,        0);
 	DO_INIT(PUSHGLOBALARRAY,   1);
 	DO_INIT(SETRESULTVALUE,    0);
+	DO_INIT(STRLEN,            0);
 
 	#undef DO_INIT
 }

@@ -74,6 +74,8 @@ void BinaryTokenZDACS::init()
 	DO_INIT(PRINTSTRING,     0);
 	DO_INIT(PUSHNUMBER,      1);
 	DO_INIT(PUSHSCRIPTVAR,   1);
+	DO_INIT(RANDOM,          0);
+	DO_INIT(RANDOM_IMM,      2);
 	DO_INIT(RESTART,         0);
 	DO_INIT(SHIFTL,          0);
 	DO_INIT(SHIFTR,          0);
@@ -92,6 +94,7 @@ void BinaryTokenZDACS::init()
 	DO_INIT(PRINTFIXED,        0);
 	DO_INIT(PUSHGLOBALARRAY,   1);
 	DO_INIT(SETRESULTVALUE,    0);
+	DO_INIT(STRLEN,            0);
 
 	#undef DO_INIT
 }
@@ -137,6 +140,8 @@ void BinaryTokenZDACS::make_tokens(std::vector<ObjectToken> const & objects, std
 	CASE_DIRECTMAP(PRINTSTRING);
 	CASE_DIRECTMAP(PUSHNUMBER);
 	CASE_DIRECTMAP(PUSHSCRIPTVAR);
+	CASE_DIRECTMAP(RANDOM);
+	CASE_DIRECTMAP(RANDOM_IMM);
 	CASE_DIRECTMAP(RESTART);
 	CASE_DIRECTMAP(SHIFTL);
 	CASE_DIRECTMAP(SHIFTR);
@@ -154,6 +159,7 @@ void BinaryTokenZDACS::make_tokens(std::vector<ObjectToken> const & objects, std
 	CASE_DIRECTMAP(PRINTFIXED);
 	CASE_DIRECTMAP(PUSHGLOBALARRAY);
 	CASE_DIRECTMAP(SETRESULTVALUE);
+	CASE_DIRECTMAP(STRLEN);
 
 	case ObjectToken::OCODE_NONE:
 		throw SourceException("unknown OCODE", objects[index].getPosition(), "BinaryTokenZDACS");
