@@ -372,15 +372,15 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 			throw SourceException("unsupported SC_CONSTANT VT", position, "SourceVariable");
 
 		case VT_LNSPEC:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int32(_data.vdLnSpec.number, position)));
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdLnSpec.number, position)));
 			break;
 
 		case VT_NATIVE:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int32(_data.vdNative.number, position)));
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdNative.number, position)));
 			break;
 
 		case VT_SCRIPT:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int32(_data.vdScript.number, position)));
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdScript.number, position)));
 			break;
 		}
 		break;
@@ -399,7 +399,7 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 		case VT_NATIVE:
 		case VT_SCRIPT:
 		case VT_STRING:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHSCRIPTVAR, position, ObjectExpression::create_value_int32((*address)++, position)));
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHSCRIPTVAR, position, ObjectExpression::create_value_int((*address)++, position)));
 			break;
 
 		case VT_STRUCT:
@@ -521,7 +521,7 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, So
 		case VT_NATIVE:
 		case VT_SCRIPT:
 		case VT_STRING:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_ASSIGNSCRIPTVAR, position, ObjectExpression::create_value_int32((*address)--, position)));
+			objects->push_back(ObjectToken(ObjectToken::OCODE_ASSIGNSCRIPTVAR, position, ObjectExpression::create_value_int((*address)--, position)));
 			break;
 
 		case VT_STRUCT:

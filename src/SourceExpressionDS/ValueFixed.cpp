@@ -89,13 +89,13 @@ bool SourceExpressionDS_ValueFixed::isConstant() const
 
 ObjectExpression SourceExpressionDS_ValueFixed::makeObject() const
 {
-	return ObjectExpression::create_value_int32(_value, getPosition());
+	return ObjectExpression::create_value_int(_value, getPosition());
 }
 void SourceExpressionDS_ValueFixed::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	std::vector<ObjectExpression> args;
 
-	args.push_back(ObjectExpression::create_value_int32(_value, getPosition()));
+	args.push_back(ObjectExpression::create_value_int(_value, getPosition()));
 
 	objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), getLabels(), args));
 }

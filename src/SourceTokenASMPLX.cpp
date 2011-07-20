@@ -241,9 +241,9 @@ ObjectExpression SourceTokenASMPLX::make_expression(std::string const & expr, So
 		if (expr[0] == '0')
 		{
 			if (expr.find_first_of('.') == std::string::npos)
-				return ObjectExpression::create_value_int32(string_to_int(expr, position), position);
+				return ObjectExpression::create_value_int(string_to_int(expr, position), position);
 			else
-				return ObjectExpression::create_value_int32(string_to_fixed(expr, position), position);
+				return ObjectExpression::create_value_int(string_to_fixed(expr, position), position);
 		}
 		else
 		{
@@ -254,8 +254,8 @@ ObjectExpression SourceTokenASMPLX::make_expression(std::string const & expr, So
 	{
 		switch (expr[0])
 		{
-		case '+': return ObjectExpression::create_unary_add(make_expression(expr.substr(1), position));
-		case '-': return ObjectExpression::create_unary_sub(make_expression(expr.substr(1), position));
+		case '+': return ObjectExpression::create_unary_add(make_expression(expr.substr(1), position), position);
+		case '-': return ObjectExpression::create_unary_sub(make_expression(expr.substr(1), position), position);
 
 		default: throw SourceException("unknown prefix operator", position, "SourceTokenASMPLX");
 		}
@@ -279,14 +279,14 @@ ObjectExpression SourceTokenASMPLX::make_expression(std::string const & expr, So
 
 		switch (expr[index])
 		{
-		case '*': return ObjectExpression::create_binary_mul(make_expression(exprL, position), make_expression(exprR, position));
-		case '/': return ObjectExpression::create_binary_div(make_expression(exprL, position), make_expression(exprR, position));
-		case '%': return ObjectExpression::create_binary_mod(make_expression(exprL, position), make_expression(exprR, position));
-		case '+': return ObjectExpression::create_binary_add(make_expression(exprL, position), make_expression(exprR, position));
-		case '-': return ObjectExpression::create_binary_sub(make_expression(exprL, position), make_expression(exprR, position));
-		case '&': return ObjectExpression::create_binary_and(make_expression(exprL, position), make_expression(exprR, position));
-		case '|': return ObjectExpression::create_binary_ior(make_expression(exprL, position), make_expression(exprR, position));
-		case '^': return ObjectExpression::create_binary_xor(make_expression(exprL, position), make_expression(exprR, position));
+		case '*': return ObjectExpression::create_binary_mul(make_expression(exprL, position), make_expression(exprR, position), position);
+		case '/': return ObjectExpression::create_binary_div(make_expression(exprL, position), make_expression(exprR, position), position);
+		case '%': return ObjectExpression::create_binary_mod(make_expression(exprL, position), make_expression(exprR, position), position);
+		case '+': return ObjectExpression::create_binary_add(make_expression(exprL, position), make_expression(exprR, position), position);
+		case '-': return ObjectExpression::create_binary_sub(make_expression(exprL, position), make_expression(exprR, position), position);
+		case '&': return ObjectExpression::create_binary_and(make_expression(exprL, position), make_expression(exprR, position), position);
+		case '|': return ObjectExpression::create_binary_ior(make_expression(exprL, position), make_expression(exprR, position), position);
+		case '^': return ObjectExpression::create_binary_xor(make_expression(exprL, position), make_expression(exprR, position), position);
 		default: throw SourceException("unknown operator", position, "SourceTokenASMPLX");
 		}
 	}

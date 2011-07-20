@@ -14,37 +14,37 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* ObjectExpression/Base.cpp
+/* ObjectExpression/Unary.hpp
 **
-** Defines the ObjectExpression_Base methods.
+** Defines the ObjectExpression_Unary class.
 */
+
+#ifndef HPP_Unary__ObjectExpression_
+#define HPP_Unary__ObjectExpression_
 
 #include "Base.hpp"
 
 
 
-ObjectExpression_Base::ObjectExpression_Base(SourcePosition const & position) : _position(position)
+class ObjectExpression_Unary : public ObjectExpression_Base
 {
+public:
+	ObjectExpression_Unary(ObjectExpression const & expr, SourcePosition const & position);
 
-}
-ObjectExpression_Base::~ObjectExpression_Base()
-{
+	virtual ObjectExpression::ExpressionType getType() const;
 
-}
+	virtual void printDebug(std::ostream * out) const;
 
-SourcePosition const & ObjectExpression_Base::getPosition() const
-{
-	return _position;
-}
+	virtual ObjectExpression::float_t resolveFloat() const;
+	virtual ObjectExpression::int_t resolveInt() const;
 
-void ObjectExpression_Base::printDebug(std::ostream * out) const
-{
-	*out << "ObjectExpression_Base(";
-		*out << "position=(";
-		print_debug(out, _position);
-		*out << ")";
-	*out << ")";
-}
+protected:
+	ObjectExpression _expr;
+};
+
+
+
+#endif /* HPP_Unary__ObjectExpression_ */
 
 
 

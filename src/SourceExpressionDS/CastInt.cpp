@@ -101,7 +101,7 @@ void SourceExpressionDS_CastInt::makeObjectsGet(std::vector<ObjectToken> * const
 		break;
 
 	case SourceVariable::VT_FIXED:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(16, getPosition())));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int(16, getPosition())));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_SHIFTR, getPosition()));
 		break;
 	}

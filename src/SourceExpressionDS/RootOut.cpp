@@ -95,7 +95,7 @@ void SourceExpressionDS_RootOut::doOut(std::vector<ObjectToken> * const objects,
 		break;
 
 	case SourceVariable::VT_STRUCT:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32('{', getPosition())));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int('{', getPosition())));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTCHARACTER, getPosition()));
 
 		for (size_t i(type->types.size()); i--;)
@@ -104,18 +104,18 @@ void SourceExpressionDS_RootOut::doOut(std::vector<ObjectToken> * const objects,
 
 			if (i)
 			{
-				objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(' ', getPosition())));
+				objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int(' ', getPosition())));
 				objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTCHARACTER, getPosition()));
 			}
 		}
 
-		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32('}', getPosition())));
+		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int('}', getPosition())));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTCHARACTER, getPosition()));
 
 		break;
 	}
 
-	objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(';', getPosition())));
+	objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int(';', getPosition())));
 	objects->push_back(ObjectToken(ObjectToken::OCODE_PRINTCHARACTER, getPosition()));
 }
 

@@ -88,7 +88,7 @@ bool SourceExpressionDS_ValueScript::isConstant() const
 
 ObjectExpression SourceExpressionDS_ValueScript::makeObject() const
 {
-	return ObjectExpression::create_value_int32(_number, getPosition());
+	return ObjectExpression::create_value_int(_number, getPosition());
 }
 void SourceExpressionDS_ValueScript::makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const
 {
@@ -97,7 +97,7 @@ void SourceExpressionDS_ValueScript::makeObjectsCall(std::vector<ObjectToken> * 
 }
 void SourceExpressionDS_ValueScript::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
-	objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int32(_number, getPosition())));
+	objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int(_number, getPosition())));
 }
 
 void SourceExpressionDS_ValueScript::printDebug(std::ostream * const out) const

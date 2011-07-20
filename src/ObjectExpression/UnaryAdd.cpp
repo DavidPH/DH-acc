@@ -16,48 +16,66 @@
 
 /* ObjectExpression/UnaryAdd.cpp
 **
-** ObjectExpressionUnaryAdd class and methods.
+** Defines the ObjectExpression_UnaryAdd class and methods.
 */
 
-#include "../ObjectExpression.hpp"
+#include "Unary.hpp"
 
 
 
-class ObjectExpressionUnaryAdd : public ObjectExpressionBase
+class ObjectExpression_UnaryAdd : public ObjectExpression_Unary
 {
 public:
-	ObjectExpressionUnaryAdd(ObjectExpression const & expr);
+	ObjectExpression_UnaryAdd(ObjectExpression const & expr, SourcePosition const & position);
 
-	virtual ObjectExpressionUnaryAdd * clone() const;
+	virtual ObjectExpression_UnaryAdd * clone() const;
 
-	virtual int32_t resolveInt32() const;
+	virtual char const * getName() const;
 
-private:
-	ObjectExpression _expr;
+	virtual void printDebug(std::ostream * out) const;
+
+	virtual ObjectExpression::float_t resolveFloat() const;
+	virtual ObjectExpression::int_t resolveInt() const;
 };
 
 
 
-ObjectExpression ObjectExpression::create_unary_add(ObjectExpression const & expr)
+ObjectExpression ObjectExpression::create_unary_add(ObjectExpression const & expr, SourcePosition const & position)
 {
-	return new ObjectExpressionUnaryAdd(expr);
+	return ObjectExpression_UnaryAdd(expr, position);
 }
 
 
 
-ObjectExpressionUnaryAdd::ObjectExpressionUnaryAdd(ObjectExpression const & expr) : ObjectExpressionBase(expr.getPosition()), _expr(expr)
+ObjectExpression_UnaryAdd::ObjectExpression_UnaryAdd(ObjectExpression const & expr, SourcePosition const & position) : ObjectExpression_Unary(expr, position)
 {
 
 }
 
-ObjectExpressionUnaryAdd * ObjectExpressionUnaryAdd::clone() const
+ObjectExpression_UnaryAdd * ObjectExpression_UnaryAdd::clone() const
 {
-	return new ObjectExpressionUnaryAdd(*this);
+	return new ObjectExpression_UnaryAdd(*this);
 }
 
-int32_t ObjectExpressionUnaryAdd::resolveInt32() const
+char const * ObjectExpression_UnaryAdd::getName() const
 {
-	return _expr.resolveInt32();
+	return "ObjectExpression_UnaryAdd";
+}
+
+void ObjectExpression_UnaryAdd::printDebug(std::ostream * const out) const
+{
+	*out << "ObjectExpression_UnaryAdd(";
+	ObjectExpression_Unary::printDebug(out);
+	*out << ")";
+}
+
+ObjectExpression::float_t ObjectExpression_UnaryAdd::resolveFloat() const
+{
+	return _expr.resolveFloat();
+}
+ObjectExpression::int_t ObjectExpression_UnaryAdd::resolveInt() const
+{
+	return _expr.resolveInt();
 }
 
 

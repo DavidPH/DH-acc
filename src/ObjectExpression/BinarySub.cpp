@@ -16,49 +16,84 @@
 
 /* ObjectExpression/BinarySub.cpp
 **
-** ObjectExpressionBinarySub class and methods.
+** Defines the ObjectExpression_BinarySub class and methods.
 */
 
-#include "../ObjectExpression.hpp"
+#include "Binary.hpp"
 
 
 
-class ObjectExpressionBinarySub : public ObjectExpressionBase
+class ObjectExpression_BinarySub : public ObjectExpression_Binary
 {
 public:
-	ObjectExpressionBinarySub(ObjectExpression const & exprL, ObjectExpression const & exprR);
+	ObjectExpression_BinarySub(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
 
-	virtual ObjectExpressionBinarySub * clone() const;
+	virtual ObjectExpression_BinarySub * clone() const;
 
-	virtual int32_t resolveInt32() const;
+	virtual char const * getName() const;
 
-private:
-	ObjectExpression _exprL;
-	ObjectExpression _exprR;
+	virtual void printDebug(std::ostream * out) const;
+
+	virtual ObjectExpression::float_t resolveFloat() const;
+	virtual ObjectExpression::int_t resolveInt() const;
 };
 
 
 
-ObjectExpression ObjectExpression::create_binary_sub(ObjectExpression const & exprL, ObjectExpression const & exprR)
+ObjectExpression ObjectExpression::create_binary_sub(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position)
 {
-	return new ObjectExpressionBinarySub(exprL, exprR);
+	return ObjectExpression_BinarySub(exprL, exprR, position);
 }
 
 
 
-ObjectExpressionBinarySub::ObjectExpressionBinarySub(ObjectExpression const & exprL, ObjectExpression const & exprR) : ObjectExpressionBase(exprL.getPosition()), _exprL(exprL), _exprR(exprR)
+ObjectExpression_BinarySub::ObjectExpression_BinarySub(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
 {
 
 }
 
-ObjectExpressionBinarySub * ObjectExpressionBinarySub::clone() const
+ObjectExpression_BinarySub * ObjectExpression_BinarySub::clone() const
 {
-	return new ObjectExpressionBinarySub(*this);
+	return new ObjectExpression_BinarySub(*this);
 }
 
-int32_t ObjectExpressionBinarySub::resolveInt32() const
+char const * ObjectExpression_BinarySub::getName() const
 {
-	return _exprL.resolveInt32() - _exprR.resolveInt32();
+	return "ObjectExpression_BinarySub";
+}
+
+void ObjectExpression_BinarySub::printDebug(std::ostream * const out) const
+{
+	*out << "ObjectExpression_BinarySub(";
+	ObjectExpression_Binary::printDebug(out);
+	*out << ")";
+}
+
+ObjectExpression::float_t ObjectExpression_BinarySub::resolveFloat() const
+{
+	switch (getType())
+	{
+	case ObjectExpression::ET_FLOAT:
+		return _exprL.resolveFloat() - _exprR.resolveFloat();
+
+	case ObjectExpression::ET_INT:
+		return (ObjectExpression::float_t)(_exprL.resolveInt() - _exprR.resolveInt());
+	}
+
+	return ObjectExpression_Binary::resolveFloat();
+}
+ObjectExpression::int_t ObjectExpression_BinarySub::resolveInt() const
+{
+	switch (getType())
+	{
+	case ObjectExpression::ET_FLOAT:
+		return (ObjectExpression::int_t)(_exprL.resolveFloat() - _exprR.resolveFloat());
+
+	case ObjectExpression::ET_INT:
+		return _exprL.resolveInt() - _exprR.resolveInt();
+	}
+
+	return ObjectExpression_Binary::resolveInt();
 }
 
 

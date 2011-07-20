@@ -262,7 +262,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			std::string lnspecName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
 			// lnspecNumber
-			int32_t lnspecNumber(ObjectExpression::get_int32(in->get(SourceTokenC::TT_NUMBER)));
+			ObjectExpression::int_t lnspecNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_NUMBER)));
 
 			// lnspecArgs
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
@@ -304,7 +304,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			std::string nativeName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
 			// nativeNumber
-			int32_t nativeNumber(ObjectExpression::get_int32(in->get(SourceTokenC::TT_NUMBER)));
+			ObjectExpression::int_t nativeNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_NUMBER)));
 
 			// nativeArgs
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
@@ -363,10 +363,10 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 			// scriptNumber
 			SourceTokenC scriptNumberToken(in->get());
-			int32_t scriptNumber;
+			ObjectExpression::int_t scriptNumber;
 			if (scriptNumberToken.getType() == SourceTokenC::TT_NUMBER)
 			{
-				scriptNumber = ObjectExpression::get_int32(scriptNumberToken);
+				scriptNumber = ObjectExpression::get_int(scriptNumberToken);
 			}
 			else if (scriptNumberToken.getType() == SourceTokenC::TT_IDENTIFIER)
 			{
@@ -683,8 +683,8 @@ void SourceExpressionDS::make_objects_call_lnspec(std::vector<ObjectToken> * obj
 
 	ObjectToken::ObjectCode ocode;
 
-	ObjectExpression oarg0(ObjectExpression::create_value_int32(0, position));
-	ObjectExpression ospec(ObjectExpression::create_value_int32(data.number, position));
+	ObjectExpression oarg0(ObjectExpression::create_value_int(0, position));
+	ObjectExpression ospec(ObjectExpression::create_value_int(data.number, position));
 
 	ObjectToken otok0(ObjectToken::OCODE_PUSHNUMBER, position, oarg0);
 
@@ -726,8 +726,8 @@ void SourceExpressionDS::make_objects_call_native(std::vector<ObjectToken> * obj
 	}
 
 	ObjectToken::ObjectCode ocode(ObjectToken::OCODE_CALLFUNC);
-	ObjectExpression oargc(ObjectExpression::create_value_int32(args.size(), position));
-	ObjectExpression ofunc(ObjectExpression::create_value_int32(data.number, position));
+	ObjectExpression oargc(ObjectExpression::create_value_int(args.size(), position));
+	ObjectExpression ofunc(ObjectExpression::create_value_int(data.number, position));
 
 	std::vector<ObjectExpression> oargs;
 	oargs.push_back(oargc);
@@ -753,7 +753,10 @@ void SourceExpressionDS::make_objects_call_script(std::vector<ObjectToken> * con
 	}
 
 	ObjectToken::ObjectCode code;
-	ObjectExpression lspec(ObjectExpression::create_value_int32(84, position));
+	ObjectExpression oarg0(ObjectExpression::create_value_int(0, position));
+	ObjectExpression ospec(ObjectExpression::create_value_int(84, position));
+
+	ObjectToken otok0(ObjectToken::OCODE_PUSHNUMBER, position, oarg0);
 
 	if (type->callType->type == SourceVariable::VT_VOID)
 	{
@@ -772,10 +775,10 @@ void SourceExpressionDS::make_objects_call_script(std::vector<ObjectToken> * con
 		code = ObjectToken::OCODE_LSPEC5RESULT;
 
 		for (size_t i(args.size()); i < 4; ++i)
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int32(0, position)));
+			objects->push_back(otok0);
 	}
 
-	objects->push_back(ObjectToken(code, position, lspec));
+	objects->push_back(ObjectToken(code, position, ospec));
 }
 
 ObjectExpression SourceExpressionDS::makeObject() const

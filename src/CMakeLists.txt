@@ -4,17 +4,20 @@ add_executable(DH-acc
 	BinaryTokenZDACS.cpp
 	ObjectExpression.cpp
 	ObjectExpression/Base.cpp
-	ObjectExpression/BinaryAnd.cpp
+	ObjectExpression/Binary.cpp
 	ObjectExpression/BinaryAdd.cpp
+	ObjectExpression/BinaryAnd.cpp
 	ObjectExpression/BinaryDiv.cpp
 	ObjectExpression/BinaryIOr.cpp
 	ObjectExpression/BinaryMod.cpp
 	ObjectExpression/BinaryMul.cpp
 	ObjectExpression/BinarySub.cpp
 	ObjectExpression/BinaryXOr.cpp
+	ObjectExpression/Unary.cpp
 	ObjectExpression/UnaryAdd.cpp
 	ObjectExpression/UnarySub.cpp
-	ObjectExpression/ValueInt32.cpp
+	ObjectExpression/ValueFloat.cpp
+	ObjectExpression/ValueInt.cpp
 	ObjectExpression/ValueSymbol.cpp
 	ObjectToken.cpp
 	option.cpp

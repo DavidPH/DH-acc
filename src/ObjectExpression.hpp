@@ -30,29 +30,23 @@
 #include <string>
 #include <vector>
 
+class ObjectExpression_Base;
 class SourceTokenC;
 
 
 
-class ObjectExpressionBase
-{
-public:
-	ObjectExpressionBase(SourcePosition const & position);
-	virtual ~ObjectExpressionBase();
-
-	virtual ObjectExpressionBase * clone() const = 0;
-
-	SourcePosition const & getPosition() const;
-
-	virtual int32_t resolveInt32() const = 0;
-
-public:
-	SourcePosition _position;
-};
-
 class ObjectExpression
 {
 public:
+	typedef long double float_t;
+	typedef long int int_t;
+
+	enum ExpressionType
+	{
+		ET_FLOAT,
+		ET_INT
+	};
+
 	enum ScriptFlag
 	{
 		SF_NET        = 1,
@@ -92,14 +86,17 @@ public:
 
 	ObjectExpression();
 	ObjectExpression(ObjectExpression const & expr);
-	ObjectExpression(ObjectExpressionBase * const expr);
+	ObjectExpression(ObjectExpression_Base const & expr);
 	~ObjectExpression();
 
 	SourcePosition const & getPosition() const;
 
+	ExpressionType getType() const;
+
 	ObjectExpression & operator = (ObjectExpression const & expr);
 
-	int32_t resolveInt32() const;
+	float_t resolveFloat() const;
+	int_t resolveInt() const;
 
 
 
@@ -118,22 +115,25 @@ public:
 
 	static void add_symbol(std::string const & symbol, ObjectExpression const & value);
 
-	static ObjectExpression create_binary_add(ObjectExpression const & exprL, ObjectExpression const & exprR);
-	static ObjectExpression create_binary_and(ObjectExpression const & exprL, ObjectExpression const & exprR);
-	static ObjectExpression create_binary_div(ObjectExpression const & exprL, ObjectExpression const & exprR);
-	static ObjectExpression create_binary_ior(ObjectExpression const & exprL, ObjectExpression const & exprR);
-	static ObjectExpression create_binary_mod(ObjectExpression const & exprL, ObjectExpression const & exprR);
-	static ObjectExpression create_binary_mul(ObjectExpression const & exprL, ObjectExpression const & exprR);
-	static ObjectExpression create_binary_sub(ObjectExpression const & exprL, ObjectExpression const & exprR);
-	static ObjectExpression create_binary_xor(ObjectExpression const & exprL, ObjectExpression const & exprR);
+	static ObjectExpression create_binary_add(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
+	static ObjectExpression create_binary_and(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
+	static ObjectExpression create_binary_div(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
+	static ObjectExpression create_binary_ior(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
+	static ObjectExpression create_binary_mod(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
+	static ObjectExpression create_binary_mul(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
+	static ObjectExpression create_binary_sub(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
+	static ObjectExpression create_binary_xor(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
 
-	static ObjectExpression create_unary_add(ObjectExpression const & expr);
-	static ObjectExpression create_unary_sub(ObjectExpression const & expr);
+	static ObjectExpression create_unary_add(ObjectExpression const & expr, SourcePosition const & position);
+	static ObjectExpression create_unary_sub(ObjectExpression const & expr, SourcePosition const & position);
 
-	static ObjectExpression create_value_int32(int32_t const value, SourcePosition const & position);
+	static ObjectExpression create_value_float(float_t value, SourcePosition const & position);
+	static ObjectExpression create_value_float(SourceTokenC const & token);
+	static ObjectExpression create_value_int(int_t value, SourcePosition const & position);
+	static ObjectExpression create_value_int(SourceTokenC const & token);
 	static ObjectExpression create_value_symbol(std::string const & symbol, SourcePosition const & position);
 
-	static int32_t get_int32(SourceTokenC const & token);
+	static int_t get_int(SourceTokenC const & token);
 
 	static ScriptFlag get_ScriptFlag(std::string const & value, SourcePosition const & position);
 
@@ -159,7 +159,7 @@ public:
 	static void set_address_count(int32_t addressCount);
 
 private:
-	ObjectExpressionBase * _expr;
+	ObjectExpression_Base * _expr;
 
 
 

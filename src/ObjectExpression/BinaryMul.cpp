@@ -16,49 +16,84 @@
 
 /* ObjectExpression/BinaryMul.cpp
 **
-** ObjectExpressionBinaryMul class and methods.
+** Defines the ObjectExpression_BinaryMul class and methods.
 */
 
-#include "../ObjectExpression.hpp"
+#include "Binary.hpp"
 
 
 
-class ObjectExpressionBinaryMul : public ObjectExpressionBase
+class ObjectExpression_BinaryMul : public ObjectExpression_Binary
 {
 public:
-	ObjectExpressionBinaryMul(ObjectExpression const & exprL, ObjectExpression const & exprR);
+	ObjectExpression_BinaryMul(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
 
-	virtual ObjectExpressionBinaryMul * clone() const;
+	virtual ObjectExpression_BinaryMul * clone() const;
 
-	virtual int32_t resolveInt32() const;
+	virtual char const * getName() const;
 
-private:
-	ObjectExpression _exprL;
-	ObjectExpression _exprR;
+	virtual void printDebug(std::ostream * out) const;
+
+	virtual ObjectExpression::float_t resolveFloat() const;
+	virtual ObjectExpression::int_t resolveInt() const;
 };
 
 
 
-ObjectExpression ObjectExpression::create_binary_mul(ObjectExpression const & exprL, ObjectExpression const & exprR)
+ObjectExpression ObjectExpression::create_binary_mul(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position)
 {
-	return new ObjectExpressionBinaryMul(exprL, exprR);
+	return ObjectExpression_BinaryMul(exprL, exprR, position);
 }
 
 
 
-ObjectExpressionBinaryMul::ObjectExpressionBinaryMul(ObjectExpression const & exprL, ObjectExpression const & exprR) : ObjectExpressionBase(exprL.getPosition()), _exprL(exprL), _exprR(exprR)
+ObjectExpression_BinaryMul::ObjectExpression_BinaryMul(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
 {
 
 }
 
-ObjectExpressionBinaryMul * ObjectExpressionBinaryMul::clone() const
+ObjectExpression_BinaryMul * ObjectExpression_BinaryMul::clone() const
 {
-	return new ObjectExpressionBinaryMul(*this);
+	return new ObjectExpression_BinaryMul(*this);
 }
 
-int32_t ObjectExpressionBinaryMul::resolveInt32() const
+char const * ObjectExpression_BinaryMul::getName() const
 {
-	return _exprL.resolveInt32() * _exprR.resolveInt32();
+	return "ObjectExpression_BinaryAdd";
+}
+
+void ObjectExpression_BinaryMul::printDebug(std::ostream * const out) const
+{
+	*out << "ObjectExpression_BinaryMul(";
+	ObjectExpression_Binary::printDebug(out);
+	*out << ")";
+}
+
+ObjectExpression::float_t ObjectExpression_BinaryMul::resolveFloat() const
+{
+	switch (getType())
+	{
+	case ObjectExpression::ET_FLOAT:
+		return _exprL.resolveFloat() * _exprR.resolveFloat();
+
+	case ObjectExpression::ET_INT:
+		return (ObjectExpression::float_t)(_exprL.resolveInt() * _exprR.resolveInt());
+	}
+
+	return ObjectExpression_Binary::resolveFloat();
+}
+ObjectExpression::int_t ObjectExpression_BinaryMul::resolveInt() const
+{
+	switch (getType())
+	{
+	case ObjectExpression::ET_FLOAT:
+		return (ObjectExpression::int_t)(_exprL.resolveFloat() * _exprR.resolveFloat());
+
+	case ObjectExpression::ET_INT:
+		return _exprL.resolveInt() * _exprR.resolveInt();
+	}
+
+	return ObjectExpression_Binary::resolveInt();
 }
 
 

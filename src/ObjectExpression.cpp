@@ -24,6 +24,8 @@
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 
+#include "ObjectExpression/Base.hpp"
+
 #include <sstream>
 
 
@@ -45,7 +47,7 @@ ObjectExpression::ObjectExpression(ObjectExpression const & expr) : _expr(expr._
 {
 
 }
-ObjectExpression::ObjectExpression(ObjectExpressionBase * const expr) : _expr(expr)
+ObjectExpression::ObjectExpression(ObjectExpression_Base const & expr) : _expr(expr.clone())
 {
 
 }
@@ -61,7 +63,7 @@ void ObjectExpression::add_address_count(int32_t const addressCount)
 
 void ObjectExpression::add_label(std::string const & symbol)
 {
-	add_symbol(symbol, create_value_int32(_address_count, SourcePosition::none));
+	add_symbol(symbol, create_value_int(_address_count, SourcePosition::none));
 }
 
 void ObjectExpression::add_script(std::string const & label, int32_t number, ScriptType type, int32_t args, int vars, int flags)
@@ -84,7 +86,7 @@ void ObjectExpression::add_string(std::string const & symbol, std::string const 
 {
 	// TODO: Option for string folding.
 
-	add_symbol(symbol, create_value_int32((int32_t)_string_table.size(), SourcePosition::none));
+	add_symbol(symbol, create_value_int((int_t)_string_table.size(), SourcePosition::none));
 
 	String s = {get_string_length(), value};
 	_string_table.push_back(s);
@@ -95,9 +97,9 @@ void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression c
 	_symbol_table[symbol] = value;
 }
 
-int32_t ObjectExpression::get_int32(SourceTokenC const & token)
+ObjectExpression::int_t ObjectExpression::get_int(SourceTokenC const & token)
 {
-	int32_t i;
+	int_t i;
 	std::istringstream iss(token.getData());
 	iss >> i;
 	return i;
@@ -194,7 +196,12 @@ ObjectExpression ObjectExpression::get_symbol(std::string const & symbol, Source
 
 SourcePosition const & ObjectExpression::getPosition() const
 {
-	return _expr->getPosition();
+	return _expr ? _expr->getPosition() : SourcePosition::none;
+}
+
+ObjectExpression::ExpressionType ObjectExpression::getType() const
+{
+	return _expr ? _expr->getType() : ET_INT;
 }
 
 ObjectExpression & ObjectExpression::operator = (ObjectExpression const & expr)
@@ -209,9 +216,13 @@ void ObjectExpression::reserve_script_number(int32_t number)
 	_script_used[number] = true;
 }
 
-int32_t ObjectExpression::resolveInt32() const
+ObjectExpression::float_t ObjectExpression::resolveFloat() const
 {
-	return _expr ? _expr->resolveInt32() : 0;
+	return _expr ? _expr->resolveFloat() : 0;
+}
+ObjectExpression::int_t ObjectExpression::resolveInt() const
+{
+	return _expr ? _expr->resolveInt() : 0;
 }
 
 void ObjectExpression::set_address_count(int32_t addressCount)
@@ -226,8 +237,7 @@ void print_debug(std::ostream * const out, ObjectExpression const & in)
 	*out << "ObjectExpression(";
 
 	if (in._expr)
-		//in._expr->printDebug(out);
-		*out << "TODO";
+		in._expr->printDebug(out);
 	else
 		*out << "NULL";
 

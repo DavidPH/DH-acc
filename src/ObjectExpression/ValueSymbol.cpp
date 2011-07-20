@@ -16,21 +16,30 @@
 
 /* ObjectExpression/ValueSymbol.cpp
 **
-** ObjectExpressionValueSymbol class and methods.
+** Defines the ObjectExpression_ValueSymbol class and methods.
 */
 
-#include "../ObjectExpression.hpp"
+#include "Base.hpp"
+
+#include "../print_debug.hpp"
 
 
 
-class ObjectExpressionValueSymbol : public ObjectExpressionBase
+class ObjectExpression_ValueSymbol : public ObjectExpression_Base
 {
 public:
-	ObjectExpressionValueSymbol(std::string const & value, SourcePosition const & position);
+	ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position);
 
-	virtual ObjectExpressionValueSymbol * clone() const;
+	virtual ObjectExpression_ValueSymbol * clone() const;
 
-	virtual int32_t resolveInt32() const;
+	virtual char const * getName() const;
+
+	virtual ObjectExpression::ExpressionType getType() const;
+
+	virtual void printDebug(std::ostream * out) const;
+
+	virtual ObjectExpression::float_t resolveFloat() const;
+	virtual ObjectExpression::int_t resolveInt() const;
 
 private:
 	std::string _value;
@@ -40,24 +49,49 @@ private:
 
 ObjectExpression ObjectExpression::create_value_symbol(std::string const & value, SourcePosition const & position)
 {
-	return new ObjectExpressionValueSymbol(value, position);
+	return ObjectExpression_ValueSymbol(value, position);
 }
 
 
 
-ObjectExpressionValueSymbol::ObjectExpressionValueSymbol(std::string const & value, SourcePosition const & position) : ObjectExpressionBase(position), _value(value)
+ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position) : ObjectExpression_Base(position), _value(value)
 {
 
 }
 
-ObjectExpressionValueSymbol * ObjectExpressionValueSymbol::clone() const
+ObjectExpression_ValueSymbol * ObjectExpression_ValueSymbol::clone() const
 {
-	return new ObjectExpressionValueSymbol(*this);
+	return new ObjectExpression_ValueSymbol(*this);
 }
 
-int32_t ObjectExpressionValueSymbol::resolveInt32() const
+char const * ObjectExpression_ValueSymbol::getName() const
 {
-	return ObjectExpression::get_symbol(_value, _position).resolveInt32();
+	return "ObjectExpression_ValueSymbol";
+}
+
+ObjectExpression::ExpressionType ObjectExpression_ValueSymbol::getType() const
+{
+	return ObjectExpression::get_symbol(_value, getPosition()).getType();
+}
+
+void ObjectExpression_ValueSymbol::printDebug(std::ostream * const out) const
+{
+	*out << "ObjectExpression_ValueSymbol(";
+	ObjectExpression_Base::printDebug(out);
+	*out << " ";
+		*out << "value=(";
+		print_debug(out, _value);
+		*out << ")";
+	*out << ")";
+}
+
+ObjectExpression::float_t ObjectExpression_ValueSymbol::resolveFloat() const
+{
+	return ObjectExpression::get_symbol(_value, getPosition()).resolveFloat();
+}
+ObjectExpression::int_t ObjectExpression_ValueSymbol::resolveInt() const
+{
+	return ObjectExpression::get_symbol(_value, getPosition()).resolveInt();
 }
 
 

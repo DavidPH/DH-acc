@@ -16,49 +16,70 @@
 
 /* ObjectExpression/BinaryIOr.cpp
 **
-** ObjectExpressionBinaryIOr class and methods.
+** Defines the ObjectExpression_BinaryIOr class and methods.
 */
 
-#include "../ObjectExpression.hpp"
+#include "Binary.hpp"
 
 
 
-class ObjectExpressionBinaryIOr : public ObjectExpressionBase
+class ObjectExpression_BinaryIOr : public ObjectExpression_Binary
 {
 public:
-	ObjectExpressionBinaryIOr(ObjectExpression const & exprL, ObjectExpression const & exprR);
+	ObjectExpression_BinaryIOr(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
 
-	virtual ObjectExpressionBinaryIOr * clone() const;
+	virtual ObjectExpression_BinaryIOr * clone() const;
 
-	virtual int32_t resolveInt32() const;
+	virtual char const * getName() const;
 
-private:
-	ObjectExpression _exprL;
-	ObjectExpression _exprR;
+	virtual void printDebug(std::ostream * out) const;
+
+	virtual ObjectExpression::int_t resolveInt() const;
 };
 
 
 
-ObjectExpression ObjectExpression::create_binary_ior(ObjectExpression const & exprL, ObjectExpression const & exprR)
+ObjectExpression ObjectExpression::create_binary_ior(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position)
 {
-	return new ObjectExpressionBinaryIOr(exprL, exprR);
+	return ObjectExpression_BinaryIOr(exprL, exprR, position);
 }
 
 
 
-ObjectExpressionBinaryIOr::ObjectExpressionBinaryIOr(ObjectExpression const & exprL, ObjectExpression const & exprR) : ObjectExpressionBase(exprL.getPosition()), _exprL(exprL), _exprR(exprR)
+ObjectExpression_BinaryIOr::ObjectExpression_BinaryIOr(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
 {
 
 }
 
-ObjectExpressionBinaryIOr * ObjectExpressionBinaryIOr::clone() const
+ObjectExpression_BinaryIOr * ObjectExpression_BinaryIOr::clone() const
 {
-	return new ObjectExpressionBinaryIOr(*this);
+	return new ObjectExpression_BinaryIOr(*this);
 }
 
-int32_t ObjectExpressionBinaryIOr::resolveInt32() const
+char const * ObjectExpression_BinaryIOr::getName() const
 {
-	return _exprL.resolveInt32() | _exprR.resolveInt32();
+	return "ObjectExpression_BinaryIOr";
+}
+
+void ObjectExpression_BinaryIOr::printDebug(std::ostream * const out) const
+{
+	*out << "ObjectExpression_BinaryIOr(";
+	ObjectExpression_Binary::printDebug(out);
+	*out << ")";
+}
+
+ObjectExpression::int_t ObjectExpression_BinaryIOr::resolveInt() const
+{
+	switch (getType())
+	{
+	case ObjectExpression::ET_FLOAT:
+		return ObjectExpression_Binary::resolveInt();
+
+	case ObjectExpression::ET_INT:
+		return _exprL.resolveInt() | _exprR.resolveInt();
+	}
+
+	return ObjectExpression_Binary::resolveInt();
 }
 
 

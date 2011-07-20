@@ -173,13 +173,31 @@ void BinaryTokenZDACS::write(std::ostream * const out) const
 	write_32(out, _code);
 
 	for (uintptr_t i(0); i < _arg_counts[_code]; ++i)
-		write_32(out, i < _args.size() ? _args[i].resolveInt32() : 0);
+	{
+		if (i < _args.size())
+			write_32(out, _args[i]);
+		else
+			write_32(out, 0);
+	}
 }
 
 void BinaryTokenZDACS::write_16(std::ostream * const out, uint16_t const i)
 {
 	out->put((i >> 0) & 0xFF);
 	out->put((i >> 8) & 0xFF);
+}
+void BinaryTokenZDACS::write_32(std::ostream * const out, ObjectExpression const & expr)
+{
+	switch (expr.getType())
+	{
+	case ObjectExpression::ET_FLOAT:
+		write_32(out, (int32_t)(expr.resolveFloat() * 65536.0));
+		break;
+
+	case ObjectExpression::ET_INT:
+		write_32(out, (int32_t)expr.resolveInt());
+		break;
+	}
 }
 void BinaryTokenZDACS::write_32(std::ostream * const out, uint32_t const i)
 {
@@ -303,14 +321,14 @@ void BinaryTokenZDACS::write_script(std::ostream * const out, ObjectExpression::
 	{
 	case OUTPUT_ACS0:
 		write_32(out, (int32_t)(s.type * 1000) + (int32_t)s.number);
-		write_32(out, ObjectExpression::get_symbol(s.label, SourcePosition::none).resolveInt32());
+		write_32(out, ObjectExpression::get_symbol(s.label, SourcePosition::none));
 		write_32(out, s.args);
 		break;
 
 	case OUTPUT_ACSE:
 		write_16(out, (int16_t)s.number);
 		write_16(out, (int16_t)s.type);
-		write_32(out, ObjectExpression::get_symbol(s.label, SourcePosition::none).resolveInt32());
+		write_32(out, ObjectExpression::get_symbol(s.label, SourcePosition::none));
 		write_32(out, s.args);
 		break;
 
