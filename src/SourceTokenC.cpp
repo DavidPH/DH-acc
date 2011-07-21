@@ -212,11 +212,11 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 		return;
 	}
 
-	if (isdigit(c))
+	if (isdigit(c) || c == '.')
 	{
-		_type = TT_NUMBER;
+		_type = c == '.' ? TT_FLOAT : TT_INTEGER;
 
-		bool foundDot   (false);
+		bool foundDot   (c == '.');
 		bool foundPlus  (false);
 		bool foundZero  (c == '0');
 		bool foundPrefix(!foundZero);
@@ -242,12 +242,14 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 
 			if (!foundDot && c == '.')
 			{
+				_type = TT_FLOAT;
 				foundDot = true;
 				continue;
 			}
 
 			if (!foundPlus && ((cOld == 'E') || (cOld == 'e')) && ((c == '+') || (c == '-')))
 			{
+				_type = TT_FLOAT;
 				foundPlus = true;
 				continue;
 			}
@@ -312,10 +314,12 @@ void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type)
 {
 	switch (type)
 	{
-	case SourceTokenC::TT_IDENTIFIER:            *out << "TT_IDENTIFIER"; break;
-	case SourceTokenC::TT_NUMBER:                *out << "TT_NUMBER"; break;
-	case SourceTokenC::TT_OP_PLUS:               *out << "TT_OP_PLUS"; break;
-	case SourceTokenC::TT_OP_SEMICOLON:          *out << "TT_OP_SEMICOLON"; break;
+	case SourceTokenC::TT_CHARACTER:             *out << "TT_CHARACTER";             break;
+	case SourceTokenC::TT_FLOAT:                 *out << "TT_FLOAT";                 break;
+	case SourceTokenC::TT_IDENTIFIER:            *out << "TT_IDENTIFIER";            break;
+	case SourceTokenC::TT_INTEGER:               *out << "TT_INTEGER";               break;
+	case SourceTokenC::TT_OP_PLUS:               *out << "TT_OP_PLUS";               break;
+	case SourceTokenC::TT_OP_SEMICOLON:          *out << "TT_OP_SEMICOLON";          break;
 	case SourceTokenC::TT_OP_SHIFT_RIGHT_EQUALS: *out << "TT_OP_SHIFT_RIGHT_EQUALS"; break;
 	default: *out << "TT_"; break;
 	}

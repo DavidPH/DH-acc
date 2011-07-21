@@ -126,7 +126,6 @@ private:
 	static SourceExpressionDS make_expression_value_fixed(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_int(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_member(SourceExpressionDS const & expr, SourceTokenC const & token);
-	static SourceExpressionDS make_expression_value_number(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_script(int32_t number, SourceVariable::VariableType const * type, SourcePosition const & position);
 	static SourceExpressionDS make_expression_value_string(ObjectExpression const & symbol, SourcePosition const & position);
 	static SourceExpressionDS make_expression_value_variable(SourceVariable const & var, SourcePosition const & position);

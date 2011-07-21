@@ -37,8 +37,9 @@ public:
 	enum TokenType
 	{
 		TT_CHARACTER,
+		TT_FLOAT,
 		TT_IDENTIFIER,
-		TT_NUMBER,
+		TT_INTEGER,
 		TT_STRING,
 
 		TT_OP_AND,                // &

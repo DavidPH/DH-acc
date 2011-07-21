@@ -224,6 +224,9 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		return make_expression_value_variable(charVariable, token.getPosition());
 	}
 
+	case SourceTokenC::TT_FLOAT:
+		return make_expression_value_fixed(token);
+
 	case SourceTokenC::TT_IDENTIFIER:
 		if (token.getData() == "asmfunc")
 		{
@@ -279,7 +282,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			std::string lnspecName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
 			// lnspecNumber
-			ObjectExpression::int_t lnspecNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_NUMBER)));
+			ObjectExpression::int_t lnspecNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER)));
 
 			// lnspecArgs
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
@@ -321,7 +324,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			std::string nativeName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
 			// nativeNumber
-			ObjectExpression::int_t nativeNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_NUMBER)));
+			ObjectExpression::int_t nativeNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER)));
 
 			// nativeArgs
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
@@ -381,7 +384,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			// scriptNumber
 			SourceTokenC scriptNumberToken(in->get());
 			ObjectExpression::int_t scriptNumber;
-			if (scriptNumberToken.getType() == SourceTokenC::TT_NUMBER)
+			if (scriptNumberToken.getType() == SourceTokenC::TT_INTEGER)
 			{
 				scriptNumber = ObjectExpression::get_int(scriptNumberToken);
 			}
@@ -576,8 +579,8 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 		return make_expression_value_variable(context->getVariable(token), token.getPosition());
 
-	case SourceTokenC::TT_NUMBER:
-		return make_expression_value_number(token);
+	case SourceTokenC::TT_INTEGER:
+		return make_expression_value_int(token);
 
 	case SourceTokenC::TT_STRING:
 		return make_expression_value_string(ObjectExpression::create_value_symbol(ObjectExpression::add_string(token.getData() + '\0'), token.getPosition()), token.getPosition());
@@ -600,14 +603,6 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		in->unget(token);
 		throw SourceException("unexpected token type (single)", token.getPosition(), "SourceExpressionDS");
 	}
-}
-
-SourceExpressionDS SourceExpressionDS::make_expression_value_number(SourceTokenC const & token)
-{
-	if (token.getData().find_first_of('.') == std::string::npos)
-		return make_expression_value_int(token);
-	else
-		return make_expression_value_fixed(token);
 }
 
 SourceExpressionDS SourceExpressionDS::make_expressions(SourceTokenizerDS * const in)
