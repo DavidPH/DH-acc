@@ -36,6 +36,7 @@ class SourceTokenC
 public:
 	enum TokenType
 	{
+		TT_CHARACTER,
 		TT_IDENTIFIER,
 		TT_NUMBER,
 		TT_STRING,

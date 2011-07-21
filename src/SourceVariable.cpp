@@ -98,6 +98,10 @@ SourceVariable::SourceVariable(std::string const & name, VariableData_AsmFunc co
 {
 	_data.vdAsmFunc = vdAsmFunc;
 }
+SourceVariable::SourceVariable(std::string const & name, VariableData_Char const & vdChar, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdChar.type)
+{
+	_data.vdChar = vdChar;
+}
 SourceVariable::SourceVariable(std::string const & name, VariableData_LnSpec const & vdLnSpec, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdLnSpec.type)
 {
 	_data.vdLnSpec = vdLnSpec;
@@ -365,6 +369,9 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 			break;
 
 		case VT_CHAR:
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdChar.value, position)));
+			break;
+
 		case VT_FIXED:
 		case VT_INT:
 		case VT_STRING:

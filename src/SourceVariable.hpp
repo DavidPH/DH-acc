@@ -81,6 +81,11 @@ public:
 		ObjectToken::ObjectCode ocode;
 		ObjectToken::ObjectCode ocode_imm;
 	};
+	struct VariableData_Char
+	{
+		VariableType const * type;
+		int value;
+	};
 	struct VariableData_LnSpec
 	{
 		VariableType const * type;
@@ -100,6 +105,7 @@ public:
 	union VariableData
 	{
 		VariableData_AsmFunc vdAsmFunc;
+		VariableData_Char vdChar;
 		VariableData_LnSpec vdLnSpec;
 		VariableData_Native vdNative;
 		VariableData_Script vdScript;
@@ -110,6 +116,7 @@ public:
 	SourceVariable();
 	SourceVariable(std::string const & nameObject, std::string const & nameSource, int const address, StorageClass const sc, VariableType const * const type, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_AsmFunc const & vdAsmFunc, SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Char const & vdChar, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_LnSpec const & vdLnSpec, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Native const & vdNative, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position);
@@ -165,8 +172,6 @@ private:
 	StorageClass _sc;
 	VariableType const * _type;
 
-	static VariableType const * get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, std::vector<VariableType const *> const & types);
-
 	void makeObjectsGet(std::vector<ObjectToken> * const objects, SourcePosition const & position, VariableType const * const type, int * const address) const;
 	void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const;
 	void makeObjectsGet(VariableType const * const type, int * const address) const;
@@ -175,6 +180,8 @@ private:
 	void makeObjectsSet(VariableType const * const type, int * const address) const;
 
 
+
+	static VariableType const * get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, std::vector<VariableType const *> const & types);
 
 	static std::vector<std::string>    _names;
 	static std::vector<VariableType *> _types;

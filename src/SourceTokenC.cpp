@@ -260,9 +260,9 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 		return;
 	}
 
-	if (c == '"')
+	if (c == '"' || c == '\'')
 	{
-		_type = TT_STRING;
+		_type = c == '"' ? TT_STRING : TT_CHARACTER;
 
 		c = in->get();
 

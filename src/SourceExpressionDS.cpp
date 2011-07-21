@@ -207,6 +207,23 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 	switch (token.getType())
 	{
+	case SourceTokenC::TT_CHARACTER:
+	{
+		if (token.getData().size() != 1)
+			throw SourceException("invalid length for character literal", token.getPosition(), "SourceExpressionDS");
+
+		// charVarType
+		SourceVariable::VariableType const * charVarType(SourceVariable::get_VariableType(SourceVariable::VT_CHAR));
+
+		// charVarData
+		SourceVariable::VariableData_Char charVarData = {charVarType, token.getData()[0]};
+
+		// charVariable
+		SourceVariable charVariable("", charVarData, token.getPosition());
+
+		return make_expression_value_variable(charVariable, token.getPosition());
+	}
+
 	case SourceTokenC::TT_IDENTIFIER:
 		if (token.getData() == "asmfunc")
 		{
