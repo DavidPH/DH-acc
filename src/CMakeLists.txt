@@ -38,10 +38,10 @@ add_executable(DH-acc
 	SourceExpressionDS/BinaryMul.cpp
 	SourceExpressionDS/BinarySub.cpp
 	SourceExpressionDS/CastChar.cpp
-	SourceExpressionDS/CastFixed.cpp
 	SourceExpressionDS/CastInt.cpp
 	SourceExpressionDS/CastLnSpec.cpp
 	SourceExpressionDS/CastNative.cpp
+	SourceExpressionDS/CastReal.cpp
 	SourceExpressionDS/CastScript.cpp
 	SourceExpressionDS/CastString.cpp
 	SourceExpressionDS/CastStruct.cpp
@@ -52,11 +52,7 @@ add_executable(DH-acc
 	SourceExpressionDS/RootReturn.cpp
 	SourceExpressionDS/RootTerm.cpp
 	SourceExpressionDS/RootVoid.cpp
-	SourceExpressionDS/ValueFixed.cpp
-	SourceExpressionDS/ValueInt.cpp
 	SourceExpressionDS/ValueMember.cpp
-	SourceExpressionDS/ValueScript.cpp
-	SourceExpressionDS/ValueString.cpp
 	SourceExpressionDS/ValueVariable.cpp
 	SourceBlockC.cpp
 	SourcePosition.cpp

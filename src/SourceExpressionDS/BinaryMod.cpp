@@ -80,8 +80,8 @@ void SourceExpressionDS_BinaryMod::makeObjectsGet(std::vector<ObjectToken> * con
 		throw SourceException("invalid VT", getPosition(), getName());
 
 	case SourceVariable::VT_CHAR:
-	case SourceVariable::VT_FIXED:
 	case SourceVariable::VT_INT:
+	case SourceVariable::VT_REAL:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_MOD, getPosition()));
 		break;
 	}

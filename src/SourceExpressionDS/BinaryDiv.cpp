@@ -84,7 +84,7 @@ void SourceExpressionDS_BinaryDiv::makeObjectsGet(std::vector<ObjectToken> * con
 		objects->push_back(ObjectToken(ObjectToken::OCODE_DIV, getPosition()));
 		break;
 
-	case SourceVariable::VT_FIXED:
+	case SourceVariable::VT_REAL:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_DIVFIXED, getPosition()));
 		break;
 	}

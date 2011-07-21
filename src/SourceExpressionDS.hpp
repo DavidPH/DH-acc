@@ -104,10 +104,10 @@ private:
 	static SourceExpressionDS make_expression_binary_sub(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 
 	static SourceExpressionDS make_expression_cast_char(SourceExpressionDS const & expr, SourcePosition const & position);
-	static SourceExpressionDS make_expression_cast_fixed(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_int(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_lnspec(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_native(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
+	static SourceExpressionDS make_expression_cast_real(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_script(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_string(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_struct(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
@@ -123,11 +123,11 @@ private:
 	static SourceExpressionDS make_expression_root_term(SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_void(SourceExpressionDS const & expr, SourcePosition const & position);
 
-	static SourceExpressionDS make_expression_value_fixed(SourceTokenC const & token);
+	static SourceExpressionDS make_expression_value_char(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_int(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_member(SourceExpressionDS const & expr, SourceTokenC const & token);
-	static SourceExpressionDS make_expression_value_script(int32_t number, SourceVariable::VariableType const * type, SourcePosition const & position);
-	static SourceExpressionDS make_expression_value_string(ObjectExpression const & symbol, SourcePosition const & position);
+	static SourceExpressionDS make_expression_value_real(SourceTokenC const & token);
+	static SourceExpressionDS make_expression_value_string(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_variable(SourceVariable const & var, SourcePosition const & position);
 };
 

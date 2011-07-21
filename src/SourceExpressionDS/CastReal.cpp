@@ -14,9 +14,9 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourceExpressionDS/CastFixed.cpp
+/* SourceExpressionDS/CastReal.cpp
 **
-** Defines the SourceExpressionDS_CastFixed class and methods.
+** Defines the SourceExpressionDS_CastReal class and methods.
 */
 
 #include "Base.hpp"
@@ -26,12 +26,12 @@
 
 
 
-class SourceExpressionDS_CastFixed : public SourceExpressionDS_Base
+class SourceExpressionDS_CastReal : public SourceExpressionDS_Base
 {
 public:
-	SourceExpressionDS_CastFixed(SourceExpressionDS const & expr, SourcePosition const & position);
+	SourceExpressionDS_CastReal(SourceExpressionDS const & expr, SourcePosition const & position);
 
-	virtual SourceExpressionDS_CastFixed * clone() const;
+	virtual SourceExpressionDS_CastReal * clone() const;
 
 	virtual char const * getName() const;
 
@@ -49,39 +49,39 @@ private:
 
 
 
-SourceExpressionDS SourceExpressionDS::make_expression_cast_fixed(SourceExpressionDS const & expr, SourcePosition const & position)
+SourceExpressionDS SourceExpressionDS::make_expression_cast_real(SourceExpressionDS const & expr, SourcePosition const & position)
 {
-	return new SourceExpressionDS_CastFixed(expr, position);
+	return new SourceExpressionDS_CastReal(expr, position);
 }
 
 
 
-SourceExpressionDS_CastFixed::SourceExpressionDS_CastFixed(SourceExpressionDS const & expr, SourcePosition const & position) : SourceExpressionDS_Base(position), _expr(expr)
+SourceExpressionDS_CastReal::SourceExpressionDS_CastReal(SourceExpressionDS const & expr, SourcePosition const & position) : SourceExpressionDS_Base(position), _expr(expr)
 {
 
 }
 
-SourceExpressionDS_CastFixed * SourceExpressionDS_CastFixed::clone() const
+SourceExpressionDS_CastReal * SourceExpressionDS_CastReal::clone() const
 {
-	return new SourceExpressionDS_CastFixed(*this);
+	return new SourceExpressionDS_CastReal(*this);
 }
 
-char const * SourceExpressionDS_CastFixed::getName() const
+char const * SourceExpressionDS_CastReal::getName() const
 {
-	return "SourceExpressionDS_CastFixed";
+	return "SourceExpressionDS_CastReal";
 }
 
-SourceVariable::VariableType const * SourceExpressionDS_CastFixed::getType() const
+SourceVariable::VariableType const * SourceExpressionDS_CastReal::getType() const
 {
-	return SourceVariable::get_VariableType(SourceVariable::VT_FIXED);
+	return SourceVariable::get_VariableType(SourceVariable::VT_REAL);
 }
 
-bool SourceExpressionDS_CastFixed::isConstant() const
+bool SourceExpressionDS_CastReal::isConstant() const
 {
 	return _expr.isConstant();
 }
 
-void SourceExpressionDS_CastFixed::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_CastReal::makeObjectsGet(std::vector<ObjectToken> * const objects) const
 {
 	_expr.makeObjectsGet(objects);
 
@@ -102,14 +102,14 @@ void SourceExpressionDS_CastFixed::makeObjectsGet(std::vector<ObjectToken> * con
 		objects->push_back(ObjectToken(ObjectToken::OCODE_SHIFTL, getPosition()));
 		break;
 
-	case SourceVariable::VT_FIXED:
+	case SourceVariable::VT_REAL:
 		break;
 	}
 }
 
-void SourceExpressionDS_CastFixed::printDebug(std::ostream * const out) const
+void SourceExpressionDS_CastReal::printDebug(std::ostream * const out) const
 {
-	*out << "SourceExpressionDS_CastFixed(";
+	*out << "SourceExpressionDS_CastReal(";
 	SourceExpressionDS_Base::printDebug(out);
 	*out << " ";
 		*out << "expr=(";

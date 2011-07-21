@@ -46,8 +46,8 @@ public:
 	enum VariableTypeInternal
 	{
 		VT_CHAR,
-		VT_FIXED,
 		VT_INT,
+		VT_REAL,
 		VT_STRING,
 
 		VT_VOID,
@@ -86,6 +86,11 @@ public:
 		VariableType const * type;
 		int value;
 	};
+	struct VariableData_Int
+	{
+		VariableType const * type;
+		int value;
+	};
 	struct VariableData_LnSpec
 	{
 		VariableType const * type;
@@ -96,7 +101,17 @@ public:
 		VariableType const * type;
 		int number;
 	};
+	struct VariableData_Real
+	{
+		VariableType const * type;
+		double value;
+	};
 	struct VariableData_Script
+	{
+		VariableType const * type;
+		int number;
+	};
+	struct VariableData_String
 	{
 		VariableType const * type;
 		int number;
@@ -105,10 +120,13 @@ public:
 	union VariableData
 	{
 		VariableData_AsmFunc vdAsmFunc;
-		VariableData_Char vdChar;
-		VariableData_LnSpec vdLnSpec;
-		VariableData_Native vdNative;
-		VariableData_Script vdScript;
+		VariableData_Char    vdChar;
+		VariableData_Int     vdInt;
+		VariableData_LnSpec  vdLnSpec;
+		VariableData_Native  vdNative;
+		VariableData_Real    vdReal;
+		VariableData_Script  vdScript;
+		VariableData_String  vdString;
 	};
 
 
@@ -116,10 +134,13 @@ public:
 	SourceVariable();
 	SourceVariable(std::string const & nameObject, std::string const & nameSource, int const address, StorageClass const sc, VariableType const * const type, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_AsmFunc const & vdAsmFunc, SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Char const & vdChar, SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_LnSpec const & vdLnSpec, SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Native const & vdNative, SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Char    const & vdChar,    SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Int     const & vdInt,     SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_LnSpec  const & vdLnSpec,  SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Native  const & vdNative,  SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Real    const & vdReal,    SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Script  const & vdScript,  SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_String  const & vdString,  SourcePosition const & position, std::string const & nameObject);
 
 	StorageClass getClass() const;
 

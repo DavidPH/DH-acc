@@ -133,6 +133,8 @@ public:
 	static ObjectExpression create_value_int(SourceTokenC const & token);
 	static ObjectExpression create_value_symbol(std::string const & symbol, SourcePosition const & position);
 
+	static float_t get_float(SourceTokenC const & token);
+
 	static int_t get_int(SourceTokenC const & token);
 
 	static ScriptFlag get_ScriptFlag(std::string const & value, SourcePosition const & position);

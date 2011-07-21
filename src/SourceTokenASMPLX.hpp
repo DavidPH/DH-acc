@@ -79,8 +79,8 @@ private:
 
 	// Returns -1 for number 0.
 	static int32_t string_to_base(std::string const & s, SourcePosition const & position);
-	static int32_t string_to_fixed(std::string const & s, SourcePosition const & position);
 	static int32_t string_to_int(std::string const & s, SourcePosition const & position);
+	static long double string_to_real(std::string const & s, SourcePosition const & position);
 
 	static std::map<std::string, std::pair<ObjectToken::ObjectCode, int> > _arg_counts;
 };

@@ -243,7 +243,7 @@ ObjectExpression SourceTokenASMPLX::make_expression(std::string const & expr, So
 			if (expr.find_first_of('.') == std::string::npos)
 				return ObjectExpression::create_value_int(string_to_int(expr, position), position);
 			else
-				return ObjectExpression::create_value_int(string_to_fixed(expr, position), position);
+				return ObjectExpression::create_value_float(string_to_real(expr, position), position);
 		}
 		else
 		{
@@ -393,30 +393,6 @@ int32_t SourceTokenASMPLX::string_to_base(std::string const & s, SourcePosition 
 	default: throw SourceException("invalid base", position, "SourceTokenASMPLX");
 	}
 }
-int32_t SourceTokenASMPLX::string_to_fixed(std::string const & s, SourcePosition const & position)
-{
-	int32_t base(string_to_base(s, position));
-
-	if (base == -1) return 0;
-
-	uintptr_t index(2);
-
-	int32_t fInt(0);
-	for (; index < s.size() && s[index] != '.'; ++index)
-	{
-		fInt *= base;
-		fInt += char_to_int(s[index], base, position);
-	}
-
-	int32_t fFrac(0);
-	for (++index; index < s.size(); ++index)
-	{
-		fFrac += char_to_int(s[index], base, position) << 16;
-		fFrac /= base;
-	}
-
-	return (fInt << 16) + fFrac;
-}
 int32_t SourceTokenASMPLX::string_to_int(std::string const & s, SourcePosition const & position)
 {
 	int32_t base(string_to_base(s, position));
@@ -431,6 +407,30 @@ int32_t SourceTokenASMPLX::string_to_int(std::string const & s, SourcePosition c
 	}
 
 	return i;
+}
+long double SourceTokenASMPLX::string_to_real(std::string const & s, SourcePosition const & position)
+{
+	long double base(string_to_base(s, position));
+
+	if (base == -1) return 0;
+
+	uintptr_t index(2);
+
+	long double fInt(0);
+	for (; index < s.size() && s[index] != '.'; ++index)
+	{
+		fInt *= base;
+		fInt += char_to_int(s[index], base, position);
+	}
+
+	long double fFrac(0);
+	for (++index; index < s.size(); ++index)
+	{
+		fFrac += char_to_int(s[index], base, position);
+		fFrac /= base;
+	}
+
+	return fInt + fFrac;
 }
 
 

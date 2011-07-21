@@ -80,10 +80,10 @@ void SourceExpressionDS_RootVoid::doVoid(std::vector<ObjectToken> * const object
 		break;
 
 	case SourceVariable::VT_CHAR:
-	case SourceVariable::VT_FIXED:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_LNSPEC:
 	case SourceVariable::VT_NATIVE:
+	case SourceVariable::VT_REAL:
 	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_DROP, getPosition()));

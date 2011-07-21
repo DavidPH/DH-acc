@@ -62,10 +62,10 @@ int SourceVariable::VariableType::size() const
 		return 0;
 
 	case VT_CHAR:
-	case VT_FIXED:
 	case VT_INT:
 	case VT_LNSPEC:
 	case VT_NATIVE:
+	case VT_REAL:
 	case VT_SCRIPT:
 	case VT_STRING:
 		return 1;
@@ -102,6 +102,10 @@ SourceVariable::SourceVariable(std::string const & name, VariableData_Char const
 {
 	_data.vdChar = vdChar;
 }
+SourceVariable::SourceVariable(std::string const & name, VariableData_Int const & vdInt, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdInt.type)
+{
+	_data.vdInt = vdInt;
+}
 SourceVariable::SourceVariable(std::string const & name, VariableData_LnSpec const & vdLnSpec, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdLnSpec.type)
 {
 	_data.vdLnSpec = vdLnSpec;
@@ -110,9 +114,17 @@ SourceVariable::SourceVariable(std::string const & name, VariableData_Native con
 {
 	_data.vdNative = vdNative;
 }
+SourceVariable::SourceVariable(std::string const & name, VariableData_Real const & vdReal, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdReal.type)
+{
+	_data.vdReal = vdReal;
+}
 SourceVariable::SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdScript.type)
 {
 	_data.vdScript = vdScript;
+}
+SourceVariable::SourceVariable(std::string const & name, VariableData_String const & vdString, SourcePosition const & position, std::string const & nameObject) : _address(-1), _nameObject(nameObject), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdString.type)
+{
+	_data.vdString = vdString;
 }
 
 void SourceVariable::add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types)
@@ -248,13 +260,13 @@ void SourceVariable::init()
 	_names[VT_CHAR] = "char";
 	_types[VT_CHAR] = new VariableType(type);
 
-	type.type = VT_FIXED;
-	_names[VT_FIXED] = "fixed";
-	_types[VT_FIXED] = new VariableType(type);
-
 	type.type = VT_INT;
 	_names[VT_INT] = "int";
 	_types[VT_INT] = new VariableType(type);
+
+	type.type = VT_REAL;
+	_names[VT_REAL] = "real";
+	_types[VT_REAL] = new VariableType(type);
 
 	type.type = VT_STRING;
 	_names[VT_STRING] = "string";
@@ -273,8 +285,8 @@ void SourceVariable::makeObjectsCall(std::vector<ObjectToken> * const objects, s
 		break;
 
 	case VT_CHAR:
-	case VT_FIXED:
 	case VT_INT:
+	case VT_REAL:
 	case VT_STRING:
 	case VT_STRUCT:
 	case VT_VOID:
@@ -329,10 +341,10 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, st
 		{
 		case VT_ASMFUNC:
 		case VT_CHAR:
-		case VT_FIXED:
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
+		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
 		case VT_VOID:
@@ -370,24 +382,40 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 
 		case VT_CHAR:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdChar.value, position)));
+			++*address;
 			break;
 
-		case VT_FIXED:
 		case VT_INT:
-		case VT_STRING:
-		case VT_STRUCT:
-			throw SourceException("unsupported SC_CONSTANT VT", position, "SourceVariable");
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdInt.value, position)));
+			++*address;
+			break;
 
 		case VT_LNSPEC:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdLnSpec.number, position)));
+			++*address;
 			break;
 
 		case VT_NATIVE:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdNative.number, position)));
+			++*address;
+			break;
+
+		case VT_REAL:
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_float(_data.vdReal.value, position)));
+			++*address;
+			break;
+
+		case VT_STRUCT:
+			throw SourceException("unsupported SC_CONSTANT VT", position, "SourceVariable");
+
+		case VT_STRING:
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_symbol(_nameObject, position)));
+			++*address;
 			break;
 
 		case VT_SCRIPT:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdScript.number, position)));
+			++*address;
 			break;
 		}
 		break;
@@ -400,10 +428,10 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 			break;
 
 		case VT_CHAR:
-		case VT_FIXED:
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
+		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHSCRIPTVAR, position, ObjectExpression::create_value_int((*address)++, position)));
@@ -430,10 +458,10 @@ void SourceVariable::makeObjectsGet(VariableType const * const type, int * const
 			break;
 
 		case VT_CHAR:
-		case VT_FIXED:
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
+		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
 			++*address;
@@ -479,10 +507,10 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, st
 		{
 		case VT_ASMFUNC:
 		case VT_CHAR:
-		case VT_FIXED:
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
+		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
 		case VT_VOID:
@@ -522,10 +550,10 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, So
 			break;
 
 		case VT_CHAR:
-		case VT_FIXED:
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
+		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_ASSIGNSCRIPTVAR, position, ObjectExpression::create_value_int((*address)--, position)));
@@ -552,10 +580,10 @@ void SourceVariable::makeObjectsSet(VariableType const * const type, int * const
 			break;
 
 		case VT_CHAR:
-		case VT_FIXED:
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
+		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
 			--*address;
@@ -644,10 +672,10 @@ void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal 
 	{
 	case SourceVariable::VT_ASMFUNC: *out << "VT_ASMFUNC"; break;
 	case SourceVariable::VT_CHAR:    *out << "VT_CHAR";    break;
-	case SourceVariable::VT_FIXED:   *out << "VT_FIXED";   break;
 	case SourceVariable::VT_INT:     *out << "VT_INT";     break;
 	case SourceVariable::VT_LNSPEC:  *out << "VT_LNSPEC";  break;
 	case SourceVariable::VT_NATIVE:  *out << "VT_NATIVE";  break;
+	case SourceVariable::VT_REAL:    *out << "VT_REAL" ;   break;
 	case SourceVariable::VT_SCRIPT:  *out << "VT_SCRIPT";  break;
 	case SourceVariable::VT_STRING:  *out << "VT_STRING";  break;
 	case SourceVariable::VT_STRUCT:  *out << "VT_STRUCT";  break;

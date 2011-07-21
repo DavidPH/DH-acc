@@ -102,7 +102,7 @@ void SourceExpressionDS_CastLnSpec::makeObjectsGet(std::vector<ObjectToken> * co
 	case SourceVariable::VT_STRING:
 		break;
 
-	case SourceVariable::VT_FIXED:
+	case SourceVariable::VT_REAL:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int(16, getPosition())));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_SHIFTR, getPosition()));
 		break;

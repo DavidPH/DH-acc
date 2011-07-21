@@ -84,7 +84,7 @@ void SourceExpressionDS_BinaryMul::makeObjectsGet(std::vector<ObjectToken> * con
 		objects->push_back(ObjectToken(ObjectToken::OCODE_MUL, getPosition()));
 		break;
 
-	case SourceVariable::VT_FIXED:
+	case SourceVariable::VT_REAL:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_MULFIXED, getPosition()));
 		break;
 	}

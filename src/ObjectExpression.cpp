@@ -97,6 +97,14 @@ void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression c
 	_symbol_table[symbol] = value;
 }
 
+ObjectExpression::float_t ObjectExpression::get_float(SourceTokenC const & token)
+{
+	float_t f;
+	std::istringstream iss(token.getData());
+	iss >> f;
+	return f;
+}
+
 ObjectExpression::int_t ObjectExpression::get_int(SourceTokenC const & token)
 {
 	int_t i;

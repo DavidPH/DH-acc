@@ -22,6 +22,7 @@
 #include "Base.hpp"
 
 #include "../ObjectToken.hpp"
+#include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceVariable.hpp"
 
@@ -54,6 +55,49 @@ private:
 
 
 
+SourceExpressionDS SourceExpressionDS::make_expression_value_char(SourceTokenC const & token)
+{
+	if (token.getData().size() != 1)
+		throw SourceException("invalid length for character literal", token.getPosition(), "SourceExpressionDS");
+
+	SourceVariable::VariableType const * charVarType(SourceVariable::get_VariableType(SourceVariable::VT_CHAR));
+
+	SourceVariable::VariableData_Char charVarData = {charVarType, token.getData()[0]};
+
+	SourceVariable charVariable("", charVarData, token.getPosition());
+
+	return make_expression_value_variable(charVariable, token.getPosition());
+}
+SourceExpressionDS SourceExpressionDS::make_expression_value_int(SourceTokenC const & token)
+{
+	SourceVariable::VariableType const * intVarType(SourceVariable::get_VariableType(SourceVariable::VT_INT));
+
+	SourceVariable::VariableData_Int intVarData = {intVarType, ObjectExpression::get_int(token)};
+
+	SourceVariable intVariable("", intVarData, token.getPosition());
+
+	return make_expression_value_variable(intVariable, token.getPosition());
+}
+SourceExpressionDS SourceExpressionDS::make_expression_value_real(SourceTokenC const & token)
+{
+	SourceVariable::VariableType const * realVarType(SourceVariable::get_VariableType(SourceVariable::VT_REAL));
+
+	SourceVariable::VariableData_Real realVarData = {realVarType, ObjectExpression::get_float(token)};
+
+	SourceVariable realVariable("", realVarData, token.getPosition());
+
+	return make_expression_value_variable(realVariable, token.getPosition());
+}
+SourceExpressionDS SourceExpressionDS::make_expression_value_string(SourceTokenC const & token)
+{
+	SourceVariable::VariableType const * stringVarType(SourceVariable::get_VariableType(SourceVariable::VT_STRING));
+
+	SourceVariable::VariableData_String stringVarData = {stringVarType, -1};
+
+	SourceVariable stringVariable("", stringVarData, token.getPosition(), ObjectExpression::add_string(token.getData() + '\0'));
+
+	return make_expression_value_variable(stringVariable, token.getPosition());
+}
 SourceExpressionDS SourceExpressionDS::make_expression_value_variable(SourceVariable const & var, SourcePosition const & position)
 {
 	return new SourceExpressionDS_ValueVariable(var, position);

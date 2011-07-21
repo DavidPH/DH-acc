@@ -68,8 +68,8 @@ SourceVariable::VariableType const * SourceExpressionDS::get_promoted_type(Sourc
 	if (type1->type == SourceVariable::VT_VOID) return type1;
 	if (type2->type == SourceVariable::VT_VOID) return type2;
 
-	if (type1->type == SourceVariable::VT_FIXED) return type1;
-	if (type2->type == SourceVariable::VT_FIXED) return type2;
+	if (type1->type == SourceVariable::VT_REAL) return type1;
+	if (type2->type == SourceVariable::VT_REAL) return type2;
 
 	if (type1->type == SourceVariable::VT_INT) return type1;
 	if (type2->type == SourceVariable::VT_INT) return type2;
@@ -187,10 +187,10 @@ SourceExpressionDS SourceExpressionDS::make_expression_cast(SourceExpressionDS c
 	{
 	case SourceVariable::VT_ASMFUNC: return make_expression_cast_void  (expr,       position);
 	case SourceVariable::VT_CHAR:    return make_expression_cast_char  (expr,       position);
-	case SourceVariable::VT_FIXED:   return make_expression_cast_fixed (expr,       position);
 	case SourceVariable::VT_INT:     return make_expression_cast_int   (expr,       position);
 	case SourceVariable::VT_LNSPEC:  return make_expression_cast_lnspec(expr, type, position);
 	case SourceVariable::VT_NATIVE:  return make_expression_cast_native(expr, type, position);
+	case SourceVariable::VT_REAL:    return make_expression_cast_real  (expr,       position);
 	case SourceVariable::VT_SCRIPT:  return make_expression_cast_script(expr, type, position);
 	case SourceVariable::VT_STRING:  return make_expression_cast_string(expr,       position);
 	case SourceVariable::VT_STRUCT:  return make_expression_cast_struct(expr, type, position);
@@ -208,24 +208,10 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 	switch (token.getType())
 	{
 	case SourceTokenC::TT_CHARACTER:
-	{
-		if (token.getData().size() != 1)
-			throw SourceException("invalid length for character literal", token.getPosition(), "SourceExpressionDS");
-
-		// charVarType
-		SourceVariable::VariableType const * charVarType(SourceVariable::get_VariableType(SourceVariable::VT_CHAR));
-
-		// charVarData
-		SourceVariable::VariableData_Char charVarData = {charVarType, token.getData()[0]};
-
-		// charVariable
-		SourceVariable charVariable("", charVarData, token.getPosition());
-
-		return make_expression_value_variable(charVariable, token.getPosition());
-	}
+		return make_expression_value_char(token);
 
 	case SourceTokenC::TT_FLOAT:
-		return make_expression_value_fixed(token);
+		return make_expression_value_real(token);
 
 	case SourceTokenC::TT_IDENTIFIER:
 		if (token.getData() == "asmfunc")
@@ -482,11 +468,13 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			// scriptVars
 			int scriptVars(scriptContext.getLimit(SourceVariable::SC_REGISTER));
 
-			context->addVariable(SourceVariable(scriptName, scriptVarData, token.getPosition()));
+			SourceVariable scriptVariable(scriptName, scriptVarData, token.getPosition());
+
+			context->addVariable(scriptVariable);
 
 			ObjectExpression::add_script(scriptLabel, scriptNumber, scriptType, scriptArgs, scriptVars, scriptFlags);
 
-			return make_expression_value_script(scriptNumber, scriptVarType, token.getPosition());
+			return make_expression_value_variable(scriptVariable, token.getPosition());
 		}
 
 		if (token.getData() == "struct")
@@ -583,7 +571,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		return make_expression_value_int(token);
 
 	case SourceTokenC::TT_STRING:
-		return make_expression_value_string(ObjectExpression::create_value_symbol(ObjectExpression::add_string(token.getData() + '\0'), token.getPosition()), token.getPosition());
+		return make_expression_value_string(token);
 
 	case SourceTokenC::TT_OP_BRACE_O:
 	{
