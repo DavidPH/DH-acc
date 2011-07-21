@@ -77,6 +77,8 @@ public:
 
 	static void make_objects(std::vector<SourceExpressionDS> const & expressions, std::vector<ObjectToken> * const objects);
 
+	static void make_objects_call_acsfunc(std::vector<ObjectToken> * objects, SourceVariable::VariableData_ACSFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+
 	static void make_objects_call_asmfunc(std::vector<ObjectToken> * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 
 	static void make_objects_call_lnspec(std::vector<ObjectToken> * objects, SourceVariable::VariableData_LnSpec const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
@@ -105,6 +107,7 @@ private:
 	static SourceExpressionDS make_expression_binary_mul(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 	static SourceExpressionDS make_expression_binary_sub(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 
+	static SourceExpressionDS make_expression_cast_acsfunc(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_char(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_int(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_lnspec(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
@@ -121,7 +124,7 @@ private:
 	static SourceExpressionDS make_expression_root_delay(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_lspec(SourceExpressionDS const & spec, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_out(SourceExpressionDS const & expr, SourcePosition const & position);
-	static SourceExpressionDS make_expression_root_return(SourceExpressionDS const & expr, SourcePosition const & position);
+	static SourceExpressionDS make_expression_root_return(SourceExpressionDS const & expr, SourceContext const & context, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_term(SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_void(SourceExpressionDS const & expr, SourcePosition const & position);
 

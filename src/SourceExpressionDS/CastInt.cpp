@@ -87,11 +87,7 @@ void SourceExpressionDS_CastInt::makeObjectsGet(std::vector<ObjectToken> * const
 
 	switch (_expr.getType()->type)
 	{
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_STRUCT:
-	case SourceVariable::VT_VOID:
-		throw SourceException("invalid VT", getPosition(), getName());
-
+	case SourceVariable::VT_ACSFUNC:
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_LNSPEC:
@@ -99,6 +95,11 @@ void SourceExpressionDS_CastInt::makeObjectsGet(std::vector<ObjectToken> * const
 	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
 		break;
+
+	case SourceVariable::VT_ASMFUNC:
+	case SourceVariable::VT_STRUCT:
+	case SourceVariable::VT_VOID:
+		throw SourceException("invalid VT", getPosition(), getName());
 
 	case SourceVariable::VT_REAL:
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int(16, getPosition())));

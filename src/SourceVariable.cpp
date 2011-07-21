@@ -57,10 +57,7 @@ int SourceVariable::VariableType::size() const
 {
 	switch (type)
 	{
-	case VT_ASMFUNC:
-	case VT_VOID:
-		return 0;
-
+	case VT_ACSFUNC:
 	case VT_CHAR:
 	case VT_INT:
 	case VT_LNSPEC:
@@ -69,6 +66,10 @@ int SourceVariable::VariableType::size() const
 	case VT_SCRIPT:
 	case VT_STRING:
 		return 1;
+
+	case VT_ASMFUNC:
+	case VT_VOID:
+		return 0;
 
 	case VT_STRUCT:
 	{
@@ -93,6 +94,10 @@ SourceVariable::SourceVariable() : _address(-1), _nameObject(), _nameSource(), _
 SourceVariable::SourceVariable(std::string const & nameObject, std::string const & nameSource, int const address, StorageClass const sc, VariableType const * const type, SourcePosition const & position) : _address(address), _nameObject(nameObject), _nameSource(nameSource), _position(position), _sc(sc), _type(type)
 {
 
+}
+SourceVariable::SourceVariable(std::string const & name, VariableData_ACSFunc const & vdACSFunc, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdACSFunc.type)
+{
+	_data.vdACSFunc = vdACSFunc;
 }
 SourceVariable::SourceVariable(std::string const & name, VariableData_AsmFunc const & vdAsmFunc, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdAsmFunc.type)
 {
@@ -166,12 +171,14 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType(VariableTy
 {
 	return _types[(type <= VT_VOID) ? type : VT_VOID];
 }
-
+SourceVariable::VariableType const * SourceVariable::get_VariableType_acsfunc(VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	return get_VariableType_auto(VT_ACSFUNC, callType, types);
+}
 SourceVariable::VariableType const * SourceVariable::get_VariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
 	return get_VariableType_auto(VT_ASMFUNC, callType, types);
 }
-
 SourceVariable::VariableType const * SourceVariable::get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, std::vector<VariableType const *> const & types)
 {
 	for (size_t i(0); i < _types.size(); ++i)
@@ -205,17 +212,14 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_auto(Varia
 
 	return type;
 }
-
 SourceVariable::VariableType const * SourceVariable::get_VariableType_lnspec(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
 	return get_VariableType_auto(VT_LNSPEC, callType, types);
 }
-
 SourceVariable::VariableType const * SourceVariable::get_VariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
 	return get_VariableType_auto(VT_NATIVE, callType, types);
 }
-
 SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::string const & name)
 {
 	for (size_t i(0); i < _names.size(); ++i)
@@ -224,7 +228,6 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::
 
 	return NULL;
 }
-
 SourceVariable::VariableType const * SourceVariable::get_VariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
 	return get_VariableType_auto(VT_SCRIPT, callType, types);
@@ -285,6 +288,9 @@ ObjectExpression SourceVariable::makeObject() const
 	case SC_CONSTANT:
 		switch (_type->type)
 		{
+		case VT_ACSFUNC:
+			return ObjectExpression::create_value_int(_data.vdACSFunc.number, _position);
+
 		case VT_ASMFUNC:
 		case VT_VOID:
 			throw SourceException("makeObject on void VT", _position, "SourceVariable");
@@ -325,6 +331,13 @@ void SourceVariable::makeObjectsCall(std::vector<ObjectToken> * const objects, s
 {
 	switch (_type->type)
 	{
+	case VT_ACSFUNC:
+		if (_sc == SC_CONSTANT)
+			SourceExpressionDS::make_objects_call_acsfunc(objects, _data.vdACSFunc, args, position);
+		else
+			throw SourceException("non-constant acsfuncs not yet supported", position, "SourceVariable");
+		break;
+
 	case VT_ASMFUNC:
 		if (_sc == SC_CONSTANT)
 			SourceExpressionDS::make_objects_call_asmfunc(objects, _data.vdAsmFunc, args, position);
@@ -387,6 +400,7 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, st
 	case SC_REGISTER:
 		switch (type->type)
 		{
+		case VT_ACSFUNC:
 		case VT_ASMFUNC:
 		case VT_CHAR:
 		case VT_INT:
@@ -424,6 +438,11 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 	case SC_CONSTANT:
 		switch (type->type)
 		{
+		case VT_ACSFUNC:
+			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdACSFunc.number, position)));
+			++*address;
+			break;
+
 		case VT_ASMFUNC:
 		case VT_VOID:
 			break;
@@ -471,10 +490,7 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 	case SC_REGISTER:
 		switch (type->type)
 		{
-		case VT_ASMFUNC:
-		case VT_VOID:
-			break;
-
+		case VT_ACSFUNC:
 		case VT_CHAR:
 		case VT_INT:
 		case VT_LNSPEC:
@@ -483,6 +499,10 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 		case VT_SCRIPT:
 		case VT_STRING:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHSCRIPTVAR, position, ObjectExpression::create_value_int((*address)++, position)));
+			break;
+
+		case VT_ASMFUNC:
+		case VT_VOID:
 			break;
 
 		case VT_STRUCT:
@@ -501,10 +521,7 @@ void SourceVariable::makeObjectsGet(VariableType const * const type, int * const
 	case SC_REGISTER:
 		switch (type->type)
 		{
-		case VT_ASMFUNC:
-		case VT_VOID:
-			break;
-
+		case VT_ACSFUNC:
 		case VT_CHAR:
 		case VT_INT:
 		case VT_LNSPEC:
@@ -513,6 +530,10 @@ void SourceVariable::makeObjectsGet(VariableType const * const type, int * const
 		case VT_SCRIPT:
 		case VT_STRING:
 			++*address;
+			break;
+
+		case VT_ASMFUNC:
+		case VT_VOID:
 			break;
 
 		case VT_STRUCT:
@@ -553,6 +574,7 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, st
 	case SC_REGISTER:
 		switch (type->type)
 		{
+		case VT_ACSFUNC:
 		case VT_ASMFUNC:
 		case VT_CHAR:
 		case VT_INT:
@@ -593,10 +615,7 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, So
 	case SC_REGISTER:
 		switch (type->type)
 		{
-		case VT_ASMFUNC:
-		case VT_VOID:
-			break;
-
+		case VT_ACSFUNC:
 		case VT_CHAR:
 		case VT_INT:
 		case VT_LNSPEC:
@@ -605,6 +624,10 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, So
 		case VT_SCRIPT:
 		case VT_STRING:
 			objects->push_back(ObjectToken(ObjectToken::OCODE_ASSIGNSCRIPTVAR, position, ObjectExpression::create_value_int((*address)--, position)));
+			break;
+
+		case VT_ASMFUNC:
+		case VT_VOID:
 			break;
 
 		case VT_STRUCT:
@@ -623,10 +646,7 @@ void SourceVariable::makeObjectsSet(VariableType const * const type, int * const
 	case SC_REGISTER:
 		switch (type->type)
 		{
-		case VT_ASMFUNC:
-		case VT_VOID:
-			break;
-
+		case VT_ACSFUNC:
 		case VT_CHAR:
 		case VT_INT:
 		case VT_LNSPEC:
@@ -635,6 +655,10 @@ void SourceVariable::makeObjectsSet(VariableType const * const type, int * const
 		case VT_SCRIPT:
 		case VT_STRING:
 			--*address;
+			break;
+
+		case VT_ASMFUNC:
+		case VT_VOID:
 			break;
 
 		case VT_STRUCT:
@@ -718,6 +742,7 @@ void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal 
 {
 	switch (in)
 	{
+	case SourceVariable::VT_ACSFUNC: *out << "VT_ACSFUNC"; break;
 	case SourceVariable::VT_ASMFUNC: *out << "VT_ASMFUNC"; break;
 	case SourceVariable::VT_CHAR:    *out << "VT_CHAR";    break;
 	case SourceVariable::VT_INT:     *out << "VT_INT";     break;

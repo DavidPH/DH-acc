@@ -30,6 +30,7 @@
 
 
 
+std::vector<ObjectExpression::ACSFunc> ObjectExpression::_acsfunc_table;
 int32_t ObjectExpression::_address_count(8+4+4);
 std::vector<ObjectExpression::Script> ObjectExpression::_script_table;
 std::map<int32_t, bool> ObjectExpression::_script_used;
@@ -54,6 +55,12 @@ ObjectExpression::ObjectExpression(ObjectExpression_Base const & expr) : _expr(e
 ObjectExpression::~ObjectExpression()
 {
 	delete _expr;
+}
+
+void ObjectExpression::add_acsfunc(std::string const & label, int_t argCount, int_t varCount, int_t retCount)
+{
+	ACSFunc f = {argCount, label, varCount, retCount};
+	_acsfunc_table.push_back(f);
 }
 
 void ObjectExpression::add_address_count(int32_t const addressCount)
@@ -95,6 +102,16 @@ void ObjectExpression::add_string(std::string const & symbol, std::string const 
 void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression const & value)
 {
 	_symbol_table[symbol] = value;
+}
+
+ObjectExpression::ACSFunc const & ObjectExpression::get_acsfunc(int_t const index)
+{
+	return _acsfunc_table[index];
+}
+
+ObjectExpression::int_t ObjectExpression::get_acsfunc_count()
+{
+	return _acsfunc_table.size();
 }
 
 ObjectExpression::float_t ObjectExpression::get_float(SourceTokenC const & token)

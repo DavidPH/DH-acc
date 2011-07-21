@@ -66,6 +66,14 @@ public:
 		ST_RETURN     = 15
 	};
 
+	struct ACSFunc
+	{
+		int_t argCount;
+		std::string label;
+		int_t retCount;
+		int_t varCount;
+	};
+
 	struct Script
 	{
 		int32_t args;
@@ -102,6 +110,8 @@ public:
 
 	friend void print_debug(std::ostream * const out, ObjectExpression const & in);
 
+	static void add_acsfunc(std::string const & label, int_t argCount, int_t varCount, int_t retCount);
+
 	static void add_address_count(int32_t const addressCount);
 
 	// Adds a label for the current address count.
@@ -132,6 +142,10 @@ public:
 	static ObjectExpression create_value_int(int_t value, SourcePosition const & position);
 	static ObjectExpression create_value_int(SourceTokenC const & token);
 	static ObjectExpression create_value_symbol(std::string const & symbol, SourcePosition const & position);
+
+	static ACSFunc const & get_acsfunc(int_t const index);
+
+	static int_t get_acsfunc_count();
 
 	static float_t get_float(SourceTokenC const & token);
 
@@ -165,6 +179,7 @@ private:
 
 
 
+	static std::vector<ACSFunc> _acsfunc_table;
 	static int32_t _address_count;
 	static std::vector<Script> _script_table;
 	static std::map<int32_t, bool> _script_used;

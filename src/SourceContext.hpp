@@ -34,8 +34,17 @@ class SourceTokenC;
 class SourceContext
 {
 public:
+	enum ContextType
+	{
+		CT_ACSFUNC,
+		CT_BLOCK,
+		CT_SCRIPT
+	};
+
+
+
 	SourceContext();
-	SourceContext(SourceContext * parent, bool inheritLocals);
+	SourceContext(SourceContext * parent, ContextType type);
 
 	void addVariable(SourceVariable const & var);
 
@@ -44,6 +53,9 @@ public:
 	int getLimit(SourceVariable::StorageClass sc) const;
 
 	SourceVariable::VariableType const * getReturnType() const;
+
+	ContextType getType() const;
+	ContextType getTypeRoot() const;
 
 	SourceVariable const & getVariable(SourceTokenC const & token) const;
 
@@ -66,6 +78,8 @@ private:
 	SourceContext * _parent;
 
 	SourceVariable::VariableType const * _returnType;
+
+	ContextType _type;
 
 	std::vector<SourceVariable> _vars;
 	std::vector<std::string> _varnames;

@@ -52,6 +52,7 @@ public:
 
 		VT_VOID,
 
+		VT_ACSFUNC,
 		VT_ASMFUNC,
 		VT_LNSPEC,
 		VT_NATIVE,
@@ -75,6 +76,11 @@ public:
 		std::vector<VariableType const *> types;
 	};
 
+	struct VariableData_ACSFunc
+	{
+		VariableType const * type;
+		int number;
+	};
 	struct VariableData_AsmFunc
 	{
 		VariableType const * type;
@@ -119,6 +125,7 @@ public:
 
 	union VariableData
 	{
+		VariableData_ACSFunc vdACSFunc;
 		VariableData_AsmFunc vdAsmFunc;
 		VariableData_Char    vdChar;
 		VariableData_Int     vdInt;
@@ -133,6 +140,7 @@ public:
 
 	SourceVariable();
 	SourceVariable(std::string const & nameObject, std::string const & nameSource, int const address, StorageClass const sc, VariableType const * const type, SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_ACSFunc const & vdACSFunc, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_AsmFunc const & vdAsmFunc, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Char    const & vdChar,    SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Int     const & vdInt,     SourcePosition const & position);
@@ -173,6 +181,8 @@ public:
 
 	static VariableType const * get_VariableType(SourceTokenC const & token);
 	static VariableType const * get_VariableType(VariableTypeInternal const type);
+	// ACSFunc types work like script types (see below).
+	static VariableType const * get_VariableType_acsfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
 	// AsmFunc types work like script types (see below).
 	static VariableType const * get_VariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
 	// LnSpec types work like script types (see below).

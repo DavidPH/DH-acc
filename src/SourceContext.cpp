@@ -35,7 +35,7 @@ SourceContext::SourceContext() : _countRegister(0), _limitRegister(0), _parent(N
 {
 
 }
-SourceContext::SourceContext(SourceContext * parent, bool inheritLocals) : _countRegister(0), _limitRegister(0), _parent(parent), _returnType(NULL), _inheritLocals(inheritLocals)
+SourceContext::SourceContext(SourceContext * parent, ContextType type) : _countRegister(0), _limitRegister(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK)
 {
 
 }
@@ -113,6 +113,13 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 SourceVariable::VariableType const * SourceContext::getReturnType() const
 {
 	return _returnType ? _returnType : _parent->getReturnType();
+}
+
+SourceContext::ContextType SourceContext::getTypeRoot() const
+{
+	if (_type == CT_BLOCK && _parent) return _parent->getTypeRoot();
+
+	return _type;
 }
 
 SourceVariable const & SourceContext::getVariable(SourceTokenC const & token) const

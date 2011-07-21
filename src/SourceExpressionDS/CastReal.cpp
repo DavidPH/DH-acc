@@ -87,11 +87,7 @@ void SourceExpressionDS_CastReal::makeObjectsGet(std::vector<ObjectToken> * cons
 
 	switch (_expr.getType()->type)
 	{
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_STRUCT:
-	case SourceVariable::VT_VOID:
-		throw SourceException("invalid VT", getPosition(), getName());
-
+	case SourceVariable::VT_ACSFUNC:
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_LNSPEC:
@@ -101,6 +97,11 @@ void SourceExpressionDS_CastReal::makeObjectsGet(std::vector<ObjectToken> * cons
 		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int(16, getPosition())));
 		objects->push_back(ObjectToken(ObjectToken::OCODE_SHIFTL, getPosition()));
 		break;
+
+	case SourceVariable::VT_ASMFUNC:
+	case SourceVariable::VT_STRUCT:
+	case SourceVariable::VT_VOID:
+		throw SourceException("invalid VT", getPosition(), getName());
 
 	case SourceVariable::VT_REAL:
 		break;

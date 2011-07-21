@@ -37,6 +37,7 @@ add_executable(DH-acc
 	SourceExpressionDS/BinaryMod.cpp
 	SourceExpressionDS/BinaryMul.cpp
 	SourceExpressionDS/BinarySub.cpp
+	SourceExpressionDS/CastACSFunc.cpp
 	SourceExpressionDS/CastChar.cpp
 	SourceExpressionDS/CastInt.cpp
 	SourceExpressionDS/CastLnSpec.cpp

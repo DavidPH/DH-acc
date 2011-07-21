@@ -70,6 +70,7 @@ void SourceExpressionDS_BinaryMod::makeObjectsGet(std::vector<ObjectToken> * con
 
 	switch (getType()->type)
 	{
+	case SourceVariable::VT_ACSFUNC:
 	case SourceVariable::VT_ASMFUNC:
 	case SourceVariable::VT_LNSPEC:
 	case SourceVariable::VT_NATIVE:

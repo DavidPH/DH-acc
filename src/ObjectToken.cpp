@@ -133,7 +133,9 @@ void ObjectToken::init()
 
 	// BinaryTokenZDACS
 	DO_INIT(ASSIGNGLOBALARRAY, 1);
-	DO_INIT(CALLFUNC,          2);
+	DO_INIT(CALLZDACS,         1);
+	DO_INIT(CALLZDACSDISCARD,  1);
+	DO_INIT(CALLZDFUNC,        2);
 	DO_INIT(DIVFIXED,          0);
 	DO_INIT(DUP,               0);
 	DO_INIT(ENDLOG,            0);
@@ -141,6 +143,8 @@ void ObjectToken::init()
 	DO_INIT(MULFIXED,          0);
 	DO_INIT(PRINTFIXED,        0);
 	DO_INIT(PUSHGLOBALARRAY,   1);
+	DO_INIT(RETURNZDACS,       0);
+	DO_INIT(RETURNZDACSVOID,   0);
 	DO_INIT(SETRESULTVALUE,    0);
 	DO_INIT(STRLEN,            0);
 
@@ -218,7 +222,9 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_TERMINATE:         *out << "OCODE_TERMINATE";         break;
 
 	case ObjectToken::OCODE_ASSIGNGLOBALARRAY: *out << "OCODE_ASSIGNGLOBALARRAY"; break;
-	case ObjectToken::OCODE_CALLFUNC:          *out << "OCODE_CALLFUNC";          break;
+	case ObjectToken::OCODE_CALLZDACS:         *out << "OCODE_CALLZDACS";         break;
+	case ObjectToken::OCODE_CALLZDACSDISCARD:  *out << "OCODE_CALLZDACSDISCARD";  break;
+	case ObjectToken::OCODE_CALLZDFUNC:        *out << "OCODE_CALLZDFUNC";        break;
 	case ObjectToken::OCODE_DIVFIXED:          *out << "OCODE_DIVFIXED";          break;
 	case ObjectToken::OCODE_DUP:               *out << "OCODE_DUP";               break;
 	case ObjectToken::OCODE_ENDLOG:            *out << "OCODE_ENDLOG";            break;
@@ -226,6 +232,8 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_MULFIXED:          *out << "OCODE_MULFIXED";          break;
 	case ObjectToken::OCODE_PRINTFIXED:        *out << "OCODE_PRINTFIXED";        break;
 	case ObjectToken::OCODE_PUSHGLOBALARRAY:   *out << "OCODE_PUSHGLOBALARRAY";   break;
+	case ObjectToken::OCODE_RETURNZDACS:       *out << "OCODE_RETURNZDACS";       break;
+	case ObjectToken::OCODE_RETURNZDACSVOID:   *out << "OCODE_RETURNZDACSVOID";   break;
 	case ObjectToken::OCODE_SETRESULTVALUE:    *out << "OCODE_SETRESULTVALUE";    break;
 	case ObjectToken::OCODE_STRLEN:            *out << "OCODE_STRLEN";            break;
 	case ObjectToken::OCODE_NONE:              *out << "OCODE_NONE";              break;

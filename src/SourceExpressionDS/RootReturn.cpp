@@ -22,13 +22,14 @@
 #include "Base.hpp"
 
 #include "../ObjectToken.hpp"
+#include "../SourceContext.hpp"
 
 
 
 class SourceExpressionDS_RootReturn : public SourceExpressionDS_Base
 {
 public:
-	SourceExpressionDS_RootReturn(SourceExpressionDS const & expr, SourcePosition const & position);
+	SourceExpressionDS_RootReturn(SourceExpressionDS const & expr, SourceContext const & context, SourcePosition const & position);
 
 	virtual SourceExpressionDS_RootReturn * clone() const;
 
@@ -44,20 +45,22 @@ public:
 
 private:
 	SourceExpressionDS _expr;
+	SourceContext::ContextType _type;
 };
 
 
 
-SourceExpressionDS SourceExpressionDS::make_expression_root_return(SourceExpressionDS const & expr, SourcePosition const & position)
+SourceExpressionDS SourceExpressionDS::make_expression_root_return(SourceExpressionDS const & expr, SourceContext const & context, SourcePosition const & position)
 {
-	return new SourceExpressionDS_RootReturn(expr, position);
+	return new SourceExpressionDS_RootReturn(expr, context, position);
 }
 
 
 
-SourceExpressionDS_RootReturn::SourceExpressionDS_RootReturn(SourceExpressionDS const & expr, SourcePosition const & position) : SourceExpressionDS_Base(position), _expr(expr)
+SourceExpressionDS_RootReturn::SourceExpressionDS_RootReturn(SourceExpressionDS const & expr, SourceContext const & context, SourcePosition const & position) : SourceExpressionDS_Base(position), _expr(expr), _type(context.getTypeRoot())
 {
-
+	if (_expr.getType() != context.getReturnType())
+		_expr = SourceExpressionDS::make_expression_cast(_expr, context.getReturnType(), getPosition());
 }
 
 SourceExpressionDS_RootReturn * SourceExpressionDS_RootReturn::clone() const
@@ -84,10 +87,27 @@ void SourceExpressionDS_RootReturn::makeObjectsGet(std::vector<ObjectToken> * co
 {
 	_expr.makeObjectsGet(objects);
 
-	if (_expr.getType()->type != SourceVariable::VT_VOID)
-		objects->push_back(ObjectToken(ObjectToken::OCODE_SETRESULTVALUE, getPosition()));
+	switch (_type)
+	{
+	case SourceContext::CT_ACSFUNC:
+		if (_expr.getType()->type == SourceVariable::VT_VOID)
+			objects->push_back(ObjectToken(ObjectToken::OCODE_RETURNZDACSVOID, getPosition()));
+		else
+			objects->push_back(ObjectToken(ObjectToken::OCODE_RETURNZDACS, getPosition()));
 
-	objects->push_back(ObjectToken(ObjectToken::OCODE_TERMINATE, getPosition()));
+		break;
+
+	case SourceContext::CT_BLOCK:
+		break;
+
+	case SourceContext::CT_SCRIPT:
+		if (_expr.getType()->type != SourceVariable::VT_VOID)
+			objects->push_back(ObjectToken(ObjectToken::OCODE_SETRESULTVALUE, getPosition()));
+
+		objects->push_back(ObjectToken(ObjectToken::OCODE_TERMINATE, getPosition()));
+
+		break;
+	}
 }
 
 void SourceExpressionDS_RootReturn::printDebug(std::ostream * const out) const

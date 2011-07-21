@@ -244,16 +244,17 @@ SourceExpressionDS SourceExpressionDS::make_expression_cast(SourceExpressionDS c
 {
 	switch (type->type)
 	{
-	case SourceVariable::VT_ASMFUNC: return make_expression_cast_void  (expr,       position);
-	case SourceVariable::VT_CHAR:    return make_expression_cast_char  (expr,       position);
-	case SourceVariable::VT_INT:     return make_expression_cast_int   (expr,       position);
-	case SourceVariable::VT_LNSPEC:  return make_expression_cast_lnspec(expr, type, position);
-	case SourceVariable::VT_NATIVE:  return make_expression_cast_native(expr, type, position);
-	case SourceVariable::VT_REAL:    return make_expression_cast_real  (expr,       position);
-	case SourceVariable::VT_SCRIPT:  return make_expression_cast_script(expr, type, position);
-	case SourceVariable::VT_STRING:  return make_expression_cast_string(expr,       position);
-	case SourceVariable::VT_STRUCT:  return make_expression_cast_struct(expr, type, position);
-	case SourceVariable::VT_VOID:    return make_expression_cast_void  (expr,       position);
+	case SourceVariable::VT_ACSFUNC: return make_expression_cast_acsfunc(expr, type, position);
+	case SourceVariable::VT_ASMFUNC: return make_expression_cast_void   (expr,       position);
+	case SourceVariable::VT_CHAR:    return make_expression_cast_char   (expr,       position);
+	case SourceVariable::VT_INT:     return make_expression_cast_int    (expr,       position);
+	case SourceVariable::VT_LNSPEC:  return make_expression_cast_lnspec (expr, type, position);
+	case SourceVariable::VT_NATIVE:  return make_expression_cast_native (expr, type, position);
+	case SourceVariable::VT_REAL:    return make_expression_cast_real   (expr,       position);
+	case SourceVariable::VT_SCRIPT:  return make_expression_cast_script (expr, type, position);
+	case SourceVariable::VT_STRING:  return make_expression_cast_string (expr,       position);
+	case SourceVariable::VT_STRUCT:  return make_expression_cast_struct (expr, type, position);
+	case SourceVariable::VT_VOID:    return make_expression_cast_void   (expr,       position);
 	}
 
 	throw SourceException("attempt to cast to unknown", position, "SourceExpressionDS");
@@ -273,6 +274,41 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		return make_expression_value_real(token);
 
 	case SourceTokenC::TT_IDENTIFIER:
+		if (token.getData() == "acsfunc")
+		{
+			SourceContext acsfuncContext(context, SourceContext::CT_ACSFUNC);
+
+			int acsfuncNumber(ObjectExpression::get_acsfunc_count());
+
+			std::string acsfuncName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+
+			std::string acsfuncLabel("acsfunc_" + acsfuncName);
+
+			std::vector<SourceVariable::VariableType const *> acsfuncArgTypes;
+			std::vector<std::string> acsfuncArgNames;
+			int acsfuncArgCount;
+			SourceVariable::VariableType const * acsfuncReturn;
+			make_expression_arglist(in, &acsfuncArgTypes, &acsfuncArgNames, &acsfuncArgCount, &acsfuncContext, &acsfuncReturn);
+
+			SourceExpressionDS acsfuncExpression(make_expression_single(in, blocks, &acsfuncContext));
+			acsfuncExpression.addLabel(acsfuncLabel);
+			blocks->push_back(acsfuncExpression);
+
+			SourceVariable::VariableType const * acsfuncVarType(SourceVariable::get_VariableType_acsfunc(acsfuncReturn, acsfuncArgTypes));
+
+			SourceVariable::VariableData_ACSFunc acsfuncVarData = {acsfuncVarType, acsfuncNumber};
+
+			int acsfuncVarCount(acsfuncContext.getLimit(SourceVariable::SC_REGISTER));
+
+			SourceVariable acsfuncVariable(acsfuncName, acsfuncVarData, token.getPosition());
+
+			context->addVariable(acsfuncVariable);
+
+			ObjectExpression::add_acsfunc(acsfuncLabel, acsfuncArgCount, acsfuncVarCount, acsfuncReturn->size());
+
+			return make_expression_value_variable(acsfuncVariable, token.getPosition());
+		}
+
 		if (token.getData() == "asmfunc")
 		{
 			// asmfuncName
@@ -361,19 +397,12 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			return make_expression_root_out(make_expression(in, blocks, context), token.getPosition());
 
 		if (token.getData() == "return")
-		{
-			SourceExpressionDS expr(make_expression(in, blocks, context));
-
-			if (expr.getType() != context->getReturnType())
-				expr = make_expression_cast(expr, context->getReturnType(), token.getPosition());
-
-			return make_expression_root_return(expr, token.getPosition());
-		}
+			return make_expression_root_return(make_expression(in, blocks, context), *context, token.getPosition());
 
 		if (token.getData() == "script")
 		{
 			// scriptContext
-			SourceContext scriptContext(context, false);
+			SourceContext scriptContext(context, SourceContext::CT_SCRIPT);
 
 			// scriptName
 			std::string scriptName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
@@ -553,7 +582,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 	{
 		in->unget(token);
 		std::vector<SourceExpressionDS> expressions;
-		SourceContext blockContext(context, true);
+		SourceContext blockContext(context, SourceContext::CT_BLOCK);
 		make_expressions(in, &expressions, blocks, &blockContext);
 		return make_expression_root_block(expressions, token.getPosition());
 	}
@@ -562,6 +591,10 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		expr = make_expression(in, blocks, context);
 		in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 		return expr;
+
+	case SourceTokenC::TT_OP_SEMICOLON:
+		in->unget(token);
+		return NULL;
 
 	default:
 		in->unget(token);
@@ -574,7 +607,7 @@ SourceExpressionDS SourceExpressionDS::make_expressions(SourceTokenizerDS * cons
 	SourcePosition position(in->peek().getPosition());
 	std::vector<SourceExpressionDS> expressions;
 	std::vector<SourceExpressionDS> blocks;
-	SourceContext context(&SourceContext::global_context, true);
+	SourceContext context(&SourceContext::global_context, SourceContext::CT_BLOCK);
 
 	make_expressions(in, &expressions, &blocks, &context);
 
@@ -603,6 +636,30 @@ void SourceExpressionDS::make_objects(std::vector<SourceExpressionDS> const & ex
 {
 	for (uintptr_t index(0); index < expressions.size(); ++index)
 		expressions[index].makeObjectsGet(objects);
+}
+
+void SourceExpressionDS::make_objects_call_acsfunc(std::vector<ObjectToken> * objects, SourceVariable::VariableData_ACSFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
+{
+	if (args.size() != data.type->types.size())
+		throw SourceException("incorrect arg count to call acsfunc", position, "SourceExpressionDS");
+
+	for (size_t i(0); i < args.size(); ++i)
+	{
+		if (args[i].getType() != data.type->types[i])
+			throw SourceException("incorrect arg type to call acsfunc", args[i].getPosition(), "SourceExpressionDS");
+
+		args[i].makeObjectsGet(objects);
+	}
+
+	ObjectToken::ObjectCode ocode;
+	ObjectExpression ofunc(ObjectExpression::create_value_int(data.number, position));
+
+	if (data.type->callType->type == SourceVariable::VT_VOID)
+		ocode = ObjectToken::OCODE_CALLZDACSDISCARD;
+	else
+		ocode = ObjectToken::OCODE_CALLZDACS;
+
+	objects->push_back(ObjectToken(ocode, position, ofunc));
 }
 
 void SourceExpressionDS::make_objects_call_asmfunc(std::vector<ObjectToken> * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
@@ -701,7 +758,7 @@ void SourceExpressionDS::make_objects_call_native(std::vector<ObjectToken> * obj
 		args[i].makeObjectsGet(objects);
 	}
 
-	ObjectToken::ObjectCode ocode(ObjectToken::OCODE_CALLFUNC);
+	ObjectToken::ObjectCode ocode(ObjectToken::OCODE_CALLZDFUNC);
 	ObjectExpression oargc(ObjectExpression::create_value_int(args.size(), position));
 	ObjectExpression ofunc(ObjectExpression::create_value_int(data.number, position));
 

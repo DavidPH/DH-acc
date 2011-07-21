@@ -77,6 +77,10 @@ public:
 		BCODE_MULFIXED          = 136,
 		BCODE_DIVFIXED          = 137,
 		BCODE_PRINTFIXED        = 157,
+		BCODE_CALLZDACS         = 203,
+		BCODE_CALLZDACSDISCARD  = 204,
+		BCODE_RETURNZDACSVOID   = 205,
+		BCODE_RETURNZDACS       = 206,
 		BCODE_DUP               = 216,
 		BCODE_PUSHGLOBALARRAY   = 235,
 		BCODE_ASSIGNGLOBALARRAY = 236,
@@ -84,7 +88,7 @@ public:
 		BCODE_SETRESULTVALUE    = 257,
 		BCODE_LSPEC5RESULT      = 263,
 		BCODE_ENDLOG            = 270,
-		BCODE_CALLFUNC          = 351,
+		BCODE_CALLZDFUNC        = 351,
 
 		BCODE_NONE
 	};
@@ -103,9 +107,11 @@ public:
 
 	static void make_tokens(std::vector<ObjectToken> const & objects, std::vector<BinaryTokenZDACS> * const instructions);
 
+	static void write_8(std::ostream * const out, uint8_t const i);
 	static void write_16(std::ostream * const out, uint16_t const i);
 	static void write_32(std::ostream * const out, ObjectExpression const & expr);
 	static void write_32(std::ostream * const out, uint32_t const i);
+	static void write_acsfunc(std::ostream * const out, ObjectExpression::ACSFunc const & f);
 	static void write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions);
 	static void write_script(std::ostream * const out, ObjectExpression::Script const & s);
 	static void write_script_flags(std::ostream * const out, ObjectExpression::Script const & s);

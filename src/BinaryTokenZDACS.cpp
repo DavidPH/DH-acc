@@ -85,7 +85,9 @@ void BinaryTokenZDACS::init()
 
 	// BinaryTokenZDACS
 	DO_INIT(ASSIGNGLOBALARRAY, 1);
-	DO_INIT(CALLFUNC,          2);
+	DO_INIT(CALLZDACS,         1);
+	DO_INIT(CALLZDACSDISCARD,  1);
+	DO_INIT(CALLZDFUNC,        2);
 	DO_INIT(DIVFIXED,          0);
 	DO_INIT(DUP,               0);
 	DO_INIT(ENDLOG,            0);
@@ -93,6 +95,8 @@ void BinaryTokenZDACS::init()
 	DO_INIT(MULFIXED,          0);
 	DO_INIT(PRINTFIXED,        0);
 	DO_INIT(PUSHGLOBALARRAY,   1);
+	DO_INIT(RETURNZDACS,       0);
+	DO_INIT(RETURNZDACSVOID,   0);
 	DO_INIT(SETRESULTVALUE,    0);
 	DO_INIT(STRLEN,            0);
 
@@ -150,7 +154,9 @@ void BinaryTokenZDACS::make_tokens(std::vector<ObjectToken> const & objects, std
 	CASE_DIRECTMAP(TERMINATE);
 
 	CASE_DIRECTMAP(ASSIGNGLOBALARRAY);
-	CASE_DIRECTMAP(CALLFUNC);
+	CASE_DIRECTMAP(CALLZDACS);
+	CASE_DIRECTMAP(CALLZDACSDISCARD);
+	CASE_DIRECTMAP(CALLZDFUNC);
 	CASE_DIRECTMAP(DIVFIXED);
 	CASE_DIRECTMAP(DUP);
 	CASE_DIRECTMAP(ENDLOG);
@@ -158,6 +164,8 @@ void BinaryTokenZDACS::make_tokens(std::vector<ObjectToken> const & objects, std
 	CASE_DIRECTMAP(MULFIXED);
 	CASE_DIRECTMAP(PRINTFIXED);
 	CASE_DIRECTMAP(PUSHGLOBALARRAY);
+	CASE_DIRECTMAP(RETURNZDACS);
+	CASE_DIRECTMAP(RETURNZDACSVOID);
 	CASE_DIRECTMAP(SETRESULTVALUE);
 	CASE_DIRECTMAP(STRLEN);
 
@@ -181,6 +189,10 @@ void BinaryTokenZDACS::write(std::ostream * const out) const
 	}
 }
 
+void BinaryTokenZDACS::write_8(std::ostream * const out, uint8_t const i)
+{
+	out->put((i >> 0) & 0xFF);
+}
 void BinaryTokenZDACS::write_16(std::ostream * const out, uint16_t const i)
 {
 	out->put((i >> 0) & 0xFF);
@@ -205,6 +217,24 @@ void BinaryTokenZDACS::write_32(std::ostream * const out, uint32_t const i)
 	out->put((i >>  8) & 0xFF);
 	out->put((i >> 16) & 0xFF);
 	out->put((i >> 24) & 0xFF);
+}
+
+void BinaryTokenZDACS::write_acsfunc(std::ostream * const out, ObjectExpression::ACSFunc const & f)
+{
+	switch (output_type)
+	{
+	case OUTPUT_ACSE:
+		write_8 (out, (int8_t)f.argCount);
+		write_8 (out, (int8_t)f.varCount);
+		write_8 (out, (int8_t)f.retCount);
+		write_8 (out, 0);
+		write_32(out, ObjectExpression::get_symbol(f.label, SourcePosition::none));
+		break;
+
+	default:
+		throw SourceException("unknown output type for script", SourcePosition::none, "BinaryTokenZDACS");
+	}
+
 }
 
 void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions)
@@ -260,6 +290,7 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 
 	case OUTPUT_ACSE:
 	{
+		ObjectExpression::int_t const acsfuncCount(ObjectExpression::get_acsfunc_count());
 		int32_t const scriptCount(ObjectExpression::get_script_count());
 		int32_t const stringCount(ObjectExpression::get_string_count());
 
@@ -268,6 +299,15 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 
 		for (uintptr_t index(0); index < instructions.size(); ++index)
 			instructions[index].write(out);
+
+		if (acsfuncCount)
+		{
+			*out << 'F' << 'U' << 'N' << 'C';
+			write_32(out, acsfuncCount*8);
+
+			for (ObjectExpression::int_t index(0); index < acsfuncCount; ++index)
+				write_acsfunc(out, ObjectExpression::get_acsfunc(index));
+		}
 
 		if (scriptCount)
 		{
