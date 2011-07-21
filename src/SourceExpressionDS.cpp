@@ -181,6 +181,65 @@ SourceExpressionDS SourceExpressionDS::make_expression(SourceTokenizerDS * const
 	}
 }
 
+void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceVariable::VariableType const *> * argTypes, SourceVariable::VariableType const * * returnType)
+{
+	make_expression_arglist(in, argTypes, NULL, NULL, NULL, returnType);
+}
+void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceVariable::VariableType const *> * argTypes, std::vector<std::string> * argNames, int * argCount, SourceContext * argContext, SourceVariable::VariableType const * * returnType)
+{
+	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+	if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
+	{
+		SourceVariable::StorageClass sc(SourceVariable::SC_REGISTER);
+
+		argTypes->push_back(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+
+		if (argNames)
+		{
+			argNames->push_back(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+		}
+		else if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
+		{
+			in->get(SourceTokenC::TT_IDENTIFIER);
+		}
+
+		if (argContext && argNames)
+		{
+			int addr(argContext->getCount(sc));
+
+			argContext->addVariable(SourceVariable(argNames->back(), argNames->back(), addr, sc, argTypes->back(), SourcePosition::none));
+		}
+
+		if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
+			break;
+
+		in->get(SourceTokenC::TT_OP_COMMA);
+	}
+	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+	if (argCount)
+	{
+		if (argContext)
+			*argCount = argContext->getLimit(SourceVariable::SC_REGISTER);
+		else
+		{
+			*argCount = 0;
+
+			for (size_t i(0); i < argTypes->size(); ++i)
+				*argCount += (*argTypes)[i]->size();
+		}
+	}
+
+	if (returnType)
+	{
+		in->get(SourceTokenC::TT_OP_MINUS_GT);
+
+		*returnType = SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER));
+
+		if (argContext) argContext->setReturnType(*returnType);
+	}
+}
+
 SourceExpressionDS SourceExpressionDS::make_expression_cast(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position)
 {
 	switch (type->type)
@@ -226,25 +285,9 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			ObjectToken::ObjectCode asmfuncOCodeImmediate(ObjectToken::get_code(in->get(SourceTokenC::TT_IDENTIFIER)));
 
 			// asmfuncArgs
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 			std::vector<SourceVariable::VariableType const *> asmfuncArgs;
-			if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
-			{
-				asmfuncArgs.push_back(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
-
-				if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
-					in->get(SourceTokenC::TT_IDENTIFIER);
-
-				if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
-					break;
-
-				in->get(SourceTokenC::TT_OP_COMMA);
-			}
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-			// asmfuncReturn
-			in->get(SourceTokenC::TT_OP_MINUS_GT);
-			SourceVariable::VariableType const * asmfuncReturn(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+			SourceVariable::VariableType const * asmfuncReturn;
+			make_expression_arglist(in, &asmfuncArgs, &asmfuncReturn);
 
 			// asmfuncVarType
 			SourceVariable::VariableType const * asmfuncVarType(SourceVariable::get_VariableType_asmfunc(asmfuncReturn, asmfuncArgs));
@@ -271,25 +314,9 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			ObjectExpression::int_t lnspecNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER)));
 
 			// lnspecArgs
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 			std::vector<SourceVariable::VariableType const *> lnspecArgs;
-			if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
-			{
-				lnspecArgs.push_back(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
-
-				if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
-					in->get(SourceTokenC::TT_IDENTIFIER);
-
-				if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
-					break;
-
-				in->get(SourceTokenC::TT_OP_COMMA);
-			}
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-			// lnspecReturn
-			in->get(SourceTokenC::TT_OP_MINUS_GT);
-			SourceVariable::VariableType const * lnspecReturn(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+			SourceVariable::VariableType const * lnspecReturn;
+			make_expression_arglist(in, &lnspecArgs, &lnspecReturn);
 
 			// lnspecVarType
 			SourceVariable::VariableType const * lnspecVarType(SourceVariable::get_VariableType_lnspec(lnspecReturn, lnspecArgs));
@@ -313,25 +340,9 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			ObjectExpression::int_t nativeNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER)));
 
 			// nativeArgs
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 			std::vector<SourceVariable::VariableType const *> nativeArgs;
-			if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
-			{
-				nativeArgs.push_back(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
-
-				if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
-					in->get(SourceTokenC::TT_IDENTIFIER);
-
-				if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
-					break;
-
-				in->get(SourceTokenC::TT_OP_COMMA);
-			}
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-			// nativeReturn
-			in->get(SourceTokenC::TT_OP_MINUS_GT);
-			SourceVariable::VariableType const * nativeReturn(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+			SourceVariable::VariableType const * nativeReturn;
+			make_expression_arglist(in, &nativeArgs, &nativeReturn);
 
 			// nativeVarType
 			SourceVariable::VariableType const * nativeVarType(SourceVariable::get_VariableType_native(nativeReturn, nativeArgs));
@@ -428,31 +439,11 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			}
 
 			// scriptArgs
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 			std::vector<SourceVariable::VariableType const *> scriptArgTypes;
-			if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
-			{
-				SourceVariable::StorageClass sc(SourceVariable::SC_REGISTER);
-				SourceVariable::VariableType const * type(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
-				std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
-				int addr(scriptContext.getCount(sc));
-
-				scriptArgTypes.push_back(type);
-				scriptContext.addVariable(SourceVariable(name, name, addr, sc, type, token.getPosition()));
-
-				if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
-					break;
-
-				in->get(SourceTokenC::TT_OP_COMMA);
-			}
-			int scriptArgs(scriptContext.getLimit(SourceVariable::SC_REGISTER));
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-			// scriptReturn
-			in->get(SourceTokenC::TT_OP_MINUS_GT);
-			SourceTokenC scriptReturnToken(in->get(SourceTokenC::TT_IDENTIFIER));
-			SourceVariable::VariableType const * scriptReturn(SourceVariable::get_VariableType(scriptReturnToken));
-			scriptContext.setReturnType(scriptReturn);
+			std::vector<std::string> scriptArgNames;
+			int scriptArgCount;
+			SourceVariable::VariableType const * scriptReturn;
+			make_expression_arglist(in, &scriptArgTypes, &scriptArgNames, &scriptArgCount, &scriptContext, &scriptReturn);
 
 			// scriptVarType
 			SourceVariable::VariableType const * scriptVarType(SourceVariable::get_VariableType_script(scriptReturn, scriptArgTypes));
@@ -472,7 +463,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 			context->addVariable(scriptVariable);
 
-			ObjectExpression::add_script(scriptLabel, scriptNumber, scriptType, scriptArgs, scriptVars, scriptFlags);
+			ObjectExpression::add_script(scriptLabel, scriptNumber, scriptType, scriptArgCount, scriptVars, scriptFlags);
 
 			return make_expression_value_variable(scriptVariable, token.getPosition());
 		}
@@ -512,24 +503,9 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 			if (typeToken.getData() == "script")
 			{
-				in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 				std::vector<SourceVariable::VariableType const *> scriptArgTypes;
-				if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
-				{
-					scriptArgTypes.push_back(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
-
-					if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
-						in->get(SourceTokenC::TT_IDENTIFIER);
-
-					if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
-						break;
-
-					in->get(SourceTokenC::TT_OP_COMMA);
-				}
-				in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-				in->get(SourceTokenC::TT_OP_MINUS_GT);
-				SourceVariable::VariableType const * scriptReturn(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+				SourceVariable::VariableType const * scriptReturn;
+				make_expression_arglist(in, &scriptArgTypes, &scriptReturn);
 
 				SourceVariable::add_typedef(in->get(SourceTokenC::TT_IDENTIFIER).getData(), SourceVariable::get_VariableType_script(scriptReturn, scriptArgTypes));
 			}
