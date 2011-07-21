@@ -273,6 +273,54 @@ void SourceVariable::init()
 	_types[VT_STRING] = new VariableType(type);
 }
 
+bool SourceVariable::isConstant() const
+{
+	return _sc == SC_CONSTANT;
+}
+
+ObjectExpression SourceVariable::makeObject() const
+{
+	switch (_sc)
+	{
+	case SC_CONSTANT:
+		switch (_type->type)
+		{
+		case VT_ASMFUNC:
+		case VT_VOID:
+			throw SourceException("makeObject on void VT", _position, "SourceVariable");
+
+		case VT_CHAR:
+			return ObjectExpression::create_value_int(_data.vdChar.value, _position);
+
+		case VT_INT:
+			return ObjectExpression::create_value_int(_data.vdInt.value, _position);
+
+		case VT_LNSPEC:
+			return ObjectExpression::create_value_int(_data.vdLnSpec.number, _position);
+
+		case VT_NATIVE:
+			return ObjectExpression::create_value_int(_data.vdNative.number, _position);
+
+		case VT_REAL:
+			return ObjectExpression::create_value_float(_data.vdReal.value, _position);
+
+		case VT_STRUCT:
+			throw SourceException("makeObject on compound VT", _position, "SourceVariable");
+
+		case VT_STRING:
+			return ObjectExpression::create_value_symbol(_nameObject, _position);
+
+		case VT_SCRIPT:
+			return ObjectExpression::create_value_int(_data.vdScript.number, _position);
+		}
+		break;
+
+	case SC_REGISTER:
+		throw SourceException("makeObject on SC_REGISTER", _position, "SourceVariable");
+	}
+
+	throw SourceException("makeObject", _position, "SourceVariable");
+}
 void SourceVariable::makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args, SourcePosition const & position) const
 {
 	switch (_type->type)

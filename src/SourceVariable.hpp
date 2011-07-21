@@ -149,6 +149,9 @@ public:
 
 	VariableType const * getType() const;
 
+	bool isConstant() const;
+
+	ObjectExpression makeObject() const;
 	void makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args, SourcePosition const & position) const;
 	void makeObjectsGet(std::vector<ObjectToken> * const objects, SourcePosition const & position) const;
 	void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, SourcePosition const & position) const;
