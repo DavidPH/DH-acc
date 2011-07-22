@@ -29,6 +29,7 @@
 class SourceExpressionDS_RootIf : public SourceExpressionDS_Base
 {
 public:
+	SourceExpressionDS_RootIf(SourceExpressionDS const & exprCondition, SourceExpressionDS const & exprIf, SourceContext * context, SourcePosition const & position);
 	SourceExpressionDS_RootIf(SourceExpressionDS const & exprCondition, SourceExpressionDS const & exprIf, SourceExpressionDS const & exprElse, SourceContext * context, SourcePosition const & position);
 
 	virtual SourceExpressionDS_RootIf * clone() const;
@@ -51,10 +52,16 @@ private:
 	std::string _labelIf;
 	std::string _labelElse;
 	std::string _labelEnd;
+
+	bool _hasElse;
 };
 
 
 
+SourceExpressionDS SourceExpressionDS::make_expression_root_if(SourceExpressionDS const & exprCondition, SourceExpressionDS const & exprIf, SourceContext * context, SourcePosition const & position)
+{
+	return new SourceExpressionDS_RootIf(exprCondition, exprIf, context, position);
+}
 SourceExpressionDS SourceExpressionDS::make_expression_root_if(SourceExpressionDS const & exprCondition, SourceExpressionDS const & exprIf, SourceExpressionDS const & exprElse, SourceContext * context, SourcePosition const & position)
 {
 	return new SourceExpressionDS_RootIf(exprCondition, exprIf, exprElse, context, position);
@@ -62,7 +69,14 @@ SourceExpressionDS SourceExpressionDS::make_expression_root_if(SourceExpressionD
 
 
 
-SourceExpressionDS_RootIf::SourceExpressionDS_RootIf(SourceExpressionDS const & exprCondition, SourceExpressionDS const & exprIf, SourceExpressionDS const & exprElse, SourceContext * context, SourcePosition const & position) : SourceExpressionDS_Base(position), _exprCondition(exprCondition), _exprIf(exprIf), _exprElse(exprElse)
+SourceExpressionDS_RootIf::SourceExpressionDS_RootIf(SourceExpressionDS const & exprCondition, SourceExpressionDS const & exprIf, SourceContext * context, SourcePosition const & position) : SourceExpressionDS_Base(position), _exprCondition(exprCondition), _exprIf(exprIf), _hasElse(false)
+{
+	std::string label(context->makeLabel());
+
+	_labelIf   = label + "_if";
+	_labelEnd  = label + "_end";
+}
+SourceExpressionDS_RootIf::SourceExpressionDS_RootIf(SourceExpressionDS const & exprCondition, SourceExpressionDS const & exprIf, SourceExpressionDS const & exprElse, SourceContext * context, SourcePosition const & position) : SourceExpressionDS_Base(position), _exprCondition(exprCondition), _exprIf(exprIf), _exprElse(exprElse), _hasElse(true)
 {
 	std::string label(context->makeLabel());
 
@@ -94,19 +108,18 @@ bool SourceExpressionDS_RootIf::isConstant() const
 void SourceExpressionDS_RootIf::makeObjectsGet(ObjectVector * objects) const
 {
 	_exprCondition.makeObjectsGet(objects);
-
 	objects->setPosition(getPosition());
-
-	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_labelElse));
+	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_hasElse ? _labelElse : _labelEnd));
 
 	objects->addLabel(_labelIf);
-
 	_exprIf.makeObjectsGet(objects);
-	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_labelEnd));
 
-	objects->addLabel(_labelElse);
-
-	_exprElse.makeObjectsGet(objects);
+	if (_hasElse)
+	{
+		objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_labelEnd));
+		objects->addLabel(_labelElse);
+		_exprElse.makeObjectsGet(objects);
+	}
 
 	objects->addLabel(_labelEnd);
 }

@@ -344,27 +344,32 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 		if (token.getData() == "if")
 		{
+
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
-			SourceExpressionDS exprCondition(make_expression(in, blocks, context));
+			SourceContext contextCondition(context, SourceContext::CT_BLOCK);
+			SourceExpressionDS exprCondition(make_expression(in, blocks, &contextCondition));
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-			SourceExpressionDS exprIf(make_expression(in, blocks, context));
+			SourceContext contextIf(&contextCondition, SourceContext::CT_BLOCK);
+			SourceExpressionDS exprIf(make_expression(in, blocks, &contextIf));
 			SourceTokenC semicolonToken(in->get(SourceTokenC::TT_OP_SEMICOLON));
-
-			SourceExpressionDS exprElse;
 
 			if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER && in->peek().getData() == "else")
 			{
 				in->get();
-				exprElse = make_expression(in, blocks, context);
+
+				SourceContext contextElse(&contextCondition, SourceContext::CT_BLOCK);
+				SourceExpressionDS exprElse(make_expression(in, blocks, &contextElse));
 				in->unget(in->get(SourceTokenC::TT_OP_SEMICOLON));
+
+				return make_expression_root_if(exprCondition, exprIf, exprElse, context, token.getPosition());
 			}
 			else
 			{
 				in->unget(semicolonToken);
-			}
 
-			return make_expression_root_if(exprCondition, exprIf, exprElse, context, token.getPosition());
+				return make_expression_root_if(exprCondition, exprIf, context, token.getPosition());
+			}
 		}
 
 		if (token.getData() == "lnspec")
