@@ -349,7 +349,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
 			SourceExpressionDS exprIf(make_expression(in, blocks, context));
-			in->get(SourceTokenC::TT_OP_SEMICOLON);
+			SourceTokenC semicolonToken(in->get(SourceTokenC::TT_OP_SEMICOLON));
 
 			SourceExpressionDS exprElse;
 
@@ -357,7 +357,11 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 			{
 				in->get();
 				exprElse = make_expression(in, blocks, context);
-				in->get(SourceTokenC::TT_OP_SEMICOLON);
+				in->unget(in->get(SourceTokenC::TT_OP_SEMICOLON));
+			}
+			else
+			{
+				in->unget(semicolonToken);
 			}
 
 			return make_expression_root_if(exprCondition, exprIf, exprElse, context, token.getPosition());
