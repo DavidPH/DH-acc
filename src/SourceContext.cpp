@@ -25,17 +25,19 @@
 #include "SourceTokenC.hpp"
 #include "SourceVariable.hpp"
 
+#include <sstream>
+
 
 
 SourceContext SourceContext::global_context;
 
 
 
-SourceContext::SourceContext() : _countRegister(0), _limitRegister(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _inheritLocals(false)
+SourceContext::SourceContext() : _countRegister(0), _labelCount(0), _limitRegister(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _inheritLocals(false)
 {
 
 }
-SourceContext::SourceContext(SourceContext * parent, ContextType type) : _countRegister(0), _limitRegister(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK)
+SourceContext::SourceContext(SourceContext * parent, ContextType type) : _countRegister(0), _label(parent->makeLabelShort()), _labelCount(0), _limitRegister(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK)
 {
 
 }
@@ -96,6 +98,14 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
 	throw SourceException("getCount", SourcePosition::none, "SourceContext");
 }
 
+std::string SourceContext::getLabel() const
+{
+	if (_parent)
+		return _parent->getLabel() + _label;
+	else
+		return _label;
+}
+
 int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 {
 	switch (sc)
@@ -137,6 +147,19 @@ SourceVariable const & SourceContext::getVariable(std::string const & name, Sour
 	if (_parent) return _parent->getVariable(name, position, canLocal && _inheritLocals);
 
 	throw SourceException("no such variable", position, "SourceContext");
+}
+
+std::string SourceContext::makeLabel()
+{
+	return getLabel() + makeLabelShort();
+}
+std::string SourceContext::makeLabelShort()
+{
+	std::ostringstream oss;
+
+	oss << "block" << ++_labelCount;
+
+	return oss.str();
 }
 
 void SourceContext::setReturnType(SourceVariable::VariableType const * returnType)

@@ -59,6 +59,8 @@ public:
 
 	SourceVariable const & getVariable(SourceTokenC const & token) const;
 
+	std::string makeLabel();
+
 	void setReturnType(SourceVariable::VariableType const * returnType);
 
 
@@ -69,9 +71,16 @@ private:
 	void addCount(int count, SourceVariable::StorageClass sc);
 	void addLimit(int limit, SourceVariable::StorageClass sc);
 
+	std::string getLabel() const;
+
 	SourceVariable const & getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
 
+	std::string makeLabelShort();
+
 	int _countRegister;
+
+	std::string _label;
+	int _labelCount;
 
 	int _limitRegister;
 

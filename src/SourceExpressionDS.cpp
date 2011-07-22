@@ -342,6 +342,27 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		if (token.getData() == "delay")
 			return make_expression_root_delay(make_expression(in, blocks, context), token.getPosition());
 
+		if (token.getData() == "if")
+		{
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+			SourceExpressionDS exprCondition(make_expression(in, blocks, context));
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+			SourceExpressionDS exprIf(make_expression(in, blocks, context));
+			in->get(SourceTokenC::TT_OP_SEMICOLON);
+
+			SourceExpressionDS exprElse;
+
+			if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER && in->peek().getData() == "else")
+			{
+				in->get();
+				exprElse = make_expression(in, blocks, context);
+				in->get(SourceTokenC::TT_OP_SEMICOLON);
+			}
+
+			return make_expression_root_if(exprCondition, exprIf, exprElse, context, token.getPosition());
+		}
+
 		if (token.getData() == "lnspec")
 		{
 			// lnspecName

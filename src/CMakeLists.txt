@@ -50,6 +50,7 @@ add_executable(DH-acc
 	SourceExpressionDS/RootBlock.cpp
 	SourceExpressionDS/RootCall.cpp
 	SourceExpressionDS/RootDelay.cpp
+	SourceExpressionDS/RootIf.cpp
 	SourceExpressionDS/RootOut.cpp
 	SourceExpressionDS/RootReturn.cpp
 	SourceExpressionDS/RootTerm.cpp

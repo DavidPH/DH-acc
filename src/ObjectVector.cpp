@@ -80,6 +80,10 @@ ObjectExpression ObjectVector::getValue(int i)
 {
 	return getValue((ObjectExpression::int_t)i);
 }
+ObjectExpression ObjectVector::getValue(std::string const & label)
+{
+	return ObjectExpression::create_value_symbol(label, _position);
+}
 
 ObjectToken const & ObjectVector::operator [] (ObjectExpression::int_t index) const
 {

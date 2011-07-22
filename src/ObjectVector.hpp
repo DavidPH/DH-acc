@@ -47,6 +47,7 @@ public:
 	ObjectExpression getValue(ObjectExpression::float_t f);
 	ObjectExpression getValue(ObjectExpression::int_t i);
 	ObjectExpression getValue(int i);
+	ObjectExpression getValue(std::string const & label);
 
 	ObjectToken const & operator [] (ObjectExpression::int_t index) const;
 
