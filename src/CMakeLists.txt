@@ -55,6 +55,7 @@ add_executable(DH-acc
 	SourceExpressionDS/RootReturn.cpp
 	SourceExpressionDS/RootTerm.cpp
 	SourceExpressionDS/RootVoid.cpp
+	SourceExpressionDS/RootWhile.cpp
 	SourceExpressionDS/ValueMember.cpp
 	SourceExpressionDS/ValueVariable.cpp
 	SourceBlockC.cpp

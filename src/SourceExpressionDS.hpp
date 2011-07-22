@@ -129,6 +129,7 @@ private:
 	static SourceExpressionDS make_expression_root_return(SourceExpressionDS const & expr, SourceContext const & context, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_term(SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_void(SourceExpressionDS const & expr, SourcePosition const & position);
+	static SourceExpressionDS make_expression_root_while(SourceExpressionDS const & exprCondition, SourceExpressionDS const & exprWhile, SourceContext * context, SourcePosition const & position);
 
 	static SourceExpressionDS make_expression_value_char(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_int(SourceTokenC const & token);

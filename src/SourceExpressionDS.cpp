@@ -344,7 +344,6 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 		if (token.getData() == "if")
 		{
-
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 			SourceContext contextCondition(context, SourceContext::CT_BLOCK);
 			SourceExpressionDS exprCondition(make_expression(in, blocks, &contextCondition));
@@ -599,6 +598,20 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 
 			if (type)
 				return make_expression_cast(make_expression_single(in, blocks, context), type, token.getPosition());
+		}
+
+		if (token.getData() == "while")
+		{
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+			SourceContext contextCondition(context, SourceContext::CT_BLOCK);
+			SourceExpressionDS exprCondition(make_expression(in, blocks, &contextCondition));
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+			SourceContext contextWhile(&contextCondition, SourceContext::CT_BLOCK);
+			SourceExpressionDS exprWhile(make_expression(in, blocks, &contextWhile));
+			in->unget(in->get(SourceTokenC::TT_OP_SEMICOLON));
+
+			return make_expression_root_while(exprCondition, exprWhile, context, token.getPosition());
 		}
 
 		return make_expression_value_variable(context->getVariable(token), token.getPosition());
