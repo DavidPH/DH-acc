@@ -22,6 +22,7 @@
 #include "SourceVariable.hpp"
 
 #include "ObjectExpression.hpp"
+#include "ObjectVector.hpp"
 #include "print_debug.hpp"
 #include "SourceException.hpp"
 #include "SourceExpressionDS.hpp"
@@ -281,7 +282,7 @@ bool SourceVariable::isConstant() const
 	return _sc == SC_CONSTANT;
 }
 
-ObjectExpression SourceVariable::makeObject() const
+ObjectExpression SourceVariable::makeObject(SourcePosition const & position) const
 {
 	switch (_sc)
 	{
@@ -289,46 +290,48 @@ ObjectExpression SourceVariable::makeObject() const
 		switch (_type->type)
 		{
 		case VT_ACSFUNC:
-			return ObjectExpression::create_value_int(_data.vdACSFunc.number, _position);
+			return ObjectExpression::create_value_int(_data.vdACSFunc.number, position);
 
 		case VT_ASMFUNC:
 		case VT_VOID:
-			throw SourceException("makeObject on void VT", _position, "SourceVariable");
+			throw SourceException("makeObject on void VT", position, "SourceVariable");
 
 		case VT_CHAR:
-			return ObjectExpression::create_value_int(_data.vdChar.value, _position);
+			return ObjectExpression::create_value_int(_data.vdChar.value, position);
 
 		case VT_INT:
-			return ObjectExpression::create_value_int(_data.vdInt.value, _position);
+			return ObjectExpression::create_value_int(_data.vdInt.value, position);
 
 		case VT_LNSPEC:
-			return ObjectExpression::create_value_int(_data.vdLnSpec.number, _position);
+			return ObjectExpression::create_value_int(_data.vdLnSpec.number, position);
 
 		case VT_NATIVE:
-			return ObjectExpression::create_value_int(_data.vdNative.number, _position);
+			return ObjectExpression::create_value_int(_data.vdNative.number, position);
 
 		case VT_REAL:
-			return ObjectExpression::create_value_float(_data.vdReal.value, _position);
+			return ObjectExpression::create_value_float(_data.vdReal.value, position);
 
 		case VT_STRUCT:
-			throw SourceException("makeObject on compound VT", _position, "SourceVariable");
+			throw SourceException("makeObject on compound VT", position, "SourceVariable");
 
 		case VT_STRING:
-			return ObjectExpression::create_value_symbol(_nameObject, _position);
+			return ObjectExpression::create_value_symbol(_nameObject, position);
 
 		case VT_SCRIPT:
-			return ObjectExpression::create_value_int(_data.vdScript.number, _position);
+			return ObjectExpression::create_value_int(_data.vdScript.number, position);
 		}
 		break;
 
 	case SC_REGISTER:
-		throw SourceException("makeObject on SC_REGISTER", _position, "SourceVariable");
+		throw SourceException("makeObject on SC_REGISTER", position, "SourceVariable");
 	}
 
 	throw SourceException("makeObject", _position, "SourceVariable");
 }
-void SourceVariable::makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args, SourcePosition const & position) const
+void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args, SourcePosition const & position) const
 {
+	objects->setPosition(position);
+
 	switch (_type->type)
 	{
 	case VT_ACSFUNC:
@@ -374,17 +377,21 @@ void SourceVariable::makeObjectsCall(std::vector<ObjectToken> * const objects, s
 	}
 }
 
-void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, SourcePosition const & position) const
+void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const & position) const
 {
+	objects->setPosition(position);
+
 	int address(_address);
 	makeObjectsGet(objects, position, _type, &address);
 }
-void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, SourcePosition const & position) const
+void SourceVariable::makeObjectsGet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position) const
 {
+	objects->setPosition(position);
+
 	int address(_address);
 	makeObjectsGet(objects, names, position, _type, &address);
 }
-void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const
+void SourceVariable::makeObjectsGet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const
 {
 	if (names->empty())
 	{
@@ -431,7 +438,7 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, st
 		break;
 	}
 }
-void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, SourcePosition const & position, VariableType const * const type, int * const address) const
+void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * const type, int * const address) const
 {
 	switch (_sc)
 	{
@@ -439,50 +446,20 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 		switch (type->type)
 		{
 		case VT_ACSFUNC:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdACSFunc.number, position)));
+		case VT_CHAR:
+		case VT_INT:
+		case VT_LNSPEC:
+		case VT_NATIVE:
+		case VT_REAL:
+		case VT_STRUCT:
+		case VT_STRING:
+		case VT_SCRIPT:
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, makeObject(position));
 			++*address;
 			break;
 
 		case VT_ASMFUNC:
 		case VT_VOID:
-			break;
-
-		case VT_CHAR:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdChar.value, position)));
-			++*address;
-			break;
-
-		case VT_INT:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdInt.value, position)));
-			++*address;
-			break;
-
-		case VT_LNSPEC:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdLnSpec.number, position)));
-			++*address;
-			break;
-
-		case VT_NATIVE:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdNative.number, position)));
-			++*address;
-			break;
-
-		case VT_REAL:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_float(_data.vdReal.value, position)));
-			++*address;
-			break;
-
-		case VT_STRUCT:
-			throw SourceException("unsupported SC_CONSTANT VT", position, "SourceVariable");
-
-		case VT_STRING:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_symbol(_nameObject, position)));
-			++*address;
-			break;
-
-		case VT_SCRIPT:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, position, ObjectExpression::create_value_int(_data.vdScript.number, position)));
-			++*address;
 			break;
 		}
 		break;
@@ -498,7 +475,7 @@ void SourceVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, So
 		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHSCRIPTVAR, position, ObjectExpression::create_value_int((*address)++, position)));
+			objects->addToken(ObjectToken::OCODE_PUSHSCRIPTVAR, objects->getValue((*address)++));
 			break;
 
 		case VT_ASMFUNC:
@@ -545,20 +522,24 @@ void SourceVariable::makeObjectsGet(VariableType const * const type, int * const
 	}
 }
 
-void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, SourcePosition const & position) const
+void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const & position) const
 {
+	objects->setPosition(position);
+
 	int address(_address + _type->size() - 1);
 	makeObjectsSet(objects, position, _type, &address);
 	makeObjectsGet(objects, position);
 }
-void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, SourcePosition const & position) const
+void SourceVariable::makeObjectsSet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position) const
 {
+	objects->setPosition(position);
+
 	int address(_address + _type->size() - 1);
 	std::vector<std::string> namesOriginal(*names);
 	makeObjectsSet(objects, names, position, _type, &address);
 	makeObjectsGet(objects, &namesOriginal, position);
 }
-void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const
+void SourceVariable::makeObjectsSet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const
 {
 	if (names->empty())
 	{
@@ -605,7 +586,7 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, st
 		break;
 	}
 }
-void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, SourcePosition const & position, VariableType const * const type, int * const address) const
+void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * const type, int * const address) const
 {
 	switch (_sc)
 	{
@@ -623,7 +604,7 @@ void SourceVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, So
 		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
-			objects->push_back(ObjectToken(ObjectToken::OCODE_ASSIGNSCRIPTVAR, position, ObjectExpression::create_value_int((*address)--, position)));
+			objects->addToken(ObjectToken::OCODE_ASSIGNSCRIPTVAR, objects->getValue((*address)--));
 			break;
 
 		case VT_ASMFUNC:

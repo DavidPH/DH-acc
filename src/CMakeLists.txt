@@ -20,6 +20,7 @@ add_executable(DH-acc
 	ObjectExpression/ValueInt.cpp
 	ObjectExpression/ValueSymbol.cpp
 	ObjectToken.cpp
+	ObjectVector.cpp
 	option.cpp
 	ost_type.cpp
 	print_debug.cpp

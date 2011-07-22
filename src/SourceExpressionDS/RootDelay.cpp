@@ -21,7 +21,7 @@
 
 #include "Base.hpp"
 
-#include "../ObjectToken.hpp"
+#include "../ObjectVector.hpp"
 
 
 
@@ -38,7 +38,7 @@ public:
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -81,11 +81,13 @@ bool SourceExpressionDS_RootDelay::isConstant() const
 	return false;
 }
 
-void SourceExpressionDS_RootDelay::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_RootDelay::makeObjectsGet(ObjectVector * objects) const
 {
 	_expr.makeObjectsGet(objects);
 
-	objects->push_back(ObjectToken(ObjectToken::OCODE_DELAY, getPosition()));
+	objects->setPosition(getPosition());
+
+	objects->addToken(ObjectToken::OCODE_DELAY);
 }
 
 void SourceExpressionDS_RootDelay::printDebug(std::ostream * const out) const

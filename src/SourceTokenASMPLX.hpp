@@ -31,6 +31,7 @@
 #include <vector>
 
 class ObjectExpression;
+class ObjectVector;
 class SourceStream;
 
 
@@ -59,7 +60,7 @@ public:
 
 	static void init();
 
-	static void make_objects(std::vector<SourceTokenASMPLX> const & tokens, std::vector<ObjectToken> * const objects);
+	static void make_objects(std::vector<SourceTokenASMPLX> const & tokens, ObjectVector * objects);
 
 	static void read_tokens(SourceStream * const in, std::vector<SourceTokenASMPLX> * const tokens);
 

@@ -21,7 +21,6 @@
 
 #include "Base.hpp"
 
-#include "../ObjectToken.hpp"
 #include "../print_debug.hpp"
 #include "../SourceException.hpp"
 
@@ -40,7 +39,7 @@ public:
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -92,7 +91,7 @@ bool SourceExpressionDS_RootCall::isConstant() const
 	return false;
 }
 
-void SourceExpressionDS_RootCall::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_RootCall::makeObjectsGet(ObjectVector * objects) const
 {
 	_expr.makeObjectsCall(objects, _args);
 }

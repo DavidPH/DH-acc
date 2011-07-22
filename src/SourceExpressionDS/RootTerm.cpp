@@ -21,7 +21,7 @@
 
 #include "Base.hpp"
 
-#include "../ObjectToken.hpp"
+#include "../ObjectVector.hpp"
 
 
 
@@ -38,7 +38,7 @@ public:
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -79,9 +79,11 @@ bool SourceExpressionDS_RootTerm::isConstant() const
 	return false;
 }
 
-void SourceExpressionDS_RootTerm::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_RootTerm::makeObjectsGet(ObjectVector * objects) const
 {
-	objects->push_back(ObjectToken(ObjectToken::OCODE_TERMINATE, getPosition()));
+	objects->setPosition(getPosition());
+
+	objects->addToken(ObjectToken::OCODE_TERMINATE);
 }
 
 void SourceExpressionDS_RootTerm::printDebug(std::ostream * const out) const

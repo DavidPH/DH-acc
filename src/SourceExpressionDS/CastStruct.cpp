@@ -21,7 +21,6 @@
 
 #include "Base.hpp"
 
-#include "../ObjectToken.hpp"
 #include "../print_debug.hpp"
 #include "../SourceException.hpp"
 
@@ -40,8 +39,8 @@ public:
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
+	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -95,12 +94,12 @@ bool SourceExpressionDS_CastStruct::isConstant() const
 	return false;
 }
 
-void SourceExpressionDS_CastStruct::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_CastStruct::makeObjectsGet(ObjectVector * objects) const
 {
 	for (size_t i(0); i < _expressions.size(); ++i)
 		_expressions[i].makeObjectsGet(objects);
 }
-void SourceExpressionDS_CastStruct::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+void SourceExpressionDS_CastStruct::makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	if (names->empty())
 	{

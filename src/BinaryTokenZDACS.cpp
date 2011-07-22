@@ -22,6 +22,7 @@
 #include "BinaryTokenZDACS.hpp"
 
 #include "ObjectToken.hpp"
+#include "ObjectVector.hpp"
 #include "ost_type.hpp"
 #include "SourceException.hpp"
 
@@ -103,7 +104,7 @@ void BinaryTokenZDACS::init()
 	#undef DO_INIT
 }
 
-void BinaryTokenZDACS::make_tokens(std::vector<ObjectToken> const & objects, std::vector<BinaryTokenZDACS> * const instructions)
+void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<BinaryTokenZDACS> * const instructions)
 {
 	#define CASE_DIRECTMAP(NAME)\
 	case ObjectToken::OCODE_##NAME:\
@@ -115,7 +116,7 @@ void BinaryTokenZDACS::make_tokens(std::vector<ObjectToken> const & objects, std
 	}\
 	break
 
-	for (uintptr_t index(0); index < objects.size(); ++index) switch (objects[index].getCode())
+	for (ObjectExpression::int_t index(0); index < objects.size(); ++index) switch (objects[index].getCode())
 	{
 	CASE_DIRECTMAP(ADD);
 	CASE_DIRECTMAP(ASSIGNSCRIPTVAR);

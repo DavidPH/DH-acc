@@ -30,6 +30,7 @@
 #include <vector>
 
 class ObjectToken;
+class ObjectVector;
 
 
 
@@ -105,7 +106,7 @@ public:
 
 	static void init();
 
-	static void make_tokens(std::vector<ObjectToken> const & objects, std::vector<BinaryTokenZDACS> * const instructions);
+	static void make_tokens(ObjectVector const & objects, std::vector<BinaryTokenZDACS> * instructions);
 
 	static void write_8(std::ostream * const out, uint8_t const i);
 	static void write_16(std::ostream * const out, uint16_t const i);

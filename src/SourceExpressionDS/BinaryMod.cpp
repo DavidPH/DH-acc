@@ -21,7 +21,7 @@
 
 #include "Binary.hpp"
 
-#include "../ObjectToken.hpp"
+#include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
 
 
@@ -35,7 +35,7 @@ public:
 
 	virtual char const * getName() const;
 
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 };
@@ -64,9 +64,11 @@ char const * SourceExpressionDS_BinaryMod::getName() const
 	return "SourceExpressionDS_BinaryMod";
 }
 
-void SourceExpressionDS_BinaryMod::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_BinaryMod::makeObjectsGet(ObjectVector * objects) const
 {
 	SourceExpressionDS_Binary::makeObjectsGet(objects);
+
+	objects->setPosition(getPosition());
 
 	switch (getType()->type)
 	{
@@ -83,7 +85,7 @@ void SourceExpressionDS_BinaryMod::makeObjectsGet(std::vector<ObjectToken> * con
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_REAL:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_MOD, getPosition()));
+		objects->addToken(ObjectToken::OCODE_MOD);
 		break;
 	}
 }

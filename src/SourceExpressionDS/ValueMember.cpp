@@ -21,10 +21,8 @@
 
 #include "Base.hpp"
 
-#include "../ObjectToken.hpp"
 #include "../print_debug.hpp"
 #include "../SourceTokenC.hpp"
-#include "../SourceVariable.hpp"
 
 
 
@@ -41,10 +39,10 @@ public:
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
-	virtual void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
-	virtual void makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
+	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsSet(ObjectVector * objects) const;
+	virtual void makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -87,22 +85,22 @@ bool SourceExpressionDS_ValueMember::isConstant() const
 	return false;
 }
 
-void SourceExpressionDS_ValueMember::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_ValueMember::makeObjectsGet(ObjectVector * objects) const
 {
 	std::vector<std::string> names(1, _name);
 	_expr.makeObjectsGet(objects, &names);
 }
-void SourceExpressionDS_ValueMember::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+void SourceExpressionDS_ValueMember::makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	names->push_back(_name);
 	_expr.makeObjectsGet(objects, names);
 }
-void SourceExpressionDS_ValueMember::makeObjectsSet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_ValueMember::makeObjectsSet(ObjectVector * objects) const
 {
 	std::vector<std::string> names(1, _name);
 	_expr.makeObjectsSet(objects, &names);
 }
-void SourceExpressionDS_ValueMember::makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+void SourceExpressionDS_ValueMember::makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	names->push_back(_name);
 	_expr.makeObjectsSet(objects, names);

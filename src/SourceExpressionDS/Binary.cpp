@@ -57,7 +57,7 @@ bool SourceExpressionDS_Binary::isConstant() const
 	return _exprL.isConstant() && _exprR.isConstant();
 }
 
-void SourceExpressionDS_Binary::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_Binary::makeObjectsGet(ObjectVector * objects) const
 {
 	_exprL.makeObjectsGet(objects);
 	_exprR.makeObjectsGet(objects);

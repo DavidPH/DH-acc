@@ -29,7 +29,7 @@
 #include <vector>
 
 class ObjectExpression;
-class ObjectToken;
+class ObjectVector;
 class SourceContext;
 class SourceExpressionDS_Base;
 class SourcePosition;
@@ -57,11 +57,11 @@ public:
 	bool isConstant() const;
 
 	ObjectExpression makeObject() const;
-	void makeObjectsCall(std::vector<ObjectToken> * objects, std::vector<SourceExpressionDS> const & args) const;
-	void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
-	void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
-	void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
-	void makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
+	void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const;
+	void makeObjectsGet(ObjectVector * objects) const;
+	void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const;
+	void makeObjectsSet(ObjectVector * objects) const;
+	void makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	SourceExpressionDS & operator = (SourceExpressionDS const & expr);
 
@@ -75,17 +75,17 @@ public:
 
 	static SourceExpressionDS make_expressions(SourceTokenizerDS * const tokenizer);
 
-	static void make_objects(std::vector<SourceExpressionDS> const & expressions, std::vector<ObjectToken> * const objects);
+	static void make_objects(std::vector<SourceExpressionDS> const & expressions, ObjectVector * objects);
 
-	static void make_objects_call_acsfunc(std::vector<ObjectToken> * objects, SourceVariable::VariableData_ACSFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+	static void make_objects_call_acsfunc(ObjectVector * objects, SourceVariable::VariableData_ACSFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 
-	static void make_objects_call_asmfunc(std::vector<ObjectToken> * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+	static void make_objects_call_asmfunc(ObjectVector * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 
-	static void make_objects_call_lnspec(std::vector<ObjectToken> * objects, SourceVariable::VariableData_LnSpec const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+	static void make_objects_call_lnspec(ObjectVector * objects, SourceVariable::VariableData_LnSpec const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 
-	static void make_objects_call_native(std::vector<ObjectToken> * objects, SourceVariable::VariableData_Native const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+	static void make_objects_call_native(ObjectVector * objects, SourceVariable::VariableData_Native const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 
-	static void make_objects_call_script(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+	static void make_objects_call_script(ObjectVector * objects, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
 
 	static SourceExpressionDS const nop;
 

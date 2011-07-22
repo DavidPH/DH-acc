@@ -23,6 +23,7 @@
 
 #include "ObjectExpression.hpp"
 #include "ObjectToken.hpp"
+#include "ObjectVector.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
@@ -632,13 +633,13 @@ void SourceExpressionDS::make_expressions(SourceTokenizerDS * const in, std::vec
 	in->get(SourceTokenC::TT_OP_BRACE_C);
 }
 
-void SourceExpressionDS::make_objects(std::vector<SourceExpressionDS> const & expressions, std::vector<ObjectToken> * const objects)
+void SourceExpressionDS::make_objects(std::vector<SourceExpressionDS> const & expressions, ObjectVector * objects)
 {
 	for (uintptr_t index(0); index < expressions.size(); ++index)
 		expressions[index].makeObjectsGet(objects);
 }
 
-void SourceExpressionDS::make_objects_call_acsfunc(std::vector<ObjectToken> * objects, SourceVariable::VariableData_ACSFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
+void SourceExpressionDS::make_objects_call_acsfunc(ObjectVector * objects, SourceVariable::VariableData_ACSFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
 {
 	if (args.size() != data.type->types.size())
 		throw SourceException("incorrect arg count to call acsfunc", position, "SourceExpressionDS");
@@ -651,18 +652,20 @@ void SourceExpressionDS::make_objects_call_acsfunc(std::vector<ObjectToken> * ob
 		args[i].makeObjectsGet(objects);
 	}
 
+	objects->setPosition(position);
+
 	ObjectToken::ObjectCode ocode;
-	ObjectExpression ofunc(ObjectExpression::create_value_int(data.number, position));
+	ObjectExpression ofunc(objects->getValue(data.number));
 
 	if (data.type->callType->type == SourceVariable::VT_VOID)
 		ocode = ObjectToken::OCODE_CALLZDACSDISCARD;
 	else
 		ocode = ObjectToken::OCODE_CALLZDACS;
 
-	objects->push_back(ObjectToken(ocode, position, ofunc));
+	objects->addToken(ocode, ofunc);
 }
 
-void SourceExpressionDS::make_objects_call_asmfunc(std::vector<ObjectToken> * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
+void SourceExpressionDS::make_objects_call_asmfunc(ObjectVector * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
 {
 	if (args.size() != data.type->types.size())
 		throw SourceException("incorrect arg count to call asmfunc", position, "SourceExpressionDS");
@@ -684,7 +687,7 @@ void SourceExpressionDS::make_objects_call_asmfunc(std::vector<ObjectToken> * ob
 		for (size_t i(0); i < args.size(); ++i)
 			oargs.push_back(args[i].makeObject());
 
-		objects->push_back(ObjectToken(data.ocode_imm, position, oargs));
+		objects->setPosition(position).addToken(data.ocode_imm, oargs);
 	}
 	else
 	{
@@ -694,11 +697,11 @@ void SourceExpressionDS::make_objects_call_asmfunc(std::vector<ObjectToken> * ob
 		for (size_t i(0); i < args.size(); ++i)
 			args[i].makeObjectsGet(objects);
 
-		objects->push_back(ObjectToken(data.ocode, position));
+		objects->setPosition(position).addToken(data.ocode);
 	}
 }
 
-void SourceExpressionDS::make_objects_call_lnspec(std::vector<ObjectToken> * objects, SourceVariable::VariableData_LnSpec const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
+void SourceExpressionDS::make_objects_call_lnspec(ObjectVector * objects, SourceVariable::VariableData_LnSpec const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
 {
 	if (args.size() != data.type->types.size())
 		throw SourceException("incorrect arg count to call lnspec", position, "SourceExpressionDS");
@@ -714,18 +717,16 @@ void SourceExpressionDS::make_objects_call_lnspec(std::vector<ObjectToken> * obj
 		args[i].makeObjectsGet(objects);
 	}
 
+	objects->setPosition(position);
+
 	ObjectToken::ObjectCode ocode;
-
-	ObjectExpression oarg0(ObjectExpression::create_value_int(0, position));
-	ObjectExpression ospec(ObjectExpression::create_value_int(data.number, position));
-
-	ObjectToken otok0(ObjectToken::OCODE_PUSHNUMBER, position, oarg0);
+	ObjectExpression ospec(objects->getValue(data.number));
 
 	if (data.type->callType->type == SourceVariable::VT_VOID)
 	{
 		switch (args.size())
 		{
-		case 0: ocode = ObjectToken::OCODE_LSPEC1; objects->push_back(otok0); break;
+		case 0: ocode = ObjectToken::OCODE_LSPEC1; objects->addTokenPushZero(); break;
 		case 1: ocode = ObjectToken::OCODE_LSPEC1; break;
 		case 2: ocode = ObjectToken::OCODE_LSPEC2; break;
 		case 3: ocode = ObjectToken::OCODE_LSPEC3; break;
@@ -739,13 +740,13 @@ void SourceExpressionDS::make_objects_call_lnspec(std::vector<ObjectToken> * obj
 		ocode = ObjectToken::OCODE_LSPEC5RESULT;
 
 		for (size_t i(args.size()); i < 5; ++i)
-			objects->push_back(otok0);
+			objects->addTokenPushZero();
 	}
 
-	objects->push_back(ObjectToken(ocode, position, ospec));
+	objects->addToken(ocode, ospec);
 }
 
-void SourceExpressionDS::make_objects_call_native(std::vector<ObjectToken> * objects, SourceVariable::VariableData_Native const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
+void SourceExpressionDS::make_objects_call_native(ObjectVector * objects, SourceVariable::VariableData_Native const & data, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
 {
 	if (args.size() != data.type->types.size())
 		throw SourceException("incorrect arg count to call native", position, "SourceExpressionDS");
@@ -758,18 +759,16 @@ void SourceExpressionDS::make_objects_call_native(std::vector<ObjectToken> * obj
 		args[i].makeObjectsGet(objects);
 	}
 
+	objects->setPosition(position);
+
 	ObjectToken::ObjectCode ocode(ObjectToken::OCODE_CALLZDFUNC);
-	ObjectExpression oargc(ObjectExpression::create_value_int(args.size(), position));
-	ObjectExpression ofunc(ObjectExpression::create_value_int(data.number, position));
+	ObjectExpression oargc(objects->getValue((int)args.size()));
+	ObjectExpression ofunc(objects->getValue(data.number));
 
-	std::vector<ObjectExpression> oargs;
-	oargs.push_back(oargc);
-	oargs.push_back(ofunc);
-
-	objects->push_back(ObjectToken(ocode, position, oargs));
+	objects->addToken(ocode, oargc, ofunc);
 }
 
-void SourceExpressionDS::make_objects_call_script(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
+void SourceExpressionDS::make_objects_call_script(ObjectVector * objects, SourceVariable::VariableType const * type, std::vector<SourceExpressionDS> const & args, SourcePosition const & position)
 {
 	if (args.size() != type->types.size())
 		throw SourceException("incorrect arg count to call script", position, "SourceExpressionDS");
@@ -785,11 +784,10 @@ void SourceExpressionDS::make_objects_call_script(std::vector<ObjectToken> * con
 		args[i].makeObjectsGet(objects);
 	}
 
-	ObjectToken::ObjectCode code;
-	ObjectExpression oarg0(ObjectExpression::create_value_int(0, position));
-	ObjectExpression ospec(ObjectExpression::create_value_int(84, position));
+	objects->setPosition(position);
 
-	ObjectToken otok0(ObjectToken::OCODE_PUSHNUMBER, position, oarg0);
+	ObjectToken::ObjectCode code;
+	ObjectExpression ospec(objects->getValue(84));
 
 	if (type->callType->type == SourceVariable::VT_VOID)
 	{
@@ -808,10 +806,10 @@ void SourceExpressionDS::make_objects_call_script(std::vector<ObjectToken> * con
 		code = ObjectToken::OCODE_LSPEC5RESULT;
 
 		for (size_t i(args.size()); i < 4; ++i)
-			objects->push_back(otok0);
+			objects->addTokenPushZero();
 	}
 
-	objects->push_back(ObjectToken(code, position, ospec));
+	objects->addToken(code, ospec);
 }
 
 ObjectExpression SourceExpressionDS::makeObject() const
@@ -821,23 +819,23 @@ ObjectExpression SourceExpressionDS::makeObject() const
 	else
 		throw SourceException("attempted to create object from NULL expression", SourcePosition::none, "SourceExpressionDS");
 }
-void SourceExpressionDS::makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const
+void SourceExpressionDS::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const
 {
 	if (_expr) _expr->makeObjectsCall(objects, args);
 }
-void SourceExpressionDS::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS::makeObjectsGet(ObjectVector * objects) const
 {
 	if (_expr) _expr->makeObjectsGet(objects);
 }
-void SourceExpressionDS::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+void SourceExpressionDS::makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	if (_expr) _expr->makeObjectsGet(objects, names);
 }
-void SourceExpressionDS::makeObjectsSet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS::makeObjectsSet(ObjectVector * objects) const
 {
 	if (_expr) _expr->makeObjectsSet(objects);
 }
-void SourceExpressionDS::makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+void SourceExpressionDS::makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	if (_expr) _expr->makeObjectsSet(objects, names);
 }

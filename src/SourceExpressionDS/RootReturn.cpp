@@ -21,7 +21,7 @@
 
 #include "Base.hpp"
 
-#include "../ObjectToken.hpp"
+#include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
 
 
@@ -39,7 +39,7 @@ public:
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -83,17 +83,19 @@ bool SourceExpressionDS_RootReturn::isConstant() const
 	return false;
 }
 
-void SourceExpressionDS_RootReturn::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_RootReturn::makeObjectsGet(ObjectVector * objects) const
 {
 	_expr.makeObjectsGet(objects);
+
+	objects->setPosition(getPosition());
 
 	switch (_type)
 	{
 	case SourceContext::CT_ACSFUNC:
 		if (_expr.getType()->type == SourceVariable::VT_VOID)
-			objects->push_back(ObjectToken(ObjectToken::OCODE_RETURNZDACSVOID, getPosition()));
+			objects->addToken(ObjectToken::OCODE_RETURNZDACSVOID);
 		else
-			objects->push_back(ObjectToken(ObjectToken::OCODE_RETURNZDACS, getPosition()));
+			objects->addToken(ObjectToken::OCODE_RETURNZDACS);
 
 		break;
 
@@ -102,9 +104,9 @@ void SourceExpressionDS_RootReturn::makeObjectsGet(std::vector<ObjectToken> * co
 
 	case SourceContext::CT_SCRIPT:
 		if (_expr.getType()->type != SourceVariable::VT_VOID)
-			objects->push_back(ObjectToken(ObjectToken::OCODE_SETRESULTVALUE, getPosition()));
+			objects->addToken(ObjectToken::OCODE_SETRESULTVALUE);
 
-		objects->push_back(ObjectToken(ObjectToken::OCODE_TERMINATE, getPosition()));
+		objects->addToken(ObjectToken::OCODE_TERMINATE);
 
 		break;
 	}

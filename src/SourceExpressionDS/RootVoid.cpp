@@ -21,7 +21,7 @@
 
 #include "Base.hpp"
 
-#include "../ObjectToken.hpp"
+#include "../ObjectVector.hpp"
 
 
 
@@ -38,14 +38,14 @@ public:
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
 	SourceExpressionDS _expr;
 
-	void doVoid(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * const type) const;
+	void doVoid(ObjectVector * objects, SourceVariable::VariableType const * const type) const;
 };
 
 
@@ -71,7 +71,7 @@ SourceExpressionDS_RootVoid * SourceExpressionDS_RootVoid::clone() const
 	return new SourceExpressionDS_RootVoid(*this);
 }
 
-void SourceExpressionDS_RootVoid::doVoid(std::vector<ObjectToken> * const objects, SourceVariable::VariableType const * const type) const
+void SourceExpressionDS_RootVoid::doVoid(ObjectVector * objects, SourceVariable::VariableType const * const type) const
 {
 	switch (type->type)
 	{
@@ -83,7 +83,7 @@ void SourceExpressionDS_RootVoid::doVoid(std::vector<ObjectToken> * const object
 	case SourceVariable::VT_REAL:
 	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_DROP, getPosition()));
+		objects->addToken(ObjectToken::OCODE_DROP);
 		break;
 
 	case SourceVariable::VT_ASMFUNC:
@@ -112,9 +112,12 @@ bool SourceExpressionDS_RootVoid::isConstant() const
 	return _expr.isConstant();
 }
 
-void SourceExpressionDS_RootVoid::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_RootVoid::makeObjectsGet(ObjectVector * objects) const
 {
 	_expr.makeObjectsGet(objects);
+
+	objects->setPosition(getPosition());
+
 	doVoid(objects, _expr.getType());
 }
 

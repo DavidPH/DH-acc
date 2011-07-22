@@ -21,8 +21,6 @@
 
 #include "Binary.hpp"
 
-#include "../ObjectToken.hpp"
-
 
 
 class SourceExpressionDS_BinaryAssign : public SourceExpressionDS_Binary
@@ -34,7 +32,7 @@ public:
 
 	virtual char const * getName() const;
 
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 };
@@ -63,7 +61,7 @@ char const * SourceExpressionDS_BinaryAssign::getName() const
 	return "SourceExpressionDS_BinaryAssign";
 }
 
-void SourceExpressionDS_BinaryAssign::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_BinaryAssign::makeObjectsGet(ObjectVector * objects) const
 {
 	_exprR.makeObjectsGet(objects);
 	_exprL.makeObjectsSet(objects);

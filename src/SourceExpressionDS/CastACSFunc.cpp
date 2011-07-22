@@ -21,7 +21,7 @@
 
 #include "Base.hpp"
 
-#include "../ObjectToken.hpp"
+#include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
 #include "../SourceException.hpp"
 
@@ -40,7 +40,7 @@ public:
 
 	virtual bool isConstant() const;
 
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -83,9 +83,11 @@ bool SourceExpressionDS_CastACSFunc::isConstant() const
 	return _expr.isConstant();
 }
 
-void SourceExpressionDS_CastACSFunc::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_CastACSFunc::makeObjectsGet(ObjectVector * objects) const
 {
 	_expr.makeObjectsGet(objects);
+
+	objects->setPosition(getPosition());
 
 	switch (_expr.getType()->type)
 	{
@@ -104,8 +106,8 @@ void SourceExpressionDS_CastACSFunc::makeObjectsGet(std::vector<ObjectToken> * c
 		throw SourceException("invalid VT", getPosition(), getName());
 
 	case SourceVariable::VT_REAL:
-		objects->push_back(ObjectToken(ObjectToken::OCODE_PUSHNUMBER, getPosition(), ObjectExpression::create_value_int(16, getPosition())));
-		objects->push_back(ObjectToken(ObjectToken::OCODE_SHIFTR, getPosition()));
+		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(16));
+		objects->addToken(ObjectToken::OCODE_SHIFTR);
 		break;
 	}
 }

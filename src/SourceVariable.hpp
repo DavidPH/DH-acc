@@ -29,6 +29,7 @@
 #include <string>
 #include <vector>
 
+class ObjectVector;
 class SourceExpressionDS;
 class SourceTokenC;
 
@@ -159,12 +160,12 @@ public:
 
 	bool isConstant() const;
 
-	ObjectExpression makeObject() const;
-	void makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args, SourcePosition const & position) const;
-	void makeObjectsGet(std::vector<ObjectToken> * const objects, SourcePosition const & position) const;
-	void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, SourcePosition const & position) const;
-	void makeObjectsSet(std::vector<ObjectToken> * const objects, SourcePosition const & position) const;
-	void makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, SourcePosition const & position) const;
+	ObjectExpression makeObject(SourcePosition const & position) const;
+	void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args, SourcePosition const & position) const;
+	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position) const;
+	void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position) const;
+	void makeObjectsSet(ObjectVector * objects, SourcePosition const & position) const;
+	void makeObjectsSet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position) const;
 
 
 
@@ -206,11 +207,11 @@ private:
 	StorageClass _sc;
 	VariableType const * _type;
 
-	void makeObjectsGet(std::vector<ObjectToken> * const objects, SourcePosition const & position, VariableType const * const type, int * const address) const;
-	void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const;
+	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * const type, int * const address) const;
+	void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const;
 	void makeObjectsGet(VariableType const * const type, int * const address) const;
-	void makeObjectsSet(std::vector<ObjectToken> * const objects, SourcePosition const & position, VariableType const * const type, int * const address) const;
-	void makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const;
+	void makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * const type, int * const address) const;
+	void makeObjectsSet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const;
 	void makeObjectsSet(VariableType const * const type, int * const address) const;
 
 

@@ -23,6 +23,7 @@
 
 #include "BinaryTokenZDACS.hpp"
 #include "ObjectExpression.hpp"
+#include "ObjectVector.hpp"
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
 
@@ -296,7 +297,7 @@ ObjectExpression SourceTokenASMPLX::make_expression(std::string const & expr, So
 	}
 }
 
-void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & tokens, std::vector<ObjectToken> * const objects)
+void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & tokens, ObjectVector * objects)
 {
 	std::vector<std::string> labels;
 
@@ -325,7 +326,7 @@ void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & toke
 				for (uintptr_t i(0); i < (uintptr_t)argC; ++i)
 					args.push_back(make_expression(token._data[i], token._position));
 
-				objects->push_back(ObjectToken(code, token._position, labels, args));
+				objects->addToken(ObjectToken(code, token._position, labels, args));
 
 				labels.clear();
 			}

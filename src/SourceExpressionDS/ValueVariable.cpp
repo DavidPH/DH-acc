@@ -21,10 +21,8 @@
 
 #include "Base.hpp"
 
-#include "../ObjectToken.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
-#include "../SourceVariable.hpp"
 
 
 
@@ -42,11 +40,11 @@ public:
 	virtual bool isConstant() const;
 
 	virtual ObjectExpression makeObject() const;
-	virtual void makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const;
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects) const;
-	virtual void makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
-	virtual void makeObjectsSet(std::vector<ObjectToken> * const objects) const;
-	virtual void makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const;
+	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const;
+	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsSet(ObjectVector * objects) const;
+	virtual void makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -133,25 +131,25 @@ bool SourceExpressionDS_ValueVariable::isConstant() const
 
 ObjectExpression SourceExpressionDS_ValueVariable::makeObject() const
 {
-	return _var.makeObject();
+	return _var.makeObject(getPosition());
 }
-void SourceExpressionDS_ValueVariable::makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const
+void SourceExpressionDS_ValueVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const
 {
 	_var.makeObjectsCall(objects, args, getPosition());
 }
-void SourceExpressionDS_ValueVariable::makeObjectsGet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_ValueVariable::makeObjectsGet(ObjectVector * objects) const
 {
 	_var.makeObjectsGet(objects, getPosition());
 }
-void SourceExpressionDS_ValueVariable::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+void SourceExpressionDS_ValueVariable::makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	_var.makeObjectsGet(objects, names, getPosition());
 }
-void SourceExpressionDS_ValueVariable::makeObjectsSet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_ValueVariable::makeObjectsSet(ObjectVector * objects) const
 {
 	_var.makeObjectsSet(objects, getPosition());
 }
-void SourceExpressionDS_ValueVariable::makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+void SourceExpressionDS_ValueVariable::makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	_var.makeObjectsSet(objects, names, getPosition());
 }

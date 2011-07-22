@@ -64,11 +64,11 @@ ObjectExpression SourceExpressionDS_Base::makeObject() const
 {
 	throw SourceException("attempted to makeObject on invalid expression", _position, getName());
 }
-void SourceExpressionDS_Base::makeObjectsCall(std::vector<ObjectToken> * const objects, std::vector<SourceExpressionDS> const & args) const
+void SourceExpressionDS_Base::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const
 {
 	throw SourceException("attempted to makeObjectsCall on invalid expression", _position, getName());
 }
-void SourceExpressionDS_Base::makeObjectsGet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+void SourceExpressionDS_Base::makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	if (names->empty())
 	{
@@ -78,11 +78,11 @@ void SourceExpressionDS_Base::makeObjectsGet(std::vector<ObjectToken> * const ob
 
 	throw SourceException("attempted to makeObjectsGet-member on invalid expression", _position, getName());
 }
-void SourceExpressionDS_Base::makeObjectsSet(std::vector<ObjectToken> * const objects) const
+void SourceExpressionDS_Base::makeObjectsSet(ObjectVector * objects) const
 {
 	throw SourceException("attempted to makeObjectsSet on invalid expression", _position, getName());
 }
-void SourceExpressionDS_Base::makeObjectsSet(std::vector<ObjectToken> * const objects, std::vector<std::string> * const names) const
+void SourceExpressionDS_Base::makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	if (names->empty())
 	{

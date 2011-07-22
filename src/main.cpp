@@ -22,6 +22,7 @@
 #include "BinaryTokenZDACS.hpp"
 #include "ObjectExpression.hpp"
 #include "ObjectToken.hpp"
+#include "ObjectVector.hpp"
 #include "option.hpp"
 #include "ost_type.hpp"
 #include "print_debug.hpp"
@@ -96,7 +97,7 @@ static inline int _main()
 
 	std::ifstream ifs(option::option_args[0].c_str());
 
-	std::vector<ObjectToken> objects;
+	ObjectVector objects;
 
 	switch (source_type)
 	{
