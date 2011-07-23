@@ -157,6 +157,15 @@ SourceVariable::StorageClass SourceVariable::get_StorageClass(SourceTokenC const
 	if (token.getData() == "register")
 		return SC_REGISTER;
 
+	if (token.getData() == "register_global")
+		return SC_REGISTER_GLOBAL;
+
+	if (token.getData() == "register_map")
+		return SC_REGISTER_MAP;
+
+	if (token.getData() == "register_world")
+		return SC_REGISTER_WORLD;
+
 	throw SourceException("invalid storage-class", token.getPosition(), "SourceVariable");
 }
 
@@ -324,6 +333,15 @@ ObjectExpression SourceVariable::makeObject(SourcePosition const & position) con
 
 	case SC_REGISTER:
 		throw SourceException("makeObject on SC_REGISTER", position, "SourceVariable");
+
+	case SC_REGISTER_GLOBAL:
+		throw SourceException("makeObject on SC_REGISTER_GLOBAL", position, "SourceVariable");
+
+	case SC_REGISTER_MAP:
+		throw SourceException("makeObject on SC_REGISTER_MAP", position, "SourceVariable");
+
+	case SC_REGISTER_WORLD:
+		throw SourceException("makeObject on SC_REGISTER_WORLD", position, "SourceVariable");
 	}
 
 	throw SourceException("makeObject", _position, "SourceVariable");
@@ -405,6 +423,9 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, std::vector<std::str
 		throw SourceException("SC_CONSTANT VT_STRUCT unsupported", position, "SourceVariable");
 
 	case SC_REGISTER:
+	case SC_REGISTER_GLOBAL:
+	case SC_REGISTER_MAP:
+	case SC_REGISTER_WORLD:
 		switch (type->type)
 		{
 		case VT_ACSFUNC:
@@ -440,9 +461,13 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, std::vector<std::str
 }
 void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * const type, int * const address) const
 {
+	ObjectToken::ObjectCode ocode;
+
 	switch (_sc)
 	{
 	case SC_CONSTANT:
+		ocode = ObjectToken::OCODE_PUSHNUMBER;
+
 		switch (type->type)
 		{
 		case VT_ACSFUNC:
@@ -454,7 +479,7 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		case VT_STRUCT:
 		case VT_STRING:
 		case VT_SCRIPT:
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, makeObject(position));
+			objects->addToken(ocode, makeObject(position));
 			++*address;
 			break;
 
@@ -465,6 +490,8 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		break;
 
 	case SC_REGISTER:
+		ocode = ObjectToken::OCODE_PUSHSCRIPTVAR;
+	sc_register_switch:
 		switch (type->type)
 		{
 		case VT_ACSFUNC:
@@ -475,7 +502,7 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
-			objects->addToken(ObjectToken::OCODE_PUSHSCRIPTVAR, objects->getValue((*address)++));
+			objects->addToken(ocode, objects->getValue((*address)++));
 			break;
 
 		case VT_ASMFUNC:
@@ -488,36 +515,42 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 			break;
 		}
 		break;
+
+	case SC_REGISTER_WORLD:
+		ocode = ObjectToken::OCODE_PUSHWORLDVAR;
+		goto sc_register_switch;
+
+	case SC_REGISTER_MAP:
+		ocode = ObjectToken::OCODE_PUSHMAPVAR;
+		goto sc_register_switch;
+
+	case SC_REGISTER_GLOBAL:
+		ocode = ObjectToken::OCODE_PUSHGLOBALVAR;
+		goto sc_register_switch;
 	}
 }
 void SourceVariable::makeObjectsGet(VariableType const * const type, int * const address) const
 {
-	switch (_sc)
+	switch (type->type)
 	{
-	case SC_CONSTANT:
-	case SC_REGISTER:
-		switch (type->type)
-		{
-		case VT_ACSFUNC:
-		case VT_CHAR:
-		case VT_INT:
-		case VT_LNSPEC:
-		case VT_NATIVE:
-		case VT_REAL:
-		case VT_SCRIPT:
-		case VT_STRING:
-			++*address;
-			break;
+	case VT_ACSFUNC:
+	case VT_CHAR:
+	case VT_INT:
+	case VT_LNSPEC:
+	case VT_NATIVE:
+	case VT_REAL:
+	case VT_SCRIPT:
+	case VT_STRING:
+		++*address;
+		break;
 
-		case VT_ASMFUNC:
-		case VT_VOID:
-			break;
+	case VT_ASMFUNC:
+	case VT_VOID:
+		break;
 
-		case VT_STRUCT:
-			for (size_t i(0); i < type->types.size(); ++i)
-				makeObjectsGet(type->types[i], address);
-			break;
-		}
+	case VT_STRUCT:
+		for (size_t i(0); i < type->types.size(); ++i)
+			makeObjectsGet(type->types[i], address);
 		break;
 	}
 }
@@ -553,6 +586,9 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, std::vector<std::str
 		throw SourceException("attempt to set SC_CONSTANT", position, "SourceVariable");
 
 	case SC_REGISTER:
+	case SC_REGISTER_GLOBAL:
+	case SC_REGISTER_MAP:
+	case SC_REGISTER_WORLD:
 		switch (type->type)
 		{
 		case VT_ACSFUNC:
@@ -588,12 +624,16 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, std::vector<std::str
 }
 void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * const type, int * const address) const
 {
+	ObjectToken::ObjectCode ocode;
+
 	switch (_sc)
 	{
 	case SC_CONSTANT:
 		throw SourceException("attempt to set SC_CONSTANT", position, "SourceVariable");
 
 	case SC_REGISTER:
+		ocode = ObjectToken::OCODE_ASSIGNSCRIPTVAR;
+	sc_register_switch:
 		switch (type->type)
 		{
 		case VT_ACSFUNC:
@@ -604,7 +644,7 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
-			objects->addToken(ObjectToken::OCODE_ASSIGNSCRIPTVAR, objects->getValue((*address)--));
+			objects->addToken(ocode, objects->getValue((*address)--));
 			break;
 
 		case VT_ASMFUNC:
@@ -617,36 +657,42 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 			break;
 		}
 		break;
+
+	case SC_REGISTER_GLOBAL:
+		ocode = ObjectToken::OCODE_ASSIGNGLOBALVAR;
+		goto sc_register_switch;
+
+	case SC_REGISTER_MAP:
+		ocode = ObjectToken::OCODE_ASSIGNMAPVAR;
+		goto sc_register_switch;
+
+	case SC_REGISTER_WORLD:
+		ocode = ObjectToken::OCODE_ASSIGNWORLDVAR;
+		goto sc_register_switch;
 	}
 }
 void SourceVariable::makeObjectsSet(VariableType const * const type, int * const address) const
 {
-	switch (_sc)
+	switch (type->type)
 	{
-	case SC_CONSTANT:
-	case SC_REGISTER:
-		switch (type->type)
-		{
-		case VT_ACSFUNC:
-		case VT_CHAR:
-		case VT_INT:
-		case VT_LNSPEC:
-		case VT_NATIVE:
-		case VT_REAL:
-		case VT_SCRIPT:
-		case VT_STRING:
-			--*address;
-			break;
+	case VT_ACSFUNC:
+	case VT_CHAR:
+	case VT_INT:
+	case VT_LNSPEC:
+	case VT_NATIVE:
+	case VT_REAL:
+	case VT_SCRIPT:
+	case VT_STRING:
+		--*address;
+		break;
 
-		case VT_ASMFUNC:
-		case VT_VOID:
-			break;
+	case VT_ASMFUNC:
+	case VT_VOID:
+		break;
 
-		case VT_STRUCT:
-			for (size_t i(type->types.size()); i--;)
-				makeObjectsSet(type->types[i], address);
-			break;
-		}
+	case VT_STRUCT:
+		for (size_t i(type->types.size()); i--;)
+			makeObjectsSet(type->types[i], address);
 		break;
 	}
 }
@@ -695,8 +741,11 @@ void print_debug(std::ostream * const out, SourceVariable::StorageClass const in
 {
 	switch (in)
 	{
-	case SourceVariable::SC_CONSTANT: *out << "SC_CONSTANT"; break;
-	case SourceVariable::SC_REGISTER: *out << "SC_REGISTER"; break;
+	case SourceVariable::SC_CONSTANT:        *out << "SC_CONSTANT";        break;
+	case SourceVariable::SC_REGISTER:        *out << "SC_REGISTER";        break;
+	case SourceVariable::SC_REGISTER_GLOBAL: *out << "SC_REGISTER_GLOBAL"; break;
+	case SourceVariable::SC_REGISTER_MAP:    *out << "SC_REGISTER_MAP";    break;
+	case SourceVariable::SC_REGISTER_WORLD:  *out << "SC_REGISTER_WORLD";  break;
 	}
 }
 void print_debug(std::ostream * const out, SourceVariable::VariableType const & in)

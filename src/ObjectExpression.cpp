@@ -214,7 +214,7 @@ ObjectExpression ObjectExpression::get_symbol(std::string const & symbol, Source
 	std::map<std::string, ObjectExpression>::iterator valueIt(_symbol_table.find(symbol));
 
 	if (valueIt == _symbol_table.end())
-		throw SourceException("unknown symbol", position, "ObjectExpression");
+		throw SourceException("unknown symbol '" + symbol + "'", position, "ObjectExpression");
 
 	return valueIt->second;
 }

@@ -25,6 +25,7 @@
 #include "SourceTokenC.hpp"
 #include "SourceVariable.hpp"
 
+#include <cstring>
 #include <sstream>
 
 
@@ -33,13 +34,15 @@ SourceContext SourceContext::global_context;
 
 
 
-SourceContext::SourceContext() : _countRegister(0), _labelCount(0), _limitRegister(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _inheritLocals(false)
+SourceContext::SourceContext() : _labelCount(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _inheritLocals(false)
 {
-
+	std::memset(_count, 0, sizeof(_count));
+	std::memset(_limit, 0, sizeof(_limit));
 }
-SourceContext::SourceContext(SourceContext * parent, ContextType type) : _countRegister(0), _label(parent->makeLabelShort()), _labelCount(0), _limitRegister(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK)
+SourceContext::SourceContext(SourceContext * parent, ContextType type) : _label(parent->makeLabelShort()), _labelCount(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK)
 {
-
+	std::memset(_count, 0, sizeof(_count));
+	std::memset(_limit, 0, sizeof(_limit));
 }
 
 void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
@@ -50,7 +53,22 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 		break;
 
 	case SourceVariable::SC_REGISTER:
-		addLimit(_countRegister += count, sc);
+		_count[sc] += count;
+
+		addLimit(getCount(sc), sc);
+
+		break;
+
+	case SourceVariable::SC_REGISTER_GLOBAL:
+	case SourceVariable::SC_REGISTER_MAP:
+	case SourceVariable::SC_REGISTER_WORLD:
+		if (_parent)
+			_parent->addCount(count, sc);
+		else
+			_count[sc] += count;
+
+		addLimit(getCount(sc), sc);
+
 		break;
 	}
 }
@@ -63,10 +81,21 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 		break;
 
 	case SourceVariable::SC_REGISTER:
-		if (limit > _limitRegister)
-			_limitRegister = limit;
+		if (limit > _limit[sc])
+			_limit[sc] = limit;
 
 		if (_inheritLocals && _parent)
+			_parent->addLimit(limit, sc);
+
+		break;
+
+	case SourceVariable::SC_REGISTER_GLOBAL:
+	case SourceVariable::SC_REGISTER_MAP:
+	case SourceVariable::SC_REGISTER_WORLD:
+		if (limit > _limit[sc])
+			_limit[sc] = limit;
+
+		if (_parent)
 			_parent->addLimit(limit, sc);
 
 		break;
@@ -90,9 +119,17 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
 
 	case SourceVariable::SC_REGISTER:
 		if (_inheritLocals && _parent)
-			return _parent->getCount(sc) + _countRegister;
+			return _parent->getCount(sc) + _count[sc];
 		else
-			return _countRegister;
+			return _count[sc];
+
+	case SourceVariable::SC_REGISTER_GLOBAL:
+	case SourceVariable::SC_REGISTER_MAP:
+	case SourceVariable::SC_REGISTER_WORLD:
+		if (_parent)
+			return _parent->getCount(sc) + _count[sc];
+		else
+			return _count[sc];
 	}
 
 	throw SourceException("getCount", SourcePosition::none, "SourceContext");
@@ -114,7 +151,10 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 		return 0;
 
 	case SourceVariable::SC_REGISTER:
-		return _limitRegister;
+	case SourceVariable::SC_REGISTER_GLOBAL:
+	case SourceVariable::SC_REGISTER_MAP:
+	case SourceVariable::SC_REGISTER_WORLD:
+		return _limit[sc];
 	}
 
 	throw SourceException("getCount", SourcePosition::none, "SourceContext");
@@ -141,7 +181,22 @@ SourceVariable const & SourceContext::getVariable(std::string const & name, Sour
 	for (size_t i(_vars.size()); i--;)
 	{
 		if (name == _varnames[i])
-			return _vars[i];
+		{
+			switch (_vars[i].getClass())
+			{
+			case SourceVariable::SC_CONSTANT:
+			case SourceVariable::SC_REGISTER_GLOBAL:
+			case SourceVariable::SC_REGISTER_MAP:
+			case SourceVariable::SC_REGISTER_WORLD:
+				return _vars[i];
+
+			case SourceVariable::SC_REGISTER:
+				if (canLocal)
+					return _vars[i];
+
+				break;
+			}
+		}
 	}
 
 	if (_parent) return _parent->getVariable(name, position, canLocal && _inheritLocals);

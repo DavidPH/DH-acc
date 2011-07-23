@@ -77,12 +77,12 @@ private:
 
 	std::string makeLabelShort();
 
-	int _countRegister;
+	int _count[SourceVariable::SC_REGISTER_WORLD+1];
 
 	std::string _label;
 	int _labelCount;
 
-	int _limitRegister;
+	int _limit[SourceVariable::SC_REGISTER_WORLD+1];
 
 	SourceContext * _parent;
 

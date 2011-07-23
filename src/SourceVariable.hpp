@@ -41,7 +41,10 @@ public:
 	enum StorageClass
 	{
 		SC_CONSTANT,
-		SC_REGISTER
+		SC_REGISTER,
+		SC_REGISTER_GLOBAL,
+		SC_REGISTER_MAP,
+		SC_REGISTER_WORLD
 	};
 
 	enum VariableTypeInternal

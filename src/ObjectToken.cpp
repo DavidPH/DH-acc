@@ -96,7 +96,9 @@ void ObjectToken::init()
 
 	// BinaryTokenACS
 	DO_INIT(ADD,             0);
+	DO_INIT(ASSIGNMAPVAR,    1);
 	DO_INIT(ASSIGNSCRIPTVAR, 1);
+	DO_INIT(ASSIGNWORLDVAR,  1);
 	DO_INIT(BEGINPRINT,      0);
 	DO_INIT(BRANCH,          1);
 	DO_INIT(BRANCHNOTZERO,   1);
@@ -122,8 +124,10 @@ void ObjectToken::init()
 	DO_INIT(PRINTCHARACTER,  0);
 	DO_INIT(PRINTNUMBER,     0);
 	DO_INIT(PRINTSTRING,     0);
+	DO_INIT(PUSHMAPVAR,      1);
 	DO_INIT(PUSHNUMBER,      1);
 	DO_INIT(PUSHSCRIPTVAR,   1);
+	DO_INIT(PUSHWORLDVAR,    1);
 	DO_INIT(RANDOM,          0);
 	DO_INIT(RANDOM_IMM,      2);
 	DO_INIT(RESTART,         0);
@@ -135,6 +139,9 @@ void ObjectToken::init()
 
 	// BinaryTokenZDACS
 	DO_INIT(ASSIGNGLOBALARRAY, 1);
+	DO_INIT(ASSIGNGLOBALVAR,   1);
+	DO_INIT(ASSIGNMAPARRAY,    1);
+	DO_INIT(ASSIGNWORLDARRAY,  1);
 	DO_INIT(CALLZDACS,         1);
 	DO_INIT(CALLZDACSDISCARD,  1);
 	DO_INIT(CALLZDFUNC,        2);
@@ -145,6 +152,9 @@ void ObjectToken::init()
 	DO_INIT(MULFIXED,          0);
 	DO_INIT(PRINTFIXED,        0);
 	DO_INIT(PUSHGLOBALARRAY,   1);
+	DO_INIT(PUSHGLOBALVAR,     1);
+	DO_INIT(PUSHMAPARRAY,      1);
+	DO_INIT(PUSHWORLDARRAY,    1);
 	DO_INIT(RETURNZDACS,       0);
 	DO_INIT(RETURNZDACSVOID,   0);
 	DO_INIT(SETRESULTVALUE,    0);
@@ -188,7 +198,9 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	switch (in)
 	{
 	case ObjectToken::OCODE_ADD:               *out << "OCODE_ADD";               break;
+	case ObjectToken::OCODE_ASSIGNMAPVAR:      *out << "OCODE_ASSIGNMAPVAR";      break;
 	case ObjectToken::OCODE_ASSIGNSCRIPTVAR:   *out << "OCODE_ASSIGNSCRIPTVAR";   break;
+	case ObjectToken::OCODE_ASSIGNWORLDVAR:    *out << "OCODE_ASSIGNWORLDVAR";    break;
 	case ObjectToken::OCODE_BEGINPRINT:        *out << "OCODE_BEGINPRINT";        break;
 	case ObjectToken::OCODE_BRANCH:            *out << "OCODE_BRANCH";            break;
 	case ObjectToken::OCODE_BRANCHNOTZERO:     *out << "OCODE_BRANCHNOTZERO";     break;
@@ -214,8 +226,10 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_PRINTCHARACTER:    *out << "OCODE_PRINTCHARACTER";    break;
 	case ObjectToken::OCODE_PRINTNUMBER:       *out << "OCODE_PRINTNUMBER";       break;
 	case ObjectToken::OCODE_PRINTSTRING:       *out << "OCODE_PRINTSTRING";       break;
+	case ObjectToken::OCODE_PUSHMAPVAR:        *out << "OCODE_PUSHMAPVAR";        break;
 	case ObjectToken::OCODE_PUSHNUMBER:        *out << "OCODE_PUSHNUMBER";        break;
 	case ObjectToken::OCODE_PUSHSCRIPTVAR:     *out << "OCODE_PUSHSCRIPTVAR";     break;
+	case ObjectToken::OCODE_PUSHWORLDVAR:      *out << "OCODE_PUSHWORLDVAR";      break;
 	case ObjectToken::OCODE_RANDOM:            *out << "OCODE_RANDOM";            break;
 	case ObjectToken::OCODE_RANDOM_IMM:        *out << "OCODE_RANDOM_IMM";        break;
 	case ObjectToken::OCODE_RESTART:           *out << "OCODE_RESTART";           break;
@@ -226,6 +240,9 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_TERMINATE:         *out << "OCODE_TERMINATE";         break;
 
 	case ObjectToken::OCODE_ASSIGNGLOBALARRAY: *out << "OCODE_ASSIGNGLOBALARRAY"; break;
+	case ObjectToken::OCODE_ASSIGNGLOBALVAR:   *out << "OCODE_ASSIGNGLOBALVAR";   break;
+	case ObjectToken::OCODE_ASSIGNMAPARRAY:    *out << "OCODE_ASSIGNMAPARRAY";    break;
+	case ObjectToken::OCODE_ASSIGNWORLDARRAY:  *out << "OCODE_ASSIGNWORLDARRAY";  break;
 	case ObjectToken::OCODE_CALLZDACS:         *out << "OCODE_CALLZDACS";         break;
 	case ObjectToken::OCODE_CALLZDACSDISCARD:  *out << "OCODE_CALLZDACSDISCARD";  break;
 	case ObjectToken::OCODE_CALLZDFUNC:        *out << "OCODE_CALLZDFUNC";        break;
@@ -236,6 +253,9 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_MULFIXED:          *out << "OCODE_MULFIXED";          break;
 	case ObjectToken::OCODE_PRINTFIXED:        *out << "OCODE_PRINTFIXED";        break;
 	case ObjectToken::OCODE_PUSHGLOBALARRAY:   *out << "OCODE_PUSHGLOBALARRAY";   break;
+	case ObjectToken::OCODE_PUSHGLOBALVAR:     *out << "OCODE_PUSHGLOBALVAR";     break;
+	case ObjectToken::OCODE_PUSHMAPARRAY:      *out << "OCODE_PUSHMAPARRAY";      break;
+	case ObjectToken::OCODE_PUSHWORLDARRAY:    *out << "OCODE_PUSHWORLDARRAY";    break;
 	case ObjectToken::OCODE_RETURNZDACS:       *out << "OCODE_RETURNZDACS";       break;
 	case ObjectToken::OCODE_RETURNZDACSVOID:   *out << "OCODE_RETURNZDACSVOID";   break;
 	case ObjectToken::OCODE_SETRESULTVALUE:    *out << "OCODE_SETRESULTVALUE";    break;
