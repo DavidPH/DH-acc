@@ -76,6 +76,8 @@ public:
 
 	static SourceVariable::VariableType const * get_promoted_type(SourceVariable::VariableType const * const type1, SourceVariable::VariableType const * const type2);
 
+	static void init();
+
 	static SourceExpressionDS make_expression_cast(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
 
 	static SourceExpressionDS make_expressions(SourceTokenizerDS * const tokenizer);
@@ -95,6 +97,10 @@ public:
 	static SourceExpressionDS const nop;
 
 private:
+	typedef SourceExpressionDS (*expression_single_handler)(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+
+
+
 	SourceExpressionDS_Base * _expr;
 
 
@@ -102,7 +108,6 @@ private:
 	static SourceExpressionDS make_expression(SourceTokenizerDS * const in, std::vector<SourceExpressionDS> * const blocks, SourceContext * const context);
 	static void make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceVariable::VariableType const *> * argTypes, SourceVariable::VariableType const * * returnType);
 	static void make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceVariable::VariableType const *> * argTypes, std::vector<std::string> * argNames, int * argCount, SourceContext * argContext, SourceVariable::VariableType const * * returnType);
-	static SourceExpressionDS make_expression_single(SourceTokenizerDS * const in, std::vector<SourceExpressionDS> * const blocks, SourceContext * const context);
 	static void make_expressions(SourceTokenizerDS * const tokenizer, std::vector<SourceExpressionDS> * const expressions, std::vector<SourceExpressionDS> * const blocks, SourceContext * const context);
 
 	static SourceExpressionDS make_expression_binary_add(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
@@ -138,12 +143,31 @@ private:
 	static SourceExpressionDS make_expression_root_void(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_while(SourceExpressionDS const & exprCondition, SourceExpressionDS const & exprWhile, SourceContext * context, SourcePosition const & position);
 
+	static SourceExpressionDS make_expression_single(SourceTokenizerDS * in, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_acsfunc(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_asmfunc(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_delay(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_if(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_lnspec(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_native(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_out(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_return(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_script(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_struct(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_term(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_typedef(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_var(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_void(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_while(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+
 	static SourceExpressionDS make_expression_value_char(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_int(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_member(SourceExpressionDS const & expr, SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_real(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_string(SourceTokenC const & token);
 	static SourceExpressionDS make_expression_value_variable(SourceVariable const & var, SourcePosition const & position);
+
+	static std::map<std::string, expression_single_handler> _expression_single_handlers;
 };
 
 
