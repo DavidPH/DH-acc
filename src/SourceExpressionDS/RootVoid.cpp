@@ -44,8 +44,6 @@ public:
 
 private:
 	SourceExpressionDS _expr;
-
-	void doVoid(ObjectVector * objects, SourceVariable::VariableType const * const type) const;
 };
 
 
@@ -71,33 +69,6 @@ SourceExpressionDS_RootVoid * SourceExpressionDS_RootVoid::clone() const
 	return new SourceExpressionDS_RootVoid(*this);
 }
 
-void SourceExpressionDS_RootVoid::doVoid(ObjectVector * objects, SourceVariable::VariableType const * const type) const
-{
-	switch (type->type)
-	{
-	case SourceVariable::VT_ACSFUNC:
-	case SourceVariable::VT_CHAR:
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_LNSPEC:
-	case SourceVariable::VT_NATIVE:
-	case SourceVariable::VT_REAL:
-	case SourceVariable::VT_SCRIPT:
-	case SourceVariable::VT_STRING:
-		objects->addToken(ObjectToken::OCODE_DROP);
-		break;
-
-	case SourceVariable::VT_ARRAY:
-	case SourceVariable::VT_STRUCT:
-		for (size_t i(type->types.size()); i--;)
-			doVoid(objects, type->types[i]);
-		break;
-
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_VOID:
-		break;
-	}
-}
-
 char const * SourceExpressionDS_RootVoid::getName() const
 {
 	return "SourceExpressionDS_RootVoid";
@@ -119,7 +90,8 @@ void SourceExpressionDS_RootVoid::makeObjectsGet(ObjectVector * objects) const
 
 	objects->setPosition(getPosition());
 
-	doVoid(objects, _expr.getType());
+	for (size_t i(_expr.getType()->size()); i--;)
+		objects->addToken(ObjectToken::OCODE_DROP);
 }
 
 void SourceExpressionDS_RootVoid::printDebug(std::ostream * const out) const
