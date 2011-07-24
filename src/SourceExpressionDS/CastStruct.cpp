@@ -40,7 +40,7 @@ public:
 	virtual bool isConstant() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
-	virtual void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -99,7 +99,7 @@ void SourceExpressionDS_CastStruct::makeObjectsGet(ObjectVector * objects) const
 	for (size_t i(0); i < _expressions.size(); ++i)
 		_expressions[i].makeObjectsGet(objects);
 }
-void SourceExpressionDS_CastStruct::makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpressionDS_CastStruct::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	if (names->empty())
 	{
@@ -112,7 +112,7 @@ void SourceExpressionDS_CastStruct::makeObjectsGet(ObjectVector * objects, std::
 		if (_type->names[i] == names->back())
 		{
 			names->pop_back();
-			_expressions[i].makeObjectsGet(objects, names);
+			_expressions[i].makeObjectsGetMember(objects, names);
 			return;
 		}
 	}

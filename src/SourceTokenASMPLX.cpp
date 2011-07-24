@@ -234,6 +234,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(RETURNZDACSVOID,   0);
 	DO_INIT(SETRESULTVALUE,    0);
 	DO_INIT(STRLEN,            0);
+	DO_INIT(SWAP,              0);
 
 	#undef DO_INIT
 }

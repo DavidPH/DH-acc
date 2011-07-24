@@ -40,11 +40,16 @@ public:
 	virtual bool isConstant() const;
 
 	virtual ObjectExpression makeObject() const;
+
 	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const;
+
 	virtual void makeObjectsGet(ObjectVector * objects) const;
-	virtual void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsGetArray(ObjectVector * objects, int dimensions) const;
+	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const;
+
 	virtual void makeObjectsSet(ObjectVector * objects) const;
-	virtual void makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsSetArray(ObjectVector * objects, int dimensions) const;
+	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -133,25 +138,36 @@ ObjectExpression SourceExpressionDS_ValueVariable::makeObject() const
 {
 	return _var.makeObject(getPosition());
 }
+
 void SourceExpressionDS_ValueVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const
 {
 	_var.makeObjectsCall(objects, args, getPosition());
 }
+
 void SourceExpressionDS_ValueVariable::makeObjectsGet(ObjectVector * objects) const
 {
 	_var.makeObjectsGet(objects, getPosition());
 }
-void SourceExpressionDS_ValueVariable::makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpressionDS_ValueVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions) const
 {
-	_var.makeObjectsGet(objects, names, getPosition());
+	_var.makeObjectsGetArray(objects, dimensions, getPosition());
 }
+void SourceExpressionDS_ValueVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const
+{
+	_var.makeObjectsGetMember(objects, names, getPosition());
+}
+
 void SourceExpressionDS_ValueVariable::makeObjectsSet(ObjectVector * objects) const
 {
 	_var.makeObjectsSet(objects, getPosition());
 }
-void SourceExpressionDS_ValueVariable::makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpressionDS_ValueVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions) const
 {
-	_var.makeObjectsSet(objects, names, getPosition());
+	_var.makeObjectsSetArray(objects, dimensions, getPosition());
+}
+void SourceExpressionDS_ValueVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const
+{
+	_var.makeObjectsSetMember(objects, names, getPosition());
 }
 
 void SourceExpressionDS_ValueVariable::printDebug(std::ostream * const out) const

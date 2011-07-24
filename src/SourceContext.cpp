@@ -62,6 +62,9 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		if (_parent)
 			_parent->addCount(count, sc);
 		else
@@ -92,6 +95,9 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		if (limit > _limit[sc])
 			_limit[sc] = limit;
 
@@ -107,7 +113,24 @@ void SourceContext::addVariable(SourceVariable const & var)
 	_vars.push_back(var);
 	_varnames.push_back(var.getNameSource());
 
-	addCount(var.getType()->size(), var.getClass());
+	SourceVariable::StorageClass sc(var.getClass());
+	switch (sc)
+	{
+	case SourceVariable::SC_CONSTANT:
+	case SourceVariable::SC_REGISTER:
+	case SourceVariable::SC_REGISTER_GLOBAL:
+	case SourceVariable::SC_REGISTER_MAP:
+	case SourceVariable::SC_REGISTER_WORLD:
+		addCount(var.getType()->size(), sc);
+		break;
+
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
+		// Register arrays only require a single allocation regardless of size.
+		addCount(1, sc);
+		break;
+	}
 }
 
 int SourceContext::getCount(SourceVariable::StorageClass sc) const
@@ -126,6 +149,9 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		if (_parent)
 			return _parent->getCount(sc) + _count[sc];
 		else
@@ -154,6 +180,9 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		return _limit[sc];
 	}
 
@@ -188,6 +217,9 @@ SourceVariable const & SourceContext::getVariable(std::string const & name, Sour
 			case SourceVariable::SC_REGISTER_GLOBAL:
 			case SourceVariable::SC_REGISTER_MAP:
 			case SourceVariable::SC_REGISTER_WORLD:
+			case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+			case SourceVariable::SC_REGISTERARRAY_MAP:
+			case SourceVariable::SC_REGISTERARRAY_WORLD:
 				return _vars[i];
 
 			case SourceVariable::SC_REGISTER:

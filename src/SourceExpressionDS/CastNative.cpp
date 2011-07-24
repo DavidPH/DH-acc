@@ -100,6 +100,7 @@ void SourceExpressionDS_CastNative::makeObjectsGet(ObjectVector * objects) const
 	case SourceVariable::VT_STRING:
 		break;
 
+	case SourceVariable::VT_ARRAY:
 	case SourceVariable::VT_ASMFUNC:
 	case SourceVariable::VT_STRUCT:
 	case SourceVariable::VT_VOID:

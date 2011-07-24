@@ -57,11 +57,16 @@ public:
 	bool isConstant() const;
 
 	ObjectExpression makeObject() const;
+
 	void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const;
+
 	void makeObjectsGet(ObjectVector * objects) const;
-	void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const;
+	void makeObjectsGetArray(ObjectVector * objects, int dimensions) const;
+	void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const;
+
 	void makeObjectsSet(ObjectVector * objects) const;
-	void makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const;
+	void makeObjectsSetArray(ObjectVector * objects, int dimensions) const;
+	void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	SourceExpressionDS & operator = (SourceExpressionDS const & expr);
 
@@ -101,6 +106,7 @@ private:
 	static void make_expressions(SourceTokenizerDS * const tokenizer, std::vector<SourceExpressionDS> * const expressions, std::vector<SourceExpressionDS> * const blocks, SourceContext * const context);
 
 	static SourceExpressionDS make_expression_binary_add(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
+	static SourceExpressionDS make_expression_binary_array(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 	static SourceExpressionDS make_expression_binary_assign(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 	static SourceExpressionDS make_expression_binary_div(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 	static SourceExpressionDS make_expression_binary_mod(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
@@ -108,6 +114,7 @@ private:
 	static SourceExpressionDS make_expression_binary_sub(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
 
 	static SourceExpressionDS make_expression_cast_acsfunc(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
+	static SourceExpressionDS make_expression_cast_array(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_char(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_int(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_cast_lnspec(SourceExpressionDS const & expr, SourceVariable::VariableType const * const type, SourcePosition const & position);

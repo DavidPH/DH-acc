@@ -100,6 +100,7 @@ void SourceExpressionDS_CastReal::makeObjectsGet(ObjectVector * objects) const
 		objects->addToken(ObjectToken::OCODE_SHIFTL);
 		break;
 
+	case SourceVariable::VT_ARRAY:
 	case SourceVariable::VT_ASMFUNC:
 	case SourceVariable::VT_STRUCT:
 	case SourceVariable::VT_VOID:

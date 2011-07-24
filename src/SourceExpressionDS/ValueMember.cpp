@@ -40,9 +40,10 @@ public:
 	virtual bool isConstant() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
-	virtual void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const;
+
 	virtual void makeObjectsSet(ObjectVector * objects) const;
-	virtual void makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 
@@ -88,22 +89,23 @@ bool SourceExpressionDS_ValueMember::isConstant() const
 void SourceExpressionDS_ValueMember::makeObjectsGet(ObjectVector * objects) const
 {
 	std::vector<std::string> names(1, _name);
-	_expr.makeObjectsGet(objects, &names);
+	_expr.makeObjectsGetMember(objects, &names);
 }
-void SourceExpressionDS_ValueMember::makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpressionDS_ValueMember::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	names->push_back(_name);
-	_expr.makeObjectsGet(objects, names);
+	_expr.makeObjectsGetMember(objects, names);
 }
+
 void SourceExpressionDS_ValueMember::makeObjectsSet(ObjectVector * objects) const
 {
 	std::vector<std::string> names(1, _name);
-	_expr.makeObjectsSet(objects, &names);
+	_expr.makeObjectsSetMember(objects, &names);
 }
-void SourceExpressionDS_ValueMember::makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpressionDS_ValueMember::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const
 {
 	names->push_back(_name);
-	_expr.makeObjectsSet(objects, names);
+	_expr.makeObjectsSetMember(objects, names);
 }
 
 void SourceExpressionDS_ValueMember::printDebug(std::ostream * const out) const

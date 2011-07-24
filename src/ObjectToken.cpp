@@ -159,6 +159,7 @@ void ObjectToken::init()
 	DO_INIT(RETURNZDACSVOID,   0);
 	DO_INIT(SETRESULTVALUE,    0);
 	DO_INIT(STRLEN,            0);
+	DO_INIT(SWAP,              0);
 
 	DO_INIT(NONE, 0);
 
@@ -260,6 +261,8 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_RETURNZDACSVOID:   *out << "OCODE_RETURNZDACSVOID";   break;
 	case ObjectToken::OCODE_SETRESULTVALUE:    *out << "OCODE_SETRESULTVALUE";    break;
 	case ObjectToken::OCODE_STRLEN:            *out << "OCODE_STRLEN";            break;
+	case ObjectToken::OCODE_SWAP:              *out << "OCODE_SWAP";              break;
+
 	case ObjectToken::OCODE_NONE:              *out << "OCODE_NONE";              break;
 	}
 }

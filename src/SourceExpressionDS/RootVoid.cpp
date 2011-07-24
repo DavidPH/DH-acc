@@ -86,13 +86,14 @@ void SourceExpressionDS_RootVoid::doVoid(ObjectVector * objects, SourceVariable:
 		objects->addToken(ObjectToken::OCODE_DROP);
 		break;
 
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_VOID:
-		break;
-
+	case SourceVariable::VT_ARRAY:
 	case SourceVariable::VT_STRUCT:
 		for (size_t i(type->types.size()); i--;)
 			doVoid(objects, type->types[i]);
+		break;
+
+	case SourceVariable::VT_ASMFUNC:
+	case SourceVariable::VT_VOID:
 		break;
 	}
 }

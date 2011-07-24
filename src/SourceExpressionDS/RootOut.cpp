@@ -79,22 +79,7 @@ void SourceExpressionDS_RootOut::doOut(ObjectVector * objects, SourceVariable::V
 		objects->addToken(ObjectToken::OCODE_PRINTNUMBER);
 		break;
 
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_VOID:
-		break;
-
-	case SourceVariable::VT_CHAR:
-		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
-		break;
-
-	case SourceVariable::VT_REAL:
-		objects->addToken(ObjectToken::OCODE_PRINTFIXED);
-		break;
-
-	case SourceVariable::VT_STRING:
-		objects->addToken(ObjectToken::OCODE_PRINTSTRING);
-		break;
-
+	case SourceVariable::VT_ARRAY:
 	case SourceVariable::VT_STRUCT:
 		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('{'));
 		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
@@ -113,6 +98,22 @@ void SourceExpressionDS_RootOut::doOut(ObjectVector * objects, SourceVariable::V
 		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('}'));
 		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
 
+		break;
+
+	case SourceVariable::VT_ASMFUNC:
+	case SourceVariable::VT_VOID:
+		break;
+
+	case SourceVariable::VT_CHAR:
+		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+		break;
+
+	case SourceVariable::VT_REAL:
+		objects->addToken(ObjectToken::OCODE_PRINTFIXED);
+		break;
+
+	case SourceVariable::VT_STRING:
+		objects->addToken(ObjectToken::OCODE_PRINTSTRING);
 		break;
 	}
 

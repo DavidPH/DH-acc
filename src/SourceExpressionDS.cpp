@@ -118,6 +118,15 @@ SourceExpressionDS SourceExpressionDS::make_expression(SourceTokenizerDS * const
 			expr = make_expression_binary_mul(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
+		case SourceTokenC::TT_OP_BRACKET_C:
+			in->unget(token);
+			return expr;
+
+		case SourceTokenC::TT_OP_BRACKET_O:
+			expr = make_expression_binary_array(expr, make_expression(in, blocks, context), token.getPosition());
+			in->get(SourceTokenC::TT_OP_BRACKET_C);
+			break;
+
 		case SourceTokenC::TT_OP_COMMA:
 			in->unget(token);
 			return expr;
@@ -246,6 +255,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_cast(SourceExpressionDS c
 	switch (type->type)
 	{
 	case SourceVariable::VT_ACSFUNC: return make_expression_cast_acsfunc(expr, type, position);
+	case SourceVariable::VT_ARRAY:   return make_expression_cast_array  (expr, type, position);
 	case SourceVariable::VT_ASMFUNC: return make_expression_cast_void   (expr,       position);
 	case SourceVariable::VT_CHAR:    return make_expression_cast_char   (expr,       position);
 	case SourceVariable::VT_INT:     return make_expression_cast_int    (expr,       position);
@@ -560,7 +570,16 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		{
 			SourceTokenC typeToken(in->get(SourceTokenC::TT_IDENTIFIER));
 
-			if (typeToken.getData() == "script")
+			if (typeToken.getData() == "array")
+			{
+				SourceVariable::VariableType const * refType(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+				in->get(SourceTokenC::TT_OP_BRACKET_O);
+				int count((int)make_expression(in, blocks, context).makeObject().resolveInt());
+				in->get(SourceTokenC::TT_OP_BRACKET_C);
+
+				SourceVariable::add_typedef(in->get(SourceTokenC::TT_IDENTIFIER).getData(), SourceVariable::get_VariableType_array(refType, count));
+			}
+			else if (typeToken.getData() == "script")
 			{
 				std::vector<SourceVariable::VariableType const *> scriptArgTypes;
 				SourceVariable::VariableType const * scriptReturn;
@@ -862,25 +881,36 @@ ObjectExpression SourceExpressionDS::makeObject() const
 	else
 		throw SourceException("attempted to create object from NULL expression", SourcePosition::none, "SourceExpressionDS");
 }
+
 void SourceExpressionDS::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const
 {
 	if (_expr) _expr->makeObjectsCall(objects, args);
 }
+
 void SourceExpressionDS::makeObjectsGet(ObjectVector * objects) const
 {
 	if (_expr) _expr->makeObjectsGet(objects);
 }
-void SourceExpressionDS::makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpressionDS::makeObjectsGetArray(ObjectVector * objects, int dimensions) const
 {
-	if (_expr) _expr->makeObjectsGet(objects, names);
+	if (_expr) _expr->makeObjectsGetArray(objects, dimensions);
 }
+void SourceExpressionDS::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const
+{
+	if (_expr) _expr->makeObjectsGetMember(objects, names);
+}
+
 void SourceExpressionDS::makeObjectsSet(ObjectVector * objects) const
 {
 	if (_expr) _expr->makeObjectsSet(objects);
 }
-void SourceExpressionDS::makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpressionDS::makeObjectsSetArray(ObjectVector * objects, int dimensions) const
 {
-	if (_expr) _expr->makeObjectsSet(objects, names);
+	if (_expr) _expr->makeObjectsSetArray(objects, dimensions);
+}
+void SourceExpressionDS::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const
+{
+	if (_expr) _expr->makeObjectsSetMember(objects, names);
 }
 
 SourceExpressionDS & SourceExpressionDS::operator = (SourceExpressionDS const & expr)

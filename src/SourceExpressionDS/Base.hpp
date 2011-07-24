@@ -51,11 +51,16 @@ public:
 	virtual bool isConstant() const = 0;
 
 	virtual ObjectExpression makeObject() const;
+
 	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const;
+
 	virtual void makeObjectsGet(ObjectVector * objects) const = 0;
-	virtual void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsGetArray(ObjectVector * objects, int dimensions) const;
+	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const;
+
 	virtual void makeObjectsSet(ObjectVector * objects) const;
-	virtual void makeObjectsSet(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsSetArray(ObjectVector * objects, int dimensions) const;
+	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	virtual void printDebug(std::ostream * const out) const;
 

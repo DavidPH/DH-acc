@@ -44,7 +44,10 @@ public:
 		SC_REGISTER,
 		SC_REGISTER_GLOBAL,
 		SC_REGISTER_MAP,
-		SC_REGISTER_WORLD
+		SC_REGISTER_WORLD,
+		SC_REGISTERARRAY_GLOBAL,
+		SC_REGISTERARRAY_MAP,
+		SC_REGISTERARRAY_WORLD
 	};
 
 	enum VariableTypeInternal
@@ -57,6 +60,7 @@ public:
 		VT_VOID,
 
 		VT_ACSFUNC,
+		VT_ARRAY,
 		VT_ASMFUNC,
 		VT_LNSPEC,
 		VT_NATIVE,
@@ -74,6 +78,9 @@ public:
 
 		// Type returned when called.
 		VariableType const * callType;
+
+		// Type returned when dereferenced.
+		VariableType const * refType;
 
 		// VT_STRUCT members or VT_FUNCTION/VT_SCRIPT args.
 		std::vector<std::string>          names;
@@ -164,11 +171,16 @@ public:
 	bool isConstant() const;
 
 	ObjectExpression makeObject(SourcePosition const & position) const;
+
 	void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args, SourcePosition const & position) const;
+
 	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position) const;
-	void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position) const;
+	void makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position) const;
+	void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position) const;
+
 	void makeObjectsSet(ObjectVector * objects, SourcePosition const & position) const;
-	void makeObjectsSet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position) const;
+	void makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position) const;
+	void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position) const;
 
 
 
@@ -187,6 +199,7 @@ public:
 	static VariableType const * get_VariableType(VariableTypeInternal const type);
 	// ACSFunc types work like script types (see below).
 	static VariableType const * get_VariableType_acsfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
+	static VariableType const * get_VariableType_array(VariableType const * refType, int count);
 	// AsmFunc types work like script types (see below).
 	static VariableType const * get_VariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
 	// LnSpec types work like script types (see below).
@@ -210,12 +223,18 @@ private:
 	StorageClass _sc;
 	VariableType const * _type;
 
-	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * const type, int * const address) const;
-	void makeObjectsGet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const;
-	void makeObjectsGet(VariableType const * const type, int * const address) const;
-	void makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * const type, int * const address) const;
-	void makeObjectsSet(ObjectVector * objects, std::vector<std::string> * const names, SourcePosition const & position, VariableType const * const type, int * const address) const;
-	void makeObjectsSet(VariableType const * const type, int * const address) const;
+	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address) const;
+	void makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, int * address) const;
+	void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, int * address) const;
+	void makeObjectsGetPrep(ObjectVector * objects, int * address, int dimensions) const;
+	void makeObjectsGetSkip(VariableType const * type, int * address) const;
+
+	void makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address) const;
+	void makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, int * address) const;
+	void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, int * address) const;
+	void makeObjectsSetPost(ObjectVector * objects, int dimensions) const;
+	void makeObjectsSetPrep(ObjectVector * objects, int * address, int dimensions) const;
+	void makeObjectsSetSkip(VariableType const * type, int * address) const;
 
 
 
