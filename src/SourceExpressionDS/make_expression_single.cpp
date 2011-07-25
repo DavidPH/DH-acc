@@ -394,7 +394,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single_var(SourceTokenize
 	std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 	int addr(context->getCount(sc));
 
-	SourceVariable var(name, name, addr, sc, type, token.getPosition());
+	SourceVariable var(context->getLabel() + name, name, addr, sc, type, token.getPosition());
 
 	context->addVariable(var);
 

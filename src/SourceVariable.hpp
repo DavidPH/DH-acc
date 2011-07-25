@@ -162,6 +162,8 @@ public:
 	SourceVariable(std::string const & name, VariableData_String  const & vdString,  SourcePosition const & position, std::string const & nameObject);
 	SourceVariable(std::string const & name, VariableType const * type, ObjectExpression const & expr, SourcePosition const & position);
 
+	int getAddress() const;
+
 	StorageClass getClass() const;
 
 	std::string const & getNameObject() const;

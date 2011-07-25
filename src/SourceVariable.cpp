@@ -234,11 +234,20 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_script(Var
 	return get_VariableType_auto(VT_SCRIPT, callType, types);
 }
 
+int SourceVariable::getAddress() const
+{
+	return _address;
+}
+
 SourceVariable::StorageClass SourceVariable::getClass() const
 {
 	return _sc;
 }
 
+std::string const & SourceVariable::getNameObject() const
+{
+	return _nameObject;
+}
 std::string const & SourceVariable::getNameSource() const
 {
 	return _nameSource;

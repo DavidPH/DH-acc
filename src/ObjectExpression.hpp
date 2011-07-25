@@ -74,6 +74,13 @@ public:
 		int_t varCount;
 	};
 
+	struct RegisterArray
+	{
+		std::string name;
+		int_t number;
+		int_t size;
+	};
+
 	struct Script
 	{
 		int32_t args;
@@ -117,6 +124,8 @@ public:
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
 
+	static void add_registerarray_map(std::string const & name, int_t number, int_t size);
+
 	static void add_script(std::string const & label, int32_t number, ScriptType type, int32_t args, int vars, int flags);
 
 	// Adds a string using an auto-generated symbol and returns that symbol.
@@ -151,6 +160,10 @@ public:
 
 	static int_t get_int(SourceTokenC const & token);
 
+	static RegisterArray const & get_registerarray_map(int_t index);
+
+	static int_t get_registerarray_map_count();
+
 	static ScriptFlag get_ScriptFlag(std::string const & value, SourcePosition const & position);
 
 	static ScriptType get_ScriptType(std::string const & value, SourcePosition const & position);
@@ -181,6 +194,7 @@ private:
 
 	static std::vector<ACSFunc> _acsfunc_table;
 	static int32_t _address_count;
+	static std::vector<RegisterArray> _registerarray_map_table;
 	static std::vector<Script> _script_table;
 	static std::map<int32_t, bool> _script_used;
 	static int32_t _script_used_last;

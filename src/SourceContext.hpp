@@ -50,6 +50,8 @@ public:
 
 	int getCount(SourceVariable::StorageClass sc) const;
 
+	std::string getLabel() const;
+
 	int getLimit(SourceVariable::StorageClass sc) const;
 
 	SourceVariable::VariableType const * getReturnType() const;
@@ -70,8 +72,6 @@ public:
 private:
 	void addCount(int count, SourceVariable::StorageClass sc);
 	void addLimit(int limit, SourceVariable::StorageClass sc);
-
-	std::string getLabel() const;
 
 	SourceVariable const & getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
 

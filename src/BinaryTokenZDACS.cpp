@@ -259,9 +259,8 @@ void BinaryTokenZDACS::write_acsfunc(std::ostream * const out, ObjectExpression:
 		break;
 
 	default:
-		throw SourceException("unknown output type for script", SourcePosition::none, "BinaryTokenZDACS");
+		throw SourceException("unknown output type for acsfunc", SourcePosition::none, "BinaryTokenZDACS");
 	}
-
 }
 
 void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions)
@@ -318,6 +317,7 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 	case OUTPUT_ACSE:
 	{
 		ObjectExpression::int_t const acsfuncCount(ObjectExpression::get_acsfunc_count());
+		ObjectExpression::int_t const registerarrayMapCount(ObjectExpression::get_registerarray_map_count());
 		int32_t const scriptCount(ObjectExpression::get_script_count());
 		int32_t const stringCount(ObjectExpression::get_string_count());
 
@@ -334,6 +334,15 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 
 			for (ObjectExpression::int_t index(0); index < acsfuncCount; ++index)
 				write_acsfunc(out, ObjectExpression::get_acsfunc(index));
+		}
+
+		if (registerarrayMapCount)
+		{
+			*out << 'A' << 'R' << 'A' << 'Y';
+			write_32(out, registerarrayMapCount*8);
+
+			for (ObjectExpression::int_t index(0); index < registerarrayMapCount; ++index)
+				write_registerarray(out, ObjectExpression::get_registerarray_map(index));
 		}
 
 		if (scriptCount)
@@ -382,6 +391,20 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 	}
 }
 
+void BinaryTokenZDACS::write_registerarray(std::ostream * const out, ObjectExpression::RegisterArray const & r)
+{
+	switch (output_type)
+	{
+	case OUTPUT_ACSE:
+		write_32(out, r.number);
+		write_32(out, r.size+1);
+		break;
+
+	default:
+		throw SourceException("unknown output type for registerarray", SourcePosition::none, "BinaryTokenZDACS");
+	}
+}
+
 void BinaryTokenZDACS::write_script(std::ostream * const out, ObjectExpression::Script const & s)
 {
 	switch (output_type)
@@ -402,7 +425,6 @@ void BinaryTokenZDACS::write_script(std::ostream * const out, ObjectExpression::
 	default:
 		throw SourceException("unknown output type for script", SourcePosition::none, "BinaryTokenZDACS");
 	}
-
 }
 
 void BinaryTokenZDACS::write_script_flags(std::ostream * const out, ObjectExpression::Script const & s)
@@ -417,7 +439,6 @@ void BinaryTokenZDACS::write_script_flags(std::ostream * const out, ObjectExpres
 	default:
 		throw SourceException("unknown output type for script_flags", SourcePosition::none, "BinaryTokenZDACS");
 	}
-
 }
 
 void BinaryTokenZDACS::write_script_vars(std::ostream * const out, ObjectExpression::Script const & s)
@@ -432,7 +453,6 @@ void BinaryTokenZDACS::write_script_vars(std::ostream * const out, ObjectExpress
 	default:
 		throw SourceException("unknown output type for script_vars", SourcePosition::none, "BinaryTokenZDACS");
 	}
-
 }
 
 void BinaryTokenZDACS::write_string(std::ostream * const out, std::string const & s)

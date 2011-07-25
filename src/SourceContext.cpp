@@ -124,8 +124,9 @@ void SourceContext::addVariable(SourceVariable const & var)
 		addCount(var.getType()->size(), sc);
 		break;
 
-	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
 	case SourceVariable::SC_REGISTERARRAY_MAP:
+		ObjectExpression::add_registerarray_map(var.getNameObject(), var.getAddress(), var.getType()->size());
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		// Register arrays only require a single allocation regardless of size.
 		addCount(1, sc);

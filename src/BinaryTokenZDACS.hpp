@@ -127,6 +127,7 @@ public:
 	static void write_32(std::ostream * const out, uint32_t const i);
 	static void write_acsfunc(std::ostream * const out, ObjectExpression::ACSFunc const & f);
 	static void write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions);
+	static void write_registerarray(std::ostream * out, ObjectExpression::RegisterArray const & r);
 	static void write_script(std::ostream * const out, ObjectExpression::Script const & s);
 	static void write_script_flags(std::ostream * const out, ObjectExpression::Script const & s);
 	static void write_script_vars(std::ostream * const out, ObjectExpression::Script const & s);

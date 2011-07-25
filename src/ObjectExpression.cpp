@@ -32,6 +32,7 @@
 
 std::vector<ObjectExpression::ACSFunc> ObjectExpression::_acsfunc_table;
 int32_t ObjectExpression::_address_count(8+4+4);
+std::vector<ObjectExpression::RegisterArray> ObjectExpression::_registerarray_map_table;
 std::vector<ObjectExpression::Script> ObjectExpression::_script_table;
 std::map<int32_t, bool> ObjectExpression::_script_used;
 int32_t ObjectExpression::_script_used_last(0);
@@ -71,6 +72,12 @@ void ObjectExpression::add_address_count(int32_t const addressCount)
 void ObjectExpression::add_label(std::string const & symbol)
 {
 	add_symbol(symbol, create_value_int(_address_count, SourcePosition::none));
+}
+
+void ObjectExpression::add_registerarray_map(std::string const & name, int_t number, int_t size)
+{
+	RegisterArray r = {name, number, size};
+	_registerarray_map_table.push_back(r);
 }
 
 void ObjectExpression::add_script(std::string const & label, int32_t number, ScriptType type, int32_t args, int vars, int flags)
@@ -128,6 +135,16 @@ ObjectExpression::int_t ObjectExpression::get_int(SourceTokenC const & token)
 	std::istringstream iss(token.getData());
 	iss >> i;
 	return i;
+}
+
+ObjectExpression::RegisterArray const & ObjectExpression::get_registerarray_map(int_t index)
+{
+	return _registerarray_map_table[index];
+}
+
+ObjectExpression::int_t ObjectExpression::get_registerarray_map_count()
+{
+	return (int_t)_registerarray_map_table.size();
 }
 
 ObjectExpression::ScriptFlag ObjectExpression::get_ScriptFlag(std::string const & value, SourcePosition const & position)
