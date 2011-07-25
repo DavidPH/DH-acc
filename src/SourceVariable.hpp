@@ -160,6 +160,7 @@ public:
 	SourceVariable(std::string const & name, VariableData_Real    const & vdReal,    SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Script  const & vdScript,  SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_String  const & vdString,  SourcePosition const & position, std::string const & nameObject);
+	SourceVariable(std::string const & name, VariableType const * type, ObjectExpression const & expr, SourcePosition const & position);
 
 	StorageClass getClass() const;
 
@@ -217,6 +218,7 @@ public:
 private:
 	int _address;
 	VariableData _data;
+	ObjectExpression _expr;
 	std::string _nameObject;
 	std::string _nameSource;
 	SourcePosition _position;

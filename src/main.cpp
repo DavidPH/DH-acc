@@ -75,6 +75,7 @@ static inline void _init(int argc, char const * const * argv)
 
 	BinaryTokenZDACS::init();
 	ObjectToken::init();
+	SourceExpressionDS::init();
 	SourceTokenASMPLX::init();
 
 	option::option_set_name(argv[0]);

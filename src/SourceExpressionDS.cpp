@@ -104,6 +104,7 @@ void SourceExpressionDS::init()
 {
 	_expression_single_handlers["acsfunc"] = make_expression_single_acsfunc;
 	_expression_single_handlers["asmfunc"] = make_expression_single_asmfunc;
+	_expression_single_handlers["const"]   = make_expression_single_const;
 	_expression_single_handlers["delay"]   = make_expression_single_delay;
 	_expression_single_handlers["if"]      = make_expression_single_if;
 	_expression_single_handlers["lnspec"]  = make_expression_single_lnspec;
@@ -307,18 +308,20 @@ SourceExpressionDS SourceExpressionDS::make_expressions(SourceTokenizerDS * cons
 }
 void SourceExpressionDS::make_expressions(SourceTokenizerDS * const in, std::vector<SourceExpressionDS> * const expressions, std::vector<SourceExpressionDS> * const blocks, SourceContext * const context)
 {
-	in->get(SourceTokenC::TT_OP_BRACE_O);
+	bool brackets(in->peek().getType() == SourceTokenC::TT_OP_BRACKET_O);
+
+	in->get(brackets ? SourceTokenC::TT_OP_BRACKET_O : SourceTokenC::TT_OP_BRACE_O);
 
 	while (true)
 	{
-		if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_C)
+		if (in->peek().getType() == (brackets ? SourceTokenC::TT_OP_BRACKET_C : SourceTokenC::TT_OP_BRACE_C))
 			break;
 
 		expressions->push_back(make_expression(in, blocks, context));
 		in->get(SourceTokenC::TT_OP_SEMICOLON);
 	}
 
-	in->get(SourceTokenC::TT_OP_BRACE_C);
+	in->get(brackets ? SourceTokenC::TT_OP_BRACKET_C : SourceTokenC::TT_OP_BRACE_C);
 }
 
 void SourceExpressionDS::make_objects(std::vector<SourceExpressionDS> const & expressions, ObjectVector * objects)

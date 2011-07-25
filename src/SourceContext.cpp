@@ -233,7 +233,7 @@ SourceVariable const & SourceContext::getVariable(std::string const & name, Sour
 
 	if (_parent) return _parent->getVariable(name, position, canLocal && _inheritLocals);
 
-	throw SourceException("no such variable", position, "SourceContext");
+	throw SourceException("no such variable '" + name + "'", position, "SourceContext");
 }
 
 std::string SourceContext::makeLabel()

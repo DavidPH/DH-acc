@@ -76,6 +76,14 @@ SourceExpressionDS SourceExpressionDS::make_expression_single(SourceTokenizerDS 
 		return make_expression_root_block(expressions, token.getPosition());
 	}
 
+	case SourceTokenC::TT_OP_BRACKET_O:
+	{
+		in->unget(token);
+		std::vector<SourceExpressionDS> expressions;
+		make_expressions(in, &expressions, blocks, context);
+		return make_expression_root_block(expressions, token.getPosition());
+	}
+
 	case SourceTokenC::TT_OP_PARENTHESIS_O:
 		expr = make_expression(in, blocks, context);
 		in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
@@ -144,6 +152,19 @@ SourceExpressionDS SourceExpressionDS::make_expression_single_asmfunc(SourceToke
 
 	context->addVariable(asmfuncVariable);
 	return make_expression_value_variable(asmfuncVariable, token.getPosition());
+}
+SourceExpressionDS SourceExpressionDS::make_expression_single_const(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context)
+{
+	SourceVariable::VariableType const * type(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+	std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+	in->get(SourceTokenC::TT_OP_EQUALS);
+	SourceExpressionDS data(make_expression(in, blocks, context));
+
+	SourceVariable var(name, type, data.makeObject(), token.getPosition());
+
+	context->addVariable(var);
+
+	return make_expression_value_variable(var, token.getPosition());
 }
 SourceExpressionDS SourceExpressionDS::make_expression_single_delay(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context)
 {

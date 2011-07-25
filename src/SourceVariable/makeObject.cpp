@@ -28,6 +28,8 @@
 
 ObjectExpression SourceVariable::makeObject(SourcePosition const & position) const
 {
+	if (_address == -2) return _expr;
+
 	switch (_sc)
 	{
 	case SC_CONSTANT:

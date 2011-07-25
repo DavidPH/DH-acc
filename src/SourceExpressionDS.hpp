@@ -146,6 +146,7 @@ private:
 	static SourceExpressionDS make_expression_single(SourceTokenizerDS * in, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
 	static SourceExpressionDS make_expression_single_acsfunc(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
 	static SourceExpressionDS make_expression_single_asmfunc(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
+	static SourceExpressionDS make_expression_single_const(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
 	static SourceExpressionDS make_expression_single_delay(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
 	static SourceExpressionDS make_expression_single_if(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);
 	static SourceExpressionDS make_expression_single_lnspec(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpressionDS> * blocks, SourceContext * context);

@@ -85,6 +85,10 @@ SourceVariable::SourceVariable(std::string const & name, VariableData_String con
 {
 	_data.vdString = vdString;
 }
+SourceVariable::SourceVariable(std::string const & name, VariableType const * type, ObjectExpression const & expr, SourcePosition const & position) : _address(-2), _expr(expr), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(type)
+{
+
+}
 
 void SourceVariable::add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types)
 {
