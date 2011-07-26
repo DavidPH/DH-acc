@@ -117,6 +117,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single_acsfunc(SourceToke
 	SourceExpressionDS acsfuncExpression(make_expression_single(in, blocks, &acsfuncContext));
 	acsfuncExpression.addLabel(acsfuncLabel);
 	blocks->push_back(acsfuncExpression);
+	blocks->push_back(make_expression_root_return(make_expression_root_data(acsfuncReturn, true, token.getPosition()), acsfuncContext, token.getPosition()));
 
 	SourceVariable::VariableType const * acsfuncVarType(SourceVariable::get_VariableType_acsfunc(acsfuncReturn, acsfuncArgTypes));
 
@@ -319,6 +320,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single_script(SourceToken
 	SourceExpressionDS scriptExpression(make_expression_single(in, blocks, &scriptContext));
 	scriptExpression.addLabel(scriptLabel);
 	blocks->push_back(scriptExpression);
+	blocks->push_back(make_expression_root_return(make_expression_root_data(scriptReturn, true, token.getPosition()), scriptContext, token.getPosition()));
 
 	int scriptVarCount(scriptContext.getLimit(SourceVariable::SC_REGISTER));
 

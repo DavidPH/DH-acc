@@ -133,6 +133,7 @@ private:
 	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_block(std::vector<SourceExpressionDS> const & expressions, std::vector<std::string> const & labels, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_call(SourceExpressionDS const & expr, std::vector<SourceExpressionDS> const & args, SourcePosition const & position);
+	static SourceExpressionDS make_expression_root_data(SourceVariable::VariableType const * type, bool garbage, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_delay(SourceExpressionDS const & expr, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_if(SourceExpressionDS const & exprCondition, SourceExpressionDS const & exprIf, SourceContext * context, SourcePosition const & position);
 	static SourceExpressionDS make_expression_root_if(SourceExpressionDS const & exprCondition, SourceExpressionDS const & exprIf, SourceExpressionDS const & exprElse, SourceContext * context, SourcePosition const & position);

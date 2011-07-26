@@ -138,6 +138,8 @@ bool SourceExpressionDS_RootOut::isConstant() const
 
 void SourceExpressionDS_RootOut::makeObjectsGet(ObjectVector * objects) const
 {
+	objects->addLabel(getLabels());
+
 	_expr.makeObjectsGet(objects);
 
 	objects->setPosition(getPosition());
