@@ -106,7 +106,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single_acsfunc(SourceToke
 
 	std::string acsfuncName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
-	std::string acsfuncLabel("acsfunc_" + acsfuncName);
+	std::string acsfuncLabel(context->getLabel() + "acsfunc_" + acsfuncName);
 
 	std::vector<SourceVariable::VariableType const *> acsfuncArgTypes;
 	std::vector<std::string> acsfuncArgNames;
@@ -287,7 +287,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single_script(SourceToken
 		scriptName = oss.str();
 	}
 
-	std::string scriptLabel("script_" + scriptName);
+	std::string scriptLabel(context->getLabel() + "script_" + scriptName);
 
 	SourceTokenC scriptTypeToken(in->get(SourceTokenC::TT_IDENTIFIER));
 	ObjectExpression::ScriptType scriptType(ObjectExpression::get_ScriptType(scriptTypeToken.getData(), scriptTypeToken.getPosition()));
