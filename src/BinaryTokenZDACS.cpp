@@ -32,7 +32,7 @@ uintptr_t BinaryTokenZDACS::_arg_counts[BCODE_NONE];
 
 
 
-BinaryTokenZDACS::BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args) : _args(args), _code(code), _labels(labels), _position(position)
+BinaryTokenZDACS::BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args) : _args(args), _code(code), _labels(labels), _position(position)
 {
 
 }
@@ -122,7 +122,7 @@ void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<Bin
 	#define CASE_DIRECTMAP(NAME)\
 	case ObjectToken::OCODE_##NAME:\
 	{\
-		std::vector<ObjectExpression> args;\
+		std::vector<ObjectExpression::Pointer> args;\
 		for (uintptr_t i(0); i < _arg_counts[BCODE_##NAME]; ++i)\
 			args.push_back(objects[index].getArg(i));\
 		instructions->push_back(BinaryTokenZDACS(BCODE_##NAME, objects[index].getPosition(), objects[index].getLabels(), args));\
@@ -210,7 +210,7 @@ void BinaryTokenZDACS::write(std::ostream * const out) const
 	for (uintptr_t i(0); i < _arg_counts[_code]; ++i)
 	{
 		if (i < _args.size())
-			write_32(out, _args[i]);
+			write_32(out, *_args[i]);
 		else
 			write_32(out, 0);
 	}
@@ -255,7 +255,7 @@ void BinaryTokenZDACS::write_acsfunc(std::ostream * const out, ObjectExpression:
 		write_8 (out, (int8_t)f.varCount);
 		write_8 (out, (int8_t)f.retCount);
 		write_8 (out, 0);
-		write_32(out, ObjectExpression::get_symbol(f.label, SourcePosition::none));
+		write_32(out, *ObjectExpression::get_symbol(f.label, SourcePosition::none));
 		break;
 
 	default:
@@ -411,14 +411,14 @@ void BinaryTokenZDACS::write_script(std::ostream * const out, ObjectExpression::
 	{
 	case OUTPUT_ACS0:
 		write_32(out, (int32_t)(s.type * 1000) + (int32_t)s.number);
-		write_32(out, ObjectExpression::get_symbol(s.label, SourcePosition::none));
+		write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
 		write_32(out, s.args);
 		break;
 
 	case OUTPUT_ACSE:
 		write_16(out, (int16_t)s.number);
 		write_16(out, (int16_t)s.type);
-		write_32(out, ObjectExpression::get_symbol(s.label, SourcePosition::none));
+		write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
 		write_32(out, s.args);
 		break;
 

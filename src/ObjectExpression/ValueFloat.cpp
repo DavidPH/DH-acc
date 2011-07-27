@@ -19,63 +19,50 @@
 ** Defines the ObjectExpression_ValueFloat class and methods.
 */
 
-#include "Base.hpp"
+#include "../ObjectExpression.hpp"
 
 
 
-class ObjectExpression_ValueFloat : public ObjectExpression_Base
+class ObjectExpression_ValueFloat : public ObjectExpression
 {
+	MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueFloat, ObjectExpression);
+
 public:
-	ObjectExpression_ValueFloat(ObjectExpression::float_t value, SourcePosition const & position);
+	ObjectExpression_ValueFloat(float_t value, SourcePosition const & position);
 
-	virtual ObjectExpression_ValueFloat * clone() const;
-
-	virtual char const * getName() const;
-
-	virtual ObjectExpression::ExpressionType getType() const;
+	virtual ExpressionType getType() const;
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual ObjectExpression::float_t resolveFloat() const;
-	virtual ObjectExpression::int_t resolveInt() const;
+	virtual float_t resolveFloat() const;
 
 private:
-	ObjectExpression::float_t _value;
+	float_t _value;
 };
 
 
 
-ObjectExpression ObjectExpression::create_value_float(ObjectExpression::float_t value, SourcePosition const & position)
+ObjectExpression::Pointer ObjectExpression::create_value_float(float_t value, SourcePosition const & position)
 {
-	return ObjectExpression_ValueFloat(value, position);
+	return new ObjectExpression_ValueFloat(value, position);
 }
 
 
 
-ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(ObjectExpression::float_t value, SourcePosition const & position) : ObjectExpression_Base(position), _value(value)
+ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(float_t value, SourcePosition const & position) : ObjectExpression(position), _value(value)
 {
 
-}
-
-ObjectExpression_ValueFloat * ObjectExpression_ValueFloat::clone() const
-{
-	return new ObjectExpression_ValueFloat(*this);
-}
-
-char const * ObjectExpression_ValueFloat::getName() const
-{
-	return "ObjectExpression_ValueFloat";
 }
 
 ObjectExpression::ExpressionType ObjectExpression_ValueFloat::getType() const
 {
-	return ObjectExpression::ET_FLOAT;
+	return ET_FLOAT;
 }
 
-void ObjectExpression_ValueFloat::printDebug(std::ostream * const out) const
+void ObjectExpression_ValueFloat::printDebug(std::ostream * out) const
 {
 	*out << "ObjectExpression_ValueFloat(";
-	ObjectExpression_Base::printDebug(out);
+	Super::printDebug(out);
 	*out << " ";
 		*out << "value=(";
 		*out << _value;
@@ -86,10 +73,6 @@ void ObjectExpression_ValueFloat::printDebug(std::ostream * const out) const
 ObjectExpression::float_t ObjectExpression_ValueFloat::resolveFloat() const
 {
 	return _value;
-}
-ObjectExpression::int_t ObjectExpression_ValueFloat::resolveInt() const
-{
-	return (ObjectExpression::int_t)_value;
 }
 
 

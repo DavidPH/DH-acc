@@ -25,57 +25,49 @@
 
 class ObjectExpression_UnarySub : public ObjectExpression_Unary
 {
+	MAKE_COUNTER_CLASS_BASE(ObjectExpression_UnarySub, ObjectExpression_Unary);
+
 public:
-	ObjectExpression_UnarySub(ObjectExpression const & expr, SourcePosition const & position);
-
-	virtual ObjectExpression_UnarySub * clone() const;
-
-	virtual char const * getName() const;
+	ObjectExpression_UnarySub(ObjectExpression * expr, SourcePosition const & position);
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual ObjectExpression::float_t resolveFloat() const;
-	virtual ObjectExpression::int_t resolveInt() const;
+	virtual float_t resolveFloat() const;
+	virtual int_t resolveInt() const;
 };
 
 
 
-ObjectExpression ObjectExpression::create_unary_sub(ObjectExpression const & expr, SourcePosition const & position)
+ObjectExpression::Pointer ObjectExpression::create_unary_sub(ObjectExpression * expr, SourcePosition const & position)
 {
-	return ObjectExpression_UnarySub(expr, position);
+	return new ObjectExpression_UnarySub(expr, position);
 }
 
 
 
-ObjectExpression_UnarySub::ObjectExpression_UnarySub(ObjectExpression const & expr, SourcePosition const & position) : ObjectExpression_Unary(expr, position)
+ObjectExpression_UnarySub::ObjectExpression_UnarySub(ObjectExpression * expr, SourcePosition const & position) : ObjectExpression_Unary(expr, position)
 {
 
 }
 
-ObjectExpression_UnarySub * ObjectExpression_UnarySub::clone() const
-{
-	return new ObjectExpression_UnarySub(*this);
-}
-
-char const * ObjectExpression_UnarySub::getName() const
-{
-	return "ObjectExpression_UnarySub";
-}
-
-void ObjectExpression_UnarySub::printDebug(std::ostream * const out) const
+void ObjectExpression_UnarySub::printDebug(std::ostream * out) const
 {
 	*out << "ObjectExpression_UnarySub(";
-	ObjectExpression_Unary::printDebug(out);
+	Super::printDebug(out);
 	*out << ")";
 }
 
 ObjectExpression::float_t ObjectExpression_UnarySub::resolveFloat() const
 {
-	return -_expr.resolveFloat();
+	if (getType() == ET_FLOAT) return -expr->resolveFloat();
+
+	return Super::resolveFloat();
 }
 ObjectExpression::int_t ObjectExpression_UnarySub::resolveInt() const
 {
-	return -_expr.resolveInt();
+	if (getType() == ET_INT) return -expr->resolveInt();
+
+	return Super::resolveInt();
 }
 
 

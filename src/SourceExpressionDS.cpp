@@ -346,7 +346,7 @@ void SourceExpressionDS::make_objects_call_acsfunc(ObjectVector * objects, Sourc
 	objects->setPosition(position);
 
 	ObjectToken::ObjectCode ocode;
-	ObjectExpression ofunc(objects->getValue(data.number));
+	ObjectExpression::Pointer ofunc(objects->getValue(data.number));
 
 	if (data.type->callType->type == SourceVariable::VT_VOID)
 		ocode = ObjectToken::OCODE_CALLZDACSDISCARD;
@@ -373,7 +373,7 @@ void SourceExpressionDS::make_objects_call_asmfunc(ObjectVector * objects, Sourc
 
 	if (immediate)
 	{
-		std::vector<ObjectExpression> oargs;
+		std::vector<ObjectExpression::Pointer> oargs;
 
 		for (size_t i(0); i < args.size(); ++i)
 			oargs.push_back(args[i].makeObject());
@@ -411,7 +411,7 @@ void SourceExpressionDS::make_objects_call_lnspec(ObjectVector * objects, Source
 	objects->setPosition(position);
 
 	ObjectToken::ObjectCode ocode;
-	ObjectExpression ospec(objects->getValue(data.number));
+	ObjectExpression::Pointer ospec(objects->getValue(data.number));
 
 	if (data.type->callType->type == SourceVariable::VT_VOID)
 	{
@@ -453,8 +453,8 @@ void SourceExpressionDS::make_objects_call_native(ObjectVector * objects, Source
 	objects->setPosition(position);
 
 	ObjectToken::ObjectCode ocode(ObjectToken::OCODE_CALLZDFUNC);
-	ObjectExpression oargc(objects->getValue((int)args.size()));
-	ObjectExpression ofunc(objects->getValue(data.number));
+	ObjectExpression::Pointer oargc(objects->getValue((int)args.size()));
+	ObjectExpression::Pointer ofunc(objects->getValue(data.number));
 
 	objects->addToken(ocode, oargc, ofunc);
 }
@@ -478,7 +478,7 @@ void SourceExpressionDS::make_objects_call_script(ObjectVector * objects, Source
 	objects->setPosition(position);
 
 	ObjectToken::ObjectCode code;
-	ObjectExpression ospec(objects->getValue(84));
+	ObjectExpression::Pointer ospec(objects->getValue(84));
 
 	if (type->callType->type == SourceVariable::VT_VOID)
 	{
@@ -503,7 +503,7 @@ void SourceExpressionDS::make_objects_call_script(ObjectVector * objects, Source
 	objects->addToken(code, ospec);
 }
 
-ObjectExpression SourceExpressionDS::makeObject() const
+ObjectExpression::Pointer SourceExpressionDS::makeObject() const
 {
 	if (_expr)
 		return _expr->makeObject();

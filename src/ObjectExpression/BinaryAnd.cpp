@@ -25,61 +25,42 @@
 
 class ObjectExpression_BinaryAnd : public ObjectExpression_Binary
 {
+	MAKE_COUNTER_CLASS_BASE(ObjectExpression_BinaryAnd, ObjectExpression_Binary);
+
 public:
-	ObjectExpression_BinaryAnd(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
-
-	virtual ObjectExpression_BinaryAnd * clone() const;
-
-	virtual char const * getName() const;
+	ObjectExpression_BinaryAnd(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual ObjectExpression::int_t resolveInt() const;
+	virtual int_t resolveInt() const;
 };
 
 
 
-ObjectExpression ObjectExpression::create_binary_and(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position)
+ObjectExpression::Pointer ObjectExpression::create_binary_and(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position)
 {
-	return ObjectExpression_BinaryAnd(exprL, exprR, position);
+	return new ObjectExpression_BinaryAnd(exprL, exprR, position);
 }
 
 
 
-ObjectExpression_BinaryAnd::ObjectExpression_BinaryAnd(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
+ObjectExpression_BinaryAnd::ObjectExpression_BinaryAnd(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
 {
 
 }
 
-ObjectExpression_BinaryAnd * ObjectExpression_BinaryAnd::clone() const
-{
-	return new ObjectExpression_BinaryAnd(*this);
-}
-
-char const * ObjectExpression_BinaryAnd::getName() const
-{
-	return "ObjectExpression_BinaryAnd";
-}
-
-void ObjectExpression_BinaryAnd::printDebug(std::ostream * const out) const
+void ObjectExpression_BinaryAnd::printDebug(std::ostream * out) const
 {
 	*out << "ObjectExpression_BinaryAnd(";
-	ObjectExpression_Binary::printDebug(out);
+	Super::printDebug(out);
 	*out << ")";
 }
 
 ObjectExpression::int_t ObjectExpression_BinaryAnd::resolveInt() const
 {
-	switch (getType())
-	{
-	case ObjectExpression::ET_FLOAT:
-		return ObjectExpression_Binary::resolveInt();
+	if (getType() == ET_INT) return exprL->resolveInt() & exprR->resolveInt();
 
-	case ObjectExpression::ET_INT:
-		return _exprL.resolveInt() & _exprR.resolveInt();
-	}
-
-	return ObjectExpression_Binary::resolveInt();
+	return Super::resolveInt();
 }
 
 

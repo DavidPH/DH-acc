@@ -25,34 +25,25 @@
 
 
 
-ObjectExpression_Unary::ObjectExpression_Unary(ObjectExpression const & expr, SourcePosition const & position) : ObjectExpression_Base(position), _expr(expr)
+ObjectExpression_Unary::ObjectExpression_Unary(ObjectExpression * expr, SourcePosition const & position) : ObjectExpression(position), expr(expr)
 {
 
 }
 
 ObjectExpression::ExpressionType ObjectExpression_Unary::getType() const
 {
-	return _expr.getType();
+	return expr->getType();
 }
 
-void ObjectExpression_Unary::printDebug(std::ostream * const out) const
+void ObjectExpression_Unary::printDebug(std::ostream * out) const
 {
 	*out << "ObjectExpression_Unary(";
-	ObjectExpression_Base::printDebug(out);
+	Super::printDebug(out);
 	*out << " ";
 		*out << "expr=(";
-		print_debug(out, _expr);
+		print_debug(out, *expr);
 		*out << ")";
 	*out << ")";
-}
-
-ObjectExpression::float_t ObjectExpression_Unary::resolveFloat() const
-{
-	throw SourceException("cannot resolve float", getPosition(), getName());
-}
-ObjectExpression::int_t ObjectExpression_Unary::resolveInt() const
-{
-	throw SourceException("cannot resolve int", getPosition(), getName());
 }
 
 

@@ -369,7 +369,7 @@ SourceExpressionDS SourceExpressionDS::make_expression_single_typedef(SourceToke
 	{
 		SourceVariable::VariableType const * refType(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
 		in->get(SourceTokenC::TT_OP_BRACKET_O);
-		int count((int)make_expression(in, blocks, context).makeObject().resolveInt());
+		int count((int)make_expression(in, blocks, context).makeObject()->resolveInt());
 		in->get(SourceTokenC::TT_OP_BRACKET_C);
 
 		SourceVariable::add_typedef(in->get(SourceTokenC::TT_IDENTIFIER).getData(), SourceVariable::get_VariableType_array(refType, count));

@@ -25,61 +25,42 @@
 
 class ObjectExpression_BinaryXOr : public ObjectExpression_Binary
 {
+	MAKE_COUNTER_CLASS_BASE(ObjectExpression_BinaryXOr, ObjectExpression_Binary);
+
 public:
-	ObjectExpression_BinaryXOr(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
-
-	virtual ObjectExpression_BinaryXOr * clone() const;
-
-	virtual char const * getName() const;
+	ObjectExpression_BinaryXOr(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual ObjectExpression::int_t resolveInt() const;
+	virtual int_t resolveInt() const;
 };
 
 
 
-ObjectExpression ObjectExpression::create_binary_xor(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position)
+ObjectExpression::Pointer ObjectExpression::create_binary_xor(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position)
 {
-	return ObjectExpression_BinaryXOr(exprL, exprR, position);
+	return new ObjectExpression_BinaryXOr(exprL, exprR, position);
 }
 
 
 
-ObjectExpression_BinaryXOr::ObjectExpression_BinaryXOr(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
+ObjectExpression_BinaryXOr::ObjectExpression_BinaryXOr(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
 {
 
-}
-
-ObjectExpression_BinaryXOr * ObjectExpression_BinaryXOr::clone() const
-{
-	return new ObjectExpression_BinaryXOr(*this);
-}
-
-char const * ObjectExpression_BinaryXOr::getName() const
-{
-	return "ObjectExpression_BinaryXOr";
 }
 
 void ObjectExpression_BinaryXOr::printDebug(std::ostream * const out) const
 {
 	*out << "ObjectExpression_BinaryXOr(";
-	ObjectExpression_Binary::printDebug(out);
+	Super::printDebug(out);
 	*out << ")";
 }
 
 ObjectExpression::int_t ObjectExpression_BinaryXOr::resolveInt() const
 {
-	switch (getType())
-	{
-	case ObjectExpression::ET_FLOAT:
-		return ObjectExpression_Binary::resolveInt();
+	if (getType() == ET_INT) return exprL->resolveInt() ^ exprR->resolveInt();
 
-	case ObjectExpression::ET_INT:
-		return _exprL.resolveInt() ^ _exprR.resolveInt();
-	}
-
-	return ObjectExpression_Binary::resolveInt();
+	return Super::resolveInt();
 }
 
 

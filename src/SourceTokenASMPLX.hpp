@@ -76,7 +76,7 @@ private:
 
 	static int32_t char_to_int(char const c, int32_t const base, SourcePosition const & position);
 
-	static ObjectExpression make_expression(std::string const & expr, SourcePosition const & position);
+	static ObjectExpression::Pointer make_expression(std::string const & expr, SourcePosition const & position);
 
 	// Returns -1 for number 0.
 	static int32_t string_to_base(std::string const & s, SourcePosition const & position);

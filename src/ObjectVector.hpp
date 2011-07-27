@@ -39,16 +39,16 @@ public:
 
 	void addToken(ObjectToken const & token);
 	void addToken(ObjectToken::ObjectCode code);
-	void addToken(ObjectToken::ObjectCode code, std::vector<ObjectExpression> const & args);
-	void addToken(ObjectToken::ObjectCode code, ObjectExpression const & arg0);
-	void addToken(ObjectToken::ObjectCode code, ObjectExpression const & arg0, ObjectExpression const & arg1);
+	void addToken(ObjectToken::ObjectCode code, std::vector<ObjectExpression::Pointer> const & args);
+	void addToken(ObjectToken::ObjectCode code, ObjectExpression * arg0);
+	void addToken(ObjectToken::ObjectCode code, ObjectExpression * arg0, ObjectExpression * arg1);
 	void addTokenPushZero();
 
-	ObjectExpression getValue(ObjectExpression::float_t f);
-	ObjectExpression getValue(ObjectExpression::int_t i);
-	ObjectExpression getValue(int i);
-	ObjectExpression getValue(std::string const & label);
-	ObjectExpression getValue(unsigned int i);
+	ObjectExpression::Pointer getValue(ObjectExpression::float_t f);
+	ObjectExpression::Pointer getValue(ObjectExpression::int_t i);
+	ObjectExpression::Pointer getValue(int i);
+	ObjectExpression::Pointer getValue(std::string const & label);
+	ObjectExpression::Pointer getValue(unsigned int i);
 
 	ObjectToken const & operator [] (ObjectExpression::int_t index) const;
 

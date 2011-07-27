@@ -22,25 +22,24 @@
 #ifndef HPP_Binary__ObjectExpression_
 #define HPP_Binary__ObjectExpression_
 
-#include "Base.hpp"
+#include "../ObjectExpression.hpp"
 
 
 
-class ObjectExpression_Binary : public ObjectExpression_Base
+class ObjectExpression_Binary : public ObjectExpression
 {
-public:
-	ObjectExpression_Binary(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
+	MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression_Binary, ObjectExpression);
 
-	virtual ObjectExpression::ExpressionType getType() const;
+public:
+	ObjectExpression_Binary(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+
+	virtual ExpressionType getType() const;
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual ObjectExpression::float_t resolveFloat() const;
-	virtual ObjectExpression::int_t resolveInt() const;
-
 protected:
-	ObjectExpression _exprL;
-	ObjectExpression _exprR;
+	ObjectExpression::Pointer exprL;
+	ObjectExpression::Pointer exprR;
 };
 
 

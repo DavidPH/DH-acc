@@ -109,7 +109,7 @@ public:
 
 
 
-	BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args);
+	BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args);
 
 	void addLabel(std::string const & label);
 
@@ -134,7 +134,7 @@ public:
 	static void write_string(std::ostream * const out, std::string const & s);
 
 private:
-	std::vector<ObjectExpression> _args;
+	std::vector<ObjectExpression::Pointer> _args;
 	BinaryCode _code;
 	std::vector<std::string> _labels;
 	SourcePosition _position;

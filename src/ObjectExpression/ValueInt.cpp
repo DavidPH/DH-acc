@@ -23,59 +23,46 @@
 
 
 
-class ObjectExpression_ValueInt : public ObjectExpression_Base
+class ObjectExpression_ValueInt : public ObjectExpression
 {
+	MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueInt, ObjectExpression);
+
 public:
-	ObjectExpression_ValueInt(ObjectExpression::int_t value, SourcePosition const & position);
+	ObjectExpression_ValueInt(int_t value, SourcePosition const & position);
 
-	virtual ObjectExpression_ValueInt * clone() const;
-
-	virtual char const * getName() const;
-
-	virtual ObjectExpression::ExpressionType getType() const;
+	virtual ExpressionType getType() const;
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual ObjectExpression::float_t resolveFloat() const;
-	virtual ObjectExpression::int_t resolveInt() const;
+	virtual int_t resolveInt() const;
 
 private:
-	ObjectExpression::int_t _value;
+	int_t _value;
 };
 
 
 
-ObjectExpression ObjectExpression::create_value_int(ObjectExpression::int_t value, SourcePosition const & position)
+ObjectExpression::Pointer ObjectExpression::create_value_int(int_t value, SourcePosition const & position)
 {
-	return ObjectExpression_ValueInt(value, position);
+	return new ObjectExpression_ValueInt(value, position);
 }
 
 
 
-ObjectExpression_ValueInt::ObjectExpression_ValueInt(ObjectExpression::int_t value, SourcePosition const & position) : ObjectExpression_Base(position), _value(value)
+ObjectExpression_ValueInt::ObjectExpression_ValueInt(int_t value, SourcePosition const & position) : ObjectExpression(position), _value(value)
 {
 
-}
-
-ObjectExpression_ValueInt * ObjectExpression_ValueInt::clone() const
-{
-	return new ObjectExpression_ValueInt(*this);
-}
-
-char const * ObjectExpression_ValueInt::getName() const
-{
-	return "ObjectExpression_ValueInt";
 }
 
 ObjectExpression::ExpressionType ObjectExpression_ValueInt::getType() const
 {
-	return ObjectExpression::ET_INT;
+	return ET_INT;
 }
 
-void ObjectExpression_ValueInt::printDebug(std::ostream * const out) const
+void ObjectExpression_ValueInt::printDebug(std::ostream * out) const
 {
 	*out << "ObjectExpression_ValueInt(";
-	ObjectExpression_Base::printDebug(out);
+	Super::printDebug(out);
 	*out << " ";
 		*out << "value=(";
 		*out << _value;
@@ -83,10 +70,6 @@ void ObjectExpression_ValueInt::printDebug(std::ostream * const out) const
 	*out << ")";
 }
 
-ObjectExpression::float_t ObjectExpression_ValueInt::resolveFloat() const
-{
-	return (ObjectExpression::float_t)_value;
-}
 ObjectExpression::int_t ObjectExpression_ValueInt::resolveInt() const
 {
 	return _value;

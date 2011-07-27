@@ -246,9 +246,9 @@ bool SourceTokenASMPLX::isexprc(char const c)
 		c == '-' || c == '&' || c == '|' || c == '^';
 }
 
-ObjectExpression SourceTokenASMPLX::make_expression(std::string const & expr, SourcePosition const & position)
+ObjectExpression::Pointer SourceTokenASMPLX::make_expression(std::string const & expr, SourcePosition const & position)
 {
-	if (expr.empty()) return ObjectExpression();
+	if (expr.empty()) return ObjectExpression::create_value_int(0, position);
 
 	// Start with the last operator because the last op found is the first
 	// one evaluated.
@@ -334,7 +334,7 @@ void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & toke
 			}
 			else
 			{
-				std::vector<ObjectExpression> args;
+				std::vector<ObjectExpression::Pointer> args;
 
 				for (uintptr_t i(0); i < (uintptr_t)argC; ++i)
 					args.push_back(make_expression(token._data[i], token._position));

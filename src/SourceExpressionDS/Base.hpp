@@ -50,7 +50,7 @@ public:
 
 	virtual bool isConstant() const = 0;
 
-	virtual ObjectExpression makeObject() const;
+	virtual ObjectExpression::Pointer makeObject() const;
 
 	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const;
 

@@ -56,7 +56,7 @@ public:
 
 	bool isConstant() const;
 
-	ObjectExpression makeObject() const;
+	ObjectExpression::Pointer makeObject() const;
 
 	void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const;
 

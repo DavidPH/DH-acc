@@ -19,22 +19,20 @@
 ** Defines the ObjectExpression_ValueSymbol class and methods.
 */
 
-#include "Base.hpp"
+#include "../ObjectExpression.hpp"
 
 #include "../print_debug.hpp"
 
 
 
-class ObjectExpression_ValueSymbol : public ObjectExpression_Base
+class ObjectExpression_ValueSymbol : public ObjectExpression
 {
+	MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueSymbol, ObjectExpression);
+
 public:
 	ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position);
 
-	virtual ObjectExpression_ValueSymbol * clone() const;
-
-	virtual char const * getName() const;
-
-	virtual ObjectExpression::ExpressionType getType() const;
+	virtual ExpressionType getType() const;
 
 	virtual void printDebug(std::ostream * out) const;
 
@@ -47,37 +45,27 @@ private:
 
 
 
-ObjectExpression ObjectExpression::create_value_symbol(std::string const & value, SourcePosition const & position)
+ObjectExpression::Pointer ObjectExpression::create_value_symbol(std::string const & value, SourcePosition const & position)
 {
-	return ObjectExpression_ValueSymbol(value, position);
+	return new ObjectExpression_ValueSymbol(value, position);
 }
 
 
 
-ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position) : ObjectExpression_Base(position), _value(value)
+ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position) : ObjectExpression(position), _value(value)
 {
 
-}
-
-ObjectExpression_ValueSymbol * ObjectExpression_ValueSymbol::clone() const
-{
-	return new ObjectExpression_ValueSymbol(*this);
-}
-
-char const * ObjectExpression_ValueSymbol::getName() const
-{
-	return "ObjectExpression_ValueSymbol";
 }
 
 ObjectExpression::ExpressionType ObjectExpression_ValueSymbol::getType() const
 {
-	return ObjectExpression::get_symbol(_value, getPosition()).getType();
+	return ObjectExpression::get_symbol(_value, position)->getType();
 }
 
-void ObjectExpression_ValueSymbol::printDebug(std::ostream * const out) const
+void ObjectExpression_ValueSymbol::printDebug(std::ostream * out) const
 {
 	*out << "ObjectExpression_ValueSymbol(";
-	ObjectExpression_Base::printDebug(out);
+	Super::printDebug(out);
 	*out << " ";
 		*out << "value=(";
 		print_debug(out, _value);
@@ -87,11 +75,11 @@ void ObjectExpression_ValueSymbol::printDebug(std::ostream * const out) const
 
 ObjectExpression::float_t ObjectExpression_ValueSymbol::resolveFloat() const
 {
-	return ObjectExpression::get_symbol(_value, getPosition()).resolveFloat();
+	return ObjectExpression::get_symbol(_value, position)->resolveFloat();
 }
 ObjectExpression::int_t ObjectExpression_ValueSymbol::resolveInt() const
 {
-	return ObjectExpression::get_symbol(_value, getPosition()).resolveInt();
+	return ObjectExpression::get_symbol(_value, position)->resolveInt();
 }
 
 

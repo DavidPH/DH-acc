@@ -60,7 +60,7 @@ std::vector<SourceExpressionDS> SourceExpressionDS_Base::getVector() const
 	throw SourceException("attempted to getVector on invalid expression", _position, getName());
 }
 
-ObjectExpression SourceExpressionDS_Base::makeObject() const
+ObjectExpression::Pointer SourceExpressionDS_Base::makeObject() const
 {
 	throw SourceException("attempted to makeObject on invalid expression", _position, getName());
 }

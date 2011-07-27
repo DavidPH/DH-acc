@@ -32,19 +32,7 @@ std::map<std::string, ObjectToken::ObjectCode> ObjectToken::_codes;
 
 
 
-ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position) : _args(), _code(code), _labels(), _position(position)
-{
-
-}
-ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, ObjectExpression const & arg) : _args(1, arg), _code(code), _labels(), _position(position)
-{
-
-}
-ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<ObjectExpression> const & args) : _args(args), _code(code), _labels(), _position(position)
-{
-
-}
-ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args) : _args(args), _code(code), _labels(labels), _position(position)
+ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args) : _args(args), _code(code), _labels(labels), _position(position)
 {
 
 }
@@ -64,9 +52,9 @@ ObjectToken::ObjectCode ObjectToken::get_code(SourceTokenC const & token)
 	return codeIt->second;
 }
 
-ObjectExpression const & ObjectToken::getArg(uintptr_t const index) const
+ObjectExpression::Pointer ObjectToken::getArg(size_t index) const
 {
-	static ObjectExpression expr;
+	static ObjectExpression::Pointer expr(ObjectExpression::create_value_int(0, SourcePosition::none));
 
 	if (index < _args.size())
 		return _args[index];

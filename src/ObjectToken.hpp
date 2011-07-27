@@ -113,14 +113,11 @@ public:
 
 
 
-	ObjectToken(ObjectCode const code, SourcePosition const & position);
-	ObjectToken(ObjectCode const code, SourcePosition const & position, ObjectExpression const & arg);
-	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<ObjectExpression> const & args);
-	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression> const & args);
+	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args);
 
 	void addLabel(std::string const & label);
 
-	ObjectExpression const & getArg(uintptr_t const index) const;
+	ObjectExpression::Pointer getArg(size_t index) const;
 
 	ObjectCode getCode() const;
 
@@ -137,7 +134,7 @@ public:
 	static void init();
 
 private:
-	std::vector<ObjectExpression> _args;
+	std::vector<ObjectExpression::Pointer> _args;
 	ObjectCode _code;
 	std::vector<std::string> _labels;
 	SourcePosition _position;

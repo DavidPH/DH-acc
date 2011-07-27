@@ -24,8 +24,6 @@
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 
-#include "ObjectExpression/Base.hpp"
-
 #include <sstream>
 
 
@@ -37,25 +35,13 @@ std::vector<ObjectExpression::Script> ObjectExpression::_script_table;
 std::map<int32_t, bool> ObjectExpression::_script_used;
 int32_t ObjectExpression::_script_used_last(0);
 std::vector<ObjectExpression::String> ObjectExpression::_string_table;
-std::map<std::string, ObjectExpression> ObjectExpression::_symbol_table;
+std::map<std::string, ObjectExpression::Pointer> ObjectExpression::_symbol_table;
 
 
 
-ObjectExpression::ObjectExpression() : _expr(NULL)
+ObjectExpression::ObjectExpression(SourcePosition const & position) : position(position)
 {
 
-}
-ObjectExpression::ObjectExpression(ObjectExpression const & expr) : _expr(expr._expr ? expr._expr->clone() : NULL)
-{
-
-}
-ObjectExpression::ObjectExpression(ObjectExpression_Base const & expr) : _expr(expr.clone())
-{
-
-}
-ObjectExpression::~ObjectExpression()
-{
-	delete _expr;
 }
 
 void ObjectExpression::add_acsfunc(std::string const & label, int_t argCount, int_t varCount, int_t retCount)
@@ -106,7 +92,7 @@ void ObjectExpression::add_string(std::string const & symbol, std::string const 
 	_string_table.push_back(s);
 }
 
-void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression const & value)
+void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression * value)
 {
 	_symbol_table[symbol] = value;
 }
@@ -226,9 +212,9 @@ int32_t ObjectExpression::get_string_length()
 	return _string_table.back().offset + _string_table.back().string.size();
 }
 
-ObjectExpression ObjectExpression::get_symbol(std::string const & symbol, SourcePosition const & position)
+ObjectExpression::Pointer ObjectExpression::get_symbol(std::string const & symbol, SourcePosition const & position)
 {
-	std::map<std::string, ObjectExpression>::iterator valueIt(_symbol_table.find(symbol));
+	std::map<std::string, ObjectExpression::Pointer>::iterator valueIt(_symbol_table.find(symbol));
 
 	if (valueIt == _symbol_table.end())
 		throw SourceException("unknown symbol '" + symbol + "'", position, "ObjectExpression");
@@ -238,19 +224,16 @@ ObjectExpression ObjectExpression::get_symbol(std::string const & symbol, Source
 
 SourcePosition const & ObjectExpression::getPosition() const
 {
-	return _expr ? _expr->getPosition() : SourcePosition::none;
+	return position;
 }
 
-ObjectExpression::ExpressionType ObjectExpression::getType() const
+void ObjectExpression::printDebug(std::ostream * const out) const
 {
-	return _expr ? _expr->getType() : ET_INT;
-}
-
-ObjectExpression & ObjectExpression::operator = (ObjectExpression const & expr)
-{
-	delete _expr;
-	_expr = expr._expr ? expr._expr->clone() : NULL;
-	return *this;
+	*out << "ObjectExpression(";
+		*out << "position=(";
+		print_debug(out, position);
+		*out << ")";
+	*out << ")";
 }
 
 void ObjectExpression::reserve_script_number(int32_t number)
@@ -260,11 +243,11 @@ void ObjectExpression::reserve_script_number(int32_t number)
 
 ObjectExpression::float_t ObjectExpression::resolveFloat() const
 {
-	return _expr ? _expr->resolveFloat() : 0;
+	throw SourceException("cannot resolve float", position, getName());
 }
 ObjectExpression::int_t ObjectExpression::resolveInt() const
 {
-	return _expr ? _expr->resolveInt() : 0;
+	throw SourceException("cannot resolve int", position, getName());
 }
 
 void ObjectExpression::set_address_count(int32_t addressCount)
@@ -274,16 +257,9 @@ void ObjectExpression::set_address_count(int32_t addressCount)
 
 
 
-void print_debug(std::ostream * const out, ObjectExpression const & in)
+void print_debug(std::ostream * out, ObjectExpression const & in)
 {
-	*out << "ObjectExpression(";
-
-	if (in._expr)
-		in._expr->printDebug(out);
-	else
-		*out << "NULL";
-
-	*out << ")";
+	in.printDebug(out);
 }
 
 

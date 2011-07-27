@@ -39,7 +39,7 @@ public:
 
 	virtual bool isConstant() const;
 
-	virtual ObjectExpression makeObject() const;
+	virtual ObjectExpression::Pointer makeObject() const;
 
 	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args) const;
 
@@ -134,7 +134,7 @@ bool SourceExpressionDS_ValueVariable::isConstant() const
 	return _var.isConstant();
 }
 
-ObjectExpression SourceExpressionDS_ValueVariable::makeObject() const
+ObjectExpression::Pointer SourceExpressionDS_ValueVariable::makeObject() const
 {
 	return _var.makeObject(getPosition());
 }

@@ -39,24 +39,24 @@ void ObjectVector::addToken(ObjectToken const & token)
 }
 void ObjectVector::addToken(ObjectToken::ObjectCode code)
 {
-	addToken(code, std::vector<ObjectExpression>());
+	addToken(code, std::vector<ObjectExpression::Pointer>());
 }
-void ObjectVector::addToken(ObjectToken::ObjectCode code, std::vector<ObjectExpression> const & args)
+void ObjectVector::addToken(ObjectToken::ObjectCode code, std::vector<ObjectExpression::Pointer> const & args)
 {
 	_tokens.push_back(ObjectToken(code, _position, _labels, args));
 	_labels.clear();
 }
-void ObjectVector::addToken(ObjectToken::ObjectCode code, ObjectExpression const & arg0)
+void ObjectVector::addToken(ObjectToken::ObjectCode code, ObjectExpression * arg0)
 {
-	std::vector<ObjectExpression> args;
+	std::vector<ObjectExpression::Pointer> args;
 
 	args.push_back(arg0);
 
 	addToken(code, args);
 }
-void ObjectVector::addToken(ObjectToken::ObjectCode code, ObjectExpression const & arg0, ObjectExpression const & arg1)
+void ObjectVector::addToken(ObjectToken::ObjectCode code, ObjectExpression * arg0, ObjectExpression * arg1)
 {
-	std::vector<ObjectExpression> args;
+	std::vector<ObjectExpression::Pointer> args;
 
 	args.push_back(arg0);
 	args.push_back(arg1);
@@ -68,23 +68,23 @@ void ObjectVector::addTokenPushZero()
 	addToken(ObjectToken::OCODE_PUSHNUMBER, getValue(0));
 }
 
-ObjectExpression ObjectVector::getValue(ObjectExpression::float_t f)
+ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression::float_t f)
 {
 	return ObjectExpression::create_value_float(f, _position);
 }
-ObjectExpression ObjectVector::getValue(ObjectExpression::int_t i)
+ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression::int_t i)
 {
 	return ObjectExpression::create_value_int(i, _position);
 }
-ObjectExpression ObjectVector::getValue(int i)
+ObjectExpression::Pointer ObjectVector::getValue(int i)
 {
 	return getValue((ObjectExpression::int_t)i);
 }
-ObjectExpression ObjectVector::getValue(std::string const & label)
+ObjectExpression::Pointer ObjectVector::getValue(std::string const & label)
 {
 	return ObjectExpression::create_value_symbol(label, _position);
 }
-ObjectExpression ObjectVector::getValue(unsigned int i)
+ObjectExpression::Pointer ObjectVector::getValue(unsigned int i)
 {
 	return getValue((ObjectExpression::int_t)i);
 }

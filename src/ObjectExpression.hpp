@@ -22,6 +22,7 @@
 #ifndef HPP_ObjectExpression_
 #define HPP_ObjectExpression_
 
+#include "CounterPointer.hpp"
 #include "SourcePosition.hpp"
 
 #include <map>
@@ -30,13 +31,14 @@
 #include <string>
 #include <vector>
 
-class ObjectExpression_Base;
 class SourceTokenC;
 
 
 
-class ObjectExpression
+class ObjectExpression : public Counter
 {
+	MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression, Counter);
+
 public:
 	typedef long double float_t;
 	typedef long int int_t;
@@ -99,23 +101,18 @@ public:
 
 
 
-	ObjectExpression();
-	ObjectExpression(ObjectExpression const & expr);
-	ObjectExpression(ObjectExpression_Base const & expr);
-	~ObjectExpression();
-
 	SourcePosition const & getPosition() const;
 
-	ExpressionType getType() const;
+	virtual ExpressionType getType() const = 0;
 
-	ObjectExpression & operator = (ObjectExpression const & expr);
+	virtual void printDebug(std::ostream * out) const;
 
-	float_t resolveFloat() const;
-	int_t resolveInt() const;
+	virtual float_t resolveFloat() const;
+	virtual int_t resolveInt() const;
 
 
 
-	friend void print_debug(std::ostream * const out, ObjectExpression const & in);
+	friend void print_debug(std::ostream * out, ObjectExpression const & in);
 
 	static void add_acsfunc(std::string const & label, int_t argCount, int_t varCount, int_t retCount);
 
@@ -132,25 +129,25 @@ public:
 	static std::string add_string(std::string const & value);
 	static void add_string(std::string const & symbol, std::string const & value);
 
-	static void add_symbol(std::string const & symbol, ObjectExpression const & value);
+	static void add_symbol(std::string const & symbol, ObjectExpression * value);
 
-	static ObjectExpression create_binary_add(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
-	static ObjectExpression create_binary_and(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
-	static ObjectExpression create_binary_div(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
-	static ObjectExpression create_binary_ior(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
-	static ObjectExpression create_binary_mod(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
-	static ObjectExpression create_binary_mul(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
-	static ObjectExpression create_binary_sub(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
-	static ObjectExpression create_binary_xor(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
+	static Pointer create_binary_add(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_and(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_div(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_ior(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_mod(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_mul(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_sub(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_xor(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 
-	static ObjectExpression create_unary_add(ObjectExpression const & expr, SourcePosition const & position);
-	static ObjectExpression create_unary_sub(ObjectExpression const & expr, SourcePosition const & position);
+	static Pointer create_unary_add(ObjectExpression * expr, SourcePosition const & position);
+	static Pointer create_unary_sub(ObjectExpression * expr, SourcePosition const & position);
 
-	static ObjectExpression create_value_float(float_t value, SourcePosition const & position);
-	static ObjectExpression create_value_float(SourceTokenC const & token);
-	static ObjectExpression create_value_int(int_t value, SourcePosition const & position);
-	static ObjectExpression create_value_int(SourceTokenC const & token);
-	static ObjectExpression create_value_symbol(std::string const & symbol, SourcePosition const & position);
+	static Pointer create_value_float(float_t value, SourcePosition const & position);
+	static Pointer create_value_float(SourceTokenC const & token);
+	static Pointer create_value_int(int_t value, SourcePosition const & position);
+	static Pointer create_value_int(SourceTokenC const & token);
+	static Pointer create_value_symbol(std::string const & symbol, SourcePosition const & position);
 
 	static ACSFunc const & get_acsfunc(int_t const index);
 
@@ -181,17 +178,20 @@ public:
 	// Returns length of all strings combined.
 	static int32_t get_string_length();
 
-	static ObjectExpression get_symbol(std::string const & symbol, SourcePosition const & position);
+	static Pointer get_symbol(std::string const & symbol, SourcePosition const & position);
 
 	static void reserve_script_number(int32_t number);
 
 	static void set_address_count(int32_t addressCount);
 
+protected:
+	ObjectExpression(SourcePosition const & position);
+
+	SourcePosition position;
+
+
+
 private:
-	ObjectExpression_Base * _expr;
-
-
-
 	static std::vector<ACSFunc> _acsfunc_table;
 	static int32_t _address_count;
 	static std::vector<RegisterArray> _registerarray_map_table;
@@ -199,7 +199,7 @@ private:
 	static std::map<int32_t, bool> _script_used;
 	static int32_t _script_used_last;
 	static std::vector<String> _string_table;
-	static std::map<std::string, ObjectExpression> _symbol_table;
+	static std::map<std::string, ObjectExpression::Pointer> _symbol_table;
 };
 
 

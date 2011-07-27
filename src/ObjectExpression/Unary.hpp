@@ -22,24 +22,23 @@
 #ifndef HPP_Unary__ObjectExpression_
 #define HPP_Unary__ObjectExpression_
 
-#include "Base.hpp"
+#include "../ObjectExpression.hpp"
 
 
 
-class ObjectExpression_Unary : public ObjectExpression_Base
+class ObjectExpression_Unary : public ObjectExpression
 {
-public:
-	ObjectExpression_Unary(ObjectExpression const & expr, SourcePosition const & position);
+	MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression_Unary, ObjectExpression);
 
-	virtual ObjectExpression::ExpressionType getType() const;
+public:
+	ObjectExpression_Unary(ObjectExpression * expr, SourcePosition const & position);
+
+	virtual ExpressionType getType() const;
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual ObjectExpression::float_t resolveFloat() const;
-	virtual ObjectExpression::int_t resolveInt() const;
-
 protected:
-	ObjectExpression _expr;
+	ObjectExpression::Pointer expr;
 };
 
 

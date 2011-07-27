@@ -27,75 +27,49 @@
 
 class ObjectExpression_BinaryMod : public ObjectExpression_Binary
 {
+	MAKE_COUNTER_CLASS_BASE(ObjectExpression_BinaryMod, ObjectExpression_Binary);
+
 public:
-	ObjectExpression_BinaryMod(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position);
-
-	virtual ObjectExpression_BinaryMod * clone() const;
-
-	virtual char const * getName() const;
+	ObjectExpression_BinaryMod(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual ObjectExpression::float_t resolveFloat() const;
-	virtual ObjectExpression::int_t resolveInt() const;
+	virtual float_t resolveFloat() const;
+	virtual int_t resolveInt() const;
 };
 
 
 
-ObjectExpression ObjectExpression::create_binary_mod(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position)
+ObjectExpression::Pointer ObjectExpression::create_binary_mod(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position)
 {
-	return ObjectExpression_BinaryMod(exprL, exprR, position);
+	return new ObjectExpression_BinaryMod(exprL, exprR, position);
 }
 
 
 
-ObjectExpression_BinaryMod::ObjectExpression_BinaryMod(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
+ObjectExpression_BinaryMod::ObjectExpression_BinaryMod(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
 {
 
 }
 
-ObjectExpression_BinaryMod * ObjectExpression_BinaryMod::clone() const
-{
-	return new ObjectExpression_BinaryMod(*this);
-}
-
-char const * ObjectExpression_BinaryMod::getName() const
-{
-	return "ObjectExpression_BinaryMod";
-}
-
-void ObjectExpression_BinaryMod::printDebug(std::ostream * const out) const
+void ObjectExpression_BinaryMod::printDebug(std::ostream * out) const
 {
 	*out << "ObjectExpression_BinaryMod(";
-	ObjectExpression_Binary::printDebug(out);
+	Super::printDebug(out);
 	*out << ")";
 }
 
 ObjectExpression::float_t ObjectExpression_BinaryMod::resolveFloat() const
 {
-	switch (getType())
-	{
-	case ObjectExpression::ET_FLOAT:
-		return std::fmod(_exprL.resolveFloat(), _exprR.resolveFloat());
+	if (getType() == ET_FLOAT) return std::fmod(exprL->resolveFloat(), exprR->resolveFloat());
 
-	case ObjectExpression::ET_INT:
-		return (ObjectExpression::float_t)(_exprL.resolveInt() % _exprR.resolveInt());
-	}
-
-	return ObjectExpression_Binary::resolveFloat();
+	return Super::resolveFloat();
 }
 ObjectExpression::int_t ObjectExpression_BinaryMod::resolveInt() const
 {
-	switch (getType())
-	{
-	case ObjectExpression::ET_FLOAT:
-		return (ObjectExpression::int_t)std::fmod(_exprL.resolveFloat(), _exprR.resolveFloat());
+	if (getType() == ET_INT) return exprL->resolveInt() % exprR->resolveInt();
 
-	case ObjectExpression::ET_INT:
-		return _exprL.resolveInt() % _exprR.resolveInt();
-	}
-
-	return ObjectExpression_Binary::resolveInt();
+	return Super::resolveInt();
 }
 
 

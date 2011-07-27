@@ -85,7 +85,7 @@ SourceVariable::SourceVariable(std::string const & name, VariableData_String con
 {
 	_data.vdString = vdString;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableType const * type, ObjectExpression const & expr, SourcePosition const & position) : _address(-2), _expr(expr), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(type)
+SourceVariable::SourceVariable(std::string const & name, VariableType const * type, ObjectExpression * expr, SourcePosition const & position) : _address(-1), _expr(expr), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(type)
 {
 
 }

@@ -25,41 +25,32 @@
 
 
 
-ObjectExpression_Binary::ObjectExpression_Binary(ObjectExpression const & exprL, ObjectExpression const & exprR, SourcePosition const & position) : ObjectExpression_Base(position), _exprL(exprL), _exprR(exprR)
+ObjectExpression_Binary::ObjectExpression_Binary(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : ObjectExpression(position), exprL(exprL), exprR(exprR)
 {
-	if (_exprL.getType() != _exprR.getType())
-		throw SourceException("type mismatch", getPosition(), "ObjectExpression_Binary");
+	if (exprL->getType() != exprR->getType())
+		throw SourceException("type mismatch", position, getName());
 }
 
 ObjectExpression::ExpressionType ObjectExpression_Binary::getType() const
 {
-	return _exprL.getType();
+	return exprL->getType();
 }
 
-void ObjectExpression_Binary::printDebug(std::ostream * const out) const
+void ObjectExpression_Binary::printDebug(std::ostream * out) const
 {
 	*out << "ObjectExpression_Binary(";
-	ObjectExpression_Base::printDebug(out);
+	Super::printDebug(out);
 	*out << " ";
 		*out << "exprL=(";
-		print_debug(out, _exprL);
+		print_debug(out, *exprL);
 		*out << ")";
 
 		*out << ", ";
 
 		*out << "exprR=(";
-		print_debug(out, _exprR);
+		print_debug(out, *exprR);
 		*out << ")";
 	*out << ")";
-}
-
-ObjectExpression::float_t ObjectExpression_Binary::resolveFloat() const
-{
-	throw SourceException("cannot resolve float", getPosition(), getName());
-}
-ObjectExpression::int_t ObjectExpression_Binary::resolveInt() const
-{
-	throw SourceException("cannot resolve int", getPosition(), getName());
 }
 
 
