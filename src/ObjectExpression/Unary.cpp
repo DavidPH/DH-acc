@@ -25,7 +25,7 @@
 
 
 
-ObjectExpression_Unary::ObjectExpression_Unary(ObjectExpression * expr, SourcePosition const & position) : ObjectExpression(position), expr(expr)
+ObjectExpression_Unary::ObjectExpression_Unary(ObjectExpression * expr, SourcePosition const & position) : Super(position), expr(expr)
 {
 
 }

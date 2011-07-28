@@ -27,7 +27,7 @@
 
 
 
-void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args, SourcePosition const & position) const
+void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position) const
 {
 	objects->setPosition(position);
 
@@ -35,12 +35,13 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 	{
 	case VT_ACSFUNC:
 		if (_sc == SC_CONSTANT)
-			SourceExpressionDS::make_objects_call_acsfunc(objects, _data.vdACSFunc, args, position);
+			SourceExpression::make_objects_call_acsfunc(objects, _data.vdACSFunc, args, position);
 		else
 			throw SourceException("non-constant acsfuncs not yet supported", position, "SourceVariable");
 		break;
 
 	case VT_ARRAY:
+	case VT_BLOCK:
 	case VT_CHAR:
 	case VT_INT:
 	case VT_REAL:
@@ -51,28 +52,28 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 
 	case VT_ASMFUNC:
 		if (_sc == SC_CONSTANT)
-			SourceExpressionDS::make_objects_call_asmfunc(objects, _data.vdAsmFunc, args, position);
+			SourceExpression::make_objects_call_asmfunc(objects, _data.vdAsmFunc, args, position);
 		else
 			throw SourceException("non-constant asmfuncs not supported", position, "SourceVariable");
 		break;
 
 	case VT_LNSPEC:
 		if (_sc == SC_CONSTANT)
-			SourceExpressionDS::make_objects_call_lnspec(objects, _data.vdLnSpec, args, position);
+			SourceExpression::make_objects_call_lnspec(objects, _data.vdLnSpec, args, position);
 		else
 			throw SourceException("non-constant lnspecs not yet supported", position, "SourceVariable");
 		break;
 
 	case VT_NATIVE:
 		if (_sc == SC_CONSTANT)
-			SourceExpressionDS::make_objects_call_native(objects, _data.vdNative, args, position);
+			SourceExpression::make_objects_call_native(objects, _data.vdNative, args, position);
 		else
 			throw SourceException("non-constant natives not yet supported", position, "SourceVariable");
 		break;
 
 	case VT_SCRIPT:
 		makeObjectsGet(objects, position);
-		SourceExpressionDS::make_objects_call_script(objects, _type, args, position);
+		SourceExpression::make_objects_call_script(objects, _type, args, position);
 		break;
 	}
 }

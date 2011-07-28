@@ -45,7 +45,7 @@ ObjectExpression::Pointer ObjectExpression::create_binary_add(ObjectExpression *
 
 
 
-ObjectExpression_BinaryAdd::ObjectExpression_BinaryAdd(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
+ObjectExpression_BinaryAdd::ObjectExpression_BinaryAdd(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
 {
 
 }

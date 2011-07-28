@@ -25,42 +25,31 @@ add_executable(DH-acc
 	print_debug.cpp
 	SourceContext.cpp
 	SourceException.cpp
+	SourceExpression.cpp
+	SourceExpression/Binary.cpp
+	SourceExpression/BinaryAdd.cpp
+	SourceExpression/BinaryArray.cpp
+	SourceExpression/BinaryAssign.cpp
+	SourceExpression/BinaryDiv.cpp
+	SourceExpression/BinaryMod.cpp
+	SourceExpression/BinaryMul.cpp
+	SourceExpression/BinarySub.cpp
+	SourceExpression/BranchCall.cpp
+	SourceExpression/BranchIf.cpp
+	SourceExpression/BranchReturn.cpp
+	SourceExpression/BranchWhile.cpp
+	SourceExpression/RootDelay.cpp
+	SourceExpression/RootOut.cpp
+	SourceExpression/ValueBlock.cpp
+	SourceExpression/ValueCast.cpp
+	SourceExpression/ValueData.cpp
+	SourceExpression/ValueMember.cpp
+	SourceExpression/ValueVariable.cpp
 	SourceExpressionACS.cpp
 	SourceExpressionACS/Base.cpp
 	SourceExpressionACS/BinaryAdd.cpp
 	SourceExpressionDS.cpp
-	SourceExpressionDS/Base.cpp
-	SourceExpressionDS/Binary.cpp
-	SourceExpressionDS/BinaryAdd.cpp
-	SourceExpressionDS/BinaryArray.cpp
-	SourceExpressionDS/BinaryAssign.cpp
-	SourceExpressionDS/BinaryDiv.cpp
-	SourceExpressionDS/BinaryMod.cpp
-	SourceExpressionDS/BinaryMul.cpp
-	SourceExpressionDS/BinarySub.cpp
-	SourceExpressionDS/CastACSFunc.cpp
-	SourceExpressionDS/CastArray.cpp
-	SourceExpressionDS/CastChar.cpp
-	SourceExpressionDS/CastInt.cpp
-	SourceExpressionDS/CastLnSpec.cpp
-	SourceExpressionDS/CastNative.cpp
-	SourceExpressionDS/CastReal.cpp
-	SourceExpressionDS/CastScript.cpp
-	SourceExpressionDS/CastString.cpp
-	SourceExpressionDS/CastStruct.cpp
 	SourceExpressionDS/make_expression_single.cpp
-	SourceExpressionDS/RootBlock.cpp
-	SourceExpressionDS/RootCall.cpp
-	SourceExpressionDS/RootData.cpp
-	SourceExpressionDS/RootDelay.cpp
-	SourceExpressionDS/RootIf.cpp
-	SourceExpressionDS/RootOut.cpp
-	SourceExpressionDS/RootReturn.cpp
-	SourceExpressionDS/RootTerm.cpp
-	SourceExpressionDS/RootVoid.cpp
-	SourceExpressionDS/RootWhile.cpp
-	SourceExpressionDS/ValueMember.cpp
-	SourceExpressionDS/ValueVariable.cpp
 	SourceBlockC.cpp
 	SourcePosition.cpp
 	SourceStream.cpp

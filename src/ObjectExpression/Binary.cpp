@@ -25,7 +25,7 @@
 
 
 
-ObjectExpression_Binary::ObjectExpression_Binary(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : ObjectExpression(position), exprL(exprL), exprR(exprR)
+ObjectExpression_Binary::ObjectExpression_Binary(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR)
 {
 	if (exprL->getType() != exprR->getType())
 		throw SourceException("type mismatch", position, getName());

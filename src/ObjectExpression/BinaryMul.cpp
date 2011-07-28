@@ -45,7 +45,7 @@ ObjectExpression::Pointer ObjectExpression::create_binary_mul(ObjectExpression *
 
 
 
-ObjectExpression_BinaryMul::ObjectExpression_BinaryMul(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
+ObjectExpression_BinaryMul::ObjectExpression_BinaryMul(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
 {
 
 }

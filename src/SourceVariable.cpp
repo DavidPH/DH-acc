@@ -213,6 +213,10 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_auto(Varia
 
 	return type;
 }
+SourceVariable::VariableType const * SourceVariable::get_VariableType_block(std::vector<VariableType const *> const & types)
+{
+	return get_VariableType_auto(VT_BLOCK, _types[VT_VOID], types);
+}
 SourceVariable::VariableType const * SourceVariable::get_VariableType_lnspec(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
 	return get_VariableType_auto(VT_LNSPEC, callType, types);

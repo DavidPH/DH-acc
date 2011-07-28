@@ -49,6 +49,7 @@ int SourceVariable::VariableType::size() const
 		return 1;
 
 	case VT_ARRAY:
+	case VT_BLOCK:
 	case VT_STRUCT:
 	{
 		int s(0);

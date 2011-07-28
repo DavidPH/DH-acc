@@ -19,7 +19,7 @@
 ** Defines the ObjectExpression_ValueInt class and methods.
 */
 
-#include "Base.hpp"
+#include "../ObjectExpression.hpp"
 
 
 
@@ -49,7 +49,7 @@ ObjectExpression::Pointer ObjectExpression::create_value_int(int_t value, Source
 
 
 
-ObjectExpression_ValueInt::ObjectExpression_ValueInt(int_t value, SourcePosition const & position) : ObjectExpression(position), _value(value)
+ObjectExpression_ValueInt::ObjectExpression_ValueInt(int_t value, SourcePosition const & position) : Super(position), _value(value)
 {
 
 }

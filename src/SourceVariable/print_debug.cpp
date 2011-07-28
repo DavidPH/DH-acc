@@ -104,6 +104,7 @@ void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal 
 	case SourceVariable::VT_ACSFUNC: *out << "VT_ACSFUNC"; break;
 	case SourceVariable::VT_ARRAY:   *out << "VT_ARRAY";   break;
 	case SourceVariable::VT_ASMFUNC: *out << "VT_ASMFUNC"; break;
+	case SourceVariable::VT_BLOCK:   *out << "VT_BLOCK";   break;
 	case SourceVariable::VT_CHAR:    *out << "VT_CHAR";    break;
 	case SourceVariable::VT_INT:     *out << "VT_INT";     break;
 	case SourceVariable::VT_LNSPEC:  *out << "VT_LNSPEC";  break;

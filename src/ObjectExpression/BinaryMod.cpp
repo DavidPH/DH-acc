@@ -47,7 +47,7 @@ ObjectExpression::Pointer ObjectExpression::create_binary_mod(ObjectExpression *
 
 
 
-ObjectExpression_BinaryMod::ObjectExpression_BinaryMod(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
+ObjectExpression_BinaryMod::ObjectExpression_BinaryMod(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
 {
 
 }

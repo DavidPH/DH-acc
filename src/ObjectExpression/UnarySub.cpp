@@ -45,7 +45,7 @@ ObjectExpression::Pointer ObjectExpression::create_unary_sub(ObjectExpression * 
 
 
 
-ObjectExpression_UnarySub::ObjectExpression_UnarySub(ObjectExpression * expr, SourcePosition const & position) : ObjectExpression_Unary(expr, position)
+ObjectExpression_UnarySub::ObjectExpression_UnarySub(ObjectExpression * expr, SourcePosition const & position) : Super(expr, position)
 {
 
 }

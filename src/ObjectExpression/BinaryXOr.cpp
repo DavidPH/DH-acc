@@ -44,7 +44,7 @@ ObjectExpression::Pointer ObjectExpression::create_binary_xor(ObjectExpression *
 
 
 
-ObjectExpression_BinaryXOr::ObjectExpression_BinaryXOr(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
+ObjectExpression_BinaryXOr::ObjectExpression_BinaryXOr(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
 {
 
 }

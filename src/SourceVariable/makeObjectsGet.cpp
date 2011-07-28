@@ -47,6 +47,7 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		{
 		case VT_ACSFUNC:
 		case VT_ARRAY:
+		case VT_BLOCK:
 		case VT_CHAR:
 		case VT_INT:
 		case VT_LNSPEC:
@@ -88,6 +89,7 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		case VT_VOID:
 			break;
 
+		case VT_BLOCK:
 		case VT_STRUCT:
 			for (size_t i(0); i < type->types.size(); ++i)
 				makeObjectsGet(objects, position, type->types[i], address);
@@ -126,6 +128,7 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 			break;
 
 		case VT_ARRAY:
+		case VT_BLOCK:
 		case VT_STRUCT:
 			for (size_t i(0); i < type->types.size(); ++i)
 				makeObjectsGet(objects, position, type->types[i], address);
@@ -185,6 +188,7 @@ void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions,
 		{
 		case VT_ACSFUNC:
 		case VT_ASMFUNC:
+		case VT_BLOCK:
 		case VT_CHAR:
 		case VT_INT:
 		case VT_LNSPEC:
@@ -237,6 +241,7 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 		case VT_ACSFUNC:
 		case VT_ARRAY:
 		case VT_ASMFUNC:
+		case VT_BLOCK:
 		case VT_CHAR:
 		case VT_INT:
 		case VT_LNSPEC:
@@ -304,6 +309,7 @@ void SourceVariable::makeObjectsGetSkip(VariableType const * type, int * address
 		break;
 
 	case VT_ARRAY:
+	case VT_BLOCK:
 	case VT_STRUCT:
 		for (size_t i(0); i < type->types.size(); ++i)
 			makeObjectsGetSkip(type->types[i], address);

@@ -14,25 +14,25 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourceExpressionDS/Binary.hpp
+/* SourceExpression/Binary.hpp
 **
-** Defines the SourceExpressionDS_Binary class.
+** Defines the SourceExpression_Binary class.
 */
 
-#ifndef HPP_SourceExpressionDS__Binary_
-#define HPP_SourceExpressionDS__Binary_
+#ifndef HPP_Binary__SourceExpression_
+#define HPP_Binary__SourceExpression_
 
-#include "Base.hpp"
+#include "../SourceExpression.hpp"
 
 
 
-class SourceExpressionDS_Binary : public SourceExpressionDS_Base
+class SourceExpression_Binary : public SourceExpression
 {
-public:
-	SourceExpressionDS_Binary(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, SourcePosition const & position);
-	SourceExpressionDS_Binary(SourceExpressionDS const & exprL, SourceExpressionDS const & exprR, bool const castL, SourcePosition const & position);
+	MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression_Binary, SourceExpression);
 
-	virtual SourceExpressionDS_Binary * clone() const = 0;
+public:
+	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool const castL, SourcePosition const & position);
 
 	virtual SourceVariable::VariableType const * getType() const;
 
@@ -40,16 +40,16 @@ public:
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
 
-	virtual void printDebug(std::ostream * const out) const;
+	virtual void printDebug(std::ostream * out) const;
 
 protected:
-	SourceExpressionDS _exprL;
-	SourceExpressionDS _exprR;
+	SourceExpression::Pointer exprL;
+	SourceExpression::Pointer exprR;
 };
 
 
 
-#endif /* HPP_SourceExpressionDS__Binary_ */
+#endif /* HPP_Binary__SourceExpression_ */
 
 
 

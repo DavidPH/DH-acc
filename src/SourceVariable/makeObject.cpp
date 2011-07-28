@@ -39,6 +39,7 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 			return ObjectExpression::create_value_int(_data.vdACSFunc.number, position);
 
 		case VT_ARRAY:
+		case VT_BLOCK:
 		case VT_STRUCT:
 			throw SourceException("makeObject on compound VT", position, "SourceVariable");
 

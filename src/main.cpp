@@ -142,12 +142,12 @@ static inline int _main()
 
 		ObjectExpression::reserve_script_number(0);
 
-		SourceExpressionDS expressions(SourceExpressionDS::make_expressions(&tokenizer));
-		expressions.addLabel("main");
+		SourceExpression::Pointer expressions(SourceExpressionDS::make_expressions(&tokenizer));
+		expressions->addLabel("main");
 
 		ObjectExpression::add_script("main", 0, ObjectExpression::ST_OPEN, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER), 0);
 
-		expressions.makeObjectsGet(&objects);
+		expressions->makeObjectsGet(&objects);
 	}
 		break;
 

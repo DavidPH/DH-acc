@@ -69,6 +69,7 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		case VT_VOID:
 			break;
 
+		case VT_BLOCK:
 		case VT_STRUCT:
 			for (size_t i(type->types.size()); i--;)
 				makeObjectsSet(objects, position, type->types[i], address);
@@ -108,6 +109,7 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 			break;
 
 		case VT_ARRAY:
+		case VT_BLOCK:
 		case VT_STRUCT:
 			for (size_t i(type->types.size()); i--;)
 				makeObjectsSet(objects, position, type->types[i], address);
@@ -172,6 +174,7 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions,
 		{
 		case VT_ACSFUNC:
 		case VT_ASMFUNC:
+		case VT_BLOCK:
 		case VT_CHAR:
 		case VT_INT:
 		case VT_LNSPEC:
@@ -227,6 +230,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 		case VT_ACSFUNC:
 		case VT_ARRAY:
 		case VT_ASMFUNC:
+		case VT_BLOCK:
 		case VT_CHAR:
 		case VT_INT:
 		case VT_LNSPEC:
@@ -376,6 +380,7 @@ void SourceVariable::makeObjectsSetSkip(VariableType const * const type, int * c
 		break;
 
 	case VT_ARRAY:
+	case VT_BLOCK:
 	case VT_STRUCT:
 		for (size_t i(type->types.size()); i--;)
 			makeObjectsSetSkip(type->types[i], address);

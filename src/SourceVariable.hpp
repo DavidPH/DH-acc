@@ -22,6 +22,7 @@
 #ifndef HPP_SourceVariable_
 #define HPP_SourceVariable_
 
+#include "CounterPointer.hpp"
 #include "ObjectToken.hpp"
 #include "SourcePosition.hpp"
 
@@ -30,7 +31,7 @@
 #include <vector>
 
 class ObjectVector;
-class SourceExpressionDS;
+class SourceExpression;
 class SourceTokenC;
 
 
@@ -62,6 +63,7 @@ public:
 		VT_ACSFUNC,
 		VT_ARRAY,
 		VT_ASMFUNC,
+		VT_BLOCK,
 		VT_LNSPEC,
 		VT_NATIVE,
 		VT_SCRIPT,
@@ -175,7 +177,7 @@ public:
 
 	ObjectExpression::Pointer makeObject(SourcePosition const & position) const;
 
-	void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpressionDS> const & args, SourcePosition const & position) const;
+	void makeObjectsCall(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > const & args, SourcePosition const & position) const;
 
 	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position) const;
 	void makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position) const;
@@ -205,6 +207,7 @@ public:
 	static VariableType const * get_VariableType_array(VariableType const * refType, int count);
 	// AsmFunc types work like script types (see below).
 	static VariableType const * get_VariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
+	static VariableType const * get_VariableType_block(std::vector<VariableType const *> const & types);
 	// LnSpec types work like script types (see below).
 	static VariableType const * get_VariableType_lnspec(VariableType const * callType, std::vector<VariableType const *> const & types);
 	// Native types work like script types (see below).

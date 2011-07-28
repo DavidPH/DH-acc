@@ -45,7 +45,7 @@ ObjectExpression::Pointer ObjectExpression::create_binary_div(ObjectExpression *
 
 
 
-ObjectExpression_BinaryDiv::ObjectExpression_BinaryDiv(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : ObjectExpression_Binary(exprL, exprR, position)
+ObjectExpression_BinaryDiv::ObjectExpression_BinaryDiv(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
 {
 
 }

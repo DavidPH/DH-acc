@@ -14,60 +14,49 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourceExpressionDS/RootOut.cpp
+/* SourceExpression/RootOut.cpp
 **
-** Defines the SourceExpressionDS_RootOut class and methods.
+** Defines the SourceExpression_RootOut class and methods.
 */
 
-#include "Base.hpp"
+#include "../SourceExpression.hpp"
 
 #include "../ObjectVector.hpp"
 
 
 
-class SourceExpressionDS_RootOut : public SourceExpressionDS_Base
+class SourceExpression_RootOut : public SourceExpression
 {
+	MAKE_COUNTER_CLASS_BASE(SourceExpression_RootOut, SourceExpression);
+
 public:
-	SourceExpressionDS_RootOut(SourceExpressionDS const & expr, SourcePosition const & position);
-
-	virtual SourceExpressionDS_RootOut * clone() const;
-
-	virtual char const * getName() const;
-
-	virtual SourceVariable::VariableType const * getType() const;
-
-	virtual bool isConstant() const;
+	SourceExpression_RootOut(SourceExpression * expr, SourcePosition const & position);
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
 
-	virtual void printDebug(std::ostream * const out) const;
+	virtual void printDebug(std::ostream * out) const;
 
 private:
-	SourceExpressionDS _expr;
+	SourceExpression::Pointer _expr;
 
-	void doOut(ObjectVector * objects, SourceVariable::VariableType const * const type) const;
+	void doOut(ObjectVector * objects, SourceVariable::VariableType const * type) const;
 };
 
 
 
-SourceExpressionDS SourceExpressionDS::make_expression_root_out(SourceExpressionDS const & expr, SourcePosition const & position)
+SourceExpression::Pointer SourceExpression::create_root_out(SourceExpression * expr, SourcePosition const & position)
 {
-	return new SourceExpressionDS_RootOut(expr, position);
+	return new SourceExpression_RootOut(expr, position);
 }
 
 
 
-SourceExpressionDS_RootOut::SourceExpressionDS_RootOut(SourceExpressionDS const & expr, SourcePosition const & position) : SourceExpressionDS_Base(position), _expr(expr)
+SourceExpression_RootOut::SourceExpression_RootOut(SourceExpression * expr, SourcePosition const & position) : Super(position), _expr(expr)
 {
 
 }
 
-SourceExpressionDS_RootOut * SourceExpressionDS_RootOut::clone() const
-{
-	return new SourceExpressionDS_RootOut(*this);
-}
-
-void SourceExpressionDS_RootOut::doOut(ObjectVector * objects, SourceVariable::VariableType const * const type) const
+void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::VariableType const * type) const
 {
 	switch (type->type)
 	{
@@ -80,6 +69,7 @@ void SourceExpressionDS_RootOut::doOut(ObjectVector * objects, SourceVariable::V
 		break;
 
 	case SourceVariable::VT_ARRAY:
+	case SourceVariable::VT_BLOCK:
 	case SourceVariable::VT_STRUCT:
 		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('{'));
 		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
@@ -121,38 +111,23 @@ void SourceExpressionDS_RootOut::doOut(ObjectVector * objects, SourceVariable::V
 	objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
 }
 
-char const * SourceExpressionDS_RootOut::getName() const
+void SourceExpression_RootOut::makeObjectsGet(ObjectVector * objects) const
 {
-	return "SourceExpressionDS_RootOut";
-}
+	objects->addLabel(labels);
 
-SourceVariable::VariableType const * SourceExpressionDS_RootOut::getType() const
-{
-	return SourceVariable::get_VariableType(SourceVariable::VT_VOID);
-}
+	_expr->makeObjectsGet(objects);
 
-bool SourceExpressionDS_RootOut::isConstant() const
-{
-	return false;
-}
-
-void SourceExpressionDS_RootOut::makeObjectsGet(ObjectVector * objects) const
-{
-	objects->addLabel(getLabels());
-
-	_expr.makeObjectsGet(objects);
-
-	objects->setPosition(getPosition());
+	objects->setPosition(position);
 
 	objects->addToken(ObjectToken::OCODE_BEGINPRINT);
-	doOut(objects, _expr.getType());
+	doOut(objects, _expr->getType());
 	objects->addToken(ObjectToken::OCODE_ENDLOG);
 }
 
-void SourceExpressionDS_RootOut::printDebug(std::ostream * const out) const
+void SourceExpression_RootOut::printDebug(std::ostream * out) const
 {
-	*out << "SourceExpressionDS_RootOut(";
-	SourceExpressionDS_Base::printDebug(out);
+	*out << "SourceExpression_RootOut(";
+	Super::printDebug(out);
 	*out << " ";
 		*out << "expr=(";
 		print_debug(out, _expr);

@@ -49,7 +49,7 @@ ObjectExpression::Pointer ObjectExpression::create_value_float(float_t value, So
 
 
 
-ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(float_t value, SourcePosition const & position) : ObjectExpression(position), _value(value)
+ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(float_t value, SourcePosition const & position) : Super(position), _value(value)
 {
 
 }

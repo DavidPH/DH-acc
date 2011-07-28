@@ -52,7 +52,7 @@ ObjectExpression::Pointer ObjectExpression::create_value_symbol(std::string cons
 
 
 
-ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position) : ObjectExpression(position), _value(value)
+ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position) : Super(position), _value(value)
 {
 
 }

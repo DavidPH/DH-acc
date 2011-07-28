@@ -34,7 +34,7 @@ SourceContext SourceContext::global_context;
 
 
 
-SourceContext::SourceContext() : _labelCount(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _inheritLocals(false)
+SourceContext::SourceContext() : _labelCount(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _type(CT_BLOCK), _inheritLocals(false)
 {
 	std::memset(_count, 0, sizeof(_count));
 	std::memset(_limit, 0, sizeof(_limit));
