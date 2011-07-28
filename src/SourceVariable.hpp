@@ -245,7 +245,7 @@ private:
 
 
 
-	static VariableType const * get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, std::vector<VariableType const *> const & types);
+	static VariableType const * get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types);
 
 	static std::vector<std::string>    _names;
 	static std::vector<VariableType *> _types;

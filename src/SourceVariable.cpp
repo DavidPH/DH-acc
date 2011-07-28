@@ -150,40 +150,21 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType(VariableTy
 }
 SourceVariable::VariableType const * SourceVariable::get_VariableType_acsfunc(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
-	return get_VariableType_auto(VT_ACSFUNC, callType, types);
+	return get_VariableType_auto(VT_ACSFUNC, callType, _types[VT_VOID], types);
 }
 SourceVariable::VariableType const * SourceVariable::get_VariableType_array(VariableType const * refType, int count)
 {
-	for (size_t i(0); i < _types.size(); ++i)
-	{
-		if (_types[i]->type == VT_ARRAY && _types[i]->refType == refType && _types[i]->types.size() == (size_t)count)
-		{
-			return _types[i];
-		}
-	}
-
-	VariableType * type(new VariableType);
-
-	type->type     = VT_ARRAY;
-	type->callType = _types[VT_VOID];
-	type->refType  = refType;
-	type->names    = std::vector<std::string>(count, "");
-	type->types    = std::vector<VariableType const *>(count, refType);
-
-	_names.push_back("");
-	_types.push_back(type);
-
-	return type;
+	return get_VariableType_auto(VT_ARRAY, _types[VT_VOID], refType, std::vector<VariableType const *>(count, refType));
 }
 SourceVariable::VariableType const * SourceVariable::get_VariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
-	return get_VariableType_auto(VT_ASMFUNC, callType, types);
+	return get_VariableType_auto(VT_ASMFUNC, callType, _types[VT_VOID], types);
 }
-SourceVariable::VariableType const * SourceVariable::get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, std::vector<VariableType const *> const & types)
+SourceVariable::VariableType const * SourceVariable::get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types)
 {
 	for (size_t i(0); i < _types.size(); ++i)
 	{
-		if (_types[i]->type == itype && _types[i]->callType == callType && _types[i]->types.size() == types.size())
+		if (_types[i]->type == itype && _types[i]->callType == callType && _types[i]->refType == refType && _types[i]->types.size() == types.size())
 		{
 			bool matched(true);
 
@@ -204,7 +185,7 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_auto(Varia
 
 	type->type     = itype;
 	type->callType = callType;
-	type->refType  = _types[VT_VOID];
+	type->refType  = refType;
 	type->names    = std::vector<std::string>(types.size(), "");
 	type->types    = types;
 
@@ -215,15 +196,15 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_auto(Varia
 }
 SourceVariable::VariableType const * SourceVariable::get_VariableType_block(std::vector<VariableType const *> const & types)
 {
-	return get_VariableType_auto(VT_BLOCK, _types[VT_VOID], types);
+	return get_VariableType_auto(VT_BLOCK, _types[VT_VOID], _types[VT_VOID], types);
 }
 SourceVariable::VariableType const * SourceVariable::get_VariableType_lnspec(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
-	return get_VariableType_auto(VT_LNSPEC, callType, types);
+	return get_VariableType_auto(VT_LNSPEC, callType, _types[VT_VOID], types);
 }
 SourceVariable::VariableType const * SourceVariable::get_VariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
-	return get_VariableType_auto(VT_NATIVE, callType, types);
+	return get_VariableType_auto(VT_NATIVE, callType, _types[VT_VOID], types);
 }
 SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::string const & name)
 {
@@ -235,7 +216,7 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::
 }
 SourceVariable::VariableType const * SourceVariable::get_VariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
-	return get_VariableType_auto(VT_SCRIPT, callType, types);
+	return get_VariableType_auto(VT_SCRIPT, callType, _types[VT_VOID], types);
 }
 
 int SourceVariable::getAddress() const

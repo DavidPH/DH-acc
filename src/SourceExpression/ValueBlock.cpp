@@ -73,7 +73,7 @@ SourceVariable::VariableType const * SourceExpression_ValueBlock::getType() cons
 
 void SourceExpression_ValueBlock::makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type) const
 {
-	makeObjectsGet(objects);
+	objects->addLabel(labels);
 
 	if (_expressions.size() != type->types.size())
 		throw SourceException("incorrect number of expressions to cast", position, getName());
