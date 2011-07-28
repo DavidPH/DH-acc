@@ -207,9 +207,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expressions(SourceTokenizerDS
 	SourcePosition position(in->peek().getPosition());
 	std::vector<SourceExpression::Pointer> expressions;
 	std::vector<SourceExpression::Pointer> blocks;
-	SourceContext context(&SourceContext::global_context, SourceContext::CT_BLOCK);
 
-	make_expressions(in, &expressions, &blocks, &context);
+	make_expressions(in, &expressions, &blocks, &SourceContext::global_context);
 
 	for (size_t i(0); i < blocks.size(); ++i)
 		expressions.push_back(blocks[i]);
