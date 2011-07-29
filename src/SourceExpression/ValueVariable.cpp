@@ -42,11 +42,11 @@ public:
 	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args) const;
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
-	virtual void makeObjectsGetArray(ObjectVector * objects, int dimensions) const;
+	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
 	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	virtual void makeObjectsSet(ObjectVector * objects) const;
-	virtual void makeObjectsSetArray(ObjectVector * objects, int dimensions) const;
+	virtual void makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
 	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	virtual void printDebug(std::ostream * out) const;
@@ -136,7 +136,7 @@ void SourceExpression_ValueVariable::makeObjectsGet(ObjectVector * objects) cons
 {
 	_var.makeObjectsGet(objects, position);
 }
-void SourceExpression_ValueVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions) const
+void SourceExpression_ValueVariable::makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const
 {
 	_var.makeObjectsGetArray(objects, dimensions, position);
 }
@@ -149,7 +149,7 @@ void SourceExpression_ValueVariable::makeObjectsSet(ObjectVector * objects) cons
 {
 	_var.makeObjectsSet(objects, position);
 }
-void SourceExpression_ValueVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions) const
+void SourceExpression_ValueVariable::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const
 {
 	_var.makeObjectsSetArray(objects, dimensions, position);
 }

@@ -23,6 +23,7 @@
 
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../SourceExpression.hpp"
 
 
 
@@ -31,9 +32,8 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 	objects->setPosition(position);
 
 	int address;
-	makeObjectsSetPrep(objects, &address, 0);
+	makeObjectsSetPrep(objects, &address, NULL);
 	makeObjectsSet(objects, position, _type, &address);
-	makeObjectsSetPost(objects, 0);
 	makeObjectsGet(objects, position);
 }
 void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * const type, int * const address) const
@@ -138,14 +138,13 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 	}
 }
 
-void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position) const
+void SourceVariable::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions, SourcePosition const & position) const
 {
 	objects->setPosition(position);
 
 	int address;
 	makeObjectsSetPrep(objects, &address, dimensions);
-	makeObjectsSetArray(objects, dimensions, position, _type, &address);
-	makeObjectsSetPost(objects, dimensions);
+	makeObjectsSetArray(objects, dimensions->size(), position, _type, &address);
 	makeObjectsGetArray(objects, dimensions, position);
 }
 void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * const type, int * const address) const
@@ -200,9 +199,8 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 
 	int address;
 	std::vector<std::string> namesOriginal(*names);
-	makeObjectsSetPrep(objects, &address, 0);
+	makeObjectsSetPrep(objects, &address, NULL);
 	makeObjectsSetMember(objects, names, position, _type, &address);
-	makeObjectsSetPost(objects, 0);
 	makeObjectsGetMember(objects, &namesOriginal, position);
 }
 void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * const type, int * const address) const
@@ -261,51 +259,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 	}
 }
 
-void SourceVariable::makeObjectsSetPost(ObjectVector * objects, int dimensions) const
-{
-	ObjectToken::ObjectCode ocode;
-
-	switch (_sc)
-	{
-	case SC_CONSTANT:
-	case SC_REGISTER:
-	case SC_REGISTER_GLOBAL:
-	case SC_REGISTER_MAP:
-	case SC_REGISTER_WORLD:
-		break;
-
-	sc_registerarray_case:
-	{
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(0));
-		objects->addToken(ocode, objects->getValue(_address));
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
-		objects->addToken(ObjectToken::OCODE_SUB);
-
-		VariableType const * type = _type;
-
-		for (int i(dimensions); i--;) type = type->refType;
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(type->size()));
-		objects->addToken(ObjectToken::OCODE_DIV);
-
-		if (dimensions) for (int i(dimensions); --i;) objects->addTokenPushZero();
-	}
-		break;
-
-	case SC_REGISTERARRAY_GLOBAL:
-		ocode = ObjectToken::OCODE_PUSHGLOBALARRAY;
-		goto sc_registerarray_case;
-
-	case SC_REGISTERARRAY_MAP:
-		ocode = ObjectToken::OCODE_PUSHMAPARRAY;
-		goto sc_registerarray_case;
-
-	case SC_REGISTERARRAY_WORLD:
-		ocode = ObjectToken::OCODE_PUSHWORLDARRAY;
-		goto sc_registerarray_case;
-	}
-}
-
-void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, int * address, int dimensions) const
+void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, int * address, std::vector<SourceExpression::Pointer> * dimensions) const
 {
 	ObjectToken::ObjectCode ocode;
 
@@ -320,34 +274,52 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, int * address, i
 		break;
 
 	sc_registerarray_case:
-	{
-		VariableType const * type = _type;
-		if (!dimensions) objects->addTokenPushZero();
+		if (dimensions)
+		{
+			VariableType const * type = _type;
+
+			if ((*dimensions)[0])
+			{
+				// Array index.
+				objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(0));
+
+				for (size_t i(dimensions->size()); i--;)
+				{
+					type = type->refType;
+
+					(*dimensions)[i]->makeObjectsGet(objects);
+					objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(type->size()));
+					objects->addToken(ObjectToken::OCODE_MUL);
+
+					if (i != (dimensions->size() - 1)) objects->addToken(ObjectToken::OCODE_ADD);
+
+					(*dimensions)[i] = NULL;
+				}
+
+				objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
+				objects->addToken(ObjectToken::OCODE_ADD);
+
+				objects->addToken(ocode, objects->getValue(_address));
+			}
+			else
+			{
+				// We've already calculated the index, don't
+				// need to do anything but reset address.
+				for (size_t i(0); i < dimensions->size(); ++i)
+					type = type->refType;
+			}
+
+			*address = type->size() - 1;
+		}
 		else
 		{
-			objects->addTokenPushZero();
-			objects->addToken(ObjectToken::OCODE_SWAP);
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(0));
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
+			objects->addToken(ocode, objects->getValue(_address));
+
+			*address = _type->size() - 1;
 		}
 
-		for (int i(dimensions); i--;)
-		{
-			type = type->refType;
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(type->size()));
-			objects->addToken(ObjectToken::OCODE_MUL);
-			objects->addToken(ObjectToken::OCODE_ADD);
-			if (i) objects->addToken(ObjectToken::OCODE_SWAP);
-		}
-
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
-		objects->addToken(ObjectToken::OCODE_ADD);
-
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(0));
-		objects->addToken(ObjectToken::OCODE_SWAP);
-
-		objects->addToken(ocode, objects->getValue(_address));
-
-		*address = type->size() - 1;
-	}
 		break;
 
 	case SC_REGISTERARRAY_GLOBAL:

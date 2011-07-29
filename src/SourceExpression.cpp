@@ -349,9 +349,9 @@ void SourceExpression::makeObjectsGet(ObjectVector * objects) const
 {
 	throw SourceException("makeObjectsGet on invalid expression", position, getName());
 }
-void SourceExpression::makeObjectsGetArray(ObjectVector * objects, int dimensions) const
+void SourceExpression::makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const
 {
-	if (dimensions == 0)
+	if (dimensions->empty())
 	{
 		makeObjectsGet(objects);
 		return;
@@ -374,9 +374,9 @@ void SourceExpression::makeObjectsSet(ObjectVector * objects) const
 {
 	throw SourceException("makeObjectsSet on invalid expression", position, getName());
 }
-void SourceExpression::makeObjectsSetArray(ObjectVector * objects, int dimensions) const
+void SourceExpression::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const
 {
-	if (dimensions == 0)
+	if (dimensions->empty())
 	{
 		makeObjectsSet(objects);
 		return;

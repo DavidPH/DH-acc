@@ -59,11 +59,11 @@ public:
 	virtual void makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type) const;
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
-	virtual void makeObjectsGetArray(ObjectVector * objects, int dimensions) const;
+	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
 	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	virtual void makeObjectsSet(ObjectVector * objects) const;
-	virtual void makeObjectsSetArray(ObjectVector * objects, int dimensions) const;
+	virtual void makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
 	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const;
 
 	virtual void printDebug(std::ostream * out) const;

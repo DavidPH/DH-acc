@@ -37,10 +37,10 @@ public:
 	virtual bool isConstant() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
-	virtual void makeObjectsGetArray(ObjectVector * objects, int dimensions) const;
+	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
 
 	virtual void makeObjectsSet(ObjectVector * objects) const;
-	virtual void makeObjectsSetArray(ObjectVector * objects, int dimensions) const;
+	virtual void makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
 
 	virtual void printDebug(std::ostream * out) const;
 
@@ -79,27 +79,31 @@ bool SourceExpression_BinaryArray::isConstant() const
 void SourceExpression_BinaryArray::makeObjectsGet(ObjectVector * objects) const
 {
 	objects->addLabel(labels);
-	_exprR->makeObjectsGet(objects);
-	_exprL->makeObjectsGetArray(objects, 1);
+
+	std::vector<SourceExpression::Pointer> dimensions(1, _exprR);
+	_exprL->makeObjectsGetArray(objects, &dimensions);
 }
-void SourceExpression_BinaryArray::makeObjectsGetArray(ObjectVector * objects, int dimensions) const
+void SourceExpression_BinaryArray::makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const
 {
 	objects->addLabel(labels);
-	_exprR->makeObjectsGet(objects);
-	_exprL->makeObjectsGetArray(objects, dimensions+1);
+
+	dimensions->push_back(_exprR);
+	_exprL->makeObjectsGetArray(objects, dimensions);
 }
 
 void SourceExpression_BinaryArray::makeObjectsSet(ObjectVector * objects) const
 {
 	objects->addLabel(labels);
-	_exprR->makeObjectsGet(objects);
-	_exprL->makeObjectsSetArray(objects, 1);
+
+	std::vector<SourceExpression::Pointer> dimensions(1, _exprR);
+	_exprL->makeObjectsSetArray(objects, &dimensions);
 }
-void SourceExpression_BinaryArray::makeObjectsSetArray(ObjectVector * objects, int dimensions) const
+void SourceExpression_BinaryArray::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const
 {
 	objects->addLabel(labels);
-	_exprR->makeObjectsGet(objects);
-	_exprL->makeObjectsSetArray(objects, dimensions+1);
+
+	dimensions->push_back(_exprR);
+	_exprL->makeObjectsSetArray(objects, dimensions);
 }
 
 void SourceExpression_BinaryArray::printDebug(std::ostream * out) const

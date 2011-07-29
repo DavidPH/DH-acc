@@ -31,7 +31,7 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 	objects->setPosition(position);
 
 	int address;
-	makeObjectsGetPrep(objects, &address, 0);
+	makeObjectsGetPrep(objects, &address, NULL);
 	makeObjectsGet(objects, position, _type, &address);
 }
 void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address) const
@@ -154,13 +154,13 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 	}
 }
 
-void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position) const
+void SourceVariable::makeObjectsGetArray(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, SourcePosition const & position) const
 {
 	objects->setPosition(position);
 
 	int address;
 	makeObjectsGetPrep(objects, &address, dimensions);
-	makeObjectsGetArray(objects, dimensions, position, _type, &address);
+	makeObjectsGetArray(objects, dimensions->size(), position, _type, &address);
 }
 void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, int * address) const
 {
@@ -213,7 +213,7 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 	objects->setPosition(position);
 
 	int address;
-	makeObjectsGetPrep(objects, &address, 0);
+	makeObjectsGetPrep(objects, &address, NULL);
 	makeObjectsGetMember(objects, names, position, _type, &address);
 }
 void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, int * address) const
@@ -272,7 +272,7 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 	}
 }
 
-void SourceVariable::makeObjectsGetPrep(ObjectVector * objects, int * address, int dimensions) const
+void SourceVariable::makeObjectsGetPrep(ObjectVector * objects, int * address, std::vector<CounterPointer<SourceExpression> > * dimensions) const
 {
 	switch (_sc)
 	{

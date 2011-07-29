@@ -180,11 +180,11 @@ public:
 	void makeObjectsCall(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > const & args, SourcePosition const & position) const;
 
 	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position) const;
-	void makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position) const;
+	void makeObjectsGetArray(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, SourcePosition const & position) const;
 	void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position) const;
 
 	void makeObjectsSet(ObjectVector * objects, SourcePosition const & position) const;
-	void makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position) const;
+	void makeObjectsSetArray(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, SourcePosition const & position) const;
 	void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position) const;
 
 
@@ -233,14 +233,13 @@ private:
 	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address) const;
 	void makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, int * address) const;
 	void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, int * address) const;
-	void makeObjectsGetPrep(ObjectVector * objects, int * address, int dimensions) const;
+	void makeObjectsGetPrep(ObjectVector * objects, int * address, std::vector<CounterPointer<SourceExpression> > * dimensions) const;
 	void makeObjectsGetSkip(VariableType const * type, int * address) const;
 
 	void makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address) const;
 	void makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, int * address) const;
 	void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, int * address) const;
-	void makeObjectsSetPost(ObjectVector * objects, int dimensions) const;
-	void makeObjectsSetPrep(ObjectVector * objects, int * address, int dimensions) const;
+	void makeObjectsSetPrep(ObjectVector * objects, int * address, std::vector<CounterPointer<SourceExpression> > * dimensions) const;
 	void makeObjectsSetSkip(VariableType const * type, int * address) const;
 
 
