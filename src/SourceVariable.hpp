@@ -233,13 +233,13 @@ private:
 	StorageClass _sc;
 	VariableType const * _type;
 
-	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address) const;
+	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address, bool dimensioned) const;
 	void makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, int * address) const;
 	void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, int * address) const;
 	void makeObjectsGetPrep(ObjectVector * objects, int * address, std::vector<CounterPointer<SourceExpression> > * dimensions) const;
 	void makeObjectsGetSkip(VariableType const * type, int * address) const;
 
-	void makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address) const;
+	void makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address, bool dimensioned) const;
 	void makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, int * address) const;
 	void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, int * address) const;
 	void makeObjectsSetPrep(ObjectVector * objects, int * address, std::vector<CounterPointer<SourceExpression> > * dimensions) const;

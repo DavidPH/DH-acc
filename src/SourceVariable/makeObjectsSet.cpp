@@ -33,18 +33,24 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 
 	int address;
 	makeObjectsSetPrep(objects, &address, NULL);
-	makeObjectsSet(objects, position, _type, &address);
+	makeObjectsSet(objects, position, _type, &address, false);
 	makeObjectsGet(objects, position);
 }
-void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * const type, int * const address) const
+void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address, bool dimensioned) const
 {
+	bool                    array(false);
 	ObjectToken::ObjectCode ocode;
-	ObjectToken::ObjectCode opush;
 
 	switch (_sc)
 	{
 	case SC_AUTO:
-		ocode = ObjectToken::OCODE_ASSIGNSTACKVAR;
+		if (dimensioned)
+		{
+			array = true;
+			ocode = ObjectToken::OCODE_ASSIGNSTACKARRAY2;
+		}
+		else
+			ocode = ObjectToken::OCODE_ASSIGNSTACKVAR;
 		goto sc_register_case;
 
 	case SC_CONSTANT:
@@ -63,14 +69,17 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
-			objects->addToken(ocode, objects->getValue((*address)--));
+			if (array)
+				objects->addToken(ocode, objects->getValue(_address), objects->getValue((*address)--));
+			else
+				objects->addToken(ocode, objects->getValue((*address)--));
 			break;
 
 		case VT_ARRAY:
 		case VT_BLOCK:
 		case VT_STRUCT:
 			for (size_t i(type->types.size()); i--;)
-				makeObjectsSet(objects, position, type->types[i], address);
+				makeObjectsSet(objects, position, type->types[i], address, dimensioned);
 			break;
 
 		case VT_ASMFUNC:
@@ -91,52 +100,20 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		ocode = ObjectToken::OCODE_ASSIGNWORLDVAR;
 		goto sc_register_case;
 
-	sc_registerarray_case:
-		switch (type->type)
-		{
-		case VT_ACSFUNC:
-		case VT_CHAR:
-		case VT_INT:
-		case VT_LNSPEC:
-		case VT_NATIVE:
-		case VT_REAL:
-		case VT_SCRIPT:
-		case VT_STRING:
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue((*address)--));
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(0));
-			objects->addToken(opush, objects->getValue(_address));
-			objects->addToken(ObjectToken::OCODE_ADD);
-			objects->addToken(ObjectToken::OCODE_SWAP);
-			objects->addToken(ocode, objects->getValue(_address));
-			break;
-
-		case VT_ARRAY:
-		case VT_BLOCK:
-		case VT_STRUCT:
-			for (size_t i(type->types.size()); i--;)
-				makeObjectsSet(objects, position, type->types[i], address);
-			break;
-
-		case VT_ASMFUNC:
-		case VT_VOID:
-			break;
-		}
-		break;
-
 	case SC_REGISTERARRAY_GLOBAL:
-		ocode = ObjectToken::OCODE_ASSIGNGLOBALARRAY;
-		opush = ObjectToken::OCODE_PUSHGLOBALARRAY;
-		goto sc_registerarray_case;
+		array = true;
+		ocode = ObjectToken::OCODE_ASSIGNGLOBALARRAY2;
+		goto sc_register_case;
 
 	case SC_REGISTERARRAY_MAP:
-		ocode = ObjectToken::OCODE_ASSIGNMAPARRAY;
-		opush = ObjectToken::OCODE_PUSHMAPARRAY;
-		goto sc_registerarray_case;
+		array = true;
+		ocode = ObjectToken::OCODE_ASSIGNMAPARRAY2;
+		goto sc_register_case;
 
 	case SC_REGISTERARRAY_WORLD:
-		ocode = ObjectToken::OCODE_ASSIGNWORLDARRAY;
-		opush = ObjectToken::OCODE_PUSHWORLDARRAY;
-		goto sc_registerarray_case;
+		array = true;
+		ocode = ObjectToken::OCODE_ASSIGNWORLDARRAY2;
+		goto sc_register_case;
 	}
 }
 
@@ -149,28 +126,17 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, std::vector<Sou
 	makeObjectsSetArray(objects, dimensions->size(), position, _type, &address);
 	makeObjectsGetArray(objects, dimensions, position);
 }
-void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * const type, int * const address) const
+void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, int * address) const
 {
 	if (dimensions == 0)
 	{
-		makeObjectsSet(objects, position, type, address);
+		makeObjectsSet(objects, position, type, address, true);
 		return;
 	}
 
 	switch (_sc)
 	{
 	case SC_AUTO:
-		throw SourceException("makeObjectsSetArray on SC_AUTO", position, "SourceVariable");
-
-	case SC_CONSTANT:
-		throw SourceException("makeObjectsSetArray on SC_CONSTANT", position, "SourceVariable");
-
-	case SC_REGISTER:
-	case SC_REGISTER_GLOBAL:
-	case SC_REGISTER_MAP:
-	case SC_REGISTER_WORLD:
-		throw SourceException("makeObjectsSetArray on register", position, "SourceVariable");
-
 	case SC_REGISTERARRAY_GLOBAL:
 	case SC_REGISTERARRAY_MAP:
 	case SC_REGISTERARRAY_WORLD:
@@ -195,6 +161,15 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions,
 			break;
 		}
 		break;
+
+	case SC_CONSTANT:
+		throw SourceException("makeObjectsSetArray on SC_CONSTANT", position, "SourceVariable");
+
+	case SC_REGISTER:
+	case SC_REGISTER_GLOBAL:
+	case SC_REGISTER_MAP:
+	case SC_REGISTER_WORLD:
+		throw SourceException("makeObjectsSetArray on register", position, "SourceVariable");
 	}
 }
 
@@ -208,11 +183,11 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 	makeObjectsSetMember(objects, names, position, _type, &address);
 	makeObjectsGetMember(objects, &namesOriginal, position);
 }
-void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * const type, int * const address) const
+void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, int * address) const
 {
 	if (names->empty())
 	{
-		makeObjectsSet(objects, position, type, address);
+		makeObjectsSet(objects, position, type, address, false);
 		return;
 	}
 
@@ -267,29 +242,18 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 
 void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, int * address, std::vector<SourceExpression::Pointer> * dimensions) const
 {
-	ObjectToken::ObjectCode ocode;
-
 	switch (_sc)
 	{
 	case SC_AUTO:
-	case SC_CONSTANT:
-	case SC_REGISTER:
-	case SC_REGISTER_GLOBAL:
-	case SC_REGISTER_MAP:
-	case SC_REGISTER_WORLD:
-		*address = _address + _type->size() - 1;
-		break;
-
-	sc_registerarray_case:
+	case SC_REGISTERARRAY_GLOBAL:
+	case SC_REGISTERARRAY_MAP:
+	case SC_REGISTERARRAY_WORLD:
 		if (dimensions)
 		{
 			VariableType const * type = _type;
 
 			if ((*dimensions)[0])
 			{
-				// Array index.
-				objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(0));
-
 				for (size_t i(dimensions->size()); i--;)
 				{
 					type = type->refType;
@@ -303,10 +267,7 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, int * address, s
 					(*dimensions)[i] = NULL;
 				}
 
-				objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
-				objects->addToken(ObjectToken::OCODE_ADD);
-
-				objects->addToken(ocode, objects->getValue(_address));
+				objects->addToken(ObjectToken::OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 			}
 			else
 			{
@@ -318,32 +279,32 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, int * address, s
 
 			*address = type->size() - 1;
 		}
+		else if (_sc == SC_AUTO)
+		{
+			*address = _address + _type->size() - 1;
+		}
 		else
 		{
 			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(0));
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
-			objects->addToken(ocode, objects->getValue(_address));
+
+			objects->addToken(ObjectToken::OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
 			*address = _type->size() - 1;
 		}
 
 		break;
 
-	case SC_REGISTERARRAY_GLOBAL:
-		ocode = ObjectToken::OCODE_ASSIGNGLOBALARRAY;
-		goto sc_registerarray_case;
-
-	case SC_REGISTERARRAY_MAP:
-		ocode = ObjectToken::OCODE_ASSIGNMAPARRAY;
-		goto sc_registerarray_case;
-
-	case SC_REGISTERARRAY_WORLD:
-		ocode = ObjectToken::OCODE_ASSIGNWORLDARRAY;
-		goto sc_registerarray_case;
+	case SC_CONSTANT:
+	case SC_REGISTER:
+	case SC_REGISTER_GLOBAL:
+	case SC_REGISTER_MAP:
+	case SC_REGISTER_WORLD:
+		*address = _address + _type->size() - 1;
+		break;
 	}
 }
 
-void SourceVariable::makeObjectsSetSkip(VariableType const * const type, int * const address) const
+void SourceVariable::makeObjectsSetSkip(VariableType const * type, int * address) const
 {
 	switch (type->type)
 	{

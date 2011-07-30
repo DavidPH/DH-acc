@@ -152,10 +152,18 @@ void ObjectToken::init()
 	DO_INIT(SWAP,              0);
 
 	// ObjectToken
-	DO_INIT(ADDSTACK_IMM,   1);
-	DO_INIT(ASSIGNSTACKVAR, 1);
-	DO_INIT(PUSHSTACKVAR,   1);
-	DO_INIT(SUBSTACK_IMM,   1);
+	DO_INIT(ADDSTACK_IMM,       1);
+	DO_INIT(ASSIGNGLOBALARRAY2, 2);
+	DO_INIT(ASSIGNMAPARRAY2,    2);
+	DO_INIT(ASSIGNSTACKARRAY2,  2);
+	DO_INIT(ASSIGNSTACKVAR,     1);
+	DO_INIT(ASSIGNWORLDARRAY2,  2);
+	DO_INIT(PUSHGLOBALARRAY2,   2);
+	DO_INIT(PUSHMAPARRAY2,      2);
+	DO_INIT(PUSHSTACKARRAY2,    2);
+	DO_INIT(PUSHSTACKVAR,       1);
+	DO_INIT(PUSHWORLDARRAY2,    2);
+	DO_INIT(SUBSTACK_IMM,       1);
 
 	DO_INIT(NONE, 0);
 
@@ -194,49 +202,49 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 {
 	switch (in)
 	{
-	case ObjectToken::OCODE_ADD:               *out << "OCODE_ADD";               break;
-	case ObjectToken::OCODE_ADDWORLDVAR:       *out << "OCODE_ADDWORLDVAR";       break;
-	case ObjectToken::OCODE_ASSIGNMAPVAR:      *out << "OCODE_ASSIGNMAPVAR";      break;
-	case ObjectToken::OCODE_ASSIGNSCRIPTVAR:   *out << "OCODE_ASSIGNSCRIPTVAR";   break;
-	case ObjectToken::OCODE_ASSIGNWORLDVAR:    *out << "OCODE_ASSIGNWORLDVAR";    break;
-	case ObjectToken::OCODE_BEGINPRINT:        *out << "OCODE_BEGINPRINT";        break;
-	case ObjectToken::OCODE_BRANCH:            *out << "OCODE_BRANCH";            break;
-	case ObjectToken::OCODE_BRANCHNOTZERO:     *out << "OCODE_BRANCHNOTZERO";     break;
-	case ObjectToken::OCODE_BRANCHZERO:        *out << "OCODE_BRANCHZERO";        break;
-	case ObjectToken::OCODE_DELAY:             *out << "OCODE_DELAY";             break;
-	case ObjectToken::OCODE_DELAY_IMM:         *out << "OCODE_DELAY_IMM";         break;
-	case ObjectToken::OCODE_DIV:               *out << "OCODE_DIV";               break;
-	case ObjectToken::OCODE_DROP:              *out << "OCODE_DROP";              break;
-	case ObjectToken::OCODE_ENDPRINT:          *out << "OCODE_NOP";               break;
-	case ObjectToken::OCODE_LSPEC1:            *out << "OCODE_LSPEC1";            break;
-	case ObjectToken::OCODE_LSPEC1_IMM:        *out << "OCODE_LSPEC1_IMM";        break;
-	case ObjectToken::OCODE_LSPEC2:            *out << "OCODE_LSPEC2";            break;
-	case ObjectToken::OCODE_LSPEC2_IMM:        *out << "OCODE_LSPEC2_IMM";        break;
-	case ObjectToken::OCODE_LSPEC3:            *out << "OCODE_LSPEC3";            break;
-	case ObjectToken::OCODE_LSPEC3_IMM:        *out << "OCODE_LSPEC3_IMM";        break;
-	case ObjectToken::OCODE_LSPEC4:            *out << "OCODE_LSPEC4";            break;
-	case ObjectToken::OCODE_LSPEC4_IMM:        *out << "OCODE_LSPEC4_IMM";        break;
-	case ObjectToken::OCODE_LSPEC5:            *out << "OCODE_LSPEC5";            break;
-	case ObjectToken::OCODE_LSPEC5_IMM:        *out << "OCODE_LSPEC5_IMM";        break;
-	case ObjectToken::OCODE_MUL:               *out << "OCODE_MUL";               break;
-	case ObjectToken::OCODE_MOD:               *out << "OCODE_MOD";               break;
-	case ObjectToken::OCODE_NOP:               *out << "OCODE_NOP";               break;
-	case ObjectToken::OCODE_PRINTCHARACTER:    *out << "OCODE_PRINTCHARACTER";    break;
-	case ObjectToken::OCODE_PRINTNUMBER:       *out << "OCODE_PRINTNUMBER";       break;
-	case ObjectToken::OCODE_PRINTSTRING:       *out << "OCODE_PRINTSTRING";       break;
-	case ObjectToken::OCODE_PUSHMAPVAR:        *out << "OCODE_PUSHMAPVAR";        break;
-	case ObjectToken::OCODE_PUSHNUMBER:        *out << "OCODE_PUSHNUMBER";        break;
-	case ObjectToken::OCODE_PUSHSCRIPTVAR:     *out << "OCODE_PUSHSCRIPTVAR";     break;
-	case ObjectToken::OCODE_PUSHWORLDVAR:      *out << "OCODE_PUSHWORLDVAR";      break;
-	case ObjectToken::OCODE_RANDOM:            *out << "OCODE_RANDOM";            break;
-	case ObjectToken::OCODE_RANDOM_IMM:        *out << "OCODE_RANDOM_IMM";        break;
-	case ObjectToken::OCODE_RESTART:           *out << "OCODE_RESTART";           break;
-	case ObjectToken::OCODE_SHIFTL:            *out << "OCODE_SHIFTL";            break;
-	case ObjectToken::OCODE_SHIFTR:            *out << "OCODE_SHIFTR";            break;
-	case ObjectToken::OCODE_SUB:               *out << "OCODE_SUB";               break;
-	case ObjectToken::OCODE_SUBWORLDVAR:       *out << "OCODE_SUBWORLDVAR";       break;
-	case ObjectToken::OCODE_SUSPEND:           *out << "OCODE_SUSPEND";           break;
-	case ObjectToken::OCODE_TERMINATE:         *out << "OCODE_TERMINATE";         break;
+	case ObjectToken::OCODE_ADD:             *out << "OCODE_ADD";             break;
+	case ObjectToken::OCODE_ADDWORLDVAR:     *out << "OCODE_ADDWORLDVAR";     break;
+	case ObjectToken::OCODE_ASSIGNMAPVAR:    *out << "OCODE_ASSIGNMAPVAR";    break;
+	case ObjectToken::OCODE_ASSIGNSCRIPTVAR: *out << "OCODE_ASSIGNSCRIPTVAR"; break;
+	case ObjectToken::OCODE_ASSIGNWORLDVAR:  *out << "OCODE_ASSIGNWORLDVAR";  break;
+	case ObjectToken::OCODE_BEGINPRINT:      *out << "OCODE_BEGINPRINT";      break;
+	case ObjectToken::OCODE_BRANCH:          *out << "OCODE_BRANCH";          break;
+	case ObjectToken::OCODE_BRANCHNOTZERO:   *out << "OCODE_BRANCHNOTZERO";   break;
+	case ObjectToken::OCODE_BRANCHZERO:      *out << "OCODE_BRANCHZERO";      break;
+	case ObjectToken::OCODE_DELAY:           *out << "OCODE_DELAY";           break;
+	case ObjectToken::OCODE_DELAY_IMM:       *out << "OCODE_DELAY_IMM";       break;
+	case ObjectToken::OCODE_DIV:             *out << "OCODE_DIV";             break;
+	case ObjectToken::OCODE_DROP:            *out << "OCODE_DROP";            break;
+	case ObjectToken::OCODE_ENDPRINT:        *out << "OCODE_NOP";             break;
+	case ObjectToken::OCODE_LSPEC1:          *out << "OCODE_LSPEC1";          break;
+	case ObjectToken::OCODE_LSPEC1_IMM:      *out << "OCODE_LSPEC1_IMM";      break;
+	case ObjectToken::OCODE_LSPEC2:          *out << "OCODE_LSPEC2";          break;
+	case ObjectToken::OCODE_LSPEC2_IMM:      *out << "OCODE_LSPEC2_IMM";      break;
+	case ObjectToken::OCODE_LSPEC3:          *out << "OCODE_LSPEC3";          break;
+	case ObjectToken::OCODE_LSPEC3_IMM:      *out << "OCODE_LSPEC3_IMM";      break;
+	case ObjectToken::OCODE_LSPEC4:          *out << "OCODE_LSPEC4";          break;
+	case ObjectToken::OCODE_LSPEC4_IMM:      *out << "OCODE_LSPEC4_IMM";      break;
+	case ObjectToken::OCODE_LSPEC5:          *out << "OCODE_LSPEC5";          break;
+	case ObjectToken::OCODE_LSPEC5_IMM:      *out << "OCODE_LSPEC5_IMM";      break;
+	case ObjectToken::OCODE_MUL:             *out << "OCODE_MUL";             break;
+	case ObjectToken::OCODE_MOD:             *out << "OCODE_MOD";             break;
+	case ObjectToken::OCODE_NOP:             *out << "OCODE_NOP";             break;
+	case ObjectToken::OCODE_PRINTCHARACTER:  *out << "OCODE_PRINTCHARACTER";  break;
+	case ObjectToken::OCODE_PRINTNUMBER:     *out << "OCODE_PRINTNUMBER";     break;
+	case ObjectToken::OCODE_PRINTSTRING:     *out << "OCODE_PRINTSTRING";     break;
+	case ObjectToken::OCODE_PUSHMAPVAR:      *out << "OCODE_PUSHMAPVAR";      break;
+	case ObjectToken::OCODE_PUSHNUMBER:      *out << "OCODE_PUSHNUMBER";      break;
+	case ObjectToken::OCODE_PUSHSCRIPTVAR:   *out << "OCODE_PUSHSCRIPTVAR";   break;
+	case ObjectToken::OCODE_PUSHWORLDVAR:    *out << "OCODE_PUSHWORLDVAR";    break;
+	case ObjectToken::OCODE_RANDOM:          *out << "OCODE_RANDOM";          break;
+	case ObjectToken::OCODE_RANDOM_IMM:      *out << "OCODE_RANDOM_IMM";      break;
+	case ObjectToken::OCODE_RESTART:         *out << "OCODE_RESTART";         break;
+	case ObjectToken::OCODE_SHIFTL:          *out << "OCODE_SHIFTL";          break;
+	case ObjectToken::OCODE_SHIFTR:          *out << "OCODE_SHIFTR";          break;
+	case ObjectToken::OCODE_SUB:             *out << "OCODE_SUB";             break;
+	case ObjectToken::OCODE_SUBWORLDVAR:     *out << "OCODE_SUBWORLDVAR";     break;
+	case ObjectToken::OCODE_SUSPEND:         *out << "OCODE_SUSPEND";         break;
+	case ObjectToken::OCODE_TERMINATE:       *out << "OCODE_TERMINATE";       break;
 
 	case ObjectToken::OCODE_ASSIGNGLOBALARRAY: *out << "OCODE_ASSIGNGLOBALARRAY"; break;
 	case ObjectToken::OCODE_ASSIGNGLOBALVAR:   *out << "OCODE_ASSIGNGLOBALVAR";   break;
@@ -261,12 +269,20 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_STRLEN:            *out << "OCODE_STRLEN";            break;
 	case ObjectToken::OCODE_SWAP:              *out << "OCODE_SWAP";              break;
 
-	case ObjectToken::OCODE_ADDSTACK_IMM:      *out << "OCODE_ADDSTACK_IMM";      break;
-	case ObjectToken::OCODE_ASSIGNSTACKVAR:    *out << "OCODE_ASSIGNSTACKVAR";    break;
-	case ObjectToken::OCODE_PUSHSTACKVAR:      *out << "OCODE_PUSHSTACKVAR";      break;
-	case ObjectToken::OCODE_SUBSTACK_IMM:      *out << "OCODE_SUBSTACK_IMM";      break;
+	case ObjectToken::OCODE_ADDSTACK_IMM:       *out << "OCODE_ADDSTACK_IMM";       break;
+	case ObjectToken::OCODE_ASSIGNGLOBALARRAY2: *out << "OCODE_ASSIGNGLOBALARRAY2"; break;
+	case ObjectToken::OCODE_ASSIGNMAPARRAY2:    *out << "OCODE_ASSIGNMAPARRAY2";    break;
+	case ObjectToken::OCODE_ASSIGNSTACKARRAY2:  *out << "OCODE_ASSIGNSTACKARRAY2";  break;
+	case ObjectToken::OCODE_ASSIGNSTACKVAR:     *out << "OCODE_ASSIGNSTACKVAR";     break;
+	case ObjectToken::OCODE_ASSIGNWORLDARRAY2:  *out << "OCODE_ASSIGNWORLDARRAY2";  break;
+	case ObjectToken::OCODE_PUSHGLOBALARRAY2:   *out << "OCODE_PUSHGLOBALARRAY2";   break;
+	case ObjectToken::OCODE_PUSHMAPARRAY2:      *out << "OCODE_PUSHMAPARRAY2";      break;
+	case ObjectToken::OCODE_PUSHSTACKARRAY2:    *out << "OCODE_PUSHSTACKARRAY2";    break;
+	case ObjectToken::OCODE_PUSHSTACKVAR:       *out << "OCODE_PUSHSTACKVAR";       break;
+	case ObjectToken::OCODE_PUSHWORLDARRAY2:    *out << "OCODE_PUSHWORLDARRAY2";    break;
+	case ObjectToken::OCODE_SUBSTACK_IMM:       *out << "OCODE_SUBSTACK_IMM";       break;
 
-	case ObjectToken::OCODE_NONE:              *out << "OCODE_NONE";              break;
+	case ObjectToken::OCODE_NONE: *out << "OCODE_NONE"; break;
 	}
 }
 

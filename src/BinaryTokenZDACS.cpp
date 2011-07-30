@@ -128,25 +128,31 @@ void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<Bin
 	#define PUSH_ARGS1(STOP)\
 		PUSH_ARGS2(0, STOP)
 
-	#define PUSH_TOKEN(NAME)\
+	#define PUSH_TOKEN(BCODE)\
 		instructions->push_back(BinaryTokenZDACS(\
-			BCODE_##NAME,\
+			BCODE,\
 			objects[index].getPosition(),\
 			objects[index].getLabels(),\
 			args\
 		));\
 		args.clear()
 
-	#define PUSH_TOKEN_ARGS1(NAME,STOP)\
+	#define PUSH_TOKEN_ARGS1(BCODE,STOP)\
 		PUSH_ARGS1(STOP);\
-		PUSH_TOKEN(NAME)
+		PUSH_TOKEN(BCODE)
 
-	#define CASE_DIRECTMAP(NAME)\
-	case ObjectToken::OCODE_##NAME:\
-		PUSH_TOKEN_ARGS1(NAME, _arg_counts[BCODE_##NAME]);\
+	#define PUSH_TOKEN_ARGS2(BCODE,START,STOP)\
+		PUSH_ARGS2(START, STOP);\
+		PUSH_TOKEN(BCODE)
+
+	#define CASE_DIRECTMAP(CODE)\
+	case ObjectToken::OCODE_##CODE:\
+		PUSH_TOKEN_ARGS1(BCODE_##CODE, _arg_counts[BCODE_##CODE]);\
 		break
 
 	std::vector<ObjectExpression::Pointer> args;
+
+	BinaryCode bcode;
 
 	for (ObjectExpression::int_t index(0); index < objects.size(); ++index) switch (objects[index].getCode())
 	{
@@ -218,34 +224,104 @@ void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<Bin
 	CASE_DIRECTMAP(SWAP);
 
 	case ObjectToken::OCODE_ADDSTACK_IMM:
-		PUSH_TOKEN_ARGS1(PUSHNUMBER, 1);
+		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
 		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
-		PUSH_TOKEN(ADDWORLDVAR);
+		PUSH_TOKEN(BCODE_ADDWORLDVAR);
+		break;
+
+	assignarray_case:
+		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 1, 2);
+		args.push_back(ObjectExpression::create_value_int(1, SourcePosition::none));
+		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
+		PUSH_TOKEN(BCODE_ADD);
+		PUSH_TOKEN(BCODE_SWAP);
+		PUSH_TOKEN_ARGS2(bcode, 0, 1);
+		break;
+
+	case ObjectToken::OCODE_ASSIGNGLOBALARRAY2:
+		bcode = BCODE_ASSIGNGLOBALARRAY;
+		goto assignarray_case;
+
+	case ObjectToken::OCODE_ASSIGNMAPARRAY2:
+		bcode = BCODE_ASSIGNMAPARRAY;
+		goto assignarray_case;
+
+	case ObjectToken::OCODE_ASSIGNSTACKARRAY2:
+		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 0, 1);
+		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 1, 2);
+		PUSH_TOKEN(BCODE_ADD);
+		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
+		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
+		PUSH_TOKEN(BCODE_ADD);
+		args.push_back(ObjectExpression::create_value_int(1, SourcePosition::none));
+		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
+		PUSH_TOKEN(BCODE_ADD);
+		PUSH_TOKEN(BCODE_SWAP);
+		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
+		PUSH_TOKEN(BCODE_ASSIGNGLOBALARRAY);
 		break;
 
 	case ObjectToken::OCODE_ASSIGNSTACKVAR:
-		PUSH_TOKEN_ARGS1(PUSHNUMBER, 1);
+		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
 		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
-		PUSH_TOKEN(PUSHWORLDVAR);
-		PUSH_TOKEN(ADD);
-		PUSH_TOKEN(SWAP);
+		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
+		PUSH_TOKEN(BCODE_ADD);
+		PUSH_TOKEN(BCODE_SWAP);
 		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
-		PUSH_TOKEN(ASSIGNGLOBALARRAY);
+		PUSH_TOKEN(BCODE_ASSIGNGLOBALARRAY);
+		break;
+
+	case ObjectToken::OCODE_ASSIGNWORLDARRAY2:
+		bcode = BCODE_ASSIGNWORLDARRAY;
+		goto assignarray_case;
+
+	pusharray_case:
+		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 1, 2);
+		args.push_back(ObjectExpression::create_value_int(1, SourcePosition::none));
+		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
+		PUSH_TOKEN(BCODE_ADD);
+		PUSH_TOKEN_ARGS2(bcode, 0, 1);
+		break;
+
+	case ObjectToken::OCODE_PUSHGLOBALARRAY2:
+		bcode = BCODE_PUSHGLOBALARRAY;
+		goto pusharray_case;
+
+	case ObjectToken::OCODE_PUSHMAPARRAY2:
+		bcode = BCODE_PUSHMAPARRAY;
+		goto pusharray_case;
+
+	case ObjectToken::OCODE_PUSHSTACKARRAY2:
+		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 0, 1);
+		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 1, 2);
+		PUSH_TOKEN(BCODE_ADD);
+		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
+		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
+		PUSH_TOKEN(BCODE_ADD);
+		args.push_back(ObjectExpression::create_value_int(1, SourcePosition::none));
+		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
+		PUSH_TOKEN(BCODE_ADD);
+		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
+		PUSH_TOKEN(BCODE_PUSHGLOBALARRAY);
 		break;
 
 	case ObjectToken::OCODE_PUSHSTACKVAR:
-		PUSH_TOKEN_ARGS1(PUSHNUMBER, 1);
+		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
 		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
-		PUSH_TOKEN(PUSHWORLDVAR);
-		PUSH_TOKEN(ADD);
+		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
+		PUSH_TOKEN(BCODE_ADD);
 		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
-		PUSH_TOKEN(PUSHGLOBALARRAY);
+		PUSH_TOKEN(BCODE_PUSHGLOBALARRAY);
 		break;
 
+	case ObjectToken::OCODE_PUSHWORLDARRAY2:
+		bcode = BCODE_PUSHWORLDARRAY;
+		goto pusharray_case;
+
 	case ObjectToken::OCODE_SUBSTACK_IMM:
-		PUSH_TOKEN_ARGS1(PUSHNUMBER, 1);
+		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
 		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
-		PUSH_TOKEN(SUBWORLDVAR);
+		PUSH_TOKEN(BCODE_SUBWORLDVAR);
 		break;
 
 	case ObjectToken::OCODE_NONE:
@@ -254,6 +330,7 @@ void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<Bin
 
 	#undef CASE_DIRECTMAP
 
+	#undef PUSH_TOKEN_ARGS2
 	#undef PUSH_TOKEN_ARGS1
 
 	#undef PUSH_TOKEN

@@ -39,9 +39,9 @@ SourceContext::SourceContext() : _labelCount(0), _parent(NULL), _returnType(Sour
 	std::memset(_count, 0, sizeof(_count));
 	std::memset(_limit, 0, sizeof(_limit));
 
-	// Stack pointer.
-	_count[SourceVariable::SC_REGISTER_WORLD] = 1;
-	_limit[SourceVariable::SC_REGISTER_WORLD] = 1;
+	// Stack pointer and array temporary.
+	_count[SourceVariable::SC_REGISTER_WORLD] = 2;
+	_limit[SourceVariable::SC_REGISTER_WORLD] = 2;
 
 	// Pointer-addressable space.
 	_count[SourceVariable::SC_REGISTERARRAY_GLOBAL] = 1;
