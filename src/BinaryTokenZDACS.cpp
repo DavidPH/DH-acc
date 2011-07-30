@@ -121,9 +121,11 @@ void BinaryTokenZDACS::init()
 
 void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<BinaryTokenZDACS> * const instructions)
 {
+	static std::vector<std::string> const nolabels;
+
 	#define PUSH_ARGS2(START,STOP)\
 		for (uintptr_t i(START); i < STOP; ++i)\
-			args.push_back(objects[index].getArg(i))
+			args.push_back(object.getArg(i))
 
 	#define PUSH_ARGS1(STOP)\
 		PUSH_ARGS2(0, STOP)
@@ -131,11 +133,12 @@ void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<Bin
 	#define PUSH_TOKEN(BCODE)\
 		instructions->push_back(BinaryTokenZDACS(\
 			BCODE,\
-			objects[index].getPosition(),\
-			objects[index].getLabels(),\
+			position,\
+			*labels,\
 			args\
 		));\
-		args.clear()
+		args.clear();\
+		labels = &nolabels;
 
 	#define PUSH_TOKEN_ARGS1(BCODE,STOP)\
 		PUSH_ARGS1(STOP);\
@@ -154,7 +157,15 @@ void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<Bin
 
 	BinaryCode bcode;
 
-	for (ObjectExpression::int_t index(0); index < objects.size(); ++index) switch (objects[index].getCode())
+	for (ObjectExpression::int_t index(0); index < objects.size(); ++index)
+	{
+	ObjectToken const & object(objects[index]);
+
+	SourcePosition const & position(object.getPosition());
+
+	std::vector<std::string> const * labels(&object.getLabels());
+
+	switch (object.getCode())
 	{
 	CASE_DIRECTMAP(ADD);
 	CASE_DIRECTMAP(ADDWORLDVAR);
@@ -326,6 +337,7 @@ void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<Bin
 
 	case ObjectToken::OCODE_NONE:
 		throw SourceException("unknown OCODE", objects[index].getPosition(), "BinaryTokenZDACS");
+	}
 	}
 
 	#undef CASE_DIRECTMAP
