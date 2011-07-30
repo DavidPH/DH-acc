@@ -79,6 +79,7 @@ public:
 		TT_OP_PLUS,               // +
 		TT_OP_PLUS_EQUALS,        // +=
 		TT_OP_PLUS2,              // ++
+		TT_OP_QUERY,              // ?
 		TT_OP_SEMICOLON,          // ;
 		TT_OP_SHIFT_LEFT,         // <<
 		TT_OP_SHIFT_LEFT_EQUALS,  // <<=

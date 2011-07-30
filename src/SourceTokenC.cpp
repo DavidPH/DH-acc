@@ -51,6 +51,7 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 	case ')': _type = TT_OP_PARENTHESIS_C; return;
 	case '(': _type = TT_OP_PARENTHESIS_O; return;
 	case '.': _type = TT_OP_PERIOD;        return;
+	case '?': _type = TT_OP_QUERY;         return;
 	case ';': _type = TT_OP_SEMICOLON;     return;
 
 	case '&':
@@ -319,6 +320,7 @@ void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type)
 	case SourceTokenC::TT_IDENTIFIER:            *out << "TT_IDENTIFIER";            break;
 	case SourceTokenC::TT_INTEGER:               *out << "TT_INTEGER";               break;
 	case SourceTokenC::TT_OP_PLUS:               *out << "TT_OP_PLUS";               break;
+	case SourceTokenC::TT_OP_QUERY:              *out << "TT_OP_QUERY";              break;
 	case SourceTokenC::TT_OP_SEMICOLON:          *out << "TT_OP_SEMICOLON";          break;
 	case SourceTokenC::TT_OP_SHIFT_RIGHT_EQUALS: *out << "TT_OP_SHIFT_RIGHT_EQUALS"; break;
 	default: *out << "TT_"; break;

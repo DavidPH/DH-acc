@@ -128,6 +128,20 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 			expr = create_binary_add(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
+		case SourceTokenC::TT_OP_QUERY:
+		{
+			SourceContext contextIf(context, SourceContext::CT_BLOCK);
+			SourceExpression::Pointer exprIf(make_expression_single(in, blocks, &contextIf));
+
+			in->get(SourceTokenC::TT_OP_COLON);
+
+			SourceContext contextElse(context, SourceContext::CT_BLOCK);
+			SourceExpression::Pointer exprElse(make_expression_single(in, blocks, &contextElse));
+
+			expr = create_branch_if(expr, exprIf, exprElse, context, token.getPosition());
+		}
+			break;
+
 		case SourceTokenC::TT_OP_SEMICOLON:
 			in->unget(token);
 			return expr;
