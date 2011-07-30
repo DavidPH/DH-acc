@@ -92,14 +92,26 @@ void SourceExpression::make_objects_call_acsfunc(ObjectVector * objects, SourceV
 
 	ObjectToken::ObjectCode ocode;
 	ObjectExpression::Pointer ofunc(objects->getValue(data.number));
+	ObjectExpression::Pointer oretn;
 
 	if (data.type->callType->type == SourceVariable::VT_VOID)
 		ocode = ObjectToken::OCODE_CALLZDACSDISCARD;
 	else
 		ocode = ObjectToken::OCODE_CALLZDACS;
 
+	if (data.type->callType->size() > 1)
+		oretn = objects->getValue(data.type->callType->size() - 1);
+
 	objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, stack);
+	if (oretn) objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, oretn);
 	objects->addToken(ocode, ofunc);
+	if (oretn)
+	{
+		for (int i(-data.type->callType->size()); ++i;)
+			objects->addToken(ObjectToken::OCODE_PUSHSTACKVAR, objects->getValue(i));
+
+		objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, oretn);
+	}
 	objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, stack);
 }
 
@@ -224,31 +236,43 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, SourceVa
 
 	objects->setPosition(position);
 
-	ObjectToken::ObjectCode code;
+	ObjectToken::ObjectCode ocode;
 	ObjectExpression::Pointer ospec(objects->getValue(84));
+	ObjectExpression::Pointer oretn;
 
 	if (type->callType->type == SourceVariable::VT_VOID)
 	{
 		switch (args.size())
 		{
-		case 0: code = ObjectToken::OCODE_LSPEC1; break;
-		case 1: code = ObjectToken::OCODE_LSPEC2; break;
-		case 2: code = ObjectToken::OCODE_LSPEC3; break;
-		case 3: code = ObjectToken::OCODE_LSPEC4; break;
+		case 0: ocode = ObjectToken::OCODE_LSPEC1; break;
+		case 1: ocode = ObjectToken::OCODE_LSPEC2; break;
+		case 2: ocode = ObjectToken::OCODE_LSPEC3; break;
+		case 3: ocode = ObjectToken::OCODE_LSPEC4; break;
 		default:
 			throw SourceException("unexpected arg count to call script", position, "SourceExpressionDS");
 		}
 	}
 	else
 	{
-		code = ObjectToken::OCODE_LSPEC5RESULT;
+		ocode = ObjectToken::OCODE_LSPEC5RESULT;
 
 		for (size_t i(args.size()); i < 4; ++i)
 			objects->addTokenPushZero();
 	}
 
+	if (type->callType->size() > 1)
+		oretn = objects->getValue(type->callType->size() - 1);
+
 	objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, stack);
-	objects->addToken(code, ospec);
+	if (oretn) objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, oretn);
+	objects->addToken(ocode, ospec);
+	if (oretn)
+	{
+		for (int i(-type->callType->size()); ++i;)
+			objects->addToken(ObjectToken::OCODE_PUSHSTACKVAR, objects->getValue(i));
+
+		objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, oretn);
+	}
 	objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, stack);
 }
 
