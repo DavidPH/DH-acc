@@ -34,6 +34,38 @@ SourceVariable::VariableType const * SourceVariable::VariableType::getType(std::
 	throw SourceException("invalid member-variable-type", position, "SourceVariable::VariableType");
 }
 
+bool SourceVariable::VariableType::isVoid() const
+{
+	switch (type)
+	{
+	case VT_ACSFUNC:
+	case VT_ASMFUNC:
+	case VT_CHAR:
+	case VT_INT:
+	case VT_LNSPEC:
+	case VT_NATIVE:
+	case VT_REAL:
+	case VT_SCRIPT:
+	case VT_STRING:
+		return false;
+
+	case VT_ARRAY:
+	case VT_BLOCK:
+	case VT_STRUCT:
+	{
+		for (size_t i(0); i < types.size(); ++i)
+			if (!types[i]->isVoid()) return false;
+
+		return true;
+	}
+
+	case VT_VOID:
+		return true;
+	}
+
+	return 0;
+}
+
 int SourceVariable::VariableType::size() const
 {
 	switch (type)

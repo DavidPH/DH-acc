@@ -23,6 +23,7 @@
 
 #include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
+#include "../SourceException.hpp"
 
 
 
@@ -33,6 +34,8 @@ class SourceExpression_BranchIf : public SourceExpression
 public:
 	SourceExpression_BranchIf(SourceExpression * exprCondition, SourceExpression * exprIf, SourceContext * context, SourcePosition const & position);
 	SourceExpression_BranchIf(SourceExpression * exprCondition, SourceExpression * exprIf, SourceExpression * exprElse, SourceContext * context, SourcePosition const & position);
+
+	virtual SourceVariable::VariableType const * getType() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
 
@@ -68,6 +71,22 @@ SourceExpression_BranchIf::SourceExpression_BranchIf(SourceExpression * exprCond
 	_labelIf   = label + "_if";
 	_labelElse = label + "_else";
 	_labelEnd  = label + "_end";
+
+	if (_exprElse)
+	{
+		if (_exprIf->getType() != _exprElse->getType() && (!_exprIf->getType()->isVoid() || !_exprIf->getType()->isVoid()))
+			throw SourceException("if/else type mismatch", position, getName());
+	}
+	else
+	{
+		if (!_exprIf->getType()->isVoid())
+			throw SourceException("if type nonvoid", position, getName());
+	}
+}
+
+SourceVariable::VariableType const * SourceExpression_BranchIf::getType() const
+{
+	return _exprIf->getType();
 }
 
 void SourceExpression_BranchIf::makeObjectsGet(ObjectVector * objects) const

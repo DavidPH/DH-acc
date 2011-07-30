@@ -75,6 +75,8 @@ public:
 	{
 		VariableType const * getType(std::string const & name, SourcePosition const & position) const;
 
+		bool isVoid() const;
+
 		int size() const;
 
 		VariableTypeInternal type;

@@ -173,29 +173,23 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_delay(Sourc
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_if(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
-	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 	SourceContext contextCondition(context, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprCondition(make_expression(in, blocks, &contextCondition));
-	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+	SourceExpression::Pointer exprCondition(make_expression_single(in, blocks, &contextCondition));
 
 	SourceContext contextIf(&contextCondition, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprIf(make_expression(in, blocks, &contextIf));
-	SourceTokenC semicolonToken(in->get(SourceTokenC::TT_OP_SEMICOLON));
+	SourceExpression::Pointer exprIf(make_expression_single(in, blocks, &contextIf));
 
 	if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER && in->peek().getData() == "else")
 	{
 		in->get();
 
 		SourceContext contextElse(&contextCondition, SourceContext::CT_BLOCK);
-		SourceExpression::Pointer exprElse(make_expression(in, blocks, &contextElse));
-		in->unget(in->get(SourceTokenC::TT_OP_SEMICOLON));
+		SourceExpression::Pointer exprElse(make_expression_single(in, blocks, &contextElse));
 
 		return create_branch_if(exprCondition, exprIf, exprElse, context, token.getPosition());
 	}
 	else
 	{
-		in->unget(semicolonToken);
-
 		return create_branch_if(exprCondition, exprIf, context, token.getPosition());
 	}
 }
