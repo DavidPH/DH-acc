@@ -23,6 +23,7 @@
 
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 
 
@@ -32,7 +33,7 @@ class SourceExpression_BranchCall : public SourceExpression
 	MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchCall, SourceExpression);
 
 public:
-	SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
+	SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position);
 
 	virtual SourceVariable::VariableType const * getType() const;
 
@@ -43,18 +44,19 @@ public:
 private:
 	std::vector<SourceExpression::Pointer> _args;
 	SourceExpression::Pointer _expr;
+	ObjectExpression::int_t _stack;
 };
 
 
 
-SourceExpression::Pointer SourceExpression::create_branch_call(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
+SourceExpression::Pointer SourceExpression::create_branch_call(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position)
 {
-	return new SourceExpression_BranchCall(expr, args, position);
+	return new SourceExpression_BranchCall(expr, args, context, position);
 }
 
 
 
-SourceExpression_BranchCall::SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position) : Super(position), _args(args), _expr(expr)
+SourceExpression_BranchCall::SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position) : Super(position), _args(args), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
 {
 	SourceVariable::VariableType const * type(_expr->getType());
 
@@ -76,7 +78,8 @@ SourceVariable::VariableType const * SourceExpression_BranchCall::getType() cons
 void SourceExpression_BranchCall::makeObjectsGet(ObjectVector * objects) const
 {
 	objects->addLabel(labels);
-	_expr->makeObjectsCall(objects, _args);
+
+	_expr->makeObjectsCall(objects, _args, objects->getValue(_stack));
 }
 
 void SourceExpression_BranchCall::printDebug(std::ostream * out) const

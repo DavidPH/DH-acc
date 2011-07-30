@@ -54,7 +54,7 @@ public:
 
 	virtual CounterPointer<ObjectExpression> makeObject() const;
 
-	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args) const;
+	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const;
 
 	virtual void makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type) const;
 
@@ -80,13 +80,13 @@ public:
 	static Pointer create_binary_mul(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_sub(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
-	static Pointer create_branch_call(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
+	static Pointer create_branch_call(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_if(SourceExpression * exprCondition, SourceExpression * exprIf, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_if(SourceExpression * exprCondition, SourceExpression * exprIf, SourceExpression * exprElse, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_return(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_while(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position);
 
-	static Pointer create_root_delay(SourceExpression * expr, SourcePosition const & position);
+	static Pointer create_root_delay(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 	static Pointer create_root_out(SourceExpression * expr, SourcePosition const & position);
 
 	static Pointer create_value_block(std::vector<SourceExpression::Pointer> const & expressions, SourcePosition const & position);
@@ -103,7 +103,7 @@ public:
 
 	static void make_objects(std::vector<SourceExpression::Pointer> const & expressions, ObjectVector * objects);
 
-	static void make_objects_call_acsfunc(ObjectVector * objects, SourceVariable::VariableData_ACSFunc const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
+	static void make_objects_call_acsfunc(ObjectVector * objects, SourceVariable::VariableData_ACSFunc const & data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
 
 	static void make_objects_call_asmfunc(ObjectVector * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
 
@@ -111,7 +111,7 @@ public:
 
 	static void make_objects_call_native(ObjectVector * objects, SourceVariable::VariableData_Native const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
 
-	static void make_objects_call_script(ObjectVector * objects, SourceVariable::VariableType const * type, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
+	static void make_objects_call_script(ObjectVector * objects, SourceVariable::VariableType const * type, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
 
 	static void make_objects_cast(ObjectVector * objects, SourceVariable::VariableType const * typeFrom, SourceVariable::VariableType const * typeTo, SourcePosition const & position);
 

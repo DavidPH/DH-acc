@@ -112,6 +112,9 @@ void SourceVariable::add_typedef(std::string const & name, VariableType const * 
 
 SourceVariable::StorageClass SourceVariable::get_StorageClass(SourceTokenC const & token)
 {
+	if (token.getData() == "auto")
+		return SC_AUTO;
+
 	if (token.getData() == "register")
 		return SC_REGISTER;
 

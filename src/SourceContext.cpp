@@ -38,6 +38,14 @@ SourceContext::SourceContext() : _labelCount(0), _parent(NULL), _returnType(Sour
 {
 	std::memset(_count, 0, sizeof(_count));
 	std::memset(_limit, 0, sizeof(_limit));
+
+	// Stack pointer.
+	_count[SourceVariable::SC_REGISTER_WORLD] = 1;
+	_limit[SourceVariable::SC_REGISTER_WORLD] = 1;
+
+	// Pointer-addressable space.
+	_count[SourceVariable::SC_REGISTERARRAY_GLOBAL] = 1;
+	_limit[SourceVariable::SC_REGISTERARRAY_GLOBAL] = 1;
 }
 SourceContext::SourceContext(SourceContext * parent, ContextType type) : _label(parent->makeLabelShort()), _labelCount(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK)
 {
@@ -49,14 +57,15 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 {
 	switch (sc)
 	{
-	case SourceVariable::SC_CONSTANT:
-		break;
-
+	case SourceVariable::SC_AUTO:
 	case SourceVariable::SC_REGISTER:
 		_count[sc] += count;
 
 		addLimit(getCount(sc), sc);
 
+		break;
+
+	case SourceVariable::SC_CONSTANT:
 		break;
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
@@ -80,9 +89,7 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 {
 	switch (sc)
 	{
-	case SourceVariable::SC_CONSTANT:
-		break;
-
+	case SourceVariable::SC_AUTO:
 	case SourceVariable::SC_REGISTER:
 		if (limit > _limit[sc])
 			_limit[sc] = limit;
@@ -90,6 +97,9 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 		if (_inheritLocals && _parent)
 			_parent->addLimit(limit, sc);
 
+		break;
+
+	case SourceVariable::SC_CONSTANT:
 		break;
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
@@ -116,6 +126,7 @@ void SourceContext::addVariable(SourceVariable const & var)
 	SourceVariable::StorageClass sc(var.getClass());
 	switch (sc)
 	{
+	case SourceVariable::SC_AUTO:
 	case SourceVariable::SC_CONSTANT:
 	case SourceVariable::SC_REGISTER:
 	case SourceVariable::SC_REGISTER_GLOBAL:
@@ -138,14 +149,15 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
 {
 	switch (sc)
 	{
-	case SourceVariable::SC_CONSTANT:
-		return 0;
-
+	case SourceVariable::SC_AUTO:
 	case SourceVariable::SC_REGISTER:
 		if (_inheritLocals && _parent)
 			return _parent->getCount(sc) + _count[sc];
 		else
 			return _count[sc];
+
+	case SourceVariable::SC_CONSTANT:
+		return 0;
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
@@ -174,9 +186,7 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 {
 	switch (sc)
 	{
-	case SourceVariable::SC_CONSTANT:
-		return 0;
-
+	case SourceVariable::SC_AUTO:
 	case SourceVariable::SC_REGISTER:
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
@@ -185,6 +195,9 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 	case SourceVariable::SC_REGISTERARRAY_MAP:
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		return _limit[sc];
+
+	case SourceVariable::SC_CONSTANT:
+		return 0;
 	}
 
 	throw SourceException("getCount", SourcePosition::none, "SourceContext");
@@ -214,6 +227,13 @@ SourceVariable const & SourceContext::getVariable(std::string const & name, Sour
 		{
 			switch (_vars[i].getClass())
 			{
+			case SourceVariable::SC_AUTO:
+			case SourceVariable::SC_REGISTER:
+				if (canLocal)
+					return _vars[i];
+
+				break;
+
 			case SourceVariable::SC_CONSTANT:
 			case SourceVariable::SC_REGISTER_GLOBAL:
 			case SourceVariable::SC_REGISTER_MAP:
@@ -222,12 +242,6 @@ SourceVariable const & SourceContext::getVariable(std::string const & name, Sour
 			case SourceVariable::SC_REGISTERARRAY_MAP:
 			case SourceVariable::SC_REGISTERARRAY_WORLD:
 				return _vars[i];
-
-			case SourceVariable::SC_REGISTER:
-				if (canLocal)
-					return _vars[i];
-
-				break;
 			}
 		}
 	}

@@ -22,6 +22,7 @@
 #include "../SourceExpression.hpp"
 
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 
 
 
@@ -30,7 +31,7 @@ class SourceExpression_RootDelay : public SourceExpression
 	MAKE_COUNTER_CLASS_BASE(SourceExpression_RootDelay, SourceExpression);
 
 public:
-	SourceExpression_RootDelay(SourceExpression * expr, SourcePosition const & position);
+	SourceExpression_RootDelay(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
 
@@ -38,18 +39,19 @@ public:
 
 private:
 	SourceExpression::Pointer _expr;
+	ObjectExpression::int_t _stack;
 };
 
 
 
-SourceExpression::Pointer SourceExpression::create_root_delay(SourceExpression * expr, SourcePosition const & position)
+SourceExpression::Pointer SourceExpression::create_root_delay(SourceExpression * expr, SourceContext * context, SourcePosition const & position)
 {
-	return new SourceExpression_RootDelay(expr, position);
+	return new SourceExpression_RootDelay(expr, context, position);
 }
 
 
 
-SourceExpression_RootDelay::SourceExpression_RootDelay(SourceExpression * expr, SourcePosition const & position) : Super(position), _expr(expr)
+SourceExpression_RootDelay::SourceExpression_RootDelay(SourceExpression * expr, SourceContext * context, SourcePosition const & position) : Super(position), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
 {
 	if (_expr->getType()->type != SourceVariable::VT_INT)
 		_expr = create_value_cast(_expr, SourceVariable::get_VariableType(SourceVariable::VT_INT), position);
@@ -63,7 +65,10 @@ void SourceExpression_RootDelay::makeObjectsGet(ObjectVector * objects) const
 
 	objects->setPosition(position);
 
+	ObjectExpression::Pointer stack(objects->getValue(_stack));
+	objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, stack);
 	objects->addToken(ObjectToken::OCODE_DELAY);
+	objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, stack);
 }
 
 void SourceExpression_RootDelay::printDebug(std::ostream * out) const

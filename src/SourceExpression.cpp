@@ -75,7 +75,7 @@ void SourceExpression::make_objects(std::vector<SourceExpression::Pointer> const
 		expressions[index]->makeObjectsGet(objects);
 }
 
-void SourceExpression::make_objects_call_acsfunc(ObjectVector * objects, SourceVariable::VariableData_ACSFunc const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
+void SourceExpression::make_objects_call_acsfunc(ObjectVector * objects, SourceVariable::VariableData_ACSFunc const & data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position)
 {
 	if (args.size() != data.type->types.size())
 		throw SourceException("incorrect arg count to call acsfunc", position, "SourceExpressionDS");
@@ -98,7 +98,9 @@ void SourceExpression::make_objects_call_acsfunc(ObjectVector * objects, SourceV
 	else
 		ocode = ObjectToken::OCODE_CALLZDACS;
 
+	objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, stack);
 	objects->addToken(ocode, ofunc);
+	objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, stack);
 }
 
 void SourceExpression::make_objects_call_asmfunc(ObjectVector * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
@@ -204,7 +206,7 @@ void SourceExpression::make_objects_call_native(ObjectVector * objects, SourceVa
 	objects->addToken(ocode, oargc, ofunc);
 }
 
-void SourceExpression::make_objects_call_script(ObjectVector * objects, SourceVariable::VariableType const * type, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
+void SourceExpression::make_objects_call_script(ObjectVector * objects, SourceVariable::VariableType const * type, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position)
 {
 	if (args.size() != type->types.size())
 		throw SourceException("incorrect arg count to call script", position, "SourceExpressionDS");
@@ -245,7 +247,9 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, SourceVa
 			objects->addTokenPushZero();
 	}
 
+	objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, stack);
 	objects->addToken(code, ospec);
+	objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, stack);
 }
 
 void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable::VariableType const * typeFrom, SourceVariable::VariableType const * typeTo, SourcePosition const & position)
@@ -334,7 +338,7 @@ ObjectExpression::Pointer SourceExpression::makeObject() const
 	throw SourceException("makeObject on invalid expression", position, getName());
 }
 
-void SourceExpression::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args) const
+void SourceExpression::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const
 {
 	throw SourceException("makeObjectsCall on invalid expression", position, getName());
 }

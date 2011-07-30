@@ -41,6 +41,7 @@ class SourceVariable
 public:
 	enum StorageClass
 	{
+		SC_AUTO,
 		SC_CONSTANT,
 		SC_REGISTER,
 		SC_REGISTER_GLOBAL,
@@ -177,7 +178,7 @@ public:
 
 	ObjectExpression::Pointer makeObject(SourcePosition const & position) const;
 
-	void makeObjectsCall(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > const & args, SourcePosition const & position) const;
+	void makeObjectsCall(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > const & args, ObjectExpression * stack, SourcePosition const & position) const;
 
 	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position) const;
 	void makeObjectsGetArray(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, SourcePosition const & position) const;

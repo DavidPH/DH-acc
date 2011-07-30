@@ -67,6 +67,7 @@ void print_debug(std::ostream * const out, SourceVariable::StorageClass const in
 {
 	switch (in)
 	{
+	case SourceVariable::SC_AUTO:                 *out << "SC_AUTO";                 break;
 	case SourceVariable::SC_CONSTANT:             *out << "SC_CONSTANT";             break;
 	case SourceVariable::SC_REGISTER:             *out << "SC_REGISTER";             break;
 	case SourceVariable::SC_REGISTER_GLOBAL:      *out << "SC_REGISTER_GLOBAL";      break;

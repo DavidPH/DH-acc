@@ -39,7 +39,7 @@ public:
 
 	virtual ObjectExpression::Pointer makeObject() const;
 
-	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args) const;
+	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const;
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
 	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
@@ -127,9 +127,9 @@ ObjectExpression::Pointer SourceExpression_ValueVariable::makeObject() const
 	return _var.makeObject(position);
 }
 
-void SourceExpression_ValueVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args) const
+void SourceExpression_ValueVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const
 {
-	_var.makeObjectsCall(objects, args, position);
+	_var.makeObjectsCall(objects, args, stack, position);
 }
 
 void SourceExpression_ValueVariable::makeObjectsGet(ObjectVector * objects) const

@@ -84,6 +84,7 @@ void ObjectToken::init()
 
 	// BinaryTokenACS
 	DO_INIT(ADD,             0);
+	DO_INIT(ADDWORLDVAR,     1);
 	DO_INIT(ASSIGNMAPVAR,    1);
 	DO_INIT(ASSIGNSCRIPTVAR, 1);
 	DO_INIT(ASSIGNWORLDVAR,  1);
@@ -122,6 +123,7 @@ void ObjectToken::init()
 	DO_INIT(SHIFTL,          0);
 	DO_INIT(SHIFTR,          0);
 	DO_INIT(SUB,             0);
+	DO_INIT(SUBWORLDVAR,     1);
 	DO_INIT(SUSPEND,         0);
 	DO_INIT(TERMINATE,       0);
 
@@ -148,6 +150,12 @@ void ObjectToken::init()
 	DO_INIT(SETRESULTVALUE,    0);
 	DO_INIT(STRLEN,            0);
 	DO_INIT(SWAP,              0);
+
+	// ObjectToken
+	DO_INIT(ADDSTACK_IMM,   1);
+	DO_INIT(ASSIGNSTACKVAR, 1);
+	DO_INIT(PUSHSTACKVAR,   1);
+	DO_INIT(SUBSTACK_IMM,   1);
 
 	DO_INIT(NONE, 0);
 
@@ -187,6 +195,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	switch (in)
 	{
 	case ObjectToken::OCODE_ADD:               *out << "OCODE_ADD";               break;
+	case ObjectToken::OCODE_ADDWORLDVAR:       *out << "OCODE_ADDWORLDVAR";       break;
 	case ObjectToken::OCODE_ASSIGNMAPVAR:      *out << "OCODE_ASSIGNMAPVAR";      break;
 	case ObjectToken::OCODE_ASSIGNSCRIPTVAR:   *out << "OCODE_ASSIGNSCRIPTVAR";   break;
 	case ObjectToken::OCODE_ASSIGNWORLDVAR:    *out << "OCODE_ASSIGNWORLDVAR";    break;
@@ -225,6 +234,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_SHIFTL:            *out << "OCODE_SHIFTL";            break;
 	case ObjectToken::OCODE_SHIFTR:            *out << "OCODE_SHIFTR";            break;
 	case ObjectToken::OCODE_SUB:               *out << "OCODE_SUB";               break;
+	case ObjectToken::OCODE_SUBWORLDVAR:       *out << "OCODE_SUBWORLDVAR";       break;
 	case ObjectToken::OCODE_SUSPEND:           *out << "OCODE_SUSPEND";           break;
 	case ObjectToken::OCODE_TERMINATE:         *out << "OCODE_TERMINATE";         break;
 
@@ -250,6 +260,11 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_SETRESULTVALUE:    *out << "OCODE_SETRESULTVALUE";    break;
 	case ObjectToken::OCODE_STRLEN:            *out << "OCODE_STRLEN";            break;
 	case ObjectToken::OCODE_SWAP:              *out << "OCODE_SWAP";              break;
+
+	case ObjectToken::OCODE_ADDSTACK_IMM:      *out << "OCODE_ADDSTACK_IMM";      break;
+	case ObjectToken::OCODE_ASSIGNSTACKVAR:    *out << "OCODE_ASSIGNSTACKVAR";    break;
+	case ObjectToken::OCODE_PUSHSTACKVAR:      *out << "OCODE_PUSHSTACKVAR";      break;
+	case ObjectToken::OCODE_SUBSTACK_IMM:      *out << "OCODE_SUBSTACK_IMM";      break;
 
 	case ObjectToken::OCODE_NONE:              *out << "OCODE_NONE";              break;
 	}

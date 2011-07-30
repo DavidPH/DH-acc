@@ -169,7 +169,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_const(Sourc
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_delay(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
-	return create_root_delay(make_expression(in, blocks, context), token.getPosition());
+	return create_root_delay(make_expression(in, blocks, context), context, token.getPosition());
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_if(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {

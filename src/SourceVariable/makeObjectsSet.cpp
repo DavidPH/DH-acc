@@ -43,6 +43,10 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 
 	switch (_sc)
 	{
+	case SC_AUTO:
+		ocode = ObjectToken::OCODE_ASSIGNSTACKVAR;
+		goto sc_register_case;
+
 	case SC_CONSTANT:
 		throw SourceException("makeObjectsSet on SC_CONSTANT", position, "SourceVariable");
 
@@ -63,16 +67,14 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 			break;
 
 		case VT_ARRAY:
-			throw SourceException("makeObjectsSet on register VT_ARRAY", position, "SourceVariable");
-
-		case VT_ASMFUNC:
-		case VT_VOID:
-			break;
-
 		case VT_BLOCK:
 		case VT_STRUCT:
 			for (size_t i(type->types.size()); i--;)
 				makeObjectsSet(objects, position, type->types[i], address);
+			break;
+
+		case VT_ASMFUNC:
+		case VT_VOID:
 			break;
 		}
 		break;
@@ -157,6 +159,9 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions,
 
 	switch (_sc)
 	{
+	case SC_AUTO:
+		throw SourceException("makeObjectsSetArray on SC_AUTO", position, "SourceVariable");
+
 	case SC_CONSTANT:
 		throw SourceException("makeObjectsSetArray on SC_CONSTANT", position, "SourceVariable");
 
@@ -213,9 +218,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 
 	switch (_sc)
 	{
-	case SC_CONSTANT:
-		throw SourceException("attempt to set SC_CONSTANT", position, "SourceVariable");
-
+	case SC_AUTO:
 	case SC_REGISTER:
 	case SC_REGISTER_GLOBAL:
 	case SC_REGISTER_MAP:
@@ -256,6 +259,9 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 			break;
 		}
 		break;
+
+	case SC_CONSTANT:
+		throw SourceException("attempt to set SC_CONSTANT", position, "SourceVariable");
 	}
 }
 
@@ -265,6 +271,7 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, int * address, s
 
 	switch (_sc)
 	{
+	case SC_AUTO:
 	case SC_CONSTANT:
 	case SC_REGISTER:
 	case SC_REGISTER_GLOBAL:

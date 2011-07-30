@@ -32,6 +32,9 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 
 	switch (_sc)
 	{
+	case SC_AUTO:
+		throw SourceException("makeObject on SC_AUTO", position, "SourceVariable");
+
 	case SC_CONSTANT:
 		switch (_type->type)
 		{

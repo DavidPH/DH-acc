@@ -112,7 +112,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 			}
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-			expr = create_branch_call(expr, args, token.getPosition());
+			expr = create_branch_call(expr, args, context, token.getPosition());
 		}
 			break;
 

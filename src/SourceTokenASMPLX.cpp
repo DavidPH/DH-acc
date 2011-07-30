@@ -171,6 +171,7 @@ void SourceTokenASMPLX::init()
 
 	// BinaryTokenACS
 	DO_INIT(ADD,             0);
+	DO_INIT(ADDWORLDVAR,     1);
 	DO_INIT(ASSIGNMAPVAR,    1);
 	DO_INIT(ASSIGNSCRIPTVAR, 1);
 	DO_INIT(ASSIGNWORLDVAR,  1);
@@ -209,6 +210,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(SHIFTL,          0);
 	DO_INIT(SHIFTR,          0);
 	DO_INIT(SUB,             0);
+	DO_INIT(SUBWORLDVAR,     1);
 	DO_INIT(SUSPEND,         0);
 	DO_INIT(TERMINATE,       0);
 
@@ -235,6 +237,12 @@ void SourceTokenASMPLX::init()
 	DO_INIT(SETRESULTVALUE,    0);
 	DO_INIT(STRLEN,            0);
 	DO_INIT(SWAP,              0);
+
+	// ObjectToken
+	DO_INIT(ADDSTACK_IMM,   1);
+	DO_INIT(ASSIGNSTACKVAR, 1);
+	DO_INIT(PUSHSTACKVAR,   1);
+	DO_INIT(SUBSTACK_IMM,   1);
 
 	#undef DO_INIT
 }

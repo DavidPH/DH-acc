@@ -27,7 +27,7 @@
 
 
 
-void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position) const
+void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position) const
 {
 	objects->setPosition(position);
 
@@ -35,7 +35,7 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 	{
 	case VT_ACSFUNC:
 		if (_sc == SC_CONSTANT)
-			SourceExpression::make_objects_call_acsfunc(objects, _data.vdACSFunc, args, position);
+			SourceExpression::make_objects_call_acsfunc(objects, _data.vdACSFunc, args, stack, position);
 		else
 			throw SourceException("non-constant acsfuncs not yet supported", position, "SourceVariable");
 		break;
@@ -73,7 +73,7 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 
 	case VT_SCRIPT:
 		makeObjectsGet(objects, position);
-		SourceExpression::make_objects_call_script(objects, _type, args, position);
+		SourceExpression::make_objects_call_script(objects, _type, args, stack, position);
 		break;
 	}
 }
