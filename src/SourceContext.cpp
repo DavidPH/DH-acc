@@ -66,14 +66,14 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 		break;
 
 	case SourceVariable::SC_CONSTANT:
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		break;
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
-	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-	case SourceVariable::SC_REGISTERARRAY_MAP:
-	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		if (_parent)
 			_parent->addCount(count, sc);
 		else
@@ -100,14 +100,14 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 		break;
 
 	case SourceVariable::SC_CONSTANT:
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		break;
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
-	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-	case SourceVariable::SC_REGISTERARRAY_MAP:
-	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		if (limit > _limit[sc])
 			_limit[sc] = limit;
 
@@ -156,14 +156,14 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
 			return _count[sc];
 
 	case SourceVariable::SC_CONSTANT:
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		return 0;
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
-	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-	case SourceVariable::SC_REGISTERARRAY_MAP:
-	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		if (_parent)
 			return _parent->getCount(sc) + _count[sc];
 		else
@@ -190,12 +190,12 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
-	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-	case SourceVariable::SC_REGISTERARRAY_MAP:
-	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		return _limit[sc];
 
 	case SourceVariable::SC_CONSTANT:
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		return 0;
 	}
 
@@ -280,13 +280,19 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Sourc
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
-	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		ObjectExpression::add_symbol(nameObject, ObjectExpression::create_value_int(getCount(sc), position));
 		break;
 
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+		ObjectExpression::add_registerarray_global(nameObject, type->size());
+		break;
+
 	case SourceVariable::SC_REGISTERARRAY_MAP:
-		ObjectExpression::add_registerarray_map(nameObject, getCount(sc), type->size());
+		ObjectExpression::add_registerarray_map(nameObject, type->size());
+		break;
+
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
+		ObjectExpression::add_registerarray_world(nameObject, type->size());
 		break;
 	}
 

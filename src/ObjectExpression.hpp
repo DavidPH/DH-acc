@@ -122,7 +122,14 @@ public:
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
 
-	static void add_registerarray_map(std::string const & name, int_t number, int_t size);
+	static void add_registerarray_global(std::string const & name, int_t size);
+	static void add_registerarray_global(std::string const & name, int_t size, int_t number);
+
+	static void add_registerarray_map(std::string const & name, int_t size);
+	static void add_registerarray_map(std::string const & name, int_t size, int_t number);
+
+	static void add_registerarray_world(std::string const & name, int_t size);
+	static void add_registerarray_world(std::string const & name, int_t size, int_t number);
 
 	static void add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount);
 	static void add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount, int_t number);
@@ -194,11 +201,20 @@ protected:
 
 
 private:
+	static void do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<int_t, bool> * registerarrayUsed);
+
+	static int_t get_registerarray_number(std::map<int_t, bool> * registerarrayUsed);
+
 	static int_t get_script_number();
 
 	static std::vector<ACSFunc> _acsfunc_table;
 	static int32_t _address_count;
+	static std::vector<RegisterArray> _registerarray_global_table;
+	static std::map<int_t, bool> _registerarray_global_used;
 	static std::vector<RegisterArray> _registerarray_map_table;
+	static std::map<int_t, bool> _registerarray_map_used;
+	static std::vector<RegisterArray> _registerarray_world_table;
+	static std::map<int_t, bool> _registerarray_world_used;
 	static std::vector<Script> _script_table;
 	static std::map<int_t, bool> _script_used;
 	static std::vector<String> _string_table;

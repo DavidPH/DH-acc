@@ -30,7 +30,12 @@
 
 std::vector<ObjectExpression::ACSFunc> ObjectExpression::_acsfunc_table;
 int32_t ObjectExpression::_address_count;
+std::vector<ObjectExpression::RegisterArray> ObjectExpression::_registerarray_global_table;
+std::map<ObjectExpression::int_t, bool> ObjectExpression::_registerarray_global_used;
 std::vector<ObjectExpression::RegisterArray> ObjectExpression::_registerarray_map_table;
+std::map<ObjectExpression::int_t, bool> ObjectExpression::_registerarray_map_used;
+std::vector<ObjectExpression::RegisterArray> ObjectExpression::_registerarray_world_table;
+std::map<ObjectExpression::int_t, bool> ObjectExpression::_registerarray_world_used;
 std::vector<ObjectExpression::Script> ObjectExpression::_script_table;
 std::map<ObjectExpression::int_t, bool> ObjectExpression::_script_used;
 std::vector<ObjectExpression::String> ObjectExpression::_string_table;
@@ -59,10 +64,44 @@ void ObjectExpression::add_label(std::string const & symbol)
 	add_symbol(symbol, create_value_int(_address_count, SourcePosition::none));
 }
 
-void ObjectExpression::add_registerarray_map(std::string const & name, int_t number, int_t size)
+void ObjectExpression::add_registerarray_global(std::string const & name, int_t size)
+{
+	RegisterArray r = {name, -1, size};
+	_registerarray_global_table.push_back(r);
+}
+void ObjectExpression::add_registerarray_global(std::string const & name, int_t size, int_t number)
+{
+	RegisterArray r = {name, number, size};
+	_registerarray_global_table.push_back(r);
+	_registerarray_global_used[number] = true;
+
+	add_symbol(name, create_value_int(number, SourcePosition::none));
+}
+
+void ObjectExpression::add_registerarray_map(std::string const & name, int_t size)
+{
+	RegisterArray r = {name, -1, size};
+	_registerarray_map_table.push_back(r);
+}
+void ObjectExpression::add_registerarray_map(std::string const & name, int_t size, int_t number)
 {
 	RegisterArray r = {name, number, size};
 	_registerarray_map_table.push_back(r);
+	_registerarray_map_used[number] = true;
+
+	add_symbol(name, create_value_int(number, SourcePosition::none));
+}
+
+void ObjectExpression::add_registerarray_world(std::string const & name, int_t size)
+{
+	RegisterArray r = {name, -1, size};
+	_registerarray_world_table.push_back(r);
+}
+void ObjectExpression::add_registerarray_world(std::string const & name, int_t size, int_t number)
+{
+	RegisterArray r = {name, number, size};
+	_registerarray_world_table.push_back(r);
+	_registerarray_world_used[number] = true;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
@@ -105,8 +144,24 @@ void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression *
 	_symbol_table[symbol] = value;
 }
 
+void ObjectExpression::do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<int_t, bool> * registerarrayUsed)
+{
+	for (size_t i(0); i < registerarrayTable->size(); ++i)
+	{
+		if ((*registerarrayTable)[i].number == -1)
+		{
+			(*registerarrayTable)[i].number = get_registerarray_number(registerarrayUsed);
+
+			add_symbol((*registerarrayTable)[i].name, create_value_int((*registerarrayTable)[i].number, SourcePosition::none));
+		}
+	}
+}
 void ObjectExpression::do_deferred_allocation()
 {
+	do_deferred_allocation_registerarray(&_registerarray_global_table, &_registerarray_global_used);
+	do_deferred_allocation_registerarray(&_registerarray_map_table, &_registerarray_map_used);
+	do_deferred_allocation_registerarray(&_registerarray_world_table, &_registerarray_world_used);
+
 	for (size_t i(0); i < _script_table.size(); ++i)
 	{
 		if (_script_table[i].number == -1)
@@ -205,6 +260,18 @@ ObjectExpression::Script const & ObjectExpression::get_script(int32_t const inde
 int32_t ObjectExpression::get_script_count()
 {
 	return (int32_t)_script_table.size();
+}
+
+ObjectExpression::int_t ObjectExpression::get_registerarray_number(std::map<int_t, bool> * registerarrayUsed)
+{
+	int_t registerarrayUsedLast(0);
+
+	while (registerarrayUsed->find(registerarrayUsedLast) != registerarrayUsed->end() && registerarrayUsedLast < 65535) ++registerarrayUsedLast;
+
+	if (registerarrayUsedLast == 65535) throw SourceException("no more registerarray numbers", SourcePosition::none, "ObjectExpression");
+
+	(*registerarrayUsed)[registerarrayUsedLast] = true;
+	return registerarrayUsedLast;
 }
 
 ObjectExpression::int_t ObjectExpression::get_script_number()
