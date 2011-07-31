@@ -384,9 +384,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_var(SourceT
 	SourceVariable::StorageClass sc(SourceVariable::get_StorageClass(in->get(SourceTokenC::TT_IDENTIFIER)));
 	SourceVariable::VariableType const * type(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
 	std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
-	int addr(context->getCount(sc));
 
-	SourceVariable var(context->getLabel() + name, name, addr, sc, type, token.getPosition());
+	SourceVariable var(context->makeNameObject(sc, type, name, token.getPosition()), name, sc, type, token.getPosition());
 
 	context->addVariable(var);
 

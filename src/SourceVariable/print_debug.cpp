@@ -28,12 +28,6 @@
 void print_debug(std::ostream * const out, SourceVariable const & in)
 {
 	*out << "SourceVariable(";
-		*out << "address=(";
-		*out << in._address;
-		*out << ")";
-
-		*out << ", ";
-
 		*out << "nameObject=(";
 		print_debug(out, in._nameObject);
 		*out << ")";

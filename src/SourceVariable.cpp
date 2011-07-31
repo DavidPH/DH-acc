@@ -41,51 +41,51 @@ static struct _SourceVariable_init_c
 
 
 
-SourceVariable::SourceVariable() : _address(-1), _nameObject(), _nameSource(), _position(), _sc(), _type()
+SourceVariable::SourceVariable() : _nameObject(), _nameSource(), _position(), _sc(), _type()
 {
 
 }
-SourceVariable::SourceVariable(std::string const & nameObject, std::string const & nameSource, int const address, StorageClass const sc, VariableType const * const type, SourcePosition const & position) : _address(address), _nameObject(nameObject), _nameSource(nameSource), _position(position), _sc(sc), _type(type)
+SourceVariable::SourceVariable(std::string const & nameObject, std::string const & nameSource, StorageClass sc, VariableType const * type, SourcePosition const & position) : _nameObject(nameObject), _nameSource(nameSource), _position(position), _sc(sc), _type(type)
 {
 
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_ACSFunc const & vdACSFunc, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdACSFunc.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_ACSFunc const & vdACSFunc, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdACSFunc.type)
 {
 	_data.vdACSFunc = vdACSFunc;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_AsmFunc const & vdAsmFunc, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdAsmFunc.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_AsmFunc const & vdAsmFunc, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdAsmFunc.type)
 {
 	_data.vdAsmFunc = vdAsmFunc;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_Char const & vdChar, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdChar.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_Char const & vdChar, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdChar.type)
 {
 	_data.vdChar = vdChar;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_Int const & vdInt, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdInt.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_Int const & vdInt, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdInt.type)
 {
 	_data.vdInt = vdInt;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_LnSpec const & vdLnSpec, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdLnSpec.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_LnSpec const & vdLnSpec, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdLnSpec.type)
 {
 	_data.vdLnSpec = vdLnSpec;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_Native const & vdNative, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdNative.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_Native const & vdNative, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdNative.type)
 {
 	_data.vdNative = vdNative;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_Real const & vdReal, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdReal.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_Real const & vdReal, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdReal.type)
 {
 	_data.vdReal = vdReal;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position) : _address(-1), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdScript.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdScript.type)
 {
 	_data.vdScript = vdScript;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_String const & vdString, SourcePosition const & position, std::string const & nameObject) : _address(-1), _nameObject(nameObject), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdString.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_String const & vdString, SourcePosition const & position, std::string const & nameObject) : _nameObject(nameObject), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdString.type)
 {
 	_data.vdString = vdString;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableType const * type, ObjectExpression * expr, SourcePosition const & position) : _address(-1), _expr(expr), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(type)
+SourceVariable::SourceVariable(std::string const & name, VariableType const * type, ObjectExpression * expr, SourcePosition const & position) : _expr(expr), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(type)
 {
 
 }
@@ -220,11 +220,6 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::
 SourceVariable::VariableType const * SourceVariable::get_VariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
 	return get_VariableType_auto(VT_SCRIPT, callType, _types[VT_VOID], types);
-}
-
-int SourceVariable::getAddress() const
-{
-	return _address;
 }
 
 SourceVariable::StorageClass SourceVariable::getClass() const

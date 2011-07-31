@@ -64,6 +64,8 @@ void ObjectExpression::add_registerarray_map(std::string const & name, int_t num
 {
 	RegisterArray r = {name, number, size};
 	_registerarray_map_table.push_back(r);
+
+	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
 void ObjectExpression::add_script(std::string const & label, int32_t number, ScriptType type, int32_t args, int vars, int flags)

@@ -31,12 +31,13 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 {
 	objects->setPosition(position);
 
+	ObjectExpression::Pointer addressBase;
 	int address;
-	makeObjectsSetPrep(objects, &address, NULL);
-	makeObjectsSet(objects, position, _type, &address, false);
+	makeObjectsSetPrep(objects, NULL, &addressBase, &address);
+	makeObjectsSet(objects, position, _type, addressBase, &address, false);
 	makeObjectsGet(objects, position);
 }
-void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address, bool dimensioned) const
+void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address, bool dimensioned) const
 {
 	bool                    array(false);
 	ObjectToken::ObjectCode ocode;
@@ -70,16 +71,16 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		case VT_SCRIPT:
 		case VT_STRING:
 			if (array)
-				objects->addToken(ocode, objects->getValue(_address), objects->getValue((*address)--));
+				objects->addToken(ocode, objects->getValue(_nameObject), objects->getValueAdd(addressBase, (*address)--));
 			else
-				objects->addToken(ocode, objects->getValue((*address)--));
+				objects->addToken(ocode, objects->getValueAdd(addressBase, (*address)--));
 			break;
 
 		case VT_ARRAY:
 		case VT_BLOCK:
 		case VT_STRUCT:
 			for (size_t i(type->types.size()); i--;)
-				makeObjectsSet(objects, position, type->types[i], address, dimensioned);
+				makeObjectsSet(objects, position, type->types[i], addressBase, address, dimensioned);
 			break;
 
 		case VT_ASMFUNC:
@@ -121,16 +122,17 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, std::vector<Sou
 {
 	objects->setPosition(position);
 
+	ObjectExpression::Pointer addressBase;
 	int address;
-	makeObjectsSetPrep(objects, &address, dimensions);
-	makeObjectsSetArray(objects, dimensions->size(), position, _type, &address);
+	makeObjectsSetPrep(objects, dimensions, &addressBase, &address);
+	makeObjectsSetArray(objects, dimensions->size(), position, _type, addressBase, &address);
 	makeObjectsGetArray(objects, dimensions, position);
 }
-void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, int * address) const
+void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
 {
 	if (dimensions == 0)
 	{
-		makeObjectsSet(objects, position, type, address, true);
+		makeObjectsSet(objects, position, type, addressBase, address, true);
 		return;
 	}
 
@@ -157,7 +159,7 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions,
 			throw SourceException("makeObjectsSetArray on non-VT_ARRAY", position, "SourceVariable");
 
 		case VT_ARRAY:
-			makeObjectsSetArray(objects, dimensions-1, position, type->refType, address);
+			makeObjectsSetArray(objects, dimensions-1, position, type->refType, addressBase, address);
 			break;
 		}
 		break;
@@ -177,17 +179,18 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 {
 	objects->setPosition(position);
 
+	ObjectExpression::Pointer addressBase;
 	int address;
 	std::vector<std::string> namesOriginal(*names);
-	makeObjectsSetPrep(objects, &address, NULL);
-	makeObjectsSetMember(objects, names, position, _type, &address);
+	makeObjectsSetPrep(objects, NULL, &addressBase, &address);
+	makeObjectsSetMember(objects, names, position, _type, addressBase, &address);
 	makeObjectsGetMember(objects, &namesOriginal, position);
 }
-void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, int * address) const
+void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
 {
 	if (names->empty())
 	{
-		makeObjectsSet(objects, position, type, address, false);
+		makeObjectsSet(objects, position, type, addressBase, address, false);
 		return;
 	}
 
@@ -223,7 +226,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 				if (type->names[i] == names->back())
 				{
 					names->pop_back();
-					makeObjectsSetMember(objects, names, position, type->types[i], address);
+					makeObjectsSetMember(objects, names, position, type->types[i], addressBase, address);
 					return;
 				}
 				else
@@ -240,7 +243,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 	}
 }
 
-void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, int * address, std::vector<SourceExpression::Pointer> * dimensions) const
+void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions, ObjectExpression::Pointer * addressBase, int * address) const
 {
 	switch (_sc)
 	{
@@ -277,11 +280,13 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, int * address, s
 					type = type->refType;
 			}
 
+			*addressBase = objects->getValue(0);
 			*address = type->size() - 1;
 		}
 		else if (_sc == SC_AUTO)
 		{
-			*address = _address + _type->size() - 1;
+			*addressBase = objects->getValue(_nameObject);
+			*address = _type->size() - 1;
 		}
 		else
 		{
@@ -289,6 +294,7 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, int * address, s
 
 			objects->addToken(ObjectToken::OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
+			*addressBase = objects->getValue(0);
 			*address = _type->size() - 1;
 		}
 
@@ -299,7 +305,8 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, int * address, s
 	case SC_REGISTER_GLOBAL:
 	case SC_REGISTER_MAP:
 	case SC_REGISTER_WORLD:
-		*address = _address + _type->size() - 1;
+		*addressBase = objects->getValue(_nameObject);
+		*address = _type->size() - 1;
 		break;
 	}
 }

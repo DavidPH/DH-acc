@@ -44,11 +44,14 @@ public:
 	void addToken(ObjectToken::ObjectCode code, ObjectExpression * arg0, ObjectExpression * arg1);
 	void addTokenPushZero();
 
-	ObjectExpression::Pointer getValue(ObjectExpression::float_t f);
-	ObjectExpression::Pointer getValue(ObjectExpression::int_t i);
-	ObjectExpression::Pointer getValue(int i);
-	ObjectExpression::Pointer getValue(std::string const & label);
-	ObjectExpression::Pointer getValue(unsigned int i);
+	ObjectExpression::Pointer getValue(ObjectExpression::float_t f) const;
+	ObjectExpression::Pointer getValue(ObjectExpression::int_t i) const;
+	ObjectExpression::Pointer getValue(int i) const;
+	ObjectExpression::Pointer getValue(ObjectExpression * expr) const;
+	ObjectExpression::Pointer getValue(std::string const & label) const;
+	ObjectExpression::Pointer getValue(unsigned int i) const;
+
+	template<typename T1, typename T2> ObjectExpression::Pointer getValueAdd(T1 const & l, T2 const & r) const;
 
 	ObjectToken const & operator [] (ObjectExpression::int_t index) const;
 
@@ -62,6 +65,13 @@ private:
 	std::vector<std::string> _labels;
 	std::vector<ObjectToken> _tokens;
 };
+
+
+
+template<typename T1, typename T2> inline ObjectExpression::Pointer ObjectVector::getValueAdd(T1 const & l, T2 const & r) const
+{
+	return ObjectExpression::create_binary_add(getValue(l), getValue(r), _position);
+}
 
 
 

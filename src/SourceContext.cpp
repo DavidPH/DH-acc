@@ -136,7 +136,6 @@ void SourceContext::addVariable(SourceVariable const & var)
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_MAP:
-		ObjectExpression::add_registerarray_map(var.getNameObject(), var.getAddress(), var.getType()->size());
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		// Register arrays only require a single allocation regardless of size.
@@ -262,6 +261,36 @@ std::string SourceContext::makeLabelShort()
 	oss << "block" << ++_labelCount;
 
 	return oss.str();
+}
+
+std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, SourcePosition const & position) const
+{
+	std::string nameObject(getLabel() + nameSource);
+
+	switch (sc)
+	{
+	case SourceVariable::SC_AUTO:
+	case SourceVariable::SC_REGISTER:
+		ObjectExpression::add_symbol(nameObject, ObjectExpression::create_value_int(getCount(sc), position));
+		break;
+
+	case SourceVariable::SC_CONSTANT:
+		throw SourceException("makeNameObject on SC_CONSTANT", position, "SourceContext");
+
+	case SourceVariable::SC_REGISTER_GLOBAL:
+	case SourceVariable::SC_REGISTER_MAP:
+	case SourceVariable::SC_REGISTER_WORLD:
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
+		ObjectExpression::add_symbol(nameObject, ObjectExpression::create_value_int(getCount(sc), position));
+		break;
+
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+		ObjectExpression::add_registerarray_map(nameObject, getCount(sc), type->size());
+		break;
+	}
+
+	return nameObject;
 }
 
 void SourceContext::setReturnType(SourceVariable::VariableType const * returnType)

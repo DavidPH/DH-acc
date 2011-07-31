@@ -544,7 +544,7 @@ void BinaryTokenZDACS::write_registerarray(std::ostream * const out, ObjectExpre
 	{
 	case OUTPUT_ACSE:
 		write_32(out, r.number);
-		write_32(out, r.size+1);
+		write_32(out, r.size);
 		break;
 
 	default:

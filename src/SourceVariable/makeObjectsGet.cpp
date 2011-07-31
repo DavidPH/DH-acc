@@ -30,11 +30,12 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 {
 	objects->setPosition(position);
 
+	ObjectExpression::Pointer addressBase;
 	int address;
-	makeObjectsGetPrep(objects, &address, NULL);
-	makeObjectsGet(objects, position, _type, &address, false);
+	makeObjectsGetPrep(objects, NULL, &addressBase, &address);
+	makeObjectsGet(objects, position, _type, addressBase, &address, false);
 }
-void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, int * address, bool dimensioned) const
+void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address, bool dimensioned) const
 {
 	bool                    array(false);
 	ObjectToken::ObjectCode ocode;
@@ -91,16 +92,16 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		case VT_SCRIPT:
 		case VT_STRING:
 			if (array)
-				objects->addToken(ocode, objects->getValue(_address), objects->getValue((*address)++));
+				objects->addToken(ocode, objects->getValue(_nameObject), objects->getValueAdd(addressBase, (*address)++));
 			else
-				objects->addToken(ocode, objects->getValue((*address)++));
+				objects->addToken(ocode, objects->getValueAdd(addressBase, (*address)++));
 			break;
 
 		case VT_ARRAY:
 		case VT_BLOCK:
 		case VT_STRUCT:
 			for (size_t i(0); i < type->types.size(); ++i)
-				makeObjectsGet(objects, position, type->types[i], address, dimensioned);
+				makeObjectsGet(objects, position, type->types[i], addressBase, address, dimensioned);
 			break;
 
 		case VT_ASMFUNC:
@@ -142,15 +143,16 @@ void SourceVariable::makeObjectsGetArray(ObjectVector * objects, std::vector<Cou
 {
 	objects->setPosition(position);
 
+	ObjectExpression::Pointer addressBase;
 	int address;
-	makeObjectsGetPrep(objects, &address, dimensions);
-	makeObjectsGetArray(objects, dimensions->size(), position, _type, &address);
+	makeObjectsGetPrep(objects, dimensions, &addressBase, &address);
+	makeObjectsGetArray(objects, dimensions->size(), position, _type, addressBase, &address);
 }
-void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, int * address) const
+void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
 {
 	if (dimensions == 0)
 	{
-		makeObjectsGet(objects, position, type, address, true);
+		makeObjectsGet(objects, position, type, addressBase, address, true);
 		return;
 	}
 
@@ -177,7 +179,7 @@ void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions,
 			throw SourceException("makeObjectsGetArray on non-VT_ARRAY", position, "SourceVariable");
 
 		case VT_ARRAY:
-			makeObjectsGetArray(objects, dimensions-1, position, type->refType, address);
+			makeObjectsGetArray(objects, dimensions-1, position, type->refType, addressBase, address);
 			break;
 		}
 		break;
@@ -197,15 +199,16 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 {
 	objects->setPosition(position);
 
+	ObjectExpression::Pointer addressBase;
 	int address;
-	makeObjectsGetPrep(objects, &address, NULL);
-	makeObjectsGetMember(objects, names, position, _type, &address);
+	makeObjectsGetPrep(objects, NULL, &addressBase, &address);
+	makeObjectsGetMember(objects, names, position, _type, addressBase, &address);
 }
-void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, int * address) const
+void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
 {
 	if (names->empty())
 	{
-		makeObjectsGet(objects, position, type, address, false);
+		makeObjectsGet(objects, position, type, addressBase, address, false);
 		return;
 	}
 
@@ -241,7 +244,7 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 				if (type->names[i] == names->back())
 				{
 					names->pop_back();
-					makeObjectsGetMember(objects, names, position, type->types[i], address);
+					makeObjectsGetMember(objects, names, position, type->types[i], addressBase, address);
 					return;
 				}
 				else
@@ -258,13 +261,13 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 	}
 }
 
-void SourceVariable::makeObjectsGetPrep(ObjectVector * objects, int * address, std::vector<CounterPointer<SourceExpression> > * dimensions) const
+void SourceVariable::makeObjectsGetPrep(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, ObjectExpression::Pointer * addressBase, int * address) const
 {
 	switch (_sc)
 	{
 	case SC_AUTO:
-		makeObjectsSetPrep(objects, address, dimensions);
-		*address = dimensions ? 0 : _address;
+		makeObjectsSetPrep(objects, dimensions, addressBase, address);
+		*address = 0;
 		break;
 
 	case SC_CONSTANT:
@@ -272,13 +275,15 @@ void SourceVariable::makeObjectsGetPrep(ObjectVector * objects, int * address, s
 	case SC_REGISTER_GLOBAL:
 	case SC_REGISTER_MAP:
 	case SC_REGISTER_WORLD:
-		*address = _address;
+		*addressBase = objects->getValue(_nameObject);
+		*address = 0;
 		break;
 
 	case SC_REGISTERARRAY_GLOBAL:
 	case SC_REGISTERARRAY_MAP:
 	case SC_REGISTERARRAY_WORLD:
-		makeObjectsSetPrep(objects, address, dimensions);
+		makeObjectsSetPrep(objects, dimensions, addressBase, address);
+		*addressBase = objects->getValue(0);
 		*address = 0;
 		break;
 	}

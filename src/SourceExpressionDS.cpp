@@ -181,9 +181,7 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 
 		if (argContext && argNames)
 		{
-			int addr(argContext->getCount(sc));
-
-			argContext->addVariable(SourceVariable(argNames->back(), argNames->back(), addr, sc, argTypes->back(), SourcePosition::none));
+			argContext->addVariable(SourceVariable(argContext->makeNameObject(sc, argTypes->back(), argNames->back(), SourcePosition::none), argNames->back(), sc, argTypes->back(), SourcePosition::none));
 		}
 
 		if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)

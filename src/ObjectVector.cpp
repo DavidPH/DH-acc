@@ -68,23 +68,27 @@ void ObjectVector::addTokenPushZero()
 	addToken(ObjectToken::OCODE_PUSHNUMBER, getValue(0));
 }
 
-ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression::float_t f)
+ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression::float_t f) const
 {
 	return ObjectExpression::create_value_float(f, _position);
 }
-ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression::int_t i)
+ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression::int_t i) const
 {
 	return ObjectExpression::create_value_int(i, _position);
 }
-ObjectExpression::Pointer ObjectVector::getValue(int i)
+ObjectExpression::Pointer ObjectVector::getValue(int i) const
 {
 	return getValue((ObjectExpression::int_t)i);
 }
-ObjectExpression::Pointer ObjectVector::getValue(std::string const & label)
+ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression * expr) const
+{
+	return expr;
+}
+ObjectExpression::Pointer ObjectVector::getValue(std::string const & label) const
 {
 	return ObjectExpression::create_value_symbol(label, _position);
 }
-ObjectExpression::Pointer ObjectVector::getValue(unsigned int i)
+ObjectExpression::Pointer ObjectVector::getValue(unsigned int i) const
 {
 	return getValue((ObjectExpression::int_t)i);
 }
