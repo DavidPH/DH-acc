@@ -42,10 +42,6 @@ SourceContext::SourceContext() : _labelCount(0), _parent(NULL), _returnType(Sour
 	// Stack pointer and array temporary.
 	_count[SourceVariable::SC_REGISTER_WORLD] = 2;
 	_limit[SourceVariable::SC_REGISTER_WORLD] = 2;
-
-	// Pointer-addressable space.
-	_count[SourceVariable::SC_REGISTERARRAY_GLOBAL] = 1;
-	_limit[SourceVariable::SC_REGISTERARRAY_GLOBAL] = 1;
 }
 SourceContext::SourceContext(SourceContext * parent, ContextType type) : _label(parent->makeLabelShort()), _labelCount(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK)
 {
@@ -293,6 +289,41 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Sourc
 
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		ObjectExpression::add_registerarray_world(nameObject, type->size());
+		break;
+	}
+
+	return nameObject;
+}
+std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, ObjectExpression::int_t address, SourcePosition const & position) const
+{
+	std::string nameObject(getLabel() + nameSource);
+
+	switch (sc)
+	{
+	case SourceVariable::SC_AUTO:
+	case SourceVariable::SC_REGISTER:
+		ObjectExpression::add_symbol(nameObject, ObjectExpression::create_value_int(getCount(sc), position));
+		break;
+
+	case SourceVariable::SC_CONSTANT:
+		throw SourceException("makeNameObject on SC_CONSTANT", position, "SourceContext");
+
+	case SourceVariable::SC_REGISTER_GLOBAL:
+	case SourceVariable::SC_REGISTER_MAP:
+	case SourceVariable::SC_REGISTER_WORLD:
+		ObjectExpression::add_symbol(nameObject, ObjectExpression::create_value_int(getCount(sc), position));
+		break;
+
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+		ObjectExpression::add_registerarray_global(nameObject, type->size(), address);
+		break;
+
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+		ObjectExpression::add_registerarray_map(nameObject, type->size(), address);
+		break;
+
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
+		ObjectExpression::add_registerarray_world(nameObject, type->size(), address);
 		break;
 	}
 

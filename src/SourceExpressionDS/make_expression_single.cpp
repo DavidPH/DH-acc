@@ -397,7 +397,20 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_var(SourceT
 	SourceVariable::VariableType const * type(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
 	std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
-	SourceVariable var(context->makeNameObject(sc, type, name, token.getPosition()), name, sc, type, token.getPosition());
+	std::string nameObject;
+	if (in->peek().getType() == SourceTokenC::TT_OP_AT)
+	{
+		in->get(SourceTokenC::TT_OP_AT);
+		ObjectExpression::int_t address = ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER));
+		nameObject = context->makeNameObject(sc, type, name, address, token.getPosition());
+	}
+	else
+	{
+		nameObject = context->makeNameObject(sc, type, name, token.getPosition());
+	}
+
+
+	SourceVariable var(nameObject, name, sc, type, token.getPosition());
 
 	context->addVariable(var);
 

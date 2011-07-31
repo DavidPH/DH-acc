@@ -62,6 +62,7 @@ public:
 	std::string makeLabel();
 
 	std::string makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, SourcePosition const & position) const;
+	std::string makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, ObjectExpression::int_t address, SourcePosition const & position) const;
 
 	void setReturnType(SourceVariable::VariableType const * returnType);
 

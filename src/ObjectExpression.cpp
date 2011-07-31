@@ -158,6 +158,9 @@ void ObjectExpression::do_deferred_allocation_registerarray(std::vector<Register
 }
 void ObjectExpression::do_deferred_allocation()
 {
+	// Pointer-addressable space.
+	_registerarray_global_used[0] = true;
+
 	do_deferred_allocation_registerarray(&_registerarray_global_table, &_registerarray_global_used);
 	do_deferred_allocation_registerarray(&_registerarray_map_table, &_registerarray_map_used);
 	do_deferred_allocation_registerarray(&_registerarray_world_table, &_registerarray_world_used);
