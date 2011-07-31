@@ -391,6 +391,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_var(SourceT
 
 	return create_value_variable(var, token.getPosition());
 }
+SourceExpression::Pointer SourceExpressionDS::make_expression_single_void(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+{
+	return create_value_cast(make_expression(in, blocks, context), SourceVariable::get_VariableType(SourceVariable::VT_VOID), token.getPosition());
+}
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_while(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);

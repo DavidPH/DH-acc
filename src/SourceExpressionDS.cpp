@@ -53,6 +53,7 @@ void SourceExpressionDS::init()
 	_expression_single_handlers["struct"]  = make_expression_single_struct;
 	_expression_single_handlers["typedef"] = make_expression_single_typedef;
 	_expression_single_handlers["var"]     = make_expression_single_var;
+	_expression_single_handlers["void"]    = make_expression_single_void;
 	_expression_single_handlers["while"]   = make_expression_single_while;
 }
 
