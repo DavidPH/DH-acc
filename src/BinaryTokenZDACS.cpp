@@ -26,6 +26,8 @@
 #include "ost_type.hpp"
 #include "SourceException.hpp"
 
+#include <sstream>
+
 
 
 uintptr_t BinaryTokenZDACS::_arg_counts[BCODE_NONE];
@@ -426,13 +428,17 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 		ObjectExpression::add_address_count(size);
 	}
 
+	std::string chunk;
+	std::ostringstream chunkout;
+
+	ObjectExpression::int_t const acsfuncCount(ObjectExpression::get_acsfunc_count());
+	ObjectExpression::int_t const registerarrayMapCount(ObjectExpression::get_registerarray_map_count());
+	int32_t const scriptCount(ObjectExpression::get_script_count());
+	int32_t const stringCount(ObjectExpression::get_string_count());
+
 	switch (output_type)
 	{
 	case OUTPUT_ACS0:
-	{
-		int32_t const scriptCount(ObjectExpression::get_script_count());
-		int32_t const stringCount(ObjectExpression::get_string_count());
-
 		// 0
 		*out << 'A' << 'C' << 'S' << '\0';
 		write_32(out, directoryOffset);
@@ -458,79 +464,124 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 		// directoryOffset+4+(scriptCount*12)+4+(stringCount*4)
 		for (int32_t index(0); index < stringCount; ++index)
 			write_string(out, ObjectExpression::get_string(index).string);
-	}
+
 		break;
 
 	case OUTPUT_ACSE:
-	{
-		ObjectExpression::int_t const acsfuncCount(ObjectExpression::get_acsfunc_count());
-		ObjectExpression::int_t const registerarrayMapCount(ObjectExpression::get_registerarray_map_count());
-		int32_t const scriptCount(ObjectExpression::get_script_count());
-		int32_t const stringCount(ObjectExpression::get_string_count());
-
+		// Header
 		*out << 'A' << 'C' << 'S' << 'E';
 		write_32(out, directoryOffset);
 
+		// Instructions
 		for (uintptr_t index(0); index < instructions.size(); ++index)
 			instructions[index].write(out);
 
-		if (acsfuncCount)
-		{
-			*out << 'F' << 'U' << 'N' << 'C';
-			write_32(out, acsfuncCount*8);
+		// ARAY - Map Array Declarations
+		chunkout.str("");
 
-			for (ObjectExpression::int_t index(0); index < acsfuncCount; ++index)
-				write_acsfunc(out, ObjectExpression::get_acsfunc(index));
-		}
+		for (ObjectExpression::int_t index(0); index < registerarrayMapCount; ++index)
+			write_registerarray(&chunkout, ObjectExpression::get_registerarray_map(index));
 
-		if (registerarrayMapCount)
+		chunk = chunkout.str();
+
+		if (chunk.size())
 		{
 			*out << 'A' << 'R' << 'A' << 'Y';
-			write_32(out, registerarrayMapCount*8);
+			write_32(out, chunk.size());
 
-			for (ObjectExpression::int_t index(0); index < registerarrayMapCount; ++index)
-				write_registerarray(out, ObjectExpression::get_registerarray_map(index));
+			*out << chunk;
 		}
 
-		if (scriptCount)
+		// FUNC - Functions
+		chunkout.str("");
+
+		for (ObjectExpression::int_t index(0); index < acsfuncCount; ++index)
+			write_acsfunc(&chunkout, ObjectExpression::get_acsfunc(index));
+
+		chunk = chunkout.str();
+
+		if (chunk.size())
+		{
+			*out << 'F' << 'U' << 'N' << 'C';
+			write_32(out, chunk.size());
+
+			*out << chunk;
+		}
+
+		// SPTR - Script Pointers
+		chunkout.str("");
+
+		for (int32_t index(0); index < scriptCount; ++index)
+			write_script(&chunkout, ObjectExpression::get_script(index));
+
+		chunk = chunkout.str();
+
+		if (chunk.size())
 		{
 			*out << 'S' << 'P' << 'T' << 'R';
-			write_32(out, scriptCount*12);
+			write_32(out, chunk.size());
 
-			for (int32_t index(0); index < scriptCount; ++index)
-				write_script(out, ObjectExpression::get_script(index));
-
-			*out << 'S' << 'F' << 'L' << 'G';
-			write_32(out, scriptCount*4);
-
-			for (int32_t index(0); index < scriptCount; ++index)
-				write_script_flags(out, ObjectExpression::get_script(index));
-
-			*out << 'S' << 'V' << 'C' << 'T';
-			write_32(out, scriptCount*4);
-
-			for (int32_t index(0); index < scriptCount; ++index)
-				write_script_vars(out, ObjectExpression::get_script(index));
+			*out << chunk;
 		}
+
+		// SFLG - Script Flags
+		chunkout.str("");
+
+		for (int32_t index(0); index < scriptCount; ++index)
+			write_script_flags(&chunkout, ObjectExpression::get_script(index));
+
+		chunk = chunkout.str();
+
+		if (chunk.size())
+		{
+			*out << 'S' << 'F' << 'L' << 'G';
+			write_32(out, chunk.size());
+
+			*out << chunk;
+		}
+
+		// STRL - String Literals
+		chunkout.str("");
 
 		if (stringCount)
 		{
-			int32_t const stringLength(ObjectExpression::get_string_length());
-
-			*out << 'S' << 'T' << 'R' << 'L';
-			write_32(out, 12 + (stringCount*4) + stringLength);
-
-			write_32(out, 0);
-			write_32(out, stringCount);
-			write_32(out, 0);
-
-			for (int32_t index(0); index < stringCount; ++index)
-				write_32(out, 12 + (stringCount*4) + ObjectExpression::get_string(index).offset);
-
-			for (int32_t index(0); index < stringCount; ++index)
-				write_string(out, ObjectExpression::get_string(index).string);
+			write_32(&chunkout, 0);
+			write_32(&chunkout, stringCount);
+			write_32(&chunkout, 0);
 		}
-	}
+
+		for (int32_t index(0); index < stringCount; ++index)
+			write_32(&chunkout, 12 + (stringCount*4) + ObjectExpression::get_string(index).offset);
+
+		for (int32_t index(0); index < stringCount; ++index)
+			write_string(&chunkout, ObjectExpression::get_string(index).string);
+
+		chunk = chunkout.str();
+
+		if (chunk.size())
+		{
+			*out << 'S' << 'T' << 'R' << 'L';
+			write_32(out, chunk.size());
+
+			*out << chunk;
+		}
+
+		// SVCT - Script Variable Counts
+		chunkout.str("");
+
+		for (int32_t index(0); index < scriptCount; ++index)
+			write_script_vars(&chunkout, ObjectExpression::get_script(index));
+
+		chunk = chunkout.str();
+
+		if (chunk.size())
+		{
+			*out << 'S' << 'V' << 'C' << 'T';
+			write_32(out, chunk.size());
+
+			*out << chunk;
+		}
+
 		break;
 
 	default:
