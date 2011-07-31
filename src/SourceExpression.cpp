@@ -282,8 +282,8 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 
 	if (typeTo->type == SourceVariable::VT_VOID)
 	{
-		for (size_t i(typeTo->size()); i--;)
-			objects->addTokenPushZero();
+		for (size_t i(typeFrom->size()); i--;)
+			objects->addToken(ObjectToken::OCODE_DROP);
 
 		return;
 	}

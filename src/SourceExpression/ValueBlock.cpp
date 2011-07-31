@@ -75,11 +75,19 @@ void SourceExpression_ValueBlock::makeObjectsCast(ObjectVector * objects, Source
 {
 	objects->addLabel(labels);
 
-	if (_expressions.size() != type->types.size())
-		throw SourceException("incorrect number of expressions to cast", position, getName());
+	if (type->type == SourceVariable::VT_VOID)
+	{
+		for (size_t i(0); i < _expressions.size(); ++i)
+			_expressions[i]->makeObjectsCast(objects, type);
+	}
+	else
+	{
+		if (_expressions.size() != type->types.size())
+			throw SourceException("incorrect number of expressions to cast", position, getName());
 
-	for (size_t i(0); i < _expressions.size(); ++i)
-		_expressions[i]->makeObjectsCast(objects, type->types[i]);
+		for (size_t i(0); i < _expressions.size(); ++i)
+			_expressions[i]->makeObjectsCast(objects, type->types[i]);
+	}
 }
 
 void SourceExpression_ValueBlock::makeObjectsGet(ObjectVector * objects) const

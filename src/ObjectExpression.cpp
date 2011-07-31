@@ -46,7 +46,7 @@ ObjectExpression::ObjectExpression(SourcePosition const & position) : position(p
 
 void ObjectExpression::add_acsfunc(std::string const & label, int_t argCount, int_t varCount, int_t retCount)
 {
-	ACSFunc f = {argCount, label, varCount, retCount};
+	ACSFunc f = {argCount, label, retCount, varCount};
 	_acsfunc_table.push_back(f);
 }
 
