@@ -66,10 +66,8 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 			return ObjectExpression::create_value_float(_data.vdReal.value, position);
 
 		case VT_STRING:
-			return ObjectExpression::create_value_symbol(_nameObject, position);
-
 		case VT_SCRIPT:
-			return ObjectExpression::create_value_int(_data.vdScript.number, position);
+			return ObjectExpression::create_value_symbol(_nameObject, position);
 		}
 		break;
 

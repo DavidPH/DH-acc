@@ -77,7 +77,7 @@ SourceVariable::SourceVariable(std::string const & name, VariableData_Real const
 {
 	_data.vdReal = vdReal;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdScript.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position, std::string const & nameObject) : _nameObject(nameObject), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdScript.type)
 {
 	_data.vdScript = vdScript;
 }

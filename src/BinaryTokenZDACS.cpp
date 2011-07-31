@@ -608,16 +608,16 @@ void BinaryTokenZDACS::write_script(std::ostream * const out, ObjectExpression::
 	switch (output_type)
 	{
 	case OUTPUT_ACS0:
-		write_32(out, (int32_t)(s.type * 1000) + (int32_t)s.number);
+		write_32(out, (int32_t)(s.stype * 1000) + (int32_t)s.number);
 		write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
-		write_32(out, s.args);
+		write_32(out, s.argCount);
 		break;
 
 	case OUTPUT_ACSE:
 		write_16(out, (int16_t)s.number);
-		write_16(out, (int16_t)s.type);
+		write_16(out, (int16_t)s.stype);
 		write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
-		write_32(out, s.args);
+		write_32(out, s.argCount);
 		break;
 
 	default:
@@ -645,7 +645,7 @@ void BinaryTokenZDACS::write_script_vars(std::ostream * const out, ObjectExpress
 	{
 	case OUTPUT_ACSE:
 		write_16(out, (int16_t)s.number);
-		write_16(out, (int16_t)s.vars);
+		write_16(out, (int16_t)s.varCount);
 		break;
 
 	default:

@@ -241,52 +241,25 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_return(Sour
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
+	// scriptContext
 	SourceContext scriptContext(context, SourceContext::CT_SCRIPT);
 
+	// scriptName
 	std::string scriptName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
-	SourceTokenC scriptNumberToken(in->get());
-	ObjectExpression::int_t scriptNumber;
-	if (scriptNumberToken.getType() == SourceTokenC::TT_INTEGER)
+	// scriptType
+	ObjectExpression::ScriptType scriptType;
+	if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
 	{
-		scriptNumber = ObjectExpression::get_int(scriptNumberToken);
-	}
-	else if (scriptNumberToken.getType() == SourceTokenC::TT_IDENTIFIER)
-	{
-		if (scriptNumberToken.getData() == "auto")
-		{
-			scriptNumber = ObjectExpression::get_script_number();
-		}
-		else
-		{
-			throw SourceException("expected 'auto'", token.getPosition(), "SourceExpressionDS");
-		}
+		SourceTokenC scriptTypeToken(in->get(SourceTokenC::TT_IDENTIFIER));
+		scriptType = ObjectExpression::get_ScriptType(scriptTypeToken.getData(), scriptTypeToken.getPosition());
 	}
 	else
 	{
-		throw SourceException("expected TT_NUMBER of TT_IDENTIFIER", token.getPosition(), "SourceExpressionDS");
-	}
-	ObjectExpression::reserve_script_number(scriptNumber);
-
-	// scriptName special cases
-	if (scriptName == "auto")
-	{
-		std::ostringstream oss;
-		oss << "script" << scriptNumber;
-		scriptName = oss.str();
-	}
-	else if (scriptName == "void")
-	{
-		std::ostringstream oss;
-		oss << "___script__" << scriptNumber << "__void___";
-		scriptName = oss.str();
+		scriptType = ObjectExpression::ST_CLOSED;
 	}
 
-	std::string scriptLabel(context->getLabel() + "script_" + scriptName);
-
-	SourceTokenC scriptTypeToken(in->get(SourceTokenC::TT_IDENTIFIER));
-	ObjectExpression::ScriptType scriptType(ObjectExpression::get_ScriptType(scriptTypeToken.getData(), scriptTypeToken.getPosition()));
-
+	// scriptFlags
 	int scriptFlags(0);
 	while (true)
 	{
@@ -301,28 +274,67 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 		scriptFlags |= ObjectExpression::get_ScriptFlag(token.getData(), token.getPosition());
 	}
 
+	// scriptArgTypes/Names/Return
 	std::vector<SourceVariable::VariableType const *> scriptArgTypes;
 	std::vector<std::string> scriptArgNames;
 	int scriptArgCount;
 	SourceVariable::VariableType const * scriptReturn;
 	make_expression_arglist(in, &scriptArgTypes, &scriptArgNames, &scriptArgCount, &scriptContext, &scriptReturn);
 
+	// scriptNumber
+	ObjectExpression::int_t scriptNumber;
+	if (in->peek().getType() == SourceTokenC::TT_OP_AT)
+	{
+		in->get(SourceTokenC::TT_OP_AT);
+		scriptNumber = ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER));
+		ObjectExpression::reserve_script_number(scriptNumber);
+	}
+	else
+	{
+		scriptNumber = -1;
+	}
+
+	// scriptName special cases
+	if (scriptName == "auto")
+	{
+		if (scriptNumber < 0)
+			throw SourceException("script name auto requires explicit script number", token.getPosition(), "SourceExpressionDS");
+
+		std::ostringstream oss;
+		oss << "script" << scriptNumber;
+		scriptName = oss.str();
+	}
+
+	// scriptLabel
+	std::string scriptLabel(context->getLabel() + "script_" + (scriptName == "void" ? context->makeLabel() : scriptName));
+
+	// scriptNameObject
+	std::string scriptNameObject(scriptLabel + "_id");
+
+	// scriptVarType
 	SourceVariable::VariableType const * scriptVarType(SourceVariable::get_VariableType_script(scriptReturn, scriptArgTypes));
 
-	SourceVariable::VariableData_Script scriptVarData = {scriptVarType, scriptNumber};
+	// scriptVarData
+	SourceVariable::VariableData_Script scriptVarData = {scriptVarType, -1};
 
+	// scriptExpression
 	SourceExpression::Pointer scriptExpression(make_expression_single(in, blocks, &scriptContext));
 	scriptExpression->addLabel(scriptLabel);
 	blocks->push_back(scriptExpression);
 	blocks->push_back(create_branch_return(create_value_data(scriptReturn, true, token.getPosition()), &scriptContext, token.getPosition()));
 
+	// scriptVarCount
 	int scriptVarCount(scriptContext.getLimit(SourceVariable::SC_REGISTER));
 
-	SourceVariable scriptVariable(scriptName, scriptVarData, token.getPosition());
+	// scriptVariable
+	SourceVariable scriptVariable(scriptName == "void" ? (std::string)"" : scriptName, scriptVarData, token.getPosition(), scriptNameObject);
 
 	context->addVariable(scriptVariable);
 
-	ObjectExpression::add_script(scriptLabel, scriptNumber, scriptType, scriptArgCount, scriptVarCount, scriptFlags);
+	if (scriptNumber < 0)
+		ObjectExpression::add_script(scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount, scriptVarCount);
+	else
+		ObjectExpression::add_script(scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount, scriptVarCount, scriptNumber);
 
 	return create_value_variable(scriptVariable, token.getPosition());
 }

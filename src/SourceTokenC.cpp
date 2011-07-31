@@ -41,6 +41,7 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 
 	switch (c)
 	{
+	case '@': _type = TT_OP_AT;            return;
 	case '}': _type = TT_OP_BRACE_C;       return;
 	case '{': _type = TT_OP_BRACE_O;       return;
 	case ']': _type = TT_OP_BRACKET_C;     return;
@@ -319,6 +320,7 @@ void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type)
 	case SourceTokenC::TT_FLOAT:                 *out << "TT_FLOAT";                 break;
 	case SourceTokenC::TT_IDENTIFIER:            *out << "TT_IDENTIFIER";            break;
 	case SourceTokenC::TT_INTEGER:               *out << "TT_INTEGER";               break;
+	case SourceTokenC::TT_OP_AT:                 *out << "TT_OP_AT";                 break;
 	case SourceTokenC::TT_OP_PLUS:               *out << "TT_OP_PLUS";               break;
 	case SourceTokenC::TT_OP_QUERY:              *out << "TT_OP_QUERY";              break;
 	case SourceTokenC::TT_OP_SEMICOLON:          *out << "TT_OP_SEMICOLON";          break;

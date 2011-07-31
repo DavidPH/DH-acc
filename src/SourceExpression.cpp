@@ -317,7 +317,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 
 		case SourceVariable::VT_REAL:
 			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(16));
-			objects->addToken(ObjectToken::OCODE_SHIFTR);
+			objects->addToken(ObjectToken::OCODE_SHIFTL);
 			break;
 		}
 		break;
@@ -340,7 +340,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		case SourceVariable::VT_SCRIPT:
 		case SourceVariable::VT_STRING:
 			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(16));
-			objects->addToken(ObjectToken::OCODE_SHIFTL);
+			objects->addToken(ObjectToken::OCODE_SHIFTR);
 			break;
 
 		case SourceVariable::VT_ARRAY:

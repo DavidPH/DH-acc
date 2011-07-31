@@ -29,11 +29,10 @@
 
 
 std::vector<ObjectExpression::ACSFunc> ObjectExpression::_acsfunc_table;
-int32_t ObjectExpression::_address_count(8+4+4);
+int32_t ObjectExpression::_address_count;
 std::vector<ObjectExpression::RegisterArray> ObjectExpression::_registerarray_map_table;
 std::vector<ObjectExpression::Script> ObjectExpression::_script_table;
-std::map<int32_t, bool> ObjectExpression::_script_used;
-int32_t ObjectExpression::_script_used_last(0);
+std::map<ObjectExpression::int_t, bool> ObjectExpression::_script_used;
 std::vector<ObjectExpression::String> ObjectExpression::_string_table;
 std::map<std::string, ObjectExpression::Pointer> ObjectExpression::_symbol_table;
 
@@ -68,11 +67,18 @@ void ObjectExpression::add_registerarray_map(std::string const & name, int_t num
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_script(std::string const & label, int32_t number, ScriptType type, int32_t args, int vars, int flags)
+void ObjectExpression::add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount)
+{
+	Script s = {label, name, stype, argCount, flags, -1, varCount};
+	_script_table.push_back(s);
+}
+void ObjectExpression::add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount, int_t number)
 {
 	reserve_script_number(number);
-	Script s = {args, flags, label, number, type, vars};
+	Script s = {label, name, stype, argCount, flags, number, varCount};
 	_script_table.push_back(s);
+
+	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
 std::string ObjectExpression::add_string(std::string const & value)
@@ -97,6 +103,19 @@ void ObjectExpression::add_string(std::string const & symbol, std::string const 
 void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression * value)
 {
 	_symbol_table[symbol] = value;
+}
+
+void ObjectExpression::do_deferred_allocation()
+{
+	for (size_t i(0); i < _script_table.size(); ++i)
+	{
+		if (_script_table[i].number == -1)
+		{
+			_script_table[i].number = get_script_number();
+
+			add_symbol(_script_table[i].name, create_value_int(_script_table[i].number, SourcePosition::none));
+		}
+	}
 }
 
 ObjectExpression::ACSFunc const & ObjectExpression::get_acsfunc(int_t const index)
@@ -188,13 +207,16 @@ int32_t ObjectExpression::get_script_count()
 	return (int32_t)_script_table.size();
 }
 
-int32_t ObjectExpression::get_script_number()
+ObjectExpression::int_t ObjectExpression::get_script_number()
 {
-	while (_script_used.find(_script_used_last) != _script_used.end() && _script_used_last < 1000) ++_script_used_last;
+	int_t scriptUsedLast(0);
 
-	if (_script_used_last == 1000) throw SourceException("no more script numbers", SourcePosition::none, "ObjectExpression");
+	while (_script_used.find(scriptUsedLast) != _script_used.end() && scriptUsedLast < 1000) ++scriptUsedLast;
 
-	return _script_used_last;
+	if (scriptUsedLast == 1000) throw SourceException("no more script numbers", SourcePosition::none, "ObjectExpression");
+
+	_script_used[scriptUsedLast] = true;
+	return scriptUsedLast;
 }
 
 ObjectExpression::String const & ObjectExpression::get_string(int32_t const index)

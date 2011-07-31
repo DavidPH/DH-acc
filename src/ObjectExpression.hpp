@@ -85,12 +85,13 @@ public:
 
 	struct Script
 	{
-		int32_t args;
-		int flags;
 		std::string label;
-		int32_t number;
-		ScriptType type;
-		int vars;
+		std::string name;
+		ScriptType stype;
+		int_t argCount;
+		int_t flags;
+		int_t number;
+		int_t varCount;
 	};
 
 	struct String
@@ -123,7 +124,8 @@ public:
 
 	static void add_registerarray_map(std::string const & name, int_t number, int_t size);
 
-	static void add_script(std::string const & label, int32_t number, ScriptType type, int32_t args, int vars, int flags);
+	static void add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount);
+	static void add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount, int_t number);
 
 	// Adds a string using an auto-generated symbol and returns that symbol.
 	static std::string add_string(std::string const & value);
@@ -149,6 +151,8 @@ public:
 	static Pointer create_value_int(SourceTokenC const & token);
 	static Pointer create_value_symbol(std::string const & symbol, SourcePosition const & position);
 
+	static void do_deferred_allocation();
+
 	static ACSFunc const & get_acsfunc(int_t const index);
 
 	static int_t get_acsfunc_count();
@@ -168,8 +172,6 @@ public:
 	static Script const & get_script(int32_t const index);
 
 	static int32_t get_script_count();
-
-	static int32_t get_script_number();
 
 	static String const & get_string(int32_t const index);
 
@@ -192,12 +194,13 @@ protected:
 
 
 private:
+	static int_t get_script_number();
+
 	static std::vector<ACSFunc> _acsfunc_table;
 	static int32_t _address_count;
 	static std::vector<RegisterArray> _registerarray_map_table;
 	static std::vector<Script> _script_table;
-	static std::map<int32_t, bool> _script_used;
-	static int32_t _script_used_last;
+	static std::map<int_t, bool> _script_used;
 	static std::vector<String> _string_table;
 	static std::map<std::string, ObjectExpression::Pointer> _symbol_table;
 };

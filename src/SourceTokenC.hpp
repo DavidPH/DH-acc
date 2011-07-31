@@ -46,6 +46,7 @@ public:
 		TT_OP_AND_EQUALS,         // &=
 		TT_OP_AND2,               // &&
 		TT_OP_AND2_EQUALS,        // &&=
+		TT_OP_AT,                 // @
 		TT_OP_ASTERISK,           // *
 		TT_OP_ASTERISK_EQUALS,    // *=
 		TT_OP_BRACE_C,            // }

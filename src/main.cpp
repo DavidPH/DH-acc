@@ -145,7 +145,7 @@ static inline int _main()
 		SourceExpression::Pointer expressions(SourceExpressionDS::make_expressions(&tokenizer));
 		expressions->addLabel("main");
 
-		ObjectExpression::add_script("main", 0, ObjectExpression::ST_OPEN, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER), 0);
+		ObjectExpression::add_script("main_id", "main", ObjectExpression::ST_OPEN, 0, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER), 0);
 
 		expressions->makeObjectsCast(&objects, SourceVariable::get_VariableType(SourceVariable::VT_VOID));
 	}
@@ -155,6 +155,8 @@ static inline int _main()
 		std::cerr << "Unknown source type.\n";
 		return 1;
 	}
+
+	ObjectExpression::do_deferred_allocation();
 
 	if (target_type == TARGET_UNKNOWN)
 		target_type = TARGET_ZDOOM;
