@@ -14,45 +14,45 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourceExpression/BinaryAdd.cpp
+/* SourceExpression/BinaryGE.cpp
 **
-** Defines the SourceExpression_BinaryAdd class and methods.
+** Defines the SourceExpression_BinaryGE class and methods.
 */
 
-#include "Binary.hpp"
+#include "BinaryCompare.hpp"
 
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
 
 
 
-class SourceExpression_BinaryAdd : public SourceExpression_Binary
+class SourceExpression_BinaryGE : public SourceExpression_BinaryCompare
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryAdd, SourceExpression_Binary);
+	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryGE, SourceExpression_BinaryCompare);
 
 public:
-	SourceExpression_BinaryAdd(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+	SourceExpression_BinaryGE(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
 
-	virtual void printDebug(std::ostream * const out) const;
+	virtual void printDebug(std::ostream * out) const;
 };
 
 
 
-SourceExpression::Pointer SourceExpression::create_binary_add(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
+SourceExpression::Pointer SourceExpression::create_binary_ge(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
 {
-	return new SourceExpression_BinaryAdd(exprL, exprR, position);
+	return new SourceExpression_BinaryGE(exprL, exprR, position);
 }
 
 
 
-SourceExpression_BinaryAdd::SourceExpression_BinaryAdd(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, true, position)
+SourceExpression_BinaryGE::SourceExpression_BinaryGE(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
 {
 
 }
 
-void SourceExpression_BinaryAdd::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BinaryGE::makeObjectsGet(ObjectVector * objects) const
 {
 	Super::makeObjectsGet(objects);
 
@@ -61,29 +61,29 @@ void SourceExpression_BinaryAdd::makeObjectsGet(ObjectVector * objects) const
 	switch (getType()->type)
 	{
 	case SourceVariable::VT_ACSFUNC:
+	case SourceVariable::VT_CHAR:
+	case SourceVariable::VT_INT:
+	case SourceVariable::VT_LNSPEC:
+	case SourceVariable::VT_NATIVE:
+	case SourceVariable::VT_POINTER:
+	case SourceVariable::VT_REAL:
+	case SourceVariable::VT_SCRIPT:
+	case SourceVariable::VT_STRING:
+		objects->addToken(ObjectToken::OCODE_CMPGE);
+		break;
+
 	case SourceVariable::VT_ARRAY:
 	case SourceVariable::VT_ASMFUNC:
 	case SourceVariable::VT_BLOCK:
-	case SourceVariable::VT_LNSPEC:
-	case SourceVariable::VT_NATIVE:
-	case SourceVariable::VT_SCRIPT:
-	case SourceVariable::VT_STRING:
 	case SourceVariable::VT_STRUCT:
 	case SourceVariable::VT_VOID:
 		throw SourceException("invalid VT", position, getName());
-
-	case SourceVariable::VT_CHAR:
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_POINTER:
-	case SourceVariable::VT_REAL:
-		objects->addToken(ObjectToken::OCODE_ADD);
-		break;
 	}
 }
 
-void SourceExpression_BinaryAdd::printDebug(std::ostream * out) const
+void SourceExpression_BinaryGE::printDebug(std::ostream * out) const
 {
-	*out << "SourceExpression_BinaryAdd(";
+	*out << "SourceExpression_BinaryGE(";
 	Super::printDebug(out);
 	*out << ")";
 }

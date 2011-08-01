@@ -26,11 +26,11 @@
 
 
 
-SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR)
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool arithmetic, SourcePosition const & position) : Super(position), _arithmetic(arithmetic), exprL(exprL), exprR(exprR)
 {
 	SourceVariable::VariableType const * type(getType());
 
-	if (type->type == SourceVariable::VT_POINTER)
+	if (type->type == SourceVariable::VT_POINTER && _arithmetic)
 		return;
 
 	if (exprL->getType() != type)
@@ -39,7 +39,7 @@ SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, Sourc
 	if (exprR->getType() != type)
 		this->exprR = create_value_cast(exprR, type, position);
 }
-SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool castL, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR)
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool castL, bool arithmetic, SourcePosition const & position) : Super(position), _arithmetic(arithmetic), exprL(exprL), exprR(exprR)
 {
 	if (exprL->getType() != exprR->getType())
 	{
@@ -66,7 +66,7 @@ void SourceExpression_Binary::makeObjectsGet(ObjectVector * objects) const
 	SourceVariable::VariableType const * type(getType());
 
 	// Pointer arithmetic.
-	if (type->type == SourceVariable::VT_POINTER)
+	if (type->type == SourceVariable::VT_POINTER && _arithmetic)
 	{
 		SourceVariable::VariableType const * typeL(exprL->getType());
 		SourceVariable::VariableType const * typeR(exprR->getType());

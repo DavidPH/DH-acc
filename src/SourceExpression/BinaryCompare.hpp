@@ -14,42 +14,33 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourceExpression/Binary.hpp
+/* SourceExpression/BinaryCompare.hpp
 **
-** Defines the SourceExpression_Binary class.
+** Defines the SourceExpression_BinaryCompare class.
 */
 
-#ifndef HPP_Binary__SourceExpression_
-#define HPP_Binary__SourceExpression_
+#ifndef HPP_BinaryCompare__SourceExpression_
+#define HPP_BinaryCompare__SourceExpression_
 
-#include "../SourceExpression.hpp"
+#include "Binary.hpp"
 
 
 
-class SourceExpression_Binary : public SourceExpression
+class SourceExpression_BinaryCompare : public SourceExpression_Binary
 {
-	MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression_Binary, SourceExpression);
+	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryCompare, SourceExpression_Binary);
 
 public:
-	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool arithmetic, SourcePosition const & position);
-	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool castL, bool arithmetic, SourcePosition const & position);
+	SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
 	virtual SourceVariable::VariableType const * getType() const;
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
-
 	virtual void printDebug(std::ostream * out) const;
-
-protected:
-	bool _arithmetic;
-
-	SourceExpression::Pointer exprL;
-	SourceExpression::Pointer exprR;
 };
 
 
 
-#endif /* HPP_Binary__SourceExpression_ */
+#endif /* HPP_BinaryCompare__SourceExpression_ */
 
 
 

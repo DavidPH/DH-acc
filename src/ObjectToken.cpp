@@ -92,6 +92,12 @@ void ObjectToken::init()
 	DO_INIT(BRANCH,          1);
 	DO_INIT(BRANCHNOTZERO,   1);
 	DO_INIT(BRANCHZERO,      1);
+	DO_INIT(CMPEQ,           0);
+	DO_INIT(CMPGE,           0);
+	DO_INIT(CMPGT,           0);
+	DO_INIT(CMPLE,           0);
+	DO_INIT(CMPLT,           0);
+	DO_INIT(CMPNE,           0);
 	DO_INIT(DELAY,           0);
 	DO_INIT(DELAY_IMM,       1);
 	DO_INIT(DIV,             0);
@@ -217,6 +223,12 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_BRANCH:          *out << "OCODE_BRANCH";          break;
 	case ObjectToken::OCODE_BRANCHNOTZERO:   *out << "OCODE_BRANCHNOTZERO";   break;
 	case ObjectToken::OCODE_BRANCHZERO:      *out << "OCODE_BRANCHZERO";      break;
+	case ObjectToken::OCODE_CMPEQ:           *out << "OCODE_CMPEQ";           break;
+	case ObjectToken::OCODE_CMPGE:           *out << "OCODE_CMPGE";           break;
+	case ObjectToken::OCODE_CMPGT:           *out << "OCODE_CMPGT";           break;
+	case ObjectToken::OCODE_CMPLE:           *out << "OCODE_CMPLE";           break;
+	case ObjectToken::OCODE_CMPLT:           *out << "OCODE_CMPLT";           break;
+	case ObjectToken::OCODE_CMPNE:           *out << "OCODE_CMPNE";           break;
 	case ObjectToken::OCODE_DELAY:           *out << "OCODE_DELAY";           break;
 	case ObjectToken::OCODE_DELAY_IMM:       *out << "OCODE_DELAY_IMM";       break;
 	case ObjectToken::OCODE_DIV:             *out << "OCODE_DIV";             break;

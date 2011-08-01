@@ -47,7 +47,7 @@ SourceExpression::Pointer SourceExpression::create_binary_mul(SourceExpression *
 
 
 
-SourceExpression_BinaryMul::SourceExpression_BinaryMul(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+SourceExpression_BinaryMul::SourceExpression_BinaryMul(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, true, position)
 {
 
 }

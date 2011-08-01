@@ -81,6 +81,30 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 			in->get(SourceTokenC::TT_OP_BRACKET_C);
 			break;
 
+		case SourceTokenC::TT_OP_CMP_EQ:
+			expr = create_binary_eq(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
+		case SourceTokenC::TT_OP_CMP_GE:
+			expr = create_binary_ge(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
+		case SourceTokenC::TT_OP_CMP_GT:
+			expr = create_binary_gt(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
+		case SourceTokenC::TT_OP_CMP_LE:
+			expr = create_binary_le(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
+		case SourceTokenC::TT_OP_CMP_LT:
+			expr = create_binary_lt(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
+		case SourceTokenC::TT_OP_CMP_NE:
+			expr = create_binary_ne(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
 		case SourceTokenC::TT_OP_COMMA:
 			in->unget(token);
 			return expr;

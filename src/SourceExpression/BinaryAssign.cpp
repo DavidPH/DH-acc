@@ -46,7 +46,7 @@ SourceExpression::Pointer SourceExpression::create_binary_assign(SourceExpressio
 
 
 
-SourceExpression_BinaryAssign::SourceExpression_BinaryAssign(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, false, position)
+SourceExpression_BinaryAssign::SourceExpression_BinaryAssign(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, false, false, position)
 {
 
 }

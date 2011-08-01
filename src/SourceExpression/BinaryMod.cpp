@@ -47,7 +47,7 @@ SourceExpression::Pointer SourceExpression::create_binary_mod(SourceExpression *
 
 
 
-SourceExpression_BinaryMod::SourceExpression_BinaryMod(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+SourceExpression_BinaryMod::SourceExpression_BinaryMod(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, true, position)
 {
 
 }

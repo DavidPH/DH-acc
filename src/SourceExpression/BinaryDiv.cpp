@@ -47,7 +47,7 @@ SourceExpression::Pointer SourceExpression::create_binary_div(SourceExpression *
 
 
 
-SourceExpression_BinaryDiv::SourceExpression_BinaryDiv(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+SourceExpression_BinaryDiv::SourceExpression_BinaryDiv(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, true, position)
 {
 
 }
