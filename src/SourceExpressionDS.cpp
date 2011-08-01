@@ -92,6 +92,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 			expr = create_binary_sub(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
+		case SourceTokenC::TT_OP_MINUS_GT:
+			expr = create_value_member(create_unary_dereference(expr, token.getPosition()), in->get(SourceTokenC::TT_IDENTIFIER));
+			break;
+
 		case SourceTokenC::TT_OP_PARENTHESIS_C:
 			in->unget(token);
 			return expr;
