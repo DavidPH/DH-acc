@@ -90,7 +90,7 @@ SourceVariable::SourceVariable(std::string const & name, VariableType const * ty
 
 }
 
-void SourceVariable::add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types)
+SourceVariable::VariableType const * SourceVariable::add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types)
 {
 	VariableType * type(new VariableType);
 
@@ -102,6 +102,8 @@ void SourceVariable::add_struct(std::string const & name, std::vector<std::strin
 
 	_names.push_back(name);
 	_types.push_back(type);
+
+	return type;
 }
 
 void SourceVariable::add_typedef(std::string const & name, VariableType const * type)

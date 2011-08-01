@@ -99,6 +99,7 @@ public:
 	static Pointer create_value_cast(SourceExpression * expr, SourceVariable::VariableType const * type, SourcePosition const & position);
 	static Pointer create_value_char(SourceTokenC const & token);
 	static Pointer create_value_data(SourceVariable::VariableType const * type, bool garbage, SourcePosition const & position);
+	static Pointer create_value_int(int value, SourcePosition const & position);
 	static Pointer create_value_int(SourceTokenC const & token);
 	static Pointer create_value_member(SourceExpression * expr, SourceTokenC const & token);
 	static Pointer create_value_real(SourceTokenC const & token);

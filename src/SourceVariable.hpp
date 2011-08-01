@@ -203,7 +203,7 @@ public:
 	friend void print_debug(std::ostream * const out, SourceVariable::VariableType const & in);
 	friend void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal const in);
 
-	static void add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types);
+	static VariableType const * add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types);
 
 	static void add_typedef(std::string const & name, VariableType const * type);
 

@@ -50,6 +50,7 @@ void SourceExpressionDS::init()
 	_expression_single_handlers["out"]     = make_expression_single_out;
 	_expression_single_handlers["return"]  = make_expression_single_return;
 	_expression_single_handlers["script"]  = make_expression_single_script;
+	_expression_single_handlers["sizeof"]  = make_expression_single_sizeof;
 	_expression_single_handlers["struct"]  = make_expression_single_struct;
 	_expression_single_handlers["typedef"] = make_expression_single_typedef;
 	_expression_single_handlers["var"]     = make_expression_single_var;
@@ -158,11 +159,11 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 	}
 }
 
-void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceVariable::VariableType const *> * argTypes, SourceVariable::VariableType const * * returnType)
+void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<SourceVariable::VariableType const *> * argTypes, SourceVariable::VariableType const * * returnType)
 {
-	make_expression_arglist(in, argTypes, NULL, NULL, NULL, returnType);
+	make_expression_arglist(in, blocks, context, argTypes, NULL, NULL, NULL, returnType);
 }
-void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceVariable::VariableType const *> * argTypes, std::vector<std::string> * argNames, int * argCount, SourceContext * argContext, SourceVariable::VariableType const * * returnType)
+void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<SourceVariable::VariableType const *> * argTypes, std::vector<std::string> * argNames, int * argCount, SourceContext * argContext, SourceVariable::VariableType const * * returnType)
 {
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 	if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
@@ -209,7 +210,7 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 	{
 		in->get(SourceTokenC::TT_OP_MINUS_GT);
 
-		*returnType = SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER));
+		*returnType = make_expression_type(in, blocks, context);
 
 		if (argContext) argContext->setReturnType(*returnType);
 	}

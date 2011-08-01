@@ -50,6 +50,7 @@ add_executable(DH-acc
 	SourceExpressionACS/BinaryAdd.cpp
 	SourceExpressionDS.cpp
 	SourceExpressionDS/make_expression_single.cpp
+	SourceExpressionDS/make_expression_type.cpp
 	SourceBlockC.cpp
 	SourcePosition.cpp
 	SourceStream.cpp

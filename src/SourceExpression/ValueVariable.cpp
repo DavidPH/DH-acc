@@ -76,6 +76,16 @@ SourceExpression::Pointer SourceExpression::create_value_char(SourceTokenC const
 
 	return create_value_variable(charVariable, token.getPosition());
 }
+SourceExpression::Pointer SourceExpression::create_value_int(int value, SourcePosition const & position)
+{
+	SourceVariable::VariableType const * intVarType(SourceVariable::get_VariableType(SourceVariable::VT_INT));
+
+	SourceVariable::VariableData_Int intVarData = {intVarType, value};
+
+	SourceVariable intVariable("", intVarData, position);
+
+	return create_value_variable(intVariable, position);
+}
 SourceExpression::Pointer SourceExpression::create_value_int(SourceTokenC const & token)
 {
 	SourceVariable::VariableType const * intVarType(SourceVariable::get_VariableType(SourceVariable::VT_INT));
