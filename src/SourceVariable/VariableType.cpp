@@ -25,6 +25,19 @@
 
 
 
+int SourceVariable::VariableType::getOffset(std::string const & name, SourcePosition const & position) const
+{
+	int offset(0);
+
+	for (size_t i(0); i < names.size(); ++i)
+		if (name == names[i])
+			return offset;
+		else
+			offset += types[i]->size();
+
+	throw SourceException("invalid member-variable-type", position, "SourceVariable::VariableType");
+}
+
 SourceVariable::VariableType const * SourceVariable::VariableType::getType(std::string const & name, SourcePosition const & position) const
 {
 	for (size_t i(0); i < names.size(); ++i)

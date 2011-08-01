@@ -34,7 +34,11 @@ class SourceExpression_ValueMember : public SourceExpression
 public:
 	SourceExpression_ValueMember(SourceExpression * expr, SourceTokenC const & token);
 
+	virtual bool canMakeObjectsAddress() const;
+
 	virtual SourceVariable::VariableType const * getType() const;
+
+	virtual void makeObjectsAddress(ObjectVector * objects) const;
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
 	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const;
@@ -63,17 +67,54 @@ SourceExpression_ValueMember::SourceExpression_ValueMember(SourceExpression * ex
 
 }
 
+bool SourceExpression_ValueMember::canMakeObjectsAddress() const
+{
+	return _expr->canMakeObjectsAddress();
+}
+
 SourceVariable::VariableType const * SourceExpression_ValueMember::getType() const
 {
-	return _expr->getType()->getType(_name, getPosition());
+	return _expr->getType()->getType(_name, position);
+}
+
+void SourceExpression_ValueMember::makeObjectsAddress(ObjectVector * objects) const
+{
+	if (canMakeObjectsAddress())
+	{
+		objects->addLabel(labels);
+
+		_expr->makeObjectsAddress(objects);
+		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(_expr->getType()->getOffset(_name, position)));
+		objects->addToken(ObjectToken::OCODE_ADD);
+	}
+	else
+	{
+		Super::makeObjectsAddress(objects);
+	}
 }
 
 void SourceExpression_ValueMember::makeObjectsGet(ObjectVector * objects) const
 {
-	objects->addLabel(labels);
+	if (canMakeObjectsAddress())
+	{
+		makeObjectsAddress(objects);
+		objects->addToken(ObjectToken::OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
-	std::vector<std::string> names(1, _name);
-	_expr->makeObjectsGetMember(objects, &names);
+		for (int i(0); i < getType()->size(); ++i)
+		{
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(i));
+			objects->addToken(ObjectToken::OCODE_PUSHWORLDVAR, objects->getValue(1));
+			objects->addToken(ObjectToken::OCODE_ADD);
+			objects->addToken(ObjectToken::OCODE_PUSHGLOBALARRAY, objects->getValue(0));
+		}
+	}
+	else
+	{
+		objects->addLabel(labels);
+
+		std::vector<std::string> names(1, _name);
+		_expr->makeObjectsGetMember(objects, &names);
+	}
 }
 void SourceExpression_ValueMember::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const
 {
@@ -85,10 +126,27 @@ void SourceExpression_ValueMember::makeObjectsGetMember(ObjectVector * objects, 
 
 void SourceExpression_ValueMember::makeObjectsSet(ObjectVector * objects) const
 {
-	objects->addLabel(labels);
+	if (canMakeObjectsAddress())
+	{
+		makeObjectsAddress(objects);
+		objects->addToken(ObjectToken::OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
-	std::vector<std::string> names(1, _name);
-	_expr->makeObjectsSetMember(objects, &names);
+		for (int i(getType()->size()); i--;)
+		{
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(i));
+			objects->addToken(ObjectToken::OCODE_PUSHWORLDVAR, objects->getValue(1));
+			objects->addToken(ObjectToken::OCODE_ADD);
+			objects->addToken(ObjectToken::OCODE_SWAP);
+			objects->addToken(ObjectToken::OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
+		}
+	}
+	else
+	{
+		objects->addLabel(labels);
+
+		std::vector<std::string> names(1, _name);
+		_expr->makeObjectsSetMember(objects, &names);
+	}
 }
 void SourceExpression_ValueMember::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const
 {

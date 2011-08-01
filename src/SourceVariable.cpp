@@ -282,6 +282,7 @@ void SourceVariable::init()
 	type.type = VT_STRING;
 	_names[VT_STRING] = "string";
 	_types[VT_STRING] = new VariableType(type);
+	_types[VT_STRING]->refType = type.refType = _types[VT_CHAR];
 }
 
 

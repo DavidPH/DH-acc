@@ -73,6 +73,8 @@ public:
 
 	struct VariableType
 	{
+		int getOffset(std::string const & name, SourcePosition const & position) const;
+
 		VariableType const * getType(std::string const & name, SourcePosition const & position) const;
 
 		bool isVoid() const;

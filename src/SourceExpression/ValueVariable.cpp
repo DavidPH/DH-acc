@@ -34,10 +34,16 @@ public:
 	SourceExpression_ValueVariable(SourceVariable const & var, SourcePosition const & position);
 
 	virtual bool canMakeObject() const;
+	virtual bool canMakeObjectAddress() const;
+
+	virtual bool canMakeObjectsAddress() const;
 
 	virtual SourceVariable::VariableType const * getType() const;
 
 	virtual ObjectExpression::Pointer makeObject() const;
+	virtual ObjectExpression::Pointer makeObjectAddress() const;
+
+	virtual void makeObjectsAddress(ObjectVector * objects) const;
 
 	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const;
 
@@ -116,6 +122,15 @@ bool SourceExpression_ValueVariable::canMakeObject() const
 {
 	return _var.canMakeObject();
 }
+bool SourceExpression_ValueVariable::canMakeObjectAddress() const
+{
+	return _var.canMakeObjectAddress();
+}
+
+bool SourceExpression_ValueVariable::canMakeObjectsAddress() const
+{
+	return _var.canMakeObjectsAddress();
+}
 
 SourceVariable::VariableType const * SourceExpression_ValueVariable::getType() const
 {
@@ -125,6 +140,15 @@ SourceVariable::VariableType const * SourceExpression_ValueVariable::getType() c
 ObjectExpression::Pointer SourceExpression_ValueVariable::makeObject() const
 {
 	return _var.makeObject(position);
+}
+ObjectExpression::Pointer SourceExpression_ValueVariable::makeObjectAddress() const
+{
+	return _var.makeObjectAddress(position);
+}
+
+void SourceExpression_ValueVariable::makeObjectsAddress(ObjectVector * objects) const
+{
+	_var.makeObjectsAddress(objects, position);
 }
 
 void SourceExpression_ValueVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const
