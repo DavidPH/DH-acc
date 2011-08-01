@@ -45,6 +45,10 @@ void SourceVariable::makeObjectsAddress(ObjectVector * objects, SourcePosition c
 	case SC_REGISTERARRAY_MAP:
 	case SC_REGISTERARRAY_WORLD:
 		throw SourceException("makeObjectsAddress on register", position, "SourceVariable");
+
+	case SC_STATIC:
+		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, makeObjectAddress(position));
+		break;
 	}
 }
 

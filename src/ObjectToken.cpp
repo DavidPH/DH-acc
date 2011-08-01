@@ -157,12 +157,16 @@ void ObjectToken::init()
 	DO_INIT(ASSIGNMAPARRAY2,    2);
 	DO_INIT(ASSIGNSTACKARRAY2,  2);
 	DO_INIT(ASSIGNSTACKVAR,     1);
+	DO_INIT(ASSIGNSTATICARRAY2, 2);
+	DO_INIT(ASSIGNSTATICVAR,    1);
 	DO_INIT(ASSIGNWORLDARRAY2,  2);
 	DO_INIT(PUSHGLOBALARRAY2,   2);
 	DO_INIT(PUSHMAPARRAY2,      2);
 	DO_INIT(PUSHSTACKADDRESS,   1);
 	DO_INIT(PUSHSTACKARRAY2,    2);
 	DO_INIT(PUSHSTACKVAR,       1);
+	DO_INIT(PUSHSTATICARRAY2,   2);
+	DO_INIT(PUSHSTATICVAR,      1);
 	DO_INIT(PUSHWORLDARRAY2,    2);
 	DO_INIT(SUBSTACK_IMM,       1);
 
@@ -275,12 +279,16 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_ASSIGNMAPARRAY2:    *out << "OCODE_ASSIGNMAPARRAY2";    break;
 	case ObjectToken::OCODE_ASSIGNSTACKARRAY2:  *out << "OCODE_ASSIGNSTACKARRAY2";  break;
 	case ObjectToken::OCODE_ASSIGNSTACKVAR:     *out << "OCODE_ASSIGNSTACKVAR";     break;
+	case ObjectToken::OCODE_ASSIGNSTATICARRAY2: *out << "OCODE_ASSIGNSTATICARRAY2"; break;
+	case ObjectToken::OCODE_ASSIGNSTATICVAR:    *out << "OCODE_ASSIGNSTATICVAR";    break;
 	case ObjectToken::OCODE_ASSIGNWORLDARRAY2:  *out << "OCODE_ASSIGNWORLDARRAY2";  break;
 	case ObjectToken::OCODE_PUSHGLOBALARRAY2:   *out << "OCODE_PUSHGLOBALARRAY2";   break;
 	case ObjectToken::OCODE_PUSHMAPARRAY2:      *out << "OCODE_PUSHMAPARRAY2";      break;
 	case ObjectToken::OCODE_PUSHSTACKADDRESS:   *out << "OCODE_PUSHSTACKADDRESS";   break;
 	case ObjectToken::OCODE_PUSHSTACKARRAY2:    *out << "OCODE_PUSHSTACKARRAY2";    break;
 	case ObjectToken::OCODE_PUSHSTACKVAR:       *out << "OCODE_PUSHSTACKVAR";       break;
+	case ObjectToken::OCODE_PUSHSTATICARRAY2:   *out << "OCODE_PUSHSTATICARRAY2";   break;
+	case ObjectToken::OCODE_PUSHSTATICVAR:      *out << "OCODE_PUSHSTATICVAR";      break;
 	case ObjectToken::OCODE_PUSHWORLDARRAY2:    *out << "OCODE_PUSHWORLDARRAY2";    break;
 	case ObjectToken::OCODE_SUBSTACK_IMM:       *out << "OCODE_SUBSTACK_IMM";       break;
 

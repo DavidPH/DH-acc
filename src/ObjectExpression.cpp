@@ -49,6 +49,10 @@ std::map<ObjectExpression::int_t, bool>      ObjectExpression::_registerarray_wo
 std::vector<ObjectExpression::Script>   ObjectExpression::_script_table;
 std::map<ObjectExpression::int_t, bool> ObjectExpression::_script_used;
 
+ObjectExpression::Pointer               ObjectExpression:: static_offset(create_value_int(8192, SourcePosition()));
+std::vector<ObjectExpression::Static>   ObjectExpression::_static_table;
+std::map<ObjectExpression::int_t, bool> ObjectExpression::_static_used;
+
 std::vector<ObjectExpression::String> ObjectExpression::_string_table;
 
 std::map<std::string, ObjectExpression::Pointer>        ObjectExpression::_symbol_table;
@@ -190,6 +194,23 @@ void ObjectExpression::add_script(std::string const & name, std::string const & 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
+void ObjectExpression::add_static(std::string const & name, int_t size)
+{
+	Static s = {name, -1, size};
+	_static_table.push_back(s);
+
+	add_symbol(name, ET_INT);
+}
+void ObjectExpression::add_static(std::string const & name, int_t size, int_t number)
+{
+	Static s = {name, number, size};
+	_static_table.push_back(s);
+	for (int_t i(0); i < size; ++i)
+		_static_used[number+i] = true;
+
+	add_symbol(name, create_value_int(number, SourcePosition::none));
+}
+
 std::string ObjectExpression::add_string(std::string const & value)
 {
 	std::ostringstream oss;
@@ -219,20 +240,6 @@ void ObjectExpression::add_symbol(std::string const & symbol, ExpressionType typ
 	_symbol_type_table[symbol] = type;
 }
 
-void ObjectExpression::do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<int_t, bool> * registerarrayUsed)
-{
-	for (size_t i(0); i < registerarrayTable->size(); ++i)
-	{
-		RegisterArray & r((*registerarrayTable)[i]);
-
-		if (r.number == -1)
-		{
-			r.number = get_registerarray_number(registerarrayUsed);
-
-			add_symbol(r.name, create_value_int(r.number, SourcePosition::none));
-		}
-	}
-}
 void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<int_t, bool> * registerUsed)
 {
 	for (size_t i(0); i < registerTable->size(); ++i)
@@ -242,6 +249,20 @@ void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * r
 		if (r.number == -1)
 		{
 			r.number = get_register_number(registerUsed, r.size);
+
+			add_symbol(r.name, create_value_int(r.number, SourcePosition::none));
+		}
+	}
+}
+void ObjectExpression::do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<int_t, bool> * registerarrayUsed)
+{
+	for (size_t i(0); i < registerarrayTable->size(); ++i)
+	{
+		RegisterArray & r((*registerarrayTable)[i]);
+
+		if (r.number == -1)
+		{
+			r.number = get_registerarray_number(registerarrayUsed);
 
 			add_symbol(r.name, create_value_int(r.number, SourcePosition::none));
 		}
@@ -267,11 +288,25 @@ void ObjectExpression::do_deferred_allocation()
 
 	for (size_t i(0); i < _script_table.size(); ++i)
 	{
-		if (_script_table[i].number == -1)
-		{
-			_script_table[i].number = get_script_number();
+		Script & s(_script_table[i]);
 
-			add_symbol(_script_table[i].name, create_value_int(_script_table[i].number, SourcePosition::none));
+		if (s.number == -1)
+		{
+			s.number = get_script_number();
+
+			add_symbol(s.name, create_value_int(s.number, SourcePosition::none));
+		}
+	}
+
+	for (size_t i(0); i < _static_table.size(); ++i)
+	{
+		Static & s(_static_table[i]);
+
+		if (s.number == -1)
+		{
+			s.number = get_static_number(s.size);
+
+			add_symbol(s.name, create_value_int(s.number, SourcePosition::none));
 		}
 	}
 }
@@ -401,6 +436,11 @@ ObjectExpression::int_t ObjectExpression::get_script_number()
 
 	_script_used[scriptUsedLast] = true;
 	return scriptUsedLast;
+}
+
+ObjectExpression::int_t ObjectExpression::get_static_number(int_t size)
+{
+	return get_register_number(&_static_used, size);
 }
 
 ObjectExpression::String const & ObjectExpression::get_string(int32_t const index)

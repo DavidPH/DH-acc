@@ -91,6 +91,9 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 
 	case SC_REGISTERARRAY_WORLD:
 		throw SourceException("makeObject on SC_REGISTERARRAY_WORLD", position, "SourceVariable");
+
+	case SC_STATIC:
+		throw SourceException("makeObject on SC_STATIC", position, "SourceVariable");
 	}
 
 	throw SourceException("makeObject", _position, "SourceVariable");
@@ -113,6 +116,9 @@ ObjectExpression::Pointer SourceVariable::makeObjectAddress(SourcePosition const
 	case SC_REGISTERARRAY_MAP:
 	case SC_REGISTERARRAY_WORLD:
 		throw SourceException("makeObjectAddress on register", position, "SourceVariable");
+
+	case SC_STATIC:
+		return ObjectExpression::create_binary_add(ObjectExpression::create_value_symbol(_nameObject, position), ObjectExpression::static_offset, position);
 	}
 
 	throw SourceException("makeObjectAddress", _position, "SourceVariable");

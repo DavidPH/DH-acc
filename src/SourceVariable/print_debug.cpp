@@ -70,6 +70,7 @@ void print_debug(std::ostream * const out, SourceVariable::StorageClass const in
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL: *out << "SC_REGISTERARRAY_GLOBAL"; break;
 	case SourceVariable::SC_REGISTERARRAY_MAP:    *out << "SC_REGISTERARRAY_MAP";    break;
 	case SourceVariable::SC_REGISTERARRAY_WORLD:  *out << "SC_REGISTERARRAY_WORLD";  break;
+	case SourceVariable::SC_STATIC:               *out << "SC_STATIC";               break;
 	}
 }
 void print_debug(std::ostream * const out, SourceVariable::VariableType const & in)

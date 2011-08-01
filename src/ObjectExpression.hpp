@@ -101,6 +101,13 @@ public:
 		int_t varCount;
 	};
 
+	struct Static
+	{
+		std::string name;
+		int_t number;
+		int_t size;
+	};
+
 	struct String
 	{
 		int32_t offset;
@@ -149,6 +156,9 @@ public:
 
 	static void add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount);
 	static void add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount, int_t number);
+
+	static void add_static(std::string const & name, int_t size);
+	static void add_static(std::string const & name, int_t size, int_t number);
 
 	// Adds a string using an auto-generated symbol and returns that symbol.
 	static std::string add_string(std::string const & value);
@@ -211,12 +221,12 @@ public:
 
 	static void set_address_count(int32_t addressCount);
 
+	static ObjectExpression::Pointer static_offset;
+
 protected:
 	ObjectExpression(SourcePosition const & position);
 
 	SourcePosition position;
-
-
 
 private:
 	static void do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<int_t, bool> * registerUsed);
@@ -225,6 +235,7 @@ private:
 	static int_t get_register_number(std::map<int_t, bool> * registerUsed, int_t size);
 	static int_t get_registerarray_number(std::map<int_t, bool> * registerarrayUsed);
 	static int_t get_script_number();
+	static int_t get_static_number(int_t size);
 
 	static bool is_register_used(std::map<int_t, bool> * registerUsed, int_t number, int_t size);
 
@@ -248,6 +259,9 @@ private:
 
 	static std::vector<Script>   _script_table;
 	static std::map<int_t, bool> _script_used;
+
+	static std::vector<Static>   _static_table;
+	static std::map<int_t, bool> _static_used;
 
 	static std::vector<String> _string_table;
 

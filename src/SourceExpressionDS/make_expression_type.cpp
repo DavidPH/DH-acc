@@ -69,7 +69,7 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 	}
 	else if (token.getData() == "struct")
 	{
-		if (in->peek()->getType() == SourceTokenC::TT_IDENTIFIER)
+		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
 			name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
 
 		in->get(SourceTokenC::TT_OP_BRACE_O);

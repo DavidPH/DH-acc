@@ -118,12 +118,12 @@ bool SourceVariable::canMakeObject() const
 }
 bool SourceVariable::canMakeObjectAddress() const
 {
-	return false;
+	return _sc == SC_STATIC;
 }
 
 bool SourceVariable::canMakeObjectsAddress() const
 {
-	return _sc == SC_AUTO;
+	return _sc == SC_AUTO || _sc == SC_STATIC;
 }
 
 SourceVariable::StorageClass SourceVariable::get_StorageClass(SourceTokenC const & token)
@@ -151,6 +151,9 @@ SourceVariable::StorageClass SourceVariable::get_StorageClass(SourceTokenC const
 
 	if (token.getData() == "registerarray_world")
 		return SC_REGISTERARRAY_WORLD;
+
+	if (token.getData() == "static")
+		return SC_STATIC;
 
 	throw SourceException("invalid storage-class", token.getPosition(), "SourceVariable");
 }

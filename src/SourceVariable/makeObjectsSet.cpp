@@ -115,6 +115,16 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		array = true;
 		ocode = ObjectToken::OCODE_ASSIGNWORLDARRAY2;
 		goto sc_register_case;
+
+	case SC_STATIC:
+		if (dimensioned)
+		{
+			array = true;
+			ocode = ObjectToken::OCODE_ASSIGNSTATICARRAY2;
+		}
+		else
+			ocode = ObjectToken::OCODE_ASSIGNSTATICVAR;
+		goto sc_register_case;
 	}
 }
 
@@ -142,6 +152,7 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions,
 	case SC_REGISTERARRAY_GLOBAL:
 	case SC_REGISTERARRAY_MAP:
 	case SC_REGISTERARRAY_WORLD:
+	case SC_STATIC:
 		switch (type->type)
 		{
 		case VT_ACSFUNC:
@@ -204,6 +215,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 	case SC_REGISTERARRAY_GLOBAL:
 	case SC_REGISTERARRAY_MAP:
 	case SC_REGISTERARRAY_WORLD:
+	case SC_STATIC:
 		switch (type->type)
 		{
 		case VT_ACSFUNC:
@@ -248,6 +260,7 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, std::vector<Sour
 	switch (_sc)
 	{
 	case SC_AUTO:
+	case SC_STATIC:
 	case SC_REGISTERARRAY_GLOBAL:
 	case SC_REGISTERARRAY_MAP:
 	case SC_REGISTERARRAY_WORLD:

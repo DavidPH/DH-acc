@@ -64,6 +64,7 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
 	case SourceVariable::SC_REGISTERARRAY_MAP:
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
+	case SourceVariable::SC_STATIC:
 		break;
 	}
 }
@@ -89,6 +90,7 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
 	case SourceVariable::SC_REGISTERARRAY_MAP:
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
+	case SourceVariable::SC_STATIC:
 		break;
 	}
 }
@@ -107,6 +109,7 @@ void SourceContext::addVariable(SourceVariable const & var)
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
+	case SourceVariable::SC_STATIC:
 		addCount(var.getType()->size(), sc);
 		break;
 
@@ -137,6 +140,7 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
 	case SourceVariable::SC_REGISTERARRAY_MAP:
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
+	case SourceVariable::SC_STATIC:
 		return 0;
 	}
 
@@ -166,6 +170,7 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
 	case SourceVariable::SC_REGISTERARRAY_MAP:
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
+	case SourceVariable::SC_STATIC:
 		return 0;
 	}
 
@@ -210,6 +215,7 @@ SourceVariable const & SourceContext::getVariable(std::string const & name, Sour
 			case SourceVariable::SC_REGISTERARRAY_GLOBAL:
 			case SourceVariable::SC_REGISTERARRAY_MAP:
 			case SourceVariable::SC_REGISTERARRAY_WORLD:
+			case SourceVariable::SC_STATIC:
 				return _vars[i];
 			}
 		}
@@ -270,6 +276,10 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Sourc
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		ObjectExpression::add_registerarray_world(nameObject, type->size());
 		break;
+
+	case SourceVariable::SC_STATIC:
+		ObjectExpression::add_static(nameObject, type->size());
+		break;
 	}
 
 	return nameObject;
@@ -310,6 +320,10 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Sourc
 
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		ObjectExpression::add_registerarray_world(nameObject, type->size(), address);
+		break;
+
+	case SourceVariable::SC_STATIC:
+		ObjectExpression::add_static(nameObject, type->size(), address);
 		break;
 	}
 

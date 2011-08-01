@@ -80,12 +80,12 @@ private:
 
 	std::string makeLabelShort();
 
-	int _count[SourceVariable::SC_REGISTERARRAY_WORLD+1];
+	int _count[SourceVariable::SC_STATIC+1];
 
 	std::string _label;
 	int _labelCount;
 
-	int _limit[SourceVariable::SC_REGISTERARRAY_WORLD+1];
+	int _limit[SourceVariable::SC_STATIC+1];
 
 	SourceContext * _parent;
 
