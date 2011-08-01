@@ -141,6 +141,7 @@ void ObjectToken::init()
 	DO_INIT(LSPEC5RESULT,      1);
 	DO_INIT(MULFIXED,          0);
 	DO_INIT(PRINTFIXED,        0);
+	DO_INIT(PRINTHEX,          0);
 	DO_INIT(PUSHGLOBALARRAY,   1);
 	DO_INIT(PUSHGLOBALVAR,     1);
 	DO_INIT(PUSHMAPARRAY,      1);
@@ -264,6 +265,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_LSPEC5RESULT:      *out << "OCODE_LSPEC5RESULT";      break;
 	case ObjectToken::OCODE_MULFIXED:          *out << "OCODE_MULFIXED";          break;
 	case ObjectToken::OCODE_PRINTFIXED:        *out << "OCODE_PRINTFIXED";        break;
+	case ObjectToken::OCODE_PRINTHEX:          *out << "OCODE_PRINTHEX";          break;
 	case ObjectToken::OCODE_PUSHGLOBALARRAY:   *out << "OCODE_PUSHGLOBALARRAY";   break;
 	case ObjectToken::OCODE_PUSHGLOBALVAR:     *out << "OCODE_PUSHGLOBALVAR";     break;
 	case ObjectToken::OCODE_PUSHMAPARRAY:      *out << "OCODE_PUSHMAPARRAY";      break;

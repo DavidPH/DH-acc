@@ -58,6 +58,9 @@ SourceVariable::VariableType const * SourceExpression::get_promoted_type(SourceV
 	if (type1->type == SourceVariable::VT_VOID) return type1;
 	if (type2->type == SourceVariable::VT_VOID) return type2;
 
+	if (type1->type == SourceVariable::VT_POINTER) return type1;
+	if (type2->type == SourceVariable::VT_POINTER) return type2;
+
 	if (type1->type == SourceVariable::VT_REAL) return type1;
 	if (type2->type == SourceVariable::VT_REAL) return type2;
 
@@ -309,6 +312,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_LNSPEC:
 	case SourceVariable::VT_NATIVE:
+	case SourceVariable::VT_POINTER:
 	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
 		switch (typeTo->type)
@@ -318,6 +322,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		case SourceVariable::VT_INT:
 		case SourceVariable::VT_LNSPEC:
 		case SourceVariable::VT_NATIVE:
+		case SourceVariable::VT_POINTER:
 		case SourceVariable::VT_SCRIPT:
 		case SourceVariable::VT_STRING:
 			break;
@@ -351,6 +356,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		case SourceVariable::VT_INT:
 		case SourceVariable::VT_LNSPEC:
 		case SourceVariable::VT_NATIVE:
+		case SourceVariable::VT_POINTER:
 		case SourceVariable::VT_SCRIPT:
 		case SourceVariable::VT_STRING:
 			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(16));

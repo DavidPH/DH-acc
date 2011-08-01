@@ -98,6 +98,13 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 		type = SourceVariable::get_VariableType(token);
 	}
 
+	while (in->peek().getType() == SourceTokenC::TT_OP_ASTERISK)
+	{
+		in->get(SourceTokenC::TT_OP_ASTERISK);
+
+		type = SourceVariable::get_VariableType_pointer(type);
+	}
+
 	return type;
 }
 

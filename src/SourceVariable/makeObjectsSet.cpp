@@ -67,6 +67,7 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
+		case VT_POINTER:
 		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
@@ -162,6 +163,7 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions,
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
+		case VT_POINTER:
 		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
@@ -226,6 +228,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
+		case VT_POINTER:
 		case VT_REAL:
 		case VT_SCRIPT:
 		case VT_STRING:
@@ -333,6 +336,7 @@ void SourceVariable::makeObjectsSetSkip(VariableType const * type, int * address
 	case VT_INT:
 	case VT_LNSPEC:
 	case VT_NATIVE:
+	case VT_POINTER:
 	case VT_REAL:
 	case VT_SCRIPT:
 	case VT_STRING:

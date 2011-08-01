@@ -68,6 +68,7 @@ public:
 		VT_BLOCK,
 		VT_LNSPEC,
 		VT_NATIVE,
+		VT_POINTER,
 		VT_SCRIPT,
 		VT_STRUCT
 	};
@@ -224,6 +225,7 @@ public:
 	static VariableType const * get_VariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types);
 	// Returns NULL if type not found.
 	static VariableType const * get_VariableType_null(std::string const & name);
+	static VariableType const * get_VariableType_pointer(VariableType const * refType);
 	// Script types are identified by their associated types.
 	// If there is no such script type defined, it will be added.
 	static VariableType const * get_VariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types);

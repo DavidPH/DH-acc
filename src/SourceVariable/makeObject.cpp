@@ -62,6 +62,9 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 		case VT_NATIVE:
 			return ObjectExpression::create_value_int(_data.vdNative.number, position);
 
+		case VT_POINTER:
+			throw SourceException("makeObject on VT_POINTER", position, "SourceVariable");
+
 		case VT_REAL:
 			return ObjectExpression::create_value_float(_data.vdReal.value, position);
 

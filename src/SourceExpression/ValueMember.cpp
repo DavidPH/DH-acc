@@ -79,18 +79,11 @@ SourceVariable::VariableType const * SourceExpression_ValueMember::getType() con
 
 void SourceExpression_ValueMember::makeObjectsAddress(ObjectVector * objects) const
 {
-	if (canMakeObjectsAddress())
-	{
-		objects->addLabel(labels);
+	objects->addLabel(labels);
 
-		_expr->makeObjectsAddress(objects);
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(_expr->getType()->getOffset(_name, position)));
-		objects->addToken(ObjectToken::OCODE_ADD);
-	}
-	else
-	{
-		Super::makeObjectsAddress(objects);
-	}
+	_expr->makeObjectsAddress(objects);
+	objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(_expr->getType()->getOffset(_name, position)));
+	objects->addToken(ObjectToken::OCODE_ADD);
 }
 
 void SourceExpression_ValueMember::makeObjectsGet(ObjectVector * objects) const

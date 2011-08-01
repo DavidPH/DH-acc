@@ -44,6 +44,7 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 	case VT_BLOCK:
 	case VT_CHAR:
 	case VT_INT:
+	case VT_POINTER:
 	case VT_REAL:
 	case VT_STRING:
 	case VT_STRUCT:

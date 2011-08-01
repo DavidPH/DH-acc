@@ -40,6 +40,9 @@ add_executable(DH-acc
 	SourceExpression/BranchWhile.cpp
 	SourceExpression/RootDelay.cpp
 	SourceExpression/RootOut.cpp
+	SourceExpression/Unary.cpp
+	SourceExpression/UnaryDereference.cpp
+	SourceExpression/UnaryReference.cpp
 	SourceExpression/ValueBlock.cpp
 	SourceExpression/ValueCast.cpp
 	SourceExpression/ValueData.cpp

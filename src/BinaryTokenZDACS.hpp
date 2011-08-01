@@ -104,6 +104,7 @@ public:
 		BCODE_SETRESULTVALUE    = 257,
 		BCODE_LSPEC5RESULT      = 263,
 		BCODE_ENDLOG            = 270,
+		BCODE_PRINTHEX          = 350,
 		BCODE_CALLZDFUNC        = 351,
 
 		BCODE_NONE

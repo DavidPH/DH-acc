@@ -22,12 +22,16 @@
 #include "Binary.hpp"
 
 #include "../ObjectVector.hpp"
+#include "../SourceException.hpp"
 
 
 
 SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR)
 {
 	SourceVariable::VariableType const * type(getType());
+
+	if (type->type == SourceVariable::VT_POINTER)
+		return;
 
 	if (exprL->getType() != type)
 		this->exprL = create_value_cast(exprL, type, position);
@@ -50,11 +54,6 @@ SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, Sourc
 	}
 }
 
-bool SourceExpression_Binary::canMakeObject() const
-{
-	return exprL->canMakeObject() && exprR->canMakeObject();
-}
-
 SourceVariable::VariableType const * SourceExpression_Binary::getType() const
 {
 	return get_promoted_type(exprL->getType(), exprR->getType(), position);
@@ -64,8 +63,38 @@ void SourceExpression_Binary::makeObjectsGet(ObjectVector * objects) const
 {
 	objects->addLabel(labels);
 
-	exprL->makeObjectsGet(objects);
-	exprR->makeObjectsGet(objects);
+	SourceVariable::VariableType const * type(getType());
+
+	// Pointer arithmetic.
+	if (type->type == SourceVariable::VT_POINTER)
+	{
+		SourceVariable::VariableType const * typeL(exprL->getType());
+		SourceVariable::VariableType const * typeR(exprR->getType());
+
+		if (typeL->type == typeR->type && typeL != typeR)
+			throw SourceException("VT_POINTER mismatch", position, getName());
+
+		exprL->makeObjectsGet(objects);
+		if (typeL->type != SourceVariable::VT_POINTER)
+		{
+			make_objects_cast(objects, typeL, type, position);
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(type->refType->size()));
+			objects->addToken(ObjectToken::OCODE_MUL);
+		}
+
+		exprR->makeObjectsGet(objects);
+		if (typeR->type != SourceVariable::VT_POINTER)
+		{
+			make_objects_cast(objects, typeR, type, position);
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(type->refType->size()));
+			objects->addToken(ObjectToken::OCODE_MUL);
+		}
+	}
+	else
+	{
+		exprL->makeObjectsGet(objects);
+		exprR->makeObjectsGet(objects);
+	}
 }
 
 void SourceExpression_Binary::printDebug(std::ostream * out) const

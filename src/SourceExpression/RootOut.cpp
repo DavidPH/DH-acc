@@ -98,6 +98,10 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::Var
 		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
 		break;
 
+	case SourceVariable::VT_POINTER:
+		objects->addToken(ObjectToken::OCODE_PRINTHEX);
+		break;
+
 	case SourceVariable::VT_REAL:
 		objects->addToken(ObjectToken::OCODE_PRINTFIXED);
 		break;

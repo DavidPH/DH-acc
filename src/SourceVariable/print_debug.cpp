@@ -105,6 +105,7 @@ void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal 
 	case SourceVariable::VT_INT:     *out << "VT_INT";     break;
 	case SourceVariable::VT_LNSPEC:  *out << "VT_LNSPEC";  break;
 	case SourceVariable::VT_NATIVE:  *out << "VT_NATIVE";  break;
+	case SourceVariable::VT_POINTER: *out << "VT_POINTER"; break;
 	case SourceVariable::VT_REAL:    *out << "VT_REAL" ;   break;
 	case SourceVariable::VT_SCRIPT:  *out << "VT_SCRIPT";  break;
 	case SourceVariable::VT_STRING:  *out << "VT_STRING";  break;

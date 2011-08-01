@@ -240,6 +240,10 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_script(Var
 {
 	return get_VariableType_auto(VT_SCRIPT, callType, _types[VT_VOID], types);
 }
+SourceVariable::VariableType const * SourceVariable::get_VariableType_pointer(VariableType const * refType)
+{
+	return get_VariableType_auto(VT_POINTER, _types[VT_VOID], refType, std::vector<VariableType const *>());
+}
 
 SourceVariable::StorageClass SourceVariable::getClass() const
 {

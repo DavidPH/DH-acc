@@ -70,7 +70,7 @@ SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * ex
 
 bool SourceExpression_BinaryArray::canMakeObjectsAddress() const
 {
-	return _exprL->canMakeObjectsAddress();
+	return _exprL->getType()->type == SourceVariable::VT_POINTER || _exprL->canMakeObjectsAddress();
 }
 
 SourceVariable::VariableType const * SourceExpression_BinaryArray::getType() const
@@ -80,26 +80,27 @@ SourceVariable::VariableType const * SourceExpression_BinaryArray::getType() con
 
 void SourceExpression_BinaryArray::makeObjectsAddress(ObjectVector * objects) const
 {
-	if (canMakeObjectsAddress())
-	{
-		objects->addLabel(labels);
+	objects->addLabel(labels);
 
-		_exprL->makeObjectsAddress(objects);
-		_exprR->makeObjectsGet(objects);
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(getType()->size()));
-		objects->addToken(ObjectToken::OCODE_MUL);
-		objects->addToken(ObjectToken::OCODE_ADD);
+	if (_exprL->getType()->type == SourceVariable::VT_POINTER)
+	{
+		_exprL->makeObjectsGet(objects);
 	}
 	else
 	{
-		Super::makeObjectsAddress(objects);
+		_exprL->makeObjectsAddress(objects);
 	}
+
+	_exprR->makeObjectsGet(objects);
+	objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(getType()->size()));
+	objects->addToken(ObjectToken::OCODE_MUL);
+	objects->addToken(ObjectToken::OCODE_ADD);
 }
 
 void SourceExpression_BinaryArray::makeObjectsGet(ObjectVector * objects) const
 {
 	if (getType()->type == SourceVariable::VT_VOID)
-		return Super::makeObjectsGet(objects);
+		Super::makeObjectsGet(objects);
 
 	if (_exprL->getType()->type == SourceVariable::VT_STRING)
 	{
@@ -141,11 +142,11 @@ void SourceExpression_BinaryArray::makeObjectsGetArray(ObjectVector * objects, s
 void SourceExpression_BinaryArray::makeObjectsSet(ObjectVector * objects) const
 {
 	if (getType()->type == SourceVariable::VT_VOID)
-		return Super::makeObjectsSet(objects);
+		Super::makeObjectsSet(objects);
 
 	if (_exprL->getType()->type == SourceVariable::VT_STRING)
 	{
-		return Super::makeObjectsSet(objects);
+		Super::makeObjectsSet(objects);
 	}
 	else if (canMakeObjectsAddress())
 	{

@@ -14,25 +14,24 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourceExpression/Binary.hpp
+/* SourceExpression/Unary.hpp
 **
-** Defines the SourceExpression_Binary class.
+** Defines the SourceExpression_Unary class.
 */
 
-#ifndef HPP_Binary__SourceExpression_
-#define HPP_Binary__SourceExpression_
+#ifndef HPP_Unary__SourceExpression_
+#define HPP_Unary__SourceExpression_
 
 #include "../SourceExpression.hpp"
 
 
 
-class SourceExpression_Binary : public SourceExpression
+class SourceExpression_Unary : public SourceExpression
 {
-	MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression_Binary, SourceExpression);
+	MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression_Unary, SourceExpression);
 
 public:
-	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
-	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool const castL, SourcePosition const & position);
+	SourceExpression_Unary(SourceExpression * expr, SourcePosition const & position);
 
 	virtual SourceVariable::VariableType const * getType() const;
 
@@ -41,8 +40,7 @@ public:
 	virtual void printDebug(std::ostream * out) const;
 
 protected:
-	SourceExpression::Pointer exprL;
-	SourceExpression::Pointer exprR;
+	SourceExpression::Pointer expr;
 };
 
 

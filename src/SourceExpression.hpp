@@ -92,6 +92,9 @@ public:
 	static Pointer create_branch_return(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_while(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position);
 
+	static Pointer create_unary_dereference(SourceExpression * expr, SourcePosition const & position);
+	static Pointer create_unary_reference(SourceExpression * expr, SourcePosition const & position);
+
 	static Pointer create_root_delay(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 	static Pointer create_root_out(SourceExpression * expr, SourcePosition const & position);
 

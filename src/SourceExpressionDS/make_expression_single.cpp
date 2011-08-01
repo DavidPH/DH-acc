@@ -67,6 +67,12 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 	case SourceTokenC::TT_STRING:
 		return create_value_string(token);
 
+	case SourceTokenC::TT_OP_AND:
+		return create_unary_reference(make_expression_single(in, blocks, context), token.getPosition());
+
+	case SourceTokenC::TT_OP_ASTERISK:
+		return create_unary_dereference(make_expression_single(in, blocks, context), token.getPosition());
+
 	case SourceTokenC::TT_OP_BRACE_O:
 	{
 		in->unget(token);

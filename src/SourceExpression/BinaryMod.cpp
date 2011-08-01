@@ -74,6 +74,7 @@ void SourceExpression_BinaryMod::makeObjectsGet(ObjectVector * objects) const
 
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
+	case SourceVariable::VT_POINTER:
 	case SourceVariable::VT_REAL:
 		objects->addToken(ObjectToken::OCODE_MOD);
 		break;
