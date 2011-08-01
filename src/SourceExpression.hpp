@@ -46,13 +46,19 @@ public:
 
 	void addLabel(std::string const & label);
 
+	virtual bool canMakeObject() const;
+	virtual bool canMakeObjectAddress() const;
+
+	virtual bool canMakeObjectsAddress() const;
+
 	SourcePosition const & getPosition() const;
 
 	virtual SourceVariable::VariableType const * getType() const;
 
-	virtual bool isConstant() const;
-
 	virtual CounterPointer<ObjectExpression> makeObject() const;
+	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
+
+	virtual void makeObjectsAddress(ObjectVector * objects) const;
 
 	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const;
 

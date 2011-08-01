@@ -50,14 +50,14 @@ SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, Sourc
 	}
 }
 
+bool SourceExpression_Binary::canMakeObject() const
+{
+	return exprL->canMakeObject() && exprR->canMakeObject();
+}
+
 SourceVariable::VariableType const * SourceExpression_Binary::getType() const
 {
 	return get_promoted_type(exprL->getType(), exprR->getType(), position);
-}
-
-bool SourceExpression_Binary::isConstant() const
-{
-	return exprL->isConstant() && exprR->isConstant();
 }
 
 void SourceExpression_Binary::makeObjectsGet(ObjectVector * objects) const

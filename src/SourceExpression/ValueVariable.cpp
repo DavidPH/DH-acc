@@ -33,9 +33,9 @@ class SourceExpression_ValueVariable : public SourceExpression
 public:
 	SourceExpression_ValueVariable(SourceVariable const & var, SourcePosition const & position);
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual bool canMakeObject() const;
 
-	virtual bool isConstant() const;
+	virtual SourceVariable::VariableType const * getType() const;
 
 	virtual ObjectExpression::Pointer makeObject() const;
 
@@ -112,14 +112,14 @@ SourceExpression_ValueVariable::SourceExpression_ValueVariable(SourceVariable co
 
 }
 
+bool SourceExpression_ValueVariable::canMakeObject() const
+{
+	return _var.canMakeObject();
+}
+
 SourceVariable::VariableType const * SourceExpression_ValueVariable::getType() const
 {
 	return _var.getType();
-}
-
-bool SourceExpression_ValueVariable::isConstant() const
-{
-	return _var.isConstant();
 }
 
 ObjectExpression::Pointer SourceExpression_ValueVariable::makeObject() const

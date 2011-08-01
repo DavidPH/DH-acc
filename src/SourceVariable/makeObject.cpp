@@ -16,7 +16,7 @@
 
 /* SourceVariable/makeObject.cpp
 **
-** Defines the SourceVariable::makeObject method.
+** Defines the SourceVariable::makeObject and makeObjectAddress methods.
 */
 
 #include "../SourceVariable.hpp"
@@ -94,6 +94,28 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 	}
 
 	throw SourceException("makeObject", _position, "SourceVariable");
+}
+ObjectExpression::Pointer SourceVariable::makeObjectAddress(SourcePosition const & position) const
+{
+	switch (_sc)
+	{
+	case SC_AUTO:
+		throw SourceException("makeObjectAddress on SC_AUTO", position, "SourceVariable");
+
+	case SC_CONSTANT:
+		throw SourceException("makeObjectAddress on SC_CONSTANT", position, "SourceVariable");
+
+	case SC_REGISTER:
+	case SC_REGISTER_GLOBAL:
+	case SC_REGISTER_MAP:
+	case SC_REGISTER_WORLD:
+	case SC_REGISTERARRAY_GLOBAL:
+	case SC_REGISTERARRAY_MAP:
+	case SC_REGISTERARRAY_WORLD:
+		throw SourceException("makeObjectAddress on register", position, "SourceVariable");
+	}
+
+	throw SourceException("makeObjectAddress", _position, "SourceVariable");
 }
 
 

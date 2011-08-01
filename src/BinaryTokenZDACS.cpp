@@ -304,6 +304,13 @@ void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<Bin
 		bcode = BCODE_PUSHMAPARRAY;
 		goto pusharray_case;
 
+	case ObjectToken::OCODE_PUSHSTACKADDRESS:
+		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
+		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
+		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
+		PUSH_TOKEN(BCODE_ADD);
+		break;
+
 	case ObjectToken::OCODE_PUSHSTACKARRAY2:
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 0, 1);
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 1, 2);

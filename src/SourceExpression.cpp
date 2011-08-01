@@ -37,6 +37,20 @@ void SourceExpression::addLabel(std::string const & label)
 	labels.push_back(label);
 }
 
+bool SourceExpression::canMakeObject() const
+{
+	return false;
+}
+bool SourceExpression::canMakeObjectAddress() const
+{
+	return false;
+}
+
+bool SourceExpression::canMakeObjectsAddress() const
+{
+	return false;
+}
+
 SourceVariable::VariableType const * SourceExpression::get_promoted_type(SourceVariable::VariableType const * type1, SourceVariable::VariableType const * type2, SourcePosition const & position)
 {
 	if (type1 == type2) return type1;
@@ -127,7 +141,7 @@ void SourceExpression::make_objects_call_asmfunc(ObjectVector * objects, SourceV
 		if (args[i]->getType() != data.type->types[i])
 			throw SourceException("incorrect arg type to call asmfunc", args[i]->position, "SourceExpressionDS");
 
-		immediate = immediate && args[i]->isConstant();
+		immediate = immediate && args[i]->canMakeObject();
 	}
 
 	if (immediate)
@@ -361,6 +375,15 @@ ObjectExpression::Pointer SourceExpression::makeObject() const
 {
 	throw SourceException("makeObject on invalid expression", position, getName());
 }
+ObjectExpression::Pointer SourceExpression::makeObjectAddress() const
+{
+	throw SourceException("makeObjectAddress on invalid expression", position, getName());
+}
+
+void SourceExpression::makeObjectsAddress(ObjectVector * objects) const
+{
+	throw SourceException("makeObjectsAddress on invalid expression", position, getName());
+}
 
 void SourceExpression::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const
 {
@@ -421,11 +444,6 @@ void SourceExpression::makeObjectsSetMember(ObjectVector * objects, std::vector<
 	}
 
 	throw SourceException("makeObjectsSetMember on invalid expression", position, getName());
-}
-
-bool SourceExpression::isConstant() const
-{
-	return false;
 }
 
 void SourceExpression::printDebug(std::ostream * out) const

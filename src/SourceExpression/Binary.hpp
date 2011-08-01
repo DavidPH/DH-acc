@@ -34,9 +34,9 @@ public:
 	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool const castL, SourcePosition const & position);
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual bool canMakeObject() const;
 
-	virtual bool isConstant() const;
+	virtual SourceVariable::VariableType const * getType() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
 

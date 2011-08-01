@@ -167,6 +167,11 @@ public:
 	SourceVariable(std::string const & name, VariableData_String  const & vdString,  SourcePosition const & position, std::string const & nameObject);
 	SourceVariable(std::string const & name, VariableType const * type, ObjectExpression * expr, SourcePosition const & position);
 
+	bool canMakeObject() const;
+	bool canMakeObjectAddress() const;
+
+	bool canMakeObjectsAddress() const;
+
 	StorageClass getClass() const;
 
 	std::string const & getNameObject() const;
@@ -174,9 +179,10 @@ public:
 
 	VariableType const * getType() const;
 
-	bool isConstant() const;
-
 	ObjectExpression::Pointer makeObject(SourcePosition const & position) const;
+	ObjectExpression::Pointer makeObjectAddress(SourcePosition const & position) const;
+
+	void makeObjectsAddress(ObjectVector * objects, SourcePosition const & position) const;
 
 	void makeObjectsCall(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > const & args, ObjectExpression * stack, SourcePosition const & position) const;
 

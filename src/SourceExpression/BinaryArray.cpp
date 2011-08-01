@@ -34,8 +34,6 @@ public:
 
 	virtual SourceVariable::VariableType const * getType() const;
 
-	virtual bool isConstant() const;
-
 	virtual void makeObjectsGet(ObjectVector * objects) const;
 	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
 
@@ -69,11 +67,6 @@ SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * ex
 SourceVariable::VariableType const * SourceExpression_BinaryArray::getType() const
 {
 	return _exprL->getType()->refType;
-}
-
-bool SourceExpression_BinaryArray::isConstant() const
-{
-	return false;
 }
 
 void SourceExpression_BinaryArray::makeObjectsGet(ObjectVector * objects) const

@@ -160,6 +160,7 @@ void ObjectToken::init()
 	DO_INIT(ASSIGNWORLDARRAY2,  2);
 	DO_INIT(PUSHGLOBALARRAY2,   2);
 	DO_INIT(PUSHMAPARRAY2,      2);
+	DO_INIT(PUSHSTACKADDRESS,   1);
 	DO_INIT(PUSHSTACKARRAY2,    2);
 	DO_INIT(PUSHSTACKVAR,       1);
 	DO_INIT(PUSHWORLDARRAY2,    2);
@@ -277,6 +278,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_ASSIGNWORLDARRAY2:  *out << "OCODE_ASSIGNWORLDARRAY2";  break;
 	case ObjectToken::OCODE_PUSHGLOBALARRAY2:   *out << "OCODE_PUSHGLOBALARRAY2";   break;
 	case ObjectToken::OCODE_PUSHMAPARRAY2:      *out << "OCODE_PUSHMAPARRAY2";      break;
+	case ObjectToken::OCODE_PUSHSTACKADDRESS:   *out << "OCODE_PUSHSTACKADDRESS";   break;
 	case ObjectToken::OCODE_PUSHSTACKARRAY2:    *out << "OCODE_PUSHSTACKARRAY2";    break;
 	case ObjectToken::OCODE_PUSHSTACKVAR:       *out << "OCODE_PUSHSTACKVAR";       break;
 	case ObjectToken::OCODE_PUSHWORLDARRAY2:    *out << "OCODE_PUSHWORLDARRAY2";    break;

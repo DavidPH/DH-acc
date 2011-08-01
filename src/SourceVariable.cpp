@@ -110,6 +110,20 @@ void SourceVariable::add_typedef(std::string const & name, VariableType const * 
 	_types.push_back((VariableType*)type);
 }
 
+bool SourceVariable::canMakeObject() const
+{
+	return _sc == SC_CONSTANT;
+}
+bool SourceVariable::canMakeObjectAddress() const
+{
+	return false;
+}
+
+bool SourceVariable::canMakeObjectsAddress() const
+{
+	return _sc == SC_AUTO;
+}
+
 SourceVariable::StorageClass SourceVariable::get_StorageClass(SourceTokenC const & token)
 {
 	if (token.getData() == "auto")
@@ -268,11 +282,6 @@ void SourceVariable::init()
 	type.type = VT_STRING;
 	_names[VT_STRING] = "string";
 	_types[VT_STRING] = new VariableType(type);
-}
-
-bool SourceVariable::isConstant() const
-{
-	return _sc == SC_CONSTANT;
 }
 
 

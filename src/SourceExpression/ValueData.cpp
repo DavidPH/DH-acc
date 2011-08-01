@@ -33,9 +33,9 @@ class SourceExpression_ValueData : public SourceExpression
 public:
 	SourceExpression_ValueData(SourceVariable::VariableType const * type, bool garbage, SourcePosition const & position);
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual bool canMakeObject() const;
 
-	virtual bool isConstant() const;
+	virtual SourceVariable::VariableType const * getType() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects) const;
 
@@ -60,14 +60,14 @@ SourceExpression_ValueData::SourceExpression_ValueData(SourceVariable::VariableT
 
 }
 
+bool SourceExpression_ValueData::canMakeObject() const
+{
+	return !_garbage;
+}
+
 SourceVariable::VariableType const * SourceExpression_ValueData::getType() const
 {
 	return _type;
-}
-
-bool SourceExpression_ValueData::isConstant() const
-{
-	return !_garbage;
 }
 
 void SourceExpression_ValueData::makeObjectsGet(ObjectVector * objects) const
