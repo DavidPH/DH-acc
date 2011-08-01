@@ -21,6 +21,7 @@
 
 #include "../SourceExpressionDS.hpp"
 
+#include "../SourceException.hpp"
 #include "../SourceTokenizerDS.hpp"
 
 
@@ -69,25 +70,36 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 	}
 	else if (token.getData() == "struct")
 	{
+		type = NULL;
+
 		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
+		{
 			name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
 
-		in->get(SourceTokenC::TT_OP_BRACE_O);
-
-		while (true)
-		{
-			if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_C)
-				break;
-
-			types.push_back(make_expression_type(in, blocks, context));
-			names.push_back(in->get(SourceTokenC::TT_IDENTIFIER).getData());
-
-			in->get(SourceTokenC::TT_OP_SEMICOLON);
+			type = SourceVariable::add_struct(name, token.getPosition());
 		}
 
-		in->get(SourceTokenC::TT_OP_BRACE_C);
+		if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_O)
+		{
+			in->get(SourceTokenC::TT_OP_BRACE_O);
 
-		type = SourceVariable::add_struct(name, names, types);
+			while (true)
+			{
+				if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_C)
+					break;
+
+				types.push_back(make_expression_type(in, blocks, context));
+				names.push_back(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+
+				in->get(SourceTokenC::TT_OP_SEMICOLON);
+			}
+
+			in->get(SourceTokenC::TT_OP_BRACE_C);
+
+			type = SourceVariable::add_struct(name, names, types, token.getPosition());
+		}
+
+		if (!type) type = SourceVariable::add_struct(name, token.getPosition());
 	}
 	else if (token.getData() == "typeof")
 	{

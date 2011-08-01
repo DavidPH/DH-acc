@@ -90,18 +90,66 @@ SourceVariable::SourceVariable(std::string const & name, VariableType const * ty
 
 }
 
-SourceVariable::VariableType const * SourceVariable::add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types)
+SourceVariable::VariableType const * SourceVariable::add_struct(std::string const & name, SourcePosition const & position)
 {
-	VariableType * type(new VariableType);
+	VariableType * type(get_VariableType_struct(name));
 
-	type->type     = VT_STRUCT;
-	type->callType = _types[VT_VOID];
-	type->refType  = _types[VT_VOID];
-	type->names    = names;
-	type->types    = types;
+	if (type)
+	{
+		if (type->type != VT_STRUCT)
+			throw SourceException("existing type not VT_STRUCT", position, "SourceVariable");
+	}
+	else
+	{
+		type = new VariableType;
 
-	_names.push_back(name);
-	_types.push_back(type);
+		type->type     = VT_STRUCT;
+		type->callType = _types[VT_VOID];
+		type->refType  = _types[VT_VOID];
+
+		_names.push_back(name);
+		_types.push_back(type);
+	}
+
+	return type;
+}
+SourceVariable::VariableType const * SourceVariable::add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position)
+{
+	VariableType * type(get_VariableType_struct(name));
+
+	if (type)
+	{
+		if (type->type != VT_STRUCT)
+			throw SourceException("existing type not VT_STRUCT", position, "SourceVariable");
+
+		if (type->callType->type != VT_VOID)
+			throw SourceException("existing VT_STRUCT callType not void", position, "SourceVariable");
+
+		if (type->refType->type != VT_VOID)
+			throw SourceException("existing VT_STRUCT refType not void", position, "SourceVariable");
+
+		if (!type->names.empty())
+			throw SourceException("existing VT_STRUCT names not empty", position, "SourceVariable");
+
+		if (!type->types.empty())
+			throw SourceException("existing VT_STRUCT types not empty", position, "SourceVariable");
+
+		type->names = names;
+		type->types = types;
+	}
+	else
+	{
+		type = new VariableType;
+
+		type->type     = VT_STRUCT;
+		type->callType = _types[VT_VOID];
+		type->refType  = _types[VT_VOID];
+		type->names    = names;
+		type->types    = types;
+
+		_names.push_back(name);
+		_types.push_back(type);
+	}
 
 	return type;
 }
@@ -231,7 +279,7 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_native(Var
 SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::string const & name)
 {
 	for (size_t i(0); i < _names.size(); ++i)
-		if (name == _names[i])
+		if (_names[i] == name)
 			return _types[i];
 
 	return NULL;
@@ -239,6 +287,14 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::
 SourceVariable::VariableType const * SourceVariable::get_VariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
 	return get_VariableType_auto(VT_SCRIPT, callType, _types[VT_VOID], types);
+}
+SourceVariable::VariableType * SourceVariable::get_VariableType_struct(std::string const & name)
+{
+	for (size_t i(0); i < _names.size(); ++i)
+		if (_names[i] == name && _types[i]->type == VT_STRUCT)
+			return _types[i];
+
+	return NULL;
 }
 SourceVariable::VariableType const * SourceVariable::get_VariableType_pointer(VariableType const * refType)
 {

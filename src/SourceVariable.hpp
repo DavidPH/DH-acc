@@ -205,7 +205,8 @@ public:
 	friend void print_debug(std::ostream * const out, SourceVariable::VariableType const & in);
 	friend void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal const in);
 
-	static VariableType const * add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types);
+	static VariableType const * add_struct(std::string const & name, SourcePosition const & position);
+	static VariableType const * add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position);
 
 	static void add_typedef(std::string const & name, VariableType const * type);
 
@@ -256,6 +257,7 @@ private:
 
 
 	static VariableType const * get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types);
+	static VariableType * get_VariableType_struct(std::string const & name);
 
 	static std::vector<std::string>    _names;
 	static std::vector<VariableType *> _types;
