@@ -59,7 +59,7 @@ ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::string const & v
 
 ObjectExpression::ExpressionType ObjectExpression_ValueSymbol::getType() const
 {
-	return ObjectExpression::get_symbol(_value, position)->getType();
+	return ObjectExpression::get_symbol_type(_value, position);
 }
 
 void ObjectExpression_ValueSymbol::printDebug(std::ostream * out) const

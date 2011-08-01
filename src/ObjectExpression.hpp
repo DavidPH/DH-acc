@@ -76,6 +76,13 @@ public:
 		int_t varCount;
 	};
 
+	struct Register
+	{
+		std::string name;
+		int_t number;
+		int_t size;
+	};
+
 	struct RegisterArray
 	{
 		std::string name;
@@ -122,6 +129,15 @@ public:
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
 
+	static void add_register_global(std::string const & name, int_t size);
+	static void add_register_global(std::string const & name, int_t size, int_t number);
+
+	static void add_register_map(std::string const & name, int_t size);
+	static void add_register_map(std::string const & name, int_t size, int_t number);
+
+	static void add_register_world(std::string const & name, int_t size);
+	static void add_register_world(std::string const & name, int_t size, int_t number);
+
 	static void add_registerarray_global(std::string const & name, int_t size);
 	static void add_registerarray_global(std::string const & name, int_t size, int_t number);
 
@@ -139,6 +155,7 @@ public:
 	static void add_string(std::string const & symbol, std::string const & value);
 
 	static void add_symbol(std::string const & symbol, ObjectExpression * value);
+	static void add_symbol(std::string const & symbol, ExpressionType type);
 
 	static Pointer create_binary_add(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_and(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
@@ -187,7 +204,8 @@ public:
 	// Returns length of all strings combined.
 	static int32_t get_string_length();
 
-	static Pointer get_symbol(std::string const & symbol, SourcePosition const & position);
+	static ObjectExpression::Pointer get_symbol(std::string const & symbol, SourcePosition const & position);
+	static ExpressionType get_symbol_type(std::string const & symbol, SourcePosition const & position);
 
 	static void reserve_script_number(int32_t number);
 
@@ -201,24 +219,40 @@ protected:
 
 
 private:
+	static void do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<int_t, bool> * registerUsed);
 	static void do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<int_t, bool> * registerarrayUsed);
 
+	static int_t get_register_number(std::map<int_t, bool> * registerUsed, int_t size);
 	static int_t get_registerarray_number(std::map<int_t, bool> * registerarrayUsed);
-
 	static int_t get_script_number();
 
+	static bool is_register_used(std::map<int_t, bool> * registerUsed, int_t number, int_t size);
+
 	static std::vector<ACSFunc> _acsfunc_table;
+
 	static int32_t _address_count;
+
+	static std::vector<Register> _register_global_table;
+	static std::map<int_t, bool> _register_global_used;
+	static std::vector<Register> _register_map_table;
+	static std::map<int_t, bool> _register_map_used;
+	static std::vector<Register> _register_world_table;
+	static std::map<int_t, bool> _register_world_used;
+
 	static std::vector<RegisterArray> _registerarray_global_table;
-	static std::map<int_t, bool> _registerarray_global_used;
+	static std::map<int_t, bool>      _registerarray_global_used;
 	static std::vector<RegisterArray> _registerarray_map_table;
-	static std::map<int_t, bool> _registerarray_map_used;
+	static std::map<int_t, bool>      _registerarray_map_used;
 	static std::vector<RegisterArray> _registerarray_world_table;
-	static std::map<int_t, bool> _registerarray_world_used;
-	static std::vector<Script> _script_table;
+	static std::map<int_t, bool>      _registerarray_world_used;
+
+	static std::vector<Script>   _script_table;
 	static std::map<int_t, bool> _script_used;
+
 	static std::vector<String> _string_table;
+
 	static std::map<std::string, ObjectExpression::Pointer> _symbol_table;
+	static std::map<std::string, ExpressionType>            _symbol_type_table;
 };
 
 

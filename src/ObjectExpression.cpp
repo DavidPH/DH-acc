@@ -29,17 +29,30 @@
 
 
 std::vector<ObjectExpression::ACSFunc> ObjectExpression::_acsfunc_table;
+
 int32_t ObjectExpression::_address_count;
+
+std::vector<ObjectExpression::Register> ObjectExpression::_register_global_table;
+std::map<ObjectExpression::int_t, bool> ObjectExpression::_register_global_used;
+std::vector<ObjectExpression::Register> ObjectExpression::_register_map_table;
+std::map<ObjectExpression::int_t, bool> ObjectExpression::_register_map_used;
+std::vector<ObjectExpression::Register> ObjectExpression::_register_world_table;
+std::map<ObjectExpression::int_t, bool> ObjectExpression::_register_world_used;
+
 std::vector<ObjectExpression::RegisterArray> ObjectExpression::_registerarray_global_table;
-std::map<ObjectExpression::int_t, bool> ObjectExpression::_registerarray_global_used;
+std::map<ObjectExpression::int_t, bool>      ObjectExpression::_registerarray_global_used;
 std::vector<ObjectExpression::RegisterArray> ObjectExpression::_registerarray_map_table;
-std::map<ObjectExpression::int_t, bool> ObjectExpression::_registerarray_map_used;
+std::map<ObjectExpression::int_t, bool>      ObjectExpression::_registerarray_map_used;
 std::vector<ObjectExpression::RegisterArray> ObjectExpression::_registerarray_world_table;
-std::map<ObjectExpression::int_t, bool> ObjectExpression::_registerarray_world_used;
-std::vector<ObjectExpression::Script> ObjectExpression::_script_table;
+std::map<ObjectExpression::int_t, bool>      ObjectExpression::_registerarray_world_used;
+
+std::vector<ObjectExpression::Script>   ObjectExpression::_script_table;
 std::map<ObjectExpression::int_t, bool> ObjectExpression::_script_used;
+
 std::vector<ObjectExpression::String> ObjectExpression::_string_table;
-std::map<std::string, ObjectExpression::Pointer> ObjectExpression::_symbol_table;
+
+std::map<std::string, ObjectExpression::Pointer>        ObjectExpression::_symbol_table;
+std::map<std::string, ObjectExpression::ExpressionType> ObjectExpression::_symbol_type_table;
 
 
 
@@ -64,10 +77,63 @@ void ObjectExpression::add_label(std::string const & symbol)
 	add_symbol(symbol, create_value_int(_address_count, SourcePosition::none));
 }
 
+void ObjectExpression::add_register_global(std::string const & name, int_t size)
+{
+	Register r = {name, -1, size};
+	_register_global_table.push_back(r);
+
+	add_symbol(name, ET_INT);
+}
+void ObjectExpression::add_register_global(std::string const & name, int_t size, int_t number)
+{
+	Register r = {name, number, size};
+	_register_global_table.push_back(r);
+	for (int_t i(0); i < size; ++i)
+		_register_global_used[number+i] = true;
+
+	add_symbol(name, create_value_int(number, SourcePosition::none));
+}
+
+void ObjectExpression::add_register_map(std::string const & name, int_t size)
+{
+	Register r = {name, -1, size};
+	_register_map_table.push_back(r);
+
+	add_symbol(name, ET_INT);
+}
+void ObjectExpression::add_register_map(std::string const & name, int_t size, int_t number)
+{
+	Register r = {name, number, size};
+	_register_map_table.push_back(r);
+	for (int_t i(0); i < size; ++i)
+		_register_map_used[number+i] = true;
+
+	add_symbol(name, create_value_int(number, SourcePosition::none));
+}
+
+void ObjectExpression::add_register_world(std::string const & name, int_t size)
+{
+	Register r = {name, -1, size};
+	_register_world_table.push_back(r);
+
+	add_symbol(name, ET_INT);
+}
+void ObjectExpression::add_register_world(std::string const & name, int_t size, int_t number)
+{
+	Register r = {name, number, size};
+	_register_world_table.push_back(r);
+	for (int_t i(0); i < size; ++i)
+		_register_world_used[number+i] = true;
+
+	add_symbol(name, create_value_int(number, SourcePosition::none));
+}
+
 void ObjectExpression::add_registerarray_global(std::string const & name, int_t size)
 {
 	RegisterArray r = {name, -1, size};
 	_registerarray_global_table.push_back(r);
+
+	add_symbol(name, ET_INT);
 }
 void ObjectExpression::add_registerarray_global(std::string const & name, int_t size, int_t number)
 {
@@ -82,6 +148,8 @@ void ObjectExpression::add_registerarray_map(std::string const & name, int_t siz
 {
 	RegisterArray r = {name, -1, size};
 	_registerarray_map_table.push_back(r);
+
+	add_symbol(name, ET_INT);
 }
 void ObjectExpression::add_registerarray_map(std::string const & name, int_t size, int_t number)
 {
@@ -96,6 +164,8 @@ void ObjectExpression::add_registerarray_world(std::string const & name, int_t s
 {
 	RegisterArray r = {name, -1, size};
 	_registerarray_world_table.push_back(r);
+
+	add_symbol(name, ET_INT);
 }
 void ObjectExpression::add_registerarray_world(std::string const & name, int_t size, int_t number)
 {
@@ -141,25 +211,55 @@ void ObjectExpression::add_string(std::string const & symbol, std::string const 
 
 void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression * value)
 {
+	add_symbol(symbol, value->getType());
 	_symbol_table[symbol] = value;
+}
+void ObjectExpression::add_symbol(std::string const & symbol, ExpressionType type)
+{
+	_symbol_type_table[symbol] = type;
 }
 
 void ObjectExpression::do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<int_t, bool> * registerarrayUsed)
 {
 	for (size_t i(0); i < registerarrayTable->size(); ++i)
 	{
-		if ((*registerarrayTable)[i].number == -1)
-		{
-			(*registerarrayTable)[i].number = get_registerarray_number(registerarrayUsed);
+		RegisterArray & r((*registerarrayTable)[i]);
 
-			add_symbol((*registerarrayTable)[i].name, create_value_int((*registerarrayTable)[i].number, SourcePosition::none));
+		if (r.number == -1)
+		{
+			r.number = get_registerarray_number(registerarrayUsed);
+
+			add_symbol(r.name, create_value_int(r.number, SourcePosition::none));
+		}
+	}
+}
+void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<int_t, bool> * registerUsed)
+{
+	for (size_t i(0); i < registerTable->size(); ++i)
+	{
+		Register & r((*registerTable)[i]);
+
+		if (r.number == -1)
+		{
+			r.number = get_register_number(registerUsed, r.size);
+
+			add_symbol(r.name, create_value_int(r.number, SourcePosition::none));
 		}
 	}
 }
 void ObjectExpression::do_deferred_allocation()
 {
+	// Stack pointer.
+	_register_world_used[0] = true;
+	// Array temporary.
+	_register_world_used[1] = true;
+
 	// Pointer-addressable space.
 	_registerarray_global_used[0] = true;
+
+	do_deferred_allocation_register(&_register_global_table, &_register_global_used);
+	do_deferred_allocation_register(&_register_map_table, &_register_map_used);
+	do_deferred_allocation_register(&_register_world_table, &_register_world_used);
 
 	do_deferred_allocation_registerarray(&_registerarray_global_table, &_registerarray_global_used);
 	do_deferred_allocation_registerarray(&_registerarray_map_table, &_registerarray_map_used);
@@ -200,6 +300,32 @@ ObjectExpression::int_t ObjectExpression::get_int(SourceTokenC const & token)
 	std::istringstream iss(token.getData());
 	iss >> i;
 	return i;
+}
+
+ObjectExpression::int_t ObjectExpression::get_register_number(std::map<int_t, bool> * registerUsed, int_t size)
+{
+	int_t registerUsedLast(0);
+
+	while (is_register_used(registerUsed, registerUsedLast, size) && registerUsedLast < 65535) ++registerUsedLast;
+
+	if (registerUsedLast == 65535) throw SourceException("no more register numbers", SourcePosition::none, "ObjectExpression");
+
+	for (int_t i(0); i < size; ++i)
+		(*registerUsed)[registerUsedLast+i] = true;
+
+	return registerUsedLast;
+}
+
+ObjectExpression::int_t ObjectExpression::get_registerarray_number(std::map<int_t, bool> * registerarrayUsed)
+{
+	int_t registerarrayUsedLast(0);
+
+	while (registerarrayUsed->find(registerarrayUsedLast) != registerarrayUsed->end() && registerarrayUsedLast < 65535) ++registerarrayUsedLast;
+
+	if (registerarrayUsedLast == 65535) throw SourceException("no more registerarray numbers", SourcePosition::none, "ObjectExpression");
+
+	(*registerarrayUsed)[registerarrayUsedLast] = true;
+	return registerarrayUsedLast;
 }
 
 ObjectExpression::RegisterArray const & ObjectExpression::get_registerarray_map(int_t index)
@@ -265,18 +391,6 @@ int32_t ObjectExpression::get_script_count()
 	return (int32_t)_script_table.size();
 }
 
-ObjectExpression::int_t ObjectExpression::get_registerarray_number(std::map<int_t, bool> * registerarrayUsed)
-{
-	int_t registerarrayUsedLast(0);
-
-	while (registerarrayUsed->find(registerarrayUsedLast) != registerarrayUsed->end() && registerarrayUsedLast < 65535) ++registerarrayUsedLast;
-
-	if (registerarrayUsedLast == 65535) throw SourceException("no more registerarray numbers", SourcePosition::none, "ObjectExpression");
-
-	(*registerarrayUsed)[registerarrayUsedLast] = true;
-	return registerarrayUsedLast;
-}
-
 ObjectExpression::int_t ObjectExpression::get_script_number()
 {
 	int_t scriptUsedLast(0);
@@ -315,10 +429,28 @@ ObjectExpression::Pointer ObjectExpression::get_symbol(std::string const & symbo
 
 	return valueIt->second;
 }
+ObjectExpression::ExpressionType ObjectExpression::get_symbol_type(std::string const & symbol, SourcePosition const & position)
+{
+	std::map<std::string, ExpressionType>::iterator typeIt(_symbol_type_table.find(symbol));
+
+	if (typeIt == _symbol_type_table.end())
+		throw SourceException("unknown symbol '" + symbol + "'", position, "ObjectExpression");
+
+	return typeIt->second;
+}
 
 SourcePosition const & ObjectExpression::getPosition() const
 {
 	return position;
+}
+
+bool ObjectExpression::is_register_used(std::map<int_t, bool> * registerUsed, int_t number, int_t size)
+{
+	if (size == 0) return false;
+
+	std::map<int_t, bool>::iterator it(registerUsed->find(number+size-1));
+
+	return (it != registerUsed->end() && it->second) || is_register_used(registerUsed, number, size-1);
 }
 
 void ObjectExpression::printDebug(std::ostream * const out) const

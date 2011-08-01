@@ -38,10 +38,6 @@ SourceContext::SourceContext() : _labelCount(0), _parent(NULL), _returnType(Sour
 {
 	std::memset(_count, 0, sizeof(_count));
 	std::memset(_limit, 0, sizeof(_limit));
-
-	// Stack pointer and array temporary.
-	_count[SourceVariable::SC_REGISTER_WORLD] = 2;
-	_limit[SourceVariable::SC_REGISTER_WORLD] = 2;
 }
 SourceContext::SourceContext(SourceContext * parent, ContextType type) : _label(parent->makeLabelShort()), _labelCount(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK)
 {
@@ -62,21 +58,12 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 		break;
 
 	case SourceVariable::SC_CONSTANT:
-	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-	case SourceVariable::SC_REGISTERARRAY_MAP:
-	case SourceVariable::SC_REGISTERARRAY_WORLD:
-		break;
-
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
-		if (_parent)
-			_parent->addCount(count, sc);
-		else
-			_count[sc] += count;
-
-		addLimit(getCount(sc), sc);
-
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		break;
 	}
 }
@@ -96,20 +83,12 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 		break;
 
 	case SourceVariable::SC_CONSTANT:
-	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-	case SourceVariable::SC_REGISTERARRAY_MAP:
-	case SourceVariable::SC_REGISTERARRAY_WORLD:
-		break;
-
 	case SourceVariable::SC_REGISTER_GLOBAL:
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
-		if (limit > _limit[sc])
-			_limit[sc] = limit;
-
-		if (_parent)
-			_parent->addLimit(limit, sc);
-
+	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+	case SourceVariable::SC_REGISTERARRAY_MAP:
+	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		break;
 	}
 }
@@ -152,18 +131,13 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
 			return _count[sc];
 
 	case SourceVariable::SC_CONSTANT:
+	case SourceVariable::SC_REGISTER_GLOBAL:
+	case SourceVariable::SC_REGISTER_MAP:
+	case SourceVariable::SC_REGISTER_WORLD:
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
 	case SourceVariable::SC_REGISTERARRAY_MAP:
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
 		return 0;
-
-	case SourceVariable::SC_REGISTER_GLOBAL:
-	case SourceVariable::SC_REGISTER_MAP:
-	case SourceVariable::SC_REGISTER_WORLD:
-		if (_parent)
-			return _parent->getCount(sc) + _count[sc];
-		else
-			return _count[sc];
 	}
 
 	throw SourceException("getCount", SourcePosition::none, "SourceContext");
@@ -183,12 +157,12 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 	{
 	case SourceVariable::SC_AUTO:
 	case SourceVariable::SC_REGISTER:
-	case SourceVariable::SC_REGISTER_GLOBAL:
-	case SourceVariable::SC_REGISTER_MAP:
-	case SourceVariable::SC_REGISTER_WORLD:
 		return _limit[sc];
 
 	case SourceVariable::SC_CONSTANT:
+	case SourceVariable::SC_REGISTER_GLOBAL:
+	case SourceVariable::SC_REGISTER_MAP:
+	case SourceVariable::SC_REGISTER_WORLD:
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
 	case SourceVariable::SC_REGISTERARRAY_MAP:
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
@@ -274,9 +248,15 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Sourc
 		throw SourceException("makeNameObject on SC_CONSTANT", position, "SourceContext");
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
+		ObjectExpression::add_register_global(nameObject, type->size());
+		break;
+
 	case SourceVariable::SC_REGISTER_MAP:
+		ObjectExpression::add_register_map(nameObject, type->size());
+		break;
+
 	case SourceVariable::SC_REGISTER_WORLD:
-		ObjectExpression::add_symbol(nameObject, ObjectExpression::create_value_int(getCount(sc), position));
+		ObjectExpression::add_register_world(nameObject, type->size());
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
@@ -309,9 +289,15 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Sourc
 		throw SourceException("makeNameObject on SC_CONSTANT", position, "SourceContext");
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
+		ObjectExpression::add_register_global(nameObject, type->size(), address);
+		break;
+
 	case SourceVariable::SC_REGISTER_MAP:
+		ObjectExpression::add_register_map(nameObject, type->size(), address);
+		break;
+
 	case SourceVariable::SC_REGISTER_WORLD:
-		ObjectExpression::add_symbol(nameObject, ObjectExpression::create_value_int(getCount(sc), position));
+		ObjectExpression::add_register_world(nameObject, type->size(), address);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
