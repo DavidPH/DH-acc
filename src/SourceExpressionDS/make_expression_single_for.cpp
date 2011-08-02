@@ -45,10 +45,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_for(SourceT
 
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-	SourceContext contextLoop(&contextCond, SourceContext::CT_BLOCK);
+	SourceContext contextLoop(&contextCond, SourceContext::CT_LOOP);
 	SourceExpression::Pointer exprLoop(make_expression_single(in, blocks, &contextLoop));
 
-	return create_branch_for(exprInit, exprCond, exprIter, exprLoop, context, token.getPosition());
+	return create_branch_for(exprInit, exprCond, exprIter, exprLoop, &contextLoop, token.getPosition());
 }
 
 

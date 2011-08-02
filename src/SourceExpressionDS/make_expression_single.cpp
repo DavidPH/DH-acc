@@ -160,6 +160,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_asmfunc(Sou
 	context->addVariable(asmfuncVariable);
 	return create_value_variable(asmfuncVariable, token.getPosition());
 }
+SourceExpression::Pointer SourceExpressionDS::make_expression_single_break(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+{
+	return create_branch_break(context, token.getPosition());
+}
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_const(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	SourceVariable::VariableType const * type(make_expression_type(in, blocks, context));
@@ -172,6 +176,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_const(Sourc
 	context->addVariable(var);
 
 	return create_value_variable(var, token.getPosition());
+}
+SourceExpression::Pointer SourceExpressionDS::make_expression_single_continue(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+{
+	return create_branch_continue(context, token.getPosition());
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_delay(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
@@ -396,10 +404,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_while(Sourc
 	SourceContext contextCondition(context, SourceContext::CT_BLOCK);
 	SourceExpression::Pointer exprCondition(make_expression_single(in, blocks, &contextCondition));
 
-	SourceContext contextWhile(&contextCondition, SourceContext::CT_BLOCK);
+	SourceContext contextWhile(&contextCondition, SourceContext::CT_LOOP);
 	SourceExpression::Pointer exprWhile(make_expression_single(in, blocks, &contextWhile));
 
-	return create_branch_while(exprCondition, exprWhile, context, token.getPosition());
+	return create_branch_while(exprCondition, exprWhile, &contextWhile, token.getPosition());
 }
 
 

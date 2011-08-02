@@ -38,6 +38,7 @@ public:
 	{
 		CT_ACSFUNC,
 		CT_BLOCK,
+		CT_LOOP,
 		CT_SCRIPT
 	};
 
@@ -49,6 +50,8 @@ public:
 	void addVariable(SourceVariable const & var);
 
 	std::string getLabel() const;
+	std::string getLabelBreak(SourcePosition const & position) const;
+	std::string getLabelContinue(SourcePosition const & position) const;
 
 	int getLimit(SourceVariable::StorageClass sc) const;
 

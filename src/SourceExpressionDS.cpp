@@ -40,24 +40,26 @@ SourceExpressionDS::SourceExpressionDS(SourcePosition const & position) : Super(
 
 void SourceExpressionDS::init()
 {
-	_expression_single_handlers["acsfunc"] = make_expression_single_acsfunc;
-	_expression_single_handlers["asmfunc"] = make_expression_single_asmfunc;
-	_expression_single_handlers["const"]   = make_expression_single_const;
-	_expression_single_handlers["delay"]   = make_expression_single_delay;
-	_expression_single_handlers["enum"]    = make_expression_single_type;
-	_expression_single_handlers["for"]     = make_expression_single_for;
-	_expression_single_handlers["if"]      = make_expression_single_if;
-	_expression_single_handlers["lnspec"]  = make_expression_single_lnspec;
-	_expression_single_handlers["native"]  = make_expression_single_native;
-	_expression_single_handlers["out"]     = make_expression_single_out;
-	_expression_single_handlers["return"]  = make_expression_single_return;
-	_expression_single_handlers["script"]  = make_expression_single_script;
-	_expression_single_handlers["sizeof"]  = make_expression_single_sizeof;
-	_expression_single_handlers["struct"]  = make_expression_single_type;
-	_expression_single_handlers["typedef"] = make_expression_single_typedef;
-	_expression_single_handlers["var"]     = make_expression_single_var;
-	_expression_single_handlers["void"]    = make_expression_single_void;
-	_expression_single_handlers["while"]   = make_expression_single_while;
+	_expression_single_handlers["acsfunc"]  = make_expression_single_acsfunc;
+	_expression_single_handlers["asmfunc"]  = make_expression_single_asmfunc;
+	_expression_single_handlers["break"]    = make_expression_single_break;
+	_expression_single_handlers["const"]    = make_expression_single_const;
+	_expression_single_handlers["continue"] = make_expression_single_continue;
+	_expression_single_handlers["delay"]    = make_expression_single_delay;
+	_expression_single_handlers["enum"]     = make_expression_single_type;
+	_expression_single_handlers["for"]      = make_expression_single_for;
+	_expression_single_handlers["if"]       = make_expression_single_if;
+	_expression_single_handlers["lnspec"]   = make_expression_single_lnspec;
+	_expression_single_handlers["native"]   = make_expression_single_native;
+	_expression_single_handlers["out"]      = make_expression_single_out;
+	_expression_single_handlers["return"]   = make_expression_single_return;
+	_expression_single_handlers["script"]   = make_expression_single_script;
+	_expression_single_handlers["sizeof"]   = make_expression_single_sizeof;
+	_expression_single_handlers["struct"]   = make_expression_single_type;
+	_expression_single_handlers["typedef"]  = make_expression_single_typedef;
+	_expression_single_handlers["var"]      = make_expression_single_var;
+	_expression_single_handlers["void"]     = make_expression_single_void;
+	_expression_single_handlers["while"]    = make_expression_single_while;
 }
 
 SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)

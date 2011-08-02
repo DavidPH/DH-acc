@@ -41,8 +41,8 @@ private:
 	SourceExpression::Pointer _exprCondition;
 	SourceExpression::Pointer _exprWhile;
 
-	std::string _labelCondition;
-	std::string _labelEnd;
+	std::string _labelBreak;
+	std::string _labelContinue;
 };
 
 
@@ -54,27 +54,24 @@ SourceExpression::Pointer SourceExpression::create_branch_while(SourceExpression
 
 
 
-SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position) : Super(position), _exprCondition(exprCondition), _exprWhile(exprWhile)
+SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position) : Super(position), _exprCondition(exprCondition), _exprWhile(exprWhile), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position))
 {
-	std::string label(context->makeLabel());
 
-	_labelCondition = label + "_condition";
-	_labelEnd       = label + "_end";
 }
 
 void SourceExpression_BranchWhile::makeObjectsGet(ObjectVector * objects) const
 {
 	objects->addLabel(labels);
 
-	objects->addLabel(_labelCondition);
+	objects->addLabel(_labelContinue);
 	_exprCondition->makeObjectsGet(objects);
 	objects->setPosition(getPosition());
-	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_labelEnd));
+	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_labelBreak));
 
 	_exprWhile->makeObjectsGet(objects);
-	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_labelCondition));
+	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_labelContinue));
 
-	objects->addLabel(_labelEnd);
+	objects->addLabel(_labelBreak);
 }
 
 void SourceExpression_BranchWhile::printDebug(std::ostream * const out) const

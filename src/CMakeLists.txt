@@ -42,7 +42,9 @@ add_executable(DH-acc
 	SourceExpression/BinaryMul.cpp
 	SourceExpression/BinaryNE.cpp
 	SourceExpression/BinarySub.cpp
+	SourceExpression/BranchBreak.cpp
 	SourceExpression/BranchCall.cpp
+	SourceExpression/BranchContinue.cpp
 	SourceExpression/BranchFor.cpp
 	SourceExpression/BranchIf.cpp
 	SourceExpression/BranchReturn.cpp

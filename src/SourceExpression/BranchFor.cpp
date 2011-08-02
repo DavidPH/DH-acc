@@ -45,7 +45,9 @@ private:
 
 	std::string _labelCond;
 	std::string _labelIter;
-	std::string _labelEnd;
+
+	std::string _labelBreak;
+	std::string _labelContinue;
 };
 
 
@@ -57,13 +59,12 @@ SourceExpression::Pointer SourceExpression::create_branch_for(SourceExpression *
 
 
 
-SourceExpression_BranchFor::SourceExpression_BranchFor(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position) : Super(position), _exprInit(exprInit), _exprCond(exprCond), _exprIter(exprIter), _exprLoop(exprLoop)
+SourceExpression_BranchFor::SourceExpression_BranchFor(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position) : Super(position), _exprInit(exprInit), _exprCond(exprCond), _exprIter(exprIter), _exprLoop(exprLoop), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position))
 {
 	std::string label(context->makeLabel());
 
 	_labelCond = label + "_cond";
 	_labelIter = label + "_iter";
-	_labelEnd  = label + "_end";
 }
 
 void SourceExpression_BranchFor::makeObjectsGet(ObjectVector * objects) const
@@ -75,16 +76,17 @@ void SourceExpression_BranchFor::makeObjectsGet(ObjectVector * objects) const
 	objects->addLabel(_labelCond);
 	_exprCond->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_labelEnd));
+	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_labelBreak));
 
 	_exprLoop->makeObjectsGet(objects);
 
+	objects->addLabel(_labelContinue);
 	objects->addLabel(_labelIter);
 	_exprIter->makeObjectsGet(objects);
 	objects->setPosition(position);
 	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_labelCond));
 
-	objects->addLabel(_labelEnd);
+	objects->addLabel(_labelBreak);
 }
 
 void SourceExpression_BranchFor::printDebug(std::ostream * const out) const

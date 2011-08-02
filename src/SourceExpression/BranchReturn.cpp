@@ -79,6 +79,7 @@ void SourceExpression_BranchReturn::makeObjectsGet(ObjectVector * objects) const
 		break;
 
 	case SourceContext::CT_BLOCK:
+	case SourceContext::CT_LOOP:
 		objects->addToken(ObjectToken::OCODE_TERMINATE);
 		break;
 

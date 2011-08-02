@@ -39,7 +39,7 @@ SourceContext::SourceContext() : _labelCount(0), _parent(NULL), _returnType(Sour
 	std::memset(_count, 0, sizeof(_count));
 	std::memset(_limit, 0, sizeof(_limit));
 }
-SourceContext::SourceContext(SourceContext * parent, ContextType type) : _label(parent->makeLabelShort()), _labelCount(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK)
+SourceContext::SourceContext(SourceContext * parent, ContextType type) : _label(parent->makeLabelShort()), _labelCount(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP)
 {
 	std::memset(_count, 0, sizeof(_count));
 	std::memset(_limit, 0, sizeof(_limit));
@@ -154,6 +154,26 @@ std::string SourceContext::getLabel() const
 	else
 		return _label;
 }
+std::string SourceContext::getLabelBreak(SourcePosition const & position) const
+{
+	if (_type == CT_LOOP)
+		return getLabel() + "_break";
+
+	if (_parent && _inheritLocals)
+		return _parent->getLabelBreak(position);
+
+	throw SourceException("getLabelBreak", position, "SourceContext");
+}
+std::string SourceContext::getLabelContinue(SourcePosition const & position) const
+{
+	if (_type == CT_LOOP)
+		return getLabel() + "_continue";
+
+	if (_parent && _inheritLocals)
+		return _parent->getLabelContinue(position);
+
+	throw SourceException("getLabelContinue", position, "SourceContext");
+}
 
 int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 {
@@ -184,8 +204,18 @@ SourceVariable::VariableType const * SourceContext::getReturnType() const
 
 SourceContext::ContextType SourceContext::getTypeRoot() const
 {
-	if (_type == CT_BLOCK && _parent) return _parent->getTypeRoot();
+	switch (_type)
+	{
+	case CT_ACSFUNC:
+	case CT_SCRIPT:
+		return _type;
 
+	case CT_BLOCK:
+	case CT_LOOP:
+		if (_parent)
+			_parent->getTypeRoot();
+		break;
+	}
 	return _type;
 }
 
