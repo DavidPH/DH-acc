@@ -38,40 +38,53 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 	switch (token.getType())
 	{
 	case SourceTokenC::TT_CHARACTER:
-		return create_value_char(token);
+		expr = create_value_char(token);
+		break;
 
 	case SourceTokenC::TT_FLOAT:
-		return create_value_real(token);
+		expr = create_value_real(token);
+		break;
 
 	case SourceTokenC::TT_IDENTIFIER:
 	{	// Check for keyword.
 		std::map<std::string, expression_single_handler>::iterator it(_expression_single_handlers.find(token.getData()));
 
 		if (it != _expression_single_handlers.end())
-			return it->second(in, token, blocks, context);
+		{
+			expr = it->second(in, token, blocks, context);
+			break;
+		}
 	}
 
 	{	// Check for type.
 		SourceVariable::VariableType const * type(SourceVariable::get_VariableType_null(token.getData()));
 
 		if (type)
-			return create_value_cast(make_expression_single(in, blocks, context), type, token.getPosition());
+		{
+			expr = create_value_cast(make_expression_single(in, blocks, context), type, token.getPosition());
+			break;
+		}
 	}
 
 		// Must be a variable.
-		return create_value_variable(context->getVariable(token), token.getPosition());
+		expr = create_value_variable(context->getVariable(token), token.getPosition());
+		break;
 
 	case SourceTokenC::TT_INTEGER:
-		return create_value_int(token);
+		expr = create_value_int(token);
+		break;
 
 	case SourceTokenC::TT_STRING:
-		return create_value_string(token);
+		expr = create_value_string(token);
+		break;
 
 	case SourceTokenC::TT_OP_AND:
-		return create_unary_reference(make_expression_single(in, blocks, context), token.getPosition());
+		expr = create_unary_reference(make_expression_single(in, blocks, context), token.getPosition());
+		break;
 
 	case SourceTokenC::TT_OP_ASTERISK:
-		return create_unary_dereference(make_expression_single(in, blocks, context), token.getPosition());
+		expr = create_unary_dereference(make_expression_single(in, blocks, context), token.getPosition());
+		break;
 
 	case SourceTokenC::TT_OP_BRACE_O:
 	{
@@ -79,7 +92,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		std::vector<SourceExpression::Pointer> expressions;
 		SourceContext blockContext(context, SourceContext::CT_BLOCK);
 		make_expressions(in, &expressions, blocks, &blockContext);
-		return create_value_block(expressions, token.getPosition());
+		expr = create_value_block(expressions, token.getPosition());
+		break;
 	}
 
 	case SourceTokenC::TT_OP_BRACKET_O:
@@ -87,22 +101,43 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		in->unget(token);
 		std::vector<SourceExpression::Pointer> expressions;
 		make_expressions(in, &expressions, blocks, context);
-		return create_value_block(expressions, token.getPosition());
+		expr = create_value_block(expressions, token.getPosition());
+		break;
 	}
+
+	case SourceTokenC::TT_OP_MINUS2:
+		expr = create_unary_dec_pre(make_expression_single(in, blocks, context), token.getPosition());
+		break;
+
+	case SourceTokenC::TT_OP_PARENTHESIS_C:
+	case SourceTokenC::TT_OP_SEMICOLON:
+		in->unget(token);
+		return create_value_data(SourceVariable::get_VariableType(SourceVariable::VT_VOID), false, token.getPosition());
 
 	case SourceTokenC::TT_OP_PARENTHESIS_O:
 		expr = make_expression(in, blocks, context);
 		in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-		return expr;
+		break;
 
-	case SourceTokenC::TT_OP_SEMICOLON:
-		in->unget(token);
-		return create_value_data(SourceVariable::get_VariableType(SourceVariable::VT_VOID), false, token.getPosition());
+	case SourceTokenC::TT_OP_PLUS2:
+		expr = create_unary_inc_pre(make_expression_single(in, blocks, context), token.getPosition());
+		break;
 
 	default:
 		in->unget(token);
 		throw SourceException("unexpected token type (single)", token.getPosition(), "SourceExpressionDS");
 	}
+
+	if (in->peek().getType() == SourceTokenC::TT_OP_MINUS2)
+	{
+		expr = create_unary_dec_suf(expr, in->get(SourceTokenC::TT_OP_MINUS2).getPosition());
+	}
+	else if  (in->peek().getType() == SourceTokenC::TT_OP_PLUS2)
+	{
+		expr = create_unary_inc_suf(expr, in->get(SourceTokenC::TT_OP_PLUS2).getPosition());
+	}
+
+	return expr;
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_acsfunc(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {

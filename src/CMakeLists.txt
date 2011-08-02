@@ -52,6 +52,7 @@ add_executable(DH-acc
 	SourceExpression/RootDelay.cpp
 	SourceExpression/RootOut.cpp
 	SourceExpression/Unary.cpp
+	SourceExpression/UnaryDecInc.cpp
 	SourceExpression/UnaryDereference.cpp
 	SourceExpression/UnaryReference.cpp
 	SourceExpression/ValueBlock.cpp

@@ -28,6 +28,7 @@
 
 
 
+void print_debug(std::ostream * const out, bool b);
 void print_debug(std::ostream * const out, std::string const & s);
 template<typename T> void print_debug(std::ostream * const out, T const * const in)
 {

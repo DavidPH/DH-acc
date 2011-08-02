@@ -23,6 +23,10 @@
 
 
 
+void print_debug(std::ostream * const out, bool b)
+{
+	*out << (b ? "true" : "false");
+}
 void print_debug(std::ostream * const out, std::string const & s)
 {
 	*out << s;
