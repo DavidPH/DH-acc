@@ -98,6 +98,7 @@ public:
 	static Pointer create_branch_for(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_if(SourceExpression * exprCondition, SourceExpression * exprIf, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_if(SourceExpression * exprCondition, SourceExpression * exprIf, SourceExpression * exprElse, SourceContext * context, SourcePosition const & position);
+	static Pointer create_branch_not(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_return(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_while(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position);
 
@@ -106,7 +107,9 @@ public:
 	static Pointer create_unary_dereference(SourceExpression * expr, SourcePosition const & position);
 	static Pointer create_unary_inc_pre(SourceExpression * expr, SourcePosition const & position);
 	static Pointer create_unary_inc_suf(SourceExpression * expr, SourcePosition const & position);
+	static Pointer create_unary_not(SourceExpression * expr, SourcePosition const & position);
 	static Pointer create_unary_reference(SourceExpression * expr, SourcePosition const & position);
+	static Pointer create_unary_sub(SourceExpression * expr, SourcePosition const & position);
 
 	static Pointer create_root_delay(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 	static Pointer create_root_out(SourceExpression * expr, SourcePosition const & position);

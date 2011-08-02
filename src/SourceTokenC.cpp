@@ -54,6 +54,7 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 	case '.': _type = TT_OP_PERIOD;        return;
 	case '?': _type = TT_OP_QUERY;         return;
 	case ';': _type = TT_OP_SEMICOLON;     return;
+	case '~': _type = TT_OP_TILDE;         return;
 
 	case '&':
 		c = in->get();
@@ -148,7 +149,7 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 
 		in->unget(c);
 
-		_type = TT_OP_NOT; return;
+		_type = TT_OP_EXCLAMATION; return;
 
 	case '%':
 		c = in->get();
@@ -321,10 +322,12 @@ void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type)
 	case SourceTokenC::TT_IDENTIFIER:            *out << "TT_IDENTIFIER";            break;
 	case SourceTokenC::TT_INTEGER:               *out << "TT_INTEGER";               break;
 	case SourceTokenC::TT_OP_AT:                 *out << "TT_OP_AT";                 break;
+	case SourceTokenC::TT_OP_EXCLAMATION:        *out << "TT_OP_EXCLAMATION";        break;
 	case SourceTokenC::TT_OP_PLUS:               *out << "TT_OP_PLUS";               break;
 	case SourceTokenC::TT_OP_QUERY:              *out << "TT_OP_QUERY";              break;
 	case SourceTokenC::TT_OP_SEMICOLON:          *out << "TT_OP_SEMICOLON";          break;
 	case SourceTokenC::TT_OP_SHIFT_RIGHT_EQUALS: *out << "TT_OP_SHIFT_RIGHT_EQUALS"; break;
+	case SourceTokenC::TT_OP_TILDE:              *out << "TT_OP_TILDE";              break;
 	default: *out << "TT_"; break;
 	}
 }

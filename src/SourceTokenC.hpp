@@ -62,12 +62,12 @@ public:
 		TT_OP_COLON,              // :
 		TT_OP_COMMA,              // ,
 		TT_OP_EQUALS,             // =
+		TT_OP_EXCLAMATION,        // !
 		TT_OP_HASH,               // #
 		TT_OP_MINUS,              // -
 		TT_OP_MINUS_EQUALS,       // -=
 		TT_OP_MINUS_GT,           // ->
 		TT_OP_MINUS2,             // --
-		TT_OP_NOT,                // !
 		TT_OP_PARENTHESIS_C,      // )
 		TT_OP_PARENTHESIS_O,      // (
 		TT_OP_PERCENT,            // %
@@ -88,6 +88,7 @@ public:
 		TT_OP_SHIFT_RIGHT_EQUALS, // >>=
 		TT_OP_SLASH,              // /
 		TT_OP_SLASH_EQUALS,       // /=
+		TT_OP_TILDE,              // ~
 
 		TT_NONE
 	};

@@ -190,6 +190,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(DIV,             0);
 	DO_INIT(DROP,            0);
 	DO_INIT(ENDPRINT,        0);
+	DO_INIT(LOGICALNOT,      0);
 	DO_INIT(LSPEC1,          1);
 	DO_INIT(LSPEC1_IMM,      2);
 	DO_INIT(LSPEC2,          1);
@@ -202,6 +203,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(LSPEC5_IMM,      6);
 	DO_INIT(MUL,             0);
 	DO_INIT(MOD,             0);
+	DO_INIT(NEGATE,          0);
 	DO_INIT(NOP,             0);
 	DO_INIT(PRINTCHARACTER,  0);
 	DO_INIT(PRINTNUMBER,     0);
@@ -233,6 +235,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(ENDLOG,            0);
 	DO_INIT(LSPEC5RESULT,      1);
 	DO_INIT(MULFIXED,          0);
+	DO_INIT(NOT,               0);
 	DO_INIT(PRINTFIXED,        0);
 	DO_INIT(PRINTHEX,          0);
 	DO_INIT(PUSHGLOBALARRAY,   1);

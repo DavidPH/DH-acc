@@ -80,8 +80,10 @@ public:
 		BCODE_RANDOM            =  57,
 		BCODE_RANDOM_IMM        =  58,
 		BCODE_RESTART           =  69,
+		BCODE_LOGICALNOT        =  75,
 		BCODE_SHIFTL            =  76,
 		BCODE_SHIFTR            =  77,
+		BCODE_NEGATE            =  78,
 		BCODE_BRANCHZERO        =  79,
 		BCODE_BEGINPRINT        =  85,
 		BCODE_ENDPRINT          =  86,
@@ -110,6 +112,7 @@ public:
 		BCODE_SETRESULTVALUE    = 257,
 		BCODE_LSPEC5RESULT      = 263,
 		BCODE_ENDLOG            = 270,
+		BCODE_NOT               = 330,
 		BCODE_PRINTHEX          = 350,
 		BCODE_CALLZDFUNC        = 351,
 

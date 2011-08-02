@@ -47,6 +47,7 @@ add_executable(DH-acc
 	SourceExpression/BranchContinue.cpp
 	SourceExpression/BranchFor.cpp
 	SourceExpression/BranchIf.cpp
+	SourceExpression/BranchNot.cpp
 	SourceExpression/BranchReturn.cpp
 	SourceExpression/BranchWhile.cpp
 	SourceExpression/RootDelay.cpp
@@ -54,7 +55,9 @@ add_executable(DH-acc
 	SourceExpression/Unary.cpp
 	SourceExpression/UnaryDecInc.cpp
 	SourceExpression/UnaryDereference.cpp
+	SourceExpression/UnaryNot.cpp
 	SourceExpression/UnaryReference.cpp
+	SourceExpression/UnarySub.cpp
 	SourceExpression/ValueBlock.cpp
 	SourceExpression/ValueCast.cpp
 	SourceExpression/ValueData.cpp

@@ -71,9 +71,7 @@ SourceExpression_UnaryDecInc::SourceExpression_UnaryDecInc(SourceExpression * ex
 
 void SourceExpression_UnaryDecInc::makeObjectsGet(ObjectVector * objects) const
 {
-	objects->addLabel(labels);
-
-	expr->makeObjectsGet(objects);
+	Super::makeObjectsGet(objects);
 
 	objects->setPosition(position);
 

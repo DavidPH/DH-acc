@@ -103,6 +103,7 @@ void ObjectToken::init()
 	DO_INIT(DIV,             0);
 	DO_INIT(DROP,            0);
 	DO_INIT(ENDPRINT,        0);
+	DO_INIT(LOGICALNOT,      0);
 	DO_INIT(LSPEC1,          1);
 	DO_INIT(LSPEC1_IMM,      2);
 	DO_INIT(LSPEC2,          1);
@@ -115,6 +116,7 @@ void ObjectToken::init()
 	DO_INIT(LSPEC5_IMM,      6);
 	DO_INIT(MUL,             0);
 	DO_INIT(MOD,             0);
+	DO_INIT(NEGATE,          0);
 	DO_INIT(NOP,             0);
 	DO_INIT(PRINTCHARACTER,  0);
 	DO_INIT(PRINTNUMBER,     0);
@@ -146,6 +148,7 @@ void ObjectToken::init()
 	DO_INIT(ENDLOG,            0);
 	DO_INIT(LSPEC5RESULT,      1);
 	DO_INIT(MULFIXED,          0);
+	DO_INIT(NOT,               0);
 	DO_INIT(PRINTFIXED,        0);
 	DO_INIT(PRINTHEX,          0);
 	DO_INIT(PUSHGLOBALARRAY,   1);
@@ -234,6 +237,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_DIV:             *out << "OCODE_DIV";             break;
 	case ObjectToken::OCODE_DROP:            *out << "OCODE_DROP";            break;
 	case ObjectToken::OCODE_ENDPRINT:        *out << "OCODE_NOP";             break;
+	case ObjectToken::OCODE_LOGICALNOT:      *out << "OCODE_LOGICALNOT";      break;
 	case ObjectToken::OCODE_LSPEC1:          *out << "OCODE_LSPEC1";          break;
 	case ObjectToken::OCODE_LSPEC1_IMM:      *out << "OCODE_LSPEC1_IMM";      break;
 	case ObjectToken::OCODE_LSPEC2:          *out << "OCODE_LSPEC2";          break;
@@ -246,6 +250,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_LSPEC5_IMM:      *out << "OCODE_LSPEC5_IMM";      break;
 	case ObjectToken::OCODE_MUL:             *out << "OCODE_MUL";             break;
 	case ObjectToken::OCODE_MOD:             *out << "OCODE_MOD";             break;
+	case ObjectToken::OCODE_NEGATE:          *out << "OCODE_NEGATE";          break;
 	case ObjectToken::OCODE_NOP:             *out << "OCODE_NOP";             break;
 	case ObjectToken::OCODE_PRINTCHARACTER:  *out << "OCODE_PRINTCHARACTER";  break;
 	case ObjectToken::OCODE_PRINTNUMBER:     *out << "OCODE_PRINTNUMBER";     break;
@@ -276,6 +281,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_ENDLOG:            *out << "OCODE_ENDLOG";            break;
 	case ObjectToken::OCODE_LSPEC5RESULT:      *out << "OCODE_LSPEC5RESULT";      break;
 	case ObjectToken::OCODE_MULFIXED:          *out << "OCODE_MULFIXED";          break;
+	case ObjectToken::OCODE_NOT:               *out << "OCODE_NOT";               break;
 	case ObjectToken::OCODE_PRINTFIXED:        *out << "OCODE_PRINTFIXED";        break;
 	case ObjectToken::OCODE_PRINTHEX:          *out << "OCODE_PRINTHEX";          break;
 	case ObjectToken::OCODE_PUSHGLOBALARRAY:   *out << "OCODE_PUSHGLOBALARRAY";   break;

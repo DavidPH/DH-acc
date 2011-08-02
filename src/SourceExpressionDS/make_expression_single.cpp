@@ -105,6 +105,14 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		break;
 	}
 
+	case SourceTokenC::TT_OP_EXCLAMATION:
+		expr = create_branch_not(make_expression_single(in, blocks, context), context, token.getPosition());
+		break;
+
+	case SourceTokenC::TT_OP_MINUS:
+		expr = create_unary_sub(make_expression_single(in, blocks, context), token.getPosition());
+		break;
+
 	case SourceTokenC::TT_OP_MINUS2:
 		expr = create_unary_dec_pre(make_expression_single(in, blocks, context), token.getPosition());
 		break;
@@ -119,8 +127,16 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 		break;
 
+	case SourceTokenC::TT_OP_PLUS:
+		expr = make_expression_single(in, blocks, context);
+		break;
+
 	case SourceTokenC::TT_OP_PLUS2:
 		expr = create_unary_inc_pre(make_expression_single(in, blocks, context), token.getPosition());
+		break;
+
+	case SourceTokenC::TT_OP_TILDE:
+		expr = create_unary_not(make_expression_single(in, blocks, context), token.getPosition());
 		break;
 
 	default:
