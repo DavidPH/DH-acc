@@ -130,11 +130,13 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 
 		case SourceTokenC::TT_OP_PARENTHESIS_O:
 		{
+			SourceContext contextCall(context, SourceContext::CT_BLOCK);
+
 			std::vector<SourceExpression::Pointer> args;
 
 			if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
 			{
-				args.push_back(make_expression(in, blocks, context));
+				args.push_back(make_expression(in, blocks, &contextCall));
 
 				SourceTokenC token(in->get());
 
@@ -146,7 +148,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 			}
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-			expr = create_branch_call(expr, args, context, token.getPosition());
+			expr = create_branch_call(expr, args, &contextCall, token.getPosition());
 		}
 			break;
 
