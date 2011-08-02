@@ -348,7 +348,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_sizeof(Sour
 {
 	return create_value_int(make_expression_type(in, blocks, context)->size(), token.getPosition());
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_struct(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SourceExpression::Pointer SourceExpressionDS::make_expression_single_type(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	in->unget(token);
 	make_expression_type(in, blocks, context);

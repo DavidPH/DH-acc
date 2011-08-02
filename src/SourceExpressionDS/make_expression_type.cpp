@@ -21,6 +21,7 @@
 
 #include "../SourceExpressionDS.hpp"
 
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenizerDS.hpp"
 
@@ -61,6 +62,41 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 		in->get(SourceTokenC::TT_OP_BRACE_C);
 
 		type = SourceVariable::get_VariableType_block(types);
+	}
+	else if (token.getData() == "enum")
+	{
+		ObjectExpression::int_t enumVal(0);
+
+		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
+			name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+
+		// TODO: Proper enum type?
+		type = SourceVariable::get_VariableType(SourceVariable::VT_INT);
+
+		in->get(SourceTokenC::TT_OP_BRACE_O);
+
+		if (in->peek().getType() != SourceTokenC::TT_OP_BRACE_C) while (true)
+		{
+			SourceTokenC enumTok(in->get(SourceTokenC::TT_IDENTIFIER));
+
+			if (in->peek().getType() == SourceTokenC::TT_OP_EQUALS)
+			{
+				in->get(SourceTokenC::TT_OP_EQUALS);
+
+				enumVal = make_expression(in, blocks, context)->makeObject()->resolveInt();
+			}
+
+			SourceVariable enumVar(enumTok.getData(), type, ObjectExpression::create_value_int(enumVal++, enumTok.getPosition()), enumTok.getPosition());
+
+			context->addVariable(enumVar);
+
+			if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
+				break;
+
+			in->get(SourceTokenC::TT_OP_COMMA);
+		}
+
+		in->get(SourceTokenC::TT_OP_BRACE_C);
 	}
 	else if (token.getData() == "script")
 	{
