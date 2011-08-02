@@ -253,6 +253,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expressions(SourceTokenizerDS
 
 	make_expressions(in, &expressions, &blocks, &SourceContext::global_context);
 
+	expressions.push_back(create_branch_return(create_value_data(SourceVariable::get_VariableType(SourceVariable::VT_VOID), true, SourcePosition::none), &SourceContext::global_context, SourcePosition::none));
+
 	for (size_t i(0); i < blocks.size(); ++i)
 		expressions.push_back(blocks[i]);
 
