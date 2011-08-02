@@ -43,6 +43,7 @@ add_executable(DH-acc
 	SourceExpression/BinaryNE.cpp
 	SourceExpression/BinarySub.cpp
 	SourceExpression/BranchCall.cpp
+	SourceExpression/BranchFor.cpp
 	SourceExpression/BranchIf.cpp
 	SourceExpression/BranchReturn.cpp
 	SourceExpression/BranchWhile.cpp
@@ -61,6 +62,7 @@ add_executable(DH-acc
 	SourceExpressionACS/BinaryAdd.cpp
 	SourceExpressionDS.cpp
 	SourceExpressionDS/make_expression_single.cpp
+	SourceExpressionDS/make_expression_single_for.cpp
 	SourceExpressionDS/make_expression_type.cpp
 	SourceBlockC.cpp
 	SourcePosition.cpp

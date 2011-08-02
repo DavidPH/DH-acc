@@ -393,14 +393,11 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_void(Source
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_while(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
-	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 	SourceContext contextCondition(context, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprCondition(make_expression(in, blocks, &contextCondition));
-	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+	SourceExpression::Pointer exprCondition(make_expression_single(in, blocks, &contextCondition));
 
 	SourceContext contextWhile(&contextCondition, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprWhile(make_expression(in, blocks, &contextWhile));
-	in->unget(in->get(SourceTokenC::TT_OP_SEMICOLON));
+	SourceExpression::Pointer exprWhile(make_expression_single(in, blocks, &contextWhile));
 
 	return create_branch_while(exprCondition, exprWhile, context, token.getPosition());
 }
