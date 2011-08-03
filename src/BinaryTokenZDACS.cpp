@@ -50,6 +50,7 @@ void BinaryTokenZDACS::init()
 	// BinaryTokenACS
 	DO_INIT(ADD,             0);
 	DO_INIT(ADDWORLDVAR,     1);
+	DO_INIT(AND,             0);
 	DO_INIT(ASSIGNMAPVAR,    1);
 	DO_INIT(ASSIGNSCRIPTVAR, 1);
 	DO_INIT(ASSIGNWORLDVAR,  1);
@@ -68,6 +69,9 @@ void BinaryTokenZDACS::init()
 	DO_INIT(DIV,             0);
 	DO_INIT(DROP,            0);
 	DO_INIT(ENDPRINT,        0);
+	DO_INIT(IOR,             0);
+	DO_INIT(LOGICALAND,      0);
+	DO_INIT(LOGICALIOR,      0);
 	DO_INIT(LOGICALNOT,      0);
 	DO_INIT(LSPEC1,          1);
 	DO_INIT(LSPEC1_IMM,      2);
@@ -99,6 +103,7 @@ void BinaryTokenZDACS::init()
 	DO_INIT(SUBWORLDVAR,     1);
 	DO_INIT(SUSPEND,         0);
 	DO_INIT(TERMINATE,       0);
+	DO_INIT(XOR,             0);
 
 	// BinaryTokenZDACS
 	DO_INIT(ASSIGNGLOBALARRAY, 1);

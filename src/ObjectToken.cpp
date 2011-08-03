@@ -85,6 +85,7 @@ void ObjectToken::init()
 	// BinaryTokenACS
 	DO_INIT(ADD,             0);
 	DO_INIT(ADDWORLDVAR,     1);
+	DO_INIT(AND,             0);
 	DO_INIT(ASSIGNMAPVAR,    1);
 	DO_INIT(ASSIGNSCRIPTVAR, 1);
 	DO_INIT(ASSIGNWORLDVAR,  1);
@@ -103,6 +104,9 @@ void ObjectToken::init()
 	DO_INIT(DIV,             0);
 	DO_INIT(DROP,            0);
 	DO_INIT(ENDPRINT,        0);
+	DO_INIT(IOR,             0);
+	DO_INIT(LOGICALAND,      0);
+	DO_INIT(LOGICALIOR,      0);
 	DO_INIT(LOGICALNOT,      0);
 	DO_INIT(LSPEC1,          1);
 	DO_INIT(LSPEC1_IMM,      2);
@@ -134,6 +138,7 @@ void ObjectToken::init()
 	DO_INIT(SUBWORLDVAR,     1);
 	DO_INIT(SUSPEND,         0);
 	DO_INIT(TERMINATE,       0);
+	DO_INIT(XOR,             0);
 
 	// BinaryTokenZDACS
 	DO_INIT(ASSIGNGLOBALARRAY, 1);
@@ -170,6 +175,7 @@ void ObjectToken::init()
 	DO_INIT(ASSIGNSTATICARRAY2, 2);
 	DO_INIT(ASSIGNSTATICVAR,    1);
 	DO_INIT(ASSIGNWORLDARRAY2,  2);
+	DO_INIT(LOGICALXOR,         0);
 	DO_INIT(PUSHGLOBALARRAY2,   2);
 	DO_INIT(PUSHMAPARRAY2,      2);
 	DO_INIT(PUSHSTACKADDRESS,   1);
@@ -219,6 +225,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	{
 	case ObjectToken::OCODE_ADD:             *out << "OCODE_ADD";             break;
 	case ObjectToken::OCODE_ADDWORLDVAR:     *out << "OCODE_ADDWORLDVAR";     break;
+	case ObjectToken::OCODE_AND:             *out << "OCODE_AND";             break;
 	case ObjectToken::OCODE_ASSIGNMAPVAR:    *out << "OCODE_ASSIGNMAPVAR";    break;
 	case ObjectToken::OCODE_ASSIGNSCRIPTVAR: *out << "OCODE_ASSIGNSCRIPTVAR"; break;
 	case ObjectToken::OCODE_ASSIGNWORLDVAR:  *out << "OCODE_ASSIGNWORLDVAR";  break;
@@ -236,7 +243,10 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_DELAY_IMM:       *out << "OCODE_DELAY_IMM";       break;
 	case ObjectToken::OCODE_DIV:             *out << "OCODE_DIV";             break;
 	case ObjectToken::OCODE_DROP:            *out << "OCODE_DROP";            break;
-	case ObjectToken::OCODE_ENDPRINT:        *out << "OCODE_NOP";             break;
+	case ObjectToken::OCODE_ENDPRINT:        *out << "OCODE_ENDPRINT";        break;
+	case ObjectToken::OCODE_IOR:             *out << "OCODE_IOR";             break;
+	case ObjectToken::OCODE_LOGICALAND:      *out << "OCODE_LOGICALAND";      break;
+	case ObjectToken::OCODE_LOGICALIOR:      *out << "OCODE_LOGICALIOR";      break;
 	case ObjectToken::OCODE_LOGICALNOT:      *out << "OCODE_LOGICALNOT";      break;
 	case ObjectToken::OCODE_LSPEC1:          *out << "OCODE_LSPEC1";          break;
 	case ObjectToken::OCODE_LSPEC1_IMM:      *out << "OCODE_LSPEC1_IMM";      break;
@@ -268,6 +278,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_SUBWORLDVAR:     *out << "OCODE_SUBWORLDVAR";     break;
 	case ObjectToken::OCODE_SUSPEND:         *out << "OCODE_SUSPEND";         break;
 	case ObjectToken::OCODE_TERMINATE:       *out << "OCODE_TERMINATE";       break;
+	case ObjectToken::OCODE_XOR:             *out << "OCODE_XOR";             break;
 
 	case ObjectToken::OCODE_ASSIGNGLOBALARRAY: *out << "OCODE_ASSIGNGLOBALARRAY"; break;
 	case ObjectToken::OCODE_ASSIGNGLOBALVAR:   *out << "OCODE_ASSIGNGLOBALVAR";   break;
@@ -302,6 +313,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_ASSIGNSTATICARRAY2: *out << "OCODE_ASSIGNSTATICARRAY2"; break;
 	case ObjectToken::OCODE_ASSIGNSTATICVAR:    *out << "OCODE_ASSIGNSTATICVAR";    break;
 	case ObjectToken::OCODE_ASSIGNWORLDARRAY2:  *out << "OCODE_ASSIGNWORLDARRAY2";  break;
+	case ObjectToken::OCODE_LOGICALXOR:         *out << "OCODE_LOGICALXOR";         break;
 	case ObjectToken::OCODE_PUSHGLOBALARRAY2:   *out << "OCODE_PUSHGLOBALARRAY2";   break;
 	case ObjectToken::OCODE_PUSHMAPARRAY2:      *out << "OCODE_PUSHMAPARRAY2";      break;
 	case ObjectToken::OCODE_PUSHSTACKADDRESS:   *out << "OCODE_PUSHSTACKADDRESS";   break;

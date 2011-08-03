@@ -53,6 +53,10 @@ public:
 		TT_OP_BRACE_O,            // {
 		TT_OP_BRACKET_C,          // ]
 		TT_OP_BRACKET_O,          // [
+		TT_OP_CARET,              // ^
+		TT_OP_CARET_EQUALS,       // ^=
+		TT_OP_CARET2,             // ^^
+		TT_OP_CARET2_EQUALS,      // ^^=
 		TT_OP_CMP_EQ,             // ==
 		TT_OP_CMP_GE,             // >=
 		TT_OP_CMP_GT,             // >

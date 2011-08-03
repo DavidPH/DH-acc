@@ -79,28 +79,34 @@ public:
 	friend void print_debug(std::ostream * out, SourceExpression const & in);
 
 	static Pointer create_binary_add(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_and(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_array(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_assign(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_div(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_eq(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_ge(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_gt(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_ior(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_le(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_lt(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_mod(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_mul(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_ne(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_sub(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_xor(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
+	static Pointer create_branch_and(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_break(SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_call(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_continue(SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_for(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_if(SourceExpression * exprCondition, SourceExpression * exprIf, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_if(SourceExpression * exprCondition, SourceExpression * exprIf, SourceExpression * exprElse, SourceContext * context, SourcePosition const & position);
+	static Pointer create_branch_ior(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_not(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_return(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_while(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position);
+	static Pointer create_branch_xor(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position);
 
 	static Pointer create_unary_dec_pre(SourceExpression * expr, SourcePosition const & position);
 	static Pointer create_unary_dec_suf(SourceExpression * expr, SourcePosition const & position);

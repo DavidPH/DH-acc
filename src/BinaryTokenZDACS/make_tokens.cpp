@@ -72,6 +72,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	{
 	CASE_DIRECTMAP(ADD);
 	CASE_DIRECTMAP(ADDWORLDVAR);
+	CASE_DIRECTMAP(AND);
 	CASE_DIRECTMAP(ASSIGNMAPVAR);
 	CASE_DIRECTMAP(ASSIGNSCRIPTVAR);
 	CASE_DIRECTMAP(ASSIGNWORLDVAR);
@@ -90,6 +91,9 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	CASE_DIRECTMAP(DIV);
 	CASE_DIRECTMAP(DROP);
 	CASE_DIRECTMAP(ENDPRINT);
+	CASE_DIRECTMAP(IOR);
+	CASE_DIRECTMAP(LOGICALAND);
+	CASE_DIRECTMAP(LOGICALIOR);
 	CASE_DIRECTMAP(LOGICALNOT);
 	CASE_DIRECTMAP(LSPEC1);
 	CASE_DIRECTMAP(LSPEC1_IMM);
@@ -121,6 +125,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	CASE_DIRECTMAP(SUBWORLDVAR);
 	CASE_DIRECTMAP(SUSPEND);
 	CASE_DIRECTMAP(TERMINATE);
+	CASE_DIRECTMAP(XOR);
 
 	CASE_DIRECTMAP(ASSIGNGLOBALARRAY);
 	CASE_DIRECTMAP(ASSIGNGLOBALVAR);
@@ -303,6 +308,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_SUBWORLDVAR);
 		break;
 
+	case ObjectToken::OCODE_LOGICALXOR:
 	case ObjectToken::OCODE_NONE:
 		throw SourceException("unknown OCODE", position, "BinaryTokenZDACS");
 	}

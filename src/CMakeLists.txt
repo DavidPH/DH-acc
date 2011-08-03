@@ -29,6 +29,7 @@ add_executable(DH-acc
 	SourceExpression.cpp
 	SourceExpression/Binary.cpp
 	SourceExpression/BinaryAdd.cpp
+	SourceExpression/BinaryAnd.cpp
 	SourceExpression/BinaryArray.cpp
 	SourceExpression/BinaryAssign.cpp
 	SourceExpression/BinaryCompare.cpp
@@ -36,20 +37,25 @@ add_executable(DH-acc
 	SourceExpression/BinaryEQ.cpp
 	SourceExpression/BinaryGE.cpp
 	SourceExpression/BinaryGT.cpp
+	SourceExpression/BinaryIOr.cpp
 	SourceExpression/BinaryLE.cpp
 	SourceExpression/BinaryLT.cpp
 	SourceExpression/BinaryMod.cpp
 	SourceExpression/BinaryMul.cpp
 	SourceExpression/BinaryNE.cpp
 	SourceExpression/BinarySub.cpp
+	SourceExpression/BinaryXOr.cpp
+	SourceExpression/BranchAnd.cpp
 	SourceExpression/BranchBreak.cpp
 	SourceExpression/BranchCall.cpp
 	SourceExpression/BranchContinue.cpp
 	SourceExpression/BranchFor.cpp
 	SourceExpression/BranchIf.cpp
+	SourceExpression/BranchIOr.cpp
 	SourceExpression/BranchNot.cpp
 	SourceExpression/BranchReturn.cpp
 	SourceExpression/BranchWhile.cpp
+	SourceExpression/BranchXOr.cpp
 	SourceExpression/RootDelay.cpp
 	SourceExpression/RootOut.cpp
 	SourceExpression/Unary.cpp

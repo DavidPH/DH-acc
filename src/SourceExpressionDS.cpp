@@ -72,6 +72,14 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 
 		switch (token.getType())
 		{
+		case SourceTokenC::TT_OP_AND:
+			expr = create_binary_and(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
+		case SourceTokenC::TT_OP_AND2:
+			expr = create_branch_and(expr, make_expression_single(in, blocks, context), context, token.getPosition());
+			break;
+
 		case SourceTokenC::TT_OP_ASTERISK:
 			expr = create_binary_mul(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
@@ -83,6 +91,14 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 		case SourceTokenC::TT_OP_BRACKET_O:
 			expr = create_binary_array(expr, make_expression(in, blocks, context), token.getPosition());
 			in->get(SourceTokenC::TT_OP_BRACKET_C);
+			break;
+
+		case SourceTokenC::TT_OP_CARET:
+			expr = create_binary_xor(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
+		case SourceTokenC::TT_OP_CARET2:
+			expr = create_branch_xor(expr, make_expression_single(in, blocks, context), context, token.getPosition());
 			break;
 
 		case SourceTokenC::TT_OP_CMP_EQ:
@@ -115,6 +131,14 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 
 		case SourceTokenC::TT_OP_EQUALS:
 			return create_binary_assign(expr, make_expression(in, blocks, context), token.getPosition());
+
+		case SourceTokenC::TT_OP_PIPE:
+			expr = create_binary_ior(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
+		case SourceTokenC::TT_OP_PIPE2:
+			expr = create_branch_ior(expr, make_expression_single(in, blocks, context), context, token.getPosition());
+			break;
 
 		case SourceTokenC::TT_OP_MINUS:
 			expr = create_binary_sub(expr, make_expression_single(in, blocks, context), token.getPosition());

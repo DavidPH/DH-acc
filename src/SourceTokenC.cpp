@@ -84,6 +84,25 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 
 		_type = TT_OP_ASTERISK; return;
 
+	case '^':
+		c = in->get();
+
+		if (c == '=') {_type = TT_OP_CARET_EQUALS; return;}
+		if (c == '^')
+		{
+			c = in->get();
+
+			if (c == '=') {_type = TT_OP_CARET2_EQUALS; return;}
+
+			in->unget(c);
+
+			_type = TT_OP_CARET2; return;
+		}
+
+		in->unget(c);
+
+		_type = TT_OP_CARET; return;
+
 	case '=':
 		c = in->get();
 
@@ -322,6 +341,10 @@ void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type)
 	case SourceTokenC::TT_IDENTIFIER:            *out << "TT_IDENTIFIER";            break;
 	case SourceTokenC::TT_INTEGER:               *out << "TT_INTEGER";               break;
 	case SourceTokenC::TT_OP_AT:                 *out << "TT_OP_AT";                 break;
+	case SourceTokenC::TT_OP_CARET:              *out << "TT_OP_CARET";              break;
+	case SourceTokenC::TT_OP_CARET_EQUALS:       *out << "TT_OP_CARET_EQUALS";       break;
+	case SourceTokenC::TT_OP_CARET2:             *out << "TT_OP_CARET2";             break;
+	case SourceTokenC::TT_OP_CARET2_EQUALS:      *out << "TT_OP_CARET2_EQUALS";      break;
 	case SourceTokenC::TT_OP_EXCLAMATION:        *out << "TT_OP_EXCLAMATION";        break;
 	case SourceTokenC::TT_OP_PLUS:               *out << "TT_OP_PLUS";               break;
 	case SourceTokenC::TT_OP_QUERY:              *out << "TT_OP_QUERY";              break;
