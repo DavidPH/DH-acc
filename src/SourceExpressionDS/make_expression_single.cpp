@@ -223,25 +223,6 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_if(SourceTo
 		return create_branch_if(exprCondition, exprIf, context, token.getPosition());
 	}
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_native(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
-{
-	std::string nativeName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
-
-	ObjectExpression::int_t nativeNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER)));
-
-	std::vector<SourceVariable::VariableType const *> nativeArgs;
-	SourceVariable::VariableType const * nativeReturn;
-	make_expression_arglist(in, blocks, context, &nativeArgs, &nativeReturn);
-
-	SourceVariable::VariableType const * nativeVarType(SourceVariable::get_VariableType_native(nativeReturn, nativeArgs));
-
-	SourceVariable::VariableData_Native nativeVarData = {nativeVarType, nativeNumber};
-
-	SourceVariable nativeVariable(nativeName, nativeVarData, token.getPosition());
-
-	context->addVariable(nativeVariable);
-	return create_value_variable(nativeVariable, token.getPosition());
-}
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_out(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	return create_root_out(make_expression(in, blocks, context), token.getPosition());

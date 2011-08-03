@@ -77,6 +77,7 @@ add_executable(DH-acc
 	SourceExpressionDS/make_expression_single_for.cpp
 	SourceExpressionDS/make_expression_single_function.cpp
 	SourceExpressionDS/make_expression_single_linespec.cpp
+	SourceExpressionDS/make_expression_single_native.cpp
 	SourceExpressionDS/make_expression_type.cpp
 	SourceBlockC.cpp
 	SourcePosition.cpp
