@@ -161,6 +161,14 @@ void SourceExpression_BinaryArray::makeObjectsSet(ObjectVector * objects) const
 			objects->addToken(ObjectToken::OCODE_SWAP);
 			objects->addToken(ObjectToken::OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
 		}
+
+		for (int i(0); i < getType()->size(); ++i)
+		{
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(i));
+			objects->addToken(ObjectToken::OCODE_PUSHWORLDVAR, objects->getValue(1));
+			objects->addToken(ObjectToken::OCODE_ADD);
+			objects->addToken(ObjectToken::OCODE_PUSHGLOBALARRAY, objects->getValue(0));
+		}
 	}
 	else
 	{

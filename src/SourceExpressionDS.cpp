@@ -88,11 +88,6 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 			in->unget(token);
 			return expr;
 
-		case SourceTokenC::TT_OP_BRACKET_O:
-			expr = create_binary_array(expr, make_expression(in, blocks, context), token.getPosition());
-			in->get(SourceTokenC::TT_OP_BRACKET_C);
-			break;
-
 		case SourceTokenC::TT_OP_CARET:
 			expr = create_binary_xor(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;

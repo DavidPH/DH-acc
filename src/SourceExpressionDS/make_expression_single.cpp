@@ -144,16 +144,24 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		throw SourceException("unexpected token type (single)", token.getPosition(), "SourceExpressionDS");
 	}
 
-	if (in->peek().getType() == SourceTokenC::TT_OP_MINUS2)
+	while (true) switch (in->peek().getType())
 	{
-		expr = create_unary_dec_suf(expr, in->get(SourceTokenC::TT_OP_MINUS2).getPosition());
-	}
-	else if  (in->peek().getType() == SourceTokenC::TT_OP_PLUS2)
-	{
-		expr = create_unary_inc_suf(expr, in->get(SourceTokenC::TT_OP_PLUS2).getPosition());
-	}
+	case SourceTokenC::TT_OP_BRACKET_O:
+		expr = create_binary_array(expr, make_expression(in, blocks, context), in->get(SourceTokenC::TT_OP_BRACKET_O).getPosition());
+		in->get(SourceTokenC::TT_OP_BRACKET_C);
+		break;
 
-	return expr;
+	case SourceTokenC::TT_OP_MINUS2:
+		expr = create_unary_dec_suf(expr, in->get(SourceTokenC::TT_OP_MINUS2).getPosition());
+		break;
+
+	case SourceTokenC::TT_OP_PLUS2:
+		expr = create_unary_inc_suf(expr, in->get(SourceTokenC::TT_OP_PLUS2).getPosition());
+		break;
+
+	default:
+		return expr;
+	}
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_asmfunc(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
