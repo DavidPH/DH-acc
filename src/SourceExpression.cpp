@@ -168,13 +168,13 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Source
 	objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, stack);
 }
 
-void SourceExpression::make_objects_call_lnspec(ObjectVector * objects, SourceVariable::VariableData_LnSpec const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
+void SourceExpression::make_objects_call_linespec(ObjectVector * objects, SourceVariable::VariableData_LineSpec const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
 {
 	if (args.size() != data.type->types.size())
-		throw SourceException("incorrect arg count to call lnspec", position, "SourceExpressionDS");
+		throw SourceException("incorrect arg count to call linespec", position, "SourceExpressionDS");
 
 	if (args.size() > 5)
-		throw SourceException("too many args to call lnspec", position, "SourceExpressionDS");
+		throw SourceException("too many args to call linespec", position, "SourceExpressionDS");
 
 	for (size_t i(0); i < args.size(); ++i)
 	{
@@ -199,7 +199,7 @@ void SourceExpression::make_objects_call_lnspec(ObjectVector * objects, SourceVa
 		case 3: ocode = ObjectToken::OCODE_LSPEC3; break;
 		case 4: ocode = ObjectToken::OCODE_LSPEC4; break;
 		case 5: ocode = ObjectToken::OCODE_LSPEC5; break;
-		default: throw SourceException("unexpected arg count to call lnspec", position, "SourceExpressionDS");
+		default: throw SourceException("unexpected arg count to call linespec", position, "SourceExpressionDS");
 		}
 	}
 	else
@@ -317,7 +317,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_FUNCTION:
 	case SourceVariable::VT_INT:
-	case SourceVariable::VT_LNSPEC:
+	case SourceVariable::VT_LINESPEC:
 	case SourceVariable::VT_NATIVE:
 	case SourceVariable::VT_POINTER:
 	case SourceVariable::VT_SCRIPT:
@@ -334,7 +334,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		case SourceVariable::VT_CHAR:
 		case SourceVariable::VT_FUNCTION:
 		case SourceVariable::VT_INT:
-		case SourceVariable::VT_LNSPEC:
+		case SourceVariable::VT_LINESPEC:
 		case SourceVariable::VT_NATIVE:
 		case SourceVariable::VT_POINTER:
 		case SourceVariable::VT_SCRIPT:
@@ -361,7 +361,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		case SourceVariable::VT_CHAR:
 		case SourceVariable::VT_FUNCTION:
 		case SourceVariable::VT_INT:
-		case SourceVariable::VT_LNSPEC:
+		case SourceVariable::VT_LINESPEC:
 		case SourceVariable::VT_NATIVE:
 		case SourceVariable::VT_POINTER:
 		case SourceVariable::VT_SCRIPT:

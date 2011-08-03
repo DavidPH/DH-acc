@@ -58,11 +58,11 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 			throw SourceException("non-constant functions not yet supported", position, "SourceVariable");
 		break;
 
-	case VT_LNSPEC:
+	case VT_LINESPEC:
 		if (_sc == SC_CONSTANT)
-			SourceExpression::make_objects_call_lnspec(objects, _data.vdLnSpec, args, position);
+			SourceExpression::make_objects_call_linespec(objects, _data.vdLineSpec, args, position);
 		else
-			throw SourceException("non-constant lnspecs not yet supported", position, "SourceVariable");
+			throw SourceException("non-constant linespecs not yet supported", position, "SourceVariable");
 		break;
 
 	case VT_NATIVE:

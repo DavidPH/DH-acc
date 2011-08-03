@@ -56,8 +56,8 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 		case VT_INT:
 			return ObjectExpression::create_value_int(_data.vdInt.value, position);
 
-		case VT_LNSPEC:
-			return ObjectExpression::create_value_int(_data.vdLnSpec.number, position);
+		case VT_LINESPEC:
+			return ObjectExpression::create_value_int(_data.vdLineSpec.number, position);
 
 		case VT_NATIVE:
 			return ObjectExpression::create_value_int(_data.vdNative.number, position);

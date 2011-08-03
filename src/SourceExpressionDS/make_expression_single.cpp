@@ -223,25 +223,6 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_if(SourceTo
 		return create_branch_if(exprCondition, exprIf, context, token.getPosition());
 	}
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_lnspec(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
-{
-	std::string lnspecName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
-
-	ObjectExpression::int_t lnspecNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER)));
-
-	std::vector<SourceVariable::VariableType const *> lnspecArgs;
-	SourceVariable::VariableType const * lnspecReturn;
-	make_expression_arglist(in, blocks, context, &lnspecArgs, &lnspecReturn);
-
-	SourceVariable::VariableType const * lnspecVarType(SourceVariable::get_VariableType_lnspec(lnspecReturn, lnspecArgs));
-
-	SourceVariable::VariableData_LnSpec lnspecVarData = {lnspecVarType, lnspecNumber};
-
-	SourceVariable lnspecVariable(lnspecName, lnspecVarData, token.getPosition());
-
-	context->addVariable(lnspecVariable);
-	return create_value_variable(lnspecVariable, token.getPosition());
-}
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_native(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	std::string nativeName(in->get(SourceTokenC::TT_IDENTIFIER).getData());

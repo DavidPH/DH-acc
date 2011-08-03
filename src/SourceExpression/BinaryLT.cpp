@@ -70,7 +70,7 @@ void SourceExpression_BinaryLT::makeObjectsGet(ObjectVector * objects) const
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_FUNCTION:
 	case SourceVariable::VT_INT:
-	case SourceVariable::VT_LNSPEC:
+	case SourceVariable::VT_LINESPEC:
 	case SourceVariable::VT_NATIVE:
 	case SourceVariable::VT_POINTER:
 	case SourceVariable::VT_REAL:

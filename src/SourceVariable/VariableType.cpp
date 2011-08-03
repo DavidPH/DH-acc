@@ -68,7 +68,7 @@ bool SourceVariable::VariableType::isVoid() const
 	case VT_CHAR:
 	case VT_FUNCTION:
 	case VT_INT:
-	case VT_LNSPEC:
+	case VT_LINESPEC:
 	case VT_NATIVE:
 	case VT_POINTER:
 	case VT_REAL:
@@ -103,7 +103,7 @@ int SourceVariable::VariableType::size() const
 	case VT_CHAR:
 	case VT_FUNCTION:
 	case VT_INT:
-	case VT_LNSPEC:
+	case VT_LINESPEC:
 	case VT_NATIVE:
 	case VT_POINTER:
 	case VT_REAL:

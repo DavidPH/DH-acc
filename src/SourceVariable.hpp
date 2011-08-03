@@ -66,7 +66,7 @@ public:
 		VT_ASMFUNC,
 		VT_BLOCK,
 		VT_FUNCTION,
-		VT_LNSPEC,
+		VT_LINESPEC,
 		VT_NATIVE,
 		VT_POINTER,
 		VT_SCRIPT,
@@ -117,7 +117,7 @@ public:
 		VariableType const * type;
 		int value;
 	};
-	struct VariableData_LnSpec
+	struct VariableData_LineSpec
 	{
 		VariableType const * type;
 		int number;
@@ -149,7 +149,7 @@ public:
 		VariableData_Char     vdChar;
 		VariableData_Function vdFunction;
 		VariableData_Int      vdInt;
-		VariableData_LnSpec   vdLnSpec;
+		VariableData_LineSpec vdLineSpec;
 		VariableData_Native   vdNative;
 		VariableData_Real     vdReal;
 		VariableData_Script   vdScript;
@@ -164,7 +164,7 @@ public:
 	SourceVariable(std::string const & name, VariableData_Char     const & vdChar,     SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Function const & vdFunction, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Int      const & vdInt,      SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_LnSpec   const & vdLnSpec,   SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_LineSpec const & vdLineSpec, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Native   const & vdNative,   SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Real     const & vdReal,     SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Script   const & vdScript,   SourcePosition const & position, std::string const & nameObject);
@@ -220,8 +220,8 @@ public:
 	static VariableType const * get_VariableType_block(std::vector<VariableType const *> const & types);
 	// Function types work like script types (see below).
 	static VariableType const * get_VariableType_function(VariableType const * callType, std::vector<VariableType const *> const & types);
-	// LnSpec types work like script types (see below).
-	static VariableType const * get_VariableType_lnspec(VariableType const * callType, std::vector<VariableType const *> const & types);
+	// LineSpec types work like script types (see below).
+	static VariableType const * get_VariableType_linespec(VariableType const * callType, std::vector<VariableType const *> const & types);
 	// Native types work like script types (see below).
 	static VariableType const * get_VariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types);
 	// Returns NULL if type not found.

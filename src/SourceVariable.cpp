@@ -65,9 +65,9 @@ SourceVariable::SourceVariable(std::string const & name, VariableData_Int const 
 {
 	_data.vdInt = vdInt;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_LnSpec const & vdLnSpec, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdLnSpec.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_LineSpec const & vdLineSpec, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdLineSpec.type)
 {
-	_data.vdLnSpec = vdLnSpec;
+	_data.vdLineSpec = vdLineSpec;
 }
 SourceVariable::SourceVariable(std::string const & name, VariableData_Native const & vdNative, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdNative.type)
 {
@@ -268,9 +268,9 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_function(V
 {
 	return get_VariableType_auto(VT_FUNCTION, callType, _types[VT_VOID], types);
 }
-SourceVariable::VariableType const * SourceVariable::get_VariableType_lnspec(VariableType const * callType, std::vector<VariableType const *> const & types)
+SourceVariable::VariableType const * SourceVariable::get_VariableType_linespec(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
-	return get_VariableType_auto(VT_LNSPEC, callType, _types[VT_VOID], types);
+	return get_VariableType_auto(VT_LINESPEC, callType, _types[VT_VOID], types);
 }
 SourceVariable::VariableType const * SourceVariable::get_VariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types)
 {

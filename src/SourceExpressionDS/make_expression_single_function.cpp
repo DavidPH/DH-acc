@@ -14,9 +14,9 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourceExpressionDS/make_expression_single.cpp
+/* SourceExpressionDS/make_expression_single_function.cpp
 **
-** Defines the SourceExpressionDS::make_expression_single function.
+** Defines the SourceExpressionDS::make_expression_single_function function.
 */
 
 #include "../SourceExpressionDS.hpp"
@@ -67,9 +67,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	SourceVariable functionVariable(functionName, functionVarData, token.getPosition());
 
 	context->addVariable(functionVariable);
-
 	ObjectExpression::add_function(functionLabel, functionArgCount, functionVarCount, functionReturn->size());
-
 	return create_value_variable(functionVariable, token.getPosition());
 }
 

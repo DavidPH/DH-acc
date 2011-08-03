@@ -64,7 +64,7 @@ void SourceExpression_UnaryNot::makeObjectsGet(ObjectVector * objects) const
 	case SourceVariable::VT_ASMFUNC:
 	case SourceVariable::VT_BLOCK:
 	case SourceVariable::VT_FUNCTION:
-	case SourceVariable::VT_LNSPEC:
+	case SourceVariable::VT_LINESPEC:
 	case SourceVariable::VT_NATIVE:
 	case SourceVariable::VT_REAL:
 	case SourceVariable::VT_SCRIPT:
