@@ -155,41 +155,6 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 
 	return expr;
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_acsfunc(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
-{
-	SourceContext acsfuncContext(context, SourceContext::CT_ACSFUNC);
-
-	int acsfuncNumber(ObjectExpression::get_acsfunc_count());
-
-	std::string acsfuncName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
-
-	std::string acsfuncLabel(context->getLabel() + "acsfunc_" + acsfuncName);
-
-	std::vector<SourceVariable::VariableType const *> acsfuncArgTypes;
-	std::vector<std::string> acsfuncArgNames;
-	int acsfuncArgCount;
-	SourceVariable::VariableType const * acsfuncReturn;
-	make_expression_arglist(in, blocks, context, &acsfuncArgTypes, &acsfuncArgNames, &acsfuncArgCount, &acsfuncContext, &acsfuncReturn);
-
-	SourceExpression::Pointer acsfuncExpression(make_expression_single(in, blocks, &acsfuncContext));
-	acsfuncExpression->addLabel(acsfuncLabel);
-	blocks->push_back(acsfuncExpression);
-	blocks->push_back(create_branch_return(create_value_data(acsfuncReturn, true, token.getPosition()), &acsfuncContext, token.getPosition()));
-
-	SourceVariable::VariableType const * acsfuncVarType(SourceVariable::get_VariableType_acsfunc(acsfuncReturn, acsfuncArgTypes));
-
-	SourceVariable::VariableData_ACSFunc acsfuncVarData = {acsfuncVarType, acsfuncNumber};
-
-	int acsfuncVarCount(acsfuncContext.getLimit(SourceVariable::SC_REGISTER));
-
-	SourceVariable acsfuncVariable(acsfuncName, acsfuncVarData, token.getPosition());
-
-	context->addVariable(acsfuncVariable);
-
-	ObjectExpression::add_acsfunc(acsfuncLabel, acsfuncArgCount, acsfuncVarCount, acsfuncReturn->size());
-
-	return create_value_variable(acsfuncVariable, token.getPosition());
-}
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_asmfunc(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	std::string asmfuncName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
@@ -339,7 +304,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 		scriptFlags |= ObjectExpression::get_ScriptFlag(token.getData(), token.getPosition());
 	}
 
-	// scriptArgTypes/Names/Return
+	// scriptArgTypes/Names/Count scriptReturn
 	std::vector<SourceVariable::VariableType const *> scriptArgTypes;
 	std::vector<std::string> scriptArgNames;
 	int scriptArgCount;

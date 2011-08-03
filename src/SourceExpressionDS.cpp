@@ -40,7 +40,6 @@ SourceExpressionDS::SourceExpressionDS(SourcePosition const & position) : Super(
 
 void SourceExpressionDS::init()
 {
-	_expression_single_handlers["acsfunc"]  = make_expression_single_acsfunc;
 	_expression_single_handlers["asmfunc"]  = make_expression_single_asmfunc;
 	_expression_single_handlers["break"]    = make_expression_single_break;
 	_expression_single_handlers["const"]    = make_expression_single_const;
@@ -48,6 +47,7 @@ void SourceExpressionDS::init()
 	_expression_single_handlers["delay"]    = make_expression_single_delay;
 	_expression_single_handlers["enum"]     = make_expression_single_type;
 	_expression_single_handlers["for"]      = make_expression_single_for;
+	_expression_single_handlers["function"] = make_expression_single_function;
 	_expression_single_handlers["if"]       = make_expression_single_if;
 	_expression_single_handlers["lnspec"]   = make_expression_single_lnspec;
 	_expression_single_handlers["native"]   = make_expression_single_native;

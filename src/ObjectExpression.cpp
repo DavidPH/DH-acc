@@ -28,9 +28,9 @@
 
 
 
-std::vector<ObjectExpression::ACSFunc> ObjectExpression::_acsfunc_table;
-
 int32_t ObjectExpression::_address_count;
+
+std::vector<ObjectExpression::Function> ObjectExpression::_function_table;
 
 std::vector<ObjectExpression::Register> ObjectExpression::_register_global_table;
 std::map<ObjectExpression::int_t, bool> ObjectExpression::_register_global_used;
@@ -65,15 +65,15 @@ ObjectExpression::ObjectExpression(SourcePosition const & position) : position(p
 
 }
 
-void ObjectExpression::add_acsfunc(std::string const & label, int_t argCount, int_t varCount, int_t retCount)
-{
-	ACSFunc f = {argCount, label, retCount, varCount};
-	_acsfunc_table.push_back(f);
-}
-
 void ObjectExpression::add_address_count(int32_t const addressCount)
 {
 	_address_count += addressCount;
+}
+
+void ObjectExpression::add_function(std::string const & label, int_t argCount, int_t varCount, int_t retCount)
+{
+	Function f = {argCount, label, retCount, varCount};
+	_function_table.push_back(f);
 }
 
 void ObjectExpression::add_label(std::string const & symbol)
@@ -311,22 +311,22 @@ void ObjectExpression::do_deferred_allocation()
 	}
 }
 
-ObjectExpression::ACSFunc const & ObjectExpression::get_acsfunc(int_t const index)
-{
-	return _acsfunc_table[index];
-}
-
-ObjectExpression::int_t ObjectExpression::get_acsfunc_count()
-{
-	return _acsfunc_table.size();
-}
-
 ObjectExpression::float_t ObjectExpression::get_float(SourceTokenC const & token)
 {
 	float_t f;
 	std::istringstream iss(token.getData());
 	iss >> f;
 	return f;
+}
+
+ObjectExpression::Function const & ObjectExpression::get_function(int_t index)
+{
+	return _function_table[index];
+}
+
+ObjectExpression::int_t ObjectExpression::get_function_count()
+{
+	return _function_table.size();
 }
 
 ObjectExpression::int_t ObjectExpression::get_int(SourceTokenC const & token)

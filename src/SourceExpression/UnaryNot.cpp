@@ -60,12 +60,13 @@ void SourceExpression_UnaryNot::makeObjectsGet(ObjectVector * objects) const
 
 	switch (getType()->type)
 	{
-	case SourceVariable::VT_ACSFUNC:
 	case SourceVariable::VT_ARRAY:
 	case SourceVariable::VT_ASMFUNC:
 	case SourceVariable::VT_BLOCK:
+	case SourceVariable::VT_FUNCTION:
 	case SourceVariable::VT_LNSPEC:
 	case SourceVariable::VT_NATIVE:
+	case SourceVariable::VT_REAL:
 	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
 	case SourceVariable::VT_STRUCT:
@@ -75,7 +76,6 @@ void SourceExpression_UnaryNot::makeObjectsGet(ObjectVector * objects) const
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_POINTER:
-	case SourceVariable::VT_REAL:
 		objects->addToken(ObjectToken::OCODE_NOT);
 		break;
 	}

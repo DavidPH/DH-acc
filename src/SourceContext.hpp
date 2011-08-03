@@ -36,8 +36,8 @@ class SourceContext
 public:
 	enum ContextType
 	{
-		CT_ACSFUNC,
 		CT_BLOCK,
+		CT_FUNCTION,
 		CT_LOOP,
 		CT_SCRIPT
 	};

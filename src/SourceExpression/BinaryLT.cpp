@@ -60,8 +60,15 @@ void SourceExpression_BinaryLT::makeObjectsGet(ObjectVector * objects) const
 
 	switch (getType()->type)
 	{
-	case SourceVariable::VT_ACSFUNC:
+	case SourceVariable::VT_ARRAY:
+	case SourceVariable::VT_ASMFUNC:
+	case SourceVariable::VT_BLOCK:
+	case SourceVariable::VT_STRUCT:
+	case SourceVariable::VT_VOID:
+		throw SourceException("invalid VT", position, getName());
+
 	case SourceVariable::VT_CHAR:
+	case SourceVariable::VT_FUNCTION:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_LNSPEC:
 	case SourceVariable::VT_NATIVE:
@@ -71,13 +78,6 @@ void SourceExpression_BinaryLT::makeObjectsGet(ObjectVector * objects) const
 	case SourceVariable::VT_STRING:
 		objects->addToken(ObjectToken::OCODE_CMPLT);
 		break;
-
-	case SourceVariable::VT_ARRAY:
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_BLOCK:
-	case SourceVariable::VT_STRUCT:
-	case SourceVariable::VT_VOID:
-		throw SourceException("invalid VT", position, getName());
 	}
 }
 

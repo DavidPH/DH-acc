@@ -97,20 +97,20 @@ void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal 
 {
 	switch (in)
 	{
-	case SourceVariable::VT_ACSFUNC: *out << "VT_ACSFUNC"; break;
-	case SourceVariable::VT_ARRAY:   *out << "VT_ARRAY";   break;
-	case SourceVariable::VT_ASMFUNC: *out << "VT_ASMFUNC"; break;
-	case SourceVariable::VT_BLOCK:   *out << "VT_BLOCK";   break;
-	case SourceVariable::VT_CHAR:    *out << "VT_CHAR";    break;
-	case SourceVariable::VT_INT:     *out << "VT_INT";     break;
-	case SourceVariable::VT_LNSPEC:  *out << "VT_LNSPEC";  break;
-	case SourceVariable::VT_NATIVE:  *out << "VT_NATIVE";  break;
-	case SourceVariable::VT_POINTER: *out << "VT_POINTER"; break;
-	case SourceVariable::VT_REAL:    *out << "VT_REAL" ;   break;
-	case SourceVariable::VT_SCRIPT:  *out << "VT_SCRIPT";  break;
-	case SourceVariable::VT_STRING:  *out << "VT_STRING";  break;
-	case SourceVariable::VT_STRUCT:  *out << "VT_STRUCT";  break;
-	case SourceVariable::VT_VOID:    *out << "VT_VOID";    break;
+	case SourceVariable::VT_ARRAY:    *out << "VT_ARRAY";    break;
+	case SourceVariable::VT_ASMFUNC:  *out << "VT_ASMFUNC";  break;
+	case SourceVariable::VT_BLOCK:    *out << "VT_BLOCK";    break;
+	case SourceVariable::VT_CHAR:     *out << "VT_CHAR";     break;
+	case SourceVariable::VT_FUNCTION: *out << "VT_FUNCTION"; break;
+	case SourceVariable::VT_INT:      *out << "VT_INT";      break;
+	case SourceVariable::VT_LNSPEC:   *out << "VT_LNSPEC";   break;
+	case SourceVariable::VT_NATIVE:   *out << "VT_NATIVE";   break;
+	case SourceVariable::VT_POINTER:  *out << "VT_POINTER";  break;
+	case SourceVariable::VT_REAL:     *out << "VT_REAL" ;    break;
+	case SourceVariable::VT_SCRIPT:   *out << "VT_SCRIPT";   break;
+	case SourceVariable::VT_STRING:   *out << "VT_STRING";   break;
+	case SourceVariable::VT_STRUCT:   *out << "VT_STRUCT";   break;
+	case SourceVariable::VT_VOID:     *out << "VT_VOID";     break;
 	}
 }
 

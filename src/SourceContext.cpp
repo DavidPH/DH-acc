@@ -206,15 +206,15 @@ SourceContext::ContextType SourceContext::getTypeRoot() const
 {
 	switch (_type)
 	{
-	case CT_ACSFUNC:
-	case CT_SCRIPT:
-		return _type;
-
 	case CT_BLOCK:
 	case CT_LOOP:
 		if (_parent)
-			_parent->getTypeRoot();
+			return _parent->getTypeRoot();
 		break;
+
+	case CT_FUNCTION:
+	case CT_SCRIPT:
+		return _type;
 	}
 	return _type;
 }

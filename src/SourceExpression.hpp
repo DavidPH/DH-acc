@@ -135,9 +135,9 @@ public:
 
 	static void make_objects(std::vector<SourceExpression::Pointer> const & expressions, ObjectVector * objects);
 
-	static void make_objects_call_acsfunc(ObjectVector * objects, SourceVariable::VariableData_ACSFunc const & data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
-
 	static void make_objects_call_asmfunc(ObjectVector * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
+
+	static void make_objects_call_function(ObjectVector * objects, SourceVariable::VariableData_Function const & data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
 
 	static void make_objects_call_lnspec(ObjectVector * objects, SourceVariable::VariableData_LnSpec const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
 

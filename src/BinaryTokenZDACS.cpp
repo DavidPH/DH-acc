@@ -177,23 +177,6 @@ void BinaryTokenZDACS::write_32(std::ostream * const out, uint32_t const i)
 	out->put((i >> 24) & 0xFF);
 }
 
-void BinaryTokenZDACS::write_acsfunc(std::ostream * const out, ObjectExpression::ACSFunc const & f)
-{
-	switch (output_type)
-	{
-	case OUTPUT_ACSE:
-		write_8 (out, (int8_t)f.argCount);
-		write_8 (out, (int8_t)f.varCount);
-		write_8 (out, (int8_t)f.retCount);
-		write_8 (out, 0);
-		write_32(out, *ObjectExpression::get_symbol(f.label, SourcePosition::none));
-		break;
-
-	default:
-		throw SourceException("unknown output type for acsfunc", SourcePosition::none, "BinaryTokenZDACS");
-	}
-}
-
 void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions)
 {
 	int32_t directoryOffset(8);
@@ -212,7 +195,7 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 
 	std::ostringstream chunkout;
 
-	ObjectExpression::int_t const acsfuncCount(ObjectExpression::get_acsfunc_count());
+	ObjectExpression::int_t const functionCount(ObjectExpression::get_function_count());
 	ObjectExpression::int_t const registerarrayMapCount(ObjectExpression::get_registerarray_map_count());
 	int32_t const scriptCount(ObjectExpression::get_script_count());
 	int32_t const stringCount(ObjectExpression::get_string_count());
@@ -264,8 +247,8 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 		write_chunk(out, &chunkout, "ARAY");
 
 		// FUNC - Functions
-		for (ObjectExpression::int_t index(0); index < acsfuncCount; ++index)
-			write_acsfunc(&chunkout, ObjectExpression::get_acsfunc(index));
+		for (ObjectExpression::int_t index(0); index < functionCount; ++index)
+			write_function(&chunkout, ObjectExpression::get_function(index));
 
 		write_chunk(out, &chunkout, "FUNC");
 
@@ -322,6 +305,23 @@ void BinaryTokenZDACS::write_chunk(std::ostream * out, std::ostringstream * chun
 	}
 
 	chunkout->str("");
+}
+
+void BinaryTokenZDACS::write_function(std::ostream * const out, ObjectExpression::Function const & f)
+{
+	switch (output_type)
+	{
+	case OUTPUT_ACSE:
+		write_8 (out, (int8_t)f.argCount);
+		write_8 (out, (int8_t)f.varCount);
+		write_8 (out, (int8_t)f.retCount);
+		write_8 (out, 0);
+		write_32(out, *ObjectExpression::get_symbol(f.label, SourcePosition::none));
+		break;
+
+	default:
+		throw SourceException("unknown output type for function", SourcePosition::none, "BinaryTokenZDACS");
+	}
 }
 
 void BinaryTokenZDACS::write_registerarray(std::ostream * const out, ObjectExpression::RegisterArray const & r)

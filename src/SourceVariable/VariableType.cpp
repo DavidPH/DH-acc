@@ -51,18 +51,6 @@ bool SourceVariable::VariableType::isVoid() const
 {
 	switch (type)
 	{
-	case VT_ACSFUNC:
-	case VT_ASMFUNC:
-	case VT_CHAR:
-	case VT_INT:
-	case VT_LNSPEC:
-	case VT_NATIVE:
-	case VT_POINTER:
-	case VT_REAL:
-	case VT_SCRIPT:
-	case VT_STRING:
-		return false;
-
 	case VT_ARRAY:
 	case VT_BLOCK:
 	case VT_STRUCT:
@@ -75,6 +63,18 @@ bool SourceVariable::VariableType::isVoid() const
 
 	case VT_VOID:
 		return true;
+
+	case VT_ASMFUNC:
+	case VT_CHAR:
+	case VT_FUNCTION:
+	case VT_INT:
+	case VT_LNSPEC:
+	case VT_NATIVE:
+	case VT_POINTER:
+	case VT_REAL:
+	case VT_SCRIPT:
+	case VT_STRING:
+		return false;
 	}
 
 	return 0;
@@ -84,17 +84,6 @@ int SourceVariable::VariableType::size() const
 {
 	switch (type)
 	{
-	case VT_ACSFUNC:
-	case VT_CHAR:
-	case VT_INT:
-	case VT_LNSPEC:
-	case VT_NATIVE:
-	case VT_POINTER:
-	case VT_REAL:
-	case VT_SCRIPT:
-	case VT_STRING:
-		return 1;
-
 	case VT_ARRAY:
 	case VT_BLOCK:
 	case VT_STRUCT:
@@ -110,6 +99,17 @@ int SourceVariable::VariableType::size() const
 	case VT_ASMFUNC:
 	case VT_VOID:
 		return 0;
+
+	case VT_CHAR:
+	case VT_FUNCTION:
+	case VT_INT:
+	case VT_LNSPEC:
+	case VT_NATIVE:
+	case VT_POINTER:
+	case VT_REAL:
+	case VT_SCRIPT:
+	case VT_STRING:
+		return 1;
 	}
 
 	return 0;

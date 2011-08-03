@@ -68,7 +68,7 @@ public:
 		ST_RETURN     = 15
 	};
 
-	struct ACSFunc
+	struct Function
 	{
 		int_t argCount;
 		std::string label;
@@ -129,9 +129,9 @@ public:
 
 	friend void print_debug(std::ostream * out, ObjectExpression const & in);
 
-	static void add_acsfunc(std::string const & label, int_t argCount, int_t varCount, int_t retCount);
-
 	static void add_address_count(int32_t const addressCount);
+
+	static void add_function(std::string const & label, int_t argCount, int_t varCount, int_t retCount);
 
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
@@ -187,11 +187,11 @@ public:
 
 	static void do_deferred_allocation();
 
-	static ACSFunc const & get_acsfunc(int_t const index);
-
-	static int_t get_acsfunc_count();
-
 	static float_t get_float(SourceTokenC const & token);
+
+	static Function const & get_function(int_t index);
+
+	static int_t get_function_count();
 
 	static int_t get_int(SourceTokenC const & token);
 
@@ -239,9 +239,9 @@ private:
 
 	static bool is_register_used(std::map<int_t, bool> * registerUsed, int_t number, int_t size);
 
-	static std::vector<ACSFunc> _acsfunc_table;
-
 	static int32_t _address_count;
+
+	static std::vector<Function> _function_table;
 
 	static std::vector<Register> _register_global_table;
 	static std::map<int_t, bool> _register_global_used;

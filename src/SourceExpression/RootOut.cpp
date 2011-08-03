@@ -60,14 +60,6 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::Var
 {
 	switch (type->type)
 	{
-	case SourceVariable::VT_ACSFUNC:
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_LNSPEC:
-	case SourceVariable::VT_NATIVE:
-	case SourceVariable::VT_SCRIPT:
-		objects->addToken(ObjectToken::OCODE_PRINTNUMBER);
-		break;
-
 	case SourceVariable::VT_ARRAY:
 	case SourceVariable::VT_BLOCK:
 	case SourceVariable::VT_STRUCT:
@@ -96,6 +88,14 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::Var
 
 	case SourceVariable::VT_CHAR:
 		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+		break;
+
+	case SourceVariable::VT_FUNCTION:
+	case SourceVariable::VT_INT:
+	case SourceVariable::VT_LNSPEC:
+	case SourceVariable::VT_NATIVE:
+	case SourceVariable::VT_SCRIPT:
+		objects->addToken(ObjectToken::OCODE_PRINTNUMBER);
 		break;
 
 	case SourceVariable::VT_POINTER:

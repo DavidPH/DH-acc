@@ -57,10 +57,14 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 
 		switch (type->type)
 		{
-		case VT_ACSFUNC:
+		case VT_ASMFUNC:
+		case VT_VOID:
+			break;
+
 		case VT_ARRAY:
 		case VT_BLOCK:
 		case VT_CHAR:
+		case VT_FUNCTION:
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
@@ -72,10 +76,6 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 			objects->addToken(ocode, makeObject(position));
 			++*address;
 			break;
-
-		case VT_ASMFUNC:
-		case VT_VOID:
-			break;
 		}
 		break;
 
@@ -84,8 +84,19 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 	sc_register_case:
 		switch (type->type)
 		{
-		case VT_ACSFUNC:
+		case VT_ARRAY:
+		case VT_BLOCK:
+		case VT_STRUCT:
+			for (size_t i(0); i < type->types.size(); ++i)
+				makeObjectsGet(objects, position, type->types[i], addressBase, address, dimensioned);
+			break;
+
+		case VT_ASMFUNC:
+		case VT_VOID:
+			break;
+
 		case VT_CHAR:
+		case VT_FUNCTION:
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
@@ -97,17 +108,6 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 				objects->addToken(ocode, objects->getValue(_nameObject), objects->getValueAdd(addressBase, (*address)++));
 			else
 				objects->addToken(ocode, objects->getValueAdd(addressBase, (*address)++));
-			break;
-
-		case VT_ARRAY:
-		case VT_BLOCK:
-		case VT_STRUCT:
-			for (size_t i(0); i < type->types.size(); ++i)
-				makeObjectsGet(objects, position, type->types[i], addressBase, address, dimensioned);
-			break;
-
-		case VT_ASMFUNC:
-		case VT_VOID:
 			break;
 		}
 		break;
@@ -177,10 +177,14 @@ void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions,
 	case SC_STATIC:
 		switch (type->type)
 		{
-		case VT_ACSFUNC:
+		case VT_ARRAY:
+			makeObjectsGetArray(objects, dimensions-1, position, type->refType, addressBase, address);
+			break;
+
 		case VT_ASMFUNC:
 		case VT_BLOCK:
 		case VT_CHAR:
+		case VT_FUNCTION:
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
@@ -191,10 +195,6 @@ void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions,
 		case VT_STRUCT:
 		case VT_VOID:
 			throw SourceException("makeObjectsGetArray on non-VT_ARRAY", position, "SourceVariable");
-
-		case VT_ARRAY:
-			makeObjectsGetArray(objects, dimensions-1, position, type->refType, addressBase, address);
-			break;
 		}
 		break;
 
@@ -239,11 +239,11 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 	case SC_STATIC:
 		switch (type->type)
 		{
-		case VT_ACSFUNC:
 		case VT_ARRAY:
 		case VT_ASMFUNC:
 		case VT_BLOCK:
 		case VT_CHAR:
+		case VT_FUNCTION:
 		case VT_INT:
 		case VT_LNSPEC:
 		case VT_NATIVE:
@@ -310,18 +310,6 @@ void SourceVariable::makeObjectsGetSkip(VariableType const * type, int * address
 {
 	switch (type->type)
 	{
-	case VT_ACSFUNC:
-	case VT_CHAR:
-	case VT_INT:
-	case VT_LNSPEC:
-	case VT_NATIVE:
-	case VT_POINTER:
-	case VT_REAL:
-	case VT_SCRIPT:
-	case VT_STRING:
-		++*address;
-		break;
-
 	case VT_ARRAY:
 	case VT_BLOCK:
 	case VT_STRUCT:
@@ -331,6 +319,18 @@ void SourceVariable::makeObjectsGetSkip(VariableType const * type, int * address
 
 	case VT_ASMFUNC:
 	case VT_VOID:
+		break;
+
+	case VT_CHAR:
+	case VT_FUNCTION:
+	case VT_INT:
+	case VT_LNSPEC:
+	case VT_NATIVE:
+	case VT_POINTER:
+	case VT_REAL:
+	case VT_SCRIPT:
+	case VT_STRING:
+		++*address;
 		break;
 	}
 }

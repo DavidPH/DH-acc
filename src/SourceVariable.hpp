@@ -62,10 +62,10 @@ public:
 
 		VT_VOID,
 
-		VT_ACSFUNC,
 		VT_ARRAY,
 		VT_ASMFUNC,
 		VT_BLOCK,
+		VT_FUNCTION,
 		VT_LNSPEC,
 		VT_NATIVE,
 		VT_POINTER,
@@ -96,11 +96,6 @@ public:
 		std::vector<VariableType const *> types;
 	};
 
-	struct VariableData_ACSFunc
-	{
-		VariableType const * type;
-		int number;
-	};
 	struct VariableData_AsmFunc
 	{
 		VariableType const * type;
@@ -111,6 +106,11 @@ public:
 	{
 		VariableType const * type;
 		int value;
+	};
+	struct VariableData_Function
+	{
+		VariableType const * type;
+		int number;
 	};
 	struct VariableData_Int
 	{
@@ -145,29 +145,29 @@ public:
 
 	union VariableData
 	{
-		VariableData_ACSFunc vdACSFunc;
-		VariableData_AsmFunc vdAsmFunc;
-		VariableData_Char    vdChar;
-		VariableData_Int     vdInt;
-		VariableData_LnSpec  vdLnSpec;
-		VariableData_Native  vdNative;
-		VariableData_Real    vdReal;
-		VariableData_Script  vdScript;
-		VariableData_String  vdString;
+		VariableData_AsmFunc  vdAsmFunc;
+		VariableData_Char     vdChar;
+		VariableData_Function vdFunction;
+		VariableData_Int      vdInt;
+		VariableData_LnSpec   vdLnSpec;
+		VariableData_Native   vdNative;
+		VariableData_Real     vdReal;
+		VariableData_Script   vdScript;
+		VariableData_String   vdString;
 	};
 
 
 
 	SourceVariable();
 	SourceVariable(std::string const & nameObject, std::string const & nameSource, StorageClass sc, VariableType const * type, SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_ACSFunc const & vdACSFunc, SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_AsmFunc const & vdAsmFunc, SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Char    const & vdChar,    SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Int     const & vdInt,     SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_LnSpec  const & vdLnSpec,  SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Native  const & vdNative,  SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Real    const & vdReal,    SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Script  const & vdScript,  SourcePosition const & position, std::string const & nameObject);
+	SourceVariable(std::string const & name, VariableData_AsmFunc  const & vdAsmFunc,  SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Char     const & vdChar,     SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Function const & vdFunction, SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Int      const & vdInt,      SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_LnSpec   const & vdLnSpec,   SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Native   const & vdNative,   SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Real     const & vdReal,     SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Script   const & vdScript,   SourcePosition const & position, std::string const & nameObject);
 	SourceVariable(std::string const & name, VariableData_String  const & vdString,  SourcePosition const & position, std::string const & nameObject);
 	SourceVariable(std::string const & name, VariableType const * type, ObjectExpression * expr, SourcePosition const & position);
 
@@ -214,12 +214,12 @@ public:
 
 	static VariableType const * get_VariableType(SourceTokenC const & token);
 	static VariableType const * get_VariableType(VariableTypeInternal const type);
-	// ACSFunc types work like script types (see below).
-	static VariableType const * get_VariableType_acsfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
 	static VariableType const * get_VariableType_array(VariableType const * refType, int count);
 	// AsmFunc types work like script types (see below).
 	static VariableType const * get_VariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
 	static VariableType const * get_VariableType_block(std::vector<VariableType const *> const & types);
+	// Function types work like script types (see below).
+	static VariableType const * get_VariableType_function(VariableType const * callType, std::vector<VariableType const *> const & types);
 	// LnSpec types work like script types (see below).
 	static VariableType const * get_VariableType_lnspec(VariableType const * callType, std::vector<VariableType const *> const & types);
 	// Native types work like script types (see below).

@@ -33,13 +33,6 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 
 	switch (_type->type)
 	{
-	case VT_ACSFUNC:
-		if (_sc == SC_CONSTANT)
-			SourceExpression::make_objects_call_acsfunc(objects, _data.vdACSFunc, args, stack, position);
-		else
-			throw SourceException("non-constant acsfuncs not yet supported", position, "SourceVariable");
-		break;
-
 	case VT_ARRAY:
 	case VT_BLOCK:
 	case VT_CHAR:
@@ -56,6 +49,13 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 			SourceExpression::make_objects_call_asmfunc(objects, _data.vdAsmFunc, args, position);
 		else
 			throw SourceException("non-constant asmfuncs not supported", position, "SourceVariable");
+		break;
+
+	case VT_FUNCTION:
+		if (_sc == SC_CONSTANT)
+			SourceExpression::make_objects_call_function(objects, _data.vdFunction, args, stack, position);
+		else
+			throw SourceException("non-constant functions not yet supported", position, "SourceVariable");
 		break;
 
 	case VT_LNSPEC:

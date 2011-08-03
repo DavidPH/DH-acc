@@ -49,10 +49,6 @@ SourceVariable::SourceVariable(std::string const & nameObject, std::string const
 {
 
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_ACSFunc const & vdACSFunc, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdACSFunc.type)
-{
-	_data.vdACSFunc = vdACSFunc;
-}
 SourceVariable::SourceVariable(std::string const & name, VariableData_AsmFunc const & vdAsmFunc, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdAsmFunc.type)
 {
 	_data.vdAsmFunc = vdAsmFunc;
@@ -60,6 +56,10 @@ SourceVariable::SourceVariable(std::string const & name, VariableData_AsmFunc co
 SourceVariable::SourceVariable(std::string const & name, VariableData_Char const & vdChar, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdChar.type)
 {
 	_data.vdChar = vdChar;
+}
+SourceVariable::SourceVariable(std::string const & name, VariableData_Function const & vdFunction, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdFunction.type)
+{
+	_data.vdFunction = vdFunction;
 }
 SourceVariable::SourceVariable(std::string const & name, VariableData_Int const & vdInt, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdInt.type)
 {
@@ -218,10 +218,6 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType(VariableTy
 {
 	return _types[(type <= VT_VOID) ? type : VT_VOID];
 }
-SourceVariable::VariableType const * SourceVariable::get_VariableType_acsfunc(VariableType const * callType, std::vector<VariableType const *> const & types)
-{
-	return get_VariableType_auto(VT_ACSFUNC, callType, _types[VT_VOID], types);
-}
 SourceVariable::VariableType const * SourceVariable::get_VariableType_array(VariableType const * refType, int count)
 {
 	return get_VariableType_auto(VT_ARRAY, _types[VT_VOID], refType, std::vector<VariableType const *>(count, refType));
@@ -267,6 +263,10 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_auto(Varia
 SourceVariable::VariableType const * SourceVariable::get_VariableType_block(std::vector<VariableType const *> const & types)
 {
 	return get_VariableType_auto(VT_BLOCK, _types[VT_VOID], _types[VT_VOID], types);
+}
+SourceVariable::VariableType const * SourceVariable::get_VariableType_function(VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	return get_VariableType_auto(VT_FUNCTION, callType, _types[VT_VOID], types);
 }
 SourceVariable::VariableType const * SourceVariable::get_VariableType_lnspec(VariableType const * callType, std::vector<VariableType const *> const & types)
 {

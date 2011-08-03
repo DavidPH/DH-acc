@@ -70,17 +70,17 @@ void SourceExpression_BranchReturn::makeObjectsGet(ObjectVector * objects) const
 
 	switch (_type)
 	{
-	case SourceContext::CT_ACSFUNC:
+	case SourceContext::CT_BLOCK:
+	case SourceContext::CT_LOOP:
+		objects->addToken(ObjectToken::OCODE_TERMINATE);
+		break;
+
+	case SourceContext::CT_FUNCTION:
 		if (_expr->getType()->size() == 0)
 			objects->addToken(ObjectToken::OCODE_RETURNZDACSVOID);
 		else
 			objects->addToken(ObjectToken::OCODE_RETURNZDACS);
 
-		break;
-
-	case SourceContext::CT_BLOCK:
-	case SourceContext::CT_LOOP:
-		objects->addToken(ObjectToken::OCODE_TERMINATE);
 		break;
 
 	case SourceContext::CT_SCRIPT:

@@ -79,10 +79,10 @@ void SourceExpression_UnaryDecInc::makeObjectsGet(ObjectVector * objects) const
 
 	switch (getType()->type)
 	{
-	case SourceVariable::VT_ACSFUNC:
 	case SourceVariable::VT_ARRAY:
 	case SourceVariable::VT_ASMFUNC:
 	case SourceVariable::VT_BLOCK:
+	case SourceVariable::VT_FUNCTION:
 	case SourceVariable::VT_LNSPEC:
 	case SourceVariable::VT_NATIVE:
 	case SourceVariable::VT_SCRIPT:
