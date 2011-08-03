@@ -151,8 +151,18 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		in->get(SourceTokenC::TT_OP_BRACKET_C);
 		break;
 
+	case SourceTokenC::TT_OP_MINUS_GT:
+		token = in->get(SourceTokenC::TT_OP_MINUS_GT);
+		expr = create_value_member(create_unary_dereference(expr, token.getPosition()), in->get(SourceTokenC::TT_IDENTIFIER));
+		break;
+
 	case SourceTokenC::TT_OP_MINUS2:
 		expr = create_unary_dec_suf(expr, in->get(SourceTokenC::TT_OP_MINUS2).getPosition());
+		break;
+
+	case SourceTokenC::TT_OP_PERIOD:
+		token = in->get(SourceTokenC::TT_OP_PERIOD);
+		expr = create_value_member(expr, in->get(SourceTokenC::TT_IDENTIFIER));
 		break;
 
 	case SourceTokenC::TT_OP_PLUS2:
