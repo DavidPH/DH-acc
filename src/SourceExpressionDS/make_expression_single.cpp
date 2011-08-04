@@ -160,6 +160,27 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		expr = create_unary_dec_suf(expr, in->get(SourceTokenC::TT_OP_MINUS2).getPosition());
 		break;
 
+	case SourceTokenC::TT_OP_PARENTHESIS_O:
+	{
+		SourceContext contextCall(context, SourceContext::CT_BLOCK);
+
+		std::vector<SourceExpression::Pointer> args;
+
+		if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
+		{
+			args.push_back(make_expression(in, blocks, &contextCall));
+
+			if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
+				break;
+
+			in->get(SourceTokenC::TT_OP_COMMA);
+		}
+		in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+		expr = create_branch_call(expr, args, &contextCall, token.getPosition());
+	}
+		break;
+
 	case SourceTokenC::TT_OP_PERIOD:
 		token = in->get(SourceTokenC::TT_OP_PERIOD);
 		expr = create_value_member(expr, in->get(SourceTokenC::TT_IDENTIFIER));

@@ -135,30 +135,6 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 			in->unget(token);
 			return expr;
 
-		case SourceTokenC::TT_OP_PARENTHESIS_O:
-		{
-			SourceContext contextCall(context, SourceContext::CT_BLOCK);
-
-			std::vector<SourceExpression::Pointer> args;
-
-			if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
-			{
-				args.push_back(make_expression(in, blocks, &contextCall));
-
-				SourceTokenC token(in->get());
-
-				if (token.getType() != SourceTokenC::TT_OP_COMMA)
-				{
-					in->unget(token);
-					break;
-				}
-			}
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-			expr = create_branch_call(expr, args, &contextCall, token.getPosition());
-		}
-			break;
-
 		case SourceTokenC::TT_OP_PERCENT:
 			expr = create_binary_mod(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
