@@ -178,6 +178,7 @@ void SourceTokenASMPLX::init()
 	DO_INIT(ASSIGNWORLDVAR,  1);
 	DO_INIT(BEGINPRINT,      0);
 	DO_INIT(BRANCH,          1);
+	DO_INIT(BRANCHCASE,      2);
 	DO_INIT(BRANCHNOTZERO,   1);
 	DO_INIT(BRANCHZERO,      1);
 	DO_INIT(CMPEQ,           0);

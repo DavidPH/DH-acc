@@ -54,6 +54,7 @@ add_executable(DH-acc
 	SourceExpression/BranchIOr.cpp
 	SourceExpression/BranchNot.cpp
 	SourceExpression/BranchReturn.cpp
+	SourceExpression/BranchSwitch.cpp
 	SourceExpression/BranchWhile.cpp
 	SourceExpression/BranchXOr.cpp
 	SourceExpression/RootDelay.cpp
@@ -78,6 +79,7 @@ add_executable(DH-acc
 	SourceExpressionDS/make_expression_single_function.cpp
 	SourceExpressionDS/make_expression_single_linespec.cpp
 	SourceExpressionDS/make_expression_single_native.cpp
+	SourceExpressionDS/make_expression_single_switch.cpp
 	SourceExpressionDS/make_expression_type.cpp
 	SourceBlockC.cpp
 	SourcePosition.cpp

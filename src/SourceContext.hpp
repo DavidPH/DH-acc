@@ -39,7 +39,8 @@ public:
 		CT_BLOCK,
 		CT_FUNCTION,
 		CT_LOOP,
-		CT_SCRIPT
+		CT_SCRIPT,
+		CT_SWITCH
 	};
 
 
@@ -47,10 +48,17 @@ public:
 	SourceContext();
 	SourceContext(SourceContext * parent, ContextType type);
 
+	std::string addLabelCase(ObjectExpression::int_t value, SourcePosition const & position);
+	std::string addLabelCaseDefault(SourcePosition const & position);
+
 	void addVariable(SourceVariable const & var);
+
+	std::vector<ObjectExpression::int_t> getCases(SourcePosition const & position) const;
 
 	std::string getLabel() const;
 	std::string getLabelBreak(SourcePosition const & position) const;
+	std::string getLabelCase(ObjectExpression::int_t value, SourcePosition const & position);
+	std::string getLabelCaseDefault(SourcePosition const & position) const;
 	std::string getLabelContinue(SourcePosition const & position) const;
 
 	int getLimit(SourceVariable::StorageClass sc) const;
@@ -61,6 +69,8 @@ public:
 	ContextType getTypeRoot() const;
 
 	SourceVariable const & getVariable(SourceTokenC const & token) const;
+
+	bool hasLabelCaseDefault() const;
 
 	std::string makeLabel();
 
@@ -82,6 +92,9 @@ private:
 	SourceVariable const & getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
 
 	std::string makeLabelShort();
+
+	std::map<ObjectExpression::int_t, bool> _cases;
+	bool _caseDefault;
 
 	int _count[SourceVariable::SC_STATIC+1];
 

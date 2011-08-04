@@ -42,8 +42,10 @@ void SourceExpressionDS::init()
 {
 	_expression_single_handlers["asmfunc"]  = make_expression_single_asmfunc;
 	_expression_single_handlers["break"]    = make_expression_single_break;
+	_expression_single_handlers["case"]     = make_expression_single_case;
 	_expression_single_handlers["const"]    = make_expression_single_const;
 	_expression_single_handlers["continue"] = make_expression_single_continue;
+	_expression_single_handlers["default"]  = make_expression_single_default;
 	_expression_single_handlers["delay"]    = make_expression_single_delay;
 	_expression_single_handlers["enum"]     = make_expression_single_type;
 	_expression_single_handlers["for"]      = make_expression_single_for;
@@ -56,6 +58,7 @@ void SourceExpressionDS::init()
 	_expression_single_handlers["script"]   = make_expression_single_script;
 	_expression_single_handlers["sizeof"]   = make_expression_single_sizeof;
 	_expression_single_handlers["struct"]   = make_expression_single_type;
+	_expression_single_handlers["switch"]   = make_expression_single_switch;
 	_expression_single_handlers["typedef"]  = make_expression_single_typedef;
 	_expression_single_handlers["var"]      = make_expression_single_var;
 	_expression_single_handlers["void"]     = make_expression_single_void;
@@ -119,6 +122,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 		case SourceTokenC::TT_OP_CMP_NE:
 			expr = create_binary_ne(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
+
+		case SourceTokenC::TT_OP_COLON:
+			in->unget(token);
+			return expr;
 
 		case SourceTokenC::TT_OP_COMMA:
 			in->unget(token);

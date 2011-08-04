@@ -91,6 +91,7 @@ void ObjectToken::init()
 	DO_INIT(ASSIGNWORLDVAR,  1);
 	DO_INIT(BEGINPRINT,      0);
 	DO_INIT(BRANCH,          1);
+	DO_INIT(BRANCHCASE,      2);
 	DO_INIT(BRANCHNOTZERO,   1);
 	DO_INIT(BRANCHZERO,      1);
 	DO_INIT(CMPEQ,           0);
@@ -231,6 +232,7 @@ void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in)
 	case ObjectToken::OCODE_ASSIGNWORLDVAR:  *out << "OCODE_ASSIGNWORLDVAR";  break;
 	case ObjectToken::OCODE_BEGINPRINT:      *out << "OCODE_BEGINPRINT";      break;
 	case ObjectToken::OCODE_BRANCH:          *out << "OCODE_BRANCH";          break;
+	case ObjectToken::OCODE_BRANCHCASE:      *out << "OCODE_BRANCHCASE";      break;
 	case ObjectToken::OCODE_BRANCHNOTZERO:   *out << "OCODE_BRANCHNOTZERO";   break;
 	case ObjectToken::OCODE_BRANCHZERO:      *out << "OCODE_BRANCHZERO";      break;
 	case ObjectToken::OCODE_CMPEQ:           *out << "OCODE_CMPEQ";           break;

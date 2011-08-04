@@ -34,12 +34,12 @@ SourceContext SourceContext::global_context;
 
 
 
-SourceContext::SourceContext() : _labelCount(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _type(CT_BLOCK), _inheritLocals(false)
+SourceContext::SourceContext() : _caseDefault(false), _labelCount(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _type(CT_BLOCK), _inheritLocals(false)
 {
 	std::memset(_count, 0, sizeof(_count));
 	std::memset(_limit, 0, sizeof(_limit));
 }
-SourceContext::SourceContext(SourceContext * parent, ContextType type) : _label(parent->makeLabelShort()), _labelCount(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP)
+SourceContext::SourceContext(SourceContext * parent, ContextType type) : _caseDefault(false), _label(parent->makeLabelShort()), _labelCount(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP)
 {
 	std::memset(_count, 0, sizeof(_count));
 	std::memset(_limit, 0, sizeof(_limit));
@@ -67,6 +67,41 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 	case SourceVariable::SC_STATIC:
 		break;
 	}
+}
+
+std::string SourceContext::addLabelCase(ObjectExpression::int_t value, SourcePosition const & position)
+{
+	if (_type == CT_SWITCH)
+	{
+		if (_cases.find(value) == _cases.end() || !_cases[value])
+			_cases[value] = true;
+		else
+			throw SourceException("case redefined", position, "SourceContext");
+
+		return getLabelCase(value, position);
+	}
+
+	if (_parent && _inheritLocals)
+		return _parent->addLabelCase(value, position);
+
+	throw SourceException("addLabelCase", position, "SourceContext");
+}
+std::string SourceContext::addLabelCaseDefault(SourcePosition const & position)
+{
+	if (_type == CT_SWITCH)
+	{
+		if (!_caseDefault)
+			_caseDefault = true;
+		else
+			throw SourceException("casedefault redefined", position, "SourceContext");
+
+		return getLabelCaseDefault(position);
+	}
+
+	if (_parent && _inheritLocals)
+		return _parent->addLabelCaseDefault(position);
+
+	throw SourceException("addLabelCaseDefault", position, "SourceContext");
 }
 
 void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
@@ -122,6 +157,31 @@ void SourceContext::addVariable(SourceVariable const & var)
 	}
 }
 
+std::vector<ObjectExpression::int_t> SourceContext::getCases(SourcePosition const & position) const
+{
+	if (_type == CT_SWITCH)
+	{
+		std::vector<ObjectExpression::int_t> cases(_cases.size());
+
+		size_t i(0);
+		for (std::map<ObjectExpression::int_t, bool>::const_iterator it(_cases.begin()); it != _cases.end(); ++it, ++i)
+		{
+			if (!it->second)
+				throw SourceException("case used but undefined", position, "SourceContext");
+
+			cases[i] = it->first;
+		}
+
+		// No need for sort since std::map will have done that.
+		return cases;
+	}
+
+	if (_parent && _inheritLocals)
+		return _parent->getCases(position);
+
+	throw SourceException("getCases", position, "SourceContext");
+}
+
 int SourceContext::getCount(SourceVariable::StorageClass sc) const
 {
 	switch (sc)
@@ -156,13 +216,40 @@ std::string SourceContext::getLabel() const
 }
 std::string SourceContext::getLabelBreak(SourcePosition const & position) const
 {
-	if (_type == CT_LOOP)
+	if (_type == CT_LOOP || _type == CT_SWITCH)
 		return getLabel() + "_break";
 
 	if (_parent && _inheritLocals)
 		return _parent->getLabelBreak(position);
 
 	throw SourceException("getLabelBreak", position, "SourceContext");
+}
+std::string SourceContext::getLabelCase(ObjectExpression::int_t value, SourcePosition const & position)
+{
+	if (_type == CT_SWITCH)
+	{
+		if (_cases.find(value) == _cases.end())
+			_cases[value] = false;
+
+		std::ostringstream out;
+		out << getLabel() << "_case" << value;
+		return out.str();
+	}
+
+	if (_parent && _inheritLocals)
+		return _parent->getLabelCase(value, position);
+
+	throw SourceException("getLabelCase", position, "SourceContext");
+}
+std::string SourceContext::getLabelCaseDefault(SourcePosition const & position) const
+{
+	if (_type == CT_SWITCH)
+		return getLabel() + "_casedefault";
+
+	if (_parent && _inheritLocals)
+		return _parent->getLabelCaseDefault(position);
+
+	throw SourceException("getLabelCaseDefault", position, "SourceContext");
 }
 std::string SourceContext::getLabelContinue(SourcePosition const & position) const
 {
@@ -208,6 +295,7 @@ SourceContext::ContextType SourceContext::getTypeRoot() const
 	{
 	case CT_BLOCK:
 	case CT_LOOP:
+	case CT_SWITCH:
 		if (_parent)
 			return _parent->getTypeRoot();
 		break;
@@ -254,6 +342,11 @@ SourceVariable const & SourceContext::getVariable(std::string const & name, Sour
 	if (_parent) return _parent->getVariable(name, position, canLocal && _inheritLocals);
 
 	throw SourceException("no such variable '" + name + "'", position, "SourceContext");
+}
+
+bool SourceContext::hasLabelCaseDefault() const
+{
+	return _caseDefault;
 }
 
 std::string SourceContext::makeLabel()

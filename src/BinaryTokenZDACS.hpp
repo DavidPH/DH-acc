@@ -90,6 +90,7 @@ public:
 		BCODE_SHIFTR            =  77,
 		BCODE_NEGATE            =  78,
 		BCODE_BRANCHZERO        =  79,
+		BCODE_BRANCHCASE        =  84,
 		BCODE_BEGINPRINT        =  85,
 		BCODE_ENDPRINT          =  86,
 		BCODE_PRINTSTRING       =  87,

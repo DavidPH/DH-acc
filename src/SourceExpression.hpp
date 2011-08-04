@@ -105,6 +105,7 @@ public:
 	static Pointer create_branch_ior(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_not(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_return(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
+	static Pointer create_branch_switch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_while(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_xor(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position);
 

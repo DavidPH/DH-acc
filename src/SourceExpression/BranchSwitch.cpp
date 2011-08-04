@@ -1,0 +1,145 @@
+/* Copyright (C) 2011 David Hill
+**
+** This program is free software: you can redistribute it and/or modify
+** it under the terms of the GNU General Public License as published by
+** the Free Software Foundation, either version 3 of the License, or
+** (at your option) any later version.
+**
+** This program is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+** GNU General Public License for more details.
+**
+** You should have received a copy of the GNU General Public License
+** along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/* SourceExpression/BranchSwitch.cpp
+**
+** Defines the SourceExpression_BranchSwitch class and methods.
+*/
+
+#include "../SourceExpression.hpp"
+
+#include "../ObjectVector.hpp"
+#include "../print_debug.hpp"
+#include "../SourceContext.hpp"
+
+
+
+class SourceExpression_BranchSwitch : public SourceExpression
+{
+	MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchSwitch, SourceExpression);
+
+public:
+	SourceExpression_BranchSwitch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position);
+
+	virtual void makeObjectsGet(ObjectVector * objects) const;
+
+	virtual void printDebug(std::ostream * out) const;
+
+private:
+	SourceExpression::Pointer _expr;
+	SourceExpression::Pointer _exprCases;
+
+	std::vector<ObjectExpression::int_t> _cases;
+	std::vector<std::string> _caseLabels;
+
+	std::string _caseDefault;
+	std::string _caseBreak;
+
+	bool _needDefault;
+};
+
+
+
+SourceExpression::Pointer SourceExpression::create_branch_switch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position)
+{
+	return new SourceExpression_BranchSwitch(expr, exprCases, context, position);
+}
+
+
+
+SourceExpression_BranchSwitch::SourceExpression_BranchSwitch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position) : Super(position), _expr(expr), _exprCases(exprCases), _cases(context->getCases(position)), _caseLabels(_cases.size()), _caseDefault(context->getLabelCaseDefault(position)), _caseBreak(context->getLabelBreak(position)), _needDefault(!context->hasLabelCaseDefault())
+{
+	if (_expr->getType()->type != SourceVariable::VT_INT)
+		_expr = create_value_cast(_expr, SourceVariable::get_VariableType(SourceVariable::VT_INT), position);
+
+	if (_exprCases->getType()->type != SourceVariable::VT_VOID)
+		_exprCases = create_value_cast(_exprCases, SourceVariable::get_VariableType(SourceVariable::VT_VOID), position);
+
+	for (size_t i(0); i < _cases.size(); ++i)
+		_caseLabels[i] = context->getLabelCase(_cases[i], position);
+}
+
+void SourceExpression_BranchSwitch::makeObjectsGet(ObjectVector * objects) const
+{
+	objects->addLabel(labels);
+
+	_expr->makeObjectsGet(objects);
+
+	objects->setPosition(position);
+
+	// TODO: BRANCHCASESORTED
+	for (size_t i(0); i < _cases.size(); ++i)
+		objects->addToken(ObjectToken::OCODE_BRANCHCASE, objects->getValue(_cases[i]), objects->getValue(_caseLabels[i]));
+
+	objects->addToken(ObjectToken::OCODE_DROP);
+	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_caseDefault));
+
+	_exprCases->makeObjectsGet(objects);
+
+	if (_needDefault)
+		objects->addLabel(_caseDefault);
+	objects->addLabel(_caseBreak);
+}
+
+void SourceExpression_BranchSwitch::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpression_BranchSwitch(";
+	Super::printDebug(out);
+	*out << " ";
+		*out << "expr=(";
+		print_debug(out, _expr);
+		*out << ")";
+
+		*out << ", ";
+
+		*out << "exprCases=(";
+		print_debug(out, _exprCases);
+		*out << ")";
+
+		*out << ", ";
+
+		*out << "cases=(";
+		print_debug(out, _cases);
+		*out << ")";
+
+		*out << ", ";
+
+		*out << "caseLabels=(";
+		print_debug(out, _caseLabels);
+		*out << ")";
+
+		*out << ", ";
+
+		*out << "caseDefault=(";
+		print_debug(out, _caseDefault);
+		*out << ")";
+
+		*out << ", ";
+
+		*out << "caseBreak=(";
+		print_debug(out, _caseBreak);
+		*out << ")";
+
+		*out << ", ";
+
+		*out << "needDefault=(";
+		print_debug(out, _needDefault);
+		*out << ")";
+	*out << ")";
+}
+
+
+
