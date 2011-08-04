@@ -50,8 +50,11 @@ public:
 
 	std::string addLabelCase(ObjectExpression::int_t value, SourcePosition const & position);
 	std::string addLabelCaseDefault(SourcePosition const & position);
+	std::string addLabelGoto(SourceTokenC const & token);
 
 	void addVariable(SourceVariable const & var);
+
+	bool getAllowLabel() const;
 
 	std::vector<ObjectExpression::int_t> getCases(SourcePosition const & position) const;
 
@@ -60,6 +63,7 @@ public:
 	std::string getLabelCase(ObjectExpression::int_t value, SourcePosition const & position);
 	std::string getLabelCaseDefault(SourcePosition const & position) const;
 	std::string getLabelContinue(SourcePosition const & position) const;
+	std::string getLabelGoto(SourceTokenC const & token) const;
 
 	int getLimit(SourceVariable::StorageClass sc) const;
 
@@ -77,6 +81,8 @@ public:
 	std::string makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, SourcePosition const & position) const;
 	std::string makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, ObjectExpression::int_t address, SourcePosition const & position) const;
 
+	void setAllowLabel(bool allow);
+
 	void setReturnType(SourceVariable::VariableType const * returnType);
 
 
@@ -92,6 +98,8 @@ private:
 	SourceVariable const & getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
 
 	std::string makeLabelShort();
+
+	bool _allowLabel;
 
 	std::map<ObjectExpression::int_t, bool> _cases;
 	bool _caseDefault;

@@ -340,12 +340,17 @@ void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type)
 	case SourceTokenC::TT_FLOAT:                 *out << "TT_FLOAT";                 break;
 	case SourceTokenC::TT_IDENTIFIER:            *out << "TT_IDENTIFIER";            break;
 	case SourceTokenC::TT_INTEGER:               *out << "TT_INTEGER";               break;
+	case SourceTokenC::TT_STRING:                *out << "TT_STRING";                break;
 	case SourceTokenC::TT_OP_AT:                 *out << "TT_OP_AT";                 break;
 	case SourceTokenC::TT_OP_CARET:              *out << "TT_OP_CARET";              break;
 	case SourceTokenC::TT_OP_CARET_EQUALS:       *out << "TT_OP_CARET_EQUALS";       break;
 	case SourceTokenC::TT_OP_CARET2:             *out << "TT_OP_CARET2";             break;
 	case SourceTokenC::TT_OP_CARET2_EQUALS:      *out << "TT_OP_CARET2_EQUALS";      break;
+	case SourceTokenC::TT_OP_COLON:              *out << "TT_OP_COLON";              break;
+	case SourceTokenC::TT_OP_COMMA:              *out << "TT_OP_COMMA";              break;
 	case SourceTokenC::TT_OP_EXCLAMATION:        *out << "TT_OP_EXCLAMATION";        break;
+	case SourceTokenC::TT_OP_PARENTHESIS_C:      *out << "TT_OP_PARENTHESIS_C";      break;
+	case SourceTokenC::TT_OP_PARENTHESIS_O:      *out << "TT_OP_PARENTHESIS_O";      break;
 	case SourceTokenC::TT_OP_PLUS:               *out << "TT_OP_PLUS";               break;
 	case SourceTokenC::TT_OP_QUERY:              *out << "TT_OP_QUERY";              break;
 	case SourceTokenC::TT_OP_SEMICOLON:          *out << "TT_OP_SEMICOLON";          break;

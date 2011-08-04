@@ -66,6 +66,15 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		}
 	}
 
+		// Check for label.
+		if (in->peek().getType() == SourceTokenC::TT_OP_COLON && context->getAllowLabel())
+		{
+			in->get(SourceTokenC::TT_OP_COLON);
+			expr = make_expression(in, blocks, context);
+			expr->addLabel(context->getLabelGoto(token));
+			break;
+		}
+
 		// Must be a variable.
 		expr = create_value_variable(context->getVariable(token), token.getPosition());
 		break;
@@ -162,6 +171,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 
 	case SourceTokenC::TT_OP_PARENTHESIS_O:
 	{
+		token = in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+
 		SourceContext contextCall(context, SourceContext::CT_BLOCK);
 
 		std::vector<SourceExpression::Pointer> args;
@@ -221,7 +232,9 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_break(Sourc
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_case(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
+	context->setAllowLabel(false);
 	ObjectExpression::int_t value(make_expression(in, blocks, context)->makeObject()->resolveInt());
+	context->setAllowLabel(true);
 
 	in->get(SourceTokenC::TT_OP_COLON);
 

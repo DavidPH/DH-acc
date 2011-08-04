@@ -34,12 +34,12 @@ SourceContext SourceContext::global_context;
 
 
 
-SourceContext::SourceContext() : _caseDefault(false), _labelCount(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _type(CT_BLOCK), _inheritLocals(false)
+SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _labelCount(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _type(CT_BLOCK), _inheritLocals(false)
 {
 	std::memset(_count, 0, sizeof(_count));
 	std::memset(_limit, 0, sizeof(_limit));
 }
-SourceContext::SourceContext(SourceContext * parent, ContextType type) : _caseDefault(false), _label(parent->makeLabelShort()), _labelCount(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP)
+SourceContext::SourceContext(SourceContext * parent, ContextType type) : _allowLabel(true), _caseDefault(false), _label(parent->makeLabelShort()), _labelCount(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP)
 {
 	std::memset(_count, 0, sizeof(_count));
 	std::memset(_limit, 0, sizeof(_limit));
@@ -103,6 +103,10 @@ std::string SourceContext::addLabelCaseDefault(SourcePosition const & position)
 
 	throw SourceException("addLabelCaseDefault", position, "SourceContext");
 }
+std::string SourceContext::addLabelGoto(SourceTokenC const & token)
+{
+	return getLabelGoto(token);
+}
 
 void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 {
@@ -155,6 +159,14 @@ void SourceContext::addVariable(SourceVariable const & var)
 		addCount(1, sc);
 		break;
 	}
+}
+
+bool SourceContext::getAllowLabel() const
+{
+	if (_parent && _inheritLocals)
+		return _allowLabel && _parent->getAllowLabel();
+	else
+		return _allowLabel;
 }
 
 std::vector<ObjectExpression::int_t> SourceContext::getCases(SourcePosition const & position) const
@@ -260,6 +272,13 @@ std::string SourceContext::getLabelContinue(SourcePosition const & position) con
 		return _parent->getLabelContinue(position);
 
 	throw SourceException("getLabelContinue", position, "SourceContext");
+}
+std::string SourceContext::getLabelGoto(SourceTokenC const & token) const
+{
+	if (_parent && _inheritLocals)
+		return _parent->getLabelGoto(token);
+
+	return getLabel() + "_goto" + token.getData();
 }
 
 int SourceContext::getLimit(SourceVariable::StorageClass sc) const
@@ -451,6 +470,11 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Sourc
 	}
 
 	return nameObject;
+}
+
+void SourceContext::setAllowLabel(bool allow)
+{
+	_allowLabel = allow;
 }
 
 void SourceContext::setReturnType(SourceVariable::VariableType const * returnType)

@@ -50,6 +50,7 @@ void SourceExpressionDS::init()
 	_expression_single_handlers["enum"]     = make_expression_single_type;
 	_expression_single_handlers["for"]      = make_expression_single_for;
 	_expression_single_handlers["function"] = make_expression_single_function;
+	_expression_single_handlers["goto"]     = make_expression_single_goto;
 	_expression_single_handlers["if"]       = make_expression_single_if;
 	_expression_single_handlers["linespec"] = make_expression_single_linespec;
 	_expression_single_handlers["native"]   = make_expression_single_native;

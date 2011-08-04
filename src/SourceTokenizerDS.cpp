@@ -25,6 +25,7 @@
 #include "SourceStream.hpp"
 
 #include <fstream>
+#include <sstream>
 
 
 
@@ -124,7 +125,15 @@ SourceTokenC SourceTokenizerDS::get(SourceTokenC::TokenType const type)
 	SourceTokenC token(get());
 
 	if (token.getType() != type)
-		throw SourceException("unexpected token type", token.getPosition(), "SourceTokenizerDS");
+	{
+		std::ostringstream out;
+		out << "expected ";
+		print_debug(&out, type);
+		out << " got ";
+		print_debug(&out, token.getType());
+
+		throw SourceException(out.str(), token.getPosition(), "SourceTokenizerDS");
+	}
 
 	return token;
 }

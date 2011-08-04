@@ -50,6 +50,7 @@ add_executable(DH-acc
 	SourceExpression/BranchCall.cpp
 	SourceExpression/BranchContinue.cpp
 	SourceExpression/BranchFor.cpp
+	SourceExpression/BranchGoto.cpp
 	SourceExpression/BranchIf.cpp
 	SourceExpression/BranchIOr.cpp
 	SourceExpression/BranchNot.cpp
@@ -77,6 +78,7 @@ add_executable(DH-acc
 	SourceExpressionDS/make_expression_single.cpp
 	SourceExpressionDS/make_expression_single_for.cpp
 	SourceExpressionDS/make_expression_single_function.cpp
+	SourceExpressionDS/make_expression_single_goto.cpp
 	SourceExpressionDS/make_expression_single_linespec.cpp
 	SourceExpressionDS/make_expression_single_native.cpp
 	SourceExpressionDS/make_expression_single_switch.cpp
