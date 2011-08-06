@@ -41,6 +41,7 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 		case VT_ARRAY:
 		case VT_BLOCK:
 		case VT_STRUCT:
+		case VT_UNION:
 			throw SourceException("makeObject on compound VT", position, "SourceVariable");
 
 		case VT_FUNCTION:

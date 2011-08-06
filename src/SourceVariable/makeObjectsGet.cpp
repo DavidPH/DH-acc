@@ -75,6 +75,7 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		case VT_STRUCT:
 		case VT_STRING:
 		case VT_SCRIPT:
+		case VT_UNION:
 			objects->addToken(ocode, makeObject(position));
 			++*address;
 			break;
@@ -112,6 +113,16 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 				objects->addToken(ocode, objects->getValue(_nameObject), objects->getValueAdd(addressBase, (*address)++));
 			else
 				objects->addToken(ocode, objects->getValueAdd(addressBase, (*address)++));
+			break;
+
+		case VT_UNION:
+			for (int i(0); i < type->size(); ++i)
+			{
+				if (array)
+					objects->addToken(ocode, objects->getValue(_nameObject), objects->getValueAdd(addressBase, (*address)++));
+				else
+					objects->addToken(ocode, objects->getValueAdd(addressBase, (*address)++));
+			}
 			break;
 		}
 		break;
@@ -199,6 +210,7 @@ void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions,
 		case VT_SCRIPT:
 		case VT_STRING:
 		case VT_STRUCT:
+		case VT_UNION:
 		case VT_VOID:
 			throw SourceException("makeObjectsGetArray on non-VT_ARRAY", position, "SourceVariable");
 		}
@@ -263,6 +275,7 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 			throw SourceException("makeObjectGetMember on non-VT_STRUCT", position, "SourceVariable");
 
 		case VT_STRUCT:
+		case VT_UNION:
 			for (size_t i(0); i < type->types.size(); ++i)
 			{
 				if (type->names[i] == names->back())
@@ -271,7 +284,7 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 					makeObjectsGetMember(objects, names, position, type->types[i], addressBase, address);
 					return;
 				}
-				else
+				else if (type->type == VT_STRUCT)
 				{
 					makeObjectsGetSkip(type->types[i], address);
 				}
@@ -316,33 +329,7 @@ void SourceVariable::makeObjectsGetPrep(ObjectVector * objects, std::vector<Coun
 
 void SourceVariable::makeObjectsGetSkip(VariableType const * type, int * address) const
 {
-	switch (type->type)
-	{
-	case VT_ARRAY:
-	case VT_BLOCK:
-	case VT_STRUCT:
-		for (size_t i(0); i < type->types.size(); ++i)
-			makeObjectsGetSkip(type->types[i], address);
-		break;
-
-	case VT_ASMFUNC:
-	case VT_VOID:
-		break;
-
-	case VT_BOOLHARD:
-	case VT_BOOLSOFT:
-	case VT_CHAR:
-	case VT_FUNCTION:
-	case VT_INT:
-	case VT_LINESPEC:
-	case VT_NATIVE:
-	case VT_POINTER:
-	case VT_REAL:
-	case VT_SCRIPT:
-	case VT_STRING:
-		++*address;
-		break;
-	}
+	*address += type->size();
 }
 
 

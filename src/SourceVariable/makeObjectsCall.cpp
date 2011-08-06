@@ -43,6 +43,7 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 	case VT_REAL:
 	case VT_STRING:
 	case VT_STRUCT:
+	case VT_UNION:
 	case VT_VOID:
 		throw SourceException("attempt to call uncallable", position, "SourceVariable");
 

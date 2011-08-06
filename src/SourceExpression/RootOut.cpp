@@ -108,6 +108,8 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::Var
 
 	case SourceVariable::VT_POINTER:
 		objects->addToken(ObjectToken::OCODE_PRINTHEX);
+		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('p'));
+		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
 		break;
 
 	case SourceVariable::VT_REAL:
@@ -117,6 +119,28 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::Var
 	case SourceVariable::VT_STRING:
 		objects->addToken(ObjectToken::OCODE_PRINTSTRING);
 		break;
+
+	case SourceVariable::VT_UNION:
+		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('U'));
+		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('{'));
+		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+
+		for (int i(type->size()); i--;)
+		{
+			objects->addToken(ObjectToken::OCODE_PRINTHEX);
+
+			if (i)
+			{
+				objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(' '));
+				objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+			}
+		}
+
+		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('}'));
+		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('U'));
+		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
 	}
 
 	objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(';'));

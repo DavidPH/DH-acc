@@ -104,15 +104,20 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 
 		type = SourceVariable::get_VariableType_script(retn, types);
 	}
-	else if (token.getData() == "struct")
+	else if (token.getData() == "struct" || token.getData() == "union")
 	{
+		bool isUnion(token.getData() == "union");
+
 		type = NULL;
 
 		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
 		{
 			name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
 
-			type = SourceVariable::add_struct(name, token.getPosition());
+			if (isUnion)
+				type = SourceVariable::add_union(name, token.getPosition());
+			else
+				type = SourceVariable::add_struct(name, token.getPosition());
 		}
 
 		if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_O)
@@ -132,10 +137,19 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 
 			in->get(SourceTokenC::TT_OP_BRACE_C);
 
-			type = SourceVariable::add_struct(name, names, types, token.getPosition());
+			if (isUnion)
+				type = SourceVariable::add_union(name, names, types, token.getPosition());
+			else
+				type = SourceVariable::add_struct(name, names, types, token.getPosition());
 		}
 
-		if (!type) type = SourceVariable::add_struct(name, token.getPosition());
+		if (!type)
+		{
+			if (isUnion)
+				type = SourceVariable::add_union(name, token.getPosition());
+			else
+				type = SourceVariable::add_struct(name, token.getPosition());
+		}
 	}
 	else if (token.getData() == "typeof")
 	{

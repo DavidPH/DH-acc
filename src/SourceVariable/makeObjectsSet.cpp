@@ -89,6 +89,16 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 			else
 				objects->addToken(ocode, objects->getValueAdd(addressBase, (*address)--));
 			break;
+
+		case VT_UNION:
+			for (int i(0); i < type->size(); ++i)
+			{
+				if (array)
+					objects->addToken(ocode, objects->getValue(_nameObject), objects->getValueAdd(addressBase, (*address)--));
+				else
+					objects->addToken(ocode, objects->getValueAdd(addressBase, (*address)--));
+			}
+			break;
 		}
 		break;
 
@@ -176,6 +186,7 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions,
 		case VT_SCRIPT:
 		case VT_STRING:
 		case VT_STRUCT:
+		case VT_UNION:
 		case VT_VOID:
 			throw SourceException("makeObjectsSetArray on non-VT_ARRAY", position, "SourceVariable");
 		}
@@ -242,6 +253,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 			throw SourceException("attempt to set member from non-struct", position, "SourceVariable");
 
 		case VT_STRUCT:
+		case VT_UNION:
 			for (size_t i(0); i < type->types.size(); ++i)
 			{
 				if (type->names[i] == names->back())
@@ -250,7 +262,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 					makeObjectsSetMember(objects, names, position, type->types[i], addressBase, address);
 					return;
 				}
-				else
+				else if (type->type == VT_STRUCT)
 				{
 					makeObjectsSetSkip(type->types[i], address);
 				}
@@ -335,33 +347,7 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, std::vector<Sour
 
 void SourceVariable::makeObjectsSetSkip(VariableType const * type, int * address) const
 {
-	switch (type->type)
-	{
-	case VT_ARRAY:
-	case VT_BLOCK:
-	case VT_STRUCT:
-		for (size_t i(type->types.size()); i--;)
-			makeObjectsSetSkip(type->types[i], address);
-		break;
-
-	case VT_ASMFUNC:
-	case VT_VOID:
-		break;
-
-	case VT_BOOLHARD:
-	case VT_BOOLSOFT:
-	case VT_CHAR:
-	case VT_FUNCTION:
-	case VT_INT:
-	case VT_LINESPEC:
-	case VT_NATIVE:
-	case VT_POINTER:
-	case VT_REAL:
-	case VT_SCRIPT:
-	case VT_STRING:
-		--*address;
-		break;
-	}
+	*address -= type->size();
 }
 
 

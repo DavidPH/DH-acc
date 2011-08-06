@@ -29,6 +29,9 @@ int SourceVariable::VariableType::getOffset(std::string const & name, SourcePosi
 {
 	int offset(0);
 
+	if (type == VT_UNION)
+		return offset;
+
 	for (size_t i(0); i < names.size(); ++i)
 		if (name == names[i])
 			return offset;
@@ -54,6 +57,7 @@ bool SourceVariable::VariableType::isVoid() const
 	case VT_ARRAY:
 	case VT_BLOCK:
 	case VT_STRUCT:
+	case VT_UNION:
 	{
 		for (size_t i(0); i < types.size(); ++i)
 			if (!types[i]->isVoid()) return false;
@@ -114,6 +118,19 @@ int SourceVariable::VariableType::size() const
 	case VT_SCRIPT:
 	case VT_STRING:
 		return 1;
+
+	case VT_UNION:
+	{
+		int s(0);
+
+		for (size_t i(0); i < types.size(); ++i)
+		{
+			if (types[i]->size() > s)
+				s = types[i]->size();
+		}
+
+		return s;
+	}
 	}
 
 	return 0;

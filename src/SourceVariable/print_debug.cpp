@@ -112,6 +112,7 @@ void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal 
 	case SourceVariable::VT_SCRIPT:   *out << "VT_SCRIPT";   break;
 	case SourceVariable::VT_STRING:   *out << "VT_STRING";   break;
 	case SourceVariable::VT_STRUCT:   *out << "VT_STRUCT";   break;
+	case SourceVariable::VT_UNION:    *out << "VT_UNION";    break;
 	case SourceVariable::VT_VOID:     *out << "VT_VOID";     break;
 	}
 }

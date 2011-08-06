@@ -158,6 +158,70 @@ SourceVariable::VariableType const * SourceVariable::add_struct(std::string cons
 	return type;
 }
 
+SourceVariable::VariableType const * SourceVariable::add_union(std::string const & name, SourcePosition const & position)
+{
+	VariableType * type(get_VariableType_union(name));
+
+	if (type)
+	{
+		if (type->type != VT_UNION)
+			throw SourceException("existing type not VT_UNION", position, "SourceVariable");
+	}
+	else
+	{
+		type = new VariableType;
+
+		type->type     = VT_UNION;
+		type->callType = _types[VT_VOID];
+		type->refType  = _types[VT_VOID];
+
+		_names.push_back(name);
+		_types.push_back(type);
+	}
+
+	return type;
+}
+SourceVariable::VariableType const * SourceVariable::add_union(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position)
+{
+	VariableType * type(get_VariableType_union(name));
+
+	if (type)
+	{
+		if (type->type != VT_UNION)
+			throw SourceException("existing type not VT_UNION", position, "SourceVariable");
+
+		if (type->callType->type != VT_VOID)
+			throw SourceException("existing VT_UNION callType not void", position, "SourceVariable");
+
+		if (type->refType->type != VT_VOID)
+			throw SourceException("existing VT_UNION refType not void", position, "SourceVariable");
+
+		if (!type->names.empty())
+			throw SourceException("existing VT_UNION names not empty", position, "SourceVariable");
+
+		if (!type->types.empty())
+			throw SourceException("existing VT_UNION types not empty", position, "SourceVariable");
+
+		type->names = names;
+		type->types = types;
+	}
+	else
+	{
+		type = new VariableType;
+
+		type->type     = VT_UNION;
+		type->callType = _types[VT_VOID];
+		type->refType  = _types[VT_VOID];
+		type->names    = names;
+		type->types    = types;
+
+		_names.push_back(name);
+		_types.push_back(type);
+	}
+
+	return type;
+}
+
 void SourceVariable::add_typedef(std::string const & name, VariableType const * type)
 {
 	_names.push_back(name);
@@ -288,6 +352,10 @@ SourceVariable::VariableType const * SourceVariable::get_VariableType_null(std::
 
 	return NULL;
 }
+SourceVariable::VariableType const * SourceVariable::get_VariableType_pointer(VariableType const * refType)
+{
+	return get_VariableType_auto(VT_POINTER, _types[VT_VOID], refType, std::vector<VariableType const *>());
+}
 SourceVariable::VariableType const * SourceVariable::get_VariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
 	return get_VariableType_auto(VT_SCRIPT, callType, _types[VT_VOID], types);
@@ -300,9 +368,13 @@ SourceVariable::VariableType * SourceVariable::get_VariableType_struct(std::stri
 
 	return NULL;
 }
-SourceVariable::VariableType const * SourceVariable::get_VariableType_pointer(VariableType const * refType)
+SourceVariable::VariableType * SourceVariable::get_VariableType_union(std::string const & name)
 {
-	return get_VariableType_auto(VT_POINTER, _types[VT_VOID], refType, std::vector<VariableType const *>());
+	for (size_t i(0); i < _names.size(); ++i)
+		if (_names[i] == name && _types[i]->type == VT_UNION)
+			return _types[i];
+
+	return NULL;
 }
 
 SourceVariable::StorageClass SourceVariable::getClass() const

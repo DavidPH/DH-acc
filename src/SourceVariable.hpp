@@ -72,7 +72,8 @@ public:
 		VT_NATIVE,
 		VT_POINTER,
 		VT_SCRIPT,
-		VT_STRUCT
+		VT_STRUCT,
+		VT_UNION
 	};
 
 	struct VariableType
@@ -216,6 +217,8 @@ public:
 
 	static VariableType const * add_struct(std::string const & name, SourcePosition const & position);
 	static VariableType const * add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position);
+	static VariableType const * add_union(std::string const & name, SourcePosition const & position);
+	static VariableType const * add_union(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position);
 
 	static void add_typedef(std::string const & name, VariableType const * type);
 
@@ -267,6 +270,7 @@ private:
 
 	static VariableType const * get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types);
 	static VariableType * get_VariableType_struct(std::string const & name);
+	static VariableType * get_VariableType_union(std::string const & name);
 
 	static std::vector<std::string>    _names;
 	static std::vector<VariableType *> _types;
