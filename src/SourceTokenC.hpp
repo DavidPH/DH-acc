@@ -60,8 +60,12 @@ public:
 		TT_OP_CMP_EQ,             // ==
 		TT_OP_CMP_GE,             // >=
 		TT_OP_CMP_GT,             // >
+		TT_OP_CMP_GT2,            // >>
+		TT_OP_CMP_GT2_EQUALS,     // >>=
 		TT_OP_CMP_LE,             // <=
 		TT_OP_CMP_LT,             // <
+		TT_OP_CMP_LT2,            // <<
+		TT_OP_CMP_LT2_EQUALS,     // <<=
 		TT_OP_CMP_NE,             // !=
 		TT_OP_COLON,              // :
 		TT_OP_COMMA,              // ,
@@ -86,10 +90,6 @@ public:
 		TT_OP_PLUS2,              // ++
 		TT_OP_QUERY,              // ?
 		TT_OP_SEMICOLON,          // ;
-		TT_OP_SHIFT_LEFT,         // <<
-		TT_OP_SHIFT_LEFT_EQUALS,  // <<=
-		TT_OP_SHIFT_RIGHT,        // >>
-		TT_OP_SHIFT_RIGHT_EQUALS, // >>=
 		TT_OP_SLASH,              // /
 		TT_OP_SLASH_EQUALS,       // /=
 		TT_OP_TILDE,              // ~

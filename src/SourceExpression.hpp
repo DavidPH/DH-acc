@@ -90,6 +90,8 @@ public:
 	static Pointer create_binary_mod(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_mul(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_ne(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_shiftl(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_shiftr(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_sub(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_xor(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 

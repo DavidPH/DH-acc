@@ -43,6 +43,7 @@ add_executable(DH-acc
 	SourceExpression/BinaryMod.cpp
 	SourceExpression/BinaryMul.cpp
 	SourceExpression/BinaryNE.cpp
+	SourceExpression/BinaryShift.cpp
 	SourceExpression/BinarySub.cpp
 	SourceExpression/BinaryXOr.cpp
 	SourceExpression/BranchAnd.cpp

@@ -112,12 +112,20 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 			expr = create_binary_gt(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
+		case SourceTokenC::TT_OP_CMP_GT2:
+			expr = create_binary_shiftr(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
 		case SourceTokenC::TT_OP_CMP_LE:
 			expr = create_binary_le(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
 		case SourceTokenC::TT_OP_CMP_LT:
 			expr = create_binary_lt(expr, make_expression_single(in, blocks, context), token.getPosition());
+			break;
+
+		case SourceTokenC::TT_OP_CMP_LT2:
+			expr = create_binary_shiftl(expr, make_expression_single(in, blocks, context), token.getPosition());
 			break;
 
 		case SourceTokenC::TT_OP_CMP_NE:

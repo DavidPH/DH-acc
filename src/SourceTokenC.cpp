@@ -120,11 +120,11 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 		{
 			c = in->get();
 
-			if (c == '=') {_type = TT_OP_SHIFT_RIGHT_EQUALS; return;}
+			if (c == '=') {_type = TT_OP_CMP_GT2_EQUALS; return;}
 
 			in->unget(c);
 
-			_type = TT_OP_SHIFT_RIGHT; return;
+			_type = TT_OP_CMP_GT2; return;
 		}
 
 		in->unget(c);
@@ -139,11 +139,11 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 		{
 			c = in->get();
 
-			if (c == '=') {_type = TT_OP_SHIFT_LEFT_EQUALS; return;}
+			if (c == '=') {_type = TT_OP_CMP_LT2_EQUALS; return;}
 
 			in->unget(c);
 
-			_type = TT_OP_SHIFT_LEFT; return;
+			_type = TT_OP_CMP_LT2; return;
 		}
 
 		in->unget(c);
@@ -346,6 +346,7 @@ void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type)
 	case SourceTokenC::TT_OP_CARET_EQUALS:       *out << "TT_OP_CARET_EQUALS";       break;
 	case SourceTokenC::TT_OP_CARET2:             *out << "TT_OP_CARET2";             break;
 	case SourceTokenC::TT_OP_CARET2_EQUALS:      *out << "TT_OP_CARET2_EQUALS";      break;
+	case SourceTokenC::TT_OP_CMP_GT2_EQUALS:     *out << "TT_OP_CMP_GT2_EQUALS";     break;
 	case SourceTokenC::TT_OP_COLON:              *out << "TT_OP_COLON";              break;
 	case SourceTokenC::TT_OP_COMMA:              *out << "TT_OP_COMMA";              break;
 	case SourceTokenC::TT_OP_EXCLAMATION:        *out << "TT_OP_EXCLAMATION";        break;
@@ -354,7 +355,6 @@ void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type)
 	case SourceTokenC::TT_OP_PLUS:               *out << "TT_OP_PLUS";               break;
 	case SourceTokenC::TT_OP_QUERY:              *out << "TT_OP_QUERY";              break;
 	case SourceTokenC::TT_OP_SEMICOLON:          *out << "TT_OP_SEMICOLON";          break;
-	case SourceTokenC::TT_OP_SHIFT_RIGHT_EQUALS: *out << "TT_OP_SHIFT_RIGHT_EQUALS"; break;
 	case SourceTokenC::TT_OP_TILDE:              *out << "TT_OP_TILDE";              break;
 	default: *out << "TT_"; break;
 	}
