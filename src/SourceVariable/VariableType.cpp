@@ -65,6 +65,8 @@ bool SourceVariable::VariableType::isVoid() const
 		return true;
 
 	case VT_ASMFUNC:
+	case VT_BOOLHARD:
+	case VT_BOOLSOFT:
 	case VT_CHAR:
 	case VT_FUNCTION:
 	case VT_INT:
@@ -100,6 +102,8 @@ int SourceVariable::VariableType::size() const
 	case VT_VOID:
 		return 0;
 
+	case VT_BOOLHARD:
+	case VT_BOOLSOFT:
 	case VT_CHAR:
 	case VT_FUNCTION:
 	case VT_INT:

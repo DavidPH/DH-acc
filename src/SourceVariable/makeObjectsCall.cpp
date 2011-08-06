@@ -35,6 +35,8 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 	{
 	case VT_ARRAY:
 	case VT_BLOCK:
+	case VT_BOOLHARD:
+	case VT_BOOLSOFT:
 	case VT_CHAR:
 	case VT_INT:
 	case VT_POINTER:

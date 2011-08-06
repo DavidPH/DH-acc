@@ -29,29 +29,14 @@ SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression 
 {
 
 }
-SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, bool branchChecked, SourcePosition const & position) : Super(exprL, exprR, position)
+SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, bool branchChecked, SourcePosition const & position) : Super(exprL, exprR, SourceVariable::get_VariableType(SourceVariable::VT_BOOLSOFT), SourceVariable::get_VariableType(SourceVariable::VT_BOOLSOFT), position)
 {
-	if (branchChecked) switch (exprL->getType()->type)
-	{
-	case SourceVariable::VT_CHAR:
-	case SourceVariable::VT_FUNCTION:
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_LINESPEC:
-	case SourceVariable::VT_NATIVE:
-	case SourceVariable::VT_POINTER:
-	case SourceVariable::VT_REAL:
-	case SourceVariable::VT_SCRIPT:
-	case SourceVariable::VT_STRING:
-		break;
 
-	default:
-		throw SourceException("invalid VT for branch", position, getName());
-	}
 }
 
 SourceVariable::VariableType const * SourceExpression_BinaryCompare::getType() const
 {
-	return SourceVariable::get_VariableType(SourceVariable::VT_INT);
+	return SourceVariable::get_VariableType(SourceVariable::VT_BOOLHARD);
 }
 
 void SourceExpression_BinaryCompare::printDebug(std::ostream * out) const

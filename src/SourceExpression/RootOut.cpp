@@ -87,16 +87,23 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::Var
 	case SourceVariable::VT_VOID:
 		break;
 
-	case SourceVariable::VT_CHAR:
-		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
-		break;
-
+	case SourceVariable::VT_BOOLHARD:
 	case SourceVariable::VT_FUNCTION:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_LINESPEC:
 	case SourceVariable::VT_NATIVE:
 	case SourceVariable::VT_SCRIPT:
 		objects->addToken(ObjectToken::OCODE_PRINTNUMBER);
+		break;
+
+	case SourceVariable::VT_BOOLSOFT:
+		objects->addToken(ObjectToken::OCODE_LOGICALNOT);
+		objects->addToken(ObjectToken::OCODE_LOGICALNOT);
+		objects->addToken(ObjectToken::OCODE_PRINTNUMBER);
+		break;
+
+	case SourceVariable::VT_CHAR:
+		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
 		break;
 
 	case SourceVariable::VT_POINTER:

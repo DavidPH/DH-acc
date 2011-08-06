@@ -50,6 +50,10 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 		case VT_VOID:
 			throw SourceException("makeObject on void VT", position, "SourceVariable");
 
+		case VT_BOOLHARD:
+		case VT_BOOLSOFT:
+			return ObjectExpression::create_value_int(_data.vdBool.value, position);
+
 		case VT_CHAR:
 			return ObjectExpression::create_value_int(_data.vdChar.value, position);
 

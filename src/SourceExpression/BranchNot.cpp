@@ -48,7 +48,7 @@ SourceExpression::Pointer SourceExpression::create_branch_not(SourceExpression *
 
 
 
-SourceExpression_BranchNot::SourceExpression_BranchNot(SourceExpression * expr, SourcePosition const & position) : Super(expr, NULL, position)
+SourceExpression_BranchNot::SourceExpression_BranchNot(SourceExpression * expr, SourcePosition const & position) : Super(expr, SourceVariable::get_VariableType(SourceVariable::VT_BOOLSOFT), position)
 {
 
 }
@@ -57,23 +57,7 @@ void SourceExpression_BranchNot::makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	switch (getType()->type)
-	{
-	case SourceVariable::VT_CHAR:
-	case SourceVariable::VT_FUNCTION:
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_LINESPEC:
-	case SourceVariable::VT_NATIVE:
-	case SourceVariable::VT_POINTER:
-	case SourceVariable::VT_SCRIPT:
-	case SourceVariable::VT_STRING:
-	case SourceVariable::VT_REAL:
-		objects->addToken(ObjectToken::OCODE_LOGICALNOT);
-		break;
-
-	default:
-		throw SourceException("invalid VT", position, getName());
-	}
+	objects->addToken(ObjectToken::OCODE_LOGICALNOT);
 }
 
 void SourceExpression_BranchNot::printDebug(std::ostream * out) const

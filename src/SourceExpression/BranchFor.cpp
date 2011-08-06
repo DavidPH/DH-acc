@@ -62,6 +62,18 @@ SourceExpression::Pointer SourceExpression::create_branch_for(SourceExpression *
 SourceExpression_BranchFor::SourceExpression_BranchFor(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position) : Super(position), _exprInit(exprInit), _exprCond(exprCond), _exprIter(exprIter), _exprLoop(exprLoop), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position))
 {
 	_labelCond = context->makeLabel() + "_cond";
+
+	if (_exprInit->getType()->type != SourceVariable::VT_VOID)
+		_exprInit = create_value_cast(_exprInit, SourceVariable::get_VariableType(SourceVariable::VT_VOID), position);
+
+	if (_exprCond->getType()->type != SourceVariable::VT_BOOLSOFT)
+		_exprCond = create_value_cast(_exprCond, SourceVariable::get_VariableType(SourceVariable::VT_BOOLSOFT), position);
+
+	if (_exprIter->getType()->type != SourceVariable::VT_VOID)
+		_exprIter = create_value_cast(_exprIter, SourceVariable::get_VariableType(SourceVariable::VT_VOID), position);
+
+	if (_exprLoop->getType()->type != SourceVariable::VT_VOID)
+		_exprLoop = create_value_cast(_exprLoop, SourceVariable::get_VariableType(SourceVariable::VT_VOID), position);
 }
 
 void SourceExpression_BranchFor::makeObjectsGet(ObjectVector * objects)

@@ -73,6 +73,9 @@ SourceExpression_BranchIf::SourceExpression_BranchIf(SourceExpression * exprCond
 	_labelElse = label + "_else";
 	_labelEnd  = label + "_end";
 
+	if (_exprCondition->getType()->type != SourceVariable::VT_BOOLSOFT)
+		_exprCondition = create_value_cast(_exprCondition, SourceVariable::get_VariableType(SourceVariable::VT_BOOLSOFT), position);
+
 	if (_exprElse)
 	{
 		if (_exprIf->getType() != _exprElse->getType() && (!_exprIf->getType()->isVoid() || !_exprIf->getType()->isVoid()))

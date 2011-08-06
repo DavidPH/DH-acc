@@ -63,6 +63,8 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 
 		case VT_ARRAY:
 		case VT_BLOCK:
+		case VT_BOOLHARD:
+		case VT_BOOLSOFT:
 		case VT_CHAR:
 		case VT_FUNCTION:
 		case VT_INT:
@@ -95,6 +97,8 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		case VT_VOID:
 			break;
 
+		case VT_BOOLHARD:
+		case VT_BOOLSOFT:
 		case VT_CHAR:
 		case VT_FUNCTION:
 		case VT_INT:
@@ -183,6 +187,8 @@ void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions,
 
 		case VT_ASMFUNC:
 		case VT_BLOCK:
+		case VT_BOOLHARD:
+		case VT_BOOLSOFT:
 		case VT_CHAR:
 		case VT_FUNCTION:
 		case VT_INT:
@@ -242,6 +248,8 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 		case VT_ARRAY:
 		case VT_ASMFUNC:
 		case VT_BLOCK:
+		case VT_BOOLHARD:
+		case VT_BOOLSOFT:
 		case VT_CHAR:
 		case VT_FUNCTION:
 		case VT_INT:
@@ -321,6 +329,8 @@ void SourceVariable::makeObjectsGetSkip(VariableType const * type, int * address
 	case VT_VOID:
 		break;
 
+	case VT_BOOLHARD:
+	case VT_BOOLSOFT:
 	case VT_CHAR:
 	case VT_FUNCTION:
 	case VT_INT:

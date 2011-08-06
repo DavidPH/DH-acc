@@ -55,6 +55,8 @@ public:
 
 	enum VariableTypeInternal
 	{
+		VT_BOOLHARD,
+		VT_BOOLSOFT,
 		VT_CHAR,
 		VT_INT,
 		VT_REAL,
@@ -102,6 +104,11 @@ public:
 		ObjectToken::ObjectCode ocode;
 		ObjectToken::ObjectCode ocode_imm;
 	};
+	struct VariableData_Bool
+	{
+		VariableType const * type;
+		bool value;
+	};
 	struct VariableData_Char
 	{
 		VariableType const * type;
@@ -146,6 +153,7 @@ public:
 	union VariableData
 	{
 		VariableData_AsmFunc  vdAsmFunc;
+		VariableData_Bool     vdBool;
 		VariableData_Char     vdChar;
 		VariableData_Function vdFunction;
 		VariableData_Int      vdInt;
@@ -161,6 +169,7 @@ public:
 	SourceVariable();
 	SourceVariable(std::string const & nameObject, std::string const & nameSource, StorageClass sc, VariableType const * type, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_AsmFunc  const & vdAsmFunc,  SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableData_Bool     const & vdBool,     SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Char     const & vdChar,     SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Function const & vdFunction, SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Int      const & vdInt,      SourcePosition const & position);
@@ -168,7 +177,7 @@ public:
 	SourceVariable(std::string const & name, VariableData_Native   const & vdNative,   SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Real     const & vdReal,     SourcePosition const & position);
 	SourceVariable(std::string const & name, VariableData_Script   const & vdScript,   SourcePosition const & position, std::string const & nameObject);
-	SourceVariable(std::string const & name, VariableData_String  const & vdString,  SourcePosition const & position, std::string const & nameObject);
+	SourceVariable(std::string const & name, VariableData_String   const & vdString,   SourcePosition const & position, std::string const & nameObject);
 	SourceVariable(std::string const & name, VariableType const * type, ObjectExpression * expr, SourcePosition const & position);
 
 	bool canMakeObject() const;

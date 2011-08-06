@@ -53,6 +53,10 @@ SourceVariable::SourceVariable(std::string const & name, VariableData_AsmFunc co
 {
 	_data.vdAsmFunc = vdAsmFunc;
 }
+SourceVariable::SourceVariable(std::string const & name, VariableData_Bool const & vdBool, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdBool.type)
+{
+	_data.vdBool = vdBool;
+}
 SourceVariable::SourceVariable(std::string const & name, VariableData_Char const & vdChar, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdChar.type)
 {
 	_data.vdChar = vdChar;
@@ -332,6 +336,14 @@ void SourceVariable::init()
 	_types[VT_VOID]->callType = type.callType = _types[VT_VOID];
 	_types[VT_VOID]->refType  = type.refType  = _types[VT_VOID];
 
+	type.type = VT_BOOLHARD;
+	_names[VT_BOOLHARD] = "bool";
+	_types[VT_BOOLHARD] = new VariableType(type);
+
+	type.type = VT_BOOLSOFT;
+	_names[VT_BOOLSOFT] = "softbool";
+	_types[VT_BOOLSOFT] = new VariableType(type);
+
 	type.type = VT_CHAR;
 	_names[VT_CHAR] = "char";
 	_types[VT_CHAR] = new VariableType(type);
@@ -347,7 +359,7 @@ void SourceVariable::init()
 	type.type = VT_STRING;
 	_names[VT_STRING] = "string";
 	_types[VT_STRING] = new VariableType(type);
-	_types[VT_STRING]->refType = type.refType = _types[VT_CHAR];
+	_types[VT_STRING]->refType = _types[VT_CHAR];
 }
 
 

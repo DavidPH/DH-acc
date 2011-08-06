@@ -73,6 +73,8 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		case VT_VOID:
 			break;
 
+		case VT_BOOLHARD:
+		case VT_BOOLSOFT:
 		case VT_CHAR:
 		case VT_FUNCTION:
 		case VT_INT:
@@ -162,6 +164,8 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions,
 
 		case VT_ASMFUNC:
 		case VT_BLOCK:
+		case VT_BOOLHARD:
+		case VT_BOOLSOFT:
 		case VT_CHAR:
 		case VT_FUNCTION:
 		case VT_INT:
@@ -223,6 +227,8 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 		case VT_ARRAY:
 		case VT_ASMFUNC:
 		case VT_BLOCK:
+		case VT_BOOLHARD:
+		case VT_BOOLSOFT:
 		case VT_CHAR:
 		case VT_FUNCTION:
 		case VT_INT:
@@ -342,6 +348,8 @@ void SourceVariable::makeObjectsSetSkip(VariableType const * type, int * address
 	case VT_VOID:
 		break;
 
+	case VT_BOOLHARD:
+	case VT_BOOLSOFT:
 	case VT_CHAR:
 	case VT_FUNCTION:
 	case VT_INT:
