@@ -36,12 +36,13 @@ public:
 
 	virtual SourceVariable::VariableType const * getType() const;
 
-	virtual void makeObjectsAddress(ObjectVector * objects) const;
+	virtual void makeObjectsAddress(ObjectVector * objects);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
-	virtual void makeObjectsSet(ObjectVector * objects) const;
+	virtual void makeObjectsSet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * const out) const;
 };
 
@@ -54,7 +55,7 @@ SourceExpression::Pointer SourceExpression::create_unary_dereference(SourceExpre
 
 
 
-SourceExpression_UnaryDereference::SourceExpression_UnaryDereference(SourceExpression * expr, SourcePosition const & position) : Super(expr, position)
+SourceExpression_UnaryDereference::SourceExpression_UnaryDereference(SourceExpression * expr, SourcePosition const & position) : Super(expr, NULL, position)
 {
 
 }
@@ -69,19 +70,19 @@ SourceVariable::VariableType const * SourceExpression_UnaryDereference::getType(
 	return expr->getType()->refType;
 }
 
-void SourceExpression_UnaryDereference::makeObjectsAddress(ObjectVector * objects) const
+void SourceExpression_UnaryDereference::makeObjectsAddress(ObjectVector * objects)
 {
-	Super::makeObjectsGet(objects);
+	Super::recurse_makeObjectsGet(objects);
 }
 
-void SourceExpression_UnaryDereference::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_UnaryDereference::makeObjectsGet(ObjectVector * objects)
 {
 	if (getType()->type == SourceVariable::VT_VOID)
-		SourceExpression::makeObjectsGet(objects);
+		Super::makeObjectsGet(objects);
 
 	if (expr->getType()->type == SourceVariable::VT_STRING)
 	{
-		Super::makeObjectsGet(objects);
+		Super::recurse_makeObjectsGet(objects);
 		objects->addTokenPushZero();
 		objects->addToken(ObjectToken::OCODE_CALLZDFUNC, objects->getValue(2), objects->getValue(15));
 	}
@@ -100,14 +101,14 @@ void SourceExpression_UnaryDereference::makeObjectsGet(ObjectVector * objects) c
 	}
 }
 
-void SourceExpression_UnaryDereference::makeObjectsSet(ObjectVector * objects) const
+void SourceExpression_UnaryDereference::makeObjectsSet(ObjectVector * objects)
 {
 	if (getType()->type == SourceVariable::VT_VOID)
-		SourceExpression::makeObjectsSet(objects);
+		Super::makeObjectsSet(objects);
 
 	if (expr->getType()->type == SourceVariable::VT_STRING)
 	{
-		SourceExpression::makeObjectsSet(objects);
+		Super::makeObjectsSet(objects);
 	}
 	else
 	{

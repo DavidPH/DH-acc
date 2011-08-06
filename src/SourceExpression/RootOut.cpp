@@ -32,8 +32,9 @@ class SourceExpression_RootOut : public SourceExpression
 public:
 	SourceExpression_RootOut(SourceExpression * expr, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
@@ -115,9 +116,9 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::Var
 	objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
 }
 
-void SourceExpression_RootOut::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_RootOut::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsGet(objects);
 
 	_expr->makeObjectsGet(objects);
 

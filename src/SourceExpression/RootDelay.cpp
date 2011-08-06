@@ -33,8 +33,9 @@ class SourceExpression_RootDelay : public SourceExpression
 public:
 	SourceExpression_RootDelay(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
@@ -57,9 +58,9 @@ SourceExpression_RootDelay::SourceExpression_RootDelay(SourceExpression * expr, 
 		_expr = create_value_cast(_expr, SourceVariable::get_VariableType(SourceVariable::VT_INT), position);
 }
 
-void SourceExpression_RootDelay::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_RootDelay::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsGet(objects);
 
 	_expr->makeObjectsGet(objects);
 

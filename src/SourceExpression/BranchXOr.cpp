@@ -33,8 +33,9 @@ class SourceExpression_BranchXOr : public SourceExpression_BinaryCompare
 public:
 	SourceExpression_BranchXOr(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
@@ -56,7 +57,7 @@ SourceExpression::Pointer SourceExpression::create_branch_xor(SourceExpression *
 
 
 
-SourceExpression_BranchXOr::SourceExpression_BranchXOr(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position) : Super(exprL, exprR, position)
+SourceExpression_BranchXOr::SourceExpression_BranchXOr(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position) : Super(exprL, exprR, true, position)
 {
 	std::string label(context->makeLabel());
 
@@ -66,22 +67,20 @@ SourceExpression_BranchXOr::SourceExpression_BranchXOr(SourceExpression * exprL,
 	_labelEnd = label + "_end";
 }
 
-void SourceExpression_BranchXOr::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BranchXOr::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsGet(objects);
 
 	exprL->makeObjectsGet(objects);
+	exprR->makeObjectsGet(objects);
+
 	objects->setPosition(position);
 	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_labelL0));
 
-	exprR->makeObjectsGet(objects);
-	objects->setPosition(position);
 	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_label1));
 	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_label0));
 
 	objects->addLabel(_labelL0);
-	exprR->makeObjectsGet(objects);
-	objects->setPosition(position);
 	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_label0));
 
 	objects->addLabel(_label1);

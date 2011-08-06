@@ -37,8 +37,9 @@ public:
 
 	virtual SourceVariable::VariableType const * getType() const;
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
@@ -75,9 +76,9 @@ SourceVariable::VariableType const * SourceExpression_BranchCall::getType() cons
 	return _expr->getType()->callType;
 }
 
-void SourceExpression_BranchCall::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BranchCall::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsGet(objects);
 
 	_expr->makeObjectsCall(objects, _args, objects->getValue(_stack));
 }

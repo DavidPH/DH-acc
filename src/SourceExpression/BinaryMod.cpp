@@ -33,8 +33,9 @@ class SourceExpression_BinaryMod : public SourceExpression_Binary
 public:
 	SourceExpression_BinaryMod(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 };
 
@@ -52,32 +53,21 @@ SourceExpression_BinaryMod::SourceExpression_BinaryMod(SourceExpression * exprL,
 
 }
 
-void SourceExpression_BinaryMod::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BinaryMod::makeObjectsGet(ObjectVector * objects)
 {
-	Super::makeObjectsGet(objects);
-
-	objects->setPosition(position);
+	Super::recurse_makeObjectsGet(objects);
 
 	switch (getType()->type)
 	{
-	case SourceVariable::VT_ARRAY:
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_BLOCK:
-	case SourceVariable::VT_FUNCTION:
-	case SourceVariable::VT_LINESPEC:
-	case SourceVariable::VT_NATIVE:
-	case SourceVariable::VT_SCRIPT:
-	case SourceVariable::VT_STRING:
-	case SourceVariable::VT_STRUCT:
-	case SourceVariable::VT_VOID:
-		throw SourceException("invalid VT", position, getName());
-
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_POINTER:
 	case SourceVariable::VT_REAL:
 		objects->addToken(ObjectToken::OCODE_MOD);
 		break;
+
+	default:
+		throw SourceException("invalid VT", position, getName());
 	}
 }
 

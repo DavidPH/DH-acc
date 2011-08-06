@@ -34,8 +34,9 @@ class SourceExpression_UnaryDecInc : public SourceExpression_Unary
 public:
 	SourceExpression_UnaryDecInc(SourceExpression * expr, bool inc, bool suf, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
@@ -64,50 +65,66 @@ SourceExpression::Pointer SourceExpression::create_unary_inc_suf(SourceExpressio
 
 
 
-SourceExpression_UnaryDecInc::SourceExpression_UnaryDecInc(SourceExpression * expr, bool inc, bool suf, SourcePosition const & position) : Super(expr, position), _inc(inc), _suf(suf)
+SourceExpression_UnaryDecInc::SourceExpression_UnaryDecInc(SourceExpression * expr, bool inc, bool suf, SourcePosition const & position) : Super(expr, NULL, position), _inc(inc), _suf(suf)
 {
 
 }
 
-void SourceExpression_UnaryDecInc::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_UnaryDecInc::makeObjectsGet(ObjectVector * objects)
 {
-	Super::makeObjectsGet(objects);
+	Super::recurse_makeObjectsGet(objects);
 
-	objects->setPosition(position);
-
-	ObjectToken::ObjectCode ocode(_inc ? ObjectToken::OCODE_ADD : ObjectToken::OCODE_SUB);
-
-	switch (getType()->type)
+	// Only modify for the first evaluation.
+	if (evaluations == 1)
 	{
-	case SourceVariable::VT_ARRAY:
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_BLOCK:
-	case SourceVariable::VT_FUNCTION:
-	case SourceVariable::VT_LINESPEC:
-	case SourceVariable::VT_NATIVE:
-	case SourceVariable::VT_SCRIPT:
-	case SourceVariable::VT_STRING:
-	case SourceVariable::VT_STRUCT:
-	case SourceVariable::VT_VOID:
-		throw SourceException("invalid VT", position, getName());
+		ObjectToken::ObjectCode ocode(_inc ? ObjectToken::OCODE_ADD : ObjectToken::OCODE_SUB);
 
-	case SourceVariable::VT_CHAR:
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_REAL:
-		if (_suf) objects->addToken(ObjectToken::OCODE_DUP);
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
-		objects->addToken(ocode);
-		expr->makeObjectsSet(objects);
-		if (_suf) objects->addToken(ObjectToken::OCODE_DROP);
-		break;
+		switch (getType()->type)
+		{
+		case SourceVariable::VT_CHAR:
+		case SourceVariable::VT_INT:
+		case SourceVariable::VT_REAL:
+			if (_suf) objects->addToken(ObjectToken::OCODE_DUP);
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
+			objects->addToken(ocode);
+			expr->makeObjectsSet(objects);
+			if (_suf) objects->addToken(ObjectToken::OCODE_DROP);
+			break;
 
-	case SourceVariable::VT_POINTER:
-		if (_suf) objects->addToken(ObjectToken::OCODE_DUP);
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size()));
-		objects->addToken(ocode);
-		expr->makeObjectsSet(objects);
-		if (_suf) objects->addToken(ObjectToken::OCODE_DROP);
-		break;
+		case SourceVariable::VT_POINTER:
+			if (_suf) objects->addToken(ObjectToken::OCODE_DUP);
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size()));
+			objects->addToken(ocode);
+			expr->makeObjectsSet(objects);
+			if (_suf) objects->addToken(ObjectToken::OCODE_DROP);
+			break;
+
+		default:
+			throw SourceException("invalid VT", position, getName());
+		}
+	}
+	// Have undo the inc/dec when re-evaluating.
+	else if (_suf)
+	{
+		ObjectToken::ObjectCode ocode(_inc ? ObjectToken::OCODE_SUB : ObjectToken::OCODE_ADD);
+
+		switch (getType()->type)
+		{
+		case SourceVariable::VT_CHAR:
+		case SourceVariable::VT_INT:
+		case SourceVariable::VT_REAL:
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
+			objects->addToken(ocode);
+			break;
+
+		case SourceVariable::VT_POINTER:
+			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size()));
+			objects->addToken(ocode);
+			break;
+
+		default:
+			throw SourceException("invalid VT", position, getName());
+		}
 	}
 }
 

@@ -43,18 +43,19 @@ public:
 	virtual ObjectExpression::Pointer makeObject() const;
 	virtual ObjectExpression::Pointer makeObjectAddress() const;
 
-	virtual void makeObjectsAddress(ObjectVector * objects) const;
+	virtual void makeObjectsAddress(ObjectVector * objects);
 
-	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const;
+	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
-	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
-	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
+	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
 
-	virtual void makeObjectsSet(ObjectVector * objects) const;
-	virtual void makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
-	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsSet(ObjectVector * objects);
+	virtual void makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
@@ -156,39 +157,55 @@ ObjectExpression::Pointer SourceExpression_ValueVariable::makeObjectAddress() co
 	return _var.makeObjectAddress(position);
 }
 
-void SourceExpression_ValueVariable::makeObjectsAddress(ObjectVector * objects) const
+void SourceExpression_ValueVariable::makeObjectsAddress(ObjectVector * objects)
 {
+	Super::recurse_makeObjectsAddress(objects);
+
 	_var.makeObjectsAddress(objects, position);
 }
 
-void SourceExpression_ValueVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const
+void SourceExpression_ValueVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack)
 {
+	Super::recurse_makeObjectsCall(objects, args, stack);
+
 	_var.makeObjectsCall(objects, args, stack, position);
 }
 
-void SourceExpression_ValueVariable::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_ValueVariable::makeObjectsGet(ObjectVector * objects)
 {
+	Super::recurse_makeObjectsGet(objects);
+
 	_var.makeObjectsGet(objects, position);
 }
-void SourceExpression_ValueVariable::makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const
+void SourceExpression_ValueVariable::makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
+	Super::recurse_makeObjectsGetArray(objects, dimensions);
+
 	_var.makeObjectsGetArray(objects, dimensions, position);
 }
-void SourceExpression_ValueVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpression_ValueVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
+	Super::recurse_makeObjectsGetMember(objects, names);
+
 	_var.makeObjectsGetMember(objects, names, position);
 }
 
-void SourceExpression_ValueVariable::makeObjectsSet(ObjectVector * objects) const
+void SourceExpression_ValueVariable::makeObjectsSet(ObjectVector * objects)
 {
+	Super::recurse_makeObjectsSet(objects);
+
 	_var.makeObjectsSet(objects, position);
 }
-void SourceExpression_ValueVariable::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const
+void SourceExpression_ValueVariable::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
+	Super::recurse_makeObjectsSetArray(objects, dimensions);
+
 	_var.makeObjectsSetArray(objects, dimensions, position);
 }
-void SourceExpression_ValueVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpression_ValueVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
+	Super::recurse_makeObjectsSetMember(objects, names);
+
 	_var.makeObjectsSetMember(objects, names, position);
 }
 

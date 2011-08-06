@@ -26,7 +26,24 @@
 
 
 
-SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool arithmetic, SourcePosition const & position) : Super(position), _arithmetic(arithmetic), exprL(exprL), exprR(exprR)
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(2)
+{
+	doCast();
+}
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool arithmetic, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(arithmetic)
+{
+	doCast();
+}
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourceVariable::VariableType const * castL, SourceVariable::VariableType const * castR, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(2)
+{
+	doCast(castL, castR);
+}
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourceVariable::VariableType const * castL, SourceVariable::VariableType const * castR, bool arithmetic, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(arithmetic)
+{
+	doCast(castL, castR);
+}
+
+void SourceExpression_Binary::doCast()
 {
 	SourceVariable::VariableType const * type(getType());
 
@@ -39,19 +56,13 @@ SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, Sourc
 	if (exprR->getType() != type)
 		this->exprR = create_value_cast(exprR, type, position);
 }
-SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool castL, bool arithmetic, SourcePosition const & position) : Super(position), _arithmetic(arithmetic), exprL(exprL), exprR(exprR)
+void SourceExpression_Binary::doCast(SourceVariable::VariableType const * castL, SourceVariable::VariableType const * castR)
 {
-	if (exprL->getType() != exprR->getType())
-	{
-		if (castL)
-		{
-			this->exprL = create_value_cast(exprL, exprR->getType(), position);
-		}
-		else
-		{
-			this->exprR = create_value_cast(exprR, exprL->getType(), position);
-		}
-	}
+	if (castL && exprL->getType() != castL)
+		this->exprL = create_value_cast(exprL, castL, position);
+
+	if (castR && exprR->getType() != castR)
+		this->exprR = create_value_cast(exprR, castR, position);
 }
 
 SourceVariable::VariableType const * SourceExpression_Binary::getType() const
@@ -59,12 +70,31 @@ SourceVariable::VariableType const * SourceExpression_Binary::getType() const
 	return get_promoted_type(exprL->getType(), exprR->getType(), position);
 }
 
-void SourceExpression_Binary::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_Binary::printDebug(std::ostream * out) const
 {
-	objects->addLabel(labels);
+	*out << "SourceExpression_Binary(";
+	Super::printDebug(out);
+	*out << " ";
+		*out << "exprL=(";
+		print_debug(out, exprL);
+		*out << ")";
+
+		*out << ", ";
+
+		*out << "exprR=(";
+		print_debug(out, exprR);
+		*out << ")";
+	*out << ")";
+}
+
+void SourceExpression_Binary::recurse_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	// Special case, child handles expressions.
+	if (_arithmetic == 2) return;
 
 	SourceVariable::VariableType const * type(getType());
-
 	// Pointer arithmetic.
 	if (type->type == SourceVariable::VT_POINTER && _arithmetic)
 	{
@@ -95,23 +125,8 @@ void SourceExpression_Binary::makeObjectsGet(ObjectVector * objects) const
 		exprL->makeObjectsGet(objects);
 		exprR->makeObjectsGet(objects);
 	}
-}
 
-void SourceExpression_Binary::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_Binary(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "exprL=(";
-		print_debug(out, exprL);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "exprR=(";
-		print_debug(out, exprR);
-		*out << ")";
-	*out << ")";
+	objects->setPosition(position);
 }
 
 

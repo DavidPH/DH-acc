@@ -23,6 +23,7 @@
 
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
+#include "../SourceContext.hpp"
 
 
 
@@ -31,10 +32,11 @@ class SourceExpression_BranchGoto : public SourceExpression
 	MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchGoto, SourceExpression);
 
 public:
-	SourceExpression_BranchGoto(std::string const & label, SourceContext * context, SourcePosition const & position);
+	SourceExpression_BranchGoto(std::string const & label, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
@@ -43,23 +45,29 @@ private:
 
 
 
+SourceExpression::Pointer SourceExpression::create_branch_break(SourceContext * context, SourcePosition const & position)
+{
+	return new SourceExpression_BranchGoto(context->getLabelBreak(position), position);
+}
+SourceExpression::Pointer SourceExpression::create_branch_continue(SourceContext * context, SourcePosition const & position)
+{
+	return new SourceExpression_BranchGoto(context->getLabelContinue(position), position);
+}
 SourceExpression::Pointer SourceExpression::create_branch_goto(std::string const & label, SourceContext * context, SourcePosition const & position)
 {
-	return new SourceExpression_BranchGoto(label, context, position);
+	return new SourceExpression_BranchGoto(label, position);
 }
 
 
 
-SourceExpression_BranchGoto::SourceExpression_BranchGoto(std::string const & label, SourceContext * context, SourcePosition const & position) : Super(position), _label(label)
+SourceExpression_BranchGoto::SourceExpression_BranchGoto(std::string const & label, SourcePosition const & position) : Super(position), _label(label)
 {
 
 }
 
-void SourceExpression_BranchGoto::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BranchGoto::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
-
-	objects->setPosition(position);
+	Super::recurse_makeObjectsGet(objects);
 
 	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_label));
 }

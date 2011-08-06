@@ -36,10 +36,11 @@ public:
 
 	virtual SourceVariable::VariableType const * getType() const;
 
-	virtual void makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type) const;
+	virtual void makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
@@ -71,9 +72,9 @@ SourceVariable::VariableType const * SourceExpression_ValueBlock::getType() cons
 	return _type;
 }
 
-void SourceExpression_ValueBlock::makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type) const
+void SourceExpression_ValueBlock::makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsCast(objects, type);
 
 	if (type->type == SourceVariable::VT_VOID)
 	{
@@ -90,9 +91,9 @@ void SourceExpression_ValueBlock::makeObjectsCast(ObjectVector * objects, Source
 	}
 }
 
-void SourceExpression_ValueBlock::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_ValueBlock::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsGet(objects);
 
 	for (size_t i(0); i < _expressions.size(); ++i)
 		_expressions[i]->makeObjectsGet(objects);

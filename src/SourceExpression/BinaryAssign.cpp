@@ -32,8 +32,9 @@ class SourceExpression_BinaryAssign : public SourceExpression_Binary
 public:
 	SourceExpression_BinaryAssign(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 };
 
@@ -46,16 +47,24 @@ SourceExpression::Pointer SourceExpression::create_binary_assign(SourceExpressio
 
 
 
-SourceExpression_BinaryAssign::SourceExpression_BinaryAssign(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, false, false, position)
+SourceExpression_BinaryAssign::SourceExpression_BinaryAssign(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, NULL, exprL->getType(), position)
 {
 
 }
 
-void SourceExpression_BinaryAssign::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BinaryAssign::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
-	exprR->makeObjectsGet(objects);
-	exprL->makeObjectsSet(objects);
+	Super::recurse_makeObjectsGet(objects);
+
+	if (evaluations == 1)
+	{
+		exprR->makeObjectsGet(objects);
+		exprL->makeObjectsSet(objects);
+	}
+	else
+	{
+		exprL->makeObjectsGet(objects);
+	}
 }
 
 void SourceExpression_BinaryAssign::printDebug(std::ostream * out) const

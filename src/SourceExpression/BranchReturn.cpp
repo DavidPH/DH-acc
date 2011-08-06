@@ -23,6 +23,7 @@
 
 #include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
+#include "../SourceException.hpp"
 
 
 
@@ -33,8 +34,9 @@ class SourceExpression_BranchReturn : public SourceExpression
 public:
 	SourceExpression_BranchReturn(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
@@ -57,9 +59,9 @@ SourceExpression_BranchReturn::SourceExpression_BranchReturn(SourceExpression * 
 		_expr = SourceExpression::create_value_cast(_expr, context->getReturnType(), position);
 }
 
-void SourceExpression_BranchReturn::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BranchReturn::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsGet(objects);
 
 	_expr->makeObjectsGet(objects);
 
@@ -71,8 +73,6 @@ void SourceExpression_BranchReturn::makeObjectsGet(ObjectVector * objects) const
 	switch (_type)
 	{
 	case SourceContext::CT_BLOCK:
-	case SourceContext::CT_LOOP:
-	case SourceContext::CT_SWITCH:
 		objects->addToken(ObjectToken::OCODE_TERMINATE);
 		break;
 
@@ -91,6 +91,9 @@ void SourceExpression_BranchReturn::makeObjectsGet(ObjectVector * objects) const
 		objects->addToken(ObjectToken::OCODE_TERMINATE);
 
 		break;
+
+	default:
+		throw SourceException("invalid CT", position, getName());
 	}
 }
 

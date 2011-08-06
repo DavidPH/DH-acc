@@ -33,8 +33,9 @@ class SourceExpression_BinaryLE : public SourceExpression_BinaryCompare
 public:
 	SourceExpression_BinaryLE(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 };
 
@@ -52,21 +53,12 @@ SourceExpression_BinaryLE::SourceExpression_BinaryLE(SourceExpression * exprL, S
 
 }
 
-void SourceExpression_BinaryLE::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BinaryLE::makeObjectsGet(ObjectVector * objects)
 {
-	Super::makeObjectsGet(objects);
+	Super::recurse_makeObjectsGet(objects);
 
-	objects->setPosition(position);
-
-	switch (getType()->type)
+	switch (exprL->getType()->type)
 	{
-	case SourceVariable::VT_ARRAY:
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_BLOCK:
-	case SourceVariable::VT_STRUCT:
-	case SourceVariable::VT_VOID:
-		throw SourceException("invalid VT", position, getName());
-
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_FUNCTION:
 	case SourceVariable::VT_INT:
@@ -78,6 +70,9 @@ void SourceExpression_BinaryLE::makeObjectsGet(ObjectVector * objects) const
 	case SourceVariable::VT_STRING:
 		objects->addToken(ObjectToken::OCODE_CMPLE);
 		break;
+
+	default:
+		throw SourceException("invalid VT", position, getName());
 	}
 }
 

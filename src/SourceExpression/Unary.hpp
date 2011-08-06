@@ -31,16 +31,20 @@ class SourceExpression_Unary : public SourceExpression
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression_Unary, SourceExpression);
 
 public:
-	SourceExpression_Unary(SourceExpression * expr, SourcePosition const & position);
-
 	virtual SourceVariable::VariableType const * getType() const;
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+protected:
+	SourceExpression_Unary(SourceExpression * expr, SourcePosition const & position);
+	SourceExpression_Unary(SourceExpression * expr, SourceVariable::VariableType const * cast, SourcePosition const & position);
 
 	virtual void printDebug(std::ostream * out) const;
 
-protected:
+	virtual void recurse_makeObjectsGet(ObjectVector * objects);
+
 	SourceExpression::Pointer expr;
+
+private:
+	bool _make;
 };
 
 

@@ -33,8 +33,9 @@ class SourceExpression_BranchIOr : public SourceExpression_BinaryCompare
 public:
 	SourceExpression_BranchIOr(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
@@ -54,7 +55,7 @@ SourceExpression::Pointer SourceExpression::create_branch_ior(SourceExpression *
 
 
 
-SourceExpression_BranchIOr::SourceExpression_BranchIOr(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position) : Super(exprL, exprR, position)
+SourceExpression_BranchIOr::SourceExpression_BranchIOr(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position) : Super(exprL, exprR, true, position)
 {
 	std::string label(context->makeLabel());
 
@@ -62,9 +63,9 @@ SourceExpression_BranchIOr::SourceExpression_BranchIOr(SourceExpression * exprL,
 	_labelEnd = label + "_end";
 }
 
-void SourceExpression_BranchIOr::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BranchIOr::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsGet(objects);
 
 	exprL->makeObjectsGet(objects);
 	objects->setPosition(position);

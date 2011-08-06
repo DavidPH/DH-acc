@@ -31,9 +31,11 @@ class SourceExpression_BinaryCompare : public SourceExpression_Binary
 	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryCompare, SourceExpression_Binary);
 
 public:
-	SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
-
 	virtual SourceVariable::VariableType const * getType() const;
+
+protected:
+	SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+	SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, bool branchChecked, SourcePosition const & position);
 
 	virtual void printDebug(std::ostream * out) const;
 };

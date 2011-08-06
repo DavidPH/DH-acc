@@ -27,14 +27,14 @@
 
 
 
-SourceExpression::SourceExpression(SourcePosition const & position) : position(position)
+SourceExpression::SourceExpression(SourcePosition const & position) : evaluations(0), position(position)
 {
 
 }
 
 void SourceExpression::addLabel(std::string const & label)
 {
-	labels.push_back(label);
+	_labels.push_back(label);
 }
 
 bool SourceExpression::canMakeObject() const
@@ -74,11 +74,6 @@ SourceVariable::VariableType const * SourceExpression::get_promoted_type(SourceV
 	if (type2->type == SourceVariable::VT_STRING) return type2;
 
 	return SourceVariable::get_VariableType(SourceVariable::VT_VOID);
-}
-
-SourcePosition const & SourceExpression::getPosition() const
-{
-	return position;
 }
 
 SourceVariable::VariableType const * SourceExpression::getType() const
@@ -386,77 +381,64 @@ ObjectExpression::Pointer SourceExpression::makeObjectAddress() const
 	throw SourceException("makeObjectAddress on invalid expression", position, getName());
 }
 
-void SourceExpression::makeObjectsAddress(ObjectVector * objects) const
+void SourceExpression::makeObjects(ObjectVector * objects)
+{
+	makeObjectsCast(objects, SourceVariable::get_VariableType(SourceVariable::VT_VOID));
+}
+
+void SourceExpression::makeObjectsAddress(ObjectVector * objects)
 {
 	throw SourceException("makeObjectsAddress on invalid expression", position, getName());
 }
 
-void SourceExpression::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const
+void SourceExpression::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack)
 {
 	throw SourceException("makeObjectsCall on invalid expression", position, getName());
 }
 
-void SourceExpression::makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type) const
+void SourceExpression::makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type)
 {
 	makeObjectsGet(objects);
 	make_objects_cast(objects, getType(), type, position);
 }
 
-void SourceExpression::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression::makeObjectsGet(ObjectVector * objects)
 {
 	throw SourceException("makeObjectsGet on invalid expression", position, getName());
 }
-void SourceExpression::makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const
+void SourceExpression::makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
-	if (dimensions->empty())
-	{
-		makeObjectsGet(objects);
-		return;
-	}
-
 	throw SourceException("makeObjectsGetArray on invalid expression", position, getName());
 }
-void SourceExpression::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpression::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
-	if (names->empty())
-	{
-		makeObjectsGet(objects);
-		return;
-	}
-
 	throw SourceException("makeObjectsGetMember on invalid expression", position, getName());
 }
 
-void SourceExpression::makeObjectsSet(ObjectVector * objects) const
+void SourceExpression::makeObjectsSet(ObjectVector * objects)
 {
 	throw SourceException("makeObjectsSet on invalid expression", position, getName());
 }
-void SourceExpression::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const
+void SourceExpression::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
-	if (dimensions->empty())
-	{
-		makeObjectsSet(objects);
-		return;
-	}
-
 	throw SourceException("makeObjectsSetArray on invalid expression", position, getName());
 }
-void SourceExpression::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpression::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
-	if (names->empty())
-	{
-		makeObjectsSet(objects);
-		return;
-	}
-
 	throw SourceException("makeObjectsSetMember on invalid expression", position, getName());
 }
 
 void SourceExpression::printDebug(std::ostream * out) const
 {
 	*out << "SourceExpressionDS(";
+		*out << "evaluations=(";
+		print_debug(out, evaluations);
+		*out << ")";
+
+		*out << ", ";
+
 		*out << "labels=(";
-		print_debug(out, labels);
+		print_debug(out, _labels);
 		*out << ")";
 
 		*out << ", ";
@@ -465,6 +447,50 @@ void SourceExpression::printDebug(std::ostream * out) const
 		print_debug(out, position);
 		*out << ")";
 	*out << ")";
+}
+
+void SourceExpression::recurse_makeObjectsAddress(ObjectVector * objects)
+{
+	recurse_makeObjectsGet(objects);
+}
+
+void SourceExpression::recurse_makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack)
+{
+	recurse_makeObjectsGet(objects);
+}
+
+void SourceExpression::recurse_makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type)
+{
+	recurse_makeObjectsGet(objects);
+}
+
+void SourceExpression::recurse_makeObjectsGet(ObjectVector * objects)
+{
+	if (!evaluations++)
+		objects->addLabel(_labels);
+
+	objects->setPosition(position);
+}
+void SourceExpression::recurse_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
+{
+	recurse_makeObjectsGet(objects);
+}
+void SourceExpression::recurse_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
+{
+	recurse_makeObjectsGet(objects);
+}
+
+void SourceExpression::recurse_makeObjectsSet(ObjectVector * objects)
+{
+	recurse_makeObjectsGet(objects);
+}
+void SourceExpression::recurse_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
+{
+	recurse_makeObjectsGet(objects);
+}
+void SourceExpression::recurse_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
+{
+	recurse_makeObjectsGet(objects);
 }
 
 

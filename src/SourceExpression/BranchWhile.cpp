@@ -33,8 +33,9 @@ class SourceExpression_BranchWhile : public SourceExpression
 public:
 	SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
@@ -59,13 +60,13 @@ SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * ex
 
 }
 
-void SourceExpression_BranchWhile::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BranchWhile::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsGet(objects);
 
 	objects->addLabel(_labelContinue);
 	_exprCondition->makeObjectsGet(objects);
-	objects->setPosition(getPosition());
+	objects->setPosition(position);
 	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_labelBreak));
 
 	_exprWhile->makeObjectsGet(objects);

@@ -33,8 +33,9 @@ class SourceExpression_BranchNot : public SourceExpression_Unary
 public:
 	SourceExpression_BranchNot(SourceExpression * expr, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * const out) const;
 };
 
@@ -47,26 +48,17 @@ SourceExpression::Pointer SourceExpression::create_branch_not(SourceExpression *
 
 
 
-SourceExpression_BranchNot::SourceExpression_BranchNot(SourceExpression * expr, SourcePosition const & position) : Super(expr, position)
+SourceExpression_BranchNot::SourceExpression_BranchNot(SourceExpression * expr, SourcePosition const & position) : Super(expr, NULL, position)
 {
 
 }
 
-void SourceExpression_BranchNot::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BranchNot::makeObjectsGet(ObjectVector * objects)
 {
-	Super::makeObjectsGet(objects);
-
-	objects->setPosition(position);
+	Super::recurse_makeObjectsGet(objects);
 
 	switch (getType()->type)
 	{
-	case SourceVariable::VT_ARRAY:
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_BLOCK:
-	case SourceVariable::VT_STRUCT:
-	case SourceVariable::VT_VOID:
-		throw SourceException("invalid VT", position, getName());
-
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_FUNCTION:
 	case SourceVariable::VT_INT:
@@ -78,6 +70,9 @@ void SourceExpression_BranchNot::makeObjectsGet(ObjectVector * objects) const
 	case SourceVariable::VT_REAL:
 		objects->addToken(ObjectToken::OCODE_LOGICALNOT);
 		break;
+
+	default:
+		throw SourceException("invalid VT", position, getName());
 	}
 }
 

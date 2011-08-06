@@ -42,8 +42,6 @@ class SourceExpression : public Counter
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression, Counter);
 
 public:
-	SourceExpression(SourcePosition const & position);
-
 	void addLabel(std::string const & label);
 
 	virtual bool canMakeObject() const;
@@ -51,30 +49,30 @@ public:
 
 	virtual bool canMakeObjectsAddress() const;
 
-	SourcePosition const & getPosition() const;
-
 	virtual SourceVariable::VariableType const * getType() const;
 
 	virtual CounterPointer<ObjectExpression> makeObject() const;
 	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
 
-	virtual void makeObjectsAddress(ObjectVector * objects) const;
+	void makeObjects(ObjectVector * objects);
 
-	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack) const;
+	virtual void makeObjectsAddress(ObjectVector * objects);
 
-	virtual void makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type) const;
+	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
-	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
-	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type);
 
-	virtual void makeObjectsSet(ObjectVector * objects) const;
-	virtual void makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions) const;
-	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
+	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
 
-	virtual void printDebug(std::ostream * out) const;
+	virtual void makeObjectsSet(ObjectVector * objects);
+	virtual void makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names);
 
 
+
+	friend class SourceVariable;
 
 	friend void print_debug(std::ostream * out, SourceExpression const & in);
 
@@ -150,8 +148,31 @@ public:
 	static void make_objects_cast(ObjectVector * objects, SourceVariable::VariableType const * typeFrom, SourceVariable::VariableType const * typeTo, SourcePosition const & position);
 
 protected:
-	std::vector<std::string> labels;
+	SourceExpression(SourcePosition const & position);
+
+	virtual void printDebug(std::ostream * out) const;
+
+	void recurse_makeObjectsAddress(ObjectVector * objects);
+
+	void recurse_makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack);
+
+	void recurse_makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type);
+
+	void recurse_makeObjectsGet(ObjectVector * objects);
+	void recurse_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	void recurse_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
+
+	void recurse_makeObjectsSet(ObjectVector * objects);
+	void recurse_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	void recurse_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names);
+
+	int evaluations;
 	SourcePosition position;
+
+private:
+	SourceExpression();
+
+	std::vector<std::string> _labels;
 };
 
 

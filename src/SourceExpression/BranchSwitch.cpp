@@ -34,8 +34,9 @@ class SourceExpression_BranchSwitch : public SourceExpression
 public:
 	SourceExpression_BranchSwitch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
@@ -72,9 +73,9 @@ SourceExpression_BranchSwitch::SourceExpression_BranchSwitch(SourceExpression * 
 		_caseLabels[i] = context->getLabelCase(_cases[i], position);
 }
 
-void SourceExpression_BranchSwitch::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BranchSwitch::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsGet(objects);
 
 	_expr->makeObjectsGet(objects);
 

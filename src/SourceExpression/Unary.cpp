@@ -25,21 +25,19 @@
 
 
 
-SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr, SourcePosition const & position) : Super(position), expr(expr)
+SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr, SourcePosition const & position) : Super(position), expr(expr), _make(false)
 {
 
+}
+SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr, SourceVariable::VariableType const * cast, SourcePosition const & position) : Super(position), expr(expr), _make(true)
+{
+	if (cast && expr->getType() != cast)
+		this->expr = create_value_cast(expr, cast, position);
 }
 
 SourceVariable::VariableType const * SourceExpression_Unary::getType() const
 {
 	return expr->getType();
-}
-
-void SourceExpression_Unary::makeObjectsGet(ObjectVector * objects) const
-{
-	objects->addLabel(labels);
-
-	expr->makeObjectsGet(objects);
 }
 
 void SourceExpression_Unary::printDebug(std::ostream * out) const
@@ -51,6 +49,18 @@ void SourceExpression_Unary::printDebug(std::ostream * out) const
 		print_debug(out, expr);
 		*out << ")";
 	*out << ")";
+}
+
+void SourceExpression_Unary::recurse_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	if (_make)
+	{
+		expr->makeObjectsGet(objects);
+
+		objects->setPosition(position);
+	}
 }
 
 

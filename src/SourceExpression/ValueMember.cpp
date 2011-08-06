@@ -38,14 +38,15 @@ public:
 
 	virtual SourceVariable::VariableType const * getType() const;
 
-	virtual void makeObjectsAddress(ObjectVector * objects) const;
+	virtual void makeObjectsAddress(ObjectVector * objects);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
-	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
+	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
 
-	virtual void makeObjectsSet(ObjectVector * objects) const;
-	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const;
+	virtual void makeObjectsSet(ObjectVector * objects);
+	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names);
 
+protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
@@ -77,16 +78,17 @@ SourceVariable::VariableType const * SourceExpression_ValueMember::getType() con
 	return _expr->getType()->getType(_name, position);
 }
 
-void SourceExpression_ValueMember::makeObjectsAddress(ObjectVector * objects) const
+void SourceExpression_ValueMember::makeObjectsAddress(ObjectVector * objects)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsAddress(objects);
 
 	_expr->makeObjectsAddress(objects);
+	objects->setPosition(position);
 	objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(_expr->getType()->getOffset(_name, position)));
 	objects->addToken(ObjectToken::OCODE_ADD);
 }
 
-void SourceExpression_ValueMember::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_ValueMember::makeObjectsGet(ObjectVector * objects)
 {
 	if (canMakeObjectsAddress())
 	{
@@ -103,21 +105,21 @@ void SourceExpression_ValueMember::makeObjectsGet(ObjectVector * objects) const
 	}
 	else
 	{
-		objects->addLabel(labels);
+		Super::recurse_makeObjectsGet(objects);
 
 		std::vector<std::string> names(1, _name);
 		_expr->makeObjectsGetMember(objects, &names);
 	}
 }
-void SourceExpression_ValueMember::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpression_ValueMember::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsGetMember(objects, names);
 
 	names->push_back(_name);
 	_expr->makeObjectsGetMember(objects, names);
 }
 
-void SourceExpression_ValueMember::makeObjectsSet(ObjectVector * objects) const
+void SourceExpression_ValueMember::makeObjectsSet(ObjectVector * objects)
 {
 	if (canMakeObjectsAddress())
 	{
@@ -135,15 +137,15 @@ void SourceExpression_ValueMember::makeObjectsSet(ObjectVector * objects) const
 	}
 	else
 	{
-		objects->addLabel(labels);
+		Super::recurse_makeObjectsSet(objects);
 
 		std::vector<std::string> names(1, _name);
 		_expr->makeObjectsSetMember(objects, &names);
 	}
 }
-void SourceExpression_ValueMember::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names) const
+void SourceExpression_ValueMember::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsSetMember(objects, names);
 
 	names->push_back(_name);
 	_expr->makeObjectsSetMember(objects, names);

@@ -147,7 +147,7 @@ static inline int _main()
 
 		ObjectExpression::add_script("main_id", "main", ObjectExpression::ST_OPEN, 0, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER), 0);
 
-		expressions->makeObjectsCast(&objects, SourceVariable::get_VariableType(SourceVariable::VT_VOID));
+		expressions->makeObjects(&objects);
 	}
 		break;
 

@@ -33,8 +33,9 @@ class SourceExpression_BranchFor : public SourceExpression
 public:
 	SourceExpression_BranchFor(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects) const;
+	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
@@ -44,7 +45,6 @@ private:
 	SourceExpression::Pointer _exprLoop;
 
 	std::string _labelCond;
-	std::string _labelIter;
 
 	std::string _labelBreak;
 	std::string _labelContinue;
@@ -61,15 +61,12 @@ SourceExpression::Pointer SourceExpression::create_branch_for(SourceExpression *
 
 SourceExpression_BranchFor::SourceExpression_BranchFor(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position) : Super(position), _exprInit(exprInit), _exprCond(exprCond), _exprIter(exprIter), _exprLoop(exprLoop), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position))
 {
-	std::string label(context->makeLabel());
-
-	_labelCond = label + "_cond";
-	_labelIter = label + "_iter";
+	_labelCond = context->makeLabel() + "_cond";
 }
 
-void SourceExpression_BranchFor::makeObjectsGet(ObjectVector * objects) const
+void SourceExpression_BranchFor::makeObjectsGet(ObjectVector * objects)
 {
-	objects->addLabel(labels);
+	Super::recurse_makeObjectsGet(objects);
 
 	_exprInit->makeObjectsGet(objects);
 
@@ -81,7 +78,6 @@ void SourceExpression_BranchFor::makeObjectsGet(ObjectVector * objects) const
 	_exprLoop->makeObjectsGet(objects);
 
 	objects->addLabel(_labelContinue);
-	objects->addLabel(_labelIter);
 	_exprIter->makeObjectsGet(objects);
 	objects->setPosition(position);
 	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_labelCond));
