@@ -312,6 +312,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 	case SourceVariable::VT_ASMFUNC:
 	case SourceVariable::VT_BLOCK:
 	case SourceVariable::VT_STRUCT:
+	case SourceVariable::VT_UNION:
 	case SourceVariable::VT_VOID:
 		throw SourceException("invalid VT from", position, "SourceExpression");
 
@@ -330,6 +331,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		case SourceVariable::VT_ASMFUNC:
 		case SourceVariable::VT_BLOCK:
 		case SourceVariable::VT_STRUCT:
+		case SourceVariable::VT_UNION:
 		case SourceVariable::VT_VOID:
 			throw SourceException("invalid VT to", position, "SourceExpression");
 
@@ -363,6 +365,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		case SourceVariable::VT_ASMFUNC:
 		case SourceVariable::VT_BLOCK:
 		case SourceVariable::VT_STRUCT:
+		case SourceVariable::VT_UNION:
 		case SourceVariable::VT_VOID:
 			throw SourceException("invalid VT to", position, "SourceExpression");
 
@@ -398,12 +401,17 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		case SourceVariable::VT_ASMFUNC:
 		case SourceVariable::VT_BLOCK:
 		case SourceVariable::VT_STRUCT:
+		case SourceVariable::VT_UNION:
 		case SourceVariable::VT_VOID:
 			throw SourceException("invalid VT to", position, "SourceExpression");
 
 		case SourceVariable::VT_BOOLHARD:
 			objects->addToken(ObjectToken::OCODE_LOGICALNOT);
 			objects->addToken(ObjectToken::OCODE_LOGICALNOT);
+			break;
+
+		case SourceVariable::VT_BOOLSOFT:
+		case SourceVariable::VT_REAL:
 			break;
 
 		case SourceVariable::VT_CHAR:
@@ -416,10 +424,6 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		case SourceVariable::VT_STRING:
 			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(16));
 			objects->addToken(ObjectToken::OCODE_SHIFTR);
-			break;
-
-		case SourceVariable::VT_BOOLSOFT:
-		case SourceVariable::VT_REAL:
 			break;
 		}
 		break;

@@ -28,6 +28,7 @@ _oldC(-2), _curC(-2), _newC(-2),
 _in(in),
 _filename(filename),
 
+_countColumn(0),
 _countLine(1),
 
 _depthComment(0),
@@ -82,6 +83,11 @@ int SourceStream::getC()
 	return -1;
 }
 
+long SourceStream::getColumn() const
+{
+	return _countColumn;
+}
+
 std::string const & SourceStream::getFilename() const
 {
 	return _filename;
@@ -120,10 +126,13 @@ void SourceStream::prepareC()
 
 
 
+		++_countColumn;
+
 		// \n end of line
 		if (_curC == '\n')
 		{
 			_inComment = false;
+			_countColumn = 0;
 			++_countLine;
 		}
 

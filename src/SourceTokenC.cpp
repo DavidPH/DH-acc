@@ -30,7 +30,7 @@ SourceTokenC::SourceTokenC() : _data(), _position(), _type(TT_NONE)
 {
 
 }
-SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->getFilename(), in->getLineCount()), _type(TT_NONE)
+SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->getFilename(), 0, 0), _type(TT_NONE)
 {
 	char c(in->get());
 
@@ -38,6 +38,7 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 	while (isspace(c)) c = in->get();
 	// If we skipped lines, need to reset position.
 	_position.line = in->getLineCount();
+	_position.column = in->getColumn();
 
 	switch (c)
 	{

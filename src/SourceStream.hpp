@@ -50,6 +50,7 @@ public:
 
 	char get();
 
+	long getColumn() const;
 	std::string const & getFilename() const;
 	long getLineCount() const;
 
@@ -71,6 +72,7 @@ private:
 	std::string _filename;
 	std::stack<char> _ungetStack;
 
+	long _countColumn;
 	long _countLine;
 
 	long _depthComment;

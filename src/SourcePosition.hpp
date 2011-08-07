@@ -31,14 +31,15 @@ class SourcePosition
 {
 public:
 	SourcePosition();
-	SourcePosition(std::string const & filename, long const line);
+	SourcePosition(std::string const & filename, long line, long column);
 
 	std::string filename;
 	long line;
+	long column;
 
 
 
-	friend void print_debug(std::ostream * const out, SourcePosition const & in);
+	friend void print_debug(std::ostream * out, SourcePosition const & in);
 
 	static SourcePosition const none;
 };

@@ -31,7 +31,7 @@ SourcePosition::SourcePosition() : filename(), line(0)
 {
 
 }
-SourcePosition::SourcePosition(std::string const & filename_, long const line_) : filename(filename_), line(line_)
+SourcePosition::SourcePosition(std::string const & filename, long line, long column) : filename(filename), line(line), column(column)
 {
 
 }
@@ -40,10 +40,10 @@ SourcePosition::SourcePosition(std::string const & filename_, long const line_) 
 
 std::ostream & operator << (std::ostream & out, SourcePosition const & in)
 {
-	return out << in.filename << ':' << in.line;
+	return out << in.filename << ':' << in.line << ':' << in.column;
 }
 
-void print_debug(std::ostream * const out, SourcePosition const & in)
+void print_debug(std::ostream * out, SourcePosition const & in)
 {
 	*out << in;
 }

@@ -33,7 +33,7 @@ std::map<std::string, std::pair<ObjectToken::ObjectCode, int> > SourceTokenASMPL
 
 
 
-SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name(), _position(in->getFilename(), in->getLineCount()), _type('\0')
+SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name(), _position(in->getFilename(), 0, 0), _type('\0')
 {
 	char c;
 
@@ -41,6 +41,7 @@ SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name()
 	while ((c = in->get()) == '\n');
 	// If we skipped lines, need to reset position.
 	_position.line = in->getLineCount();
+	_position.column = in->getColumn();
 
 	in->unget(c);
 
@@ -419,7 +420,7 @@ void SourceTokenASMPLX::read_tokens(SourceStream * const in, std::vector<SourceT
 
 	if (idstring != "ASMPLX")
 	{
-		throw SourceException("bad idstring", SourcePosition(in->getFilename(), in->getLineCount()), "SourceTokenASMPLX");
+		throw SourceException("bad idstring", SourcePosition(in->getFilename(), in->getLineCount(), in->getColumn()), "SourceTokenASMPLX");
 	}
 
 	while (true)
