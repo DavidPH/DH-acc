@@ -156,6 +156,7 @@ static inline int _main()
 	}
 
 	ObjectExpression::do_deferred_allocation();
+	objects.optimize();
 
 	if (target_type == TARGET_UNKNOWN)
 		target_type = TARGET_ZDOOM;

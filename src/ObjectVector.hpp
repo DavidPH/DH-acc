@@ -57,6 +57,8 @@ public:
 
 	ObjectToken const & operator [] (ObjectExpression::int_t index) const;
 
+	void optimize();
+
 	ObjectVector & setPosition(SourcePosition const & position);
 
 	ObjectExpression::int_t size() const;

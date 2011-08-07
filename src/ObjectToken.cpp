@@ -28,6 +28,10 @@
 
 
 
+ObjectToken::ObjectToken() : _code(OCODE_NONE)
+{
+
+}
 ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args) : _args(args), _code(code), _labels(labels), _position(position)
 {
 

@@ -40,6 +40,7 @@ class SourceTokenC;
 class ObjectToken
 {
 public:
+	ObjectToken();
 	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args);
 
 	void addLabel(std::string const & label);

@@ -100,6 +100,36 @@ ObjectToken const & ObjectVector::operator [] (ObjectExpression::int_t index) co
 	return _tokens[(size_t)index];
 }
 
+void ObjectVector::optimize()
+{
+	size_t i(0);
+
+	// PUSH/DROP removal.
+	while (i+2 < _tokens.size())
+	{
+		if (ocode_is_push(_tokens[i].getCode()) && _tokens[i+1].getCode() == OCODE_DROP)
+		{
+			std::vector<std::string> labels0(_tokens[i+0].getLabels());
+			std::vector<std::string> labels1(_tokens[i+1].getLabels());
+			for (size_t j(0); j < labels1.size(); ++j)
+				labels0.push_back(labels1[j]);
+
+			_tokens[i+2].addLabel(labels0);
+
+			for (size_t j(i+2); j < _tokens.size(); ++j)
+				_tokens[j-2] = _tokens[j];
+
+			_tokens.resize(_tokens.size() - 2);
+
+			if (i) --i;
+		}
+		else
+		{
+			++i;
+		}
+	}
+}
+
 ObjectExpression::int_t ObjectVector::size() const
 {
 	return (ObjectExpression::int_t)_tokens.size();
