@@ -39,8 +39,8 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 }
 void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address, bool dimensioned) const
 {
-	bool                    array(false);
-	ObjectToken::ObjectCode ocode;
+	bool       array(false);
+	ObjectCode ocode;
 
 	switch (_sc)
 	{
@@ -48,17 +48,17 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		if (dimensioned)
 		{
 			array = true;
-			ocode = ObjectToken::OCODE_ASSIGNSTACKARRAY2;
+			ocode = OCODE_ASSIGNSTACKARRAY2;
 		}
 		else
-			ocode = ObjectToken::OCODE_ASSIGNSTACKVAR;
+			ocode = OCODE_ASSIGNSTACKVAR;
 		goto sc_register_case;
 
 	case SC_CONSTANT:
 		throw SourceException("makeObjectsSet on SC_CONSTANT", position, "SourceVariable");
 
 	case SC_REGISTER:
-		ocode = ObjectToken::OCODE_ASSIGNSCRIPTVAR;
+		ocode = OCODE_ASSIGNSCRIPTVAR;
 	sc_register_case:
 		switch (type->type)
 		{
@@ -103,40 +103,40 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		break;
 
 	case SC_REGISTER_GLOBAL:
-		ocode = ObjectToken::OCODE_ASSIGNGLOBALVAR;
+		ocode = OCODE_ASSIGNGLOBALVAR;
 		goto sc_register_case;
 
 	case SC_REGISTER_MAP:
-		ocode = ObjectToken::OCODE_ASSIGNMAPVAR;
+		ocode = OCODE_ASSIGNMAPVAR;
 		goto sc_register_case;
 
 	case SC_REGISTER_WORLD:
-		ocode = ObjectToken::OCODE_ASSIGNWORLDVAR;
+		ocode = OCODE_ASSIGNWORLDVAR;
 		goto sc_register_case;
 
 	case SC_REGISTERARRAY_GLOBAL:
 		array = true;
-		ocode = ObjectToken::OCODE_ASSIGNGLOBALARRAY2;
+		ocode = OCODE_ASSIGNGLOBALARRAY2;
 		goto sc_register_case;
 
 	case SC_REGISTERARRAY_MAP:
 		array = true;
-		ocode = ObjectToken::OCODE_ASSIGNMAPARRAY2;
+		ocode = OCODE_ASSIGNMAPARRAY2;
 		goto sc_register_case;
 
 	case SC_REGISTERARRAY_WORLD:
 		array = true;
-		ocode = ObjectToken::OCODE_ASSIGNWORLDARRAY2;
+		ocode = OCODE_ASSIGNWORLDARRAY2;
 		goto sc_register_case;
 
 	case SC_STATIC:
 		if (dimensioned)
 		{
 			array = true;
-			ocode = ObjectToken::OCODE_ASSIGNSTATICARRAY2;
+			ocode = OCODE_ASSIGNSTATICARRAY2;
 		}
 		else
-			ocode = ObjectToken::OCODE_ASSIGNSTATICVAR;
+			ocode = OCODE_ASSIGNSTATICVAR;
 		goto sc_register_case;
 	}
 }
@@ -296,15 +296,15 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, std::vector<Sour
 					type = type->refType;
 
 					(*dimensions)[i]->makeObjectsGet(objects);
-					objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(type->size()));
-					objects->addToken(ObjectToken::OCODE_MUL);
+					objects->addToken(OCODE_PUSHNUMBER, objects->getValue(type->size()));
+					objects->addToken(OCODE_MUL);
 
-					if (i != (dimensions->size() - 1)) objects->addToken(ObjectToken::OCODE_ADD);
+					if (i != (dimensions->size() - 1)) objects->addToken(OCODE_ADD);
 
 					(*dimensions)[i] = NULL;
 				}
 
-				objects->addToken(ObjectToken::OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+				objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 			}
 			else
 			{
@@ -324,9 +324,9 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, std::vector<Sour
 		}
 		else
 		{
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(0));
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(0));
 
-			objects->addToken(ObjectToken::OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
 			*addressBase = objects->getValue(0);
 			*address = _type->size() - 1;

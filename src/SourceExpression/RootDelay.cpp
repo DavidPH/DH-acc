@@ -67,9 +67,9 @@ void SourceExpression_RootDelay::makeObjectsGet(ObjectVector * objects)
 	objects->setPosition(position);
 
 	ObjectExpression::Pointer stack(objects->getValue(_stack));
-	objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, stack);
-	objects->addToken(ObjectToken::OCODE_DELAY);
-	objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, stack);
+	objects->addToken(OCODE_ADDSTACK_IMM, stack);
+	objects->addToken(OCODE_DELAY);
+	objects->addToken(OCODE_SUBSTACK_IMM, stack);
 }
 
 void SourceExpression_RootDelay::printDebug(std::ostream * out) const

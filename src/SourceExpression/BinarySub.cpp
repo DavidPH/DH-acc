@@ -63,7 +63,7 @@ void SourceExpression_BinarySub::makeObjectsGet(ObjectVector * objects)
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_POINTER:
 	case SourceVariable::VT_REAL:
-		objects->addToken(ObjectToken::OCODE_SUB);
+		objects->addToken(OCODE_SUB);
 		break;
 
 	default:

@@ -64,8 +64,8 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::Var
 	case SourceVariable::VT_ARRAY:
 	case SourceVariable::VT_BLOCK:
 	case SourceVariable::VT_STRUCT:
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('{'));
-		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));
+		objects->addToken(OCODE_PRINTCHARACTER);
 
 		for (size_t i(type->types.size()); i--;)
 		{
@@ -73,13 +73,13 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::Var
 
 			if (i)
 			{
-				objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(' '));
-				objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+				objects->addToken(OCODE_PUSHNUMBER, objects->getValue(' '));
+				objects->addToken(OCODE_PRINTCHARACTER);
 			}
 		}
 
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('}'));
-		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('}'));
+		objects->addToken(OCODE_PRINTCHARACTER);
 
 		break;
 
@@ -93,58 +93,58 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::Var
 	case SourceVariable::VT_LINESPEC:
 	case SourceVariable::VT_NATIVE:
 	case SourceVariable::VT_SCRIPT:
-		objects->addToken(ObjectToken::OCODE_PRINTNUMBER);
+		objects->addToken(OCODE_PRINTNUMBER);
 		break;
 
 	case SourceVariable::VT_BOOLSOFT:
-		objects->addToken(ObjectToken::OCODE_LOGICALNOT);
-		objects->addToken(ObjectToken::OCODE_LOGICALNOT);
-		objects->addToken(ObjectToken::OCODE_PRINTNUMBER);
+		objects->addToken(OCODE_LOGICALNOT);
+		objects->addToken(OCODE_LOGICALNOT);
+		objects->addToken(OCODE_PRINTNUMBER);
 		break;
 
 	case SourceVariable::VT_CHAR:
-		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PRINTCHARACTER);
 		break;
 
 	case SourceVariable::VT_POINTER:
-		objects->addToken(ObjectToken::OCODE_PRINTHEX);
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('p'));
-		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PRINTHEX);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('p'));
+		objects->addToken(OCODE_PRINTCHARACTER);
 		break;
 
 	case SourceVariable::VT_REAL:
-		objects->addToken(ObjectToken::OCODE_PRINTFIXED);
+		objects->addToken(OCODE_PRINTFIXED);
 		break;
 
 	case SourceVariable::VT_STRING:
-		objects->addToken(ObjectToken::OCODE_PRINTSTRING);
+		objects->addToken(OCODE_PRINTSTRING);
 		break;
 
 	case SourceVariable::VT_UNION:
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('U'));
-		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('{'));
-		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('U'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));
+		objects->addToken(OCODE_PRINTCHARACTER);
 
 		for (int i(type->size()); i--;)
 		{
-			objects->addToken(ObjectToken::OCODE_PRINTHEX);
+			objects->addToken(OCODE_PRINTHEX);
 
 			if (i)
 			{
-				objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(' '));
-				objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+				objects->addToken(OCODE_PUSHNUMBER, objects->getValue(' '));
+				objects->addToken(OCODE_PRINTCHARACTER);
 			}
 		}
 
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('}'));
-		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue('U'));
-		objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('}'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('U'));
+		objects->addToken(OCODE_PRINTCHARACTER);
 	}
 
-	objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(';'));
-	objects->addToken(ObjectToken::OCODE_PRINTCHARACTER);
+	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(';'));
+	objects->addToken(OCODE_PRINTCHARACTER);
 }
 
 void SourceExpression_RootOut::makeObjectsGet(ObjectVector * objects)
@@ -155,9 +155,9 @@ void SourceExpression_RootOut::makeObjectsGet(ObjectVector * objects)
 
 	objects->setPosition(position);
 
-	objects->addToken(ObjectToken::OCODE_BEGINPRINT);
+	objects->addToken(OCODE_BEGINPRINT);
 	doOut(objects, _expr->getType());
-	objects->addToken(ObjectToken::OCODE_ENDLOG);
+	objects->addToken(OCODE_ENDLOG);
 }
 
 void SourceExpression_RootOut::printDebug(std::ostream * out) const

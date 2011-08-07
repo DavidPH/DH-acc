@@ -37,8 +37,8 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 }
 void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address, bool dimensioned) const
 {
-	bool                    array(false);
-	ObjectToken::ObjectCode ocode;
+	bool       array(false);
+	ObjectCode ocode;
 
 	switch (_sc)
 	{
@@ -46,14 +46,14 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		if (dimensioned)
 		{
 			array = true;
-			ocode = ObjectToken::OCODE_PUSHSTACKARRAY2;
+			ocode = OCODE_PUSHSTACKARRAY2;
 		}
 		else
-			ocode = ObjectToken::OCODE_PUSHSTACKVAR;
+			ocode = OCODE_PUSHSTACKVAR;
 		goto sc_register_case;
 
 	case SC_CONSTANT:
-		ocode = ObjectToken::OCODE_PUSHNUMBER;
+		ocode = OCODE_PUSHNUMBER;
 
 		switch (type->type)
 		{
@@ -83,7 +83,7 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		break;
 
 	case SC_REGISTER:
-		ocode = ObjectToken::OCODE_PUSHSCRIPTVAR;
+		ocode = OCODE_PUSHSCRIPTVAR;
 	sc_register_case:
 		switch (type->type)
 		{
@@ -128,40 +128,40 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		break;
 
 	case SC_REGISTER_GLOBAL:
-		ocode = ObjectToken::OCODE_PUSHGLOBALVAR;
+		ocode = OCODE_PUSHGLOBALVAR;
 		goto sc_register_case;
 
 	case SC_REGISTER_MAP:
-		ocode = ObjectToken::OCODE_PUSHMAPVAR;
+		ocode = OCODE_PUSHMAPVAR;
 		goto sc_register_case;
 
 	case SC_REGISTER_WORLD:
-		ocode = ObjectToken::OCODE_PUSHWORLDVAR;
+		ocode = OCODE_PUSHWORLDVAR;
 		goto sc_register_case;
 
 	case SC_REGISTERARRAY_GLOBAL:
 		array = true;
-		ocode = ObjectToken::OCODE_PUSHGLOBALARRAY2;
+		ocode = OCODE_PUSHGLOBALARRAY2;
 		goto sc_register_case;
 
 	case SC_REGISTERARRAY_MAP:
 		array = true;
-		ocode = ObjectToken::OCODE_PUSHMAPARRAY2;
+		ocode = OCODE_PUSHMAPARRAY2;
 		goto sc_register_case;
 
 	case SC_REGISTERARRAY_WORLD:
 		array = true;
-		ocode = ObjectToken::OCODE_PUSHWORLDARRAY2;
+		ocode = OCODE_PUSHWORLDARRAY2;
 		goto sc_register_case;
 
 	case SC_STATIC:
 		if (dimensioned)
 		{
 			array = true;
-			ocode = ObjectToken::OCODE_PUSHSTATICARRAY2;
+			ocode = OCODE_PUSHSTATICARRAY2;
 		}
 		else
-			ocode = ObjectToken::OCODE_PUSHSTATICVAR;
+			ocode = OCODE_PUSHSTATICVAR;
 		goto sc_register_case;
 	}
 }

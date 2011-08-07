@@ -69,7 +69,7 @@ void SourceExpression_BranchGoto::makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_label));
+	objects->addToken(OCODE_BRANCH, objects->getValue(_label));
 }
 
 void SourceExpression_BranchGoto::printDebug(std::ostream * out) const

@@ -209,9 +209,9 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_asmfunc(Sou
 {
 	std::string asmfuncName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
-	ObjectToken::ObjectCode asmfuncOCode(ObjectToken::get_code(in->get(SourceTokenC::TT_IDENTIFIER)));
+	ObjectCode asmfuncOCode(ocode_get_code(in->get(SourceTokenC::TT_IDENTIFIER)));
 
-	ObjectToken::ObjectCode asmfuncOCodeImmediate(ObjectToken::get_code(in->get(SourceTokenC::TT_IDENTIFIER)));
+	ObjectCode asmfuncOCodeImmediate(ocode_get_code(in->get(SourceTokenC::TT_IDENTIFIER)));
 
 	std::vector<SourceVariable::VariableType const *> asmfuncArgs;
 	SourceVariable::VariableType const * asmfuncReturn;

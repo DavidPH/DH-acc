@@ -68,7 +68,7 @@ void SourceExpression_BinaryGT::makeObjectsGet(ObjectVector * objects)
 	case SourceVariable::VT_REAL:
 	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
-		objects->addToken(ObjectToken::OCODE_CMPGT);
+		objects->addToken(OCODE_CMPGT);
 		break;
 
 	default:

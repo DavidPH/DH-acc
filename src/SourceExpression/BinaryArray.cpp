@@ -89,9 +89,9 @@ void SourceExpression_BinaryArray::makeObjectsAddress(ObjectVector * objects)
 
 	objects->setPosition(position);
 
-	objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(getType()->size()));
-	objects->addToken(ObjectToken::OCODE_MUL);
-	objects->addToken(ObjectToken::OCODE_ADD);
+	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(getType()->size()));
+	objects->addToken(OCODE_MUL);
+	objects->addToken(OCODE_ADD);
 }
 
 void SourceExpression_BinaryArray::makeObjectsGet(ObjectVector * objects)
@@ -108,20 +108,20 @@ void SourceExpression_BinaryArray::makeObjectsGet(ObjectVector * objects)
 
 		objects->setPosition(position);
 
-		objects->addToken(ObjectToken::OCODE_CALLZDFUNC, objects->getValue(2), objects->getValue(15));
+		objects->addToken(OCODE_CALLZDFUNC, objects->getValue(2), objects->getValue(15));
 	}
 	else if (canMakeObjectsAddress())
 	{
 		makeObjectsAddress(objects);
 
-		objects->addToken(ObjectToken::OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
 		for (int i(0); i < getType()->size(); ++i)
 		{
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(i));
-			objects->addToken(ObjectToken::OCODE_PUSHWORLDVAR, objects->getValue(1));
-			objects->addToken(ObjectToken::OCODE_ADD);
-			objects->addToken(ObjectToken::OCODE_PUSHGLOBALARRAY, objects->getValue(0));
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(i));
+			objects->addToken(OCODE_PUSHWORLDVAR, objects->getValue(1));
+			objects->addToken(OCODE_ADD);
+			objects->addToken(OCODE_PUSHGLOBALARRAY, objects->getValue(0));
 		}
 	}
 	else
@@ -153,23 +153,23 @@ void SourceExpression_BinaryArray::makeObjectsSet(ObjectVector * objects)
 	{
 		makeObjectsAddress(objects);
 
-		objects->addToken(ObjectToken::OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
 		for (int i(getType()->size()); i--;)
 		{
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(i));
-			objects->addToken(ObjectToken::OCODE_PUSHWORLDVAR, objects->getValue(1));
-			objects->addToken(ObjectToken::OCODE_ADD);
-			objects->addToken(ObjectToken::OCODE_SWAP);
-			objects->addToken(ObjectToken::OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(i));
+			objects->addToken(OCODE_PUSHWORLDVAR, objects->getValue(1));
+			objects->addToken(OCODE_ADD);
+			objects->addToken(OCODE_SWAP);
+			objects->addToken(OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
 		}
 
 		for (int i(0); i < getType()->size(); ++i)
 		{
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(i));
-			objects->addToken(ObjectToken::OCODE_PUSHWORLDVAR, objects->getValue(1));
-			objects->addToken(ObjectToken::OCODE_ADD);
-			objects->addToken(ObjectToken::OCODE_PUSHGLOBALARRAY, objects->getValue(0));
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(i));
+			objects->addToken(OCODE_PUSHWORLDVAR, objects->getValue(1));
+			objects->addToken(OCODE_ADD);
+			objects->addToken(OCODE_PUSHGLOBALARRAY, objects->getValue(0));
 		}
 	}
 	else

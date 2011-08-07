@@ -23,13 +23,14 @@
 
 #include "BinaryTokenZDACS.hpp"
 #include "ObjectExpression.hpp"
+#include "ObjectToken.hpp"
 #include "ObjectVector.hpp"
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
 
 
 
-std::map<std::string, std::pair<ObjectToken::ObjectCode, int> > SourceTokenASMPLX::_arg_counts;
+std::map<std::string, std::pair<ObjectCode, int> > SourceTokenASMPLX::_arg_counts;
 
 
 
@@ -168,7 +169,7 @@ SourceTokenASMPLX::TokenType SourceTokenASMPLX::getType() const
 void SourceTokenASMPLX::init()
 {
 	#define DO_INIT(NAME,ARGC)\
-	_arg_counts[#NAME] = std::pair<ObjectToken::ObjectCode, int>(ObjectToken::OCODE_##NAME, ARGC)
+	_arg_counts[#NAME] = std::pair<ObjectCode, int>(OCODE_##NAME, ARGC)
 
 	// BinaryTokenACS
 	DO_INIT(ADD,             0);
@@ -359,12 +360,12 @@ void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & toke
 
 		if (token._type == ' ')
 		{
-			std::map<std::string, std::pair<ObjectToken::ObjectCode, int> >::iterator argIt(_arg_counts.find(token._name));
+			std::map<std::string, std::pair<ObjectCode, int> >::iterator argIt(_arg_counts.find(token._name));
 
 			if (argIt == _arg_counts.end())
 				throw SourceException("unknown name", token._position, "SourceTokenASMPLX");
 
-			ObjectToken::ObjectCode const & code(argIt->second.first);
+			ObjectCode const & code(argIt->second.first);
 			int const & argC(argIt->second.second);
 
 			if (argC == -1)

@@ -78,7 +78,7 @@ void SourceExpression_ValueData::makeObjectsGet(ObjectVector * objects)
 	for (size_t i(_type->size()); i--;)
 	{
 		if (_garbage)
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(0xDEADBEEF));
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(0xDEADBEEF));
 		else
 			objects->addTokenPushZero();
 	}

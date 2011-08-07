@@ -68,27 +68,27 @@ void SourceExpression_BranchReturn::makeObjectsGet(ObjectVector * objects)
 	objects->setPosition(position);
 
 	for (int i(1); i < _expr->getType()->size(); ++i)
-		objects->addToken(ObjectToken::OCODE_ASSIGNSTACKVAR, objects->getValue(-i));
+		objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(-i));
 
 	switch (_type)
 	{
 	case SourceContext::CT_BLOCK:
-		objects->addToken(ObjectToken::OCODE_TERMINATE);
+		objects->addToken(OCODE_TERMINATE);
 		break;
 
 	case SourceContext::CT_FUNCTION:
 		if (_expr->getType()->size() == 0)
-			objects->addToken(ObjectToken::OCODE_RETURNZDACSVOID);
+			objects->addToken(OCODE_RETURNZDACSVOID);
 		else
-			objects->addToken(ObjectToken::OCODE_RETURNZDACS);
+			objects->addToken(OCODE_RETURNZDACS);
 
 		break;
 
 	case SourceContext::CT_SCRIPT:
 		if (_expr->getType()->size() != 0)
-			objects->addToken(ObjectToken::OCODE_SETRESULTVALUE);
+			objects->addToken(OCODE_SETRESULTVALUE);
 
-		objects->addToken(ObjectToken::OCODE_TERMINATE);
+		objects->addToken(OCODE_TERMINATE);
 
 		break;
 

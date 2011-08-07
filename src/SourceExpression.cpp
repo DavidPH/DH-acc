@@ -98,7 +98,7 @@ void SourceExpression::make_objects_call_asmfunc(ObjectVector * objects, SourceV
 	if (args.size() != data.type->types.size())
 		throw SourceException("incorrect arg count to call asmfunc", position, "SourceExpressionDS");
 
-	bool immediate(data.ocode_imm != ObjectToken::OCODE_NONE);
+	bool immediate(data.ocode_imm != OCODE_NONE);
 
 	for (size_t i(0); i < args.size(); ++i)
 	{
@@ -119,7 +119,7 @@ void SourceExpression::make_objects_call_asmfunc(ObjectVector * objects, SourceV
 	}
 	else
 	{
-		if (data.ocode == ObjectToken::OCODE_NONE)
+		if (data.ocode == OCODE_NONE)
 			throw SourceException("no ocode", position, "SourceExpressionDS");
 
 		for (size_t i(0); i < args.size(); ++i)
@@ -144,29 +144,29 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Source
 
 	objects->setPosition(position);
 
-	ObjectToken::ObjectCode ocode;
+	ObjectCode ocode;
 	ObjectExpression::Pointer ofunc(objects->getValue(data.number));
 	ObjectExpression::Pointer oretn;
 
 	if (data.type->callType->type == SourceVariable::VT_VOID)
-		ocode = ObjectToken::OCODE_CALLZDACSDISCARD;
+		ocode = OCODE_CALLZDACSDISCARD;
 	else
-		ocode = ObjectToken::OCODE_CALLZDACS;
+		ocode = OCODE_CALLZDACS;
 
 	if (data.type->callType->size() > 1)
 		oretn = objects->getValue(data.type->callType->size() - 1);
 
-	objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, stack);
-	if (oretn) objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, oretn);
+	objects->addToken(OCODE_ADDSTACK_IMM, stack);
+	if (oretn) objects->addToken(OCODE_ADDSTACK_IMM, oretn);
 	objects->addToken(ocode, ofunc);
 	if (oretn)
 	{
 		for (int i(-data.type->callType->size()); ++i;)
-			objects->addToken(ObjectToken::OCODE_PUSHSTACKVAR, objects->getValue(i));
+			objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
 
-		objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, oretn);
+		objects->addToken(OCODE_SUBSTACK_IMM, oretn);
 	}
-	objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, stack);
+	objects->addToken(OCODE_SUBSTACK_IMM, stack);
 }
 
 void SourceExpression::make_objects_call_linespec(ObjectVector * objects, SourceVariable::VariableData_LineSpec const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
@@ -187,25 +187,25 @@ void SourceExpression::make_objects_call_linespec(ObjectVector * objects, Source
 
 	objects->setPosition(position);
 
-	ObjectToken::ObjectCode ocode;
+	ObjectCode ocode;
 	ObjectExpression::Pointer ospec(objects->getValue(data.number));
 
 	if (data.type->callType->type == SourceVariable::VT_VOID)
 	{
 		switch (args.size())
 		{
-		case 0: ocode = ObjectToken::OCODE_LSPEC1; objects->addTokenPushZero(); break;
-		case 1: ocode = ObjectToken::OCODE_LSPEC1; break;
-		case 2: ocode = ObjectToken::OCODE_LSPEC2; break;
-		case 3: ocode = ObjectToken::OCODE_LSPEC3; break;
-		case 4: ocode = ObjectToken::OCODE_LSPEC4; break;
-		case 5: ocode = ObjectToken::OCODE_LSPEC5; break;
+		case 0: ocode = OCODE_LSPEC1; objects->addTokenPushZero(); break;
+		case 1: ocode = OCODE_LSPEC1; break;
+		case 2: ocode = OCODE_LSPEC2; break;
+		case 3: ocode = OCODE_LSPEC3; break;
+		case 4: ocode = OCODE_LSPEC4; break;
+		case 5: ocode = OCODE_LSPEC5; break;
 		default: throw SourceException("unexpected arg count to call linespec", position, "SourceExpressionDS");
 		}
 	}
 	else
 	{
-		ocode = ObjectToken::OCODE_LSPEC5RESULT;
+		ocode = OCODE_LSPEC5RESULT;
 
 		for (size_t i(args.size()); i < 5; ++i)
 			objects->addTokenPushZero();
@@ -229,7 +229,7 @@ void SourceExpression::make_objects_call_native(ObjectVector * objects, SourceVa
 
 	objects->setPosition(position);
 
-	ObjectToken::ObjectCode ocode(ObjectToken::OCODE_CALLZDFUNC);
+	ObjectCode ocode(OCODE_CALLZDFUNC);
 	ObjectExpression::Pointer oargc(objects->getValue((int)args.size()));
 	ObjectExpression::Pointer ofunc(objects->getValue(data.number));
 
@@ -254,7 +254,7 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, SourceVa
 
 	objects->setPosition(position);
 
-	ObjectToken::ObjectCode ocode;
+	ObjectCode ocode;
 	ObjectExpression::Pointer ospec(objects->getValue(84));
 	ObjectExpression::Pointer oretn;
 
@@ -262,17 +262,17 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, SourceVa
 	{
 		switch (args.size())
 		{
-		case 0: ocode = ObjectToken::OCODE_LSPEC1; break;
-		case 1: ocode = ObjectToken::OCODE_LSPEC2; break;
-		case 2: ocode = ObjectToken::OCODE_LSPEC3; break;
-		case 3: ocode = ObjectToken::OCODE_LSPEC4; break;
+		case 0: ocode = OCODE_LSPEC1; break;
+		case 1: ocode = OCODE_LSPEC2; break;
+		case 2: ocode = OCODE_LSPEC3; break;
+		case 3: ocode = OCODE_LSPEC4; break;
 		default:
 			throw SourceException("unexpected arg count to call script", position, "SourceExpressionDS");
 		}
 	}
 	else
 	{
-		ocode = ObjectToken::OCODE_LSPEC5RESULT;
+		ocode = OCODE_LSPEC5RESULT;
 
 		for (size_t i(args.size()); i < 4; ++i)
 			objects->addTokenPushZero();
@@ -281,17 +281,17 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, SourceVa
 	if (type->callType->size() > 1)
 		oretn = objects->getValue(type->callType->size() - 1);
 
-	objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, stack);
-	if (oretn) objects->addToken(ObjectToken::OCODE_ADDSTACK_IMM, oretn);
+	objects->addToken(OCODE_ADDSTACK_IMM, stack);
+	if (oretn) objects->addToken(OCODE_ADDSTACK_IMM, oretn);
 	objects->addToken(ocode, ospec);
 	if (oretn)
 	{
 		for (int i(-type->callType->size()); ++i;)
-			objects->addToken(ObjectToken::OCODE_PUSHSTACKVAR, objects->getValue(i));
+			objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
 
-		objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, oretn);
+		objects->addToken(OCODE_SUBSTACK_IMM, oretn);
 	}
-	objects->addToken(ObjectToken::OCODE_SUBSTACK_IMM, stack);
+	objects->addToken(OCODE_SUBSTACK_IMM, stack);
 }
 
 void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable::VariableType const * typeFrom, SourceVariable::VariableType const * typeTo, SourcePosition const & position)
@@ -301,7 +301,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 	if (typeTo->type == SourceVariable::VT_VOID)
 	{
 		for (size_t i(typeFrom->size()); i--;)
-			objects->addToken(ObjectToken::OCODE_DROP);
+			objects->addToken(OCODE_DROP);
 
 		return;
 	}
@@ -336,8 +336,8 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 			throw SourceException("invalid VT to", position, "SourceExpression");
 
 		case SourceVariable::VT_BOOLHARD:
-			objects->addToken(ObjectToken::OCODE_LOGICALNOT);
-			objects->addToken(ObjectToken::OCODE_LOGICALNOT);
+			objects->addToken(OCODE_LOGICALNOT);
+			objects->addToken(OCODE_LOGICALNOT);
 			break;
 
 		case SourceVariable::VT_BOOLSOFT:
@@ -352,8 +352,8 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 			break;
 
 		case SourceVariable::VT_REAL:
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(16));
-			objects->addToken(ObjectToken::OCODE_SHIFTL);
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(16));
+			objects->addToken(OCODE_SHIFTL);
 			break;
 		}
 		break;
@@ -378,18 +378,18 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		case SourceVariable::VT_POINTER:
 		case SourceVariable::VT_SCRIPT:
 		case SourceVariable::VT_STRING:
-			objects->addToken(ObjectToken::OCODE_LOGICALNOT);
-			objects->addToken(ObjectToken::OCODE_LOGICALNOT);
+			objects->addToken(OCODE_LOGICALNOT);
+			objects->addToken(OCODE_LOGICALNOT);
 			break;
 
 		case SourceVariable::VT_BOOLSOFT:
 			break;
 
 		case SourceVariable::VT_REAL:
-			objects->addToken(ObjectToken::OCODE_LOGICALNOT);
-			objects->addToken(ObjectToken::OCODE_LOGICALNOT);
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(16));
-			objects->addToken(ObjectToken::OCODE_SHIFTL);
+			objects->addToken(OCODE_LOGICALNOT);
+			objects->addToken(OCODE_LOGICALNOT);
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(16));
+			objects->addToken(OCODE_SHIFTL);
 			break;
 		}
 		break;
@@ -406,8 +406,8 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 			throw SourceException("invalid VT to", position, "SourceExpression");
 
 		case SourceVariable::VT_BOOLHARD:
-			objects->addToken(ObjectToken::OCODE_LOGICALNOT);
-			objects->addToken(ObjectToken::OCODE_LOGICALNOT);
+			objects->addToken(OCODE_LOGICALNOT);
+			objects->addToken(OCODE_LOGICALNOT);
 			break;
 
 		case SourceVariable::VT_BOOLSOFT:
@@ -422,8 +422,8 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		case SourceVariable::VT_POINTER:
 		case SourceVariable::VT_SCRIPT:
 		case SourceVariable::VT_STRING:
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(16));
-			objects->addToken(ObjectToken::OCODE_SHIFTR);
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(16));
+			objects->addToken(OCODE_SHIFTR);
 			break;
 		}
 		break;

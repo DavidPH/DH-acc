@@ -62,7 +62,7 @@ void SourceExpression_BinaryXOr::makeObjectsGet(ObjectVector * objects)
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_POINTER:
-		objects->addToken(ObjectToken::OCODE_XOR);
+		objects->addToken(OCODE_XOR);
 		break;
 
 	default:

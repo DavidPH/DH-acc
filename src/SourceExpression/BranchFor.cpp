@@ -85,14 +85,14 @@ void SourceExpression_BranchFor::makeObjectsGet(ObjectVector * objects)
 	objects->addLabel(_labelCond);
 	_exprCond->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_labelBreak));
+	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_labelBreak));
 
 	_exprLoop->makeObjectsGet(objects);
 
 	objects->addLabel(_labelContinue);
 	_exprIter->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_labelCond));
+	objects->addToken(OCODE_BRANCH, objects->getValue(_labelCond));
 
 	objects->addLabel(_labelBreak);
 }

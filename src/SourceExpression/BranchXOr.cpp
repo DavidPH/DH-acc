@@ -75,20 +75,20 @@ void SourceExpression_BranchXOr::makeObjectsGet(ObjectVector * objects)
 	exprR->makeObjectsGet(objects);
 
 	objects->setPosition(position);
-	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_labelL0));
+	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_labelL0));
 
-	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_label1));
-	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_label0));
+	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_label1));
+	objects->addToken(OCODE_BRANCH, objects->getValue(_label0));
 
 	objects->addLabel(_labelL0);
-	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_label0));
+	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_label0));
 
 	objects->addLabel(_label1);
-	objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
-	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_labelEnd));
+	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(1));
+	objects->addToken(OCODE_BRANCH, objects->getValue(_labelEnd));
 
 	objects->addLabel(_label0);
-	objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(0));
+	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(0));
 
 	objects->addLabel(_labelEnd);
 }

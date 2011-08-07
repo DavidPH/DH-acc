@@ -108,16 +108,16 @@ void SourceExpression_Binary::recurse_makeObjectsGet(ObjectVector * objects)
 		if (typeL->type != SourceVariable::VT_POINTER)
 		{
 			make_objects_cast(objects, typeL, type, position);
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(type->refType->size()));
-			objects->addToken(ObjectToken::OCODE_MUL);
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(type->refType->size()));
+			objects->addToken(OCODE_MUL);
 		}
 
 		exprR->makeObjectsGet(objects);
 		if (typeR->type != SourceVariable::VT_POINTER)
 		{
 			make_objects_cast(objects, typeR, type, position);
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(type->refType->size()));
-			objects->addToken(ObjectToken::OCODE_MUL);
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(type->refType->size()));
+			objects->addToken(OCODE_MUL);
 		}
 	}
 	else

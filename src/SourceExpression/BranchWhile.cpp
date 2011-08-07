@@ -71,10 +71,10 @@ void SourceExpression_BranchWhile::makeObjectsGet(ObjectVector * objects)
 	objects->addLabel(_labelContinue);
 	_exprCondition->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_labelBreak));
+	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_labelBreak));
 
 	_exprWhile->makeObjectsGet(objects);
-	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_labelContinue));
+	objects->addToken(OCODE_BRANCH, objects->getValue(_labelContinue));
 
 	objects->addLabel(_labelBreak);
 }

@@ -22,12 +22,14 @@
 #ifndef HPP_ObjectVector_
 #define HPP_ObjectVector_
 
+#include "ObjectCode.hpp"
 #include "ObjectExpression.hpp"
-#include "ObjectToken.hpp"
 #include "SourcePosition.hpp"
 
 #include <string>
 #include <vector>
+
+class ObjectToken;
 
 
 
@@ -38,10 +40,10 @@ public:
 	void addLabel(std::vector<std::string> const & labels);
 
 	void addToken(ObjectToken const & token);
-	void addToken(ObjectToken::ObjectCode code);
-	void addToken(ObjectToken::ObjectCode code, std::vector<ObjectExpression::Pointer> const & args);
-	void addToken(ObjectToken::ObjectCode code, ObjectExpression * arg0);
-	void addToken(ObjectToken::ObjectCode code, ObjectExpression * arg0, ObjectExpression * arg1);
+	void addToken(ObjectCode code);
+	void addToken(ObjectCode code, std::vector<ObjectExpression::Pointer> const & args);
+	void addToken(ObjectCode code, ObjectExpression * arg0);
+	void addToken(ObjectCode code, ObjectExpression * arg0, ObjectExpression * arg1);
 	void addTokenPushZero();
 
 	ObjectExpression::Pointer getValue(ObjectExpression::float_t f) const;

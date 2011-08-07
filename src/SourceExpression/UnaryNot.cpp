@@ -62,7 +62,7 @@ void SourceExpression_UnaryNot::makeObjectsGet(ObjectVector * objects)
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_POINTER:
-		objects->addToken(ObjectToken::OCODE_NOT);
+		objects->addToken(OCODE_NOT);
 		break;
 
 	default:

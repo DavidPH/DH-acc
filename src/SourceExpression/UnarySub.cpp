@@ -63,7 +63,7 @@ void SourceExpression_UnarySub::makeObjectsGet(ObjectVector * objects)
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_POINTER:
 	case SourceVariable::VT_REAL:
-		objects->addToken(ObjectToken::OCODE_NEGATE);
+		objects->addToken(OCODE_NEGATE);
 		break;
 
 	default:

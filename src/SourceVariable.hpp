@@ -23,7 +23,8 @@
 #define HPP_SourceVariable_
 
 #include "CounterPointer.hpp"
-#include "ObjectToken.hpp"
+#include "ObjectCode.hpp"
+#include "ObjectExpression.hpp"
 #include "SourcePosition.hpp"
 
 #include <ostream>
@@ -102,8 +103,8 @@ public:
 	struct VariableData_AsmFunc
 	{
 		VariableType const * type;
-		ObjectToken::ObjectCode ocode;
-		ObjectToken::ObjectCode ocode_imm;
+		ObjectCode ocode;
+		ObjectCode ocode_imm;
 	};
 	struct VariableData_Bool
 	{

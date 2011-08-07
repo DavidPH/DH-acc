@@ -22,7 +22,8 @@
 #ifndef HPP_SourceTokenASMPLX_
 #define HPP_SourceTokenASMPLX_
 
-#include "ObjectToken.hpp"
+#include "CounterPointer.hpp"
+#include "ObjectCode.hpp"
 #include "SourcePosition.hpp"
 
 #include <map>
@@ -30,6 +31,7 @@
 #include <string>
 #include <vector>
 
+class ObjectToken;
 class ObjectExpression;
 class ObjectVector;
 class SourceStream;
@@ -76,14 +78,14 @@ private:
 
 	static int32_t char_to_int(char const c, int32_t const base, SourcePosition const & position);
 
-	static ObjectExpression::Pointer make_expression(std::string const & expr, SourcePosition const & position);
+	static CounterPointer<ObjectExpression> make_expression(std::string const & expr, SourcePosition const & position);
 
 	// Returns -1 for number 0.
 	static int32_t string_to_base(std::string const & s, SourcePosition const & position);
 	static int32_t string_to_int(std::string const & s, SourcePosition const & position);
 	static long double string_to_real(std::string const & s, SourcePosition const & position);
 
-	static std::map<std::string, std::pair<ObjectToken::ObjectCode, int> > _arg_counts;
+	static std::map<std::string, std::pair<ObjectCode, int> > _arg_counts;
 };
 
 

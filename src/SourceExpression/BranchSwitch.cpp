@@ -83,10 +83,10 @@ void SourceExpression_BranchSwitch::makeObjectsGet(ObjectVector * objects)
 
 	// TODO: BRANCHCASESORTED
 	for (size_t i(0); i < _cases.size(); ++i)
-		objects->addToken(ObjectToken::OCODE_BRANCHCASE, objects->getValue(_cases[i]), objects->getValue(_caseLabels[i]));
+		objects->addToken(OCODE_BRANCHCASE, objects->getValue(_cases[i]), objects->getValue(_caseLabels[i]));
 
-	objects->addToken(ObjectToken::OCODE_DROP);
-	objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_caseDefault));
+	objects->addToken(OCODE_DROP);
+	objects->addToken(OCODE_BRANCH, objects->getValue(_caseDefault));
 
 	_exprCases->makeObjectsGet(objects);
 

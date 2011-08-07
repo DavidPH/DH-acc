@@ -84,8 +84,8 @@ void SourceExpression_ValueMember::makeObjectsAddress(ObjectVector * objects)
 
 	_expr->makeObjectsAddress(objects);
 	objects->setPosition(position);
-	objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(_expr->getType()->getOffset(_name, position)));
-	objects->addToken(ObjectToken::OCODE_ADD);
+	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(_expr->getType()->getOffset(_name, position)));
+	objects->addToken(OCODE_ADD);
 }
 
 void SourceExpression_ValueMember::makeObjectsGet(ObjectVector * objects)
@@ -93,14 +93,14 @@ void SourceExpression_ValueMember::makeObjectsGet(ObjectVector * objects)
 	if (canMakeObjectsAddress())
 	{
 		makeObjectsAddress(objects);
-		objects->addToken(ObjectToken::OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
 		for (int i(0); i < getType()->size(); ++i)
 		{
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(i));
-			objects->addToken(ObjectToken::OCODE_PUSHWORLDVAR, objects->getValue(1));
-			objects->addToken(ObjectToken::OCODE_ADD);
-			objects->addToken(ObjectToken::OCODE_PUSHGLOBALARRAY, objects->getValue(0));
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(i));
+			objects->addToken(OCODE_PUSHWORLDVAR, objects->getValue(1));
+			objects->addToken(OCODE_ADD);
+			objects->addToken(OCODE_PUSHGLOBALARRAY, objects->getValue(0));
 		}
 	}
 	else
@@ -124,15 +124,15 @@ void SourceExpression_ValueMember::makeObjectsSet(ObjectVector * objects)
 	if (canMakeObjectsAddress())
 	{
 		makeObjectsAddress(objects);
-		objects->addToken(ObjectToken::OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
 		for (int i(getType()->size()); i--;)
 		{
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(i));
-			objects->addToken(ObjectToken::OCODE_PUSHWORLDVAR, objects->getValue(1));
-			objects->addToken(ObjectToken::OCODE_ADD);
-			objects->addToken(ObjectToken::OCODE_SWAP);
-			objects->addToken(ObjectToken::OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(i));
+			objects->addToken(OCODE_PUSHWORLDVAR, objects->getValue(1));
+			objects->addToken(OCODE_ADD);
+			objects->addToken(OCODE_SWAP);
+			objects->addToken(OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
 		}
 	}
 	else

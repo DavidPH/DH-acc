@@ -63,7 +63,7 @@ void SourceExpression_BinaryShift::makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	objects->addToken(_right ? ObjectToken::OCODE_SHIFTR : ObjectToken::OCODE_SHIFTL);
+	objects->addToken(_right ? OCODE_SHIFTR : OCODE_SHIFTL);
 }
 
 void SourceExpression_BinaryShift::printDebug(std::ostream * out) const

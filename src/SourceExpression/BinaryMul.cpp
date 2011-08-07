@@ -62,11 +62,11 @@ void SourceExpression_BinaryMul::makeObjectsGet(ObjectVector * objects)
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_POINTER:
-		objects->addToken(ObjectToken::OCODE_MUL);
+		objects->addToken(OCODE_MUL);
 		break;
 
 	case SourceVariable::VT_REAL:
-		objects->addToken(ObjectToken::OCODE_MULFIXED);
+		objects->addToken(OCODE_MULFIXED);
 		break;
 
 	default:

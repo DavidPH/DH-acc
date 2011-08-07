@@ -99,7 +99,7 @@ void SourceExpression_BranchIf::makeObjectsGet(ObjectVector * objects)
 
 	_exprCondition->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(ObjectToken::OCODE_BRANCHZERO, objects->getValue(_exprElse ? _labelElse : _labelEnd));
+	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_exprElse ? _labelElse : _labelEnd));
 
 	objects->addLabel(_labelIf);
 	_exprIf->makeObjectsGet(objects);
@@ -107,7 +107,7 @@ void SourceExpression_BranchIf::makeObjectsGet(ObjectVector * objects)
 	if (_exprElse)
 	{
 		objects->setPosition(position);
-		objects->addToken(ObjectToken::OCODE_BRANCH, objects->getValue(_labelEnd));
+		objects->addToken(OCODE_BRANCH, objects->getValue(_labelEnd));
 		objects->addLabel(_labelElse);
 		_exprElse->makeObjectsGet(objects);
 	}

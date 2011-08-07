@@ -62,11 +62,11 @@ void SourceExpression_BinaryDiv::makeObjectsGet(ObjectVector * objects)
 	case SourceVariable::VT_CHAR:
 	case SourceVariable::VT_INT:
 	case SourceVariable::VT_POINTER:
-		objects->addToken(ObjectToken::OCODE_DIV);
+		objects->addToken(OCODE_DIV);
 		break;
 
 	case SourceVariable::VT_REAL:
-		objects->addToken(ObjectToken::OCODE_DIVFIXED);
+		objects->addToken(OCODE_DIVFIXED);
 		break;
 
 	default:

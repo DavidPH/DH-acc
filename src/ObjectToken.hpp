@@ -16,12 +16,13 @@
 
 /* ObjectToken.hpp
 **
-** ObjectToken class.
+** Defines the ObjectToken class.
 */
 
 #ifndef HPP_ObjectToken_
 #define HPP_ObjectToken_
 
+#include "ObjectCode.hpp"
 #include "ObjectExpression.hpp"
 #include "SourcePosition.hpp"
 
@@ -39,121 +40,10 @@ class SourceTokenC;
 class ObjectToken
 {
 public:
-	enum ObjectCode
-	{
-		// BinaryTokenACS
-		OCODE_ADD,
-		OCODE_ADDWORLDVAR,
-		OCODE_AND,
-		OCODE_ASSIGNMAPVAR,
-		OCODE_ASSIGNSCRIPTVAR,
-		OCODE_ASSIGNWORLDVAR,
-		OCODE_BEGINPRINT,
-		OCODE_BRANCH,
-		OCODE_BRANCHCASE,
-		OCODE_BRANCHNOTZERO,
-		OCODE_BRANCHZERO,
-		OCODE_CMPEQ,
-		OCODE_CMPGE,
-		OCODE_CMPGT,
-		OCODE_CMPLE,
-		OCODE_CMPLT,
-		OCODE_CMPNE,
-		OCODE_DELAY,
-		OCODE_DELAY_IMM,
-		OCODE_DIV,
-		OCODE_DROP,
-		OCODE_ENDPRINT,
-		OCODE_IOR,
-		OCODE_LOGICALAND,
-		OCODE_LOGICALIOR,
-		OCODE_LOGICALNOT,
-		OCODE_LSPEC1,
-		OCODE_LSPEC1_IMM,
-		OCODE_LSPEC2,
-		OCODE_LSPEC2_IMM,
-		OCODE_LSPEC3,
-		OCODE_LSPEC3_IMM,
-		OCODE_LSPEC4,
-		OCODE_LSPEC4_IMM,
-		OCODE_LSPEC5,
-		OCODE_LSPEC5_IMM,
-		OCODE_MUL,
-		OCODE_MOD,
-		OCODE_NEGATE,
-		OCODE_NOP,
-		OCODE_PRINTCHARACTER,
-		OCODE_PRINTNUMBER,
-		OCODE_PRINTSTRING,
-		OCODE_PUSHMAPVAR,
-		OCODE_PUSHNUMBER,
-		OCODE_PUSHSCRIPTVAR,
-		OCODE_PUSHWORLDVAR,
-		OCODE_RANDOM,
-		OCODE_RANDOM_IMM,
-		OCODE_RESTART,
-		OCODE_SHIFTL,
-		OCODE_SHIFTR,
-		OCODE_SUB,
-		OCODE_SUBWORLDVAR,
-		OCODE_SUSPEND,
-		OCODE_TERMINATE,
-		OCODE_XOR,
-
-		// BinaryTokenZDACS
-		OCODE_ASSIGNGLOBALARRAY,
-		OCODE_ASSIGNGLOBALVAR,
-		OCODE_ASSIGNMAPARRAY,
-		OCODE_ASSIGNWORLDARRAY,
-		OCODE_CALLZDACS,
-		OCODE_CALLZDACSDISCARD,
-		OCODE_CALLZDFUNC,
-		OCODE_DIVFIXED,
-		OCODE_DUP,
-		OCODE_ENDLOG,
-		OCODE_LSPEC5RESULT,
-		OCODE_MULFIXED,
-		OCODE_NOT,
-		OCODE_PRINTFIXED,
-		OCODE_PRINTHEX,
-		OCODE_PUSHGLOBALARRAY,
-		OCODE_PUSHGLOBALVAR,
-		OCODE_PUSHMAPARRAY,
-		OCODE_PUSHWORLDARRAY,
-		OCODE_RETURNZDACS,
-		OCODE_RETURNZDACSVOID,
-		OCODE_SETRESULTVALUE,
-		OCODE_STRLEN,
-		OCODE_SWAP,
-
-		// ObjectToken
-		OCODE_ADDSTACK_IMM,
-		OCODE_ASSIGNGLOBALARRAY2,
-		OCODE_ASSIGNMAPARRAY2,
-		OCODE_ASSIGNSTACKARRAY2,
-		OCODE_ASSIGNSTACKVAR,
-		OCODE_ASSIGNSTATICARRAY2,
-		OCODE_ASSIGNSTATICVAR,
-		OCODE_ASSIGNWORLDARRAY2,
-		OCODE_LOGICALXOR,
-		OCODE_PUSHGLOBALARRAY2,
-		OCODE_PUSHMAPARRAY2,
-		OCODE_PUSHSTACKADDRESS,
-		OCODE_PUSHSTACKARRAY2,
-		OCODE_PUSHSTACKVAR,
-		OCODE_PUSHSTATICARRAY2,
-		OCODE_PUSHSTATICVAR,
-		OCODE_PUSHWORLDARRAY2,
-		OCODE_SUBSTACK_IMM,
-
-		OCODE_NONE
-	};
-
-
-
 	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args);
 
 	void addLabel(std::string const & label);
+	void addLabel(std::vector<std::string> const & labels);
 
 	ObjectExpression::Pointer getArg(size_t index) const;
 
@@ -165,21 +55,12 @@ public:
 
 
 	friend void print_debug(std::ostream * const out, ObjectToken const & in);
-	friend void print_debug(std::ostream * const out, ObjectToken::ObjectCode const in);
-
-	static ObjectCode get_code(SourceTokenC const & token);
-
-	static void init();
 
 private:
 	std::vector<ObjectExpression::Pointer> _args;
 	ObjectCode _code;
 	std::vector<std::string> _labels;
 	SourcePosition _position;
-
-
-
-	static std::map<std::string, ObjectCode> _codes;
 };
 
 

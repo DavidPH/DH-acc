@@ -21,6 +21,8 @@
 
 #include "ObjectVector.hpp"
 
+#include "ObjectToken.hpp"
+
 
 
 void ObjectVector::addLabel(std::string const & label)
@@ -37,16 +39,16 @@ void ObjectVector::addToken(ObjectToken const & token)
 {
 	_tokens.push_back(token);
 }
-void ObjectVector::addToken(ObjectToken::ObjectCode code)
+void ObjectVector::addToken(ObjectCode code)
 {
 	addToken(code, std::vector<ObjectExpression::Pointer>());
 }
-void ObjectVector::addToken(ObjectToken::ObjectCode code, std::vector<ObjectExpression::Pointer> const & args)
+void ObjectVector::addToken(ObjectCode code, std::vector<ObjectExpression::Pointer> const & args)
 {
 	_tokens.push_back(ObjectToken(code, _position, _labels, args));
 	_labels.clear();
 }
-void ObjectVector::addToken(ObjectToken::ObjectCode code, ObjectExpression * arg0)
+void ObjectVector::addToken(ObjectCode code, ObjectExpression * arg0)
 {
 	std::vector<ObjectExpression::Pointer> args;
 
@@ -54,7 +56,7 @@ void ObjectVector::addToken(ObjectToken::ObjectCode code, ObjectExpression * arg
 
 	addToken(code, args);
 }
-void ObjectVector::addToken(ObjectToken::ObjectCode code, ObjectExpression * arg0, ObjectExpression * arg1)
+void ObjectVector::addToken(ObjectCode code, ObjectExpression * arg0, ObjectExpression * arg1)
 {
 	std::vector<ObjectExpression::Pointer> args;
 
@@ -65,7 +67,7 @@ void ObjectVector::addToken(ObjectToken::ObjectCode code, ObjectExpression * arg
 }
 void ObjectVector::addTokenPushZero()
 {
-	addToken(ObjectToken::OCODE_PUSHNUMBER, getValue(0));
+	addToken(OCODE_PUSHNUMBER, getValue(0));
 }
 
 ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression::float_t f) const

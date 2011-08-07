@@ -57,7 +57,7 @@ void SourceExpression_BranchNot::makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	objects->addToken(ObjectToken::OCODE_LOGICALNOT);
+	objects->addToken(OCODE_LOGICALNOT);
 }
 
 void SourceExpression_BranchNot::printDebug(std::ostream * out) const

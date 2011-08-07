@@ -68,7 +68,7 @@ void SourceExpression_BinaryLT::makeObjectsGet(ObjectVector * objects)
 	case SourceVariable::VT_REAL:
 	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
-		objects->addToken(ObjectToken::OCODE_CMPLT);
+		objects->addToken(OCODE_CMPLT);
 		break;
 
 	default:

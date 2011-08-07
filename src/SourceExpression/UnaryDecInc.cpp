@@ -77,26 +77,26 @@ void SourceExpression_UnaryDecInc::makeObjectsGet(ObjectVector * objects)
 	// Only modify for the first evaluation.
 	if (evaluations == 1)
 	{
-		ObjectToken::ObjectCode ocode(_inc ? ObjectToken::OCODE_ADD : ObjectToken::OCODE_SUB);
+		ObjectCode ocode(_inc ? OCODE_ADD : OCODE_SUB);
 
 		switch (getType()->type)
 		{
 		case SourceVariable::VT_CHAR:
 		case SourceVariable::VT_INT:
 		case SourceVariable::VT_REAL:
-			if (_suf) objects->addToken(ObjectToken::OCODE_DUP);
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
+			if (_suf) objects->addToken(OCODE_DUP);
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(1));
 			objects->addToken(ocode);
 			expr->makeObjectsSet(objects);
-			if (_suf) objects->addToken(ObjectToken::OCODE_DROP);
+			if (_suf) objects->addToken(OCODE_DROP);
 			break;
 
 		case SourceVariable::VT_POINTER:
-			if (_suf) objects->addToken(ObjectToken::OCODE_DUP);
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size()));
+			if (_suf) objects->addToken(OCODE_DUP);
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size()));
 			objects->addToken(ocode);
 			expr->makeObjectsSet(objects);
-			if (_suf) objects->addToken(ObjectToken::OCODE_DROP);
+			if (_suf) objects->addToken(OCODE_DROP);
 			break;
 
 		default:
@@ -106,19 +106,19 @@ void SourceExpression_UnaryDecInc::makeObjectsGet(ObjectVector * objects)
 	// Have undo the inc/dec when re-evaluating.
 	else if (_suf)
 	{
-		ObjectToken::ObjectCode ocode(_inc ? ObjectToken::OCODE_SUB : ObjectToken::OCODE_ADD);
+		ObjectCode ocode(_inc ? OCODE_SUB : OCODE_ADD);
 
 		switch (getType()->type)
 		{
 		case SourceVariable::VT_CHAR:
 		case SourceVariable::VT_INT:
 		case SourceVariable::VT_REAL:
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(1));
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(1));
 			objects->addToken(ocode);
 			break;
 
 		case SourceVariable::VT_POINTER:
-			objects->addToken(ObjectToken::OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size()));
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size()));
 			objects->addToken(ocode);
 			break;
 

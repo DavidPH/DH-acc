@@ -21,6 +21,7 @@
 
 #include "../BinaryTokenZDACS.hpp"
 
+#include "../ObjectToken.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
 
@@ -56,7 +57,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE)
 
 	#define CASE_DIRECTMAP(CODE)\
-	case ObjectToken::OCODE_##CODE:\
+	case OCODE_##CODE:\
 		PUSH_TOKEN_ARGS1(BCODE_##CODE, _arg_counts[BCODE_##CODE]);\
 		break
 
@@ -153,7 +154,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	CASE_DIRECTMAP(STRLEN);
 	CASE_DIRECTMAP(SWAP);
 
-	case ObjectToken::OCODE_ADDSTACK_IMM:
+	case OCODE_ADDSTACK_IMM:
 		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
 		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
 		PUSH_TOKEN(BCODE_ADDWORLDVAR);
@@ -168,15 +169,15 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN_ARGS2(bcode, 0, 1);
 		break;
 
-	case ObjectToken::OCODE_ASSIGNGLOBALARRAY2:
+	case OCODE_ASSIGNGLOBALARRAY2:
 		bcode = BCODE_ASSIGNGLOBALARRAY;
 		goto assignarray_case;
 
-	case ObjectToken::OCODE_ASSIGNMAPARRAY2:
+	case OCODE_ASSIGNMAPARRAY2:
 		bcode = BCODE_ASSIGNMAPARRAY;
 		goto assignarray_case;
 
-	case ObjectToken::OCODE_ASSIGNSTACKARRAY2:
+	case OCODE_ASSIGNSTACKARRAY2:
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 0, 1);
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 1, 2);
 		PUSH_TOKEN(BCODE_ADD);
@@ -191,7 +192,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_ASSIGNGLOBALARRAY);
 		break;
 
-	case ObjectToken::OCODE_ASSIGNSTACKVAR:
+	case OCODE_ASSIGNSTACKVAR:
 		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
 		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
 		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
@@ -201,7 +202,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_ASSIGNGLOBALARRAY);
 		break;
 
-	case ObjectToken::OCODE_ASSIGNSTATICARRAY2:
+	case OCODE_ASSIGNSTATICARRAY2:
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 0, 1);
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 1, 2);
 		PUSH_TOKEN(BCODE_ADD);
@@ -216,7 +217,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_ASSIGNGLOBALARRAY);
 		break;
 
-	case ObjectToken::OCODE_ASSIGNSTATICVAR:
+	case OCODE_ASSIGNSTATICVAR:
 		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
 		args.push_back(ObjectExpression::static_offset);
 		PUSH_TOKEN(BCODE_PUSHNUMBER);
@@ -226,7 +227,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_ASSIGNGLOBALARRAY);
 		break;
 
-	case ObjectToken::OCODE_ASSIGNWORLDARRAY2:
+	case OCODE_ASSIGNWORLDARRAY2:
 		bcode = BCODE_ASSIGNWORLDARRAY;
 		goto assignarray_case;
 
@@ -238,22 +239,22 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN_ARGS2(bcode, 0, 1);
 		break;
 
-	case ObjectToken::OCODE_PUSHGLOBALARRAY2:
+	case OCODE_PUSHGLOBALARRAY2:
 		bcode = BCODE_PUSHGLOBALARRAY;
 		goto pusharray_case;
 
-	case ObjectToken::OCODE_PUSHMAPARRAY2:
+	case OCODE_PUSHMAPARRAY2:
 		bcode = BCODE_PUSHMAPARRAY;
 		goto pusharray_case;
 
-	case ObjectToken::OCODE_PUSHSTACKADDRESS:
+	case OCODE_PUSHSTACKADDRESS:
 		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
 		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
 		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
 		PUSH_TOKEN(BCODE_ADD);
 		break;
 
-	case ObjectToken::OCODE_PUSHSTACKARRAY2:
+	case OCODE_PUSHSTACKARRAY2:
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 0, 1);
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 1, 2);
 		PUSH_TOKEN(BCODE_ADD);
@@ -267,7 +268,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_PUSHGLOBALARRAY);
 		break;
 
-	case ObjectToken::OCODE_PUSHSTACKVAR:
+	case OCODE_PUSHSTACKVAR:
 		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
 		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
 		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
@@ -276,7 +277,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_PUSHGLOBALARRAY);
 		break;
 
-	case ObjectToken::OCODE_PUSHSTATICARRAY2:
+	case OCODE_PUSHSTATICARRAY2:
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 0, 1);
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 1, 2);
 		PUSH_TOKEN(BCODE_ADD);
@@ -290,7 +291,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_PUSHGLOBALARRAY);
 		break;
 
-	case ObjectToken::OCODE_PUSHSTATICVAR:
+	case OCODE_PUSHSTATICVAR:
 		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
 		args.push_back(ObjectExpression::static_offset);
 		PUSH_TOKEN(BCODE_PUSHNUMBER);
@@ -299,18 +300,18 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_PUSHGLOBALARRAY);
 		break;
 
-	case ObjectToken::OCODE_PUSHWORLDARRAY2:
+	case OCODE_PUSHWORLDARRAY2:
 		bcode = BCODE_PUSHWORLDARRAY;
 		goto pusharray_case;
 
-	case ObjectToken::OCODE_SUBSTACK_IMM:
+	case OCODE_SUBSTACK_IMM:
 		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
 		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
 		PUSH_TOKEN(BCODE_SUBWORLDVAR);
 		break;
 
-	case ObjectToken::OCODE_LOGICALXOR:
-	case ObjectToken::OCODE_NONE:
+	case OCODE_LOGICALXOR:
+	case OCODE_NONE:
 		throw SourceException("unknown OCODE", position, "BinaryTokenZDACS");
 	}
 

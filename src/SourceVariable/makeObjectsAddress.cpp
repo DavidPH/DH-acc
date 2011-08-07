@@ -31,7 +31,7 @@ void SourceVariable::makeObjectsAddress(ObjectVector * objects, SourcePosition c
 	switch (_sc)
 	{
 	case SC_AUTO:
-		objects->addToken(ObjectToken::OCODE_PUSHSTACKADDRESS, objects->getValue(_nameObject));
+		objects->addToken(OCODE_PUSHSTACKADDRESS, objects->getValue(_nameObject));
 		break;
 
 	case SC_CONSTANT:
@@ -47,7 +47,7 @@ void SourceVariable::makeObjectsAddress(ObjectVector * objects, SourcePosition c
 		throw SourceException("makeObjectsAddress on register", position, "SourceVariable");
 
 	case SC_STATIC:
-		objects->addToken(ObjectToken::OCODE_PUSHNUMBER, makeObjectAddress(position));
+		objects->addToken(OCODE_PUSHNUMBER, makeObjectAddress(position));
 		break;
 	}
 }

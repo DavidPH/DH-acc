@@ -68,7 +68,7 @@ void SourceExpression_BinaryNE::makeObjectsGet(ObjectVector * objects)
 	case SourceVariable::VT_REAL:
 	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
-		objects->addToken(ObjectToken::OCODE_CMPNE);
+		objects->addToken(OCODE_CMPNE);
 		break;
 
 	default:

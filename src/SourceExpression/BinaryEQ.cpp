@@ -68,7 +68,7 @@ void SourceExpression_BinaryEQ::makeObjectsGet(ObjectVector * objects)
 	case SourceVariable::VT_REAL:
 	case SourceVariable::VT_SCRIPT:
 	case SourceVariable::VT_STRING:
-		objects->addToken(ObjectToken::OCODE_CMPEQ);
+		objects->addToken(OCODE_CMPEQ);
 		break;
 
 	default:
