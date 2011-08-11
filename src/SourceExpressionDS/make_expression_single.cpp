@@ -349,7 +349,6 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	{
 		in->get(SourceTokenC::TT_OP_AT);
 		scriptNumber = ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER));
-		ObjectExpression::reserve_script_number(scriptNumber);
 	}
 	else
 	{

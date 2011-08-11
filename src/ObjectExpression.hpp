@@ -16,7 +16,7 @@
 
 /* ObjectExpression.hpp
 **
-** ObjectExpression class.
+** Defines the ObjectExpression class.
 */
 
 #ifndef HPP_ObjectExpression_
@@ -25,12 +25,14 @@
 #include "CounterPointer.hpp"
 #include "SourcePosition.hpp"
 
+#include <istream>
 #include <map>
 #include <ostream>
 #include <stdint.h>
 #include <string>
 #include <vector>
 
+class ObjectVector;
 class SourceTokenC;
 
 
@@ -65,7 +67,9 @@ public:
 		ST_LIGHTNING  = 12,
 		ST_UNLOADING  = 13,
 		ST_DISCONNECT = 14,
-		ST_RETURN     = 15
+		ST_RETURN     = 15,
+
+		ST_NONE
 	};
 
 	struct Function
@@ -128,6 +132,33 @@ public:
 
 
 	friend void print_debug(std::ostream * out, ObjectExpression const & in);
+
+	friend bool override_object(Function * out, Function const & in);
+	friend bool override_object(Register * out, Register const & in);
+	friend bool override_object(RegisterArray * out, RegisterArray const & in);
+	friend bool override_object(Script * out, Script const & in);
+	friend bool override_object(Static * out, Static const & in);
+	friend bool override_object(String * out, String const & in);
+
+	friend void read_object(std::istream * in, ExpressionType * out);
+	friend void read_object(std::istream * in, Function * out);
+	friend void read_object(std::istream * in, Pointer * out);
+	friend void read_object(std::istream * in, Register * out);
+	friend void read_object(std::istream * in, RegisterArray * out);
+	friend void read_object(std::istream * in, Script * out);
+	friend void read_object(std::istream * in, ScriptType * out);
+	friend void read_object(std::istream * in, Static * out);
+	friend void read_object(std::istream * in, String * out);
+
+	friend void write_object(std::ostream * out, ExpressionType const & in);
+	friend void write_object(std::ostream * out, Function const & in);
+	friend void write_object(std::ostream * out, Pointer const & in);
+	friend void write_object(std::ostream * out, Register const & in);
+	friend void write_object(std::ostream * out, RegisterArray const & in);
+	friend void write_object(std::ostream * out, Script const & in);
+	friend void write_object(std::ostream * out, ScriptType const & in);
+	friend void write_object(std::ostream * out, Static const & in);
+	friend void write_object(std::ostream * out, String const & in);
 
 	static void add_address_count(int32_t const addressCount);
 
@@ -217,16 +248,64 @@ public:
 	static ObjectExpression::Pointer get_symbol(std::string const & symbol, SourcePosition const & position);
 	static ExpressionType get_symbol_type(std::string const & symbol, SourcePosition const & position);
 
-	static void reserve_script_number(int32_t number);
+	static void read_objects(std::istream * in, ObjectVector * objects);
 
 	static void set_address_count(int32_t addressCount);
+
+	static void write_objects(std::ostream * out, ObjectVector const & objects);
 
 	static ObjectExpression::Pointer static_offset;
 
 protected:
+	enum ObjectType
+	{
+		OT_BINARY_ADD,
+		OT_BINARY_AND,
+		OT_BINARY_DIV,
+		OT_BINARY_IOR,
+		OT_BINARY_MOD,
+		OT_BINARY_MUL,
+		OT_BINARY_SUB,
+		OT_BINARY_XOR,
+
+		OT_UNARY_ADD,
+		OT_UNARY_SUB,
+
+		OT_VALUE_FLOAT,
+		OT_VALUE_INT,
+		OT_VALUE_SYMBOL,
+
+		OT_NONE
+	};
+
 	ObjectExpression(SourcePosition const & position);
+	ObjectExpression(std::istream * in);
+
+	virtual void writeObject(std::ostream * out) const;
 
 	SourcePosition position;
+
+
+
+	friend void read_object(std::istream * in, ObjectType * out);
+
+	friend void write_object(std::ostream * out, ObjectType const & in);
+
+	static Pointer create_binary_add(std::istream * in);
+	static Pointer create_binary_and(std::istream * in);
+	static Pointer create_binary_div(std::istream * in);
+	static Pointer create_binary_ior(std::istream * in);
+	static Pointer create_binary_mod(std::istream * in);
+	static Pointer create_binary_mul(std::istream * in);
+	static Pointer create_binary_sub(std::istream * in);
+	static Pointer create_binary_xor(std::istream * in);
+
+	static Pointer create_unary_add(std::istream * in);
+	static Pointer create_unary_sub(std::istream * in);
+
+	static Pointer create_value_float(std::istream * in);
+	static Pointer create_value_int(std::istream * in);
+	static Pointer create_value_symbol(std::istream * in);
 
 private:
 	static void do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<int_t, bool> * registerUsed);

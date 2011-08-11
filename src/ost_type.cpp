@@ -40,6 +40,8 @@ bool handle_output(char const * name, char const * arg, bool barg, option::optio
 		output_type = OUTPUT_ACS0;
 	else if (args == "ACSE")
 		output_type = OUTPUT_ACSE;
+	else if (args == "object")
+		output_type = OUTPUT_object;
 	else
 		throw option::option_exception(name, arg, "unknown type");
 
@@ -55,6 +57,8 @@ bool handle_source(char const * name, char const * arg, bool barg, option::optio
 		source_type = SOURCE_ASMPLX;
 	else if (args == "DS")
 		source_type = SOURCE_DS;
+	else if (args == "object")
+		source_type = SOURCE_object;
 	else
 		throw option::option_exception(name, arg, "unknown type");
 
@@ -66,10 +70,10 @@ bool handle_target(char const * name, char const * arg, bool barg, option::optio
 
 	std::string args(arg);
 
-	if (args == "hexen")
-		target_type = TARGET_HEXEN;
-	else if (args == "zdoom")
-		target_type = TARGET_ZDOOM;
+	if (args == "Hexen")
+		target_type = TARGET_Hexen;
+	else if (args == "ZDoom")
+		target_type = TARGET_ZDoom;
 	else
 		throw option::option_exception(name, arg, "unknown type");
 

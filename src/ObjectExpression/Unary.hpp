@@ -31,13 +31,16 @@ class ObjectExpression_Unary : public ObjectExpression
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression_Unary, ObjectExpression);
 
 public:
-	ObjectExpression_Unary(ObjectExpression * expr, SourcePosition const & position);
-
 	virtual ExpressionType getType() const;
 
 	virtual void printDebug(std::ostream * out) const;
 
 protected:
+	ObjectExpression_Unary(ObjectExpression * expr, SourcePosition const & position);
+	ObjectExpression_Unary(std::istream * in);
+
+	virtual void writeObject(std::ostream * out) const;
+
 	ObjectExpression::Pointer expr;
 };
 

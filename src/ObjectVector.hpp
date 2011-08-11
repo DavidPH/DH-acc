@@ -63,6 +63,11 @@ public:
 
 	ObjectExpression::int_t size() const;
 
+
+
+	friend void read_object(std::istream * in, ObjectVector * out);
+	friend void write_object(std::ostream * out, ObjectVector const & in);
+
 private:
 	SourcePosition _position;
 

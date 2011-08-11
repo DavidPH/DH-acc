@@ -30,6 +30,11 @@ ObjectExpression_Binary::ObjectExpression_Binary(ObjectExpression * exprL, Objec
 	if (exprL->getType() != exprR->getType())
 		throw SourceException("type mismatch", position, getName());
 }
+ObjectExpression_Binary::ObjectExpression_Binary(std::istream * in) : Super(in)
+{
+	read_object(in, &exprL);
+	read_object(in, &exprR);
+}
 
 ObjectExpression::ExpressionType ObjectExpression_Binary::getType() const
 {
@@ -51,6 +56,14 @@ void ObjectExpression_Binary::printDebug(std::ostream * out) const
 		print_debug(out, *exprR);
 		*out << ")";
 	*out << ")";
+}
+
+void ObjectExpression_Binary::writeObject(std::ostream * out) const
+{
+	Super::writeObject(out);
+
+	write_object(out, exprL);
+	write_object(out, exprR);
 }
 
 

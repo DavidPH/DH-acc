@@ -21,6 +21,7 @@
 
 #include "../ObjectExpression.hpp"
 
+#include "../object_io.hpp"
 #include "../print_debug.hpp"
 
 
@@ -31,6 +32,7 @@ class ObjectExpression_ValueSymbol : public ObjectExpression
 
 public:
 	ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position);
+	ObjectExpression_ValueSymbol(std::istream * in);
 
 	virtual ExpressionType getType() const;
 
@@ -38,6 +40,9 @@ public:
 
 	virtual ObjectExpression::float_t resolveFloat() const;
 	virtual ObjectExpression::int_t resolveInt() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 
 private:
 	std::string _value;
@@ -49,12 +54,20 @@ ObjectExpression::Pointer ObjectExpression::create_value_symbol(std::string cons
 {
 	return new ObjectExpression_ValueSymbol(value, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_value_symbol(std::istream * in)
+{
+	return new ObjectExpression_ValueSymbol(in);
+}
 
 
 
 ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position) : Super(position), _value(value)
 {
 
+}
+ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::istream * in) : Super(in)
+{
+	read_object(in, &_value);
 }
 
 ObjectExpression::ExpressionType ObjectExpression_ValueSymbol::getType() const
@@ -80,6 +93,15 @@ ObjectExpression::float_t ObjectExpression_ValueSymbol::resolveFloat() const
 ObjectExpression::int_t ObjectExpression_ValueSymbol::resolveInt() const
 {
 	return ObjectExpression::get_symbol(_value, position)->resolveInt();
+}
+
+void ObjectExpression_ValueSymbol::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_VALUE_SYMBOL);
+
+	Super::writeObject(out);
+
+	write_object(out, _value);
 }
 
 

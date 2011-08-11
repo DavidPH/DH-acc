@@ -148,6 +148,10 @@ char const * make_string(ObjectCode ocode);
 
 void print_debug(std::ostream * out, ObjectCode in);
 
+void read_object(std::istream * in, ObjectCode * out);
+
+void write_object(std::ostream * out, ObjectCode const & in);
+
 
 
 #endif /* HPP_ObjectCode_ */

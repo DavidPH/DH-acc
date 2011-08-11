@@ -29,11 +29,15 @@ class ObjectExpression_UnaryAdd : public ObjectExpression_Unary
 
 public:
 	ObjectExpression_UnaryAdd(ObjectExpression * expr, SourcePosition const & position);
+	ObjectExpression_UnaryAdd(std::istream * in);
 
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual float_t resolveFloat() const;
 	virtual int_t resolveInt() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 };
 
 
@@ -42,10 +46,18 @@ ObjectExpression::Pointer ObjectExpression::create_unary_add(ObjectExpression * 
 {
 	return new ObjectExpression_UnaryAdd(expr, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_unary_add(std::istream * in)
+{
+	return new ObjectExpression_UnaryAdd(in);
+}
 
 
 
 ObjectExpression_UnaryAdd::ObjectExpression_UnaryAdd(ObjectExpression * expr, SourcePosition const & position) : Super(expr, position)
+{
+
+}
+ObjectExpression_UnaryAdd::ObjectExpression_UnaryAdd(std::istream * in) : Super(in)
 {
 
 }
@@ -68,6 +80,13 @@ ObjectExpression::int_t ObjectExpression_UnaryAdd::resolveInt() const
 	if (getType() == ET_INT) return expr->resolveInt();
 
 	return Super::resolveInt();
+}
+
+void ObjectExpression_UnaryAdd::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_UNARY_ADD);
+
+	Super::writeObject(out);
 }
 
 

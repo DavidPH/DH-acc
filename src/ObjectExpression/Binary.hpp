@@ -31,13 +31,16 @@ class ObjectExpression_Binary : public ObjectExpression
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression_Binary, ObjectExpression);
 
 public:
-	ObjectExpression_Binary(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
-
 	virtual ExpressionType getType() const;
 
 	virtual void printDebug(std::ostream * out) const;
 
 protected:
+	ObjectExpression_Binary(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	ObjectExpression_Binary(std::istream * in);
+
+	virtual void writeObject(std::ostream * out) const;
+
 	ObjectExpression::Pointer exprL;
 	ObjectExpression::Pointer exprR;
 };

@@ -21,6 +21,7 @@
 
 #include "ObjectCode.hpp"
 
+#include "object_io.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 
@@ -202,6 +203,19 @@ void print_debug(std::ostream * out, ObjectCode in)
 		*out << _ocode_str[in];
 	else
 		*out << "OCODE";
+}
+
+void read_object(std::istream * in, ObjectCode * out)
+{
+	read_object_raw(in, (char *)out, sizeof(*out));
+
+	if (*out > OCODE_NONE)
+		*out = OCODE_NONE;
+}
+
+void write_object(std::ostream * out, ObjectCode const & in)
+{
+	write_object_raw(out, (char const *)&in, sizeof(in));
 }
 
 

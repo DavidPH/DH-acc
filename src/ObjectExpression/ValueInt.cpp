@@ -21,6 +21,8 @@
 
 #include "../ObjectExpression.hpp"
 
+#include "../object_io.hpp"
+
 
 
 class ObjectExpression_ValueInt : public ObjectExpression
@@ -29,12 +31,16 @@ class ObjectExpression_ValueInt : public ObjectExpression
 
 public:
 	ObjectExpression_ValueInt(int_t value, SourcePosition const & position);
+	ObjectExpression_ValueInt(std::istream * in);
 
 	virtual ExpressionType getType() const;
 
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual int_t resolveInt() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 
 private:
 	int_t _value;
@@ -46,12 +52,20 @@ ObjectExpression::Pointer ObjectExpression::create_value_int(int_t value, Source
 {
 	return new ObjectExpression_ValueInt(value, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_value_int(std::istream * in)
+{
+	return new ObjectExpression_ValueInt(in);
+}
 
 
 
 ObjectExpression_ValueInt::ObjectExpression_ValueInt(int_t value, SourcePosition const & position) : Super(position), _value(value)
 {
 
+}
+ObjectExpression_ValueInt::ObjectExpression_ValueInt(std::istream * in) : Super(in)
+{
+	read_object(in, &_value);
 }
 
 ObjectExpression::ExpressionType ObjectExpression_ValueInt::getType() const
@@ -73,6 +87,15 @@ void ObjectExpression_ValueInt::printDebug(std::ostream * out) const
 ObjectExpression::int_t ObjectExpression_ValueInt::resolveInt() const
 {
 	return _value;
+}
+
+void ObjectExpression_ValueInt::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_VALUE_INT);
+
+	Super::writeObject(out);
+
+	write_object(out, _value);
 }
 
 

@@ -21,6 +21,8 @@
 
 #include "../ObjectExpression.hpp"
 
+#include "../object_io.hpp"
+
 
 
 class ObjectExpression_ValueFloat : public ObjectExpression
@@ -29,12 +31,16 @@ class ObjectExpression_ValueFloat : public ObjectExpression
 
 public:
 	ObjectExpression_ValueFloat(float_t value, SourcePosition const & position);
+	ObjectExpression_ValueFloat(std::istream * in);
 
 	virtual ExpressionType getType() const;
 
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual float_t resolveFloat() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 
 private:
 	float_t _value;
@@ -46,12 +52,20 @@ ObjectExpression::Pointer ObjectExpression::create_value_float(float_t value, So
 {
 	return new ObjectExpression_ValueFloat(value, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_value_float(std::istream * in)
+{
+	return new ObjectExpression_ValueFloat(in);
+}
 
 
 
 ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(float_t value, SourcePosition const & position) : Super(position), _value(value)
 {
 
+}
+ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(std::istream * in) : Super(in)
+{
+	read_object(in, &_value);
 }
 
 ObjectExpression::ExpressionType ObjectExpression_ValueFloat::getType() const
@@ -73,6 +87,15 @@ void ObjectExpression_ValueFloat::printDebug(std::ostream * out) const
 ObjectExpression::float_t ObjectExpression_ValueFloat::resolveFloat() const
 {
 	return _value;
+}
+
+void ObjectExpression_ValueFloat::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_VALUE_FLOAT);
+
+	Super::writeObject(out);
+
+	write_object(out, _value);
 }
 
 

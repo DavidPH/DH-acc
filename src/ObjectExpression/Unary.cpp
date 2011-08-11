@@ -29,6 +29,10 @@ ObjectExpression_Unary::ObjectExpression_Unary(ObjectExpression * expr, SourcePo
 {
 
 }
+ObjectExpression_Unary::ObjectExpression_Unary(std::istream * in) : Super(in)
+{
+	read_object(in, &expr);
+}
 
 ObjectExpression::ExpressionType ObjectExpression_Unary::getType() const
 {
@@ -44,6 +48,13 @@ void ObjectExpression_Unary::printDebug(std::ostream * out) const
 		print_debug(out, *expr);
 		*out << ")";
 	*out << ")";
+}
+
+void ObjectExpression_Unary::writeObject(std::ostream * out) const
+{
+	Super::writeObject(out);
+
+	write_object(out, expr);
 }
 
 

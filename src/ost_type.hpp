@@ -29,6 +29,7 @@ enum OutputType
 {
 	OUTPUT_ACS0,
 	OUTPUT_ACSE,
+	OUTPUT_object,
 
 	OUTPUT_UNKNOWN
 };
@@ -37,14 +38,15 @@ enum SourceType
 {
 	SOURCE_ASMPLX,
 	SOURCE_DS,
+	SOURCE_object,
 
 	SOURCE_UNKNOWN
 };
 
 enum TargetType
 {
-	TARGET_HEXEN,
-	TARGET_ZDOOM,
+	TARGET_Hexen,
+	TARGET_ZDoom,
 
 	TARGET_UNKNOWN
 };

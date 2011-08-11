@@ -29,11 +29,15 @@ class ObjectExpression_BinaryDiv : public ObjectExpression_Binary
 
 public:
 	ObjectExpression_BinaryDiv(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	ObjectExpression_BinaryDiv(std::istream * in);
 
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual float_t resolveFloat() const;
 	virtual int_t resolveInt() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 };
 
 
@@ -42,10 +46,18 @@ ObjectExpression::Pointer ObjectExpression::create_binary_div(ObjectExpression *
 {
 	return new ObjectExpression_BinaryDiv(exprL, exprR, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_binary_div(std::istream * in)
+{
+	return new ObjectExpression_BinaryDiv(in);
+}
 
 
 
 ObjectExpression_BinaryDiv::ObjectExpression_BinaryDiv(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+{
+
+}
+ObjectExpression_BinaryDiv::ObjectExpression_BinaryDiv(std::istream * in) : Super(in)
 {
 
 }
@@ -68,6 +80,13 @@ ObjectExpression::int_t ObjectExpression_BinaryDiv::resolveInt() const
 	if (getType() == ET_INT) return exprL->resolveInt() / exprR->resolveInt();
 
 	return Super::resolveInt();
+}
+
+void ObjectExpression_BinaryDiv::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_BINARY_DIV);
+
+	Super::writeObject(out);
 }
 
 

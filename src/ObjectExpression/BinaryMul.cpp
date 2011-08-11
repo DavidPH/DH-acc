@@ -29,11 +29,15 @@ class ObjectExpression_BinaryMul : public ObjectExpression_Binary
 
 public:
 	ObjectExpression_BinaryMul(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	ObjectExpression_BinaryMul(std::istream * in);
 
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual float_t resolveFloat() const;
 	virtual int_t resolveInt() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 };
 
 
@@ -42,10 +46,18 @@ ObjectExpression::Pointer ObjectExpression::create_binary_mul(ObjectExpression *
 {
 	return new ObjectExpression_BinaryMul(exprL, exprR, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_binary_mul(std::istream * in)
+{
+	return new ObjectExpression_BinaryMul(in);
+}
 
 
 
 ObjectExpression_BinaryMul::ObjectExpression_BinaryMul(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+{
+
+}
+ObjectExpression_BinaryMul::ObjectExpression_BinaryMul(std::istream * in) : Super(in)
 {
 
 }
@@ -68,6 +80,13 @@ ObjectExpression::int_t ObjectExpression_BinaryMul::resolveInt() const
 	if (getType() == ET_INT) return exprL->resolveInt() * exprR->resolveInt();
 
 	return Super::resolveInt();
+}
+
+void ObjectExpression_BinaryMul::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_BINARY_MUL);
+
+	Super::writeObject(out);
 }
 
 

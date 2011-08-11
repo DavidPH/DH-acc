@@ -64,6 +64,10 @@ ObjectExpression::ObjectExpression(SourcePosition const & position) : position(p
 {
 
 }
+ObjectExpression::ObjectExpression(std::istream * in)
+{
+	read_object(in, &position);
+}
 
 void ObjectExpression::add_address_count(int32_t const addressCount)
 {
@@ -92,8 +96,6 @@ void ObjectExpression::add_register_global(std::string const & name, int_t size,
 {
 	Register r = {name, number, size};
 	_register_global_table.push_back(r);
-	for (int_t i(0); i < size; ++i)
-		_register_global_used[number+i] = true;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
@@ -109,8 +111,6 @@ void ObjectExpression::add_register_map(std::string const & name, int_t size, in
 {
 	Register r = {name, number, size};
 	_register_map_table.push_back(r);
-	for (int_t i(0); i < size; ++i)
-		_register_map_used[number+i] = true;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
@@ -126,8 +126,6 @@ void ObjectExpression::add_register_world(std::string const & name, int_t size, 
 {
 	Register r = {name, number, size};
 	_register_world_table.push_back(r);
-	for (int_t i(0); i < size; ++i)
-		_register_world_used[number+i] = true;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
@@ -143,7 +141,6 @@ void ObjectExpression::add_registerarray_global(std::string const & name, int_t 
 {
 	RegisterArray r = {name, number, size};
 	_registerarray_global_table.push_back(r);
-	_registerarray_global_used[number] = true;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
@@ -159,7 +156,6 @@ void ObjectExpression::add_registerarray_map(std::string const & name, int_t siz
 {
 	RegisterArray r = {name, number, size};
 	_registerarray_map_table.push_back(r);
-	_registerarray_map_used[number] = true;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
@@ -175,7 +171,6 @@ void ObjectExpression::add_registerarray_world(std::string const & name, int_t s
 {
 	RegisterArray r = {name, number, size};
 	_registerarray_world_table.push_back(r);
-	_registerarray_world_used[number] = true;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
@@ -187,7 +182,6 @@ void ObjectExpression::add_script(std::string const & name, std::string const & 
 }
 void ObjectExpression::add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount, int_t number)
 {
-	reserve_script_number(number);
 	Script s = {label, name, stype, argCount, flags, number, varCount};
 	_script_table.push_back(s);
 
@@ -205,8 +199,6 @@ void ObjectExpression::add_static(std::string const & name, int_t size, int_t nu
 {
 	Static s = {name, number, size};
 	_static_table.push_back(s);
-	for (int_t i(0); i < size; ++i)
-		_static_used[number+i] = true;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
@@ -246,6 +238,17 @@ void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * r
 	{
 		Register & r((*registerTable)[i]);
 
+		if (r.number != -1)
+		{
+			for (int_t j(0); j < r.size; ++j)
+				(*registerUsed)[r.number+j] = true;
+		}
+	}
+
+	for (size_t i(0); i < registerTable->size(); ++i)
+	{
+		Register & r((*registerTable)[i]);
+
 		if (r.number == -1)
 		{
 			r.number = get_register_number(registerUsed, r.size);
@@ -256,6 +259,14 @@ void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * r
 }
 void ObjectExpression::do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<int_t, bool> * registerarrayUsed)
 {
+	for (size_t i(0); i < registerarrayTable->size(); ++i)
+	{
+		RegisterArray & r((*registerarrayTable)[i]);
+
+		if (r.number != -1)
+			(*registerarrayUsed)[r.number] = true;
+	}
+
 	for (size_t i(0); i < registerarrayTable->size(); ++i)
 	{
 		RegisterArray & r((*registerarrayTable)[i]);
@@ -290,11 +301,30 @@ void ObjectExpression::do_deferred_allocation()
 	{
 		Script & s(_script_table[i]);
 
+		if (s.number != -1)
+			_script_used[s.number] = true;
+	}
+
+	for (size_t i(0); i < _script_table.size(); ++i)
+	{
+		Script & s(_script_table[i]);
+
 		if (s.number == -1)
 		{
 			s.number = get_script_number();
 
 			add_symbol(s.name, create_value_int(s.number, SourcePosition::none));
+		}
+	}
+
+	for (size_t i(0); i < _static_table.size(); ++i)
+	{
+		Static & s(_static_table[i]);
+
+		if (s.number != -1)
+		{
+			for (int_t j(0); j < s.size; ++j)
+				_static_used[s.number+j] = true;
 		}
 	}
 
@@ -502,11 +532,6 @@ void ObjectExpression::printDebug(std::ostream * const out) const
 	*out << ")";
 }
 
-void ObjectExpression::reserve_script_number(int32_t number)
-{
-	_script_used[number] = true;
-}
-
 ObjectExpression::float_t ObjectExpression::resolveFloat() const
 {
 	throw SourceException("cannot resolve float", position, getName());
@@ -519,6 +544,11 @@ ObjectExpression::int_t ObjectExpression::resolveInt() const
 void ObjectExpression::set_address_count(int32_t addressCount)
 {
 	_address_count = addressCount;
+}
+
+void ObjectExpression::writeObject(std::ostream * out) const
+{
+	write_object(out, position);
 }
 
 

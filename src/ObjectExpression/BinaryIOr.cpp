@@ -29,10 +29,14 @@ class ObjectExpression_BinaryIOr : public ObjectExpression_Binary
 
 public:
 	ObjectExpression_BinaryIOr(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	ObjectExpression_BinaryIOr(std::istream * in);
 
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual int_t resolveInt() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 };
 
 
@@ -41,10 +45,18 @@ ObjectExpression::Pointer ObjectExpression::create_binary_ior(ObjectExpression *
 {
 	return new ObjectExpression_BinaryIOr(exprL, exprR, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_binary_ior(std::istream * in)
+{
+	return new ObjectExpression_BinaryIOr(in);
+}
 
 
 
 ObjectExpression_BinaryIOr::ObjectExpression_BinaryIOr(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+{
+
+}
+ObjectExpression_BinaryIOr::ObjectExpression_BinaryIOr(std::istream * in) : Super(in)
 {
 
 }
@@ -61,6 +73,13 @@ ObjectExpression::int_t ObjectExpression_BinaryIOr::resolveInt() const
 	if (getType() == ET_INT) return exprL->resolveInt() | exprR->resolveInt();
 
 	return Super::resolveInt();
+}
+
+void ObjectExpression_BinaryIOr::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_BINARY_IOR);
+
+	Super::writeObject(out);
 }
 
 

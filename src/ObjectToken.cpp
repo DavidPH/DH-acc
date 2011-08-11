@@ -22,6 +22,7 @@
 #include "ObjectToken.hpp"
 
 #include "ObjectExpression.hpp"
+#include "object_io.hpp"
 #include "print_debug.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
@@ -99,6 +100,24 @@ void print_debug(std::ostream * const out, ObjectToken const & in)
 		print_debug(out, in._position);
 		*out << ")";
 	*out << ")";
+}
+
+
+
+void read_object(std::istream * in, ObjectToken * out)
+{
+	read_object(in, &out->_args);
+	read_object(in, &out->_code);
+	read_object(in, &out->_labels);
+	read_object(in, &out->_position);
+}
+
+void write_object(std::ostream * out, ObjectToken const & in)
+{
+	write_object(out, in._args);
+	write_object(out, in._code);
+	write_object(out, in._labels);
+	write_object(out, in._position);
 }
 
 

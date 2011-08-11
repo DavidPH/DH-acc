@@ -53,9 +53,13 @@ public:
 	std::vector<std::string> const & getLabels() const;
 	SourcePosition const & getPosition() const;
 
+	void writeObject(std::ostream * out);
+
 
 
 	friend void print_debug(std::ostream * const out, ObjectToken const & in);
+	friend void read_object(std::istream * in, ObjectToken * out);
+	friend void write_object(std::ostream * out, ObjectToken const & in);
 
 private:
 	std::vector<ObjectExpression::Pointer> _args;

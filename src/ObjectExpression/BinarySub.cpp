@@ -29,11 +29,15 @@ class ObjectExpression_BinarySub : public ObjectExpression_Binary
 
 public:
 	ObjectExpression_BinarySub(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	ObjectExpression_BinarySub(std::istream * in);
 
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual float_t resolveFloat() const;
 	virtual int_t resolveInt() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 };
 
 
@@ -42,10 +46,18 @@ ObjectExpression::Pointer ObjectExpression::create_binary_sub(ObjectExpression *
 {
 	return new ObjectExpression_BinarySub(exprL, exprR, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_binary_sub(std::istream * in)
+{
+	return new ObjectExpression_BinarySub(in);
+}
 
 
 
 ObjectExpression_BinarySub::ObjectExpression_BinarySub(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+{
+
+}
+ObjectExpression_BinarySub::ObjectExpression_BinarySub(std::istream * in) : Super(in)
 {
 
 }
@@ -68,6 +80,13 @@ ObjectExpression::int_t ObjectExpression_BinarySub::resolveInt() const
 	if (getType() == ET_INT) return exprL->resolveInt() - exprR->resolveInt();
 
 	return Super::resolveInt();
+}
+
+void ObjectExpression_BinarySub::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_BINARY_SUB);
+
+	Super::writeObject(out);
 }
 
 

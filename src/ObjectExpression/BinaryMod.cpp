@@ -31,11 +31,15 @@ class ObjectExpression_BinaryMod : public ObjectExpression_Binary
 
 public:
 	ObjectExpression_BinaryMod(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	ObjectExpression_BinaryMod(std::istream * in);
 
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual float_t resolveFloat() const;
 	virtual int_t resolveInt() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 };
 
 
@@ -44,10 +48,18 @@ ObjectExpression::Pointer ObjectExpression::create_binary_mod(ObjectExpression *
 {
 	return new ObjectExpression_BinaryMod(exprL, exprR, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_binary_mod(std::istream * in)
+{
+	return new ObjectExpression_BinaryMod(in);
+}
 
 
 
 ObjectExpression_BinaryMod::ObjectExpression_BinaryMod(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+{
+
+}
+ObjectExpression_BinaryMod::ObjectExpression_BinaryMod(std::istream * in) : Super(in)
 {
 
 }
@@ -70,6 +82,13 @@ ObjectExpression::int_t ObjectExpression_BinaryMod::resolveInt() const
 	if (getType() == ET_INT) return exprL->resolveInt() % exprR->resolveInt();
 
 	return Super::resolveInt();
+}
+
+void ObjectExpression_BinaryMod::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_BINARY_MOD);
+
+	Super::writeObject(out);
 }
 
 

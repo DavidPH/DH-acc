@@ -29,11 +29,15 @@ class ObjectExpression_UnarySub : public ObjectExpression_Unary
 
 public:
 	ObjectExpression_UnarySub(ObjectExpression * expr, SourcePosition const & position);
+	ObjectExpression_UnarySub(std::istream * in);
 
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual float_t resolveFloat() const;
 	virtual int_t resolveInt() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 };
 
 
@@ -42,10 +46,18 @@ ObjectExpression::Pointer ObjectExpression::create_unary_sub(ObjectExpression * 
 {
 	return new ObjectExpression_UnarySub(expr, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_unary_sub(std::istream * in)
+{
+	return new ObjectExpression_UnarySub(in);
+}
 
 
 
 ObjectExpression_UnarySub::ObjectExpression_UnarySub(ObjectExpression * expr, SourcePosition const & position) : Super(expr, position)
+{
+
+}
+ObjectExpression_UnarySub::ObjectExpression_UnarySub(std::istream * in) : Super(in)
 {
 
 }
@@ -68,6 +80,13 @@ ObjectExpression::int_t ObjectExpression_UnarySub::resolveInt() const
 	if (getType() == ET_INT) return -expr->resolveInt();
 
 	return Super::resolveInt();
+}
+
+void ObjectExpression_UnarySub::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_UNARY_SUB);
+
+	Super::writeObject(out);
 }
 
 

@@ -21,6 +21,7 @@
 
 #include "ObjectVector.hpp"
 
+#include "object_io.hpp"
 #include "ObjectToken.hpp"
 
 
@@ -140,6 +141,22 @@ ObjectVector & ObjectVector::setPosition(SourcePosition const & position)
 	_position = position;
 
 	return *this;
+}
+
+
+
+void read_object(std::istream * in, ObjectVector * out)
+{
+	read_object(in, &out->_position);
+	read_object(in, &out->_labels);
+	read_object(in, &out->_tokens);
+}
+
+void write_object(std::ostream * out, ObjectVector const & in)
+{
+	write_object(out, in._position);
+	write_object(out, in._labels);
+	write_object(out, in._tokens);
 }
 
 

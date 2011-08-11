@@ -139,8 +139,6 @@ static inline int _main()
 
 		SourceTokenizerDS tokenizer(&in);
 
-		ObjectExpression::reserve_script_number(0);
-
 		SourceExpression::Pointer expressions(SourceExpressionDS::make_expressions(&tokenizer));
 		expressions->addLabel("main");
 
@@ -150,21 +148,34 @@ static inline int _main()
 	}
 		break;
 
+	case SOURCE_object:
+		ObjectExpression::read_objects(&ifs, &objects);
+		break;
+
 	default:
 		std::cerr << "Unknown source type.\n";
 		return 1;
+	}
+
+	if (output_type == OUTPUT_object)
+	{
+		std::ofstream ofs(option::option_args[1].c_str());
+
+		ObjectExpression::write_objects(&ofs, objects);
+
+		return 0;
 	}
 
 	ObjectExpression::do_deferred_allocation();
 	objects.optimize();
 
 	if (target_type == TARGET_UNKNOWN)
-		target_type = TARGET_ZDOOM;
+		target_type = TARGET_ZDoom;
 
 	if (output_type == OUTPUT_UNKNOWN) switch (target_type)
 	{
-	case TARGET_HEXEN: output_type = OUTPUT_ACS0; break;
-	case TARGET_ZDOOM: output_type = OUTPUT_ACSE; break;
+	case TARGET_Hexen: output_type = OUTPUT_ACS0; break;
+	case TARGET_ZDoom: output_type = OUTPUT_ACSE; break;
 	case TARGET_UNKNOWN: break;
 	}
 
@@ -172,7 +183,7 @@ static inline int _main()
 
 	switch (target_type)
 	{
-	case TARGET_ZDOOM:
+	case TARGET_ZDoom:
 	{
 		std::vector<BinaryTokenZDACS> instructions;
 		BinaryTokenZDACS::make_tokens(objects, &instructions);

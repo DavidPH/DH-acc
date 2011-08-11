@@ -29,11 +29,15 @@ class ObjectExpression_BinaryAdd : public ObjectExpression_Binary
 
 public:
 	ObjectExpression_BinaryAdd(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	ObjectExpression_BinaryAdd(std::istream * in);
 
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual float_t resolveFloat() const;
 	virtual int_t resolveInt() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 };
 
 
@@ -42,10 +46,18 @@ ObjectExpression::Pointer ObjectExpression::create_binary_add(ObjectExpression *
 {
 	return new ObjectExpression_BinaryAdd(exprL, exprR, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_binary_add(std::istream * in)
+{
+	return new ObjectExpression_BinaryAdd(in);
+}
 
 
 
 ObjectExpression_BinaryAdd::ObjectExpression_BinaryAdd(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+{
+
+}
+ObjectExpression_BinaryAdd::ObjectExpression_BinaryAdd(std::istream * in) : Super(in)
 {
 
 }
@@ -68,6 +80,13 @@ ObjectExpression::int_t ObjectExpression_BinaryAdd::resolveInt() const
 	if (getType() == ET_INT) return exprL->resolveInt() + exprR->resolveInt();
 
 	return Super::resolveInt();
+}
+
+void ObjectExpression_BinaryAdd::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_BINARY_ADD);
+
+	Super::writeObject(out);
 }
 
 

@@ -29,10 +29,14 @@ class ObjectExpression_BinaryAnd : public ObjectExpression_Binary
 
 public:
 	ObjectExpression_BinaryAnd(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+	ObjectExpression_BinaryAnd(std::istream * in);
 
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual int_t resolveInt() const;
+
+protected:
+	virtual void writeObject(std::ostream * out) const;
 };
 
 
@@ -41,10 +45,18 @@ ObjectExpression::Pointer ObjectExpression::create_binary_and(ObjectExpression *
 {
 	return new ObjectExpression_BinaryAnd(exprL, exprR, position);
 }
+ObjectExpression::Pointer ObjectExpression::create_binary_and(std::istream * in)
+{
+	return new ObjectExpression_BinaryAnd(in);
+}
 
 
 
 ObjectExpression_BinaryAnd::ObjectExpression_BinaryAnd(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+{
+
+}
+ObjectExpression_BinaryAnd::ObjectExpression_BinaryAnd(std::istream * in) : Super(in)
 {
 
 }
@@ -61,6 +73,13 @@ ObjectExpression::int_t ObjectExpression_BinaryAnd::resolveInt() const
 	if (getType() == ET_INT) return exprL->resolveInt() & exprR->resolveInt();
 
 	return Super::resolveInt();
+}
+
+void ObjectExpression_BinaryAnd::writeObject(std::ostream * out) const
+{
+	write_object(out, OT_BINARY_AND);
+
+	Super::writeObject(out);
 }
 
 

@@ -14,6 +14,7 @@ add_executable(DH-acc
 	ObjectExpression/BinaryMul.cpp
 	ObjectExpression/BinarySub.cpp
 	ObjectExpression/BinaryXOr.cpp
+	ObjectExpression/objects_io.cpp
 	ObjectExpression/Unary.cpp
 	ObjectExpression/UnaryAdd.cpp
 	ObjectExpression/UnarySub.cpp
@@ -22,6 +23,7 @@ add_executable(DH-acc
 	ObjectExpression/ValueSymbol.cpp
 	ObjectToken.cpp
 	ObjectVector.cpp
+	object_io.cpp
 	option.cpp
 	ost_type.cpp
 	print_debug.cpp

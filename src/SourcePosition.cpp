@@ -21,6 +21,8 @@
 
 #include "SourcePosition.hpp"
 
+#include "object_io.hpp"
+
 
 
 SourcePosition const SourcePosition::none;
@@ -46,6 +48,18 @@ std::ostream & operator << (std::ostream & out, SourcePosition const & in)
 void print_debug(std::ostream * out, SourcePosition const & in)
 {
 	*out << in;
+}
+void read_object(std::istream * in, SourcePosition * out)
+{
+	read_object(in, &out->filename);
+	read_object(in, &out->line);
+	read_object(in, &out->column);
+}
+void write_object(std::ostream * out, SourcePosition const & in)
+{
+	write_object(out, in.filename);
+	write_object(out, in.line);
+	write_object(out, in.column);
 }
 
 
