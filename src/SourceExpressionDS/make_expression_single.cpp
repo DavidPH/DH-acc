@@ -367,7 +367,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	}
 
 	// scriptLabel
-	std::string scriptLabel(context->getLabel() + "script_" + (scriptName == "void" ? context->makeLabel() : scriptName));
+	std::string scriptLabel(context->getLabel() + "script_" + (scriptName == "void" ? (context->makeLabel() + ObjectExpression::get_filename()) : scriptName));
 
 	// scriptNameObject
 	std::string scriptNameObject(scriptLabel + "_id");

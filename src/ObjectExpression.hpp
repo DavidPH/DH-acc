@@ -114,8 +114,9 @@ public:
 
 	struct String
 	{
-		int32_t offset;
+		std::string name;
 		std::string string;
+		int_t offset;
 	};
 
 
@@ -191,9 +192,9 @@ public:
 	static void add_static(std::string const & name, int_t size);
 	static void add_static(std::string const & name, int_t size, int_t number);
 
-	// Adds a string using an auto-generated symbol and returns that symbol.
+	// Adds a string using an auto-generated name and returns that name.
 	static std::string add_string(std::string const & value);
-	static void add_string(std::string const & symbol, std::string const & value);
+	static void add_string(std::string const & name, std::string const & value);
 
 	static void add_symbol(std::string const & symbol, ObjectExpression * value);
 	static void add_symbol(std::string const & symbol, ExpressionType type);
@@ -217,6 +218,8 @@ public:
 	static Pointer create_value_symbol(std::string const & symbol, SourcePosition const & position);
 
 	static void do_deferred_allocation();
+
+	static std::string const & get_filename();
 
 	static float_t get_float(SourceTokenC const & token);
 
@@ -251,6 +254,9 @@ public:
 	static void read_objects(std::istream * in, ObjectVector * objects);
 
 	static void set_address_count(int32_t addressCount);
+
+	// Sets the current filename, translating to make it a valid symbol.
+	static void set_filename(std::string const & filename);
 
 	static void write_objects(std::ostream * out, ObjectVector const & objects);
 
@@ -319,6 +325,8 @@ private:
 	static bool is_register_used(std::map<int_t, bool> * registerUsed, int_t number, int_t size);
 
 	static int32_t _address_count;
+
+	static std::string _filename;
 
 	static std::vector<Function> _function_table;
 

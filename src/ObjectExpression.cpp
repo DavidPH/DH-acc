@@ -30,6 +30,8 @@
 
 int32_t ObjectExpression::_address_count;
 
+std::string ObjectExpression::_filename;
+
 std::vector<ObjectExpression::Function> ObjectExpression::_function_table;
 
 std::vector<ObjectExpression::Register> ObjectExpression::_register_global_table;
@@ -206,20 +208,18 @@ void ObjectExpression::add_static(std::string const & name, int_t size, int_t nu
 std::string ObjectExpression::add_string(std::string const & value)
 {
 	std::ostringstream oss;
-	oss << "__string_" << _string_table.size();
+	oss << "__string_" << _filename << "_" << _string_table.size();
 	std::string symbol(oss.str());
 
 	add_string(symbol, value);
 	return symbol;
 }
-void ObjectExpression::add_string(std::string const & symbol, std::string const & value)
+void ObjectExpression::add_string(std::string const & name, std::string const & value)
 {
-	// TODO: Option for string folding.
-
-	add_symbol(symbol, create_value_int((int_t)_string_table.size(), SourcePosition::none));
-
-	String s = {get_string_length(), value};
+	String s = {name, value, 0};
 	_string_table.push_back(s);
+
+	add_symbol(name, ET_INT);
 }
 
 void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression * value)
@@ -289,14 +289,17 @@ void ObjectExpression::do_deferred_allocation()
 	// Pointer-addressable space.
 	_registerarray_global_used[0] = true;
 
+	// Deferred register allocation.
 	do_deferred_allocation_register(&_register_global_table, &_register_global_used);
 	do_deferred_allocation_register(&_register_map_table, &_register_map_used);
 	do_deferred_allocation_register(&_register_world_table, &_register_world_used);
 
+	// Deferred registerarray allocation.
 	do_deferred_allocation_registerarray(&_registerarray_global_table, &_registerarray_global_used);
 	do_deferred_allocation_registerarray(&_registerarray_map_table, &_registerarray_map_used);
 	do_deferred_allocation_registerarray(&_registerarray_world_table, &_registerarray_world_used);
 
+	// Deferred script allocation.
 	for (size_t i(0); i < _script_table.size(); ++i)
 	{
 		Script & s(_script_table[i]);
@@ -317,6 +320,7 @@ void ObjectExpression::do_deferred_allocation()
 		}
 	}
 
+	// Deferred static allocation.
 	for (size_t i(0); i < _static_table.size(); ++i)
 	{
 		Static & s(_static_table[i]);
@@ -339,6 +343,23 @@ void ObjectExpression::do_deferred_allocation()
 			add_symbol(s.name, create_value_int(s.number, SourcePosition::none));
 		}
 	}
+
+	// Deferred string allocation.
+	if (!_string_table.empty())
+	{
+		_string_table[0].offset = 0;
+
+		for (size_t i(1); i < _string_table.size(); ++i)
+			_string_table[i].offset = _string_table[i-1].offset + _string_table[i-1].string.size();
+	}
+
+	for (size_t i(0); i < _string_table.size(); ++i)
+		add_symbol(_string_table[i].name, create_value_int((int_t)i, SourcePosition::none));
+}
+
+std::string const & ObjectExpression::get_filename()
+{
+	return _filename;
 }
 
 ObjectExpression::float_t ObjectExpression::get_float(SourceTokenC const & token)
@@ -544,6 +565,11 @@ ObjectExpression::int_t ObjectExpression::resolveInt() const
 void ObjectExpression::set_address_count(int32_t addressCount)
 {
 	_address_count = addressCount;
+}
+
+void ObjectExpression::set_filename(std::string const & filename)
+{
+	_filename = filename;
 }
 
 void ObjectExpression::writeObject(std::ostream * out) const

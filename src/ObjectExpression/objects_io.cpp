@@ -56,10 +56,7 @@ void ObjectExpression::write_objects(std::ostream * out, ObjectVector const & ob
 void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
 {
 	if (in->get() != 'o' || in->get() != 'b' || in->get() != 'j' || in->get() != 'e' || in->get() != 'c' || in->get() != 't')
-	{
-		std::cerr << "not object file";
-		throw 1;
-	}
+		throw "Not object file.";
 
 	read_object(in, objects);
 
@@ -259,8 +256,9 @@ void read_object(std::istream * in, ObjectExpression::Static * out)
 }
 void read_object(std::istream * in, ObjectExpression::String * out)
 {
-	read_object(in, &out->offset);
+	read_object(in, &out->name);
 	read_object(in, &out->string);
+	read_object(in, &out->offset);
 }
 
 void write_object(std::ostream * out, ObjectExpression::ExpressionType const & in)
@@ -316,8 +314,9 @@ void write_object(std::ostream * out, ObjectExpression::Static const & in)
 }
 void write_object(std::ostream * out, ObjectExpression::String const & in)
 {
-	write_object(out, in.offset);
+	write_object(out, in.name);
 	write_object(out, in.string);
+	write_object(out, in.offset);
 }
 
 

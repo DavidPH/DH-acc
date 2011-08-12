@@ -43,6 +43,10 @@
 
 
 
+static std::string option_out;
+
+
+
 SourceType divine_source_type(std::string const & name)
 {
 	std::ifstream in(name.c_str());
@@ -66,7 +70,62 @@ SourceType divine_source_type(std::string const & name)
 		return SOURCE_ASMPLX;
 
 
+	// object source?
+	in.seekg(0);
+
+	if (in.get() == 'o' && in.get() == 'b' && in.get() == 'j' && in.get() == 'e' && in.get() == 'c' && in.get() == 't')
+		return SOURCE_object;
+
+
 	return SOURCE_UNKNOWN;
+}
+
+void read_source(std::string const & name, SourceType type, ObjectVector * objects)
+{
+	ObjectExpression::set_filename(name);
+
+	if (type == SOURCE_UNKNOWN)
+		type = divine_source_type(name);
+
+	std::ifstream ifs(name.c_str());
+
+	switch (type)
+	{
+	case SOURCE_ASMPLX:
+	{
+		SourceStream in(&ifs, name, SourceStream::ST_ASMPLX);
+
+		std::vector<SourceTokenASMPLX> tokens;
+		SourceTokenASMPLX::read_tokens(&in, &tokens);
+
+		ObjectExpression::add_script("main", 0, ObjectExpression::ST_OPEN, 0, 0, 0);
+
+		SourceTokenASMPLX::make_objects(tokens, objects);
+	}
+		break;
+
+	case SOURCE_DS:
+	{
+		SourceStream in(&ifs, name, SourceStream::ST_C);
+
+		SourceTokenizerDS tokenizer(&in);
+
+		SourceExpression::Pointer expressions(SourceExpressionDS::make_expressions(&tokenizer));
+		expressions->addLabel("main");
+
+		ObjectExpression::add_script("main_id", "main", ObjectExpression::ST_OPEN, 0, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER), 0);
+
+		expressions->makeObjects(objects);
+	}
+		break;
+
+	case SOURCE_object:
+		ObjectExpression::read_objects(&ifs, objects);
+		break;
+
+	default:
+		throw "Unknown source type.";
+	}
 }
 
 static inline void _init(int argc, char const * const * argv)
@@ -77,6 +136,8 @@ static inline void _init(int argc, char const * const * argv)
 	SourceExpressionDS::init();
 	SourceTokenASMPLX::init();
 
+	option::option_add("out", "output", "Output file.", &option_out, option::option_handler_default_s);
+
 	option::option_set_name(argv[0]);
 
 	if (argc == 1)
@@ -86,92 +147,48 @@ static inline void _init(int argc, char const * const * argv)
 	}
 
 	option::option_process(argc-1, argv+1);
+
+	if (option_out.empty() && !option::option_args.empty())
+	{
+		option_out = option::option_args.back();
+		option::option_args.pop_back();
+	}
+
+	if (option::option_args.empty())
+	{
+		option::option_print_help(&std::cout);
+		throw 0;
+	}
 }
 
 static inline int _main()
 {
-	if (option::option_args.size() != 2) return 1;
-
-	if (source_type == SOURCE_UNKNOWN)
-		source_type = divine_source_type(option::option_args[0]);
-
-	std::ifstream ifs(option::option_args[0].c_str());
-
 	ObjectVector objects;
 
-	switch (source_type)
-	{
-	#if 0
-	case SOURCE_ACS:
-	{
-		SourceStream in(&ifs, option::option_args[0], SourceStream::ST_C);
+	// Read source file(s).
+	for (option::option_sv::iterator arg(option::option_args.begin()); arg != option::option_args.end(); ++arg)
+		read_source(*arg, source_type, &objects);
 
-		SourceTokenizerC tokenizer(&in);
-
-		SourceBlockC block(&tokenizer);
-		print_debug(&ofs, block); return 0;
-
-		std::vector<SourceExpressionACS> expressions;
-		SourceExpressionACS::make_expressions(block, &expressions);
-		print_debug(&ofs, expressions); return 0;
-
-		SourceExpressionACS::make_objects(expressions, &objects);
-	}
-		break;
-	#endif
-
-	case SOURCE_ASMPLX:
-	{
-		SourceStream in(&ifs, option::option_args[0], SourceStream::ST_ASMPLX);
-
-		std::vector<SourceTokenASMPLX> tokens;
-		SourceTokenASMPLX::read_tokens(&in, &tokens);
-
-		ObjectExpression::add_script("main", 0, ObjectExpression::ST_OPEN, 0, 0, 0);
-
-		SourceTokenASMPLX::make_objects(tokens, &objects);
-	}
-		break;
-
-	case SOURCE_DS:
-	{
-		SourceStream in(&ifs, option::option_args[0], SourceStream::ST_C);
-
-		SourceTokenizerDS tokenizer(&in);
-
-		SourceExpression::Pointer expressions(SourceExpressionDS::make_expressions(&tokenizer));
-		expressions->addLabel("main");
-
-		ObjectExpression::add_script("main_id", "main", ObjectExpression::ST_OPEN, 0, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER), 0);
-
-		expressions->makeObjects(&objects);
-	}
-		break;
-
-	case SOURCE_object:
-		ObjectExpression::read_objects(&ifs, &objects);
-		break;
-
-	default:
-		std::cerr << "Unknown source type.\n";
-		return 1;
-	}
-
+	// If doing object output, don't process object data.
 	if (output_type == OUTPUT_object)
 	{
-		std::ofstream ofs(option::option_args[1].c_str());
+		std::ofstream ofs(option_out.c_str());
 
 		ObjectExpression::write_objects(&ofs, objects);
 
 		return 0;
 	}
 
+	// Process object data.
 	ObjectExpression::do_deferred_allocation();
 	objects.optimize();
 
+	// Default target.
+	// TODO: Default to Hexen.
 	if (target_type == TARGET_UNKNOWN)
 		target_type = TARGET_ZDoom;
 
+	// Default output.
 	if (output_type == OUTPUT_UNKNOWN) switch (target_type)
 	{
 	case TARGET_Hexen: output_type = OUTPUT_ACS0; break;
@@ -179,7 +196,8 @@ static inline int _main()
 	case TARGET_UNKNOWN: break;
 	}
 
-	std::ofstream ofs(option::option_args[1].c_str());
+	// Write output file.
+	std::ofstream ofs(option_out.c_str());
 
 	switch (target_type)
 	{
@@ -192,8 +210,7 @@ static inline int _main()
 		break;
 
 	default:
-		std::cerr << "Unknown target type.\n";
-		return 1;
+		throw "Unknown target type.";
 	}
 
 	return 0;
@@ -220,7 +237,12 @@ int main(int argc, char * * argv)
 	{
 		std::cerr << "(std::exception): " << e.what() << std::endl;
 	}
-	catch (int & e)
+	catch (char const * e)
+	{
+		std::cerr << e << std::endl;
+		return 1;
+	}
+	catch (int e)
 	{
 		return e;
 	}
