@@ -62,6 +62,10 @@ public:
 
 	void unget(char const c);
 
+
+
+	static void init();
+
 private:
 	int getC();
 

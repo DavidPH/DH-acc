@@ -43,7 +43,7 @@
 
 
 
-static std::string option_out;
+static option::option_s option_out;
 
 
 
@@ -134,6 +134,7 @@ static inline void _init(int argc, char const * const * argv)
 
 	BinaryTokenZDACS::init();
 	SourceExpressionDS::init();
+	SourceStream::init();
 	SourceTokenASMPLX::init();
 
 	option::option_add("out", "output", "Output file.", &option_out, option::option_handler_default_s);

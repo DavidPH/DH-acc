@@ -21,6 +21,12 @@
 
 #include "SourceStream.hpp"
 
+#include "option.hpp"
+
+
+
+option::option_i option_tab_columns(1);
+
 
 
 SourceStream::SourceStream(std::istream * const in, std::string const & filename, SourceType const type) :
@@ -98,6 +104,11 @@ long SourceStream::getLineCount() const
 	return _countLine;
 }
 
+void SourceStream::init()
+{
+	option::option_add("tab-columns", "input", "How many columns a tab counts for in error reporting.", &option_tab_columns, option::option_handler_default_i);
+}
+
 bool SourceStream::isInComment() const
 {
 	return _inComment || _depthComment;
@@ -126,7 +137,11 @@ void SourceStream::prepareC()
 
 
 
-		++_countColumn;
+		// \t has special counting
+		if (_curC == '\t')
+			_countColumn += option_tab_columns;
+		else
+			++_countColumn;
 
 		// \n end of line
 		if (_curC == '\n')
@@ -189,14 +204,22 @@ void SourceStream::prepareC()
 		{
 			int newC(_newC);
 			_newC = -2;
+			++_countColumn;
 
 			switch (newC)
 			{
 			case 'r': _curC = '\r'; break;
 			case 'n': _curC = '\n'; break;
 			case 't': _curC = '\t'; break;
-			case '\n': ++_countLine;
+
+			case '\n':
+				_countColumn = 0;
+				++_countLine;
+				_curC = _newC;
+				break;
+
 			case '\t':
+				_countColumn += option_tab_columns-1;
 			case '\\':
 			case '\'':
 			case '"':
