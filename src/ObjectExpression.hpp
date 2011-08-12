@@ -23,6 +23,7 @@
 #define HPP_ObjectExpression_
 
 #include "CounterPointer.hpp"
+#include "option.hpp"
 #include "SourcePosition.hpp"
 
 #include <istream>
@@ -251,6 +252,8 @@ public:
 	static ObjectExpression::Pointer get_symbol(std::string const & symbol, SourcePosition const & position);
 	static ExpressionType get_symbol_type(std::string const & symbol, SourcePosition const & position);
 
+	static void init();
+
 	static void read_objects(std::istream * in, ObjectVector * objects);
 
 	static void set_address_count(int32_t addressCount);
@@ -317,10 +320,14 @@ private:
 	static void do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<int_t, bool> * registerUsed);
 	static void do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<int_t, bool> * registerarrayUsed);
 
+	static bool do_string_fold(size_t index);
+
 	static int_t get_register_number(std::map<int_t, bool> * registerUsed, int_t size);
 	static int_t get_registerarray_number(std::map<int_t, bool> * registerarrayUsed);
 	static int_t get_script_number();
 	static int_t get_static_number(int_t size);
+
+	static int_t get_string(std::string const & s);
 
 	static bool is_register_used(std::map<int_t, bool> * registerUsed, int_t number, int_t size);
 
@@ -355,6 +362,10 @@ private:
 	static std::map<std::string, ObjectExpression::Pointer> _symbol_table;
 	static std::map<std::string, ExpressionType>            _symbol_type_table;
 };
+
+
+
+extern option::option_b option_string_fold;
 
 
 

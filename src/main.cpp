@@ -133,6 +133,7 @@ static inline void _init(int argc, char const * const * argv)
 	ost_init();
 
 	BinaryTokenZDACS::init();
+	ObjectExpression::init();
 	SourceExpressionDS::init();
 	SourceStream::init();
 	SourceTokenASMPLX::init();
