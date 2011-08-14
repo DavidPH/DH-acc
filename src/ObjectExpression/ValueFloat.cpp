@@ -30,25 +30,25 @@ class ObjectExpression_ValueFloat : public ObjectExpression
 	MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueFloat, ObjectExpression);
 
 public:
-	ObjectExpression_ValueFloat(float_t value, SourcePosition const & position);
+	ObjectExpression_ValueFloat(bigreal value, SourcePosition const & position);
 	ObjectExpression_ValueFloat(std::istream * in);
 
 	virtual ExpressionType getType() const;
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual float_t resolveFloat() const;
+	virtual bigreal resolveFloat() const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
 
 private:
-	float_t _value;
+	bigreal _value;
 };
 
 
 
-ObjectExpression::Pointer ObjectExpression::create_value_float(float_t value, SourcePosition const & position)
+ObjectExpression::Pointer ObjectExpression::create_value_float(bigreal value, SourcePosition const & position)
 {
 	return new ObjectExpression_ValueFloat(value, position);
 }
@@ -59,7 +59,7 @@ ObjectExpression::Pointer ObjectExpression::create_value_float(std::istream * in
 
 
 
-ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(float_t value, SourcePosition const & position) : Super(position), _value(value)
+ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(bigreal value, SourcePosition const & position) : Super(position), _value(value)
 {
 
 }
@@ -84,7 +84,7 @@ void ObjectExpression_ValueFloat::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-ObjectExpression::float_t ObjectExpression_ValueFloat::resolveFloat() const
+bigreal ObjectExpression_ValueFloat::resolveFloat() const
 {
 	return _value;
 }

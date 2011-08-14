@@ -24,13 +24,13 @@
 
 #include "CounterPointer.hpp"
 #include "ObjectCode.hpp"
-#include "ObjectExpression.hpp"
 #include "SourcePosition.hpp"
 
 #include <ostream>
 #include <string>
 #include <vector>
 
+class ObjectExpression;
 class ObjectVector;
 class SourceExpression;
 class SourceTokenC;
@@ -194,8 +194,8 @@ public:
 
 	VariableType const * getType() const;
 
-	ObjectExpression::Pointer makeObject(SourcePosition const & position) const;
-	ObjectExpression::Pointer makeObjectAddress(SourcePosition const & position) const;
+	CounterPointer<ObjectExpression> makeObject(SourcePosition const & position) const;
+	CounterPointer<ObjectExpression> makeObjectAddress(SourcePosition const & position) const;
 
 	void makeObjectsAddress(ObjectVector * objects, SourcePosition const & position) const;
 
@@ -248,7 +248,7 @@ public:
 
 private:
 	VariableData _data;
-	ObjectExpression::Pointer _expr;
+	CounterPointer<ObjectExpression> _expr;
 	std::string _nameObject;
 	std::string _nameSource;
 	SourcePosition _position;

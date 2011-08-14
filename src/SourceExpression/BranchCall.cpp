@@ -21,6 +21,7 @@
 
 #include "../SourceExpression.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
 #include "../SourceContext.hpp"
@@ -45,7 +46,7 @@ protected:
 private:
 	std::vector<SourceExpression::Pointer> _args;
 	SourceExpression::Pointer _expr;
-	ObjectExpression::int_t _stack;
+	bigsint _stack;
 };
 
 

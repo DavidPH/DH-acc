@@ -21,6 +21,7 @@
 
 #include "../SourceExpression.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
 
@@ -40,8 +41,8 @@ public:
 
 	virtual SourceVariable::VariableType const * getType() const;
 
-	virtual ObjectExpression::Pointer makeObject() const;
-	virtual ObjectExpression::Pointer makeObjectAddress() const;
+	virtual CounterPointer<ObjectExpression> makeObject() const;
+	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
 
 	virtual void makeObjectsAddress(ObjectVector * objects);
 
@@ -91,7 +92,7 @@ SourceExpression::Pointer SourceExpression::create_value_int(SourceTokenC const 
 {
 	SourceVariable::VariableType const * intVarType(SourceVariable::get_VariableType(SourceVariable::VT_INT));
 
-	SourceVariable::VariableData_Int intVarData = {intVarType, ObjectExpression::get_int(token)};
+	SourceVariable::VariableData_Int intVarData = {intVarType, get_bigsint(token)};
 
 	SourceVariable intVariable("", intVarData, token.getPosition());
 
@@ -101,7 +102,7 @@ SourceExpression::Pointer SourceExpression::create_value_real(SourceTokenC const
 {
 	SourceVariable::VariableType const * realVarType(SourceVariable::get_VariableType(SourceVariable::VT_REAL));
 
-	SourceVariable::VariableData_Real realVarData = {realVarType, ObjectExpression::get_float(token)};
+	SourceVariable::VariableData_Real realVarData = {realVarType, get_bigreal(token)};
 
 	SourceVariable realVariable("", realVarData, token.getPosition());
 
@@ -148,11 +149,11 @@ SourceVariable::VariableType const * SourceExpression_ValueVariable::getType() c
 	return _var.getType();
 }
 
-ObjectExpression::Pointer SourceExpression_ValueVariable::makeObject() const
+CounterPointer<ObjectExpression> SourceExpression_ValueVariable::makeObject() const
 {
 	return _var.makeObject(position);
 }
-ObjectExpression::Pointer SourceExpression_ValueVariable::makeObjectAddress() const
+CounterPointer<ObjectExpression> SourceExpression_ValueVariable::makeObjectAddress() const
 {
 	return _var.makeObjectAddress(position);
 }

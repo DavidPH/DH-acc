@@ -35,25 +35,25 @@ std::string ObjectExpression::_filename;
 std::vector<ObjectExpression::Function> ObjectExpression::_function_table;
 
 std::vector<ObjectExpression::Register> ObjectExpression::_register_global_table;
-std::map<ObjectExpression::int_t, bool> ObjectExpression::_register_global_used;
+std::map<bigsint, bool>                 ObjectExpression::_register_global_used;
 std::vector<ObjectExpression::Register> ObjectExpression::_register_map_table;
-std::map<ObjectExpression::int_t, bool> ObjectExpression::_register_map_used;
+std::map<bigsint, bool>                 ObjectExpression::_register_map_used;
 std::vector<ObjectExpression::Register> ObjectExpression::_register_world_table;
-std::map<ObjectExpression::int_t, bool> ObjectExpression::_register_world_used;
+std::map<bigsint, bool>                 ObjectExpression::_register_world_used;
 
 std::vector<ObjectExpression::RegisterArray> ObjectExpression::_registerarray_global_table;
-std::map<ObjectExpression::int_t, bool>      ObjectExpression::_registerarray_global_used;
+std::map<bigsint, bool>                      ObjectExpression::_registerarray_global_used;
 std::vector<ObjectExpression::RegisterArray> ObjectExpression::_registerarray_map_table;
-std::map<ObjectExpression::int_t, bool>      ObjectExpression::_registerarray_map_used;
+std::map<bigsint, bool>                      ObjectExpression::_registerarray_map_used;
 std::vector<ObjectExpression::RegisterArray> ObjectExpression::_registerarray_world_table;
-std::map<ObjectExpression::int_t, bool>      ObjectExpression::_registerarray_world_used;
+std::map<bigsint, bool>                      ObjectExpression::_registerarray_world_used;
 
 std::vector<ObjectExpression::Script>   ObjectExpression::_script_table;
-std::map<ObjectExpression::int_t, bool> ObjectExpression::_script_used;
+std::map<bigsint, bool>                 ObjectExpression::_script_used;
 
 ObjectExpression::Pointer               ObjectExpression:: static_offset(create_value_int(8192, SourcePosition()));
 std::vector<ObjectExpression::Static>   ObjectExpression::_static_table;
-std::map<ObjectExpression::int_t, bool> ObjectExpression::_static_used;
+std::map<bigsint, bool>                 ObjectExpression::_static_used;
 
 std::vector<ObjectExpression::String> ObjectExpression::_string_table;
 
@@ -78,7 +78,7 @@ void ObjectExpression::add_address_count(int32_t const addressCount)
 	_address_count += addressCount;
 }
 
-void ObjectExpression::add_function(std::string const & label, int_t argCount, int_t varCount, int_t retCount)
+void ObjectExpression::add_function(std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount)
 {
 	Function f = {argCount, label, retCount, varCount};
 	_function_table.push_back(f);
@@ -89,14 +89,14 @@ void ObjectExpression::add_label(std::string const & symbol)
 	add_symbol(symbol, create_value_int(_address_count, SourcePosition::none));
 }
 
-void ObjectExpression::add_register_global(std::string const & name, int_t size)
+void ObjectExpression::add_register_global(std::string const & name, bigsint size)
 {
 	Register r = {name, -1, size};
 	_register_global_table.push_back(r);
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_register_global(std::string const & name, int_t size, int_t number)
+void ObjectExpression::add_register_global(std::string const & name, bigsint size, bigsint number)
 {
 	Register r = {name, number, size};
 	_register_global_table.push_back(r);
@@ -104,14 +104,14 @@ void ObjectExpression::add_register_global(std::string const & name, int_t size,
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_register_map(std::string const & name, int_t size)
+void ObjectExpression::add_register_map(std::string const & name, bigsint size)
 {
 	Register r = {name, -1, size};
 	_register_map_table.push_back(r);
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_register_map(std::string const & name, int_t size, int_t number)
+void ObjectExpression::add_register_map(std::string const & name, bigsint size, bigsint number)
 {
 	Register r = {name, number, size};
 	_register_map_table.push_back(r);
@@ -119,14 +119,14 @@ void ObjectExpression::add_register_map(std::string const & name, int_t size, in
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_register_world(std::string const & name, int_t size)
+void ObjectExpression::add_register_world(std::string const & name, bigsint size)
 {
 	Register r = {name, -1, size};
 	_register_world_table.push_back(r);
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_register_world(std::string const & name, int_t size, int_t number)
+void ObjectExpression::add_register_world(std::string const & name, bigsint size, bigsint number)
 {
 	Register r = {name, number, size};
 	_register_world_table.push_back(r);
@@ -134,14 +134,14 @@ void ObjectExpression::add_register_world(std::string const & name, int_t size, 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_registerarray_global(std::string const & name, int_t size)
+void ObjectExpression::add_registerarray_global(std::string const & name, bigsint size)
 {
 	RegisterArray r = {name, -1, size};
 	_registerarray_global_table.push_back(r);
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_registerarray_global(std::string const & name, int_t size, int_t number)
+void ObjectExpression::add_registerarray_global(std::string const & name, bigsint size, bigsint number)
 {
 	RegisterArray r = {name, number, size};
 	_registerarray_global_table.push_back(r);
@@ -149,14 +149,14 @@ void ObjectExpression::add_registerarray_global(std::string const & name, int_t 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_registerarray_map(std::string const & name, int_t size)
+void ObjectExpression::add_registerarray_map(std::string const & name, bigsint size)
 {
 	RegisterArray r = {name, -1, size};
 	_registerarray_map_table.push_back(r);
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_registerarray_map(std::string const & name, int_t size, int_t number)
+void ObjectExpression::add_registerarray_map(std::string const & name, bigsint size, bigsint number)
 {
 	RegisterArray r = {name, number, size};
 	_registerarray_map_table.push_back(r);
@@ -164,14 +164,14 @@ void ObjectExpression::add_registerarray_map(std::string const & name, int_t siz
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_registerarray_world(std::string const & name, int_t size)
+void ObjectExpression::add_registerarray_world(std::string const & name, bigsint size)
 {
 	RegisterArray r = {name, -1, size};
 	_registerarray_world_table.push_back(r);
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_registerarray_world(std::string const & name, int_t size, int_t number)
+void ObjectExpression::add_registerarray_world(std::string const & name, bigsint size, bigsint number)
 {
 	RegisterArray r = {name, number, size};
 	_registerarray_world_table.push_back(r);
@@ -179,12 +179,12 @@ void ObjectExpression::add_registerarray_world(std::string const & name, int_t s
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount)
+void ObjectExpression::add_script(std::string const & name, std::string const & label, ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount)
 {
 	Script s = {label, name, stype, argCount, flags, -1, varCount};
 	_script_table.push_back(s);
 }
-void ObjectExpression::add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount, int_t number)
+void ObjectExpression::add_script(std::string const & name, std::string const & label, ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount, bigsint number)
 {
 	Script s = {label, name, stype, argCount, flags, number, varCount};
 	_script_table.push_back(s);
@@ -192,14 +192,14 @@ void ObjectExpression::add_script(std::string const & name, std::string const & 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_static(std::string const & name, int_t size)
+void ObjectExpression::add_static(std::string const & name, bigsint size)
 {
 	Static s = {name, -1, size};
 	_static_table.push_back(s);
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_static(std::string const & name, int_t size, int_t number)
+void ObjectExpression::add_static(std::string const & name, bigsint size, bigsint number)
 {
 	Static s = {name, number, size};
 	_static_table.push_back(s);
@@ -257,49 +257,33 @@ std::string const & ObjectExpression::get_filename()
 	return _filename;
 }
 
-ObjectExpression::float_t ObjectExpression::get_float(SourceTokenC const & token)
-{
-	float_t f;
-	std::istringstream iss(token.getData());
-	iss >> f;
-	return f;
-}
-
-ObjectExpression::Function const & ObjectExpression::get_function(int_t index)
+ObjectExpression::Function const & ObjectExpression::get_function(bigsint index)
 {
 	return _function_table[index];
 }
 
-ObjectExpression::int_t ObjectExpression::get_function_count()
+bigsint ObjectExpression::get_function_count()
 {
 	return _function_table.size();
 }
 
-ObjectExpression::int_t ObjectExpression::get_int(SourceTokenC const & token)
+bigsint ObjectExpression::get_register_number(std::map<bigsint, bool> * registerUsed, bigsint size)
 {
-	int_t i;
-	std::istringstream iss(token.getData());
-	iss >> i;
-	return i;
-}
-
-ObjectExpression::int_t ObjectExpression::get_register_number(std::map<int_t, bool> * registerUsed, int_t size)
-{
-	int_t registerUsedLast(0);
+	bigsint registerUsedLast(0);
 
 	while (is_register_used(registerUsed, registerUsedLast, size) && registerUsedLast < 65535) ++registerUsedLast;
 
 	if (registerUsedLast == 65535) throw SourceException("no more register numbers", SourcePosition::none, "ObjectExpression");
 
-	for (int_t i(0); i < size; ++i)
+	for (bigsint i(0); i < size; ++i)
 		(*registerUsed)[registerUsedLast+i] = true;
 
 	return registerUsedLast;
 }
 
-ObjectExpression::int_t ObjectExpression::get_registerarray_number(std::map<int_t, bool> * registerarrayUsed)
+bigsint ObjectExpression::get_registerarray_number(std::map<bigsint, bool> * registerarrayUsed)
 {
-	int_t registerarrayUsedLast(0);
+	bigsint registerarrayUsedLast(0);
 
 	while (registerarrayUsed->find(registerarrayUsedLast) != registerarrayUsed->end() && registerarrayUsedLast < 65535) ++registerarrayUsedLast;
 
@@ -309,14 +293,14 @@ ObjectExpression::int_t ObjectExpression::get_registerarray_number(std::map<int_
 	return registerarrayUsedLast;
 }
 
-ObjectExpression::RegisterArray const & ObjectExpression::get_registerarray_map(int_t index)
+ObjectExpression::RegisterArray const & ObjectExpression::get_registerarray_map(bigsint index)
 {
 	return _registerarray_map_table[index];
 }
 
-ObjectExpression::int_t ObjectExpression::get_registerarray_map_count()
+bigsint ObjectExpression::get_registerarray_map_count()
 {
-	return (int_t)_registerarray_map_table.size();
+	return (bigsint)_registerarray_map_table.size();
 }
 
 ObjectExpression::ScriptFlag ObjectExpression::get_ScriptFlag(std::string const & value, SourcePosition const & position)
@@ -372,9 +356,9 @@ int32_t ObjectExpression::get_script_count()
 	return (int32_t)_script_table.size();
 }
 
-ObjectExpression::int_t ObjectExpression::get_script_number()
+bigsint ObjectExpression::get_script_number()
 {
-	int_t scriptUsedLast(0);
+	bigsint scriptUsedLast(0);
 
 	while (_script_used.find(scriptUsedLast) != _script_used.end() && scriptUsedLast < 1000) ++scriptUsedLast;
 
@@ -384,7 +368,7 @@ ObjectExpression::int_t ObjectExpression::get_script_number()
 	return scriptUsedLast;
 }
 
-ObjectExpression::int_t ObjectExpression::get_static_number(int_t size)
+bigsint ObjectExpression::get_static_number(bigsint size)
 {
 	return get_register_number(&_static_used, size);
 }
@@ -394,12 +378,12 @@ ObjectExpression::String const & ObjectExpression::get_string(int32_t const inde
 	return _string_table[index];
 }
 
-ObjectExpression::int_t ObjectExpression::get_string(std::string const & s)
+bigsint ObjectExpression::get_string(std::string const & s)
 {
 	for (size_t i(0); i < _string_table.size(); ++i)
 	{
 		if (_string_table[i].string == s)
-			return (int_t)i;
+			return (bigsint)i;
 	}
 
 	return -1;
@@ -446,11 +430,11 @@ void ObjectExpression::init()
 	option::option_add("string-fold", "optimization", "Removes duplicate strings.", &option_string_fold, option::option_handler_default_b);
 }
 
-bool ObjectExpression::is_register_used(std::map<int_t, bool> * registerUsed, int_t number, int_t size)
+bool ObjectExpression::is_register_used(std::map<bigsint, bool> * registerUsed, bigsint number, bigsint size)
 {
 	if (size == 0) return false;
 
-	std::map<int_t, bool>::iterator it(registerUsed->find(number+size-1));
+	std::map<bigsint, bool>::iterator it(registerUsed->find(number+size-1));
 
 	return (it != registerUsed->end() && it->second) || is_register_used(registerUsed, number, size-1);
 }
@@ -464,11 +448,11 @@ void ObjectExpression::printDebug(std::ostream * const out) const
 	*out << ")";
 }
 
-ObjectExpression::float_t ObjectExpression::resolveFloat() const
+bigreal ObjectExpression::resolveFloat() const
 {
 	throw SourceException("cannot resolve float", position, getName());
 }
-ObjectExpression::int_t ObjectExpression::resolveInt() const
+bigsint ObjectExpression::resolveInt() const
 {
 	throw SourceException("cannot resolve int", position, getName());
 }

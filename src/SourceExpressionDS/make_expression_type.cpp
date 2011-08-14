@@ -21,6 +21,7 @@
 
 #include "../SourceExpressionDS.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenizerDS.hpp"
@@ -65,7 +66,7 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 	}
 	else if (token.getData() == "enum")
 	{
-		ObjectExpression::int_t enumVal(0);
+		bigsint enumVal(0);
 
 		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
 			name = in->get(SourceTokenC::TT_IDENTIFIER).getData();

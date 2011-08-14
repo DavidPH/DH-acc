@@ -24,6 +24,8 @@
 
 #include "SourceExpression.hpp"
 
+#include <map>
+
 class SourceTokenizerDS;
 
 

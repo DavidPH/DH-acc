@@ -30,25 +30,25 @@ class ObjectExpression_ValueInt : public ObjectExpression
 	MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueInt, ObjectExpression);
 
 public:
-	ObjectExpression_ValueInt(int_t value, SourcePosition const & position);
+	ObjectExpression_ValueInt(bigsint value, SourcePosition const & position);
 	ObjectExpression_ValueInt(std::istream * in);
 
 	virtual ExpressionType getType() const;
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual int_t resolveInt() const;
+	virtual bigsint resolveInt() const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
 
 private:
-	int_t _value;
+	bigsint _value;
 };
 
 
 
-ObjectExpression::Pointer ObjectExpression::create_value_int(int_t value, SourcePosition const & position)
+ObjectExpression::Pointer ObjectExpression::create_value_int(bigsint value, SourcePosition const & position)
 {
 	return new ObjectExpression_ValueInt(value, position);
 }
@@ -59,7 +59,7 @@ ObjectExpression::Pointer ObjectExpression::create_value_int(std::istream * in)
 
 
 
-ObjectExpression_ValueInt::ObjectExpression_ValueInt(int_t value, SourcePosition const & position) : Super(position), _value(value)
+ObjectExpression_ValueInt::ObjectExpression_ValueInt(bigsint value, SourcePosition const & position) : Super(position), _value(value)
 {
 
 }
@@ -84,7 +84,7 @@ void ObjectExpression_ValueInt::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-ObjectExpression::int_t ObjectExpression_ValueInt::resolveInt() const
+bigsint ObjectExpression_ValueInt::resolveInt() const
 {
 	return _value;
 }

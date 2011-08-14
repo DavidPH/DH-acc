@@ -22,13 +22,15 @@
 #ifndef HPP_ObjectVector_
 #define HPP_ObjectVector_
 
+#include "bignum.hpp"
+#include "CounterPointer.hpp"
 #include "ObjectCode.hpp"
-#include "ObjectExpression.hpp"
 #include "SourcePosition.hpp"
 
 #include <string>
 #include <vector>
 
+class ObjectExpression;
 class ObjectToken;
 
 
@@ -41,27 +43,28 @@ public:
 
 	void addToken(ObjectToken const & token);
 	void addToken(ObjectCode code);
-	void addToken(ObjectCode code, std::vector<ObjectExpression::Pointer> const & args);
+	void addToken(ObjectCode code, std::vector<CounterPointer<ObjectExpression> > const & args);
 	void addToken(ObjectCode code, ObjectExpression * arg0);
 	void addToken(ObjectCode code, ObjectExpression * arg0, ObjectExpression * arg1);
 	void addTokenPushZero();
 
-	ObjectExpression::Pointer getValue(ObjectExpression::float_t f) const;
-	ObjectExpression::Pointer getValue(ObjectExpression::int_t i) const;
-	ObjectExpression::Pointer getValue(int i) const;
-	ObjectExpression::Pointer getValue(ObjectExpression * expr) const;
-	ObjectExpression::Pointer getValue(std::string const & label) const;
-	ObjectExpression::Pointer getValue(unsigned int i) const;
+	CounterPointer<ObjectExpression> getValue(bigreal f) const;
+	CounterPointer<ObjectExpression> getValue(bigsint i) const;
+	CounterPointer<ObjectExpression> getValue(int i) const;
+	CounterPointer<ObjectExpression> getValue(ObjectExpression * expr) const;
+	CounterPointer<ObjectExpression> getValue(std::string const & label) const;
+	CounterPointer<ObjectExpression> getValue(unsigned int i) const;
 
-	template<typename T1, typename T2> ObjectExpression::Pointer getValueAdd(T1 const & l, T2 const & r) const;
+	CounterPointer<ObjectExpression> getValueAdd(ObjectExpression * exprL, ObjectExpression * exprR) const;
+	template<typename T1, typename T2> CounterPointer<ObjectExpression> getValueAdd(T1 const & l, T2 const & r) const;
 
-	ObjectToken const & operator [] (ObjectExpression::int_t index) const;
+	ObjectToken const & operator [] (bigsint index) const;
 
 	void optimize();
 
 	ObjectVector & setPosition(SourcePosition const & position);
 
-	ObjectExpression::int_t size() const;
+	bigsint size() const;
 
 
 
@@ -77,9 +80,9 @@ private:
 
 
 
-template<typename T1, typename T2> inline ObjectExpression::Pointer ObjectVector::getValueAdd(T1 const & l, T2 const & r) const
+template<typename T1, typename T2> inline CounterPointer<ObjectExpression> ObjectVector::getValueAdd(T1 const & l, T2 const & r) const
 {
-	return ObjectExpression::create_binary_add(getValue(l), getValue(r), _position);
+	return getValueAdd(getValue(l), getValue(r));
 }
 
 

@@ -21,6 +21,7 @@
 
 #include "../SourceExpressionDS.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
@@ -233,7 +234,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_break(Sourc
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_case(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	context->setAllowLabel(false);
-	ObjectExpression::int_t value(make_expression(in, blocks, context)->makeObject()->resolveInt());
+	bigsint value(make_expression(in, blocks, context)->makeObject()->resolveInt());
 	context->setAllowLabel(true);
 
 	in->get(SourceTokenC::TT_OP_COLON);
@@ -344,11 +345,11 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	make_expression_arglist(in, blocks, context, &scriptArgTypes, &scriptArgNames, &scriptArgCount, &scriptContext, &scriptReturn);
 
 	// scriptNumber
-	ObjectExpression::int_t scriptNumber;
+	bigsint scriptNumber;
 	if (in->peek().getType() == SourceTokenC::TT_OP_AT)
 	{
 		in->get(SourceTokenC::TT_OP_AT);
-		scriptNumber = ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER));
+		scriptNumber = get_bigsint(in->get(SourceTokenC::TT_INTEGER));
 	}
 	else
 	{
@@ -427,7 +428,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_var(SourceT
 	if (in->peek().getType() == SourceTokenC::TT_OP_AT)
 	{
 		in->get(SourceTokenC::TT_OP_AT);
-		ObjectExpression::int_t address = ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER));
+		bigsint address = get_bigsint(in->get(SourceTokenC::TT_INTEGER));
 		nameObject = context->makeNameObject(sc, type, name, address, token.getPosition());
 	}
 	else

@@ -35,8 +35,8 @@ public:
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual float_t resolveFloat() const;
-	virtual int_t resolveInt() const;
+	virtual bigreal resolveFloat() const;
+	virtual bigsint resolveInt() const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
@@ -71,13 +71,13 @@ void ObjectExpression_BinaryMod::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-ObjectExpression::float_t ObjectExpression_BinaryMod::resolveFloat() const
+bigreal ObjectExpression_BinaryMod::resolveFloat() const
 {
 	if (getType() == ET_FLOAT) return std::fmod(exprL->resolveFloat(), exprR->resolveFloat());
 
 	return Super::resolveFloat();
 }
-ObjectExpression::int_t ObjectExpression_BinaryMod::resolveInt() const
+bigsint ObjectExpression_BinaryMod::resolveInt() const
 {
 	if (getType() == ET_INT) return exprL->resolveInt() % exprR->resolveInt();
 

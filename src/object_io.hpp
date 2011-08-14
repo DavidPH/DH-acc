@@ -36,24 +36,28 @@ template<typename T> bool override_object(std::vector<T> * out, T const & in);
 void read_object(std::istream * in, int * out);
 void read_object(std::istream * in, long * out);
 void read_object(std::istream * in, long double * out);
+void read_object(std::istream * in, long long * out);
 template<typename Tk, typename Tv> void read_object(std::istream * in, std::map<Tk, Tv> * out);
 template<typename Tk, typename Tv> void read_object(std::istream * in, std::pair<Tk, Tv> * out);
 void read_object(std::istream * in, std::string * out);
 template<typename T> void read_object(std::istream * in, std::vector<T> * out);
 void read_object(std::istream * in, unsigned int * out);
 void read_object(std::istream * in, unsigned long * out);
+void read_object(std::istream * in, unsigned long long * out);
 
 void read_object_raw(std::istream * in, char * out, size_t size);
 
 void write_object(std::ostream * out, int const & in);
 void write_object(std::ostream * out, long const & in);
 void write_object(std::ostream * out, long double const & in);
+void write_object(std::ostream * out, long long const & in);
 template<typename Tk, typename Tv> void write_object(std::ostream * out, std::map<Tk, Tv> const & in);
 template<typename Tk, typename Tv> void write_object(std::ostream * out, std::pair<Tk, Tv> const & in);
 void write_object(std::ostream * out, std::string const & in);
 template<typename T> void write_object(std::ostream * out, std::vector<T> const & in);
 void write_object(std::ostream * out, unsigned int const & in);
 void write_object(std::ostream * out, unsigned long const & in);
+void write_object(std::ostream * out, unsigned long long const & in);
 
 void write_object_raw(std::ostream * out, char const * in, size_t size);
 

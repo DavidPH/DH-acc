@@ -33,8 +33,8 @@ public:
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual float_t resolveFloat() const;
-	virtual int_t resolveInt() const;
+	virtual bigreal resolveFloat() const;
+	virtual bigsint resolveInt() const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
@@ -69,13 +69,13 @@ void ObjectExpression_UnaryAdd::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-ObjectExpression::float_t ObjectExpression_UnaryAdd::resolveFloat() const
+bigreal ObjectExpression_UnaryAdd::resolveFloat() const
 {
 	if (getType() == ET_FLOAT) return expr->resolveFloat();
 
 	return Super::resolveFloat();
 }
-ObjectExpression::int_t ObjectExpression_UnaryAdd::resolveInt() const
+bigsint ObjectExpression_UnaryAdd::resolveInt() const
 {
 	if (getType() == ET_INT) return expr->resolveInt();
 

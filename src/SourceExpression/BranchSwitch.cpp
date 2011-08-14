@@ -21,6 +21,7 @@
 
 #include "../SourceExpression.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
 #include "../SourceContext.hpp"
@@ -43,7 +44,7 @@ private:
 	SourceExpression::Pointer _expr;
 	SourceExpression::Pointer _exprCases;
 
-	std::vector<ObjectExpression::int_t> _cases;
+	std::vector<bigsint> _cases;
 	std::vector<std::string> _caseLabels;
 
 	std::string _caseDefault;

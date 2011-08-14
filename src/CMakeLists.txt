@@ -1,6 +1,7 @@
 add_executable(DH-acc
 	main.cpp
 
+	bignum.cpp
 	BinaryTokenZDACS.cpp
 	BinaryTokenZDACS/make_tokens.cpp
 	ObjectCode.cpp
@@ -74,9 +75,9 @@ add_executable(DH-acc
 	SourceExpression/ValueData.cpp
 	SourceExpression/ValueMember.cpp
 	SourceExpression/ValueVariable.cpp
-	SourceExpressionACS.cpp
-	SourceExpressionACS/Base.cpp
-	SourceExpressionACS/BinaryAdd.cpp
+#	SourceExpressionACS.cpp
+#	SourceExpressionACS/Base.cpp
+#	SourceExpressionACS/BinaryAdd.cpp
 	SourceExpressionDS.cpp
 	SourceExpressionDS/make_expression_single.cpp
 	SourceExpressionDS/make_expression_single_for.cpp

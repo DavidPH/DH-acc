@@ -21,6 +21,7 @@
 
 #include "ObjectVector.hpp"
 
+#include "ObjectExpression.hpp"
 #include "object_io.hpp"
 #include "ObjectToken.hpp"
 
@@ -71,17 +72,17 @@ void ObjectVector::addTokenPushZero()
 	addToken(OCODE_PUSHNUMBER, getValue(0));
 }
 
-ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression::float_t f) const
+ObjectExpression::Pointer ObjectVector::getValue(bigreal f) const
 {
 	return ObjectExpression::create_value_float(f, _position);
 }
-ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression::int_t i) const
+ObjectExpression::Pointer ObjectVector::getValue(bigsint i) const
 {
 	return ObjectExpression::create_value_int(i, _position);
 }
 ObjectExpression::Pointer ObjectVector::getValue(int i) const
 {
-	return getValue((ObjectExpression::int_t)i);
+	return getValue((bigsint)i);
 }
 ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression * expr) const
 {
@@ -93,10 +94,15 @@ ObjectExpression::Pointer ObjectVector::getValue(std::string const & label) cons
 }
 ObjectExpression::Pointer ObjectVector::getValue(unsigned int i) const
 {
-	return getValue((ObjectExpression::int_t)i);
+	return getValue((bigsint)i);
 }
 
-ObjectToken const & ObjectVector::operator [] (ObjectExpression::int_t index) const
+CounterPointer<ObjectExpression> ObjectVector::getValueAdd(ObjectExpression * exprL, ObjectExpression * exprR) const
+{
+	return ObjectExpression::create_binary_add(exprL, exprR, _position);
+}
+
+ObjectToken const & ObjectVector::operator [] (bigsint index) const
 {
 	return _tokens[(size_t)index];
 }
@@ -131,9 +137,9 @@ void ObjectVector::optimize()
 	}
 }
 
-ObjectExpression::int_t ObjectVector::size() const
+bigsint ObjectVector::size() const
 {
-	return (ObjectExpression::int_t)_tokens.size();
+	return (bigsint)_tokens.size();
 }
 
 ObjectVector & ObjectVector::setPosition(SourcePosition const & position)

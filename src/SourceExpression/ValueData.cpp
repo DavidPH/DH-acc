@@ -21,6 +21,7 @@
 
 #include "../SourceExpression.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
 

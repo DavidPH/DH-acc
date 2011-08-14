@@ -22,8 +22,10 @@
 #ifndef HPP_SourceContext_
 #define HPP_SourceContext_
 
+#include "bignum.hpp"
 #include "SourceVariable.hpp"
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -48,7 +50,7 @@ public:
 	SourceContext();
 	SourceContext(SourceContext * parent, ContextType type);
 
-	std::string addLabelCase(ObjectExpression::int_t value, SourcePosition const & position);
+	std::string addLabelCase(bigsint value, SourcePosition const & position);
 	std::string addLabelCaseDefault(SourcePosition const & position);
 	std::string addLabelGoto(SourceTokenC const & token);
 
@@ -56,11 +58,11 @@ public:
 
 	bool getAllowLabel() const;
 
-	std::vector<ObjectExpression::int_t> getCases(SourcePosition const & position) const;
+	std::vector<bigsint> getCases(SourcePosition const & position) const;
 
 	std::string getLabel() const;
 	std::string getLabelBreak(SourcePosition const & position) const;
-	std::string getLabelCase(ObjectExpression::int_t value, SourcePosition const & position);
+	std::string getLabelCase(bigsint value, SourcePosition const & position);
 	std::string getLabelCaseDefault(SourcePosition const & position) const;
 	std::string getLabelContinue(SourcePosition const & position) const;
 	std::string getLabelGoto(SourceTokenC const & token) const;
@@ -79,7 +81,7 @@ public:
 	std::string makeLabel();
 
 	std::string makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, SourcePosition const & position) const;
-	std::string makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, ObjectExpression::int_t address, SourcePosition const & position) const;
+	std::string makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const;
 
 	void setAllowLabel(bool allow);
 
@@ -101,7 +103,7 @@ private:
 
 	bool _allowLabel;
 
-	std::map<ObjectExpression::int_t, bool> _cases;
+	std::map<bigsint, bool> _cases;
 	bool _caseDefault;
 
 	int _count[SourceVariable::SC_STATIC+1];

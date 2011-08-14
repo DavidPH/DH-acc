@@ -21,6 +21,7 @@
 
 #include "../SourceExpression.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
 
@@ -40,7 +41,7 @@ protected:
 
 private:
 	SourceExpression::Pointer _expr;
-	ObjectExpression::int_t _stack;
+	bigsint _stack;
 };
 
 

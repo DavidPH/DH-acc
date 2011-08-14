@@ -22,6 +22,7 @@
 #ifndef HPP_ObjectExpression_
 #define HPP_ObjectExpression_
 
+#include "bignum.hpp"
 #include "CounterPointer.hpp"
 #include "option.hpp"
 #include "SourcePosition.hpp"
@@ -43,9 +44,6 @@ class ObjectExpression : public Counter
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression, Counter);
 
 public:
-	typedef long double float_t;
-	typedef long int int_t;
-
 	enum ExpressionType
 	{
 		ET_FLOAT,
@@ -75,24 +73,24 @@ public:
 
 	struct Function
 	{
-		int_t argCount;
+		bigsint argCount;
 		std::string label;
-		int_t retCount;
-		int_t varCount;
+		bigsint retCount;
+		bigsint varCount;
 	};
 
 	struct Register
 	{
 		std::string name;
-		int_t number;
-		int_t size;
+		bigsint number;
+		bigsint size;
 	};
 
 	struct RegisterArray
 	{
 		std::string name;
-		int_t number;
-		int_t size;
+		bigsint number;
+		bigsint size;
 	};
 
 	struct Script
@@ -100,24 +98,24 @@ public:
 		std::string label;
 		std::string name;
 		ScriptType stype;
-		int_t argCount;
-		int_t flags;
-		int_t number;
-		int_t varCount;
+		bigsint argCount;
+		bigsint flags;
+		bigsint number;
+		bigsint varCount;
 	};
 
 	struct Static
 	{
 		std::string name;
-		int_t number;
-		int_t size;
+		bigsint number;
+		bigsint size;
 	};
 
 	struct String
 	{
 		std::string name;
 		std::string string;
-		int_t offset;
+		bigsint offset;
 	};
 
 
@@ -128,8 +126,8 @@ public:
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual float_t resolveFloat() const;
-	virtual int_t resolveInt() const;
+	virtual bigreal resolveFloat() const;
+	virtual bigsint resolveInt() const;
 
 
 
@@ -164,34 +162,34 @@ public:
 
 	static void add_address_count(int32_t const addressCount);
 
-	static void add_function(std::string const & label, int_t argCount, int_t varCount, int_t retCount);
+	static void add_function(std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount);
 
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
 
-	static void add_register_global(std::string const & name, int_t size);
-	static void add_register_global(std::string const & name, int_t size, int_t number);
+	static void add_register_global(std::string const & name, bigsint size);
+	static void add_register_global(std::string const & name, bigsint size, bigsint number);
 
-	static void add_register_map(std::string const & name, int_t size);
-	static void add_register_map(std::string const & name, int_t size, int_t number);
+	static void add_register_map(std::string const & name, bigsint size);
+	static void add_register_map(std::string const & name, bigsint size, bigsint number);
 
-	static void add_register_world(std::string const & name, int_t size);
-	static void add_register_world(std::string const & name, int_t size, int_t number);
+	static void add_register_world(std::string const & name, bigsint size);
+	static void add_register_world(std::string const & name, bigsint size, bigsint number);
 
-	static void add_registerarray_global(std::string const & name, int_t size);
-	static void add_registerarray_global(std::string const & name, int_t size, int_t number);
+	static void add_registerarray_global(std::string const & name, bigsint size);
+	static void add_registerarray_global(std::string const & name, bigsint size, bigsint number);
 
-	static void add_registerarray_map(std::string const & name, int_t size);
-	static void add_registerarray_map(std::string const & name, int_t size, int_t number);
+	static void add_registerarray_map(std::string const & name, bigsint size);
+	static void add_registerarray_map(std::string const & name, bigsint size, bigsint number);
 
-	static void add_registerarray_world(std::string const & name, int_t size);
-	static void add_registerarray_world(std::string const & name, int_t size, int_t number);
+	static void add_registerarray_world(std::string const & name, bigsint size);
+	static void add_registerarray_world(std::string const & name, bigsint size, bigsint number);
 
-	static void add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount);
-	static void add_script(std::string const & name, std::string const & label, ScriptType stype, int_t flags, int_t argCount, int_t varCount, int_t number);
+	static void add_script(std::string const & name, std::string const & label, ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount);
+	static void add_script(std::string const & name, std::string const & label, ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount, bigsint number);
 
-	static void add_static(std::string const & name, int_t size);
-	static void add_static(std::string const & name, int_t size, int_t number);
+	static void add_static(std::string const & name, bigsint size);
+	static void add_static(std::string const & name, bigsint size, bigsint number);
 
 	// Adds a string using an auto-generated name and returns that name.
 	static std::string add_string(std::string const & value);
@@ -212,27 +210,21 @@ public:
 	static Pointer create_unary_add(ObjectExpression * expr, SourcePosition const & position);
 	static Pointer create_unary_sub(ObjectExpression * expr, SourcePosition const & position);
 
-	static Pointer create_value_float(float_t value, SourcePosition const & position);
-	static Pointer create_value_float(SourceTokenC const & token);
-	static Pointer create_value_int(int_t value, SourcePosition const & position);
-	static Pointer create_value_int(SourceTokenC const & token);
+	static Pointer create_value_float(bigreal value, SourcePosition const & position);
+	static Pointer create_value_int(bigsint value, SourcePosition const & position);
 	static Pointer create_value_symbol(std::string const & symbol, SourcePosition const & position);
 
 	static void do_deferred_allocation();
 
 	static std::string const & get_filename();
 
-	static float_t get_float(SourceTokenC const & token);
+	static Function const & get_function(bigsint index);
 
-	static Function const & get_function(int_t index);
+	static bigsint get_function_count();
 
-	static int_t get_function_count();
+	static RegisterArray const & get_registerarray_map(bigsint index);
 
-	static int_t get_int(SourceTokenC const & token);
-
-	static RegisterArray const & get_registerarray_map(int_t index);
-
-	static int_t get_registerarray_map_count();
+	static bigsint get_registerarray_map_count();
 
 	static ScriptFlag get_ScriptFlag(std::string const & value, SourcePosition const & position);
 
@@ -317,19 +309,19 @@ protected:
 	static Pointer create_value_symbol(std::istream * in);
 
 private:
-	static void do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<int_t, bool> * registerUsed);
-	static void do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<int_t, bool> * registerarrayUsed);
+	static void do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<bigsint, bool> * registerUsed);
+	static void do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<bigsint, bool> * registerarrayUsed);
 
 	static bool do_string_fold(size_t index);
 
-	static int_t get_register_number(std::map<int_t, bool> * registerUsed, int_t size);
-	static int_t get_registerarray_number(std::map<int_t, bool> * registerarrayUsed);
-	static int_t get_script_number();
-	static int_t get_static_number(int_t size);
+	static bigsint get_register_number(std::map<bigsint, bool> * registerUsed, bigsint size);
+	static bigsint get_registerarray_number(std::map<bigsint, bool> * registerarrayUsed);
+	static bigsint get_script_number();
+	static bigsint get_static_number(bigsint size);
 
-	static int_t get_string(std::string const & s);
+	static bigsint get_string(std::string const & s);
 
-	static bool is_register_used(std::map<int_t, bool> * registerUsed, int_t number, int_t size);
+	static bool is_register_used(std::map<bigsint, bool> * registerUsed, bigsint number, bigsint size);
 
 	static int32_t _address_count;
 
@@ -337,25 +329,25 @@ private:
 
 	static std::vector<Function> _function_table;
 
-	static std::vector<Register> _register_global_table;
-	static std::map<int_t, bool> _register_global_used;
-	static std::vector<Register> _register_map_table;
-	static std::map<int_t, bool> _register_map_used;
-	static std::vector<Register> _register_world_table;
-	static std::map<int_t, bool> _register_world_used;
+	static std::vector<Register>   _register_global_table;
+	static std::map<bigsint, bool> _register_global_used;
+	static std::vector<Register>   _register_map_table;
+	static std::map<bigsint, bool> _register_map_used;
+	static std::vector<Register>   _register_world_table;
+	static std::map<bigsint, bool> _register_world_used;
 
 	static std::vector<RegisterArray> _registerarray_global_table;
-	static std::map<int_t, bool>      _registerarray_global_used;
+	static std::map<bigsint, bool>    _registerarray_global_used;
 	static std::vector<RegisterArray> _registerarray_map_table;
-	static std::map<int_t, bool>      _registerarray_map_used;
+	static std::map<bigsint, bool>    _registerarray_map_used;
 	static std::vector<RegisterArray> _registerarray_world_table;
-	static std::map<int_t, bool>      _registerarray_world_used;
+	static std::map<bigsint, bool>    _registerarray_world_used;
 
-	static std::vector<Script>   _script_table;
-	static std::map<int_t, bool> _script_used;
+	static std::vector<Script>     _script_table;
+	static std::map<bigsint, bool> _script_used;
 
-	static std::vector<Static>   _static_table;
-	static std::map<int_t, bool> _static_used;
+	static std::vector<Static>     _static_table;
+	static std::map<bigsint, bool> _static_used;
 
 	static std::vector<String> _string_table;
 

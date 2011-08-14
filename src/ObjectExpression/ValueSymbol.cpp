@@ -38,8 +38,8 @@ public:
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual ObjectExpression::float_t resolveFloat() const;
-	virtual ObjectExpression::int_t resolveInt() const;
+	virtual bigreal resolveFloat() const;
+	virtual bigsint resolveInt() const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
@@ -86,11 +86,11 @@ void ObjectExpression_ValueSymbol::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-ObjectExpression::float_t ObjectExpression_ValueSymbol::resolveFloat() const
+bigreal ObjectExpression_ValueSymbol::resolveFloat() const
 {
 	return ObjectExpression::get_symbol(_value, position)->resolveFloat();
 }
-ObjectExpression::int_t ObjectExpression_ValueSymbol::resolveInt() const
+bigsint ObjectExpression_ValueSymbol::resolveInt() const
 {
 	return ObjectExpression::get_symbol(_value, position)->resolveInt();
 }

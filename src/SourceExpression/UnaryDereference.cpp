@@ -21,6 +21,7 @@
 
 #include "Unary.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 
 

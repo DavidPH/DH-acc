@@ -33,7 +33,7 @@ public:
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual int_t resolveInt() const;
+	virtual bigsint resolveInt() const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
@@ -68,7 +68,7 @@ void ObjectExpression_BinaryXOr::printDebug(std::ostream * const out) const
 	*out << ")";
 }
 
-ObjectExpression::int_t ObjectExpression_BinaryXOr::resolveInt() const
+bigsint ObjectExpression_BinaryXOr::resolveInt() const
 {
 	if (getType() == ET_INT) return exprL->resolveInt() ^ exprR->resolveInt();
 

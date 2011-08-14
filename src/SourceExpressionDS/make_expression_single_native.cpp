@@ -21,6 +21,7 @@
 
 #include "../SourceExpressionDS.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
@@ -39,7 +40,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_native(Sour
 
 	// nativeNumber
 	in->get(SourceTokenC::TT_OP_AT);
-	ObjectExpression::int_t nativeNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER)));
+	bigsint nativeNumber(get_bigsint(in->get(SourceTokenC::TT_INTEGER)));
 
 	// nativeVarType
 	SourceVariable::VariableType const * nativeVarType(SourceVariable::get_VariableType_native(nativeReturn, nativeArgTypes));

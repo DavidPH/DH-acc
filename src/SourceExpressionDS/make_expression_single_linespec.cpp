@@ -21,6 +21,7 @@
 
 #include "../SourceExpressionDS.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
@@ -39,7 +40,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_linespec(So
 
 	// linespecNumber
 	in->get(SourceTokenC::TT_OP_AT);
-	ObjectExpression::int_t linespecNumber(ObjectExpression::get_int(in->get(SourceTokenC::TT_INTEGER)));
+	bigsint linespecNumber(get_bigsint(in->get(SourceTokenC::TT_INTEGER)));
 
 	// linespecVarType
 	SourceVariable::VariableType const * linespecVarType(SourceVariable::get_VariableType_linespec(linespecReturn, linespecArgTypes));

@@ -196,8 +196,8 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 
 	std::ostringstream chunkout;
 
-	ObjectExpression::int_t const functionCount(ObjectExpression::get_function_count());
-	ObjectExpression::int_t const registerarrayMapCount(ObjectExpression::get_registerarray_map_count());
+	bigsint const functionCount(ObjectExpression::get_function_count());
+	bigsint const registerarrayMapCount(ObjectExpression::get_registerarray_map_count());
 	int32_t const scriptCount(ObjectExpression::get_script_count());
 	int32_t const stringCount(ObjectExpression::get_string_count());
 
@@ -242,13 +242,13 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 			instructions[index].write(out);
 
 		// ARAY - Map Array Declarations
-		for (ObjectExpression::int_t index(0); index < registerarrayMapCount; ++index)
+		for (bigsint index(0); index < registerarrayMapCount; ++index)
 			write_registerarray(&chunkout, ObjectExpression::get_registerarray_map(index));
 
 		write_chunk(out, &chunkout, "ARAY");
 
 		// FUNC - Functions
-		for (ObjectExpression::int_t index(0); index < functionCount; ++index)
+		for (bigsint index(0); index < functionCount; ++index)
 			write_function(&chunkout, ObjectExpression::get_function(index));
 
 		write_chunk(out, &chunkout, "FUNC");

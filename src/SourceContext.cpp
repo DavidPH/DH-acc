@@ -21,6 +21,7 @@
 
 #include "SourceContext.hpp"
 
+#include "ObjectExpression.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 #include "SourceVariable.hpp"
@@ -69,7 +70,7 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 	}
 }
 
-std::string SourceContext::addLabelCase(ObjectExpression::int_t value, SourcePosition const & position)
+std::string SourceContext::addLabelCase(bigsint value, SourcePosition const & position)
 {
 	if (_type == CT_SWITCH)
 	{
@@ -169,14 +170,14 @@ bool SourceContext::getAllowLabel() const
 		return _allowLabel;
 }
 
-std::vector<ObjectExpression::int_t> SourceContext::getCases(SourcePosition const & position) const
+std::vector<bigsint> SourceContext::getCases(SourcePosition const & position) const
 {
 	if (_type == CT_SWITCH)
 	{
-		std::vector<ObjectExpression::int_t> cases(_cases.size());
+		std::vector<bigsint> cases(_cases.size());
 
 		size_t i(0);
-		for (std::map<ObjectExpression::int_t, bool>::const_iterator it(_cases.begin()); it != _cases.end(); ++it, ++i)
+		for (std::map<bigsint, bool>::const_iterator it(_cases.begin()); it != _cases.end(); ++it, ++i)
 		{
 			if (!it->second)
 				throw SourceException("case used but undefined", position, "SourceContext");
@@ -236,7 +237,7 @@ std::string SourceContext::getLabelBreak(SourcePosition const & position) const
 
 	throw SourceException("getLabelBreak", position, "SourceContext");
 }
-std::string SourceContext::getLabelCase(ObjectExpression::int_t value, SourcePosition const & position)
+std::string SourceContext::getLabelCase(bigsint value, SourcePosition const & position)
 {
 	if (_type == CT_SWITCH)
 	{
@@ -426,7 +427,7 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Sourc
 
 	return nameObject;
 }
-std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, ObjectExpression::int_t address, SourcePosition const & position) const
+std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const
 {
 	std::string nameObject(getLabel() + nameSource);
 

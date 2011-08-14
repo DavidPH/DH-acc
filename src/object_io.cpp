@@ -35,6 +35,10 @@ void read_object(std::istream * in, long double * out)
 {
 	read_object_raw(in, (char *)out, sizeof(*out));
 }
+void read_object(std::istream * in, long long * out)
+{
+	read_object_raw(in, (char *)out, sizeof(*out));
+}
 void read_object(std::istream * in, std::string * out)
 {
 	std::string::size_type size;
@@ -49,6 +53,10 @@ void read_object(std::istream * in, unsigned int * out)
 	read_object_raw(in, (char *)out, sizeof(*out));
 }
 void read_object(std::istream * in, unsigned long * out)
+{
+	read_object_raw(in, (char *)out, sizeof(*out));
+}
+void read_object(std::istream * in, unsigned long long * out)
 {
 	read_object_raw(in, (char *)out, sizeof(*out));
 }
@@ -71,6 +79,10 @@ void write_object(std::ostream * out, long double const & in)
 {
 	write_object_raw(out, (char const *)&in, sizeof(in));
 }
+void write_object(std::ostream * out, long long const & in)
+{
+	write_object_raw(out, (char const *)&in, sizeof(in));
+}
 void write_object(std::ostream * out, std::string const & in)
 {
 	std::string::size_type size(in.size());
@@ -83,6 +95,10 @@ void write_object(std::ostream * out, unsigned int const & in)
 	write_object_raw(out, (char const *)&in, sizeof(in));
 }
 void write_object(std::ostream * out, unsigned long const & in)
+{
+	write_object_raw(out, (char const *)&in, sizeof(in));
+}
+void write_object(std::ostream * out, unsigned long long const & in)
 {
 	write_object_raw(out, (char const *)&in, sizeof(in));
 }

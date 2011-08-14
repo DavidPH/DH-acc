@@ -21,6 +21,7 @@
 
 #include "SourceVariable.hpp"
 
+#include "ObjectExpression.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 

@@ -71,7 +71,7 @@ void ObjectExpression::do_deferred_allocation()
 
 		if (s.number != -1)
 		{
-			for (int_t j(0); j < s.size; ++j)
+			for (bigsint j(0); j < s.size; ++j)
 				_static_used[s.number+j] = true;
 		}
 	}
@@ -94,7 +94,7 @@ void ObjectExpression::do_deferred_allocation()
 		if (option_string_fold)
 			add_symbol(_string_table[i].name, create_value_int(get_string(_string_table[i].string), SourcePosition::none));
 		else
-			add_symbol(_string_table[i].name, create_value_int((int_t)i, SourcePosition::none));
+			add_symbol(_string_table[i].name, create_value_int((bigsint)i, SourcePosition::none));
 	}
 	if (option_string_fold) for (size_t i(0); i < _string_table.size();)
 	{
@@ -109,7 +109,7 @@ void ObjectExpression::do_deferred_allocation()
 	for (size_t i(1); i < _string_table.size(); ++i)
 		_string_table[i].offset = _string_table[i-1].offset + _string_table[i-1].string.size();
 }
-void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<int_t, bool> * registerUsed)
+void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<bigsint, bool> * registerUsed)
 {
 	for (size_t i(0); i < registerTable->size(); ++i)
 	{
@@ -117,7 +117,7 @@ void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * r
 
 		if (r.number != -1)
 		{
-			for (int_t j(0); j < r.size; ++j)
+			for (bigsint j(0); j < r.size; ++j)
 				(*registerUsed)[r.number+j] = true;
 		}
 	}
@@ -134,7 +134,7 @@ void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * r
 		}
 	}
 }
-void ObjectExpression::do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<int_t, bool> * registerarrayUsed)
+void ObjectExpression::do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<bigsint, bool> * registerarrayUsed)
 {
 	for (size_t i(0); i < registerarrayTable->size(); ++i)
 	{

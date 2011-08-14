@@ -21,6 +21,7 @@
 
 #include "SourceExpression.hpp"
 
+#include "ObjectExpression.hpp"
 #include "ObjectVector.hpp"
 #include "print_debug.hpp"
 #include "SourceException.hpp"
@@ -89,7 +90,7 @@ SourceVariable::VariableType const * SourceExpression::getType() const
 
 void SourceExpression::make_objects(std::vector<SourceExpression::Pointer> const & expressions, ObjectVector * objects)
 {
-	for (uintptr_t index(0); index < expressions.size(); ++index)
+	for (size_t index(0); index < expressions.size(); ++index)
 		expressions[index]->makeObjectsGet(objects);
 }
 

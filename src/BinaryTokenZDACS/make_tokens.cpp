@@ -312,7 +312,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 }
 void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<BinaryTokenZDACS> * instructions)
 {
-	for (ObjectExpression::int_t index(0); index < objects.size(); ++index)
+	for (bigsint index(0); index < objects.size(); ++index)
 		make_tokens(objects[index], instructions);
 }
 

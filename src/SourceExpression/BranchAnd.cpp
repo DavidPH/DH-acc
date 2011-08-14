@@ -21,6 +21,7 @@
 
 #include "BinaryCompare.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
 
