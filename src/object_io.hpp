@@ -86,7 +86,12 @@ template<typename Tk, typename Tv> void read_object(std::istream * in, std::map<
 		std::pair<Tk, Tv> o;
 		read_object(in, &o);
 
-		(*out)[o.first] = o.second;
+		typename std::map<Tk, Tv>::iterator it(out->find(o.first));
+
+		if (it == out->end())
+			(*out)[o.first] = o.second;
+		else
+			override_object(&it->second, o.second);
 	}
 
 }

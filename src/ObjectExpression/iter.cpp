@@ -30,13 +30,13 @@ void ObjectExpression::iter_function(void (*iter)(std::ostream *, Function const
 }
 void ObjectExpression::iter_registerarray_map(void (*iter)(std::ostream *, RegisterArray const &), std::ostream * out)
 {
-	for (std::vector<RegisterArray>::iterator it(_registerarray_map_table.begin()); it != _registerarray_map_table.end(); ++it)
-		iter(out, *it);
+	for (std::map<std::string, RegisterArray>::iterator it(_registerarray_map_table.begin()); it != _registerarray_map_table.end(); ++it)
+		iter(out, it->second);
 }
 void ObjectExpression::iter_script(void (*iter)(std::ostream *, Script const &), std::ostream * out)
 {
-	for (std::vector<Script>::iterator it(_script_table.begin()); it != _script_table.end(); ++it)
-		iter(out, *it);
+	for (std::map<std::string, Script>::iterator it(_script_table.begin()); it != _script_table.end(); ++it)
+		iter(out, it->second);
 }
 void ObjectExpression::iter_string(void (*iter)(std::ostream *, String const &), std::ostream * out)
 {

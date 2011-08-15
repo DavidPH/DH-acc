@@ -44,17 +44,17 @@ void ObjectExpression::do_deferred_allocation()
 	do_deferred_allocation_registerarray(&_registerarray_world_table, &_registerarray_world_used);
 
 	// Deferred script allocation.
-	for (size_t i(0); i < _script_table.size(); ++i)
+	for (std::map<std::string, Script>::iterator it(_script_table.begin()); it != _script_table.end(); ++it)
 	{
-		Script & s(_script_table[i]);
+		Script & s(it->second);
 
 		if (s.number != -1)
 			_script_used[s.number] = true;
 	}
 
-	for (size_t i(0); i < _script_table.size(); ++i)
+	for (std::map<std::string, Script>::iterator it(_script_table.begin()); it != _script_table.end(); ++it)
 	{
-		Script & s(_script_table[i]);
+		Script & s(it->second);
 
 		if (s.number == -1)
 		{
@@ -65,9 +65,9 @@ void ObjectExpression::do_deferred_allocation()
 	}
 
 	// Deferred static allocation.
-	for (size_t i(0); i < _static_table.size(); ++i)
+	for (std::map<std::string, Static>::iterator it(_static_table.begin()); it != _static_table.end(); ++it)
 	{
-		Static & s(_static_table[i]);
+		Static & s(it->second);
 
 		if (s.number != -1)
 		{
@@ -76,9 +76,9 @@ void ObjectExpression::do_deferred_allocation()
 		}
 	}
 
-	for (size_t i(0); i < _static_table.size(); ++i)
+	for (std::map<std::string, Static>::iterator it(_static_table.begin()); it != _static_table.end(); ++it)
 	{
-		Static & s(_static_table[i]);
+		Static & s(it->second);
 
 		if (s.number == -1)
 		{
@@ -109,11 +109,11 @@ void ObjectExpression::do_deferred_allocation()
 	for (size_t i(1); i < _string_table.size(); ++i)
 		_string_table[i].offset = _string_table[i-1].offset + _string_table[i-1].string.size();
 }
-void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<bigsint, bool> * registerUsed)
+void ObjectExpression::do_deferred_allocation_register(std::map<std::string, Register> * registerTable, std::map<bigsint, bool> * registerUsed)
 {
-	for (size_t i(0); i < registerTable->size(); ++i)
+	for (std::map<std::string, Register>::iterator it(registerTable->begin()); it != registerTable->end(); ++it)
 	{
-		Register & r((*registerTable)[i]);
+		Register & r(it->second);
 
 		if (r.number != -1)
 		{
@@ -122,9 +122,9 @@ void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * r
 		}
 	}
 
-	for (size_t i(0); i < registerTable->size(); ++i)
+	for (std::map<std::string, Register>::iterator it(registerTable->begin()); it != registerTable->end(); ++it)
 	{
-		Register & r((*registerTable)[i]);
+		Register & r(it->second);
 
 		if (r.number == -1)
 		{
@@ -134,19 +134,19 @@ void ObjectExpression::do_deferred_allocation_register(std::vector<Register> * r
 		}
 	}
 }
-void ObjectExpression::do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<bigsint, bool> * registerarrayUsed)
+void ObjectExpression::do_deferred_allocation_registerarray(std::map<std::string, RegisterArray> * registerarrayTable, std::map<bigsint, bool> * registerarrayUsed)
 {
-	for (size_t i(0); i < registerarrayTable->size(); ++i)
+	for (std::map<std::string, RegisterArray>::iterator it(registerarrayTable->begin()); it != registerarrayTable->end(); ++it)
 	{
-		RegisterArray & r((*registerarrayTable)[i]);
+		RegisterArray & r(it->second);
 
 		if (r.number != -1)
 			(*registerarrayUsed)[r.number] = true;
 	}
 
-	for (size_t i(0); i < registerarrayTable->size(); ++i)
+	for (std::map<std::string, RegisterArray>::iterator it(registerarrayTable->begin()); it != registerarrayTable->end(); ++it)
 	{
-		RegisterArray & r((*registerarrayTable)[i]);
+		RegisterArray & r(it->second);
 
 		if (r.number == -1)
 		{

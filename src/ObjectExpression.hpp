@@ -305,8 +305,8 @@ protected:
 	static Pointer create_value_symbol(std::istream * in);
 
 private:
-	static void do_deferred_allocation_register(std::vector<Register> * registerTable, std::map<bigsint, bool> * registerUsed);
-	static void do_deferred_allocation_registerarray(std::vector<RegisterArray> * registerarrayTable, std::map<bigsint, bool> * registerarrayUsed);
+	static void do_deferred_allocation_register(std::map<std::string, Register> * registerTable, std::map<bigsint, bool> * registerUsed);
+	static void do_deferred_allocation_registerarray(std::map<std::string, RegisterArray> * registerarrayTable, std::map<bigsint, bool> * registerarrayUsed);
 
 	static bool do_string_fold(size_t index);
 
@@ -325,25 +325,25 @@ private:
 
 	static std::vector<Function> _function_table;
 
-	static std::vector<Register>   _register_global_table;
-	static std::map<bigsint, bool> _register_global_used;
-	static std::vector<Register>   _register_map_table;
-	static std::map<bigsint, bool> _register_map_used;
-	static std::vector<Register>   _register_world_table;
-	static std::map<bigsint, bool> _register_world_used;
+	static std::map<std::string, Register> _register_global_table;
+	static std::map<bigsint, bool>         _register_global_used;
+	static std::map<std::string, Register> _register_map_table;
+	static std::map<bigsint, bool>         _register_map_used;
+	static std::map<std::string, Register> _register_world_table;
+	static std::map<bigsint, bool>         _register_world_used;
 
-	static std::vector<RegisterArray> _registerarray_global_table;
-	static std::map<bigsint, bool>    _registerarray_global_used;
-	static std::vector<RegisterArray> _registerarray_map_table;
-	static std::map<bigsint, bool>    _registerarray_map_used;
-	static std::vector<RegisterArray> _registerarray_world_table;
-	static std::map<bigsint, bool>    _registerarray_world_used;
+	static std::map<std::string, RegisterArray> _registerarray_global_table;
+	static std::map<bigsint, bool>              _registerarray_global_used;
+	static std::map<std::string, RegisterArray> _registerarray_map_table;
+	static std::map<bigsint, bool>              _registerarray_map_used;
+	static std::map<std::string, RegisterArray> _registerarray_world_table;
+	static std::map<bigsint, bool>              _registerarray_world_used;
 
-	static std::vector<Script>     _script_table;
-	static std::map<bigsint, bool> _script_used;
+	static std::map<std::string, Script> _script_table;
+	static std::map<bigsint, bool>       _script_used;
 
-	static std::vector<Static>     _static_table;
-	static std::map<bigsint, bool> _static_used;
+	static std::map<std::string, Static> _static_table;
+	static std::map<bigsint, bool>       _static_used;
 
 	static std::vector<String> _string_table;
 
