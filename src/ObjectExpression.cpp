@@ -16,7 +16,7 @@
 
 /* ObjectExpression.cpp
 **
-** ObjectExpression methods.
+** Defines the ObjectExpression methods.
 */
 
 #include "ObjectExpression.hpp"
@@ -28,7 +28,7 @@
 
 
 
-int32_t ObjectExpression::_address_count;
+bigsint ObjectExpression::_address_count;
 
 std::string ObjectExpression::_filename;
 
@@ -73,7 +73,7 @@ ObjectExpression::ObjectExpression(std::istream * in)
 	read_object(in, &position);
 }
 
-void ObjectExpression::add_address_count(int32_t const addressCount)
+void ObjectExpression::add_address_count(bigsint const addressCount)
 {
 	_address_count += addressCount;
 }
@@ -252,19 +252,19 @@ bool ObjectExpression::do_string_fold(size_t index)
 	return false;
 }
 
+bigsint ObjectExpression::get_address_count()
+{
+	return _address_count;
+}
+
 std::string const & ObjectExpression::get_filename()
 {
 	return _filename;
 }
 
-ObjectExpression::Function const & ObjectExpression::get_function(bigsint index)
-{
-	return _function_table[index];
-}
-
 bigsint ObjectExpression::get_function_count()
 {
-	return _function_table.size();
+	return (bigsint)_function_table.size();
 }
 
 bigsint ObjectExpression::get_register_number(std::map<bigsint, bool> * registerUsed, bigsint size)
@@ -291,16 +291,6 @@ bigsint ObjectExpression::get_registerarray_number(std::map<bigsint, bool> * reg
 
 	(*registerarrayUsed)[registerarrayUsedLast] = true;
 	return registerarrayUsedLast;
-}
-
-ObjectExpression::RegisterArray const & ObjectExpression::get_registerarray_map(bigsint index)
-{
-	return _registerarray_map_table[index];
-}
-
-bigsint ObjectExpression::get_registerarray_map_count()
-{
-	return (bigsint)_registerarray_map_table.size();
 }
 
 ObjectExpression::ScriptFlag ObjectExpression::get_ScriptFlag(std::string const & value, SourcePosition const & position)
@@ -346,14 +336,9 @@ ObjectExpression::ScriptType ObjectExpression::get_ScriptType(std::string const 
 	throw SourceException("invalid script-type", position, "ObjectExpression");
 }
 
-ObjectExpression::Script const & ObjectExpression::get_script(int32_t const index)
+bigsint ObjectExpression::get_script_count()
 {
-	return _script_table[index];
-}
-
-int32_t ObjectExpression::get_script_count()
-{
-	return (int32_t)_script_table.size();
+	return (bigsint)_script_table.size();
 }
 
 bigsint ObjectExpression::get_script_number()
@@ -373,11 +358,6 @@ bigsint ObjectExpression::get_static_number(bigsint size)
 	return get_register_number(&_static_used, size);
 }
 
-ObjectExpression::String const & ObjectExpression::get_string(int32_t const index)
-{
-	return _string_table[index];
-}
-
 bigsint ObjectExpression::get_string(std::string const & s)
 {
 	for (size_t i(0); i < _string_table.size(); ++i)
@@ -389,16 +369,9 @@ bigsint ObjectExpression::get_string(std::string const & s)
 	return -1;
 }
 
-int32_t ObjectExpression::get_string_count()
+bigsint ObjectExpression::get_string_count()
 {
-	return (int32_t)_string_table.size();
-}
-
-int32_t ObjectExpression::get_string_length()
-{
-	if (_string_table.empty()) return 0;
-
-	return _string_table.back().offset + _string_table.back().string.size();
+	return (bigsint)_string_table.size();
 }
 
 ObjectExpression::Pointer ObjectExpression::get_symbol(std::string const & symbol, SourcePosition const & position)
@@ -457,7 +430,7 @@ bigsint ObjectExpression::resolveInt() const
 	throw SourceException("cannot resolve int", position, getName());
 }
 
-void ObjectExpression::set_address_count(int32_t addressCount)
+void ObjectExpression::set_address_count(bigsint addressCount)
 {
 	_address_count = addressCount;
 }

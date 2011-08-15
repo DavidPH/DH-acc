@@ -151,7 +151,9 @@ public:
 	static void write_script(std::ostream * const out, ObjectExpression::Script const & s);
 	static void write_script_flags(std::ostream * const out, ObjectExpression::Script const & s);
 	static void write_script_vars(std::ostream * const out, ObjectExpression::Script const & s);
+	static void write_string(std::ostream * out, ObjectExpression::String const & s);
 	static void write_string(std::ostream * const out, std::string const & s);
+	static void write_string_offset(std::ostream * out, ObjectExpression::String const & s);
 
 private:
 	std::vector<ObjectExpression::Pointer> _args;

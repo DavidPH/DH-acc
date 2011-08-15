@@ -30,7 +30,6 @@
 #include <istream>
 #include <map>
 #include <ostream>
-#include <stdint.h>
 #include <string>
 #include <vector>
 
@@ -160,7 +159,7 @@ public:
 	friend void write_object(std::ostream * out, Static const & in);
 	friend void write_object(std::ostream * out, String const & in);
 
-	static void add_address_count(int32_t const addressCount);
+	static void add_address_count(bigsint const addressCount);
 
 	static void add_function(std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount);
 
@@ -216,39 +215,36 @@ public:
 
 	static void do_deferred_allocation();
 
+	static bigsint get_address_count();
+
 	static std::string const & get_filename();
 
-	static Function const & get_function(bigsint index);
-
 	static bigsint get_function_count();
-
-	static RegisterArray const & get_registerarray_map(bigsint index);
-
-	static bigsint get_registerarray_map_count();
 
 	static ScriptFlag get_ScriptFlag(std::string const & value, SourcePosition const & position);
 
 	static ScriptType get_ScriptType(std::string const & value, SourcePosition const & position);
 
-	static Script const & get_script(int32_t const index);
+	static bigsint get_script_count();
 
-	static int32_t get_script_count();
-
-	static String const & get_string(int32_t const index);
-
-	static int32_t get_string_count();
-
-	// Returns length of all strings combined.
-	static int32_t get_string_length();
+	static bigsint get_string_count();
 
 	static ObjectExpression::Pointer get_symbol(std::string const & symbol, SourcePosition const & position);
 	static ExpressionType get_symbol_type(std::string const & symbol, SourcePosition const & position);
 
 	static void init();
 
+	static void iter_function(void (*iter)(std::ostream *, Function const &), std::ostream * out);
+
+	static void iter_registerarray_map(void (*iter)(std::ostream *, RegisterArray const &), std::ostream * out);
+
+	static void iter_script(void (*iter)(std::ostream *, Script const &), std::ostream * out);
+
+	static void iter_string(void (*iter)(std::ostream *, String const &), std::ostream * out);
+
 	static void read_objects(std::istream * in, ObjectVector * objects);
 
-	static void set_address_count(int32_t addressCount);
+	static void set_address_count(bigsint addressCount);
 
 	// Sets the current filename, translating to make it a valid symbol.
 	static void set_filename(std::string const & filename);
@@ -323,7 +319,7 @@ private:
 
 	static bool is_register_used(std::map<bigsint, bool> * registerUsed, bigsint number, bigsint size);
 
-	static int32_t _address_count;
+	static bigsint _address_count;
 
 	static std::string _filename;
 

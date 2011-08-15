@@ -17,6 +17,7 @@ add_executable(DH-acc
 	ObjectExpression/BinaryXOr.cpp
 	ObjectExpression/do_deferred_allocation.cpp
 	ObjectExpression/objects_io.cpp
+	ObjectExpression/iter.cpp
 	ObjectExpression/Unary.cpp
 	ObjectExpression/UnaryAdd.cpp
 	ObjectExpression/UnarySub.cpp

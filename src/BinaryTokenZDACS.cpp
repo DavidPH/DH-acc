@@ -180,7 +180,6 @@ void BinaryTokenZDACS::write_32(std::ostream * const out, uint32_t const i)
 
 void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions)
 {
-	int32_t directoryOffset(8);
 	ObjectExpression::set_address_count(8);
 
 	for (uintptr_t index(0); index < instructions.size(); ++index)
@@ -190,14 +189,11 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 
 		int32_t size(_arg_counts[instructions[index]._code]*4 + 4);
 
-		directoryOffset += size;
 		ObjectExpression::add_address_count(size);
 	}
 
 	std::ostringstream chunkout;
 
-	bigsint const functionCount(ObjectExpression::get_function_count());
-	bigsint const registerarrayMapCount(ObjectExpression::get_registerarray_map_count());
 	int32_t const scriptCount(ObjectExpression::get_script_count());
 	int32_t const stringCount(ObjectExpression::get_string_count());
 
@@ -206,7 +202,7 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 	case OUTPUT_ACS0:
 		// 0
 		*out << 'A' << 'C' << 'S' << '\0';
-		write_32(out, directoryOffset);
+		write_32(out, ObjectExpression::get_address_count());
 
 		// 8
 		for (uintptr_t index(0); index < instructions.size(); ++index)
@@ -216,53 +212,42 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 		write_32(out, scriptCount);
 
 		// directoryOffset+4
-		for (int32_t index(0); index < scriptCount; ++index)
-			write_script(out, ObjectExpression::get_script(index));
+		ObjectExpression::iter_script(write_script, out);
 
 		// directoryOffset+4+(scriptCount*12)
 		write_32(out, stringCount);
 
 		// directoryOffset+4+(scriptCount*12)+4
-		for (int32_t index(0); index < stringCount; ++index)
-			write_32(out, directoryOffset + 4 + (scriptCount*12) + 4 + (stringCount*4) + ObjectExpression::get_string(index).offset);
+		ObjectExpression::iter_string(write_string_offset, out);
 
 		// directoryOffset+4+(scriptCount*12)+4+(stringCount*4)
-		for (int32_t index(0); index < stringCount; ++index)
-			write_string(out, ObjectExpression::get_string(index).string);
+		ObjectExpression::iter_string(write_string, out);
 
 		break;
 
 	case OUTPUT_ACSE:
 		// Header
 		*out << 'A' << 'C' << 'S' << 'E';
-		write_32(out, directoryOffset);
+		write_32(out, ObjectExpression::get_address_count());
 
 		// Instructions
 		for (uintptr_t index(0); index < instructions.size(); ++index)
 			instructions[index].write(out);
 
 		// ARAY - Map Array Declarations
-		for (bigsint index(0); index < registerarrayMapCount; ++index)
-			write_registerarray(&chunkout, ObjectExpression::get_registerarray_map(index));
-
+		ObjectExpression::iter_registerarray_map(write_registerarray, &chunkout);
 		write_chunk(out, &chunkout, "ARAY");
 
 		// FUNC - Functions
-		for (bigsint index(0); index < functionCount; ++index)
-			write_function(&chunkout, ObjectExpression::get_function(index));
-
+		ObjectExpression::iter_function(write_function, &chunkout);
 		write_chunk(out, &chunkout, "FUNC");
 
 		// SPTR - Script Pointers
-		for (int32_t index(0); index < scriptCount; ++index)
-			write_script(&chunkout, ObjectExpression::get_script(index));
-
+		ObjectExpression::iter_script(write_script, &chunkout);
 		write_chunk(out, &chunkout, "SPTR");
 
 		// SFLG - Script Flags
-		for (int32_t index(0); index < scriptCount; ++index)
-			write_script_flags(&chunkout, ObjectExpression::get_script(index));
-
+		ObjectExpression::iter_script(write_script_flags, &chunkout);
 		write_chunk(out, &chunkout, "SFLG");
 
 		// STRL - String Literals
@@ -273,18 +258,12 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 			write_32(&chunkout, 0);
 		}
 
-		for (int32_t index(0); index < stringCount; ++index)
-			write_32(&chunkout, 12 + (stringCount*4) + ObjectExpression::get_string(index).offset);
-
-		for (int32_t index(0); index < stringCount; ++index)
-			write_string(&chunkout, ObjectExpression::get_string(index).string);
-
+		ObjectExpression::iter_string(write_string_offset, &chunkout);
+		ObjectExpression::iter_string(write_string, &chunkout);
 		write_chunk(out, &chunkout, "STRL");
 
 		// SVCT - Script Variable Counts
-		for (int32_t index(0); index < scriptCount; ++index)
-			write_script_vars(&chunkout, ObjectExpression::get_script(index));
-
+		ObjectExpression::iter_script(write_script_vars, &chunkout);
 		write_chunk(out, &chunkout, "SVCT");
 
 		break;
@@ -389,9 +368,29 @@ void BinaryTokenZDACS::write_script_vars(std::ostream * const out, ObjectExpress
 	}
 }
 
+void BinaryTokenZDACS::write_string(std::ostream * out, ObjectExpression::String const & s)
+{
+	write_string(out, s.string);
+}
 void BinaryTokenZDACS::write_string(std::ostream * const out, std::string const & s)
 {
 	*out << s;
+}
+void BinaryTokenZDACS::write_string_offset(std::ostream * out, ObjectExpression::String const & s)
+{
+	switch (output_type)
+	{
+	case OUTPUT_ACS0:
+		write_32(out, ObjectExpression::get_address_count() + 4 + (ObjectExpression::get_script_count() * 12) + 4 + (ObjectExpression::get_string_count() * 4) + s.offset);
+		break;
+
+	case OUTPUT_ACSE:
+		write_32(out, 12 + (ObjectExpression::get_string_count() * 4) + s.offset);
+		break;
+
+	default:
+		throw SourceException("unknown output type for string_offset", SourcePosition::none, "BinaryTokenZDACS");
+	}
 }
 
 
