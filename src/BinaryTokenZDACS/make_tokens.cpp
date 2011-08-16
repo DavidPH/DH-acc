@@ -21,6 +21,7 @@
 
 #include "../BinaryTokenZDACS.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectToken.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"

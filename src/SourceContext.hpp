@@ -49,6 +49,7 @@ public:
 
 	SourceContext();
 	SourceContext(SourceContext * parent, ContextType type);
+	~SourceContext();
 
 	std::string addLabelCase(bigsint value, SourcePosition const & position);
 	std::string addLabelCaseDefault(SourcePosition const & position);

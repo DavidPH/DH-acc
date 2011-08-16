@@ -21,7 +21,6 @@
 
 #include "../SourceExpressionDS.hpp"
 
-#include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"

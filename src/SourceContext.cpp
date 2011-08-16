@@ -45,6 +45,10 @@ SourceContext::SourceContext(SourceContext * parent, ContextType type) : _allowL
 	std::memset(_count, 0, sizeof(_count));
 	std::memset(_limit, 0, sizeof(_limit));
 }
+SourceContext::~SourceContext()
+{
+
+}
 
 void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 {

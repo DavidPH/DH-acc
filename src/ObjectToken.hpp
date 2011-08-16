@@ -22,8 +22,8 @@
 #ifndef HPP_ObjectToken_
 #define HPP_ObjectToken_
 
+#include "CounterPointer.hpp"
 #include "ObjectCode.hpp"
-#include "ObjectExpression.hpp"
 #include "SourcePosition.hpp"
 
 #include <map>
@@ -41,12 +41,12 @@ class ObjectToken
 {
 public:
 	ObjectToken();
-	ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args);
+	ObjectToken(ObjectCode code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<CounterPointer<ObjectExpression> > const & args);
 
 	void addLabel(std::string const & label);
 	void addLabel(std::vector<std::string> const & labels);
 
-	ObjectExpression::Pointer getArg(size_t index) const;
+	CounterPointer<ObjectExpression> getArg(size_t index) const;
 
 	ObjectCode getCode() const;
 
@@ -62,7 +62,7 @@ public:
 	friend void write_object(std::ostream * out, ObjectToken const & in);
 
 private:
-	std::vector<ObjectExpression::Pointer> _args;
+	std::vector<CounterPointer<ObjectExpression> > _args;
 	ObjectCode _code;
 	std::vector<std::string> _labels;
 	SourcePosition _position;
