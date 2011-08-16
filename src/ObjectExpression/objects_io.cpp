@@ -82,71 +82,12 @@ void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
 
 
 
-bool override_object(ObjectExpression::Function * out, ObjectExpression::Function const & in)
-{
-	if (out->label != in.label)
-		return false;
-
-	return true;
-}
-bool override_object(ObjectExpression::Register * out, ObjectExpression::Register const & in)
-{
-	if (out->name != in.name)
-		return false;
-
-	if (out->number == -1)
-		*out = in;
-
-	return true;
-}
-bool override_object(ObjectExpression::RegisterArray * out, ObjectExpression::RegisterArray const & in)
-{
-	if (out->name != in.name)
-		return false;
-
-	if (out->number == -1)
-		*out = in;
-
-	return true;
-}
-bool override_object(ObjectExpression::Script * out, ObjectExpression::Script const & in)
-{
-	if (out->name != in.name)
-		return false;
-
-	if (out->number == -1)
-		*out = in;
-
-	return true;
-}
-bool override_object(ObjectExpression::Static * out, ObjectExpression::Static const & in)
-{
-	if (out->name != in.name)
-		return false;
-
-	if (out->number == -1)
-		*out = in;
-
-	return true;
-}
-bool override_object(ObjectExpression::String * out, ObjectExpression::String const & in)
-{
-	return false;
-}
-
 void read_object(std::istream * in, ObjectExpression::ExpressionType * out)
 {
 	read_object_raw(in, (char *)out, sizeof(*out));
 
 	if (*out > ObjectExpression::ET_INT)
 		*out = ObjectExpression::ET_INT;
-}
-void read_object(std::istream * in, ObjectExpression::Function * out)
-{
-	read_object(in, &out->argCount);
-	read_object(in, &out->label);
-	read_object(in, &out->retCount);
-	read_object(in, &out->varCount);
 }
 void read_object(std::istream * in, ObjectExpression::ObjectType * out)
 {
@@ -219,58 +160,10 @@ void read_object(std::istream * in, ObjectExpression::Pointer * out)
 		break;
 	}
 }
-void read_object(std::istream * in, ObjectExpression::Register * out)
-{
-	read_object(in, &out->name);
-	read_object(in, &out->number);
-	read_object(in, &out->size);
-}
-void read_object(std::istream * in, ObjectExpression::RegisterArray * out)
-{
-	read_object(in, &out->name);
-	read_object(in, &out->number);
-	read_object(in, &out->size);
-}
-void read_object(std::istream * in, ObjectExpression::Script * out)
-{
-	read_object(in, &out->label);
-	read_object(in, &out->name);
-	read_object(in, &out->stype);
-	read_object(in, &out->argCount);
-	read_object(in, &out->flags);
-	read_object(in, &out->number);
-	read_object(in, &out->varCount);
-}
-void read_object(std::istream * in, ObjectExpression::ScriptType * out)
-{
-	read_object_raw(in, (char *)out, sizeof(*out));
-
-	if (*out > ObjectExpression::ST_NONE)
-		*out = ObjectExpression::ST_NONE;
-}
-void read_object(std::istream * in, ObjectExpression::Static * out)
-{
-	read_object(in, &out->name);
-	read_object(in, &out->number);
-	read_object(in, &out->size);
-}
-void read_object(std::istream * in, ObjectExpression::String * out)
-{
-	read_object(in, &out->name);
-	read_object(in, &out->string);
-	read_object(in, &out->offset);
-}
 
 void write_object(std::ostream * out, ObjectExpression::ExpressionType const & in)
 {
 	write_object_raw(out, (char const *)&in, sizeof(in));
-}
-void write_object(std::ostream * out, ObjectExpression::Function const & in)
-{
-	write_object(out, in.argCount);
-	write_object(out, in.label);
-	write_object(out, in.retCount);
-	write_object(out, in.varCount);
 }
 void write_object(std::ostream * out, ObjectExpression::ObjectType const & in)
 {
@@ -279,44 +172,6 @@ void write_object(std::ostream * out, ObjectExpression::ObjectType const & in)
 void write_object(std::ostream * out, ObjectExpression::Pointer const & in)
 {
 	in->writeObject(out);
-}
-void write_object(std::ostream * out, ObjectExpression::Register const & in)
-{
-	write_object(out, in.name);
-	write_object(out, in.number);
-	write_object(out, in.size);
-}
-void write_object(std::ostream * out, ObjectExpression::RegisterArray const & in)
-{
-	write_object(out, in.name);
-	write_object(out, in.number);
-	write_object(out, in.size);
-}
-void write_object(std::ostream * out, ObjectExpression::Script const & in)
-{
-	write_object(out, in.label);
-	write_object(out, in.name);
-	write_object(out, in.stype);
-	write_object(out, in.argCount);
-	write_object(out, in.flags);
-	write_object(out, in.number);
-	write_object(out, in.varCount);
-}
-void write_object(std::ostream * out, ObjectExpression::ScriptType const & in)
-{
-	write_object_raw(out, (char const *)&in, sizeof(in));
-}
-void write_object(std::ostream * out, ObjectExpression::Static const & in)
-{
-	write_object(out, in.name);
-	write_object(out, in.number);
-	write_object(out, in.size);
-}
-void write_object(std::ostream * out, ObjectExpression::String const & in)
-{
-	write_object(out, in.name);
-	write_object(out, in.string);
-	write_object(out, in.offset);
 }
 
 

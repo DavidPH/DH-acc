@@ -98,7 +98,7 @@ void read_source(std::string const & name, SourceType type, ObjectVector * objec
 		std::vector<SourceTokenASMPLX> tokens;
 		SourceTokenASMPLX::read_tokens(&in, &tokens);
 
-		ObjectExpression::add_script("main", 0, ObjectExpression::ST_OPEN, 0, 0, 0);
+		ObjectExpression::add_script("main", 0, ObjectData_Script::ST_OPEN, 0, 0, 0);
 
 		SourceTokenASMPLX::make_objects(tokens, objects);
 	}
@@ -113,7 +113,7 @@ void read_source(std::string const & name, SourceType type, ObjectVector * objec
 		SourceExpression::Pointer expressions(SourceExpressionDS::make_expressions(&tokenizer));
 		expressions->addLabel("main");
 
-		ObjectExpression::add_script("main_id", "main", ObjectExpression::ST_OPEN, 0, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER), 0);
+		ObjectExpression::add_script("main_id", "main", ObjectData_Script::ST_OPEN, 0, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER), 0);
 
 		expressions->makeObjects(objects);
 	}

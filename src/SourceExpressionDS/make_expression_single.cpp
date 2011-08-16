@@ -311,30 +311,25 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	std::string scriptName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
 	// scriptType
-	ObjectExpression::ScriptType scriptType;
+	ObjectData_Script::ScriptType scriptType;
 	if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
 	{
 		SourceTokenC scriptTypeToken(in->get(SourceTokenC::TT_IDENTIFIER));
-		scriptType = ObjectExpression::get_ScriptType(scriptTypeToken.getData(), scriptTypeToken.getPosition());
+		scriptType = odata_get_ScriptType(scriptTypeToken);
 	}
 	else
 	{
-		scriptType = ObjectExpression::ST_CLOSED;
+		scriptType = ObjectData_Script::ST_CLOSED;
 	}
 
 	// scriptFlags
 	int scriptFlags(0);
 	while (true)
 	{
-		SourceTokenC token(in->get());
-
-		if (token.getType() != SourceTokenC::TT_IDENTIFIER)
-		{
-			in->unget(token);
+		if (in->peek().getType() != SourceTokenC::TT_IDENTIFIER)
 			break;
-		}
 
-		scriptFlags |= ObjectExpression::get_ScriptFlag(token.getData(), token.getPosition());
+		scriptFlags |= odata_get_ScriptFlag(in->get(SourceTokenC::TT_IDENTIFIER));
 	}
 
 	// scriptArgTypes/Names/Count scriptReturn

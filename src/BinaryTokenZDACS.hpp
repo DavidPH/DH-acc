@@ -22,13 +22,18 @@
 #ifndef HPP_BinaryTokenZDACS_
 #define HPP_BinaryTokenZDACS_
 
-#include "ObjectExpression.hpp"
+#include "CounterPointer.hpp"
 #include "SourcePosition.hpp"
 
 #include <ostream>
 #include <stdint.h>
 #include <vector>
 
+class ObjectData_Function;
+class ObjectData_RegisterArray;
+class ObjectData_Script;
+class ObjectData_String;
+class ObjectExpression;
 class ObjectToken;
 class ObjectVector;
 
@@ -127,7 +132,7 @@ public:
 
 
 
-	BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args);
+	BinaryTokenZDACS(BinaryCode code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<CounterPointer<ObjectExpression> > const & args);
 
 	void addLabel(std::string const & label);
 
@@ -146,17 +151,17 @@ public:
 	static void write_32(std::ostream * const out, uint32_t const i);
 	static void write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions);
 	static void write_chunk(std::ostream * out, std::ostringstream * chunkout, char const * chunkname);
-	static void write_function(std::ostream * const out, ObjectExpression::Function const & f);
-	static void write_registerarray(std::ostream * out, ObjectExpression::RegisterArray const & r);
-	static void write_script(std::ostream * const out, ObjectExpression::Script const & s);
-	static void write_script_flags(std::ostream * const out, ObjectExpression::Script const & s);
-	static void write_script_vars(std::ostream * const out, ObjectExpression::Script const & s);
-	static void write_string(std::ostream * out, ObjectExpression::String const & s);
+	static void write_function(std::ostream * out, ObjectData_Function const & f);
+	static void write_registerarray(std::ostream * out, ObjectData_RegisterArray const & r);
+	static void write_script(std::ostream * out, ObjectData_Script const & s);
+	static void write_script_flags(std::ostream * out, ObjectData_Script const & s);
+	static void write_script_vars(std::ostream * out, ObjectData_Script const & s);
+	static void write_string(std::ostream * out, ObjectData_String const & s);
 	static void write_string(std::ostream * const out, std::string const & s);
-	static void write_string_offset(std::ostream * out, ObjectExpression::String const & s);
+	static void write_string_offset(std::ostream * out, ObjectData_String const & s);
 
 private:
-	std::vector<ObjectExpression::Pointer> _args;
+	std::vector<CounterPointer<ObjectExpression> > _args;
 	BinaryCode _code;
 	std::vector<std::string> _labels;
 	SourcePosition _position;

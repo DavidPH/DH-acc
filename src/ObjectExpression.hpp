@@ -24,6 +24,7 @@
 
 #include "bignum.hpp"
 #include "CounterPointer.hpp"
+#include "ObjectData.hpp"
 #include "option.hpp"
 #include "SourcePosition.hpp"
 
@@ -49,74 +50,6 @@ public:
 		ET_INT
 	};
 
-	enum ScriptFlag
-	{
-		SF_NET        = 1,
-		SF_CLIENTSIDE = 2
-	};
-
-	enum ScriptType
-	{
-		ST_CLOSED     =  0,
-		ST_OPEN       =  1,
-		ST_RESPAWN    =  2,
-		ST_DEATH      =  3,
-		ST_ENTER      =  4,
-		ST_LIGHTNING  = 12,
-		ST_UNLOADING  = 13,
-		ST_DISCONNECT = 14,
-		ST_RETURN     = 15,
-
-		ST_NONE
-	};
-
-	struct Function
-	{
-		bigsint argCount;
-		std::string label;
-		bigsint retCount;
-		bigsint varCount;
-	};
-
-	struct Register
-	{
-		std::string name;
-		bigsint number;
-		bigsint size;
-	};
-
-	struct RegisterArray
-	{
-		std::string name;
-		bigsint number;
-		bigsint size;
-	};
-
-	struct Script
-	{
-		std::string label;
-		std::string name;
-		ScriptType stype;
-		bigsint argCount;
-		bigsint flags;
-		bigsint number;
-		bigsint varCount;
-	};
-
-	struct Static
-	{
-		std::string name;
-		bigsint number;
-		bigsint size;
-	};
-
-	struct String
-	{
-		std::string name;
-		std::string string;
-		bigsint offset;
-	};
-
 
 
 	SourcePosition const & getPosition() const;
@@ -132,32 +65,11 @@ public:
 
 	friend void print_debug(std::ostream * out, ObjectExpression const & in);
 
-	friend bool override_object(Function * out, Function const & in);
-	friend bool override_object(Register * out, Register const & in);
-	friend bool override_object(RegisterArray * out, RegisterArray const & in);
-	friend bool override_object(Script * out, Script const & in);
-	friend bool override_object(Static * out, Static const & in);
-	friend bool override_object(String * out, String const & in);
-
 	friend void read_object(std::istream * in, ExpressionType * out);
-	friend void read_object(std::istream * in, Function * out);
 	friend void read_object(std::istream * in, Pointer * out);
-	friend void read_object(std::istream * in, Register * out);
-	friend void read_object(std::istream * in, RegisterArray * out);
-	friend void read_object(std::istream * in, Script * out);
-	friend void read_object(std::istream * in, ScriptType * out);
-	friend void read_object(std::istream * in, Static * out);
-	friend void read_object(std::istream * in, String * out);
 
 	friend void write_object(std::ostream * out, ExpressionType const & in);
-	friend void write_object(std::ostream * out, Function const & in);
 	friend void write_object(std::ostream * out, Pointer const & in);
-	friend void write_object(std::ostream * out, Register const & in);
-	friend void write_object(std::ostream * out, RegisterArray const & in);
-	friend void write_object(std::ostream * out, Script const & in);
-	friend void write_object(std::ostream * out, ScriptType const & in);
-	friend void write_object(std::ostream * out, Static const & in);
-	friend void write_object(std::ostream * out, String const & in);
 
 	static void add_address_count(bigsint const addressCount);
 
@@ -184,8 +96,8 @@ public:
 	static void add_registerarray_world(std::string const & name, bigsint size);
 	static void add_registerarray_world(std::string const & name, bigsint size, bigsint number);
 
-	static void add_script(std::string const & name, std::string const & label, ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount);
-	static void add_script(std::string const & name, std::string const & label, ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount, bigsint number);
+	static void add_script(std::string const & name, std::string const & label, ObjectData_Script::ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount);
+	static void add_script(std::string const & name, std::string const & label, ObjectData_Script::ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount, bigsint number);
 
 	static void add_static(std::string const & name, bigsint size);
 	static void add_static(std::string const & name, bigsint size, bigsint number);
@@ -221,10 +133,6 @@ public:
 
 	static bigsint get_function_count();
 
-	static ScriptFlag get_ScriptFlag(std::string const & value, SourcePosition const & position);
-
-	static ScriptType get_ScriptType(std::string const & value, SourcePosition const & position);
-
 	static bigsint get_script_count();
 
 	static bigsint get_string_count();
@@ -234,13 +142,13 @@ public:
 
 	static void init();
 
-	static void iter_function(void (*iter)(std::ostream *, Function const &), std::ostream * out);
+	static void iter_function(void (*iter)(std::ostream *, ObjectData_Function const &), std::ostream * out);
 
-	static void iter_registerarray_map(void (*iter)(std::ostream *, RegisterArray const &), std::ostream * out);
+	static void iter_registerarray_map(void (*iter)(std::ostream *, ObjectData_RegisterArray const &), std::ostream * out);
 
-	static void iter_script(void (*iter)(std::ostream *, Script const &), std::ostream * out);
+	static void iter_script(void (*iter)(std::ostream *, ObjectData_Script const &), std::ostream * out);
 
-	static void iter_string(void (*iter)(std::ostream *, String const &), std::ostream * out);
+	static void iter_string(void (*iter)(std::ostream *, ObjectData_String const &), std::ostream * out);
 
 	static void read_objects(std::istream * in, ObjectVector * objects);
 
@@ -305,8 +213,8 @@ protected:
 	static Pointer create_value_symbol(std::istream * in);
 
 private:
-	static void do_deferred_allocation_register(std::map<std::string, Register> * registerTable, std::map<bigsint, bool> * registerUsed);
-	static void do_deferred_allocation_registerarray(std::map<std::string, RegisterArray> * registerarrayTable, std::map<bigsint, bool> * registerarrayUsed);
+	static void do_deferred_allocation_register(std::map<std::string, ObjectData_Register> * registerTable, std::map<bigsint, bool> * registerUsed);
+	static void do_deferred_allocation_registerarray(std::map<std::string, ObjectData_RegisterArray> * registerarrayTable, std::map<bigsint, bool> * registerarrayUsed);
 
 	static bool do_string_fold(size_t index);
 
@@ -323,29 +231,29 @@ private:
 
 	static std::string _filename;
 
-	static std::vector<Function> _function_table;
+	static std::vector<ObjectData_Function> _function_table;
 
-	static std::map<std::string, Register> _register_global_table;
-	static std::map<bigsint, bool>         _register_global_used;
-	static std::map<std::string, Register> _register_map_table;
-	static std::map<bigsint, bool>         _register_map_used;
-	static std::map<std::string, Register> _register_world_table;
-	static std::map<bigsint, bool>         _register_world_used;
+	static std::map<std::string, ObjectData_Register> _register_global_table;
+	static std::map<bigsint, bool>                    _register_global_used;
+	static std::map<std::string, ObjectData_Register> _register_map_table;
+	static std::map<bigsint, bool>                    _register_map_used;
+	static std::map<std::string, ObjectData_Register> _register_world_table;
+	static std::map<bigsint, bool>                    _register_world_used;
 
-	static std::map<std::string, RegisterArray> _registerarray_global_table;
-	static std::map<bigsint, bool>              _registerarray_global_used;
-	static std::map<std::string, RegisterArray> _registerarray_map_table;
-	static std::map<bigsint, bool>              _registerarray_map_used;
-	static std::map<std::string, RegisterArray> _registerarray_world_table;
-	static std::map<bigsint, bool>              _registerarray_world_used;
+	static std::map<std::string, ObjectData_RegisterArray> _registerarray_global_table;
+	static std::map<bigsint, bool>                         _registerarray_global_used;
+	static std::map<std::string, ObjectData_RegisterArray> _registerarray_map_table;
+	static std::map<bigsint, bool>                         _registerarray_map_used;
+	static std::map<std::string, ObjectData_RegisterArray> _registerarray_world_table;
+	static std::map<bigsint, bool>                         _registerarray_world_used;
 
-	static std::map<std::string, Script> _script_table;
-	static std::map<bigsint, bool>       _script_used;
+	static std::map<std::string, ObjectData_Script> _script_table;
+	static std::map<bigsint, bool>                  _script_used;
 
-	static std::map<std::string, Static> _static_table;
-	static std::map<bigsint, bool>       _static_used;
+	static std::map<std::string, ObjectData_Static> _static_table;
+	static std::map<bigsint, bool>                  _static_used;
 
-	static std::vector<String> _string_table;
+	static std::vector<ObjectData_String> _string_table;
 
 	static std::map<std::string, ObjectExpression::Pointer> _symbol_table;
 	static std::map<std::string, ExpressionType>            _symbol_type_table;

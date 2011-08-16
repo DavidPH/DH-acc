@@ -32,30 +32,30 @@ bigsint ObjectExpression::_address_count;
 
 std::string ObjectExpression::_filename;
 
-std::vector<ObjectExpression::Function> ObjectExpression::_function_table;
+std::vector<ObjectData_Function> ObjectExpression::_function_table;
 
-std::map<std::string, ObjectExpression::Register> ObjectExpression::_register_global_table;
-std::map<bigsint, bool>                           ObjectExpression::_register_global_used;
-std::map<std::string, ObjectExpression::Register> ObjectExpression::_register_map_table;
-std::map<bigsint, bool>                           ObjectExpression::_register_map_used;
-std::map<std::string, ObjectExpression::Register> ObjectExpression::_register_world_table;
-std::map<bigsint, bool>                           ObjectExpression::_register_world_used;
+std::map<std::string, ObjectData_Register> ObjectExpression::_register_global_table;
+std::map<bigsint, bool>                    ObjectExpression::_register_global_used;
+std::map<std::string, ObjectData_Register> ObjectExpression::_register_map_table;
+std::map<bigsint, bool>                    ObjectExpression::_register_map_used;
+std::map<std::string, ObjectData_Register> ObjectExpression::_register_world_table;
+std::map<bigsint, bool>                    ObjectExpression::_register_world_used;
 
-std::map<std::string, ObjectExpression::RegisterArray> ObjectExpression::_registerarray_global_table;
-std::map<bigsint, bool>                                ObjectExpression::_registerarray_global_used;
-std::map<std::string, ObjectExpression::RegisterArray> ObjectExpression::_registerarray_map_table;
-std::map<bigsint, bool>                                ObjectExpression::_registerarray_map_used;
-std::map<std::string, ObjectExpression::RegisterArray> ObjectExpression::_registerarray_world_table;
-std::map<bigsint, bool>                                ObjectExpression::_registerarray_world_used;
+std::map<std::string, ObjectData_RegisterArray> ObjectExpression::_registerarray_global_table;
+std::map<bigsint, bool>                         ObjectExpression::_registerarray_global_used;
+std::map<std::string, ObjectData_RegisterArray> ObjectExpression::_registerarray_map_table;
+std::map<bigsint, bool>                         ObjectExpression::_registerarray_map_used;
+std::map<std::string, ObjectData_RegisterArray> ObjectExpression::_registerarray_world_table;
+std::map<bigsint, bool>                         ObjectExpression::_registerarray_world_used;
 
-std::map<std::string, ObjectExpression::Script> ObjectExpression::_script_table;
-std::map<bigsint, bool>                         ObjectExpression::_script_used;
+std::map<std::string, ObjectData_Script> ObjectExpression::_script_table;
+std::map<bigsint, bool>                  ObjectExpression::_script_used;
 
-ObjectExpression::Pointer                       ObjectExpression:: static_offset(create_value_int(8192, SourcePosition()));
-std::map<std::string, ObjectExpression::Static> ObjectExpression::_static_table;
-std::map<bigsint, bool>                         ObjectExpression::_static_used;
+ObjectExpression::Pointer                ObjectExpression:: static_offset(create_value_int(8192, SourcePosition()));
+std::map<std::string, ObjectData_Static> ObjectExpression::_static_table;
+std::map<bigsint, bool>                  ObjectExpression::_static_used;
 
-std::vector<ObjectExpression::String> ObjectExpression::_string_table;
+std::vector<ObjectData_String> ObjectExpression::_string_table;
 
 std::map<std::string, ObjectExpression::Pointer>        ObjectExpression::_symbol_table;
 std::map<std::string, ObjectExpression::ExpressionType> ObjectExpression::_symbol_type_table;
@@ -80,7 +80,7 @@ void ObjectExpression::add_address_count(bigsint const addressCount)
 
 void ObjectExpression::add_function(std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount)
 {
-	Function f = {argCount, label, retCount, varCount};
+	ObjectData_Function f = {argCount, label, retCount, varCount};
 	_function_table.push_back(f);
 }
 
@@ -91,14 +91,14 @@ void ObjectExpression::add_label(std::string const & symbol)
 
 void ObjectExpression::add_register_global(std::string const & name, bigsint size)
 {
-	Register r = {name, -1, size};
+	ObjectData_Register r = {name, -1, size};
 	_register_global_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
 void ObjectExpression::add_register_global(std::string const & name, bigsint size, bigsint number)
 {
-	Register r = {name, number, size};
+	ObjectData_Register r = {name, number, size};
 	_register_global_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
@@ -106,14 +106,14 @@ void ObjectExpression::add_register_global(std::string const & name, bigsint siz
 
 void ObjectExpression::add_register_map(std::string const & name, bigsint size)
 {
-	Register r = {name, -1, size};
+	ObjectData_Register r = {name, -1, size};
 	_register_map_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
 void ObjectExpression::add_register_map(std::string const & name, bigsint size, bigsint number)
 {
-	Register r = {name, number, size};
+	ObjectData_Register r = {name, number, size};
 	_register_map_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
@@ -121,14 +121,14 @@ void ObjectExpression::add_register_map(std::string const & name, bigsint size, 
 
 void ObjectExpression::add_register_world(std::string const & name, bigsint size)
 {
-	Register r = {name, -1, size};
+	ObjectData_Register r = {name, -1, size};
 	_register_world_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
 void ObjectExpression::add_register_world(std::string const & name, bigsint size, bigsint number)
 {
-	Register r = {name, number, size};
+	ObjectData_Register r = {name, number, size};
 	_register_world_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
@@ -136,14 +136,14 @@ void ObjectExpression::add_register_world(std::string const & name, bigsint size
 
 void ObjectExpression::add_registerarray_global(std::string const & name, bigsint size)
 {
-	RegisterArray r = {name, -1, size};
+	ObjectData_RegisterArray r = {name, -1, size};
 	_registerarray_global_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
 void ObjectExpression::add_registerarray_global(std::string const & name, bigsint size, bigsint number)
 {
-	RegisterArray r = {name, number, size};
+	ObjectData_RegisterArray r = {name, number, size};
 	_registerarray_global_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
@@ -151,14 +151,14 @@ void ObjectExpression::add_registerarray_global(std::string const & name, bigsin
 
 void ObjectExpression::add_registerarray_map(std::string const & name, bigsint size)
 {
-	RegisterArray r = {name, -1, size};
+	ObjectData_RegisterArray r = {name, -1, size};
 	_registerarray_map_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
 void ObjectExpression::add_registerarray_map(std::string const & name, bigsint size, bigsint number)
 {
-	RegisterArray r = {name, number, size};
+	ObjectData_RegisterArray r = {name, number, size};
 	_registerarray_map_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
@@ -166,29 +166,29 @@ void ObjectExpression::add_registerarray_map(std::string const & name, bigsint s
 
 void ObjectExpression::add_registerarray_world(std::string const & name, bigsint size)
 {
-	RegisterArray r = {name, -1, size};
+	ObjectData_RegisterArray r = {name, -1, size};
 	_registerarray_world_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
 void ObjectExpression::add_registerarray_world(std::string const & name, bigsint size, bigsint number)
 {
-	RegisterArray r = {name, number, size};
+	ObjectData_RegisterArray r = {name, number, size};
 	_registerarray_world_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_script(std::string const & name, std::string const & label, ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount)
+void ObjectExpression::add_script(std::string const & name, std::string const & label, ObjectData_Script::ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount)
 {
-	Script s = {label, name, stype, argCount, flags, -1, varCount};
+	ObjectData_Script s = {label, name, stype, argCount, flags, -1, varCount};
 	_script_table[name] = s;
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_script(std::string const & name, std::string const & label, ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount, bigsint number)
+void ObjectExpression::add_script(std::string const & name, std::string const & label, ObjectData_Script::ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount, bigsint number)
 {
-	Script s = {label, name, stype, argCount, flags, number, varCount};
+	ObjectData_Script s = {label, name, stype, argCount, flags, number, varCount};
 	_script_table[name] = s;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
@@ -196,14 +196,14 @@ void ObjectExpression::add_script(std::string const & name, std::string const & 
 
 void ObjectExpression::add_static(std::string const & name, bigsint size)
 {
-	Static s = {name, -1, size};
+	ObjectData_Static s = {name, -1, size};
 	_static_table[name] = s;
 
 	add_symbol(name, ET_INT);
 }
 void ObjectExpression::add_static(std::string const & name, bigsint size, bigsint number)
 {
-	Static s = {name, number, size};
+	ObjectData_Static s = {name, number, size};
 	_static_table[name] = s;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
@@ -220,7 +220,7 @@ std::string ObjectExpression::add_string(std::string const & value)
 }
 void ObjectExpression::add_string(std::string const & name, std::string const & value)
 {
-	String s = {name, value, 0};
+	ObjectData_String s = {name, value, 0};
 	_string_table.push_back(s);
 
 	add_symbol(name, ET_INT);
@@ -293,49 +293,6 @@ bigsint ObjectExpression::get_registerarray_number(std::map<bigsint, bool> * reg
 
 	(*registerarrayUsed)[registerarrayUsedLast] = true;
 	return registerarrayUsedLast;
-}
-
-ObjectExpression::ScriptFlag ObjectExpression::get_ScriptFlag(std::string const & value, SourcePosition const & position)
-{
-	if (value == "net")
-		return SF_NET;
-
-	if (value == "clientside")
-		return SF_CLIENTSIDE;
-
-	throw SourceException("invalid script-flag", position, "ObjectExpression");
-}
-
-ObjectExpression::ScriptType ObjectExpression::get_ScriptType(std::string const & value, SourcePosition const & position)
-{
-	if (value == "closed")
-		return ST_CLOSED;
-
-	if (value == "open")
-		return ST_OPEN;
-
-	if (value == "respawn")
-		return ST_RESPAWN;
-
-	if (value == "death")
-		return ST_DEATH;
-
-	if (value == "enter")
-		return ST_ENTER;
-
-	if (value == "lightning")
-		return ST_LIGHTNING;
-
-	if (value == "unloading")
-		return ST_UNLOADING;
-
-	if (value == "disconnect")
-		return ST_DISCONNECT;
-
-	if (value == "return")
-		return ST_RETURN;
-
-	throw SourceException("invalid script-type", position, "ObjectExpression");
 }
 
 bigsint ObjectExpression::get_script_count()

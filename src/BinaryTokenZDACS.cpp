@@ -21,6 +21,7 @@
 
 #include "BinaryTokenZDACS.hpp"
 
+#include "ObjectExpression.hpp"
 #include "ost_type.hpp"
 #include "SourceException.hpp"
 
@@ -32,7 +33,7 @@ uintptr_t BinaryTokenZDACS::_arg_counts[BCODE_NONE];
 
 
 
-BinaryTokenZDACS::BinaryTokenZDACS(BinaryCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args) : _args(args), _code(code), _labels(labels), _position(position)
+BinaryTokenZDACS::BinaryTokenZDACS(BinaryCode code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args) : _args(args), _code(code), _labels(labels), _position(position)
 {
 
 }
@@ -287,7 +288,7 @@ void BinaryTokenZDACS::write_chunk(std::ostream * out, std::ostringstream * chun
 	chunkout->str("");
 }
 
-void BinaryTokenZDACS::write_function(std::ostream * const out, ObjectExpression::Function const & f)
+void BinaryTokenZDACS::write_function(std::ostream * out, ObjectData_Function const & f)
 {
 	switch (output_type)
 	{
@@ -304,7 +305,7 @@ void BinaryTokenZDACS::write_function(std::ostream * const out, ObjectExpression
 	}
 }
 
-void BinaryTokenZDACS::write_registerarray(std::ostream * const out, ObjectExpression::RegisterArray const & r)
+void BinaryTokenZDACS::write_registerarray(std::ostream * out, ObjectData_RegisterArray const & r)
 {
 	switch (output_type)
 	{
@@ -318,7 +319,7 @@ void BinaryTokenZDACS::write_registerarray(std::ostream * const out, ObjectExpre
 	}
 }
 
-void BinaryTokenZDACS::write_script(std::ostream * const out, ObjectExpression::Script const & s)
+void BinaryTokenZDACS::write_script(std::ostream * out, ObjectData_Script const & s)
 {
 	switch (output_type)
 	{
@@ -340,7 +341,7 @@ void BinaryTokenZDACS::write_script(std::ostream * const out, ObjectExpression::
 	}
 }
 
-void BinaryTokenZDACS::write_script_flags(std::ostream * const out, ObjectExpression::Script const & s)
+void BinaryTokenZDACS::write_script_flags(std::ostream * out, ObjectData_Script const & s)
 {
 	switch (output_type)
 	{
@@ -354,7 +355,7 @@ void BinaryTokenZDACS::write_script_flags(std::ostream * const out, ObjectExpres
 	}
 }
 
-void BinaryTokenZDACS::write_script_vars(std::ostream * const out, ObjectExpression::Script const & s)
+void BinaryTokenZDACS::write_script_vars(std::ostream * out, ObjectData_Script const & s)
 {
 	switch (output_type)
 	{
@@ -368,7 +369,7 @@ void BinaryTokenZDACS::write_script_vars(std::ostream * const out, ObjectExpress
 	}
 }
 
-void BinaryTokenZDACS::write_string(std::ostream * out, ObjectExpression::String const & s)
+void BinaryTokenZDACS::write_string(std::ostream * out, ObjectData_String const & s)
 {
 	write_string(out, s.string);
 }
@@ -376,7 +377,7 @@ void BinaryTokenZDACS::write_string(std::ostream * const out, std::string const 
 {
 	*out << s;
 }
-void BinaryTokenZDACS::write_string_offset(std::ostream * out, ObjectExpression::String const & s)
+void BinaryTokenZDACS::write_string_offset(std::ostream * out, ObjectData_String const & s)
 {
 	switch (output_type)
 	{

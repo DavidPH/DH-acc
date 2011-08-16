@@ -5,6 +5,7 @@ add_executable(DH-acc
 	BinaryTokenZDACS.cpp
 	BinaryTokenZDACS/make_tokens.cpp
 	ObjectCode.cpp
+	ObjectData.cpp
 	ObjectExpression.cpp
 	ObjectExpression/Binary.cpp
 	ObjectExpression/BinaryAdd.cpp
