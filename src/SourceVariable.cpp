@@ -79,6 +79,10 @@ SourceVariable::SourceVariable(std::string const & name, VariableType const * ty
 {
 
 }
+SourceVariable::~SourceVariable()
+{
+
+}
 
 bool SourceVariable::canMakeObject() const
 {

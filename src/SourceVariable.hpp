@@ -136,6 +136,7 @@ public:
 	SourceVariable(std::string const & name, VariableData_Script   const & vdScript,   SourcePosition const & position, std::string const & nameObject);
 	SourceVariable(std::string const & name, VariableData_String   const & vdString,   SourcePosition const & position, std::string const & nameObject);
 	SourceVariable(std::string const & name, VariableType const * type, ObjectExpression * expr, SourcePosition const & position);
+	~SourceVariable();
 
 	bool canMakeObject() const;
 	bool canMakeObjectAddress() const;

@@ -83,12 +83,16 @@ add_executable(DH-acc
 #	SourceExpressionACS/BinaryAdd.cpp
 	SourceExpressionDS.cpp
 	SourceExpressionDS/make_expression_single.cpp
+	SourceExpressionDS/make_expression_single_asmfunc.cpp
 	SourceExpressionDS/make_expression_single_for.cpp
 	SourceExpressionDS/make_expression_single_function.cpp
 	SourceExpressionDS/make_expression_single_goto.cpp
+	SourceExpressionDS/make_expression_single_if.cpp
 	SourceExpressionDS/make_expression_single_linespec.cpp
 	SourceExpressionDS/make_expression_single_native.cpp
+	SourceExpressionDS/make_expression_single_script.cpp
 	SourceExpressionDS/make_expression_single_switch.cpp
+	SourceExpressionDS/make_expression_single_var.cpp
 	SourceExpressionDS/make_expression_type.cpp
 	SourceBlockC.cpp
 	SourcePosition.cpp
