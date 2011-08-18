@@ -5,7 +5,7 @@ project(DH-acc)
 
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-	add_definitions(-Wall)
+	add_definitions(-Wall -ansi -pedantic-errors)
 endif()
 
 

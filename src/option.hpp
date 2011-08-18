@@ -47,15 +47,15 @@ private:
 
 
 
-typedef bool          option_b;
-typedef long double   option_f;
-typedef long long int option_i;
-typedef std::string   option_s;
+typedef bool        option_b;
+typedef long double option_f;
+typedef long int    option_i;
+typedef std::string option_s;
 
-typedef std::vector<bool>          option_bv;
-typedef std::vector<long double>   option_fv;
-typedef std::vector<long long int> option_iv;
-typedef std::vector<std::string>   option_sv;
+typedef std::vector<option_b> option_bv;
+typedef std::vector<option_f> option_fv;
+typedef std::vector<option_i> option_iv;
+typedef std::vector<option_s> option_sv;
 
 // Handlers return true if they consume the associated arg.
 typedef bool (*option_handler_b)(char const * name, char const * arg, bool barg, option_b * data);

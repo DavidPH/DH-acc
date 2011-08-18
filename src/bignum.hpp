@@ -29,10 +29,9 @@ class SourceTokenC;
 // A long double should service all requirements of bigreal.
 typedef long double bigreal;
 
-// 64 bits services all known requirements, so for now a typedef here will be
-// sufficient.
-typedef   signed long long int bigsint;
-typedef unsigned long long int biguint;
+// 32 bits services the ACS VM. Will need 64 bits for ScriptPLX.
+typedef   signed long int bigsint;
+typedef unsigned long int biguint;
 
 
 
