@@ -149,6 +149,12 @@ private:
 	std::vector<VariableType *> _types;
 	std::vector<std::string> _typenames;
 
+	std::vector<VariableType *> _structs;
+	std::vector<std::string> _structnames;
+
+	std::vector<VariableType *> _unions;
+	std::vector<std::string> _unionnames;
+
 	std::vector<SourceVariable> _vars;
 	std::vector<std::string> _varnames;
 

@@ -125,9 +125,11 @@ VariableType const * SourceContext::getVariableType_script(VariableType const * 
 
 VariableType * SourceContext::getVariableType_struct(std::string const & name)
 {
-	for (size_t i(0); i < _typenames.size(); ++i)
-		if (_typenames[i] == name && _types[i]->vt == VariableType::VT_STRUCT)
-			return _types[i];
+	if (name.empty()) return NULL;
+
+	for (size_t i(0); i < _structnames.size(); ++i)
+		if (_structnames[i] == name)
+			return _structs[i];
 
 	if (_parent) return _parent->getVariableType_struct(name);
 
@@ -145,8 +147,8 @@ VariableType const * SourceContext::getVariableType_struct(std::string const & n
 		vartype->callType = getVariableType(VariableType::VT_VOID);
 		vartype->refType  = getVariableType(VariableType::VT_VOID);
 
-		_types.push_back(vartype);
-		_typenames.push_back(name);
+		_structs.push_back(vartype);
+		_structnames.push_back(name);
 	}
 
 	return vartype;
@@ -176,8 +178,8 @@ VariableType const * SourceContext::getVariableType_struct(std::string const & n
 		vartype->names    = names;
 		vartype->types    = types;
 
-		_types.push_back(vartype);
-		_typenames.push_back(name);
+		_structs.push_back(vartype);
+		_structnames.push_back(name);
 	}
 
 	return vartype;
@@ -201,9 +203,11 @@ VariableType const * SourceContext::getVariableType_typedef(std::string const & 
 
 VariableType * SourceContext::getVariableType_union(std::string const & name)
 {
-	for (size_t i(0); i < _typenames.size(); ++i)
-		if (_typenames[i] == name && _types[i]->vt == VariableType::VT_UNION)
-			return _types[i];
+	if (name.empty()) return NULL;
+
+	for (size_t i(0); i < _unionnames.size(); ++i)
+		if (_unionnames[i] == name)
+			return _unions[i];
 
 	if (_parent) return _parent->getVariableType_union(name);
 
@@ -221,8 +225,8 @@ VariableType const * SourceContext::getVariableType_union(std::string const & na
 		vartype->callType = getVariableType(VariableType::VT_VOID);
 		vartype->refType  = getVariableType(VariableType::VT_VOID);
 
-		_types.push_back(vartype);
-		_typenames.push_back(name);
+		_unions.push_back(vartype);
+		_unionnames.push_back(name);
 	}
 
 	return vartype;
@@ -252,8 +256,8 @@ VariableType const * SourceContext::getVariableType_union(std::string const & na
 		vartype->names    = names;
 		vartype->types    = types;
 
-		_types.push_back(vartype);
-		_typenames.push_back(name);
+		_unions.push_back(vartype);
+		_unionnames.push_back(name);
 	}
 
 	return vartype;
@@ -261,9 +265,19 @@ VariableType const * SourceContext::getVariableType_union(std::string const & na
 
 VariableType const * SourceContext::getVariableTypeNull(std::string const & name)
 {
+	if (name.empty()) return NULL;
+
 	for (size_t i(0); i < _typenames.size(); ++i)
 		if (_typenames[i] == name)
 			return _types[i];
+
+	for (size_t i(0); i < _structnames.size(); ++i)
+		if (_structnames[i] == name)
+			return _structs[i];
+
+	for (size_t i(0); i < _unionnames.size(); ++i)
+		if (_unionnames[i] == name)
+			return _unions[i];
 
 	if (_parent) return _parent->getVariableTypeNull(name);
 
