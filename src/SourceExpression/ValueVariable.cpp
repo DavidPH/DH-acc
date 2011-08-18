@@ -22,8 +22,10 @@
 #include "../SourceExpression.hpp"
 
 #include "../ObjectExpression.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -39,7 +41,7 @@ public:
 
 	virtual bool canMakeObjectsAddress() const;
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
 	virtual CounterPointer<ObjectExpression> makeObject() const;
 	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
@@ -70,7 +72,7 @@ SourceExpression::Pointer SourceExpression::create_value_char(SourceTokenC const
 	if (token.getData().size() != 1)
 		throw SourceException("invalid length for character literal", token.getPosition(), "SourceExpressionDS");
 
-	SourceVariable::VariableType const * charVarType(SourceVariable::get_VariableType(SourceVariable::VT_CHAR));
+	VariableType const * charVarType(SourceContext::global_context.getVariableType(VariableType::VT_CHAR));
 
 	SourceVariable::VariableData_Char charVarData = {charVarType, token.getData()[0]};
 
@@ -80,7 +82,7 @@ SourceExpression::Pointer SourceExpression::create_value_char(SourceTokenC const
 }
 SourceExpression::Pointer SourceExpression::create_value_int(int value, SourcePosition const & position)
 {
-	SourceVariable::VariableType const * intVarType(SourceVariable::get_VariableType(SourceVariable::VT_INT));
+	VariableType const * intVarType(SourceContext::global_context.getVariableType(VariableType::VT_INT));
 
 	SourceVariable::VariableData_Int intVarData = {intVarType, value};
 
@@ -90,7 +92,7 @@ SourceExpression::Pointer SourceExpression::create_value_int(int value, SourcePo
 }
 SourceExpression::Pointer SourceExpression::create_value_int(SourceTokenC const & token)
 {
-	SourceVariable::VariableType const * intVarType(SourceVariable::get_VariableType(SourceVariable::VT_INT));
+	VariableType const * intVarType(SourceContext::global_context.getVariableType(VariableType::VT_INT));
 
 	SourceVariable::VariableData_Int intVarData = {intVarType, get_bigsint(token)};
 
@@ -100,7 +102,7 @@ SourceExpression::Pointer SourceExpression::create_value_int(SourceTokenC const 
 }
 SourceExpression::Pointer SourceExpression::create_value_real(SourceTokenC const & token)
 {
-	SourceVariable::VariableType const * realVarType(SourceVariable::get_VariableType(SourceVariable::VT_REAL));
+	VariableType const * realVarType(SourceContext::global_context.getVariableType(VariableType::VT_REAL));
 
 	SourceVariable::VariableData_Real realVarData = {realVarType, get_bigreal(token)};
 
@@ -110,7 +112,7 @@ SourceExpression::Pointer SourceExpression::create_value_real(SourceTokenC const
 }
 SourceExpression::Pointer SourceExpression::create_value_string(SourceTokenC const & token)
 {
-	SourceVariable::VariableType const * stringVarType(SourceVariable::get_VariableType(SourceVariable::VT_STRING));
+	VariableType const * stringVarType(SourceContext::global_context.getVariableType(VariableType::VT_STRING));
 
 	SourceVariable::VariableData_String stringVarData = {stringVarType, -1};
 
@@ -144,7 +146,7 @@ bool SourceExpression_ValueVariable::canMakeObjectsAddress() const
 	return _var.canMakeObjectsAddress();
 }
 
-SourceVariable::VariableType const * SourceExpression_ValueVariable::getType() const
+VariableType const * SourceExpression_ValueVariable::getType() const
 {
 	return _var.getType();
 }

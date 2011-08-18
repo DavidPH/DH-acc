@@ -22,6 +22,7 @@
 #include "Binary.hpp"
 
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 
 
 
@@ -54,7 +55,7 @@ SourceExpression::Pointer SourceExpression::create_binary_shiftr(SourceExpressio
 
 
 
-SourceExpression_BinaryShift::SourceExpression_BinaryShift(SourceExpression * exprL, SourceExpression * exprR, bool right, SourcePosition const & position) : Super(exprL, exprR, SourceVariable::get_VariableType(SourceVariable::VT_INT), SourceVariable::get_VariableType(SourceVariable::VT_INT), false, position), _right(right)
+SourceExpression_BinaryShift::SourceExpression_BinaryShift(SourceExpression * exprL, SourceExpression * exprR, bool right, SourcePosition const & position) : Super(exprL, exprR, SourceContext::global_context.getVariableType(VariableType::VT_INT), SourceContext::global_context.getVariableType(VariableType::VT_INT), false, position), _right(right)
 {
 
 }

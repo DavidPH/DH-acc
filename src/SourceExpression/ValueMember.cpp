@@ -25,6 +25,7 @@
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
 #include "../SourceTokenC.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -37,7 +38,7 @@ public:
 
 	virtual bool canMakeObjectsAddress() const;
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
 	virtual void makeObjectsAddress(ObjectVector * objects);
 
@@ -74,7 +75,7 @@ bool SourceExpression_ValueMember::canMakeObjectsAddress() const
 	return _expr->canMakeObjectsAddress();
 }
 
-SourceVariable::VariableType const * SourceExpression_ValueMember::getType() const
+VariableType const * SourceExpression_ValueMember::getType() const
 {
 	return _expr->getType()->getType(_name, position);
 }

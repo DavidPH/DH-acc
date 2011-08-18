@@ -82,7 +82,7 @@ private:
 
 template<typename T1, typename T2> inline CounterPointer<ObjectExpression> ObjectVector::getValueAdd(T1 const & l, T2 const & r) const
 {
-	return getValueAdd(getValue(l), getValue(r));
+	return getValueAdd((ObjectExpression *)getValue(l), (ObjectExpression *)getValue(r));
 }
 
 

@@ -31,13 +31,13 @@ class SourceExpression_Binary : public SourceExpression
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression_Binary, SourceExpression);
 
 public:
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
 protected:
 	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool arithmetic, SourcePosition const & position);
-	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourceVariable::VariableType const * castL, SourceVariable::VariableType const * castR, SourcePosition const & position);
-	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourceVariable::VariableType const * castL, SourceVariable::VariableType const * castR, bool arithmetic, SourcePosition const & position);
+	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, VariableType const * castL, VariableType const * castR, SourcePosition const & position);
+	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, VariableType const * castL, VariableType const * castR, bool arithmetic, SourcePosition const & position);
 
 	void recurse_makeObjectsGet(ObjectVector * objects);
 
@@ -48,7 +48,7 @@ protected:
 
 private:
 	void doCast();
-	void doCast(SourceVariable::VariableType const * castL, SourceVariable::VariableType const * castR);
+	void doCast(VariableType const * castL, VariableType const * castR);
 
 	int _arithmetic;
 };

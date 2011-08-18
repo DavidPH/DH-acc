@@ -34,8 +34,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_linespec(So
 	std::string linespecName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
 	// linespecArgTypes linespecReturn
-	std::vector<SourceVariable::VariableType const *> linespecArgTypes;
-	SourceVariable::VariableType const * linespecReturn;
+	std::vector<VariableType const *> linespecArgTypes;
+	VariableType const * linespecReturn;
 	make_expression_arglist(in, blocks, context, &linespecArgTypes, &linespecReturn);
 
 	// linespecNumber
@@ -43,7 +43,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_linespec(So
 	bigsint linespecNumber(get_bigsint(in->get(SourceTokenC::TT_INTEGER)));
 
 	// linespecVarType
-	SourceVariable::VariableType const * linespecVarType(SourceVariable::get_VariableType_linespec(linespecReturn, linespecArgTypes));
+	VariableType const * linespecVarType(context->getVariableType_linespec(linespecReturn, linespecArgTypes));
 
 	// linespecVarData
 	SourceVariable::VariableData_LineSpec linespecVarData = {linespecVarType, linespecNumber};

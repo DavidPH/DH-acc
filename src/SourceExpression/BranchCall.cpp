@@ -36,7 +36,7 @@ class SourceExpression_BranchCall : public SourceExpression
 public:
 	SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position);
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects);
 
@@ -60,7 +60,7 @@ SourceExpression::Pointer SourceExpression::create_branch_call(SourceExpression 
 
 SourceExpression_BranchCall::SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position) : Super(position), _args(args), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
 {
-	SourceVariable::VariableType const * type(_expr->getType());
+	VariableType const * type(_expr->getType());
 
 	if (_args.size() != type->types.size())
 		throw SourceException("incorrect arg count", position, getName());
@@ -72,7 +72,7 @@ SourceExpression_BranchCall::SourceExpression_BranchCall(SourceExpression * expr
 	}
 }
 
-SourceVariable::VariableType const * SourceExpression_BranchCall::getType() const
+VariableType const * SourceExpression_BranchCall::getType() const
 {
 	return _expr->getType()->callType;
 }

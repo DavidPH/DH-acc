@@ -23,6 +23,7 @@
 
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -57,11 +58,11 @@ void SourceExpression_BinaryIOr::makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	switch (getType()->type)
+	switch (getType()->vt)
 	{
-	case SourceVariable::VT_CHAR:
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_POINTER:
+	case VariableType::VT_CHAR:
+	case VariableType::VT_INT:
+	case VariableType::VT_POINTER:
 		objects->addToken(OCODE_IOR);
 		break;
 

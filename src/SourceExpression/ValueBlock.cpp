@@ -23,6 +23,7 @@
 
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 
 
@@ -34,9 +35,9 @@ class SourceExpression_ValueBlock : public SourceExpression
 public:
 	SourceExpression_ValueBlock(std::vector<SourceExpression::Pointer> const & expressions, SourcePosition const & position);
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
-	virtual void makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type);
+	virtual void makeObjectsCast(ObjectVector * objects, VariableType const * type);
 
 	virtual void makeObjectsGet(ObjectVector * objects);
 
@@ -45,7 +46,7 @@ protected:
 
 private:
 	std::vector<SourceExpression::Pointer> _expressions;
-	SourceVariable::VariableType const * _type;
+	VariableType const * _type;
 };
 
 
@@ -59,24 +60,24 @@ SourceExpression::Pointer SourceExpression::create_value_block(std::vector<Sourc
 
 SourceExpression_ValueBlock::SourceExpression_ValueBlock(std::vector<SourceExpression::Pointer> const & expressions, SourcePosition const & position) : Super(position), _expressions(expressions)
 {
-	std::vector<SourceVariable::VariableType const *> types(_expressions.size());
+	std::vector<VariableType const *> types(_expressions.size());
 
 	for (size_t i(0); i < _expressions.size(); ++i)
 		types[i] = _expressions[i]->getType();
 
-	_type = SourceVariable::get_VariableType_block(types);
+	_type = SourceContext::global_context.getVariableType_block(types);
 }
 
-SourceVariable::VariableType const * SourceExpression_ValueBlock::getType() const
+VariableType const * SourceExpression_ValueBlock::getType() const
 {
 	return _type;
 }
 
-void SourceExpression_ValueBlock::makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type)
+void SourceExpression_ValueBlock::makeObjectsCast(ObjectVector * objects, VariableType const * type)
 {
 	Super::recurse_makeObjectsCast(objects, type);
 
-	if (type->type == SourceVariable::VT_VOID)
+	if (type->vt == VariableType::VT_VOID)
 	{
 		for (size_t i(0); i < _expressions.size(); ++i)
 			_expressions[i]->makeObjectsCast(objects, type);

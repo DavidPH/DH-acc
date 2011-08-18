@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -56,27 +57,27 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 	case SC_CONSTANT:
 		ocode = OCODE_PUSHNUMBER;
 
-		switch (type->type)
+		switch (type->vt)
 		{
-		case VT_ASMFUNC:
-		case VT_VOID:
+		case VariableType::VT_ASMFUNC:
+		case VariableType::VT_VOID:
 			break;
 
-		case VT_ARRAY:
-		case VT_BLOCK:
-		case VT_BOOLHARD:
-		case VT_BOOLSOFT:
-		case VT_CHAR:
-		case VT_FUNCTION:
-		case VT_INT:
-		case VT_LINESPEC:
-		case VT_NATIVE:
-		case VT_POINTER:
-		case VT_REAL:
-		case VT_STRUCT:
-		case VT_STRING:
-		case VT_SCRIPT:
-		case VT_UNION:
+		case VariableType::VT_ARRAY:
+		case VariableType::VT_BLOCK:
+		case VariableType::VT_BOOLHARD:
+		case VariableType::VT_BOOLSOFT:
+		case VariableType::VT_CHAR:
+		case VariableType::VT_FUNCTION:
+		case VariableType::VT_INT:
+		case VariableType::VT_LINESPEC:
+		case VariableType::VT_NATIVE:
+		case VariableType::VT_POINTER:
+		case VariableType::VT_REAL:
+		case VariableType::VT_STRUCT:
+		case VariableType::VT_STRING:
+		case VariableType::VT_SCRIPT:
+		case VariableType::VT_UNION:
 			objects->addToken(ocode, makeObject(position));
 			++*address;
 			break;
@@ -86,37 +87,37 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 	case SC_REGISTER:
 		ocode = OCODE_PUSHSCRIPTVAR;
 	sc_register_case:
-		switch (type->type)
+		switch (type->vt)
 		{
-		case VT_ARRAY:
-		case VT_BLOCK:
-		case VT_STRUCT:
+		case VariableType::VT_ARRAY:
+		case VariableType::VT_BLOCK:
+		case VariableType::VT_STRUCT:
 			for (size_t i(0); i < type->types.size(); ++i)
 				makeObjectsGet(objects, position, type->types[i], addressBase, address, dimensioned);
 			break;
 
-		case VT_ASMFUNC:
-		case VT_VOID:
+		case VariableType::VT_ASMFUNC:
+		case VariableType::VT_VOID:
 			break;
 
-		case VT_BOOLHARD:
-		case VT_BOOLSOFT:
-		case VT_CHAR:
-		case VT_FUNCTION:
-		case VT_INT:
-		case VT_LINESPEC:
-		case VT_NATIVE:
-		case VT_POINTER:
-		case VT_REAL:
-		case VT_SCRIPT:
-		case VT_STRING:
+		case VariableType::VT_BOOLHARD:
+		case VariableType::VT_BOOLSOFT:
+		case VariableType::VT_CHAR:
+		case VariableType::VT_FUNCTION:
+		case VariableType::VT_INT:
+		case VariableType::VT_LINESPEC:
+		case VariableType::VT_NATIVE:
+		case VariableType::VT_POINTER:
+		case VariableType::VT_REAL:
+		case VariableType::VT_SCRIPT:
+		case VariableType::VT_STRING:
 			if (array)
 				objects->addToken(ocode, objects->getValue(_nameObject), objects->getValueAdd(addressBase, (*address)++));
 			else
 				objects->addToken(ocode, objects->getValueAdd(addressBase, (*address)++));
 			break;
 
-		case VT_UNION:
+		case VariableType::VT_UNION:
 			for (int i(0); i < type->size(); ++i)
 			{
 				if (array)
@@ -191,28 +192,13 @@ void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions,
 	case SC_REGISTERARRAY_MAP:
 	case SC_REGISTERARRAY_WORLD:
 	case SC_STATIC:
-		switch (type->type)
+		switch (type->vt)
 		{
-		case VT_ARRAY:
+		case VariableType::VT_ARRAY:
 			makeObjectsGetArray(objects, dimensions-1, position, type->refType, addressBase, address);
 			break;
 
-		case VT_ASMFUNC:
-		case VT_BLOCK:
-		case VT_BOOLHARD:
-		case VT_BOOLSOFT:
-		case VT_CHAR:
-		case VT_FUNCTION:
-		case VT_INT:
-		case VT_LINESPEC:
-		case VT_NATIVE:
-		case VT_POINTER:
-		case VT_REAL:
-		case VT_SCRIPT:
-		case VT_STRING:
-		case VT_STRUCT:
-		case VT_UNION:
-		case VT_VOID:
+		default:
 			throw SourceException("makeObjectsGetArray on non-VT_ARRAY", position, "SourceVariable");
 		}
 		break;
@@ -256,27 +242,10 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 	case SC_REGISTERARRAY_MAP:
 	case SC_REGISTERARRAY_WORLD:
 	case SC_STATIC:
-		switch (type->type)
+		switch (type->vt)
 		{
-		case VT_ARRAY:
-		case VT_ASMFUNC:
-		case VT_BLOCK:
-		case VT_BOOLHARD:
-		case VT_BOOLSOFT:
-		case VT_CHAR:
-		case VT_FUNCTION:
-		case VT_INT:
-		case VT_LINESPEC:
-		case VT_NATIVE:
-		case VT_POINTER:
-		case VT_REAL:
-		case VT_SCRIPT:
-		case VT_STRING:
-		case VT_VOID:
-			throw SourceException("makeObjectGetMember on non-VT_STRUCT", position, "SourceVariable");
-
-		case VT_STRUCT:
-		case VT_UNION:
+		case VariableType::VT_STRUCT:
+		case VariableType::VT_UNION:
 			for (size_t i(0); i < type->types.size(); ++i)
 			{
 				if (type->names[i] == names->back())
@@ -285,14 +254,18 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 					makeObjectsGetMember(objects, names, position, type->types[i], addressBase, address);
 					return;
 				}
-				else if (type->type == VT_STRUCT)
+				else if (type->vt == VariableType::VT_STRUCT)
 				{
 					makeObjectsGetSkip(type->types[i], address);
 				}
 			}
 			break;
+
+		default:
+			throw SourceException("makeObjectGetMember on non-VT_STRUCT", position, "SourceVariable");
 		}
 		break;
+
 
 	case SC_CONSTANT:
 		throw SourceException("makeObjectGetMember on SC_CONSTANT", position, "SourceVariable");

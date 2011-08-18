@@ -22,6 +22,7 @@
 #include "../SourceVariable.hpp"
 
 #include "../print_debug.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -71,49 +72,6 @@ void print_debug(std::ostream * const out, SourceVariable::StorageClass const in
 	case SourceVariable::SC_REGISTERARRAY_MAP:    *out << "SC_REGISTERARRAY_MAP";    break;
 	case SourceVariable::SC_REGISTERARRAY_WORLD:  *out << "SC_REGISTERARRAY_WORLD";  break;
 	case SourceVariable::SC_STATIC:               *out << "SC_STATIC";               break;
-	}
-}
-void print_debug(std::ostream * const out, SourceVariable::VariableType const & in)
-{
-	*out << "SourceVariable::VariableType(";
-		*out << "type=(";
-		print_debug(out, in.type);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "names=(";
-		print_debug(out, in.names);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "types=(";
-		print_debug(out, in.types);
-		*out << ")";
-	*out << ")";
-}
-void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal const in)
-{
-	switch (in)
-	{
-	case SourceVariable::VT_ARRAY:    *out << "VT_ARRAY";    break;
-	case SourceVariable::VT_ASMFUNC:  *out << "VT_ASMFUNC";  break;
-	case SourceVariable::VT_BLOCK:    *out << "VT_BLOCK";    break;
-	case SourceVariable::VT_BOOLHARD: *out << "VT_BOOLHARD"; break;
-	case SourceVariable::VT_BOOLSOFT: *out << "VT_BOOLSOFT"; break;
-	case SourceVariable::VT_CHAR:     *out << "VT_CHAR";     break;
-	case SourceVariable::VT_FUNCTION: *out << "VT_FUNCTION"; break;
-	case SourceVariable::VT_INT:      *out << "VT_INT";      break;
-	case SourceVariable::VT_LINESPEC: *out << "VT_LINESPEC"; break;
-	case SourceVariable::VT_NATIVE:   *out << "VT_NATIVE";   break;
-	case SourceVariable::VT_POINTER:  *out << "VT_POINTER";  break;
-	case SourceVariable::VT_REAL:     *out << "VT_REAL" ;    break;
-	case SourceVariable::VT_SCRIPT:   *out << "VT_SCRIPT";   break;
-	case SourceVariable::VT_STRING:   *out << "VT_STRING";   break;
-	case SourceVariable::VT_STRUCT:   *out << "VT_STRUCT";   break;
-	case SourceVariable::VT_UNION:    *out << "VT_UNION";    break;
-	case SourceVariable::VT_VOID:     *out << "VT_VOID";     break;
 	}
 }
 

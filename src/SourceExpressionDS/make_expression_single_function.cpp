@@ -43,10 +43,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	std::string functionLabel(context->getLabel() + "function_" + functionName);
 
 	// functionArgTypes/Names/Count functionReturn
-	std::vector<SourceVariable::VariableType const *> functionArgTypes;
+	std::vector<VariableType const *> functionArgTypes;
 	std::vector<std::string> functionArgNames;
 	int functionArgCount;
-	SourceVariable::VariableType const * functionReturn;
+	VariableType const * functionReturn;
 	make_expression_arglist(in, blocks, context, &functionArgTypes, &functionArgNames, &functionArgCount, &functionContext, &functionReturn);
 
 	// functionExpression
@@ -56,7 +56,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	blocks->push_back(create_branch_return(create_value_data(functionReturn, true, token.getPosition()), &functionContext, token.getPosition()));
 
 	// functionVarType
-	SourceVariable::VariableType const * functionVarType(SourceVariable::get_VariableType_function(functionReturn, functionArgTypes));
+	VariableType const * functionVarType(context->getVariableType_function(functionReturn, functionArgTypes));
 
 	// functionVarData
 	SourceVariable::VariableData_Function functionVarData = {functionVarType, functionNumber};

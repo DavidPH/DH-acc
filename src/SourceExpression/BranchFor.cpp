@@ -64,17 +64,17 @@ SourceExpression_BranchFor::SourceExpression_BranchFor(SourceExpression * exprIn
 {
 	_labelCond = context->makeLabel() + "_cond";
 
-	if (_exprInit->getType()->type != SourceVariable::VT_VOID)
-		_exprInit = create_value_cast(_exprInit, SourceVariable::get_VariableType(SourceVariable::VT_VOID), position);
+	if (_exprInit->getType()->vt != VariableType::VT_VOID)
+		_exprInit = create_value_cast(_exprInit, SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
 
-	if (_exprCond->getType()->type != SourceVariable::VT_BOOLSOFT)
-		_exprCond = create_value_cast(_exprCond, SourceVariable::get_VariableType(SourceVariable::VT_BOOLSOFT), position);
+	if (_exprCond->getType()->vt != VariableType::VT_BOOLSOFT)
+		_exprCond = create_value_cast(_exprCond, SourceContext::global_context.getVariableType(VariableType::VT_BOOLSOFT), position);
 
-	if (_exprIter->getType()->type != SourceVariable::VT_VOID)
-		_exprIter = create_value_cast(_exprIter, SourceVariable::get_VariableType(SourceVariable::VT_VOID), position);
+	if (_exprIter->getType()->vt != VariableType::VT_VOID)
+		_exprIter = create_value_cast(_exprIter, SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
 
-	if (_exprLoop->getType()->type != SourceVariable::VT_VOID)
-		_exprLoop = create_value_cast(_exprLoop, SourceVariable::get_VariableType(SourceVariable::VT_VOID), position);
+	if (_exprLoop->getType()->vt != VariableType::VT_VOID)
+		_exprLoop = create_value_cast(_exprLoop, SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
 }
 
 void SourceExpression_BranchFor::makeObjectsGet(ObjectVector * objects)

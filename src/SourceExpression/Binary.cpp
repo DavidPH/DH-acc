@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -35,20 +36,20 @@ SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, Sourc
 {
 	doCast();
 }
-SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourceVariable::VariableType const * castL, SourceVariable::VariableType const * castR, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(2)
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, VariableType const * castL, VariableType const * castR, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(2)
 {
 	doCast(castL, castR);
 }
-SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourceVariable::VariableType const * castL, SourceVariable::VariableType const * castR, bool arithmetic, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(arithmetic)
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, VariableType const * castL, VariableType const * castR, bool arithmetic, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(arithmetic)
 {
 	doCast(castL, castR);
 }
 
 void SourceExpression_Binary::doCast()
 {
-	SourceVariable::VariableType const * type(getType());
+	VariableType const * type(getType());
 
-	if (type->type == SourceVariable::VT_POINTER && _arithmetic)
+	if (type->vt == VariableType::VT_POINTER && _arithmetic)
 		return;
 
 	if (exprL->getType() != type)
@@ -57,7 +58,7 @@ void SourceExpression_Binary::doCast()
 	if (exprR->getType() != type)
 		this->exprR = create_value_cast(exprR, type, position);
 }
-void SourceExpression_Binary::doCast(SourceVariable::VariableType const * castL, SourceVariable::VariableType const * castR)
+void SourceExpression_Binary::doCast(VariableType const * castL, VariableType const * castR)
 {
 	if (castL && exprL->getType() != castL)
 		this->exprL = create_value_cast(exprL, castL, position);
@@ -66,7 +67,7 @@ void SourceExpression_Binary::doCast(SourceVariable::VariableType const * castL,
 		this->exprR = create_value_cast(exprR, castR, position);
 }
 
-SourceVariable::VariableType const * SourceExpression_Binary::getType() const
+VariableType const * SourceExpression_Binary::getType() const
 {
 	return get_promoted_type(exprL->getType(), exprR->getType(), position);
 }
@@ -95,18 +96,18 @@ void SourceExpression_Binary::recurse_makeObjectsGet(ObjectVector * objects)
 	// Special case, child handles expressions.
 	if (_arithmetic == 2) return;
 
-	SourceVariable::VariableType const * type(getType());
+	VariableType const * type(getType());
 	// Pointer arithmetic.
-	if (type->type == SourceVariable::VT_POINTER && _arithmetic)
+	if (type->vt == VariableType::VT_POINTER && _arithmetic)
 	{
-		SourceVariable::VariableType const * typeL(exprL->getType());
-		SourceVariable::VariableType const * typeR(exprR->getType());
+		VariableType const * typeL(exprL->getType());
+		VariableType const * typeR(exprR->getType());
 
-		if (typeL->type == typeR->type && typeL != typeR)
+		if (typeL->vt == typeR->vt && typeL != typeR)
 			throw SourceException("VT_POINTER mismatch", position, getName());
 
 		exprL->makeObjectsGet(objects);
-		if (typeL->type != SourceVariable::VT_POINTER)
+		if (typeL->vt != VariableType::VT_POINTER)
 		{
 			make_objects_cast(objects, typeL, type, position);
 			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(type->refType->size()));
@@ -114,7 +115,7 @@ void SourceExpression_Binary::recurse_makeObjectsGet(ObjectVector * objects)
 		}
 
 		exprR->makeObjectsGet(objects);
-		if (typeR->type != SourceVariable::VT_POINTER)
+		if (typeR->vt != VariableType::VT_POINTER)
 		{
 			make_objects_cast(objects, typeR, type, position);
 			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(type->refType->size()));

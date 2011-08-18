@@ -36,7 +36,7 @@ public:
 	SourceExpression_BranchIf(SourceExpression * exprCondition, SourceExpression * exprIf, SourceContext * context, SourcePosition const & position);
 	SourceExpression_BranchIf(SourceExpression * exprCondition, SourceExpression * exprIf, SourceExpression * exprElse, SourceContext * context, SourcePosition const & position);
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects);
 
@@ -74,8 +74,8 @@ SourceExpression_BranchIf::SourceExpression_BranchIf(SourceExpression * exprCond
 	_labelElse = label + "_else";
 	_labelEnd  = label + "_end";
 
-	if (_exprCondition->getType()->type != SourceVariable::VT_BOOLSOFT)
-		_exprCondition = create_value_cast(_exprCondition, SourceVariable::get_VariableType(SourceVariable::VT_BOOLSOFT), position);
+	if (_exprCondition->getType()->vt != VariableType::VT_BOOLSOFT)
+		_exprCondition = create_value_cast(_exprCondition, SourceContext::global_context.getVariableType(VariableType::VT_BOOLSOFT), position);
 
 	if (_exprElse)
 	{
@@ -89,7 +89,7 @@ SourceExpression_BranchIf::SourceExpression_BranchIf(SourceExpression * exprCond
 	}
 }
 
-SourceVariable::VariableType const * SourceExpression_BranchIf::getType() const
+VariableType const * SourceExpression_BranchIf::getType() const
 {
 	return _exprIf->getType();
 }

@@ -29,13 +29,13 @@ SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr, SourcePo
 {
 
 }
-SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr, SourceVariable::VariableType const * cast, SourcePosition const & position) : Super(position), expr(expr), _make(true)
+SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr, VariableType const * cast, SourcePosition const & position) : Super(position), expr(expr), _make(true)
 {
 	if (cast && expr->getType() != cast)
 		this->expr = create_value_cast(expr, cast, position);
 }
 
-SourceVariable::VariableType const * SourceExpression_Unary::getType() const
+VariableType const * SourceExpression_Unary::getType() const
 {
 	return expr->getType();
 }

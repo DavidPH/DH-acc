@@ -24,6 +24,7 @@
 
 #include "bignum.hpp"
 #include "SourceVariable.hpp"
+#include "VariableType.hpp"
 
 #include <map>
 #include <string>
@@ -47,7 +48,6 @@ public:
 
 
 
-	SourceContext();
 	SourceContext(SourceContext * parent, ContextType type);
 	~SourceContext();
 
@@ -70,35 +70,59 @@ public:
 
 	int getLimit(SourceVariable::StorageClass sc) const;
 
-	SourceVariable::VariableType const * getReturnType() const;
+	VariableType const * getReturnType() const;
 
 	ContextType getType() const;
 	ContextType getTypeRoot() const;
 
 	SourceVariable const & getVariable(SourceTokenC const & token) const;
 
+	VariableType const * getVariableType(SourceTokenC const & token);
+	VariableType const * getVariableType(VariableType::Type vt);
+	VariableType const * getVariableType_array(VariableType const * refType, bigsint count);
+	VariableType const * getVariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
+	VariableType const * getVariableType_block(std::vector<VariableType const *> const & types);
+	VariableType const * getVariableType_function(VariableType const * callType, std::vector<VariableType const *> const & types);
+	VariableType const * getVariableType_linespec(VariableType const * callType, std::vector<VariableType const *> const & types);
+	VariableType const * getVariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types);
+	VariableType const * getVariableType_pointer(VariableType const * refType);
+	VariableType const * getVariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types);
+	VariableType const * getVariableType_struct(std::string const & name, SourcePosition const & position);
+	VariableType const * getVariableType_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position);
+	VariableType const * getVariableType_typedef(SourceTokenC const & token, VariableType const * type);
+	VariableType const * getVariableType_typedef(std::string const & name, VariableType const * type, SourcePosition const & position);
+	VariableType const * getVariableType_union(std::string const & name, SourcePosition const & position);
+	VariableType const * getVariableType_union(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position);
+	VariableType const * getVariableTypeNull(std::string const & name);
+
 	bool hasLabelCaseDefault() const;
 
 	std::string makeLabel();
 
-	std::string makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, SourcePosition const & position) const;
-	std::string makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const;
+	std::string makeNameObject(SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const;
+	std::string makeNameObject(SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const;
 
 	void setAllowLabel(bool allow);
 
-	void setReturnType(SourceVariable::VariableType const * returnType);
+	void setReturnType(VariableType const * returnType);
 
 
 
 	static SourceContext global_context;
 
 private:
+	SourceContext();
+
 	void addCount(int count, SourceVariable::StorageClass sc);
 	void addLimit(int limit, SourceVariable::StorageClass sc);
 
 	int getCount(SourceVariable::StorageClass sc) const;
 
 	SourceVariable const & getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
+
+	VariableType const * getVariableType(VariableType::Type vt, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types);
+	VariableType * getVariableType_struct(std::string const & name);
+	VariableType * getVariableType_union(std::string const & name);
 
 	std::string makeLabelShort();
 
@@ -107,18 +131,23 @@ private:
 	std::map<bigsint, bool> _cases;
 	bool _caseDefault;
 
-	int _count[SourceVariable::SC_STATIC+1];
+	int _countAuto;
+	int _countRegister;
 
 	std::string _label;
 	int _labelCount;
 
-	int _limit[SourceVariable::SC_STATIC+1];
+	int _limitAuto;
+	int _limitRegister;
 
 	SourceContext * _parent;
 
-	SourceVariable::VariableType const * _returnType;
+	VariableType const * _returnType;
 
 	ContextType _type;
+
+	std::vector<VariableType *> _types;
+	std::vector<std::string> _typenames;
 
 	std::vector<SourceVariable> _vars;
 	std::vector<std::string> _varnames;

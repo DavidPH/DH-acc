@@ -23,6 +23,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -41,7 +42,7 @@ protected:
 private:
 	SourceExpression::Pointer _expr;
 
-	void doOut(ObjectVector * objects, SourceVariable::VariableType const * type) const;
+	void doOut(ObjectVector * objects, VariableType const * type) const;
 };
 
 
@@ -58,13 +59,13 @@ SourceExpression_RootOut::SourceExpression_RootOut(SourceExpression * expr, Sour
 
 }
 
-void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::VariableType const * type) const
+void SourceExpression_RootOut::doOut(ObjectVector * objects, VariableType const * type) const
 {
-	switch (type->type)
+	switch (type->vt)
 	{
-	case SourceVariable::VT_ARRAY:
-	case SourceVariable::VT_BLOCK:
-	case SourceVariable::VT_STRUCT:
+	case VariableType::VT_ARRAY:
+	case VariableType::VT_BLOCK:
+	case VariableType::VT_STRUCT:
 		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));
 		objects->addToken(OCODE_PRINTCHARACTER);
 
@@ -84,44 +85,44 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, SourceVariable::Var
 
 		break;
 
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_VOID:
+	case VariableType::VT_ASMFUNC:
+	case VariableType::VT_VOID:
 		break;
 
-	case SourceVariable::VT_BOOLHARD:
-	case SourceVariable::VT_FUNCTION:
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_LINESPEC:
-	case SourceVariable::VT_NATIVE:
-	case SourceVariable::VT_SCRIPT:
+	case VariableType::VT_BOOLHARD:
+	case VariableType::VT_FUNCTION:
+	case VariableType::VT_INT:
+	case VariableType::VT_LINESPEC:
+	case VariableType::VT_NATIVE:
+	case VariableType::VT_SCRIPT:
 		objects->addToken(OCODE_PRINTNUMBER);
 		break;
 
-	case SourceVariable::VT_BOOLSOFT:
+	case VariableType::VT_BOOLSOFT:
 		objects->addToken(OCODE_LOGICALNOT);
 		objects->addToken(OCODE_LOGICALNOT);
 		objects->addToken(OCODE_PRINTNUMBER);
 		break;
 
-	case SourceVariable::VT_CHAR:
+	case VariableType::VT_CHAR:
 		objects->addToken(OCODE_PRINTCHARACTER);
 		break;
 
-	case SourceVariable::VT_POINTER:
+	case VariableType::VT_POINTER:
 		objects->addToken(OCODE_PRINTHEX);
 		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('p'));
 		objects->addToken(OCODE_PRINTCHARACTER);
 		break;
 
-	case SourceVariable::VT_REAL:
+	case VariableType::VT_REAL:
 		objects->addToken(OCODE_PRINTFIXED);
 		break;
 
-	case SourceVariable::VT_STRING:
+	case VariableType::VT_STRING:
 		objects->addToken(OCODE_PRINTSTRING);
 		break;
 
-	case SourceVariable::VT_UNION:
+	case VariableType::VT_UNION:
 		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('U'));
 		objects->addToken(OCODE_PRINTCHARACTER);
 		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));

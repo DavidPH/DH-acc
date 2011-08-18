@@ -23,6 +23,7 @@
 
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -57,17 +58,17 @@ void SourceExpression_BinaryLT::makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	switch (exprL->getType()->type)
+	switch (exprL->getType()->vt)
 	{
-	case SourceVariable::VT_CHAR:
-	case SourceVariable::VT_FUNCTION:
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_LINESPEC:
-	case SourceVariable::VT_NATIVE:
-	case SourceVariable::VT_POINTER:
-	case SourceVariable::VT_REAL:
-	case SourceVariable::VT_SCRIPT:
-	case SourceVariable::VT_STRING:
+	case VariableType::VT_CHAR:
+	case VariableType::VT_FUNCTION:
+	case VariableType::VT_INT:
+	case VariableType::VT_LINESPEC:
+	case VariableType::VT_NATIVE:
+	case VariableType::VT_POINTER:
+	case VariableType::VT_REAL:
+	case VariableType::VT_SCRIPT:
+	case VariableType::VT_STRING:
 		objects->addToken(OCODE_CMPLT);
 		break;
 

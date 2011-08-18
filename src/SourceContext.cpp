@@ -14,7 +14,7 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* SourceContext.hpp
+/* SourceContext.cpp
 **
 ** Defines the SourceContext methods.
 */
@@ -25,6 +25,7 @@
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 #include "SourceVariable.hpp"
+#include "VariableType.hpp"
 
 #include <cstring>
 #include <sstream>
@@ -35,15 +36,39 @@ SourceContext SourceContext::global_context;
 
 
 
-SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _labelCount(0), _parent(NULL), _returnType(SourceVariable::get_VariableType(SourceVariable::VT_VOID)), _type(CT_BLOCK), _inheritLocals(false)
+SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(NULL), _type(CT_BLOCK), _inheritLocals(false)
 {
-	std::memset(_count, 0, sizeof(_count));
-	std::memset(_limit, 0, sizeof(_limit));
+	_types.resize(VariableType::VT_VOID+1);
+
+	_types[VariableType::VT_VOID] = new VariableType;
+	_types[VariableType::VT_VOID]->vt = VariableType::VT_VOID;
+	_types[VariableType::VT_VOID]->callType = _types[VariableType::VT_VOID];
+	_types[VariableType::VT_VOID]->refType  = _types[VariableType::VT_VOID];
+
+	for (VariableType::Type vt((VariableType::Type)0); vt < VariableType::VT_VOID; ++vt)
+	{
+		_types[vt] = new VariableType;
+		_types[vt]->vt = vt;
+		_types[vt]->callType = _types[VariableType::VT_VOID];
+		_types[vt]->refType  = _types[VariableType::VT_VOID];
+	}
+
+	_types[VariableType::VT_STRING]->refType = _types[VariableType::VT_CHAR];
+
+	_typenames.resize(VariableType::VT_VOID+1);
+	_typenames[VariableType::VT_BOOLHARD] = "bool";
+	_typenames[VariableType::VT_BOOLSOFT] = "softbool";
+	_typenames[VariableType::VT_CHAR]     = "char";
+	_typenames[VariableType::VT_INT]      = "int";
+	_typenames[VariableType::VT_REAL]     = "real";
+	_typenames[VariableType::VT_STRING]   = "string";
+	_typenames[VariableType::VT_VOID]     = "void";
+
+	_returnType = _types[VariableType::VT_VOID];
 }
-SourceContext::SourceContext(SourceContext * parent, ContextType type) : _allowLabel(true), _caseDefault(false), _label(parent->makeLabelShort()), _labelCount(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP)
+SourceContext::SourceContext(SourceContext * parent, ContextType type) : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _label(parent->makeLabelShort()), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP || type == CT_SWITCH)
 {
-	std::memset(_count, 0, sizeof(_count));
-	std::memset(_limit, 0, sizeof(_limit));
+
 }
 SourceContext::~SourceContext()
 {
@@ -55,11 +80,13 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 	switch (sc)
 	{
 	case SourceVariable::SC_AUTO:
-	case SourceVariable::SC_REGISTER:
-		_count[sc] += count;
-
+		_countAuto += count;
 		addLimit(getCount(sc), sc);
+		break;
 
+	case SourceVariable::SC_REGISTER:
+		_countRegister += count;
+		addLimit(getCount(sc), sc);
 		break;
 
 	case SourceVariable::SC_CONSTANT:
@@ -118,9 +145,17 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 	switch (sc)
 	{
 	case SourceVariable::SC_AUTO:
+		if (limit > _limitAuto)
+			_limitAuto = limit;
+
+		if (_inheritLocals && _parent)
+			_parent->addLimit(limit, sc);
+
+		break;
+
 	case SourceVariable::SC_REGISTER:
-		if (limit > _limit[sc])
-			_limit[sc] = limit;
+		if (limit > _limitRegister)
+			_limitRegister = limit;
 
 		if (_inheritLocals && _parent)
 			_parent->addLimit(limit, sc);
@@ -204,11 +239,16 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
 	switch (sc)
 	{
 	case SourceVariable::SC_AUTO:
+		if (_inheritLocals && _parent)
+			return _parent->getCount(sc) + _countAuto;
+		else
+			return _countAuto;
+
 	case SourceVariable::SC_REGISTER:
 		if (_inheritLocals && _parent)
-			return _parent->getCount(sc) + _count[sc];
+			return _parent->getCount(sc) + _countRegister;
 		else
-			return _count[sc];
+			return _countRegister;
 
 	case SourceVariable::SC_CONSTANT:
 	case SourceVariable::SC_REGISTER_GLOBAL:
@@ -291,8 +331,10 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 	switch (sc)
 	{
 	case SourceVariable::SC_AUTO:
+		return _limitAuto;
+
 	case SourceVariable::SC_REGISTER:
-		return _limit[sc];
+		return _limitRegister;
 
 	case SourceVariable::SC_CONSTANT:
 	case SourceVariable::SC_REGISTER_GLOBAL:
@@ -308,7 +350,7 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 	throw SourceException("getCount", SourcePosition::none, "SourceContext");
 }
 
-SourceVariable::VariableType const * SourceContext::getReturnType() const
+VariableType const * SourceContext::getReturnType() const
 {
 	return _returnType ? _returnType : _parent->getReturnType();
 }
@@ -386,7 +428,7 @@ std::string SourceContext::makeLabelShort()
 	return oss.str();
 }
 
-std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, SourcePosition const & position) const
+std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const
 {
 	std::string nameObject(getLabel() + nameSource);
 
@@ -431,7 +473,7 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Sourc
 
 	return nameObject;
 }
-std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, SourceVariable::VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const
+std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const
 {
 	std::string nameObject(getLabel() + nameSource);
 
@@ -482,7 +524,7 @@ void SourceContext::setAllowLabel(bool allow)
 	_allowLabel = allow;
 }
 
-void SourceContext::setReturnType(SourceVariable::VariableType const * returnType)
+void SourceContext::setReturnType(VariableType const * returnType)
 {
 	_returnType = returnType;
 }

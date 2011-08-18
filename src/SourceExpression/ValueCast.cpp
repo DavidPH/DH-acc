@@ -23,6 +23,7 @@
 
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -31,11 +32,11 @@ class SourceExpression_ValueCast : public SourceExpression
 	MAKE_COUNTER_CLASS_BASE(SourceExpression_ValueCast, SourceExpression);
 
 public:
-	SourceExpression_ValueCast(SourceExpression * expr, SourceVariable::VariableType const * type, SourcePosition const & postion);
+	SourceExpression_ValueCast(SourceExpression * expr, VariableType const * type, SourcePosition const & postion);
 
 	virtual bool canMakeObject() const;
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects);
 
@@ -44,19 +45,19 @@ protected:
 
 private:
 	SourceExpression::Pointer _expr;
-	SourceVariable::VariableType const * _type;
+	VariableType const * _type;
 };
 
 
 
-SourceExpression::Pointer SourceExpression::create_value_cast(SourceExpression * expr, SourceVariable::VariableType const * type, SourcePosition const & position)
+SourceExpression::Pointer SourceExpression::create_value_cast(SourceExpression * expr, VariableType const * type, SourcePosition const & position)
 {
 	return new SourceExpression_ValueCast(expr, type, position);
 }
 
 
 
-SourceExpression_ValueCast::SourceExpression_ValueCast(SourceExpression * expr, SourceVariable::VariableType const * type, SourcePosition const & position) : Super(position), _expr(expr), _type(type)
+SourceExpression_ValueCast::SourceExpression_ValueCast(SourceExpression * expr, VariableType const * type, SourcePosition const & position) : Super(position), _expr(expr), _type(type)
 {
 
 }
@@ -66,7 +67,7 @@ bool SourceExpression_ValueCast::canMakeObject() const
 	return _expr->canMakeObject();
 }
 
-SourceVariable::VariableType const * SourceExpression_ValueCast::getType() const
+VariableType const * SourceExpression_ValueCast::getType() const
 {
 	return _type;
 }

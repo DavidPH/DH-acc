@@ -25,6 +25,7 @@
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
 #include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -80,11 +81,11 @@ void SourceExpression_UnaryDecInc::makeObjectsGet(ObjectVector * objects)
 	{
 		ObjectCode ocode(_inc ? OCODE_ADD : OCODE_SUB);
 
-		switch (getType()->type)
+		switch (getType()->vt)
 		{
-		case SourceVariable::VT_CHAR:
-		case SourceVariable::VT_INT:
-		case SourceVariable::VT_REAL:
+		case VariableType::VT_CHAR:
+		case VariableType::VT_INT:
+		case VariableType::VT_REAL:
 			if (_suf) objects->addToken(OCODE_DUP);
 			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(1));
 			objects->addToken(ocode);
@@ -92,7 +93,7 @@ void SourceExpression_UnaryDecInc::makeObjectsGet(ObjectVector * objects)
 			if (_suf) objects->addToken(OCODE_DROP);
 			break;
 
-		case SourceVariable::VT_POINTER:
+		case VariableType::VT_POINTER:
 			if (_suf) objects->addToken(OCODE_DUP);
 			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size()));
 			objects->addToken(ocode);
@@ -109,16 +110,16 @@ void SourceExpression_UnaryDecInc::makeObjectsGet(ObjectVector * objects)
 	{
 		ObjectCode ocode(_inc ? OCODE_SUB : OCODE_ADD);
 
-		switch (getType()->type)
+		switch (getType()->vt)
 		{
-		case SourceVariable::VT_CHAR:
-		case SourceVariable::VT_INT:
-		case SourceVariable::VT_REAL:
+		case VariableType::VT_CHAR:
+		case VariableType::VT_INT:
+		case VariableType::VT_REAL:
 			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(1));
 			objects->addToken(ocode);
 			break;
 
-		case SourceVariable::VT_POINTER:
+		case VariableType::VT_POINTER:
 			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size()));
 			objects->addToken(ocode);
 			break;

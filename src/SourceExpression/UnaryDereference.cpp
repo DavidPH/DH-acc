@@ -23,6 +23,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -35,7 +36,7 @@ public:
 
 	virtual bool canMakeObjectsAddress() const;
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
 	virtual void makeObjectsAddress(ObjectVector * objects);
 
@@ -66,7 +67,7 @@ bool SourceExpression_UnaryDereference::canMakeObjectsAddress() const
 	return true;
 }
 
-SourceVariable::VariableType const * SourceExpression_UnaryDereference::getType() const
+VariableType const * SourceExpression_UnaryDereference::getType() const
 {
 	return expr->getType()->refType;
 }
@@ -78,10 +79,10 @@ void SourceExpression_UnaryDereference::makeObjectsAddress(ObjectVector * object
 
 void SourceExpression_UnaryDereference::makeObjectsGet(ObjectVector * objects)
 {
-	if (getType()->type == SourceVariable::VT_VOID)
+	if (getType()->vt == VariableType::VT_VOID)
 		Super::makeObjectsGet(objects);
 
-	if (expr->getType()->type == SourceVariable::VT_STRING)
+	if (expr->getType()->vt == VariableType::VT_STRING)
 	{
 		Super::recurse_makeObjectsGet(objects);
 		objects->addTokenPushZero();
@@ -104,10 +105,10 @@ void SourceExpression_UnaryDereference::makeObjectsGet(ObjectVector * objects)
 
 void SourceExpression_UnaryDereference::makeObjectsSet(ObjectVector * objects)
 {
-	if (getType()->type == SourceVariable::VT_VOID)
+	if (getType()->vt == VariableType::VT_VOID)
 		Super::makeObjectsSet(objects);
 
-	if (expr->getType()->type == SourceVariable::VT_STRING)
+	if (expr->getType()->vt == VariableType::VT_STRING)
 	{
 		Super::makeObjectsSet(objects);
 	}

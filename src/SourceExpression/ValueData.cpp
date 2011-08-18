@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -32,11 +33,11 @@ class SourceExpression_ValueData : public SourceExpression
 	MAKE_COUNTER_CLASS_BASE(SourceExpression_ValueData, SourceExpression);
 
 public:
-	SourceExpression_ValueData(SourceVariable::VariableType const * type, bool garbage, SourcePosition const & position);
+	SourceExpression_ValueData(VariableType const * type, bool garbage, SourcePosition const & position);
 
 	virtual bool canMakeObject() const;
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects);
 
@@ -44,20 +45,20 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	SourceVariable::VariableType const * _type;
+	VariableType const * _type;
 	bool _garbage;
 };
 
 
 
-SourceExpression::Pointer SourceExpression::create_value_data(SourceVariable::VariableType const * type, bool garbage, SourcePosition const & position)
+SourceExpression::Pointer SourceExpression::create_value_data(VariableType const * type, bool garbage, SourcePosition const & position)
 {
 	return new SourceExpression_ValueData(type, garbage, position);
 }
 
 
 
-SourceExpression_ValueData::SourceExpression_ValueData(SourceVariable::VariableType const * type, bool garbage, SourcePosition const & position) : Super(position), _type(type), _garbage(garbage)
+SourceExpression_ValueData::SourceExpression_ValueData(VariableType const * type, bool garbage, SourcePosition const & position) : Super(position), _type(type), _garbage(garbage)
 {
 
 }
@@ -67,7 +68,7 @@ bool SourceExpression_ValueData::canMakeObject() const
 	return !_garbage;
 }
 
-SourceVariable::VariableType const * SourceExpression_ValueData::getType() const
+VariableType const * SourceExpression_ValueData::getType() const
 {
 	return _type;
 }

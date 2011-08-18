@@ -58,11 +58,11 @@ SourceExpression::Pointer SourceExpression::create_branch_while(SourceExpression
 
 SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position) : Super(position), _exprCondition(exprCondition), _exprWhile(exprWhile), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position))
 {
-	if (_exprCondition->getType()->type != SourceVariable::VT_BOOLSOFT)
-		_exprCondition = create_value_cast(_exprCondition, SourceVariable::get_VariableType(SourceVariable::VT_BOOLSOFT), position);
+	if (_exprCondition->getType()->vt != VariableType::VT_BOOLSOFT)
+		_exprCondition = create_value_cast(_exprCondition, SourceContext::global_context.getVariableType(VariableType::VT_BOOLSOFT), position);
 
-	if (_exprWhile->getType()->type != SourceVariable::VT_VOID)
-		_exprWhile = create_value_cast(_exprWhile, SourceVariable::get_VariableType(SourceVariable::VT_VOID), position);
+	if (_exprWhile->getType()->vt != VariableType::VT_VOID)
+		_exprWhile = create_value_cast(_exprWhile, SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
 }
 
 void SourceExpression_BranchWhile::makeObjectsGet(ObjectVector * objects)

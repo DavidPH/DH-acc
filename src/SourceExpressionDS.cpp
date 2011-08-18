@@ -250,18 +250,18 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 	}
 }
 
-void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<SourceVariable::VariableType const *> * argTypes, SourceVariable::VariableType const * * returnType)
+void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<VariableType const *> * argTypes, VariableType const * * returnType)
 {
 	make_expression_arglist(in, blocks, context, argTypes, NULL, NULL, NULL, returnType);
 }
-void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<SourceVariable::VariableType const *> * argTypes, std::vector<std::string> * argNames, int * argCount, SourceContext * argContext, SourceVariable::VariableType const * * returnType)
+void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<VariableType const *> * argTypes, std::vector<std::string> * argNames, int * argCount, SourceContext * argContext, VariableType const * * returnType)
 {
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 	if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
 	{
 		SourceVariable::StorageClass sc(SourceVariable::SC_REGISTER);
 
-		argTypes->push_back(SourceVariable::get_VariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+		argTypes->push_back(context->getVariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
 
 		if (argNames)
 		{
@@ -315,7 +315,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expressions(SourceTokenizerDS
 
 	make_expressions(in, &expressions, &blocks, &SourceContext::global_context);
 
-	expressions.push_back(create_branch_return(create_value_data(SourceVariable::get_VariableType(SourceVariable::VT_VOID), true, SourcePosition::none), &SourceContext::global_context, SourcePosition::none));
+	expressions.push_back(create_branch_return(create_value_data(SourceContext::global_context.getVariableType(VariableType::VT_VOID), true, SourcePosition::none), &SourceContext::global_context, SourcePosition::none));
 
 	for (size_t i(0); i < blocks.size(); ++i)
 		expressions.push_back(blocks[i]);

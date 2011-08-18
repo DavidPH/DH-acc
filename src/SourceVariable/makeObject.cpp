@@ -23,6 +23,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -36,45 +37,45 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 		throw SourceException("makeObject on SC_AUTO", position, "SourceVariable");
 
 	case SC_CONSTANT:
-		switch (_type->type)
+		switch (_type->vt)
 		{
-		case VT_ARRAY:
-		case VT_BLOCK:
-		case VT_STRUCT:
-		case VT_UNION:
+		case VariableType::VT_ARRAY:
+		case VariableType::VT_BLOCK:
+		case VariableType::VT_STRUCT:
+		case VariableType::VT_UNION:
 			throw SourceException("makeObject on compound VT", position, "SourceVariable");
 
-		case VT_FUNCTION:
+		case VariableType::VT_FUNCTION:
 			return ObjectExpression::create_value_int(_data.vdFunction.number, position);
 
-		case VT_ASMFUNC:
-		case VT_VOID:
+		case VariableType::VT_ASMFUNC:
+		case VariableType::VT_VOID:
 			throw SourceException("makeObject on void VT", position, "SourceVariable");
 
-		case VT_BOOLHARD:
-		case VT_BOOLSOFT:
+		case VariableType::VT_BOOLHARD:
+		case VariableType::VT_BOOLSOFT:
 			return ObjectExpression::create_value_int(_data.vdBool.value, position);
 
-		case VT_CHAR:
+		case VariableType::VT_CHAR:
 			return ObjectExpression::create_value_int(_data.vdChar.value, position);
 
-		case VT_INT:
+		case VariableType::VT_INT:
 			return ObjectExpression::create_value_int(_data.vdInt.value, position);
 
-		case VT_LINESPEC:
+		case VariableType::VT_LINESPEC:
 			return ObjectExpression::create_value_int(_data.vdLineSpec.number, position);
 
-		case VT_NATIVE:
+		case VariableType::VT_NATIVE:
 			return ObjectExpression::create_value_int(_data.vdNative.number, position);
 
-		case VT_POINTER:
+		case VariableType::VT_POINTER:
 			throw SourceException("makeObject on VT_POINTER", position, "SourceVariable");
 
-		case VT_REAL:
+		case VariableType::VT_REAL:
 			return ObjectExpression::create_value_float(_data.vdReal.value, position);
 
-		case VT_STRING:
-		case VT_SCRIPT:
+		case VariableType::VT_STRING:
+		case VariableType::VT_SCRIPT:
 			return ObjectExpression::create_value_symbol(_nameObject, position);
 		}
 		break;

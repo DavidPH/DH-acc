@@ -23,6 +23,7 @@
 
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -57,15 +58,15 @@ void SourceExpression_BinaryMul::makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	switch (getType()->type)
+	switch (getType()->vt)
 	{
-	case SourceVariable::VT_CHAR:
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_POINTER:
+	case VariableType::VT_CHAR:
+	case VariableType::VT_INT:
+	case VariableType::VT_POINTER:
 		objects->addToken(OCODE_MUL);
 		break;
 
-	case SourceVariable::VT_REAL:
+	case VariableType::VT_REAL:
 		objects->addToken(OCODE_MULFIXED);
 		break;
 

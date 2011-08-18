@@ -22,6 +22,7 @@
 #include "Unary.hpp"
 
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 
 
 
@@ -32,7 +33,7 @@ class SourceExpression_UnaryReference : public SourceExpression_Unary
 public:
 	SourceExpression_UnaryReference(SourceExpression * expr, SourcePosition const & position);
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects);
 
@@ -40,7 +41,7 @@ protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
-	SourceVariable::VariableType const * _type;
+	VariableType const * _type;
 };
 
 
@@ -52,12 +53,12 @@ SourceExpression::Pointer SourceExpression::create_unary_reference(SourceExpress
 
 
 
-SourceExpression_UnaryReference::SourceExpression_UnaryReference(SourceExpression * expr, SourcePosition const & position) : Super(expr, position), _type(SourceVariable::get_VariableType_pointer(expr->getType()))
+SourceExpression_UnaryReference::SourceExpression_UnaryReference(SourceExpression * expr, SourcePosition const & position) : Super(expr, position), _type(SourceContext::global_context.getVariableType_pointer(expr->getType()))
 {
 
 }
 
-SourceVariable::VariableType const * SourceExpression_UnaryReference::getType() const
+VariableType const * SourceExpression_UnaryReference::getType() const
 {
 	return _type;
 }

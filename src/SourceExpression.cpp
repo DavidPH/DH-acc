@@ -24,7 +24,9 @@
 #include "ObjectExpression.hpp"
 #include "ObjectVector.hpp"
 #include "print_debug.hpp"
+#include "SourceContext.hpp"
 #include "SourceException.hpp"
+#include "VariableType.hpp"
 
 
 
@@ -52,40 +54,40 @@ bool SourceExpression::canMakeObjectsAddress() const
 	return false;
 }
 
-SourceVariable::VariableType const * SourceExpression::get_promoted_type(SourceVariable::VariableType const * type1, SourceVariable::VariableType const * type2, SourcePosition const & position)
+VariableType const * SourceExpression::get_promoted_type(VariableType const * type1, VariableType const * type2, SourcePosition const & position)
 {
 	if (type1 == type2) return type1;
 
-	if (type1->type == SourceVariable::VT_VOID) return type1;
-	if (type2->type == SourceVariable::VT_VOID) return type2;
+	if (type1->vt == VariableType::VT_VOID) return type1;
+	if (type2->vt == VariableType::VT_VOID) return type2;
 
-	if (type1->type == SourceVariable::VT_POINTER) return type1;
-	if (type2->type == SourceVariable::VT_POINTER) return type2;
+	if (type1->vt == VariableType::VT_POINTER) return type1;
+	if (type2->vt == VariableType::VT_POINTER) return type2;
 
-	if (type1->type == SourceVariable::VT_REAL) return type1;
-	if (type2->type == SourceVariable::VT_REAL) return type2;
+	if (type1->vt == VariableType::VT_REAL) return type1;
+	if (type2->vt == VariableType::VT_REAL) return type2;
 
-	if (type1->type == SourceVariable::VT_INT) return type1;
-	if (type2->type == SourceVariable::VT_INT) return type2;
+	if (type1->vt == VariableType::VT_INT) return type1;
+	if (type2->vt == VariableType::VT_INT) return type2;
 
-	if (type1->type == SourceVariable::VT_CHAR) return type1;
-	if (type2->type == SourceVariable::VT_CHAR) return type2;
+	if (type1->vt == VariableType::VT_CHAR) return type1;
+	if (type2->vt == VariableType::VT_CHAR) return type2;
 
-	if (type1->type == SourceVariable::VT_STRING) return type1;
-	if (type2->type == SourceVariable::VT_STRING) return type2;
+	if (type1->vt == VariableType::VT_STRING) return type1;
+	if (type2->vt == VariableType::VT_STRING) return type2;
 
-	if (type1->type == SourceVariable::VT_BOOLHARD) return type1;
-	if (type2->type == SourceVariable::VT_BOOLHARD) return type2;
+	if (type1->vt == VariableType::VT_BOOLHARD) return type1;
+	if (type2->vt == VariableType::VT_BOOLHARD) return type2;
 
-	if (type1->type == SourceVariable::VT_BOOLSOFT) return type1;
-	if (type2->type == SourceVariable::VT_BOOLSOFT) return type2;
+	if (type1->vt == VariableType::VT_BOOLSOFT) return type1;
+	if (type2->vt == VariableType::VT_BOOLSOFT) return type2;
 
-	return SourceVariable::get_VariableType(SourceVariable::VT_VOID);
+	return SourceContext::global_context.getVariableType(VariableType::VT_VOID);
 }
 
-SourceVariable::VariableType const * SourceExpression::getType() const
+VariableType const * SourceExpression::getType() const
 {
-	return SourceVariable::get_VariableType(SourceVariable::VT_VOID);
+	return SourceContext::global_context.getVariableType(VariableType::VT_VOID);
 }
 
 void SourceExpression::make_objects(std::vector<SourceExpression::Pointer> const & expressions, ObjectVector * objects)
@@ -149,7 +151,7 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Source
 	ObjectExpression::Pointer ofunc(objects->getValue(data.number));
 	ObjectExpression::Pointer oretn;
 
-	if (data.type->callType->type == SourceVariable::VT_VOID)
+	if (data.type->callType->vt == VariableType::VT_VOID)
 		ocode = OCODE_CALLZDACSDISCARD;
 	else
 		ocode = OCODE_CALLZDACS;
@@ -191,7 +193,7 @@ void SourceExpression::make_objects_call_linespec(ObjectVector * objects, Source
 	ObjectCode ocode;
 	ObjectExpression::Pointer ospec(objects->getValue(data.number));
 
-	if (data.type->callType->type == SourceVariable::VT_VOID)
+	if (data.type->callType->vt == VariableType::VT_VOID)
 	{
 		switch (args.size())
 		{
@@ -237,7 +239,7 @@ void SourceExpression::make_objects_call_native(ObjectVector * objects, SourceVa
 	objects->addToken(ocode, oargc, ofunc);
 }
 
-void SourceExpression::make_objects_call_script(ObjectVector * objects, SourceVariable::VariableType const * type, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position)
+void SourceExpression::make_objects_call_script(ObjectVector * objects, VariableType const * type, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position)
 {
 	if (args.size() != type->types.size())
 		throw SourceException("incorrect arg count to call script", position, "SourceExpressionDS");
@@ -259,7 +261,7 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, SourceVa
 	ObjectExpression::Pointer ospec(objects->getValue(84));
 	ObjectExpression::Pointer oretn;
 
-	if (type->callType->type == SourceVariable::VT_VOID)
+	if (type->callType->vt == VariableType::VT_VOID)
 	{
 		switch (args.size())
 		{
@@ -295,11 +297,11 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, SourceVa
 	objects->addToken(OCODE_SUBSTACK_IMM, stack);
 }
 
-void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable::VariableType const * typeFrom, SourceVariable::VariableType const * typeTo, SourcePosition const & position)
+void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType const * typeFrom, VariableType const * typeTo, SourcePosition const & position)
 {
 	if (typeFrom == typeTo) return;
 
-	if (typeTo->type == SourceVariable::VT_VOID)
+	if (typeTo->vt == VariableType::VT_VOID)
 	{
 		for (size_t i(typeFrom->size()); i--;)
 			objects->addToken(OCODE_DROP);
@@ -307,86 +309,86 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		return;
 	}
 
-	switch (typeFrom->type)
+	switch (typeFrom->vt)
 	{
-	case SourceVariable::VT_ARRAY:
-	case SourceVariable::VT_ASMFUNC:
-	case SourceVariable::VT_BLOCK:
-	case SourceVariable::VT_STRUCT:
-	case SourceVariable::VT_UNION:
-	case SourceVariable::VT_VOID:
+	case VariableType::VT_ARRAY:
+	case VariableType::VT_ASMFUNC:
+	case VariableType::VT_BLOCK:
+	case VariableType::VT_STRUCT:
+	case VariableType::VT_UNION:
+	case VariableType::VT_VOID:
 		throw SourceException("invalid VT from", position, "SourceExpression");
 
-	case SourceVariable::VT_BOOLHARD:
-	case SourceVariable::VT_CHAR:
-	case SourceVariable::VT_FUNCTION:
-	case SourceVariable::VT_INT:
-	case SourceVariable::VT_LINESPEC:
-	case SourceVariable::VT_NATIVE:
-	case SourceVariable::VT_POINTER:
-	case SourceVariable::VT_SCRIPT:
-	case SourceVariable::VT_STRING:
-		switch (typeTo->type)
+	case VariableType::VT_BOOLHARD:
+	case VariableType::VT_CHAR:
+	case VariableType::VT_FUNCTION:
+	case VariableType::VT_INT:
+	case VariableType::VT_LINESPEC:
+	case VariableType::VT_NATIVE:
+	case VariableType::VT_POINTER:
+	case VariableType::VT_SCRIPT:
+	case VariableType::VT_STRING:
+		switch (typeTo->vt)
 		{
-		case SourceVariable::VT_ARRAY:
-		case SourceVariable::VT_ASMFUNC:
-		case SourceVariable::VT_BLOCK:
-		case SourceVariable::VT_STRUCT:
-		case SourceVariable::VT_UNION:
-		case SourceVariable::VT_VOID:
+		case VariableType::VT_ARRAY:
+		case VariableType::VT_ASMFUNC:
+		case VariableType::VT_BLOCK:
+		case VariableType::VT_STRUCT:
+		case VariableType::VT_UNION:
+		case VariableType::VT_VOID:
 			throw SourceException("invalid VT to", position, "SourceExpression");
 
-		case SourceVariable::VT_BOOLHARD:
+		case VariableType::VT_BOOLHARD:
 			objects->addToken(OCODE_LOGICALNOT);
 			objects->addToken(OCODE_LOGICALNOT);
 			break;
 
-		case SourceVariable::VT_BOOLSOFT:
-		case SourceVariable::VT_CHAR:
-		case SourceVariable::VT_FUNCTION:
-		case SourceVariable::VT_INT:
-		case SourceVariable::VT_LINESPEC:
-		case SourceVariable::VT_NATIVE:
-		case SourceVariable::VT_POINTER:
-		case SourceVariable::VT_SCRIPT:
-		case SourceVariable::VT_STRING:
+		case VariableType::VT_BOOLSOFT:
+		case VariableType::VT_CHAR:
+		case VariableType::VT_FUNCTION:
+		case VariableType::VT_INT:
+		case VariableType::VT_LINESPEC:
+		case VariableType::VT_NATIVE:
+		case VariableType::VT_POINTER:
+		case VariableType::VT_SCRIPT:
+		case VariableType::VT_STRING:
 			break;
 
-		case SourceVariable::VT_REAL:
+		case VariableType::VT_REAL:
 			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(16));
 			objects->addToken(OCODE_SHIFTL);
 			break;
 		}
 		break;
 
-	case SourceVariable::VT_BOOLSOFT:
-		switch (typeTo->type)
+	case VariableType::VT_BOOLSOFT:
+		switch (typeTo->vt)
 		{
-		case SourceVariable::VT_ARRAY:
-		case SourceVariable::VT_ASMFUNC:
-		case SourceVariable::VT_BLOCK:
-		case SourceVariable::VT_STRUCT:
-		case SourceVariable::VT_UNION:
-		case SourceVariable::VT_VOID:
+		case VariableType::VT_ARRAY:
+		case VariableType::VT_ASMFUNC:
+		case VariableType::VT_BLOCK:
+		case VariableType::VT_STRUCT:
+		case VariableType::VT_UNION:
+		case VariableType::VT_VOID:
 			throw SourceException("invalid VT to", position, "SourceExpression");
 
-		case SourceVariable::VT_BOOLHARD:
-		case SourceVariable::VT_CHAR:
-		case SourceVariable::VT_FUNCTION:
-		case SourceVariable::VT_INT:
-		case SourceVariable::VT_LINESPEC:
-		case SourceVariable::VT_NATIVE:
-		case SourceVariable::VT_POINTER:
-		case SourceVariable::VT_SCRIPT:
-		case SourceVariable::VT_STRING:
+		case VariableType::VT_BOOLHARD:
+		case VariableType::VT_CHAR:
+		case VariableType::VT_FUNCTION:
+		case VariableType::VT_INT:
+		case VariableType::VT_LINESPEC:
+		case VariableType::VT_NATIVE:
+		case VariableType::VT_POINTER:
+		case VariableType::VT_SCRIPT:
+		case VariableType::VT_STRING:
 			objects->addToken(OCODE_LOGICALNOT);
 			objects->addToken(OCODE_LOGICALNOT);
 			break;
 
-		case SourceVariable::VT_BOOLSOFT:
+		case VariableType::VT_BOOLSOFT:
 			break;
 
-		case SourceVariable::VT_REAL:
+		case VariableType::VT_REAL:
 			objects->addToken(OCODE_LOGICALNOT);
 			objects->addToken(OCODE_LOGICALNOT);
 			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(16));
@@ -395,34 +397,34 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, SourceVariable:
 		}
 		break;
 
-	case SourceVariable::VT_REAL:
-		switch (typeTo->type)
+	case VariableType::VT_REAL:
+		switch (typeTo->vt)
 		{
-		case SourceVariable::VT_ARRAY:
-		case SourceVariable::VT_ASMFUNC:
-		case SourceVariable::VT_BLOCK:
-		case SourceVariable::VT_STRUCT:
-		case SourceVariable::VT_UNION:
-		case SourceVariable::VT_VOID:
+		case VariableType::VT_ARRAY:
+		case VariableType::VT_ASMFUNC:
+		case VariableType::VT_BLOCK:
+		case VariableType::VT_STRUCT:
+		case VariableType::VT_UNION:
+		case VariableType::VT_VOID:
 			throw SourceException("invalid VT to", position, "SourceExpression");
 
-		case SourceVariable::VT_BOOLHARD:
+		case VariableType::VT_BOOLHARD:
 			objects->addToken(OCODE_LOGICALNOT);
 			objects->addToken(OCODE_LOGICALNOT);
 			break;
 
-		case SourceVariable::VT_BOOLSOFT:
-		case SourceVariable::VT_REAL:
+		case VariableType::VT_BOOLSOFT:
+		case VariableType::VT_REAL:
 			break;
 
-		case SourceVariable::VT_CHAR:
-		case SourceVariable::VT_FUNCTION:
-		case SourceVariable::VT_INT:
-		case SourceVariable::VT_LINESPEC:
-		case SourceVariable::VT_NATIVE:
-		case SourceVariable::VT_POINTER:
-		case SourceVariable::VT_SCRIPT:
-		case SourceVariable::VT_STRING:
+		case VariableType::VT_CHAR:
+		case VariableType::VT_FUNCTION:
+		case VariableType::VT_INT:
+		case VariableType::VT_LINESPEC:
+		case VariableType::VT_NATIVE:
+		case VariableType::VT_POINTER:
+		case VariableType::VT_SCRIPT:
+		case VariableType::VT_STRING:
 			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(16));
 			objects->addToken(OCODE_SHIFTR);
 			break;
@@ -442,7 +444,7 @@ ObjectExpression::Pointer SourceExpression::makeObjectAddress() const
 
 void SourceExpression::makeObjects(ObjectVector * objects)
 {
-	makeObjectsCast(objects, SourceVariable::get_VariableType(SourceVariable::VT_VOID));
+	makeObjectsCast(objects, SourceContext::global_context.getVariableType(VariableType::VT_VOID));
 }
 
 void SourceExpression::makeObjectsAddress(ObjectVector * objects)
@@ -455,7 +457,7 @@ void SourceExpression::makeObjectsCall(ObjectVector * objects, std::vector<Sourc
 	throw SourceException("makeObjectsCall on invalid expression", position, getName());
 }
 
-void SourceExpression::makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type)
+void SourceExpression::makeObjectsCast(ObjectVector * objects, VariableType const * type)
 {
 	makeObjectsGet(objects);
 	make_objects_cast(objects, getType(), type, position);
@@ -518,7 +520,7 @@ void SourceExpression::recurse_makeObjectsCall(ObjectVector * objects, std::vect
 	recurse_makeObjectsGet(objects);
 }
 
-void SourceExpression::recurse_makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type)
+void SourceExpression::recurse_makeObjectsCast(ObjectVector * objects, VariableType const * type)
 {
 	recurse_makeObjectsGet(objects);
 }

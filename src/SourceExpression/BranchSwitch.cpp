@@ -64,11 +64,11 @@ SourceExpression::Pointer SourceExpression::create_branch_switch(SourceExpressio
 
 SourceExpression_BranchSwitch::SourceExpression_BranchSwitch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position) : Super(position), _expr(expr), _exprCases(exprCases), _cases(context->getCases(position)), _caseLabels(_cases.size()), _caseDefault(context->getLabelCaseDefault(position)), _caseBreak(context->getLabelBreak(position)), _needDefault(!context->hasLabelCaseDefault())
 {
-	if (_expr->getType()->type != SourceVariable::VT_INT)
-		_expr = create_value_cast(_expr, SourceVariable::get_VariableType(SourceVariable::VT_INT), position);
+	if (_expr->getType()->vt != VariableType::VT_INT)
+		_expr = create_value_cast(_expr, SourceContext::global_context.getVariableType(VariableType::VT_INT), position);
 
-	if (_exprCases->getType()->type != SourceVariable::VT_VOID)
-		_exprCases = create_value_cast(_exprCases, SourceVariable::get_VariableType(SourceVariable::VT_VOID), position);
+	if (_exprCases->getType()->vt != VariableType::VT_VOID)
+		_exprCases = create_value_cast(_exprCases, SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
 
 	for (size_t i(0); i < _cases.size(); ++i)
 		_caseLabels[i] = context->getLabelCase(_cases[i], position);

@@ -24,6 +24,7 @@
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
 #include "../SourceExpressionDS.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -31,51 +32,51 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 {
 	objects->setPosition(position);
 
-	switch (_type->type)
+	switch (_type->vt)
 	{
-	case VT_ARRAY:
-	case VT_BLOCK:
-	case VT_BOOLHARD:
-	case VT_BOOLSOFT:
-	case VT_CHAR:
-	case VT_INT:
-	case VT_POINTER:
-	case VT_REAL:
-	case VT_STRING:
-	case VT_STRUCT:
-	case VT_UNION:
-	case VT_VOID:
+	case VariableType::VT_ARRAY:
+	case VariableType::VT_BLOCK:
+	case VariableType::VT_BOOLHARD:
+	case VariableType::VT_BOOLSOFT:
+	case VariableType::VT_CHAR:
+	case VariableType::VT_INT:
+	case VariableType::VT_POINTER:
+	case VariableType::VT_REAL:
+	case VariableType::VT_STRING:
+	case VariableType::VT_STRUCT:
+	case VariableType::VT_UNION:
+	case VariableType::VT_VOID:
 		throw SourceException("attempt to call uncallable", position, "SourceVariable");
 
-	case VT_ASMFUNC:
+	case VariableType::VT_ASMFUNC:
 		if (_sc == SC_CONSTANT)
 			SourceExpression::make_objects_call_asmfunc(objects, _data.vdAsmFunc, args, position);
 		else
 			throw SourceException("non-constant asmfuncs not supported", position, "SourceVariable");
 		break;
 
-	case VT_FUNCTION:
+	case VariableType::VT_FUNCTION:
 		if (_sc == SC_CONSTANT)
 			SourceExpression::make_objects_call_function(objects, _data.vdFunction, args, stack, position);
 		else
 			throw SourceException("non-constant functions not yet supported", position, "SourceVariable");
 		break;
 
-	case VT_LINESPEC:
+	case VariableType::VT_LINESPEC:
 		if (_sc == SC_CONSTANT)
 			SourceExpression::make_objects_call_linespec(objects, _data.vdLineSpec, args, position);
 		else
 			throw SourceException("non-constant linespecs not yet supported", position, "SourceVariable");
 		break;
 
-	case VT_NATIVE:
+	case VariableType::VT_NATIVE:
 		if (_sc == SC_CONSTANT)
 			SourceExpression::make_objects_call_native(objects, _data.vdNative, args, position);
 		else
 			throw SourceException("non-constant natives not yet supported", position, "SourceVariable");
 		break;
 
-	case VT_SCRIPT:
+	case VariableType::VT_SCRIPT:
 		makeObjectsGet(objects, position);
 		SourceExpression::make_objects_call_script(objects, _type, args, stack, position);
 		break;

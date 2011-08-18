@@ -58,7 +58,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 	}
 
 	{	// Check for type.
-		SourceVariable::VariableType const * type(SourceVariable::get_VariableType_null(token.getData()));
+		VariableType const * type(context->getVariableTypeNull(token.getData()));
 
 		if (type)
 		{
@@ -130,7 +130,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 	case SourceTokenC::TT_OP_PARENTHESIS_C:
 	case SourceTokenC::TT_OP_SEMICOLON:
 		in->unget(token);
-		return create_value_data(SourceVariable::get_VariableType(SourceVariable::VT_VOID), false, token.getPosition());
+		return create_value_data(SourceContext::global_context.getVariableType(VariableType::VT_VOID), false, token.getPosition());
 
 	case SourceTokenC::TT_OP_PARENTHESIS_O:
 		expr = make_expression(in, blocks, context);
@@ -214,11 +214,11 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_asmfunc(Sou
 
 	ObjectCode asmfuncOCodeImmediate(ocode_get_code(in->get(SourceTokenC::TT_IDENTIFIER)));
 
-	std::vector<SourceVariable::VariableType const *> asmfuncArgs;
-	SourceVariable::VariableType const * asmfuncReturn;
+	std::vector<VariableType const *> asmfuncArgs;
+	VariableType const * asmfuncReturn;
 	make_expression_arglist(in, blocks, context, &asmfuncArgs, &asmfuncReturn);
 
-	SourceVariable::VariableType const * asmfuncVarType(SourceVariable::get_VariableType_asmfunc(asmfuncReturn, asmfuncArgs));
+	VariableType const * asmfuncVarType(context->getVariableType_asmfunc(asmfuncReturn, asmfuncArgs));
 
 	SourceVariable::VariableData_AsmFunc asmfuncVarData = {asmfuncVarType, asmfuncOCode, asmfuncOCodeImmediate};
 
@@ -245,7 +245,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_case(Source
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_const(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
-	SourceVariable::VariableType const * type(make_expression_type(in, blocks, context));
+	VariableType const * type(make_expression_type(in, blocks, context));
 	std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 	in->get(SourceTokenC::TT_OP_EQUALS);
 	SourceExpression::Pointer data(make_expression(in, blocks, context));
@@ -333,10 +333,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	}
 
 	// scriptArgTypes/Names/Count scriptReturn
-	std::vector<SourceVariable::VariableType const *> scriptArgTypes;
+	std::vector<VariableType const *> scriptArgTypes;
 	std::vector<std::string> scriptArgNames;
 	int scriptArgCount;
-	SourceVariable::VariableType const * scriptReturn;
+	VariableType const * scriptReturn;
 	make_expression_arglist(in, blocks, context, &scriptArgTypes, &scriptArgNames, &scriptArgCount, &scriptContext, &scriptReturn);
 
 	// scriptNumber
@@ -369,7 +369,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	std::string scriptNameObject(scriptLabel + "_id");
 
 	// scriptVarType
-	SourceVariable::VariableType const * scriptVarType(SourceVariable::get_VariableType_script(scriptReturn, scriptArgTypes));
+	VariableType const * scriptVarType(context->getVariableType_script(scriptReturn, scriptArgTypes));
 
 	// scriptVarData
 	SourceVariable::VariableData_Script scriptVarData = {scriptVarType, -1};
@@ -404,19 +404,19 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_type(Source
 	in->unget(token);
 	make_expression_type(in, blocks, context);
 
-	return create_value_data(SourceVariable::get_VariableType(SourceVariable::VT_VOID), false, token.getPosition());
+	return create_value_data(context->getVariableType(VariableType::VT_VOID), false, token.getPosition());
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_typedef(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
-	SourceVariable::VariableType const * type(make_expression_type(in, blocks, context));
-	SourceVariable::add_typedef(in->get(SourceTokenC::TT_IDENTIFIER).getData(), type);
+	VariableType const * type(make_expression_type(in, blocks, context));
+	context->getVariableType_typedef(in->get(SourceTokenC::TT_IDENTIFIER), type);
 
-	return create_value_data(SourceVariable::get_VariableType(SourceVariable::VT_VOID), false, token.getPosition());
+	return create_value_data(context->getVariableType(VariableType::VT_VOID), false, token.getPosition());
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_var(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	SourceVariable::StorageClass sc(SourceVariable::get_StorageClass(in->get(SourceTokenC::TT_IDENTIFIER)));
-	SourceVariable::VariableType const * type(make_expression_type(in, blocks, context));
+	VariableType const * type(make_expression_type(in, blocks, context));
 	std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
 	std::string nameObject;
@@ -440,7 +440,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_var(SourceT
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_void(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
-	return create_value_cast(make_expression(in, blocks, context), SourceVariable::get_VariableType(SourceVariable::VT_VOID), token.getPosition());
+	return create_value_cast(make_expression(in, blocks, context), context->getVariableType(VariableType::VT_VOID), token.getPosition());
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_while(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {

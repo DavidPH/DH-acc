@@ -22,6 +22,7 @@
 #include "Unary.hpp"
 
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 
 
@@ -48,7 +49,7 @@ SourceExpression::Pointer SourceExpression::create_branch_not(SourceExpression *
 
 
 
-SourceExpression_BranchNot::SourceExpression_BranchNot(SourceExpression * expr, SourcePosition const & position) : Super(expr, SourceVariable::get_VariableType(SourceVariable::VT_BOOLSOFT), position)
+SourceExpression_BranchNot::SourceExpression_BranchNot(SourceExpression * expr, SourcePosition const & position) : Super(expr, SourceContext::global_context.getVariableType(VariableType::VT_BOOLSOFT), position)
 {
 
 }

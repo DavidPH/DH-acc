@@ -21,7 +21,9 @@
 
 #include "BinaryCompare.hpp"
 
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -29,14 +31,14 @@ SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression 
 {
 
 }
-SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, bool branchChecked, SourcePosition const & position) : Super(exprL, exprR, SourceVariable::get_VariableType(SourceVariable::VT_BOOLSOFT), SourceVariable::get_VariableType(SourceVariable::VT_BOOLSOFT), position)
+SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, bool branchChecked, SourcePosition const & position) : Super(exprL, exprR, SourceContext::global_context.getVariableType(VariableType::VT_BOOLSOFT), SourceContext::global_context.getVariableType(VariableType::VT_BOOLSOFT), position)
 {
 
 }
 
-SourceVariable::VariableType const * SourceExpression_BinaryCompare::getType() const
+VariableType const * SourceExpression_BinaryCompare::getType() const
 {
-	return SourceVariable::get_VariableType(SourceVariable::VT_BOOLHARD);
+	return SourceContext::global_context.getVariableType(VariableType::VT_BOOLHARD);
 }
 
 void SourceExpression_BinaryCompare::printDebug(std::ostream * out) const

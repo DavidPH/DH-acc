@@ -32,6 +32,7 @@ add_executable(DH-acc
 	ost_type.cpp
 	print_debug.cpp
 	SourceContext.cpp
+	SourceContext/getVariableType.cpp
 	SourceException.cpp
 	SourceExpression.cpp
 	SourceExpression/Binary.cpp
@@ -103,7 +104,7 @@ add_executable(DH-acc
 	SourceVariable/makeObjectsGet.cpp
 	SourceVariable/makeObjectsSet.cpp
 	SourceVariable/print_debug.cpp
-	SourceVariable/VariableType.cpp
+	VariableType.cpp
 )
 
 

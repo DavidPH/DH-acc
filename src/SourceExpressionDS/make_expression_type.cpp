@@ -28,23 +28,23 @@
 
 
 
-SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	SourceTokenC token(in->get(SourceTokenC::TT_IDENTIFIER));
 
 	std::string name;
 	std::vector<std::string> names;
-	SourceVariable::VariableType const * retn;
-	SourceVariable::VariableType const * type;
-	std::vector<SourceVariable::VariableType const *> types;
+	VariableType const * retn;
+	VariableType const * type;
+	std::vector<VariableType const *> types;
 
 	if (token.getData() == "array")
 	{
-		SourceVariable::VariableType const * refType(make_expression_type(in, blocks, context));
+		VariableType const * refType(make_expression_type(in, blocks, context));
 		in->get(SourceTokenC::TT_OP_BRACKET_O);
 		int count((int)make_expression(in, blocks, context)->makeObject()->resolveInt());
 		in->get(SourceTokenC::TT_OP_BRACKET_C);
-		type = SourceVariable::get_VariableType_array(refType, count);
+		type = context->getVariableType_array(refType, count);
 	}
 	else if (token.getData() == "block")
 	{
@@ -62,7 +62,7 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 
 		in->get(SourceTokenC::TT_OP_BRACE_C);
 
-		type = SourceVariable::get_VariableType_block(types);
+		type = context->getVariableType_block(types);
 	}
 	else if (token.getData() == "enum")
 	{
@@ -72,7 +72,7 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 			name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
 
 		// TODO: Proper enum type?
-		type = SourceVariable::get_VariableType(SourceVariable::VT_INT);
+		type = context->getVariableType(VariableType::VT_INT);
 
 		in->get(SourceTokenC::TT_OP_BRACE_O);
 
@@ -103,7 +103,7 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 	{
 		make_expression_arglist(in, blocks, context, &types, &retn);
 
-		type = SourceVariable::get_VariableType_script(retn, types);
+		type = context->getVariableType_script(retn, types);
 	}
 	else if (token.getData() == "struct" || token.getData() == "union")
 	{
@@ -116,9 +116,9 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 			name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
 
 			if (isUnion)
-				type = SourceVariable::add_union(name, token.getPosition());
+				type = context->getVariableType_union(name, token.getPosition());
 			else
-				type = SourceVariable::add_struct(name, token.getPosition());
+				type = context->getVariableType_struct(name, token.getPosition());
 		}
 
 		if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_O)
@@ -139,17 +139,17 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 			in->get(SourceTokenC::TT_OP_BRACE_C);
 
 			if (isUnion)
-				type = SourceVariable::add_union(name, names, types, token.getPosition());
+				type = context->getVariableType_union(name, names, types, token.getPosition());
 			else
-				type = SourceVariable::add_struct(name, names, types, token.getPosition());
+				type = context->getVariableType_struct(name, names, types, token.getPosition());
 		}
 
 		if (!type)
 		{
 			if (isUnion)
-				type = SourceVariable::add_union(name, token.getPosition());
+				type = context->getVariableType_union(name, token.getPosition());
 			else
-				type = SourceVariable::add_struct(name, token.getPosition());
+				type = context->getVariableType_struct(name, token.getPosition());
 		}
 	}
 	else if (token.getData() == "typeof")
@@ -158,14 +158,14 @@ SourceVariable::VariableType const * SourceExpressionDS::make_expression_type(So
 	}
 	else
 	{
-		type = SourceVariable::get_VariableType(token);
+		type = context->getVariableType(token);
 	}
 
 	while (in->peek().getType() == SourceTokenC::TT_OP_ASTERISK)
 	{
 		in->get(SourceTokenC::TT_OP_ASTERISK);
 
-		type = SourceVariable::get_VariableType_pointer(type);
+		type = context->getVariableType_pointer(type);
 	}
 
 	return type;

@@ -34,6 +34,7 @@ class ObjectExpression;
 class ObjectVector;
 class SourceExpression;
 class SourceTokenC;
+class VariableType;
 
 
 
@@ -52,52 +53,6 @@ public:
 		SC_REGISTERARRAY_MAP,
 		SC_REGISTERARRAY_WORLD,
 		SC_STATIC
-	};
-
-	enum VariableTypeInternal
-	{
-		VT_BOOLHARD,
-		VT_BOOLSOFT,
-		VT_CHAR,
-		VT_INT,
-		VT_REAL,
-		VT_STRING,
-
-		VT_VOID,
-
-		VT_ARRAY,
-		VT_ASMFUNC,
-		VT_BLOCK,
-		VT_FUNCTION,
-		VT_LINESPEC,
-		VT_NATIVE,
-		VT_POINTER,
-		VT_SCRIPT,
-		VT_STRUCT,
-		VT_UNION
-	};
-
-	struct VariableType
-	{
-		int getOffset(std::string const & name, SourcePosition const & position) const;
-
-		VariableType const * getType(std::string const & name, SourcePosition const & position) const;
-
-		bool isVoid() const;
-
-		int size() const;
-
-		VariableTypeInternal type;
-
-		// Type returned when called.
-		VariableType const * callType;
-
-		// Type returned when dereferenced.
-		VariableType const * refType;
-
-		// VT_STRUCT members or VT_FUNCTION/VT_SCRIPT args.
-		std::vector<std::string>          names;
-		std::vector<VariableType const *> types;
 	};
 
 	struct VariableData_AsmFunc
@@ -213,38 +168,8 @@ public:
 
 	friend void print_debug(std::ostream * const out, SourceVariable const & in);
 	friend void print_debug(std::ostream * const out, SourceVariable::StorageClass const in);
-	friend void print_debug(std::ostream * const out, SourceVariable::VariableType const & in);
-	friend void print_debug(std::ostream * const out, SourceVariable::VariableTypeInternal const in);
-
-	static VariableType const * add_struct(std::string const & name, SourcePosition const & position);
-	static VariableType const * add_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position);
-	static VariableType const * add_union(std::string const & name, SourcePosition const & position);
-	static VariableType const * add_union(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position);
-
-	static void add_typedef(std::string const & name, VariableType const * type);
 
 	static StorageClass get_StorageClass(SourceTokenC const & token);
-
-	static VariableType const * get_VariableType(SourceTokenC const & token);
-	static VariableType const * get_VariableType(VariableTypeInternal const type);
-	static VariableType const * get_VariableType_array(VariableType const * refType, int count);
-	// AsmFunc types work like script types (see below).
-	static VariableType const * get_VariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
-	static VariableType const * get_VariableType_block(std::vector<VariableType const *> const & types);
-	// Function types work like script types (see below).
-	static VariableType const * get_VariableType_function(VariableType const * callType, std::vector<VariableType const *> const & types);
-	// LineSpec types work like script types (see below).
-	static VariableType const * get_VariableType_linespec(VariableType const * callType, std::vector<VariableType const *> const & types);
-	// Native types work like script types (see below).
-	static VariableType const * get_VariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types);
-	// Returns NULL if type not found.
-	static VariableType const * get_VariableType_null(std::string const & name);
-	static VariableType const * get_VariableType_pointer(VariableType const * refType);
-	// Script types are identified by their associated types.
-	// If there is no such script type defined, it will be added.
-	static VariableType const * get_VariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types);
-
-	static void init();
 
 private:
 	VariableData _data;
@@ -266,15 +191,6 @@ private:
 	void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const;
 	void makeObjectsSetPrep(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, CounterPointer<ObjectExpression> * addressBase, int * address) const;
 	void makeObjectsSetSkip(VariableType const * type, int * address) const;
-
-
-
-	static VariableType const * get_VariableType_auto(VariableTypeInternal itype, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types);
-	static VariableType * get_VariableType_struct(std::string const & name);
-	static VariableType * get_VariableType_union(std::string const & name);
-
-	static std::vector<std::string>    _names;
-	static std::vector<VariableType *> _types;
 };
 
 

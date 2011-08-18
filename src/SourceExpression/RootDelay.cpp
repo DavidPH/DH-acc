@@ -55,8 +55,8 @@ SourceExpression::Pointer SourceExpression::create_root_delay(SourceExpression *
 
 SourceExpression_RootDelay::SourceExpression_RootDelay(SourceExpression * expr, SourceContext * context, SourcePosition const & position) : Super(position), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
 {
-	if (_expr->getType()->type != SourceVariable::VT_INT)
-		_expr = create_value_cast(_expr, SourceVariable::get_VariableType(SourceVariable::VT_INT), position);
+	if (_expr->getType()->vt != VariableType::VT_INT)
+		_expr = create_value_cast(_expr, SourceContext::global_context.getVariableType(VariableType::VT_INT), position);
 }
 
 void SourceExpression_RootDelay::makeObjectsGet(ObjectVector * objects)

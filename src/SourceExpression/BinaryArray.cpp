@@ -23,6 +23,8 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -35,7 +37,7 @@ public:
 
 	virtual bool canMakeObjectsAddress() const;
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
 	virtual void makeObjectsAddress(ObjectVector * objects);
 
@@ -58,17 +60,17 @@ SourceExpression::Pointer SourceExpression::create_binary_array(SourceExpression
 
 
 
-SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, NULL, SourceVariable::get_VariableType(SourceVariable::VT_INT), position)
+SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, NULL, SourceContext::global_context.getVariableType(VariableType::VT_INT), position)
 {
 
 }
 
 bool SourceExpression_BinaryArray::canMakeObjectsAddress() const
 {
-	return exprL->getType()->type == SourceVariable::VT_POINTER || exprL->canMakeObjectsAddress();
+	return exprL->getType()->vt == VariableType::VT_POINTER || exprL->canMakeObjectsAddress();
 }
 
-SourceVariable::VariableType const * SourceExpression_BinaryArray::getType() const
+VariableType const * SourceExpression_BinaryArray::getType() const
 {
 	return exprL->getType()->refType;
 }
@@ -77,7 +79,7 @@ void SourceExpression_BinaryArray::makeObjectsAddress(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsAddress(objects);
 
-	if (exprL->getType()->type == SourceVariable::VT_POINTER)
+	if (exprL->getType()->vt == VariableType::VT_POINTER)
 	{
 		exprL->makeObjectsGet(objects);
 	}
@@ -97,10 +99,10 @@ void SourceExpression_BinaryArray::makeObjectsAddress(ObjectVector * objects)
 
 void SourceExpression_BinaryArray::makeObjectsGet(ObjectVector * objects)
 {
-	if (getType()->type == SourceVariable::VT_VOID)
+	if (getType()->vt == VariableType::VT_VOID)
 		Super::makeObjectsGet(objects);
 
-	if (exprL->getType()->type == SourceVariable::VT_STRING)
+	if (exprL->getType()->vt == VariableType::VT_STRING)
 	{
 		Super::recurse_makeObjectsGet(objects);
 
@@ -143,10 +145,10 @@ void SourceExpression_BinaryArray::makeObjectsGetArray(ObjectVector * objects, s
 
 void SourceExpression_BinaryArray::makeObjectsSet(ObjectVector * objects)
 {
-	if (getType()->type == SourceVariable::VT_VOID)
+	if (getType()->vt == VariableType::VT_VOID)
 		Super::makeObjectsSet(objects);
 
-	if (exprL->getType()->type == SourceVariable::VT_STRING)
+	if (exprL->getType()->vt == VariableType::VT_STRING)
 	{
 		Super::makeObjectsSet(objects);
 	}

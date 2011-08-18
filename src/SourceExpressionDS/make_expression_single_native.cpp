@@ -34,8 +34,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_native(Sour
 	std::string nativeName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
 	// nativeArgTypes nativeReturn
-	std::vector<SourceVariable::VariableType const *> nativeArgTypes;
-	SourceVariable::VariableType const * nativeReturn;
+	std::vector<VariableType const *> nativeArgTypes;
+	VariableType const * nativeReturn;
 	make_expression_arglist(in, blocks, context, &nativeArgTypes, &nativeReturn);
 
 	// nativeNumber
@@ -43,7 +43,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_native(Sour
 	bigsint nativeNumber(get_bigsint(in->get(SourceTokenC::TT_INTEGER)));
 
 	// nativeVarType
-	SourceVariable::VariableType const * nativeVarType(SourceVariable::get_VariableType_native(nativeReturn, nativeArgTypes));
+	VariableType const * nativeVarType(context->getVariableType_native(nativeReturn, nativeArgTypes));
 
 	// nativeVarData
 	SourceVariable::VariableData_Native nativeVarData = {nativeVarType, nativeNumber};

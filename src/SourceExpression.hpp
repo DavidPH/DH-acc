@@ -34,6 +34,7 @@ class ObjectExpression;
 class ObjectVector;
 class SourceContext;
 class SourceTokenC;
+class VariableType;
 
 
 
@@ -49,7 +50,7 @@ public:
 
 	virtual bool canMakeObjectsAddress() const;
 
-	virtual SourceVariable::VariableType const * getType() const;
+	virtual VariableType const * getType() const;
 
 	virtual CounterPointer<ObjectExpression> makeObject() const;
 	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
@@ -60,7 +61,7 @@ public:
 
 	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack);
 
-	virtual void makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type);
+	virtual void makeObjectsCast(ObjectVector * objects, VariableType const * type);
 
 	virtual void makeObjectsGet(ObjectVector * objects);
 	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
@@ -123,9 +124,9 @@ public:
 	static Pointer create_root_out(SourceExpression * expr, SourcePosition const & position);
 
 	static Pointer create_value_block(std::vector<SourceExpression::Pointer> const & expressions, SourcePosition const & position);
-	static Pointer create_value_cast(SourceExpression * expr, SourceVariable::VariableType const * type, SourcePosition const & position);
+	static Pointer create_value_cast(SourceExpression * expr, VariableType const * type, SourcePosition const & position);
 	static Pointer create_value_char(SourceTokenC const & token);
-	static Pointer create_value_data(SourceVariable::VariableType const * type, bool garbage, SourcePosition const & position);
+	static Pointer create_value_data(VariableType const * type, bool garbage, SourcePosition const & position);
 	static Pointer create_value_int(int value, SourcePosition const & position);
 	static Pointer create_value_int(SourceTokenC const & token);
 	static Pointer create_value_member(SourceExpression * expr, SourceTokenC const & token);
@@ -133,7 +134,7 @@ public:
 	static Pointer create_value_string(SourceTokenC const & token);
 	static Pointer create_value_variable(SourceVariable const & var, SourcePosition const & position);
 
-	static SourceVariable::VariableType const * get_promoted_type(SourceVariable::VariableType const * type1, SourceVariable::VariableType const * type2, SourcePosition const & position);
+	static VariableType const * get_promoted_type(VariableType const * type1, VariableType const * type2, SourcePosition const & position);
 
 	static void make_objects(std::vector<SourceExpression::Pointer> const & expressions, ObjectVector * objects);
 
@@ -145,9 +146,9 @@ public:
 
 	static void make_objects_call_native(ObjectVector * objects, SourceVariable::VariableData_Native const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
 
-	static void make_objects_call_script(ObjectVector * objects, SourceVariable::VariableType const * type, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
+	static void make_objects_call_script(ObjectVector * objects, VariableType const * type, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
 
-	static void make_objects_cast(ObjectVector * objects, SourceVariable::VariableType const * typeFrom, SourceVariable::VariableType const * typeTo, SourcePosition const & position);
+	static void make_objects_cast(ObjectVector * objects, VariableType const * typeFrom, VariableType const * typeTo, SourcePosition const & position);
 
 protected:
 	SourceExpression(SourcePosition const & position);
@@ -158,7 +159,7 @@ protected:
 
 	void recurse_makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack);
 
-	void recurse_makeObjectsCast(ObjectVector * objects, SourceVariable::VariableType const * type);
+	void recurse_makeObjectsCast(ObjectVector * objects, VariableType const * type);
 
 	void recurse_makeObjectsGet(ObjectVector * objects);
 	void recurse_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
