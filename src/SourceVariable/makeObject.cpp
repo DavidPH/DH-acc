@@ -59,6 +59,9 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 		case VariableType::VT_CHAR:
 			return ObjectExpression::create_value_int(_data.vdChar.value, position);
 
+		case VariableType::VT_ENUM:
+			throw SourceException("makeObject on VT_ENUM", position, "SourceVariable");
+
 		case VariableType::VT_INT:
 			return ObjectExpression::create_value_int(_data.vdInt.value, position);
 

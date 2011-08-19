@@ -66,38 +66,44 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 	}
 	else if (token.getData() == "enum")
 	{
-		bigsint enumVal(0);
-
 		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
 			name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
 
-		// TODO: Proper enum type?
-		type = context->getVariableType(VariableType::VT_INT);
-
-		in->get(SourceTokenC::TT_OP_BRACE_O);
-
-		if (in->peek().getType() != SourceTokenC::TT_OP_BRACE_C) while (true)
+		if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_O)
 		{
-			SourceTokenC enumTok(in->get(SourceTokenC::TT_IDENTIFIER));
+			bigsint enumVal(0);
 
-			if (in->peek().getType() == SourceTokenC::TT_OP_EQUALS)
+			type = context->getVariableType_enum(name, true, token.getPosition());
+
+			in->get(SourceTokenC::TT_OP_BRACE_O);
+
+			if (in->peek().getType() != SourceTokenC::TT_OP_BRACE_C) while (true)
 			{
-				in->get(SourceTokenC::TT_OP_EQUALS);
+				SourceTokenC enumTok(in->get(SourceTokenC::TT_IDENTIFIER));
 
-				enumVal = make_expression(in, blocks, context)->makeObject()->resolveInt();
+				if (in->peek().getType() == SourceTokenC::TT_OP_EQUALS)
+				{
+					in->get(SourceTokenC::TT_OP_EQUALS);
+
+					enumVal = make_expression(in, blocks, context)->makeObject()->resolveInt();
+				}
+
+				SourceVariable enumVar(enumTok.getData(), type, ObjectExpression::create_value_int(enumVal++, enumTok.getPosition()), enumTok.getPosition());
+
+				context->addVariable(enumVar);
+
+				if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
+					break;
+
+				in->get(SourceTokenC::TT_OP_COMMA);
 			}
 
-			SourceVariable enumVar(enumTok.getData(), type, ObjectExpression::create_value_int(enumVal++, enumTok.getPosition()), enumTok.getPosition());
-
-			context->addVariable(enumVar);
-
-			if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
-				break;
-
-			in->get(SourceTokenC::TT_OP_COMMA);
+			in->get(SourceTokenC::TT_OP_BRACE_C);
 		}
-
-		in->get(SourceTokenC::TT_OP_BRACE_C);
+		else
+		{
+			type = context->getVariableType_enum(name, false, token.getPosition());
+		}
 	}
 	else if (token.getData() == "script")
 	{

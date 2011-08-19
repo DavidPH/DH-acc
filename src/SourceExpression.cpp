@@ -321,6 +321,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 
 	case VariableType::VT_BOOLHARD:
 	case VariableType::VT_CHAR:
+	case VariableType::VT_ENUM:
 	case VariableType::VT_FUNCTION:
 	case VariableType::VT_INT:
 	case VariableType::VT_LINESPEC:
@@ -345,6 +346,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 
 		case VariableType::VT_BOOLSOFT:
 		case VariableType::VT_CHAR:
+		case VariableType::VT_ENUM:
 		case VariableType::VT_FUNCTION:
 		case VariableType::VT_INT:
 		case VariableType::VT_LINESPEC:
@@ -374,6 +376,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 
 		case VariableType::VT_BOOLHARD:
 		case VariableType::VT_CHAR:
+		case VariableType::VT_ENUM:
 		case VariableType::VT_FUNCTION:
 		case VariableType::VT_INT:
 		case VariableType::VT_LINESPEC:
@@ -418,6 +421,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 			break;
 
 		case VariableType::VT_CHAR:
+		case VariableType::VT_ENUM:
 		case VariableType::VT_FUNCTION:
 		case VariableType::VT_INT:
 		case VariableType::VT_LINESPEC:

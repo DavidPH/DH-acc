@@ -42,6 +42,7 @@ SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countA
 
 	_types[VariableType::VT_VOID] = new VariableType;
 	_types[VariableType::VT_VOID]->vt = VariableType::VT_VOID;
+	_types[VariableType::VT_VOID]->complete = true;
 	_types[VariableType::VT_VOID]->callType = _types[VariableType::VT_VOID];
 	_types[VariableType::VT_VOID]->refType  = _types[VariableType::VT_VOID];
 
@@ -49,6 +50,7 @@ SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countA
 	{
 		_types[vt] = new VariableType;
 		_types[vt]->vt = vt;
+		_types[vt]->complete = true;
 		_types[vt]->callType = _types[VariableType::VT_VOID];
 		_types[vt]->refType  = _types[VariableType::VT_VOID];
 	}

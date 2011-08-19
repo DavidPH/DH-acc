@@ -45,6 +45,7 @@ struct VariableType
 		VT_ARRAY,
 		VT_ASMFUNC,
 		VT_BLOCK,
+		VT_ENUM,
 		VT_FUNCTION,
 		VT_LINESPEC,
 		VT_NATIVE,
@@ -63,6 +64,9 @@ struct VariableType
 	int size() const;
 
 	Type vt;
+
+	// Type fully defined?
+	bool complete;
 
 	// Type returned when called.
 	VariableType const * callType;

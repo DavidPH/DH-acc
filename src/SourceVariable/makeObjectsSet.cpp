@@ -78,6 +78,7 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		case VariableType::VT_BOOLHARD:
 		case VariableType::VT_BOOLSOFT:
 		case VariableType::VT_CHAR:
+		case VariableType::VT_ENUM:
 		case VariableType::VT_FUNCTION:
 		case VariableType::VT_INT:
 		case VariableType::VT_LINESPEC:

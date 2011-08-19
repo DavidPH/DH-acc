@@ -39,6 +39,7 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 	case VariableType::VT_BOOLHARD:
 	case VariableType::VT_BOOLSOFT:
 	case VariableType::VT_CHAR:
+	case VariableType::VT_ENUM:
 	case VariableType::VT_INT:
 	case VariableType::VT_POINTER:
 	case VariableType::VT_REAL:

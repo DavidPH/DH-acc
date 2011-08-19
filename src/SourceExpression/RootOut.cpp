@@ -64,8 +64,8 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, VariableType const 
 	switch (type->vt)
 	{
 	case VariableType::VT_ARRAY:
-	case VariableType::VT_BLOCK:
-	case VariableType::VT_STRUCT:
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('A'));
+		objects->addToken(OCODE_PRINTCHARACTER);
 		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));
 		objects->addToken(OCODE_PRINTCHARACTER);
 
@@ -82,44 +82,150 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, VariableType const 
 
 		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('}'));
 		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('A'));
+		objects->addToken(OCODE_PRINTCHARACTER);
 
 		break;
 
 	case VariableType::VT_ASMFUNC:
-	case VariableType::VT_VOID:
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('A'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		break;
+
+	case VariableType::VT_BLOCK:
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('B'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+
+		for (size_t i(type->types.size()); i--;)
+		{
+			doOut(objects, type->types[i]);
+
+			if (i)
+			{
+				objects->addToken(OCODE_PUSHNUMBER, objects->getValue(' '));
+				objects->addToken(OCODE_PRINTCHARACTER);
+			}
+		}
+
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('}'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('B'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+
 		break;
 
 	case VariableType::VT_BOOLHARD:
-	case VariableType::VT_FUNCTION:
-	case VariableType::VT_INT:
-	case VariableType::VT_LINESPEC:
-	case VariableType::VT_NATIVE:
-	case VariableType::VT_SCRIPT:
 		objects->addToken(OCODE_PRINTNUMBER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('B'));
+		objects->addToken(OCODE_PRINTCHARACTER);
 		break;
 
 	case VariableType::VT_BOOLSOFT:
-		objects->addToken(OCODE_LOGICALNOT);
-		objects->addToken(OCODE_LOGICALNOT);
 		objects->addToken(OCODE_PRINTNUMBER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('B'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('S'));
+		objects->addToken(OCODE_PRINTCHARACTER);
 		break;
 
 	case VariableType::VT_CHAR:
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('\''));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('\''));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		break;
+
+	case VariableType::VT_ENUM:
+		objects->addToken(OCODE_PRINTNUMBER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('E'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		break;
+
+	case VariableType::VT_FUNCTION:
+		objects->addToken(OCODE_PRINTNUMBER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('F'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		break;
+
+	case VariableType::VT_INT:
+		objects->addToken(OCODE_PRINTNUMBER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('I'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		break;
+
+	case VariableType::VT_LINESPEC:
+		objects->addToken(OCODE_PRINTNUMBER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('L'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		break;
+
+	case VariableType::VT_NATIVE:
+		objects->addToken(OCODE_PRINTNUMBER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('N'));
 		objects->addToken(OCODE_PRINTCHARACTER);
 		break;
 
 	case VariableType::VT_POINTER:
 		objects->addToken(OCODE_PRINTHEX);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('p'));
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
 		objects->addToken(OCODE_PRINTCHARACTER);
 		break;
 
 	case VariableType::VT_REAL:
 		objects->addToken(OCODE_PRINTFIXED);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('F'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		break;
+
+	case VariableType::VT_SCRIPT:
+		objects->addToken(OCODE_PRINTNUMBER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('S'));
+		objects->addToken(OCODE_PRINTCHARACTER);
 		break;
 
 	case VariableType::VT_STRING:
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('"'));
+		objects->addToken(OCODE_PRINTCHARACTER);
 		objects->addToken(OCODE_PRINTSTRING);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('"'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		break;
+
+	case VariableType::VT_STRUCT:
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('S'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+
+		for (size_t i(type->types.size()); i--;)
+		{
+			doOut(objects, type->types[i]);
+
+			if (i)
+			{
+				objects->addToken(OCODE_PUSHNUMBER, objects->getValue(' '));
+				objects->addToken(OCODE_PRINTCHARACTER);
+			}
+		}
+
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('}'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('S'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+
 		break;
 
 	case VariableType::VT_UNION:
@@ -143,6 +249,13 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, VariableType const 
 		objects->addToken(OCODE_PRINTCHARACTER);
 		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('U'));
 		objects->addToken(OCODE_PRINTCHARACTER);
+
+		break;
+
+	case VariableType::VT_VOID:
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('V'));
+		objects->addToken(OCODE_PRINTCHARACTER);
+		break;
 	}
 
 	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(';'));

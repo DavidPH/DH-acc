@@ -73,6 +73,7 @@ bool VariableType::isVoid() const
 	case VT_BOOLHARD:
 	case VT_BOOLSOFT:
 	case VT_CHAR:
+	case VT_ENUM:
 	case VT_FUNCTION:
 	case VT_INT:
 	case VT_LINESPEC:
@@ -110,6 +111,7 @@ int VariableType::size() const
 	case VT_BOOLHARD:
 	case VT_BOOLSOFT:
 	case VT_CHAR:
+	case VT_ENUM:
 	case VT_FUNCTION:
 	case VT_INT:
 	case VT_LINESPEC:
@@ -191,6 +193,7 @@ void print_debug(std::ostream * out, VariableType::Type in)
 	case VariableType::VT_BOOLHARD: *out << "VT_BOOLHARD"; break;
 	case VariableType::VT_BOOLSOFT: *out << "VT_BOOLSOFT"; break;
 	case VariableType::VT_CHAR:     *out << "VT_CHAR";     break;
+	case VariableType::VT_ENUM:     *out << "VT_ENUM";     break;
 	case VariableType::VT_FUNCTION: *out << "VT_FUNCTION"; break;
 	case VariableType::VT_INT:      *out << "VT_INT";      break;
 	case VariableType::VT_LINESPEC: *out << "VT_LINESPEC"; break;
