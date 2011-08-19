@@ -295,7 +295,7 @@ void BinaryTokenZDACS::write_function(std::ostream * out, ObjectData_Function co
 	case OUTPUT_ACSE:
 		write_8 (out, (int8_t)f.argCount);
 		write_8 (out, (int8_t)f.varCount);
-		write_8 (out, (int8_t)f.retCount);
+		write_8 (out, (int8_t)!!f.retCount);
 		write_8 (out, 0);
 		write_32(out, *ObjectExpression::get_symbol(f.label, SourcePosition::none));
 		break;
@@ -326,14 +326,14 @@ void BinaryTokenZDACS::write_script(std::ostream * out, ObjectData_Script const 
 	case OUTPUT_ACS0:
 		write_32(out, (int32_t)(s.stype * 1000) + (int32_t)s.number);
 		write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
-		write_32(out, s.argCount);
+		write_32(out, s.argCount <= 3 ? s.argCount : 3);
 		break;
 
 	case OUTPUT_ACSE:
 		write_16(out, (int16_t)s.number);
 		write_16(out, (int16_t)s.stype);
 		write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
-		write_32(out, s.argCount);
+		write_32(out, s.argCount <= 3 ? s.argCount : 3);
 		break;
 
 	default:
@@ -346,6 +346,7 @@ void BinaryTokenZDACS::write_script_flags(std::ostream * out, ObjectData_Script 
 	switch (output_type)
 	{
 	case OUTPUT_ACSE:
+		if (!s.flags) break;
 		write_16(out, (int16_t)s.number);
 		write_16(out, (int16_t)s.flags);
 		break;
@@ -360,6 +361,8 @@ void BinaryTokenZDACS::write_script_vars(std::ostream * out, ObjectData_Script c
 	switch (output_type)
 	{
 	case OUTPUT_ACSE:
+		if (s.varCount <= 10) break;
+		if (s.varCount <= 20 && target_type == TARGET_ZDoom) break;
 		write_16(out, (int16_t)s.number);
 		write_16(out, (int16_t)s.varCount);
 		break;
