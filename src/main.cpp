@@ -87,13 +87,11 @@ void read_source(std::string const & name, SourceType type, ObjectVector * objec
 	if (type == SOURCE_UNKNOWN)
 		type = divine_source_type(name);
 
-	std::ifstream ifs(name.c_str());
-
 	switch (type)
 	{
 	case SOURCE_ASMPLX:
 	{
-		SourceStream in(&ifs, name, SourceStream::ST_ASMPLX);
+		SourceStream in(name, SourceStream::ST_ASMPLX);
 
 		std::vector<SourceTokenASMPLX> tokens;
 		SourceTokenASMPLX::read_tokens(&in, &tokens);
@@ -106,7 +104,7 @@ void read_source(std::string const & name, SourceType type, ObjectVector * objec
 
 	case SOURCE_DS:
 	{
-		SourceStream in(&ifs, name, SourceStream::ST_C);
+		SourceStream in(name, SourceStream::ST_C);
 
 		SourceTokenizerDS tokenizer(&in);
 
@@ -120,7 +118,10 @@ void read_source(std::string const & name, SourceType type, ObjectVector * objec
 		break;
 
 	case SOURCE_object:
-		ObjectExpression::read_objects(&ifs, objects);
+	{
+		std::ifstream in(name.c_str());
+		ObjectExpression::read_objects(&in, objects);
+	}
 		break;
 
 	default:

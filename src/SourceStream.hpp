@@ -46,7 +46,8 @@ public:
 
 
 	SourceStream();
-	SourceStream(std::istream * const in, std::string const & filename, SourceType const type);
+	SourceStream(std::string const & filename, SourceType type);
+	~SourceStream();
 
 	char get();
 

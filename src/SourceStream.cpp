@@ -23,15 +23,17 @@
 
 #include "option.hpp"
 
+#include <fstream>
+
 
 
 option::option_i option_tab_columns(1);
 
 
 
-SourceStream::SourceStream(std::istream * const in, std::string const & filename, SourceType const type) :
+SourceStream::SourceStream(std::string const & filename, SourceType const type) :
 _oldC(-2), _curC(-2), _newC(-2),
-_in(in),
+_in(NULL),
 _filename(filename),
 
 _countColumn(0),
@@ -64,6 +66,12 @@ _inQuoteSingle(false)
 		_doQuoteSingle = true;
 		break;
 	}
+
+	_in = new std::ifstream(_filename.c_str());
+}
+SourceStream::~SourceStream()
+{
+	delete _in;
 }
 
 char SourceStream::get()

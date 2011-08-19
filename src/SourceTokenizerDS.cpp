@@ -24,7 +24,6 @@
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
 
-#include <fstream>
 #include <sstream>
 
 
@@ -32,7 +31,6 @@
 SourceTokenizerDS::SourceTokenizerDS(SourceStream * const in)
 {
 	_in.push(in);
-	_is.push(NULL);
 }
 SourceTokenizerDS::~SourceTokenizerDS()
 {
@@ -41,9 +39,6 @@ SourceTokenizerDS::~SourceTokenizerDS()
 	{
 		delete _in.top();
 		_in.pop();
-
-		delete _is.top();
-		_is.pop();
 	}
 }
 
@@ -65,21 +60,14 @@ void SourceTokenizerDS::doCommandInclude()
 	if (includeToken.getType() != SourceTokenC::TT_STRING)
 		throw SourceException("expected TT_STRING", includeToken.getPosition(), "SourceTokenizerDS");
 
-	std::string const & include(includeToken.getData());
-
-	std::ifstream * is;
 	try
 	{
-		is = new std::ifstream(include.c_str());
+		_in.push(new SourceStream(includeToken.getData(), SourceStream::ST_C));
 	}
 	catch (std::exception & e)
 	{
 		throw SourceException("file not found", includeToken.getPosition(), "SourceTokenizerDS");
 	}
-	SourceStream  * in(new SourceStream(is, include, SourceStream::ST_C));
-
-	_is.push(is);
-	_in.push(in);
 }
 
 SourceTokenC SourceTokenizerDS::get()
@@ -103,9 +91,6 @@ SourceTokenC SourceTokenizerDS::get()
 
 		delete _in.top();
 		_in.pop();
-
-		delete _is.top();
-		_is.pop();
 
 		return get();
 	}
