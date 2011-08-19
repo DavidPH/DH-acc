@@ -139,6 +139,43 @@ int VariableType::size() const
 	return 0;
 }
 
+int VariableType::sizeCall() const
+{
+	switch (vt)
+	{
+	case VT_ARRAY:
+	case VT_BLOCK:
+	case VT_BOOLHARD:
+	case VT_BOOLSOFT:
+	case VT_CHAR:
+	case VT_ENUM:
+	case VT_INT:
+	case VT_POINTER:
+	case VT_REAL:
+	case VT_STRING:
+	case VT_STRUCT:
+	case VT_UNION:
+	case VT_VOID:
+		return 0;
+
+	case VT_ASMFUNC:
+	case VT_FUNCTION:
+	case VT_LINESPEC:
+	case VT_NATIVE:
+	case VT_SCRIPT:
+	{
+		int s(0);
+
+		for (std::vector<VariableType const *>::const_iterator it(types.begin()); it != types.end(); ++it)
+			s += (*it)->size();
+
+		return s;
+	}
+	}
+
+	return 0;
+}
+
 
 
 VariableType::Type & operator ++ (VariableType::Type & vt)

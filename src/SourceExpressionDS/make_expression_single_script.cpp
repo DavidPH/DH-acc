@@ -104,9 +104,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	SourceVariable::VariableData_Script scriptVarData = {scriptVarType, -1};
 
 	// scriptExpression
-	SourceExpression::Pointer scriptExpression(make_expression_single(in, blocks, &scriptContext));
+	SourceExpression::Pointer scriptExpression(create_root_script(scriptVarType, token.getPosition()));
 	scriptExpression->addLabel(scriptLabel);
 	blocks->push_back(scriptExpression);
+	blocks->push_back(make_expression_single(in, blocks, &scriptContext));
 	blocks->push_back(create_branch_return(create_value_data(scriptReturn, true, token.getPosition()), &scriptContext, token.getPosition()));
 
 	// scriptVarCount

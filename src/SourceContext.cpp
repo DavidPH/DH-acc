@@ -76,7 +76,11 @@ SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countA
 }
 SourceContext::SourceContext(SourceContext * parent, ContextType type) : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _label(parent->makeLabelShort()), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP || type == CT_SWITCH)
 {
-
+	if (_inheritLocals)
+	{
+		_limitAuto     = _parent->_limitAuto;
+		_limitRegister = _parent->_limitRegister;
+	}
 }
 SourceContext::~SourceContext()
 {

@@ -30,16 +30,16 @@
 
 void SourceExpression::make_objects_call_linespec(ObjectVector * objects, SourceVariable::VariableData_LineSpec const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
 {
-	if (args.size() != data.type->types.size())
-		throw SourceException("incorrect arg count to call linespec", position, "SourceExpressionDS");
+	if (data.type->sizeCall() > 5)
+		throw SourceException("too many args to call linespec", position, "SourceExpression");
 
-	if (args.size() > 5)
-		throw SourceException("too many args to call linespec", position, "SourceExpressionDS");
+	if (args.size() != data.type->types.size())
+		throw SourceException("incorrect arg count to call linespec", position, "SourceExpression");
 
 	for (size_t i(0); i < args.size(); ++i)
 	{
 		if (args[i]->getType() != data.type->types[i])
-			throw SourceException("incorrect arg type to call lnpsec", args[i]->position, "SourceExpressionDS");
+			throw SourceException("incorrect arg type to call lnpsec", args[i]->position, "SourceExpression");
 
 		args[i]->makeObjectsGet(objects);
 	}
@@ -51,7 +51,7 @@ void SourceExpression::make_objects_call_linespec(ObjectVector * objects, Source
 
 	if (data.type->callType->vt == VariableType::VT_VOID)
 	{
-		switch (args.size())
+		switch (data.type->sizeCall())
 		{
 		case 0: ocode = OCODE_LSPEC1; objects->addTokenPushZero(); break;
 		case 1: ocode = OCODE_LSPEC1; break;
@@ -59,14 +59,14 @@ void SourceExpression::make_objects_call_linespec(ObjectVector * objects, Source
 		case 3: ocode = OCODE_LSPEC3; break;
 		case 4: ocode = OCODE_LSPEC4; break;
 		case 5: ocode = OCODE_LSPEC5; break;
-		default: throw SourceException("unexpected arg count to call linespec", position, "SourceExpressionDS");
+		default: throw SourceException("unexpected arg count to call linespec", position, "SourceExpression");
 		}
 	}
 	else
 	{
 		ocode = OCODE_LSPEC5RESULT;
 
-		for (size_t i(args.size()); i < 5; ++i)
+		for (size_t i(data.type->sizeCall()); i < 5; ++i)
 			objects->addTokenPushZero();
 	}
 

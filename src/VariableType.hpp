@@ -62,6 +62,7 @@ struct VariableType
 	bool isVoid() const;
 
 	int size() const;
+	int sizeCall() const;
 
 	Type vt;
 

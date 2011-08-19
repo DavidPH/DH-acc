@@ -261,7 +261,7 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 	{
 		SourceVariable::StorageClass sc(SourceVariable::SC_REGISTER);
 
-		argTypes->push_back(context->getVariableType(in->get(SourceTokenC::TT_IDENTIFIER)));
+		argTypes->push_back(make_expression_type(in, blocks, context));
 
 		if (argNames)
 		{
