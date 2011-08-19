@@ -136,8 +136,6 @@ public:
 
 	static VariableType const * get_promoted_type(VariableType const * type1, VariableType const * type2, SourcePosition const & position);
 
-	static void make_objects(std::vector<SourceExpression::Pointer> const & expressions, ObjectVector * objects);
-
 	static void make_objects_call_asmfunc(ObjectVector * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
 
 	static void make_objects_call_function(ObjectVector * objects, SourceVariable::VariableData_Function const & data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);

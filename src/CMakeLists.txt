@@ -65,6 +65,12 @@ add_executable(DH-acc
 	SourceExpression/BranchSwitch.cpp
 	SourceExpression/BranchWhile.cpp
 	SourceExpression/BranchXOr.cpp
+	SourceExpression/make_objects_call_asmfunc.cpp
+	SourceExpression/make_objects_call_function.cpp
+	SourceExpression/make_objects_call_linespec.cpp
+	SourceExpression/make_objects_call_native.cpp
+	SourceExpression/make_objects_call_script.cpp
+	SourceExpression/make_objects_cast.cpp
 	SourceExpression/RootDelay.cpp
 	SourceExpression/RootOut.cpp
 	SourceExpression/Unary.cpp
