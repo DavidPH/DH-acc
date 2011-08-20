@@ -108,10 +108,18 @@ void read_source(std::string const & name, SourceType type, ObjectVector * objec
 
 		SourceTokenizerDS tokenizer(&in);
 
-		SourceExpression::Pointer expressions(SourceExpressionDS::make_expressions(&tokenizer));
-		expressions->addLabel("main");
+		bool mainGen(tokenizer.peek().getType() == SourceTokenC::TT_OP_BRACE_O);
 
-		ObjectExpression::add_script("main_id", "main", ObjectData_Script::ST_OPEN, 0, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER), 0);
+		SourceExpression::Pointer expressions(SourceExpressionDS::make_expressions(&tokenizer));
+
+		if (mainGen)
+		{
+			std::string mainName("main" + name);
+
+			expressions->addLabel(mainName);
+
+			ObjectExpression::add_script(mainName + "_id", mainName, ObjectData_Script::ST_OPEN, 0, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER));
+		}
 
 		expressions->makeObjects(objects);
 	}
