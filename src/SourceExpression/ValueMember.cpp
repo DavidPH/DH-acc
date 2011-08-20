@@ -136,6 +136,14 @@ void SourceExpression_ValueMember::makeObjectsSet(ObjectVector * objects)
 			objects->addToken(OCODE_SWAP);
 			objects->addToken(OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
 		}
+
+		for (int i(0); i < getType()->size(); ++i)
+		{
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(i));
+			objects->addToken(OCODE_PUSHWORLDVAR, objects->getValue(1));
+			objects->addToken(OCODE_ADD);
+			objects->addToken(OCODE_PUSHGLOBALARRAY, objects->getValue(0));
+		}
 	}
 	else
 	{

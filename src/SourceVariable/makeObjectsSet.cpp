@@ -94,7 +94,7 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 			break;
 
 		case VariableType::VT_UNION:
-			for (int i(0); i < type->size(); ++i)
+			for (int i(type->size()); i--;)
 			{
 				if (array)
 					objects->addToken(ocode, objects->getValue(_nameObject), objects->getValueAdd(addressBase, (*address)--));
@@ -225,7 +225,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 		{
 		case VariableType::VT_STRUCT:
 		case VariableType::VT_UNION:
-			for (size_t i(0); i < type->types.size(); ++i)
+			for (size_t i(type->types.size()); i--;)
 			{
 				if (type->names[i] == names->back())
 				{
@@ -284,7 +284,7 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, std::vector<Sour
 			{
 				// We've already calculated the index, don't
 				// need to do anything but reset address.
-				for (size_t i(0); i < dimensions->size(); ++i)
+				for (size_t i(dimensions->size()); i--;)
 					type = type->refType;
 			}
 
