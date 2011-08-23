@@ -34,10 +34,14 @@ class SourceTokenC;
 
 struct ObjectData_Function
 {
-	bigsint argCount;
 	std::string label;
+	std::string library;
+	std::string name;
+	bigsint argCount;
+	bigsint number;
 	bigsint retCount;
 	bigsint varCount;
+	bool external;
 };
 
 struct ObjectData_Register

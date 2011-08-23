@@ -73,7 +73,8 @@ public:
 
 	static void add_address_count(bigsint const addressCount);
 
-	static void add_function(std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount);
+	static void add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount);
+	static void add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, std::string const & library);
 
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
@@ -130,8 +131,6 @@ public:
 	static bigsint get_address_count();
 
 	static std::string const & get_filename();
-
-	static bigsint get_function_count();
 
 	static bigsint get_script_count();
 
@@ -231,7 +230,7 @@ private:
 
 	static std::string _filename;
 
-	static std::vector<ObjectData_Function> _function_table;
+	static std::map<std::string, ObjectData_Function> _function_table;
 
 	static std::map<std::string, ObjectData_Register> _register_global_table;
 	static std::map<bigsint, bool>                    _register_global_used;

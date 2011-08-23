@@ -91,6 +91,7 @@ add_executable(DH-acc
 	SourceExpressionDS.cpp
 	SourceExpressionDS/make_expression_single.cpp
 	SourceExpressionDS/make_expression_single_asmfunc.cpp
+	SourceExpressionDS/make_expression_single_extern.cpp
 	SourceExpressionDS/make_expression_single_for.cpp
 	SourceExpressionDS/make_expression_single_function.cpp
 	SourceExpressionDS/make_expression_single_goto.cpp

@@ -72,7 +72,16 @@ ObjectData_Script::ScriptType odata_get_ScriptType(SourceTokenC const & token)
 
 bool override_object(ObjectData_Function * out, ObjectData_Function const & in)
 {
-	return false;
+	if (out->name != in.name)
+		return false;
+
+	if (out->external)
+		*out = in;
+
+	else if (out->number == -1)
+		*out = in;
+
+	return true;
 }
 bool override_object(ObjectData_Register * out, ObjectData_Register const & in)
 {
@@ -124,10 +133,14 @@ bool override_object(ObjectData_String * out, ObjectData_String const & in)
 
 void read_object(std::istream * in, ObjectData_Function * out)
 {
-	read_object(in, &out->argCount);
 	read_object(in, &out->label);
+	read_object(in, &out->library);
+	read_object(in, &out->name);
+	read_object(in, &out->argCount);
+	read_object(in, &out->number);
 	read_object(in, &out->retCount);
 	read_object(in, &out->varCount);
+	read_object(in, &out->external);
 }
 void read_object(std::istream * in, ObjectData_Register * out)
 {
@@ -173,10 +186,14 @@ void read_object(std::istream * in, ObjectData_String * out)
 
 void write_object(std::ostream * out, ObjectData_Function const & in)
 {
-	write_object(out, in.argCount);
 	write_object(out, in.label);
+	write_object(out, in.library);
+	write_object(out, in.name);
+	write_object(out, in.argCount);
+	write_object(out, in.number);
 	write_object(out, in.retCount);
 	write_object(out, in.varCount);
+	write_object(out, in.external);
 }
 void write_object(std::ostream * out, ObjectData_Register const & in)
 {

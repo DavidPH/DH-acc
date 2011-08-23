@@ -33,14 +33,14 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	// functionContext
 	SourceContext functionContext(context, SourceContext::CT_FUNCTION);
 
-	// functionNumber
-	int functionNumber(ObjectExpression::get_function_count());
-
 	// functionName
 	std::string functionName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
+	// functionNameObject
+	std::string functionNameObject(context->getLabel() + functionName);
+
 	// functionLabel
-	std::string functionLabel(context->getLabel() + "function_" + functionName);
+	std::string functionLabel("function_" + functionNameObject);
 
 	// functionArgTypes/Names/Count functionReturn
 	std::vector<VariableType const *> functionArgTypes;
@@ -59,16 +59,16 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	VariableType const * functionVarType(context->getVariableType_function(functionReturn, functionArgTypes));
 
 	// functionVarData
-	SourceVariable::VariableData_Function functionVarData = {functionVarType, functionNumber};
+	SourceVariable::VariableData_Function functionVarData = {functionVarType, -1};
 
 	// functionVarCount
 	int functionVarCount(functionContext.getLimit(SourceVariable::SC_REGISTER));
 
 	// functionVariable
-	SourceVariable functionVariable(functionName, functionVarData, token.getPosition());
+	SourceVariable functionVariable(functionName, functionVarData, token.getPosition(), functionNameObject);
 
 	context->addVariable(functionVariable);
-	ObjectExpression::add_function(functionLabel, functionArgCount, functionVarCount, functionReturn->size());
+	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size());
 	return create_value_variable(functionVariable, token.getPosition());
 }
 

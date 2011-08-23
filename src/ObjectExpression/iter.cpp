@@ -25,8 +25,8 @@
 
 void ObjectExpression::iter_function(void (*iter)(std::ostream *, ObjectData_Function const &), std::ostream * out)
 {
-	for (std::vector<ObjectData_Function>::iterator it(_function_table.begin()); it != _function_table.end(); ++it)
-		iter(out, *it);
+	for (std::map<std::string, ObjectData_Function>::iterator it(_function_table.begin()); it != _function_table.end(); ++it)
+		iter(out, it->second);
 }
 void ObjectExpression::iter_registerarray_map(void (*iter)(std::ostream *, ObjectData_RegisterArray const &), std::ostream * out)
 {

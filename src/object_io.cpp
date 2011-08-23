@@ -23,6 +23,10 @@
 
 
 
+void read_object(std::istream * in, bool * out)
+{
+	*out = !!in->get();
+}
 void read_object(std::istream * in, int * out)
 {
 	read_object_raw(in, (char *)out, sizeof(*out));
@@ -59,6 +63,10 @@ void read_object_raw(std::istream * in, char * out, size_t size)
 		*out++ = (char)in->get();
 }
 
+void write_object(std::ostream * out, bool const & in)
+{
+	out->put((char)in);
+}
 void write_object(std::ostream * out, int const & in)
 {
 	write_object_raw(out, (char const *)&in, sizeof(in));

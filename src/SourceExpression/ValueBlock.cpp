@@ -37,6 +37,8 @@ public:
 
 	virtual VariableType const * getType() const;
 
+	virtual void makeObjects(ObjectVector * objects);
+
 	virtual void makeObjectsCast(ObjectVector * objects, VariableType const * type);
 
 	virtual void makeObjectsGet(ObjectVector * objects);
@@ -73,17 +75,24 @@ VariableType const * SourceExpression_ValueBlock::getType() const
 	return _type;
 }
 
+void SourceExpression_ValueBlock::makeObjects(ObjectVector * objects)
+{
+	Super::recurse_makeObjects(objects);
+
+	for (size_t i(0); i < _expressions.size(); ++i)
+		_expressions[i]->makeObjects(objects);
+}
+
 void SourceExpression_ValueBlock::makeObjectsCast(ObjectVector * objects, VariableType const * type)
 {
-	Super::recurse_makeObjectsCast(objects, type);
-
 	if (type->vt == VariableType::VT_VOID)
 	{
-		for (size_t i(0); i < _expressions.size(); ++i)
-			_expressions[i]->makeObjectsCast(objects, type);
+		makeObjects(objects);
 	}
 	else
 	{
+		Super::recurse_makeObjectsCast(objects, type);
+
 		if (_expressions.size() != type->types.size())
 			throw SourceException("incorrect number of expressions to cast", position, getName());
 

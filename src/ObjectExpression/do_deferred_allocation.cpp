@@ -25,6 +25,22 @@
 
 void ObjectExpression::do_deferred_allocation()
 {
+	// Deferred function allocation.
+	// TODO: libraries
+	// TODO: explicit allocation
+	{
+		bigsint number(0);
+
+		for (std::map<std::string, ObjectData_Function>::iterator it(_function_table.begin()); it != _function_table.end(); ++it)
+		{
+			ObjectData_Function & f(it->second);
+
+			f.number = number++;
+
+			add_symbol(f.name, create_value_int(f.number, SourcePosition::none));
+		}
+	}
+
 	// Stack pointer.
 	_register_world_used[0] = true;
 	// Array temporary.

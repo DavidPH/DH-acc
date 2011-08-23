@@ -21,6 +21,7 @@
 
 #include "../SourceVariable.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
 #include "../SourceExpressionDS.hpp"
@@ -58,7 +59,7 @@ void SourceVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceE
 
 	case VariableType::VT_FUNCTION:
 		if (_sc == SC_CONSTANT)
-			SourceExpression::make_objects_call_function(objects, _data.vdFunction, args, stack, position);
+			SourceExpression::make_objects_call_function(objects, _type, makeObject(position), args, stack, position);
 		else
 			throw SourceException("non-constant functions not yet supported", position, "SourceVariable");
 		break;

@@ -47,7 +47,7 @@ SourceVariable::SourceVariable(std::string const & name, VariableData_Char const
 {
 	_data.vdChar = vdChar;
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_Function const & vdFunction, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdFunction.type)
+SourceVariable::SourceVariable(std::string const & name, VariableData_Function const & vdFunction, SourcePosition const & position, std::string const & nameObject) : _nameObject(nameObject), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdFunction.type)
 {
 	_data.vdFunction = vdFunction;
 }

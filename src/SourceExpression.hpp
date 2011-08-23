@@ -139,7 +139,7 @@ public:
 
 	static void make_objects_call_asmfunc(ObjectVector * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
 
-	static void make_objects_call_function(ObjectVector * objects, SourceVariable::VariableData_Function const & data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
+	static void make_objects_call_function(ObjectVector * objects, VariableType const * type, ObjectExpression * number, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
 
 	static void make_objects_call_linespec(ObjectVector * objects, SourceVariable::VariableData_LineSpec const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
 

@@ -46,7 +46,9 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 			throw SourceException("makeObject on compound VT", position, "SourceVariable");
 
 		case VariableType::VT_FUNCTION:
-			return ObjectExpression::create_value_int(_data.vdFunction.number, position);
+		case VariableType::VT_STRING:
+		case VariableType::VT_SCRIPT:
+			return ObjectExpression::create_value_symbol(_nameObject, position);
 
 		case VariableType::VT_ASMFUNC:
 		case VariableType::VT_VOID:
@@ -76,10 +78,6 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 
 		case VariableType::VT_REAL:
 			return ObjectExpression::create_value_float(_data.vdReal.value, position);
-
-		case VariableType::VT_STRING:
-		case VariableType::VT_SCRIPT:
-			return ObjectExpression::create_value_symbol(_nameObject, position);
 		}
 		break;
 

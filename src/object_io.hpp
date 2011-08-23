@@ -33,6 +33,7 @@
 template<typename T> bool override_object(T * out, T const & in);
 template<typename T> bool override_object(std::vector<T> * out, T const & in);
 
+void read_object(std::istream * in, bool * out);
 void read_object(std::istream * in, int * out);
 void read_object(std::istream * in, long * out);
 void read_object(std::istream * in, long double * out);
@@ -45,6 +46,7 @@ void read_object(std::istream * in, unsigned long * out);
 
 void read_object_raw(std::istream * in, char * out, size_t size);
 
+void write_object(std::ostream * out, bool const & in);
 void write_object(std::ostream * out, int const & in);
 void write_object(std::ostream * out, long const & in);
 void write_object(std::ostream * out, long double const & in);

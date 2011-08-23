@@ -32,7 +32,7 @@ bigsint ObjectExpression::_address_count;
 
 std::string ObjectExpression::_filename;
 
-std::vector<ObjectData_Function> ObjectExpression::_function_table;
+std::map<std::string, ObjectData_Function> ObjectExpression::_function_table;
 
 std::map<std::string, ObjectData_Register> ObjectExpression::_register_global_table;
 std::map<bigsint, bool>                    ObjectExpression::_register_global_used;
@@ -78,10 +78,19 @@ void ObjectExpression::add_address_count(bigsint const addressCount)
 	_address_count += addressCount;
 }
 
-void ObjectExpression::add_function(std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount)
+void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount)
 {
-	ObjectData_Function f = {argCount, label, retCount, varCount};
-	_function_table.push_back(f);
+	ObjectData_Function f = {label, "", name, argCount, -1, retCount, varCount, false};
+	_function_table[name] = f;
+
+	add_symbol(name, ET_INT);
+}
+void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, std::string const & library)
+{
+	ObjectData_Function f = {label, "", name, argCount, -1, retCount, varCount, true};
+	_function_table[name] = f;
+
+	add_symbol(name, ET_INT);
 }
 
 void ObjectExpression::add_label(std::string const & symbol)
@@ -262,11 +271,6 @@ bigsint ObjectExpression::get_address_count()
 std::string const & ObjectExpression::get_filename()
 {
 	return _filename;
-}
-
-bigsint ObjectExpression::get_function_count()
-{
-	return (bigsint)_function_table.size();
 }
 
 bigsint ObjectExpression::get_register_number(std::map<bigsint, bool> * registerUsed, bigsint size)
