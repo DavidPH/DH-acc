@@ -100,7 +100,8 @@ CounterPointer<ObjectExpression> SourceExpression::makeObjectAddress() const
 
 void SourceExpression::makeObjects(ObjectVector * objects)
 {
-	makeObjectsCast(objects, SourceContext::global_context.getVariableType(VariableType::VT_VOID));
+	makeObjectsGet(objects);
+	make_objects_cast(objects, getType(), SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
 }
 
 void SourceExpression::makeObjectsAddress(ObjectVector * objects)
@@ -115,8 +116,17 @@ void SourceExpression::makeObjectsCall(ObjectVector * objects, std::vector<Sourc
 
 void SourceExpression::makeObjectsCast(ObjectVector * objects, VariableType const * type)
 {
-	makeObjectsGet(objects);
-	make_objects_cast(objects, getType(), type, position);
+	if (type->vt == VariableType::VT_VOID)
+	{
+		// If casting to void, use makeObjects so as to take advantage
+		// of any related optimization.
+		makeObjects(objects);
+	}
+	else
+	{
+		makeObjectsGet(objects);
+		make_objects_cast(objects, getType(), type, position);
+	}
 }
 
 void SourceExpression::makeObjectsGet(ObjectVector * objects)
@@ -164,6 +174,11 @@ void SourceExpression::printDebug(std::ostream * out) const
 		print_debug(out, position);
 		*out << ")";
 	*out << ")";
+}
+
+void SourceExpression::recurse_makeObjects(ObjectVector * objects)
+{
+	recurse_makeObjectsGet(objects);
 }
 
 void SourceExpression::recurse_makeObjectsAddress(ObjectVector * objects)

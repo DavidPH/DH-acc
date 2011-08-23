@@ -80,6 +80,10 @@ ObjectExpression::Pointer ObjectVector::getValue(bigsint i) const
 {
 	return ObjectExpression::create_value_int(i, _position);
 }
+ObjectExpression::Pointer ObjectVector::getValue(double f) const
+{
+	return getValue((bigreal)f);
+}
 ObjectExpression::Pointer ObjectVector::getValue(int i) const
 {
 	return getValue((bigsint)i);

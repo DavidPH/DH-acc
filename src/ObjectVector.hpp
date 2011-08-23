@@ -50,6 +50,7 @@ public:
 
 	CounterPointer<ObjectExpression> getValue(bigreal f) const;
 	CounterPointer<ObjectExpression> getValue(bigsint i) const;
+	CounterPointer<ObjectExpression> getValue(double f) const;
 	CounterPointer<ObjectExpression> getValue(int i) const;
 	CounterPointer<ObjectExpression> getValue(ObjectExpression * expr) const;
 	CounterPointer<ObjectExpression> getValue(std::string const & label) const;

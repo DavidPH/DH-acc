@@ -154,6 +154,8 @@ protected:
 
 	virtual void printDebug(std::ostream * out) const;
 
+	void recurse_makeObjects(ObjectVector * objects);
+
 	void recurse_makeObjectsAddress(ObjectVector * objects);
 
 	void recurse_makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack);
