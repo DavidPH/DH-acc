@@ -33,9 +33,11 @@ class SourceExpression_BinaryShift : public SourceExpression_Binary
 public:
 	SourceExpression_BinaryShift(SourceExpression * exprL, SourceExpression * exprR, bool right, SourcePosition const & position);
 
-protected:
+	virtual bool canMakeObject() const;
+
 	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
@@ -58,6 +60,11 @@ SourceExpression::Pointer SourceExpression::create_binary_shiftr(SourceExpressio
 SourceExpression_BinaryShift::SourceExpression_BinaryShift(SourceExpression * exprL, SourceExpression * exprR, bool right, SourcePosition const & position) : Super(exprL, exprR, SourceContext::global_context.getVariableType(VariableType::VT_INT), SourceContext::global_context.getVariableType(VariableType::VT_INT), false, position), _right(right)
 {
 
+}
+
+bool SourceExpression_BinaryShift::canMakeObject() const
+{
+	return false;
 }
 
 void SourceExpression_BinaryShift::makeObjectsGet(ObjectVector * objects)

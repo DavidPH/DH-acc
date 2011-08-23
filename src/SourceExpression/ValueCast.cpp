@@ -34,8 +34,6 @@ class SourceExpression_ValueCast : public SourceExpression
 public:
 	SourceExpression_ValueCast(SourceExpression * expr, VariableType const * type, SourcePosition const & postion);
 
-	virtual bool canMakeObject() const;
-
 	virtual VariableType const * getType() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects);
@@ -60,11 +58,6 @@ SourceExpression::Pointer SourceExpression::create_value_cast(SourceExpression *
 SourceExpression_ValueCast::SourceExpression_ValueCast(SourceExpression * expr, VariableType const * type, SourcePosition const & position) : Super(position), _expr(expr), _type(type)
 {
 
-}
-
-bool SourceExpression_ValueCast::canMakeObject() const
-{
-	return _expr->canMakeObject();
 }
 
 VariableType const * SourceExpression_ValueCast::getType() const

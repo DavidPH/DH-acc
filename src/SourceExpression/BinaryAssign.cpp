@@ -32,6 +32,8 @@ class SourceExpression_BinaryAssign : public SourceExpression_Binary
 public:
 	SourceExpression_BinaryAssign(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
+	virtual bool canMakeObject() const;
+
 	virtual void makeObjectsGet(ObjectVector * objects);
 
 protected:
@@ -50,6 +52,11 @@ SourceExpression::Pointer SourceExpression::create_binary_assign(SourceExpressio
 SourceExpression_BinaryAssign::SourceExpression_BinaryAssign(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, NULL, exprL->getType(), position)
 {
 
+}
+
+bool SourceExpression_BinaryAssign::canMakeObject() const
+{
+	return false;
 }
 
 void SourceExpression_BinaryAssign::makeObjectsGet(ObjectVector * objects)

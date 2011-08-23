@@ -21,6 +21,8 @@
 
 #include "Binary.hpp"
 
+#include "../ObjectExpression.hpp"
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
@@ -33,6 +35,8 @@ class SourceExpression_BinaryMul : public SourceExpression_Binary
 
 public:
 	SourceExpression_BinaryMul(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+
+	virtual CounterPointer<ObjectExpression> makeObject() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects);
 
@@ -52,6 +56,11 @@ SourceExpression::Pointer SourceExpression::create_binary_mul(SourceExpression *
 SourceExpression_BinaryMul::SourceExpression_BinaryMul(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, true, position)
 {
 
+}
+
+CounterPointer<ObjectExpression> SourceExpression_BinaryMul::makeObject() const
+{
+	return ObjectExpression::create_binary_mul(exprL->makeObject(), exprR->makeObject(), position);
 }
 
 void SourceExpression_BinaryMul::makeObjectsGet(ObjectVector * objects)

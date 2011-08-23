@@ -31,6 +31,8 @@ class SourceExpression_BinaryCompare : public SourceExpression_Binary
 	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryCompare, SourceExpression_Binary);
 
 public:
+	virtual bool canMakeObject() const;
+
 	virtual VariableType const * getType() const;
 
 protected:

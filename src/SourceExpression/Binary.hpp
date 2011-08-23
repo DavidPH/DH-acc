@@ -31,6 +31,8 @@ class SourceExpression_Binary : public SourceExpression
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression_Binary, SourceExpression);
 
 public:
+	virtual bool canMakeObject() const;
+
 	virtual VariableType const * getType() const;
 
 protected:

@@ -45,6 +45,11 @@ SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, Sourc
 	doCast(castL, castR);
 }
 
+bool SourceExpression_Binary::canMakeObject() const
+{
+	return exprL->canMakeObject() && exprR->canMakeObject();
+}
+
 void SourceExpression_Binary::doCast()
 {
 	VariableType const * type(getType());

@@ -21,6 +21,7 @@
 
 #include "Binary.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
@@ -34,9 +35,11 @@ class SourceExpression_BinaryAdd : public SourceExpression_Binary
 public:
 	SourceExpression_BinaryAdd(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
-protected:
+	virtual CounterPointer<ObjectExpression> makeObject() const;
+
 	virtual void makeObjectsGet(ObjectVector * objects);
 
+protected:
 	virtual void printDebug(std::ostream * const out) const;
 };
 
@@ -52,6 +55,11 @@ SourceExpression::Pointer SourceExpression::create_binary_add(SourceExpression *
 SourceExpression_BinaryAdd::SourceExpression_BinaryAdd(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, true, position)
 {
 
+}
+
+CounterPointer<ObjectExpression> SourceExpression_BinaryAdd::makeObject() const
+{
+	return ObjectExpression::create_binary_add(exprL->makeObject(), exprR->makeObject(), position);
 }
 
 void SourceExpression_BinaryAdd::makeObjectsGet(ObjectVector * objects)

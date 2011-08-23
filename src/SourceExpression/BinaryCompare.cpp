@@ -36,6 +36,11 @@ SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression 
 
 }
 
+bool SourceExpression_BinaryCompare::canMakeObject() const
+{
+	return false;
+}
+
 VariableType const * SourceExpression_BinaryCompare::getType() const
 {
 	return SourceContext::global_context.getVariableType(VariableType::VT_BOOLHARD);

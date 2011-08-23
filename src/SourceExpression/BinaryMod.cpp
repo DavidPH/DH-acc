@@ -21,6 +21,7 @@
 
 #include "Binary.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
@@ -33,6 +34,8 @@ class SourceExpression_BinaryMod : public SourceExpression_Binary
 
 public:
 	SourceExpression_BinaryMod(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+
+	virtual CounterPointer<ObjectExpression> makeObject() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects);
 
@@ -52,6 +55,11 @@ SourceExpression::Pointer SourceExpression::create_binary_mod(SourceExpression *
 SourceExpression_BinaryMod::SourceExpression_BinaryMod(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, true, position)
 {
 
+}
+
+CounterPointer<ObjectExpression> SourceExpression_BinaryMod::makeObject() const
+{
+	return ObjectExpression::create_binary_mod(exprL->makeObject(), exprR->makeObject(), position);
 }
 
 void SourceExpression_BinaryMod::makeObjectsGet(ObjectVector * objects)

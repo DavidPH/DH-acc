@@ -35,6 +35,8 @@ class SourceExpression_BinaryArray : public SourceExpression_Binary
 public:
 	SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
+	virtual bool canMakeObject() const;
+
 	virtual bool canMakeObjectsAddress() const;
 
 	virtual VariableType const * getType() const;
@@ -63,6 +65,11 @@ SourceExpression::Pointer SourceExpression::create_binary_array(SourceExpression
 SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, NULL, SourceContext::global_context.getVariableType(VariableType::VT_INT), position)
 {
 
+}
+
+bool SourceExpression_BinaryArray::canMakeObject() const
+{
+	return false;
 }
 
 bool SourceExpression_BinaryArray::canMakeObjectsAddress() const

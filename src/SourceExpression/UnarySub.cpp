@@ -21,6 +21,7 @@
 
 #include "Unary.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
@@ -33,6 +34,10 @@ class SourceExpression_UnarySub : public SourceExpression_Unary
 
 public:
 	SourceExpression_UnarySub(SourceExpression * expr, SourcePosition const & position);
+
+	virtual bool canMakeObject() const;
+
+	virtual CounterPointer<ObjectExpression> makeObject() const;
 
 	virtual void makeObjectsGet(ObjectVector * objects);
 
@@ -52,6 +57,16 @@ SourceExpression::Pointer SourceExpression::create_unary_sub(SourceExpression * 
 SourceExpression_UnarySub::SourceExpression_UnarySub(SourceExpression * expr, SourcePosition const & position) : Super(expr, NULL, position)
 {
 
+}
+
+bool SourceExpression_UnarySub::canMakeObject() const
+{
+	return expr->canMakeObject();
+}
+
+CounterPointer<ObjectExpression> SourceExpression_UnarySub::makeObject() const
+{
+	return ObjectExpression::create_unary_sub(expr->makeObject(), position);
 }
 
 void SourceExpression_UnarySub::makeObjectsGet(ObjectVector * objects)
