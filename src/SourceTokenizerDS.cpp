@@ -28,7 +28,7 @@
 
 
 
-SourceTokenizerDS::SourceTokenizerDS(SourceStream * const in)
+SourceTokenizerDS::SourceTokenizerDS(SourceStream * const in) : _canCommand(true), _canExpand(true), _canSkip(true)
 {
 	_in.push(in);
 }
@@ -66,7 +66,11 @@ void SourceTokenizerDS::assert(SourceTokenC::TokenType type)
 
 void SourceTokenizerDS::doCommand()
 {
-	prep(false, SourceTokenC::TT_IDENTIFIER);
+	_canCommand = false;
+	_canExpand  = false;
+	_canSkip    = false;
+
+	prep(SourceTokenC::TT_IDENTIFIER);
 
 	std::string const & command(_token.getData());
 
@@ -79,17 +83,21 @@ void SourceTokenizerDS::doCommand()
 	else if (command == "undef") doCommand_undef();
 
 	else throw SourceException("unknown command", _token.getPosition(), "SourceTokenizerDS");
+
+	_canCommand = true;
+	_canExpand  = true;
+	_canSkip    = true;
 }
 void SourceTokenizerDS::doCommand_define()
 {
-	prep(false, SourceTokenC::TT_IDENTIFIER);
+	prep(SourceTokenC::TT_IDENTIFIER);
 
 	std::string name(_token.getData());
 	SourcePosition position(_token.getPosition());
 
 	std::vector<SourceTokenC> tokens;
 
-	for (prep(false); _token.getType() != SourceTokenC::TT_OP_HASH; prep(false))
+	for (prep(); _token.getType() != SourceTokenC::TT_OP_HASH; prep())
 		tokens.push_back(_token);
 
 	if (isSkip()) return;
@@ -112,19 +120,19 @@ void SourceTokenizerDS::doCommand_endif()
 }
 void SourceTokenizerDS::doCommand_ifdef()
 {
-	prep(false, SourceTokenC::TT_IDENTIFIER);
+	prep(SourceTokenC::TT_IDENTIFIER);
 
 	_skipStack.push(!hasDefine(_token.getData()));
 }
 void SourceTokenizerDS::doCommand_ifndef()
 {
-	prep(false, SourceTokenC::TT_IDENTIFIER);
+	prep(SourceTokenC::TT_IDENTIFIER);
 
 	_skipStack.push(hasDefine(_token.getData()));
 }
 void SourceTokenizerDS::doCommand_include()
 {
-	prep(false, SourceTokenC::TT_STRING);
+	prep(SourceTokenC::TT_STRING);
 
 	if (isSkip()) return;
 
@@ -139,7 +147,7 @@ void SourceTokenizerDS::doCommand_include()
 }
 void SourceTokenizerDS::doCommand_undef()
 {
-	prep(false, SourceTokenC::TT_IDENTIFIER);
+	prep(SourceTokenC::TT_IDENTIFIER);
 
 	if (isSkip()) return;
 
@@ -148,13 +156,13 @@ void SourceTokenizerDS::doCommand_undef()
 
 SourceTokenC const & SourceTokenizerDS::get()
 {
-	prep(true);
+	prep();
 
 	return _token;
 }
 SourceTokenC const & SourceTokenizerDS::get(SourceTokenC::TokenType type)
 {
-	prep(true, type);
+	prep(type);
 
 	return _token;
 }
@@ -184,7 +192,7 @@ SourceTokenC const & SourceTokenizerDS::peek()
 	return _ungetStack.top();
 }
 
-void SourceTokenizerDS::prep(bool preprocess)
+void SourceTokenizerDS::prep()
 {
 	start:
 
@@ -207,27 +215,25 @@ void SourceTokenizerDS::prep(bool preprocess)
 		goto start;
 	}
 
-	if (!preprocess) return;
-
 	// Preprocessor directive.
-	if (_token.getType() == SourceTokenC::TT_OP_HASH)
+	if (_canCommand && _token.getType() == SourceTokenC::TT_OP_HASH)
 	{
 		doCommand();
 		goto start;
 	}
 
-	if (hasDefine())
+	if (_canExpand && hasDefine())
 	{
 		prepDefine();
 		goto start;
 	}
 
-	if (isSkip())
+	if (_canSkip && isSkip())
 		goto start;
 }
-void SourceTokenizerDS::prep(bool preprocess, SourceTokenC::TokenType type)
+void SourceTokenizerDS::prep(SourceTokenC::TokenType type)
 {
-	prep(preprocess);
+	prep();
 	assert(type);
 }
 

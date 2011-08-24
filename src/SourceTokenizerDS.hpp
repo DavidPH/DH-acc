@@ -69,8 +69,8 @@ private:
 
 	SourceTokenizerDS & operator = (SourceTokenizerDS const & tokenizer)/* = delete*/;
 
-	void prep(bool preprocess);
-	void prep(bool preprocess, SourceTokenC::TokenType type);
+	void prep();
+	void prep(SourceTokenC::TokenType type);
 	void prepDefine();
 
 	void remDefine();
@@ -82,6 +82,10 @@ private:
 	std::stack<SourceTokenC> _ungetStack;
 
 	SourceTokenC _token;
+
+	unsigned _canCommand : 1;
+	unsigned _canExpand  : 1;
+	unsigned _canSkip    : 1;
 };
 
 
