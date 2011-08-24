@@ -1,0 +1,11 @@
+/*DS*/
+
+void extern function free(void *) -> void;
+void extern function free_all() -> void;
+
+void extern function malloc(int size) -> void *;
+
+void extern function realloc(void *, int size) -> void *;
+
+
+
