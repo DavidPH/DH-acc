@@ -48,6 +48,10 @@ void ObjectToken::addLabel(std::vector<std::string> const & labels)
 		addLabel(labels[i]);
 }
 
+std::vector<ObjectExpression::Pointer> const & ObjectToken::getArgs() const
+{
+	return _args;
+}
 ObjectExpression::Pointer ObjectToken::getArg(size_t index) const
 {
 	static ObjectExpression::Pointer expr(ObjectExpression::create_value_int(0, SourcePosition::none));

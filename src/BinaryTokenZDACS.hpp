@@ -127,6 +127,8 @@ public:
 		BCODE_PRINTHEX          = 350,
 		BCODE_CALLZDFUNC        = 351,
 
+		BCODE_BRANCHTABLE,
+
 		BCODE_NONE
 	};
 
@@ -135,6 +137,10 @@ public:
 	BinaryTokenZDACS(BinaryCode code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<CounterPointer<ObjectExpression> > const & args);
 
 	void addLabel(std::string const & label);
+
+	size_t getArgCount() const;
+
+	size_t size() const;
 
 	void write(std::ostream * const out) const;
 
@@ -168,7 +174,7 @@ private:
 
 
 
-	static uintptr_t _arg_counts[BCODE_NONE];
+	static int _arg_counts[BCODE_NONE];
 };
 
 

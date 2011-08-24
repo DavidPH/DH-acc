@@ -29,7 +29,7 @@
 
 
 
-uintptr_t BinaryTokenZDACS::_arg_counts[BCODE_NONE];
+int BinaryTokenZDACS::_arg_counts[BCODE_NONE];
 
 
 
@@ -133,19 +133,58 @@ void BinaryTokenZDACS::init()
 	DO_INIT(STRLEN,            0);
 	DO_INIT(SWAP,              0);
 
+	// Other
+	DO_INIT(BRANCHTABLE, -1);
+
 	#undef DO_INIT
+}
+
+size_t BinaryTokenZDACS::size() const
+{
+	if (_arg_counts[_code] < 0) switch (_code)
+	{
+	case BCODE_BRANCHTABLE:
+		return _args.size()*6 + 4;
+
+	default:
+		throw SourceException("???", SourcePosition::none, "BinaryTokenZDACS::size");
+	}
+	else
+		return _arg_counts[_code]*4 + 4;
 }
 
 void BinaryTokenZDACS::write(std::ostream * const out) const
 {
-	write_32(out, _code);
-
-	for (uintptr_t i(0); i < _arg_counts[_code]; ++i)
+	if (_arg_counts[_code] < 0) switch (_code)
 	{
-		if (i < _args.size())
-			write_32(out, *_args[i]);
-		else
-			write_32(out, 0);
+	case BCODE_BRANCHTABLE:
+		// TODO: BCODE_BRANCHCASESORTED
+
+		for (size_t i(0); i < _args.size(); i += 2)
+		{
+			write_32(out, BCODE_BRANCHCASE);
+			write_32(out, *_args[i+0]);
+			write_32(out, *_args[i+1]);
+		}
+
+		write_32(out, BCODE_DROP);
+
+		break;
+
+	default:
+		throw SourceException("???", SourcePosition::none, "BinaryTokenZDACS::write");
+	}
+	else
+	{
+		write_32(out, _code);
+
+		for (int i(0); i < _arg_counts[_code]; ++i)
+		{
+			if ((size_t)i < _args.size())
+				write_32(out, *_args[i]);
+			else
+				write_32(out, 0);
+		}
 	}
 }
 
@@ -191,9 +230,7 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 		for (uintptr_t i(0); i < instructions[index]._labels.size(); ++i)
 			ObjectExpression::add_label(instructions[index]._labels[i]);
 
-		int32_t size(_arg_counts[instructions[index]._code]*4 + 4);
-
-		ObjectExpression::add_address_count(size);
+		ObjectExpression::add_address_count(instructions[index].size());
 	}
 
 	std::ostringstream chunkout;

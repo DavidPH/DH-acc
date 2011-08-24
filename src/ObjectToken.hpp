@@ -46,6 +46,7 @@ public:
 	void addLabel(std::string const & label);
 	void addLabel(std::vector<std::string> const & labels);
 
+	std::vector<CounterPointer<ObjectExpression> > const & getArgs() const;
 	CounterPointer<ObjectExpression> getArg(size_t index) const;
 
 	ObjectCode getCode() const;

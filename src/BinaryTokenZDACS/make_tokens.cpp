@@ -33,7 +33,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	static std::vector<std::string> const nolabels;
 
 	#define PUSH_ARGS2(START,STOP)\
-		for (uintptr_t i(START); i < STOP; ++i)\
+		for (int i(START); i < STOP; ++i)\
 			args.push_back(object.getArg(i))
 
 	#define PUSH_ARGS1(STOP)\
@@ -234,6 +234,12 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	case OCODE_ASSIGNWORLDARRAY2:
 		bcode = BCODE_ASSIGNWORLDARRAY;
 		goto assignarray_case;
+
+	case OCODE_BRANCHTABLE:
+		args = object.getArgs();
+		if (args.size() % 2) throw SourceException("uneven OCODE_BRANCHTABLE", position, "BinaryTokenZDACS");
+		PUSH_TOKEN(BCODE_BRANCHTABLE);
+		break;
 
 	pusharray_case:
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 1, 2);
