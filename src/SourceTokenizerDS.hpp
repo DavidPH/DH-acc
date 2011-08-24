@@ -55,11 +55,17 @@ private:
 
 	void doCommand();
 	void doCommand_define();
+	void doCommand_else();
+	void doCommand_endif();
+	void doCommand_ifdef();
+	void doCommand_ifndef();
 	void doCommand_include();
 	void doCommand_undef();
 
 	bool hasDefine();
 	bool hasDefine(std::string const & name);
+
+	bool isSkip();
 
 	SourceTokenizerDS & operator = (SourceTokenizerDS const & tokenizer)/* = delete*/;
 
@@ -72,6 +78,7 @@ private:
 	std::map<std::string, std::vector<SourceTokenC> > _defines;
 
 	std::stack<SourceStream *> _in;
+	std::stack<bool> _skipStack;
 	std::stack<SourceTokenC> _ungetStack;
 
 	SourceTokenC _token;

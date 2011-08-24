@@ -71,6 +71,10 @@ void SourceTokenizerDS::doCommand()
 	std::string const & command(_token.getData());
 
 	if (command == "define") doCommand_define();
+	else if (command == "else") doCommand_else();
+	else if (command == "endif") doCommand_endif();
+	else if (command == "ifdef") doCommand_ifdef();
+	else if (command == "ifndef") doCommand_ifndef();
 	else if (command == "include") doCommand_include();
 	else if (command == "undef") doCommand_undef();
 
@@ -88,11 +92,41 @@ void SourceTokenizerDS::doCommand_define()
 	for (prep(false); _token.getType() != SourceTokenC::TT_OP_HASH; prep(false))
 		tokens.push_back(_token);
 
+	if (isSkip()) return;
+
 	addDefine(name, position, tokens);
+}
+void SourceTokenizerDS::doCommand_else()
+{
+	if (_skipStack.empty())
+		throw SourceException("unmatched #else", _token.getPosition(), "SourceTokenizerDS");
+
+	_skipStack.top() = !_skipStack.top();
+}
+void SourceTokenizerDS::doCommand_endif()
+{
+	if (_skipStack.empty())
+		throw SourceException("unmatched #endif", _token.getPosition(), "SourceTokenizerDS");
+
+	_skipStack.pop();
+}
+void SourceTokenizerDS::doCommand_ifdef()
+{
+	prep(false, SourceTokenC::TT_IDENTIFIER);
+
+	_skipStack.push(!hasDefine(_token.getData()));
+}
+void SourceTokenizerDS::doCommand_ifndef()
+{
+	prep(false, SourceTokenC::TT_IDENTIFIER);
+
+	_skipStack.push(hasDefine(_token.getData()));
 }
 void SourceTokenizerDS::doCommand_include()
 {
 	prep(false, SourceTokenC::TT_STRING);
+
+	if (isSkip()) return;
 
 	try
 	{
@@ -106,6 +140,9 @@ void SourceTokenizerDS::doCommand_include()
 void SourceTokenizerDS::doCommand_undef()
 {
 	prep(false, SourceTokenC::TT_IDENTIFIER);
+
+	if (isSkip()) return;
+
 	remDefine();
 }
 
@@ -134,6 +171,11 @@ bool SourceTokenizerDS::hasDefine(std::string const & name)
 	return _defines.find(name) != _defines.end();
 }
 
+bool SourceTokenizerDS::isSkip()
+{
+	return !_skipStack.empty() && _skipStack.top();
+}
+
 SourceTokenC const & SourceTokenizerDS::peek()
 {
 	if (_ungetStack.empty())
@@ -144,6 +186,8 @@ SourceTokenC const & SourceTokenizerDS::peek()
 
 void SourceTokenizerDS::prep(bool preprocess)
 {
+	start:
+
 	if (!_ungetStack.empty())
 	{
 		_token = _ungetStack.top();
@@ -160,8 +204,7 @@ void SourceTokenizerDS::prep(bool preprocess)
 		delete _in.top();
 		_in.pop();
 
-		prep(preprocess);
-		return;
+		goto start;
 	}
 
 	if (!preprocess) return;
@@ -170,16 +213,17 @@ void SourceTokenizerDS::prep(bool preprocess)
 	if (_token.getType() == SourceTokenC::TT_OP_HASH)
 	{
 		doCommand();
-		prep(preprocess);
-		return;
+		goto start;
 	}
 
 	if (hasDefine())
 	{
 		prepDefine();
-		prep(preprocess);
-		return;
+		goto start;
 	}
+
+	if (isSkip())
+		goto start;
 }
 void SourceTokenizerDS::prep(bool preprocess, SourceTokenC::TokenType type)
 {
