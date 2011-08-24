@@ -109,11 +109,6 @@ void SourceExpression::makeObjectsAddress(ObjectVector * objects)
 	throw SourceException("makeObjectsAddress on invalid expression", position, getName());
 }
 
-void SourceExpression::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack)
-{
-	throw SourceException("makeObjectsCall on invalid expression", position, getName());
-}
-
 void SourceExpression::makeObjectsCast(ObjectVector * objects, VariableType const * type)
 {
 	if (type->vt == VariableType::VT_VOID)
@@ -182,11 +177,6 @@ void SourceExpression::recurse_makeObjects(ObjectVector * objects)
 }
 
 void SourceExpression::recurse_makeObjectsAddress(ObjectVector * objects)
-{
-	recurse_makeObjectsGet(objects);
-}
-
-void SourceExpression::recurse_makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack)
 {
 	recurse_makeObjectsGet(objects);
 }

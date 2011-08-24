@@ -22,6 +22,7 @@
 #ifndef HPP_SourceExpression_
 #define HPP_SourceExpression_
 
+#include "bignum.hpp"
 #include "CounterPointer.hpp"
 #include "SourcePosition.hpp"
 #include "SourceVariable.hpp"
@@ -58,8 +59,6 @@ public:
 	void makeObjects(ObjectVector * objects);
 
 	virtual void makeObjectsAddress(ObjectVector * objects);
-
-	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack);
 
 	virtual void makeObjectsCast(ObjectVector * objects, VariableType const * type);
 
@@ -128,7 +127,7 @@ public:
 	static Pointer create_value_cast(SourceExpression * expr, VariableType const * type, SourcePosition const & position);
 	static Pointer create_value_char(SourceTokenC const & token);
 	static Pointer create_value_data(VariableType const * type, bool garbage, SourcePosition const & position);
-	static Pointer create_value_int(int value, SourcePosition const & position);
+	static Pointer create_value_int(bigsint value, SourcePosition const & position);
 	static Pointer create_value_int(SourceTokenC const & token);
 	static Pointer create_value_member(SourceExpression * expr, SourceTokenC const & token);
 	static Pointer create_value_real(SourceTokenC const & token);
@@ -136,18 +135,6 @@ public:
 	static Pointer create_value_variable(SourceVariable const & var, SourcePosition const & position);
 
 	static VariableType const * get_promoted_type(VariableType const * type1, VariableType const * type2, SourcePosition const & position);
-
-	static void make_objects_call_asmfunc(ObjectVector * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
-
-	static void make_objects_call_function(ObjectVector * objects, VariableType const * type, ObjectExpression * number, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
-
-	static void make_objects_call_linespec(ObjectVector * objects, SourceVariable::VariableData_LineSpec const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
-
-	static void make_objects_call_native(ObjectVector * objects, SourceVariable::VariableData_Native const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
-
-	static void make_objects_call_script(ObjectVector * objects, VariableType const * type, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
-
-	static void make_objects_cast(ObjectVector * objects, VariableType const * typeFrom, VariableType const * typeTo, SourcePosition const & position);
 
 protected:
 	SourceExpression(SourcePosition const & position);
@@ -157,8 +144,6 @@ protected:
 	void recurse_makeObjects(ObjectVector * objects);
 
 	void recurse_makeObjectsAddress(ObjectVector * objects);
-
-	void recurse_makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack);
 
 	void recurse_makeObjectsCast(ObjectVector * objects, VariableType const * type);
 
@@ -173,10 +158,28 @@ protected:
 	int evaluations;
 	SourcePosition position;
 
+
+
+	static void make_objects_call(ObjectVector * objects, SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
+
+	static void make_objects_cast(ObjectVector * objects, VariableType const * typeFrom, VariableType const * typeTo, SourcePosition const & position);
+
 private:
 	SourceExpression();
 
 	std::vector<std::string> _labels;
+
+
+
+	static void make_objects_call_asmfunc(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
+
+	static void make_objects_call_function(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
+
+	static void make_objects_call_linespec(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
+
+	static void make_objects_call_native(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
+
+	static void make_objects_call_script(ObjectVector * objects, VariableType const * type, SourceExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
 };
 
 

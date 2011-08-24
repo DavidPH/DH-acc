@@ -45,7 +45,14 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 		case VariableType::VT_UNION:
 			throw SourceException("makeObject on compound VT", position, "SourceVariable");
 
+		case VariableType::VT_BOOLHARD:
+		case VariableType::VT_BOOLSOFT:
+		case VariableType::VT_CHAR:
 		case VariableType::VT_FUNCTION:
+		case VariableType::VT_INT:
+		case VariableType::VT_LINESPEC:
+		case VariableType::VT_NATIVE:
+		case VariableType::VT_REAL:
 		case VariableType::VT_STRING:
 		case VariableType::VT_SCRIPT:
 			return ObjectExpression::create_value_symbol(_nameObject, position);
@@ -54,30 +61,11 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 		case VariableType::VT_VOID:
 			throw SourceException("makeObject on void VT", position, "SourceVariable");
 
-		case VariableType::VT_BOOLHARD:
-		case VariableType::VT_BOOLSOFT:
-			return ObjectExpression::create_value_int(_data.vdBool.value, position);
-
-		case VariableType::VT_CHAR:
-			return ObjectExpression::create_value_int(_data.vdChar.value, position);
-
 		case VariableType::VT_ENUM:
 			throw SourceException("makeObject on VT_ENUM", position, "SourceVariable");
 
-		case VariableType::VT_INT:
-			return ObjectExpression::create_value_int(_data.vdInt.value, position);
-
-		case VariableType::VT_LINESPEC:
-			return ObjectExpression::create_value_int(_data.vdLineSpec.number, position);
-
-		case VariableType::VT_NATIVE:
-			return ObjectExpression::create_value_int(_data.vdNative.number, position);
-
 		case VariableType::VT_POINTER:
 			throw SourceException("makeObject on VT_POINTER", position, "SourceVariable");
-
-		case VariableType::VT_REAL:
-			return ObjectExpression::create_value_float(_data.vdReal.value, position);
 		}
 		break;
 

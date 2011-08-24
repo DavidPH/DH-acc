@@ -52,11 +52,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_extern(Sour
 		// functionVarType
 		VariableType const * functionVarType(context->getVariableType_function(functionReturn, functionArgTypes));
 
-		// functionVarData
-		SourceVariable::VariableData_Function functionVarData = {functionVarType, -1};
-
 		// functionVariable
-		SourceVariable functionVariable(functionName, functionVarData, token.getPosition(), functionNameObject);
+		SourceVariable functionVariable(functionName, functionVarType, functionNameObject, token.getPosition());
 
 		context->addVariable(functionVariable);
 		ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionArgCount, functionReturn->size(), "");

@@ -169,6 +169,9 @@ void BinaryTokenZDACS::write_32(std::ostream * const out, ObjectExpression const
 	case ObjectExpression::ET_INT:
 		write_32(out, (int32_t)expr.resolveInt());
 		break;
+
+	default:
+		throw SourceException("invalid ET", SourcePosition::none, "BinaryTokenZDACS::write_32");
 	}
 }
 void BinaryTokenZDACS::write_32(std::ostream * const out, uint32_t const i)

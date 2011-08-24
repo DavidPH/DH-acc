@@ -35,47 +35,11 @@ SourceVariable::SourceVariable(std::string const & nameObject, std::string const
 {
 
 }
-SourceVariable::SourceVariable(std::string const & name, VariableData_AsmFunc const & vdAsmFunc, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdAsmFunc.type)
-{
-	_data.vdAsmFunc = vdAsmFunc;
-}
-SourceVariable::SourceVariable(std::string const & name, VariableData_Bool const & vdBool, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdBool.type)
-{
-	_data.vdBool = vdBool;
-}
-SourceVariable::SourceVariable(std::string const & name, VariableData_Char const & vdChar, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdChar.type)
-{
-	_data.vdChar = vdChar;
-}
-SourceVariable::SourceVariable(std::string const & name, VariableData_Function const & vdFunction, SourcePosition const & position, std::string const & nameObject) : _nameObject(nameObject), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdFunction.type)
-{
-	_data.vdFunction = vdFunction;
-}
-SourceVariable::SourceVariable(std::string const & name, VariableData_Int const & vdInt, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdInt.type)
-{
-	_data.vdInt = vdInt;
-}
-SourceVariable::SourceVariable(std::string const & name, VariableData_LineSpec const & vdLineSpec, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdLineSpec.type)
-{
-	_data.vdLineSpec = vdLineSpec;
-}
-SourceVariable::SourceVariable(std::string const & name, VariableData_Native const & vdNative, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdNative.type)
-{
-	_data.vdNative = vdNative;
-}
-SourceVariable::SourceVariable(std::string const & name, VariableData_Real const & vdReal, SourcePosition const & position) : _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdReal.type)
-{
-	_data.vdReal = vdReal;
-}
-SourceVariable::SourceVariable(std::string const & name, VariableData_Script const & vdScript, SourcePosition const & position, std::string const & nameObject) : _nameObject(nameObject), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdScript.type)
-{
-	_data.vdScript = vdScript;
-}
-SourceVariable::SourceVariable(std::string const & name, VariableData_String const & vdString, SourcePosition const & position, std::string const & nameObject) : _nameObject(nameObject), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(vdString.type)
-{
-	_data.vdString = vdString;
-}
 SourceVariable::SourceVariable(std::string const & name, VariableType const * type, ObjectExpression * expr, SourcePosition const & position) : _expr(expr), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(type)
+{
+
+}
+SourceVariable::SourceVariable(std::string const & name, VariableType const * type, std::string const & nameObject, SourcePosition const & position) : _nameObject(nameObject), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(type)
 {
 
 }

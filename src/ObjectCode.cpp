@@ -153,6 +153,15 @@ _ocode_init_s::_ocode_init_s()
 	#undef DO_INIT
 }
 
+
+
+ObjectCodeSet::ObjectCodeSet() : ocode(OCODE_NONE), ocode_imm(OCODE_NONE)
+{
+
+}
+
+
+
 ObjectCode ocode_get_code(SourceTokenC const & token)
 {
 	std::map<std::string, ObjectCode>::iterator codeIt(_ocode_map.find(token.getData()));
@@ -208,6 +217,20 @@ void print_debug(std::ostream * out, ObjectCode in)
 	else
 		*out << "OCODE";
 }
+void print_debug(std::ostream * out, ObjectCodeSet const & in)
+{
+	*out << "ObjectCodeSet(";
+		*out << "ocode=(";
+		print_debug(out, in.ocode);
+		*out << ")";
+
+		*out << ", ";
+
+		*out << "ocode_imm=(";
+		print_debug(out, in.ocode_imm);
+		*out << ")";
+	*out << ")";
+}
 
 void read_object(std::istream * in, ObjectCode * out)
 {
@@ -216,10 +239,20 @@ void read_object(std::istream * in, ObjectCode * out)
 	if (*out > OCODE_NONE)
 		*out = OCODE_NONE;
 }
+void read_object(std::istream * in, ObjectCodeSet * out)
+{
+	read_object(in, &out->ocode);
+	read_object(in, &out->ocode_imm);
+}
 
 void write_object(std::ostream * out, ObjectCode const & in)
 {
 	write_object_raw(out, (char const *)&in, sizeof(in));
+}
+void write_object(std::ostream * out, ObjectCodeSet const & in)
+{
+	write_object(out, in.ocode);
+	write_object(out, in.ocode_imm);
 }
 
 

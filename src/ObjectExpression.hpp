@@ -34,6 +34,7 @@
 #include <string>
 #include <vector>
 
+class ObjectCodeSet;
 class ObjectVector;
 class SourceTokenC;
 
@@ -46,6 +47,7 @@ class ObjectExpression : public Counter
 public:
 	enum ExpressionType
 	{
+		ET_OCODE,
 		ET_FLOAT,
 		ET_INT
 	};
@@ -60,6 +62,7 @@ public:
 
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
+	virtual ObjectCodeSet resolveOCode() const;
 
 
 
@@ -122,6 +125,7 @@ public:
 	static Pointer create_unary_add(ObjectExpression * expr, SourcePosition const & position);
 	static Pointer create_unary_sub(ObjectExpression * expr, SourcePosition const & position);
 
+	static Pointer create_value_ocode(ObjectCodeSet const & ocode, SourcePosition const & position);
 	static Pointer create_value_float(bigreal value, SourcePosition const & position);
 	static Pointer create_value_int(bigsint value, SourcePosition const & position);
 	static Pointer create_value_symbol(std::string const & symbol, SourcePosition const & position);
@@ -177,6 +181,7 @@ protected:
 
 		OT_VALUE_FLOAT,
 		OT_VALUE_INT,
+		OT_VALUE_OCODE,
 		OT_VALUE_SYMBOL,
 
 		OT_NONE
@@ -209,6 +214,7 @@ protected:
 
 	static Pointer create_value_float(std::istream * in);
 	static Pointer create_value_int(std::istream * in);
+	static Pointer create_value_ocode(std::istream * in);
 	static Pointer create_value_symbol(std::istream * in);
 
 private:

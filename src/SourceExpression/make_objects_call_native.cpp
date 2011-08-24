@@ -28,14 +28,14 @@
 
 
 
-void SourceExpression::make_objects_call_native(ObjectVector * objects, SourceVariable::VariableData_Native const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
+void SourceExpression::make_objects_call_native(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
 {
-	if (args.size() != data.type->types.size())
+	if (args.size() != type->types.size())
 		throw SourceException("incorrect arg count to call native", position, "SourceExpressionDS");
 
 	for (size_t i(0); i < args.size(); ++i)
 	{
-		if (args[i]->getType() != data.type->types[i])
+		if (args[i]->getType() != type->types[i])
 			throw SourceException("incorrect arg type to call native", args[i]->position, "SourceExpressionDS");
 
 		args[i]->makeObjectsGet(objects);
@@ -45,7 +45,7 @@ void SourceExpression::make_objects_call_native(ObjectVector * objects, SourceVa
 
 	ObjectCode ocode(OCODE_CALLZDFUNC);
 	ObjectExpression::Pointer oargc(objects->getValue((int)args.size()));
-	ObjectExpression::Pointer ofunc(objects->getValue(data.number));
+	ObjectExpression::Pointer ofunc(data);
 
 	objects->addToken(ocode, oargc, ofunc);
 }

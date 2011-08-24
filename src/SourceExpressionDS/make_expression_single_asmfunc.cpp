@@ -22,6 +22,7 @@
 #include "../SourceExpressionDS.hpp"
 
 #include "../ObjectCode.hpp"
+#include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
@@ -33,9 +34,13 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_asmfunc(Sou
 	// asmfuncName
 	std::string asmfuncName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
-	// asmfuncOCode/Immediate
-	ObjectCode asmfuncOCode(ocode_get_code(in->get(SourceTokenC::TT_IDENTIFIER)));
-	ObjectCode asmfuncOCodeImmediate(ocode_get_code(in->get(SourceTokenC::TT_IDENTIFIER)));
+	// asmfuncOCode
+	ObjectCodeSet asmfuncOCode;
+	asmfuncOCode.ocode     = ocode_get_code(in->get(SourceTokenC::TT_IDENTIFIER));
+	asmfuncOCode.ocode_imm = ocode_get_code(in->get(SourceTokenC::TT_IDENTIFIER));
+
+	// asmfuncObject
+	ObjectExpression::Pointer asmfuncObject(ObjectExpression::create_value_ocode(asmfuncOCode, token.getPosition()));
 
 	// asmfuncArgTypes asmfuncReturn
 	std::vector<VariableType const *> asmfuncArgTypes;
@@ -45,11 +50,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_asmfunc(Sou
 	// asmfuncVarType
 	VariableType const * asmfuncVarType(context->getVariableType_asmfunc(asmfuncReturn, asmfuncArgTypes));
 
-	// asmfuncVarData
-	SourceVariable::VariableData_AsmFunc asmfuncVarData = {asmfuncVarType, asmfuncOCode, asmfuncOCodeImmediate};
-
 	// asmfuncVariable
-	SourceVariable asmfuncVariable(asmfuncName, asmfuncVarData, token.getPosition());
+	SourceVariable asmfuncVariable(asmfuncName, asmfuncVarType, asmfuncObject, token.getPosition());
 
 	context->addVariable(asmfuncVariable);
 	return create_value_variable(asmfuncVariable, token.getPosition());

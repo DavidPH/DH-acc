@@ -42,14 +42,14 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_linespec(So
 	in->get(SourceTokenC::TT_OP_AT);
 	bigsint linespecNumber(get_bigsint(in->get(SourceTokenC::TT_INTEGER)));
 
+	// linespecObject
+	ObjectExpression::Pointer linespecObject(ObjectExpression::create_value_int(linespecNumber, token.getPosition()));
+
 	// linespecVarType
 	VariableType const * linespecVarType(context->getVariableType_linespec(linespecReturn, linespecArgTypes));
 
-	// linespecVarData
-	SourceVariable::VariableData_LineSpec linespecVarData = {linespecVarType, linespecNumber};
-
 	// linespecVariable
-	SourceVariable linespecVariable(linespecName, linespecVarData, token.getPosition());
+	SourceVariable linespecVariable(linespecName, linespecVarType, linespecObject, token.getPosition());
 
 	context->addVariable(linespecVariable);
 	return create_value_variable(linespecVariable, token.getPosition());

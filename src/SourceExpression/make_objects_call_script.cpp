@@ -28,10 +28,12 @@
 
 
 
-void SourceExpression::make_objects_call_script(ObjectVector * objects, VariableType const * type, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position)
+void SourceExpression::make_objects_call_script(ObjectVector * objects, VariableType const * type, SourceExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position)
 {
 	if (args.size() != type->types.size())
 		throw SourceException("incorrect arg count to call script", position, "SourceExpression");
+
+	data->makeObjectsGet(objects);
 
 	for (size_t i(0); i < args.size(); ++i)
 	{

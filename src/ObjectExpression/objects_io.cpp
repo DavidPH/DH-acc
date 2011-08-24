@@ -151,6 +151,10 @@ void read_object(std::istream * in, ObjectExpression::Pointer * out)
 		*out = ObjectExpression::create_value_int(in);
 		break;
 
+	case ObjectExpression::OT_VALUE_OCODE:
+		*out = ObjectExpression::create_value_ocode(in);
+		break;
+
 	case ObjectExpression::OT_VALUE_SYMBOL:
 		*out = ObjectExpression::create_value_symbol(in);
 		break;

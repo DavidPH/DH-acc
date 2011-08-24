@@ -24,6 +24,7 @@ add_executable(DH-acc
 	ObjectExpression/UnarySub.cpp
 	ObjectExpression/ValueFloat.cpp
 	ObjectExpression/ValueInt.cpp
+	ObjectExpression/ValueOCode.cpp
 	ObjectExpression/ValueSymbol.cpp
 	ObjectToken.cpp
 	ObjectVector.cpp
@@ -65,6 +66,7 @@ add_executable(DH-acc
 	SourceExpression/BranchSwitch.cpp
 	SourceExpression/BranchWhile.cpp
 	SourceExpression/BranchXOr.cpp
+	SourceExpression/make_objects_call.cpp
 	SourceExpression/make_objects_call_asmfunc.cpp
 	SourceExpression/make_objects_call_function.cpp
 	SourceExpression/make_objects_call_linespec.cpp
@@ -112,7 +114,6 @@ add_executable(DH-acc
 	SourceVariable.cpp
 	SourceVariable/makeObject.cpp
 	SourceVariable/makeObjectsAddress.cpp
-	SourceVariable/makeObjectsCall.cpp
 	SourceVariable/makeObjectsGet.cpp
 	SourceVariable/makeObjectsSet.cpp
 	SourceVariable/print_debug.cpp

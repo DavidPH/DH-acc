@@ -81,7 +81,7 @@ void SourceExpression_BranchCall::makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	_expr->makeObjectsCall(objects, _args, objects->getValue(_stack));
+	make_objects_call(objects, _expr, _args, objects->getValue(_stack), position);
 }
 
 void SourceExpression_BranchCall::printDebug(std::ostream * out) const

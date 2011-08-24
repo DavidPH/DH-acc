@@ -48,8 +48,6 @@ public:
 
 	virtual void makeObjectsAddress(ObjectVector * objects);
 
-	virtual void makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack);
-
 	virtual void makeObjectsGet(ObjectVector * objects);
 	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
 	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
@@ -74,39 +72,27 @@ SourceExpression::Pointer SourceExpression::create_value_char(SourceTokenC const
 
 	VariableType const * charVarType(SourceContext::global_context.getVariableType(VariableType::VT_CHAR));
 
-	SourceVariable::VariableData_Char charVarData = {charVarType, token.getData()[0]};
-
-	SourceVariable charVariable("", charVarData, token.getPosition());
+	SourceVariable charVariable("", charVarType, ObjectExpression::create_value_int(token.getData()[0], token.getPosition()), token.getPosition());
 
 	return create_value_variable(charVariable, token.getPosition());
 }
-SourceExpression::Pointer SourceExpression::create_value_int(int value, SourcePosition const & position)
+SourceExpression::Pointer SourceExpression::create_value_int(bigsint value, SourcePosition const & position)
 {
 	VariableType const * intVarType(SourceContext::global_context.getVariableType(VariableType::VT_INT));
 
-	SourceVariable::VariableData_Int intVarData = {intVarType, value};
-
-	SourceVariable intVariable("", intVarData, position);
+	SourceVariable intVariable("", intVarType, ObjectExpression::create_value_int(value, position), position);
 
 	return create_value_variable(intVariable, position);
 }
 SourceExpression::Pointer SourceExpression::create_value_int(SourceTokenC const & token)
 {
-	VariableType const * intVarType(SourceContext::global_context.getVariableType(VariableType::VT_INT));
-
-	SourceVariable::VariableData_Int intVarData = {intVarType, get_bigsint(token)};
-
-	SourceVariable intVariable("", intVarData, token.getPosition());
-
-	return create_value_variable(intVariable, token.getPosition());
+	return create_value_int(get_bigsint(token), token.getPosition());
 }
 SourceExpression::Pointer SourceExpression::create_value_real(SourceTokenC const & token)
 {
 	VariableType const * realVarType(SourceContext::global_context.getVariableType(VariableType::VT_REAL));
 
-	SourceVariable::VariableData_Real realVarData = {realVarType, get_bigreal(token)};
-
-	SourceVariable realVariable("", realVarData, token.getPosition());
+	SourceVariable realVariable("", realVarType, ObjectExpression::create_value_float(get_bigreal(token), token.getPosition()), token.getPosition());
 
 	return create_value_variable(realVariable, token.getPosition());
 }
@@ -114,9 +100,7 @@ SourceExpression::Pointer SourceExpression::create_value_string(SourceTokenC con
 {
 	VariableType const * stringVarType(SourceContext::global_context.getVariableType(VariableType::VT_STRING));
 
-	SourceVariable::VariableData_String stringVarData = {stringVarType, -1};
-
-	SourceVariable stringVariable("", stringVarData, token.getPosition(), ObjectExpression::add_string(token.getData() + '\0'));
+	SourceVariable stringVariable("", stringVarType, ObjectExpression::add_string(token.getData() + '\0'), token.getPosition());
 
 	return create_value_variable(stringVariable, token.getPosition());
 }
@@ -165,13 +149,6 @@ void SourceExpression_ValueVariable::makeObjectsAddress(ObjectVector * objects)
 	Super::recurse_makeObjectsAddress(objects);
 
 	_var.makeObjectsAddress(objects, position);
-}
-
-void SourceExpression_ValueVariable::makeObjectsCall(ObjectVector * objects, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack)
-{
-	Super::recurse_makeObjectsCall(objects, args, stack);
-
-	_var.makeObjectsCall(objects, args, stack, position);
 }
 
 void SourceExpression_ValueVariable::makeObjectsGet(ObjectVector * objects)

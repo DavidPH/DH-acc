@@ -55,87 +55,12 @@ public:
 		SC_STATIC
 	};
 
-	struct VariableData_AsmFunc
-	{
-		VariableType const * type;
-		ObjectCode ocode;
-		ObjectCode ocode_imm;
-	};
-	struct VariableData_Bool
-	{
-		VariableType const * type;
-		bool value;
-	};
-	struct VariableData_Char
-	{
-		VariableType const * type;
-		int value;
-	};
-	struct VariableData_Function
-	{
-		VariableType const * type;
-		int number;
-	};
-	struct VariableData_Int
-	{
-		VariableType const * type;
-		int value;
-	};
-	struct VariableData_LineSpec
-	{
-		VariableType const * type;
-		int number;
-	};
-	struct VariableData_Native
-	{
-		VariableType const * type;
-		int number;
-	};
-	struct VariableData_Real
-	{
-		VariableType const * type;
-		double value;
-	};
-	struct VariableData_Script
-	{
-		VariableType const * type;
-		int number;
-	};
-	struct VariableData_String
-	{
-		VariableType const * type;
-		int number;
-	};
-
-	union VariableData
-	{
-		VariableData_AsmFunc  vdAsmFunc;
-		VariableData_Bool     vdBool;
-		VariableData_Char     vdChar;
-		VariableData_Function vdFunction;
-		VariableData_Int      vdInt;
-		VariableData_LineSpec vdLineSpec;
-		VariableData_Native   vdNative;
-		VariableData_Real     vdReal;
-		VariableData_Script   vdScript;
-		VariableData_String   vdString;
-	};
-
 
 
 	SourceVariable();
 	SourceVariable(std::string const & nameObject, std::string const & nameSource, StorageClass sc, VariableType const * type, SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_AsmFunc  const & vdAsmFunc,  SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Bool     const & vdBool,     SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Char     const & vdChar,     SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Function const & vdFunction, SourcePosition const & position, std::string const & nameObject);
-	SourceVariable(std::string const & name, VariableData_Int      const & vdInt,      SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_LineSpec const & vdLineSpec, SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Native   const & vdNative,   SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Real     const & vdReal,     SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableData_Script   const & vdScript,   SourcePosition const & position, std::string const & nameObject);
-	SourceVariable(std::string const & name, VariableData_String   const & vdString,   SourcePosition const & position, std::string const & nameObject);
 	SourceVariable(std::string const & name, VariableType const * type, ObjectExpression * expr, SourcePosition const & position);
+	SourceVariable(std::string const & name, VariableType const * type, std::string const & nameObject, SourcePosition const & position);
 	~SourceVariable();
 
 	bool canMakeObject() const;
@@ -155,8 +80,6 @@ public:
 
 	void makeObjectsAddress(ObjectVector * objects, SourcePosition const & position) const;
 
-	void makeObjectsCall(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > const & args, ObjectExpression * stack, SourcePosition const & position) const;
-
 	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position) const;
 	void makeObjectsGetArray(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, SourcePosition const & position) const;
 	void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position) const;
@@ -173,7 +96,6 @@ public:
 	static StorageClass get_StorageClass(SourceTokenC const & token);
 
 private:
-	VariableData _data;
 	CounterPointer<ObjectExpression> _expr;
 	std::string _nameObject;
 	std::string _nameSource;

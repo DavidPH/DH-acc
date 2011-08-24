@@ -28,7 +28,7 @@
 
 
 
-void SourceExpression::make_objects_call_function(ObjectVector * objects, VariableType const * type, ObjectExpression * number, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position)
+void SourceExpression::make_objects_call_function(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position)
 {
 	if (args.size() != type->types.size())
 		throw SourceException("incorrect arg count to call function", position, "SourceExpressionDS");
@@ -44,7 +44,7 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 	objects->setPosition(position);
 
 	ObjectCode ocode;
-	ObjectExpression::Pointer ofunc(number);
+	ObjectExpression::Pointer ofunc(data);
 	ObjectExpression::Pointer oretn;
 
 	if (type->callType->vt == VariableType::VT_VOID)

@@ -140,6 +140,14 @@ enum ObjectCode
 	OCODE_NONE
 };
 
+struct ObjectCodeSet
+{
+	ObjectCodeSet();
+
+	ObjectCode ocode;
+	ObjectCode ocode_imm;
+};
+
 
 
 ObjectCode ocode_get_code(SourceTokenC const & token);
@@ -149,10 +157,13 @@ bool ocode_is_push(ObjectCode ocode);
 char const * make_string(ObjectCode ocode);
 
 void print_debug(std::ostream * out, ObjectCode in);
+void print_debug(std::ostream * out, ObjectCodeSet const & in);
 
 void read_object(std::istream * in, ObjectCode * out);
+void read_object(std::istream * in, ObjectCodeSet * out);
 
 void write_object(std::ostream * out, ObjectCode const & in);
+void write_object(std::ostream * out, ObjectCodeSet const & in);
 
 
 

@@ -28,16 +28,18 @@
 
 
 
-void SourceExpression::make_objects_call_asmfunc(ObjectVector * objects, SourceVariable::VariableData_AsmFunc const & data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
+void SourceExpression::make_objects_call_asmfunc(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
 {
-	if (args.size() != data.type->types.size())
+	if (args.size() != type->types.size())
 		throw SourceException("incorrect arg count to call asmfunc", position, "SourceExpressionDS");
 
-	bool immediate(data.ocode_imm != OCODE_NONE);
+	ObjectCodeSet ocode(data->resolveOCode());
+
+	bool immediate(ocode.ocode_imm != OCODE_NONE);
 
 	for (size_t i(0); i < args.size(); ++i)
 	{
-		if (args[i]->getType() != data.type->types[i])
+		if (args[i]->getType() != type->types[i])
 			throw SourceException("incorrect arg type to call asmfunc", args[i]->position, "SourceExpressionDS");
 
 		immediate = immediate && args[i]->canMakeObject();
@@ -50,17 +52,17 @@ void SourceExpression::make_objects_call_asmfunc(ObjectVector * objects, SourceV
 		for (size_t i(0); i < args.size(); ++i)
 			oargs.push_back(args[i]->makeObject());
 
-		objects->setPosition(position).addToken(data.ocode_imm, oargs);
+		objects->setPosition(position).addToken(ocode.ocode_imm, oargs);
 	}
 	else
 	{
-		if (data.ocode == OCODE_NONE)
+		if (ocode.ocode == OCODE_NONE)
 			throw SourceException("no ocode", position, "SourceExpressionDS");
 
 		for (size_t i(0); i < args.size(); ++i)
 			args[i]->makeObjectsGet(objects);
 
-		objects->setPosition(position).addToken(data.ocode);
+		objects->setPosition(position).addToken(ocode.ocode);
 	}
 }
 

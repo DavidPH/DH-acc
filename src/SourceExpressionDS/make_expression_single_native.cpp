@@ -42,14 +42,14 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_native(Sour
 	in->get(SourceTokenC::TT_OP_AT);
 	bigsint nativeNumber(get_bigsint(in->get(SourceTokenC::TT_INTEGER)));
 
+	// nativeObject
+	ObjectExpression::Pointer nativeObject(ObjectExpression::create_value_int(nativeNumber, token.getPosition()));
+
 	// nativeVarType
 	VariableType const * nativeVarType(context->getVariableType_native(nativeReturn, nativeArgTypes));
 
-	// nativeVarData
-	SourceVariable::VariableData_Native nativeVarData = {nativeVarType, nativeNumber};
-
 	// nativeVariable
-	SourceVariable nativeVariable(nativeName, nativeVarData, token.getPosition());
+	SourceVariable nativeVariable(nativeName, nativeVarType, nativeObject, token.getPosition());
 
 	context->addVariable(nativeVariable);
 	return create_value_variable(nativeVariable, token.getPosition());

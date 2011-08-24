@@ -21,6 +21,7 @@
 
 #include "ObjectExpression.hpp"
 
+#include "ObjectCode.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 
@@ -391,6 +392,10 @@ bigreal ObjectExpression::resolveFloat() const
 bigsint ObjectExpression::resolveInt() const
 {
 	throw SourceException("cannot resolve int", position, getName());
+}
+ObjectCodeSet ObjectExpression::resolveOCode() const
+{
+	throw SourceException("cannot resolve ocode", position, getName());
 }
 
 void ObjectExpression::set_address_count(bigsint addressCount)

@@ -100,9 +100,6 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	// scriptVarType
 	VariableType const * scriptVarType(context->getVariableType_script(scriptReturn, scriptArgTypes));
 
-	// scriptVarData
-	SourceVariable::VariableData_Script scriptVarData = {scriptVarType, -1};
-
 	// scriptExpression
 	SourceExpression::Pointer scriptExpression(create_root_script(scriptVarType, token.getPosition()));
 	scriptExpression->addLabel(scriptLabel);
@@ -114,7 +111,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	int scriptVarCount(scriptContext.getLimit(SourceVariable::SC_REGISTER));
 
 	// scriptVariable
-	SourceVariable scriptVariable(scriptName == "void" ? (std::string)"" : scriptName, scriptVarData, token.getPosition(), scriptNameObject);
+	SourceVariable scriptVariable(scriptName == "void" ? (std::string)"" : scriptName, scriptVarType, scriptNameObject, token.getPosition());
 
 	context->addVariable(scriptVariable);
 
