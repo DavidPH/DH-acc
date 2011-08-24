@@ -1,0 +1,368 @@
+DS is a language for writing game logic for scripting engines. This logic is
+written as a series of expressions.
+
+
+
+arglist = "(" [ type [ identifier ] [ "," type [ identifier ] ]... ] ")"
+arglist_return = arglist "->" type
+
+
+
+block {}
+  Groups a set of expressions with a new context. Yields contained expressions.
+  Can be cast to a struct or array.
+    "{" [ expression ";" ]... "}"
+
+block []
+  Groups a set of expressions without a new context. Yields contained
+  expressions. Can be cast to a struct or array.
+    "[" [ expression ";" ]... "]"
+
+A DS script is a single block.
+
+
+
+operator ++
+  Increments the value at the address of expression. Yields the new value for
+  the first form and the old value for the second form.
+    "++" expression_single
+    expression_single "++"
+
+operator --
+  Decrements the value at the address of expression. Yields the new value for
+  the first form and the old value for the second form.
+    "--" expression_single
+    expression_single "--"
+
+operator ()
+  Calls the expression with provided arguments, if any. Yields the result of the
+  call. Creates a new context for expressions based on current context.
+    expression_single "(" [ expression [ "," expression ]... ] ")"
+
+operator []
+  Yields an element of expression.
+    expression_single "[" expression "]"
+
+operator .
+  Yields a member of expression.
+    expression_single "." identifier
+
+operator ->
+  Yields a pointed-to member of expression.
+    expression_single "->" identifier
+
+operator + (unary)
+  Yields the result of expression.
+    "+" expression_single
+
+operator - (unary)
+  Yields the negative result of expression.
+    "-" expression_single
+
+operator !
+  Yields the boolean inverse of expression.
+    "!" expression_single
+
+operator ~
+  Yields the bitwise inverse of expression.
+    "~" expression_single
+
+operator type
+  Yields the expression converted to type. In this case, type must be a single
+  identifier.
+    type expression_single
+
+operator * (unary)
+  Yields the value pointed-to by expression.
+    "*" expression_single
+
+operator & (unary)
+  Yields a pointer to expression.
+    "&" expression_single
+
+operator sizeof
+  Yields the size of a type.
+    "sizeof" type
+
+operator * (binary)
+    expression "*" expression_single
+
+operator /
+    expression "/" expression_single
+
+operator %
+    expression "%" expression_single
+
+operator + (binary)
+    expression "+" expression_single
+
+operator - (binary)
+    expression "-" expression_single
+
+operator >>
+    expression ">>" expression_single
+
+operator <<
+    expression "<<" expression_single
+
+operator >
+    expression ">" expression_single
+
+operator >=
+    expression ">=" expression_single
+
+operator <
+    expression "<" expression_single
+
+operator <=
+    expression "<=" expression_single
+
+operator ==
+    expression "==" expression_single
+
+operator !=
+    expression "!=" expression_single
+
+operator & (binary)
+    expression "&" expression_single
+
+operator ^ (binary)
+    expression "^" expression_single
+
+operator | (binary)
+    expression "|" expression_single
+
+operator &&
+    expression "&&" expression_single
+
+operator ^^
+    expression "^^" expression_single
+
+operator ||
+    expression "||" expression_single
+
+operator ?:
+  Performs a conditional branch. Yields the result of if-branch or else-branch.
+  If else-branch is present, it must have the same type as if-branch. Otherwise,
+  if-branch must have type void. Creates a new context for if-branch and
+  else-branch based on current context.
+    expression "?" expression_single(if-branch)
+    ":" expression_single(else-branch)
+
+operator =
+  Assigns the result of the right expression to the address of the left
+  expression.
+    expression "=" expression
+
+operator +=
+    expression "+=" expression
+
+operator -=
+    expression "-=" expression
+
+operator *=
+    expression "*=" expression
+
+operator /=
+    expression "/=" expression
+
+operator %=
+    expression "%=" expression
+
+operator <<=
+    expression "<<=" expression
+
+operator >>=
+    expression ">>=" expression
+
+operator &=
+    expression "&=" expression
+
+operator ^=
+    expression "^=" expression
+
+operator |=
+    expression "|=" expression
+
+operator &&=
+    expression "&&=" expression
+
+operator ^^=
+    expression "^^=" expression
+
+operator ||=
+    expression "||=" expression
+
+operator :
+  Defines a jump target for a goto. Yields the result of expression.
+    identifier ":" expression
+
+operator asmfunc
+  Defines a function executed as a single instruction. Yields a pointer to the
+  function, which is a void type.
+    "asmfunc" name ocode ocode_imm arglist_return
+
+operator break
+  Branches out of the current loop or switch. Yields void.
+    "break"
+
+operator case
+  Defines a jump target for a switch. Yields the result of expression. Must be
+  possible to resolve case statically.
+    "case" expression(case) ":" expression
+
+operator const
+  Defines a named and typed constant. Yields the constant.
+    "const" type name "=" expression
+
+operator continue
+  Branches to the end of the current iteration of the current loop. Yields void.
+    "continue"
+
+operator default
+  Defines the default jump target for a switch. Yields the result of expression.
+    "default" ":" expression
+
+operator delay
+  Delays execution for a specified number of clocks (sometimes referred to tics
+  or ticks). Yields void.
+    "delay" expression
+
+operator enum
+  Defines an enumeration. Yields void.
+    "enum" [ identifier ] [ "{"
+    [ identifier [ "=" expression ] [ "," identifier [ "=" expression ] ]... ]
+    "}" ]
+
+operator extern
+  Performs forward-declaration. Yields the thing declared.
+    "extern" "function" name arglist_return
+
+operator for
+  Performs iteration. Yields void. Creates a new context for initializer based
+  on current context, a new context for condition based on initializer context,
+  and a new context for remaining expressions based on condition context.
+    "for"
+    "(" expression(initializer) ";" expression(condition) ";" expression ")"
+    expression_single
+
+operator function
+  Defines a function. Yields a pointer to the function. Creates a new context
+  for expression based on current context.
+    "function" name arglist_return expression_single
+
+operator goto
+  Branches to a label or case. Yields void.
+    "goto" "case" "default"
+    "goto" "case" expression_single
+    "goto" identifier
+
+operator if
+  Performs a conditional branch. Yields the result of if-branch or else-branch.
+  If else-branch is present, it must have the same type as if-branch. Otherwise,
+  if-branch must have type void. Creates a new context for condition based on
+  current context, and new contexts for remaining expressions based on condition
+  context.
+    "if" expression_single(condition) expression_single(if-branch)
+    [ "else" expression_single(else-branch) ]
+
+operator linespec
+  Defines a function executed as a line special. Yields a pointer to the
+  function.
+    "linespec" name arglist_return @ integer
+
+operator native
+  Defines a function executed as a native function. Yields a pointer to the
+  function.
+    "native" name arglist_return @ integer
+
+operator out
+  Prints expression for debugging. Yields void.
+    "out" expression
+
+operator return
+  Returns a value. Yields void.
+    "return" expression.
+
+operator script
+  Defines a script. Yields a pointer to the script. Creates a new context for
+  expression based on current context.
+    "script" name [ type [ flag... ] ] arglist_return [ "@" integer ]
+    expression_single
+
+operator switch
+  Performs a jump into a jump table. Yields void. Creates a new context for
+  expression based on current context and a new context for block based on
+  expression context.
+    "switch" expression_single "{" [ expression ";" ] "}"
+
+operator struct
+  Defines a struct. Yields void.
+    "struct" [ name ] [ "{" [ type name ";" ]... "}" ]
+
+operator typedef
+  Defines a type. Yields void.
+    "typedef" type name
+
+operator union
+  Defines a union. Yields void.
+    "union" [ name ] [ "{" [ type name ";" ]... "}" ]
+
+operator var
+  Declares a variable. Yields the variable.
+    "var" storage_class type name [ "@" integer ]
+
+operator void
+  Drops the result of expression. Yields void.
+    "void" expression
+
+operator while
+  Performs iteration. Yields void. Creates a new context for condition based on
+  current context and a new context for remaining expression based on condition
+  context.
+    "while" expression_single(condition) expression_single
+
+
+
+storage-class auto
+  Allocates storage on the stack in addressable space.
+    "auto"
+
+storage-class register
+  Allocates storage in registers. This is the storage class of ACS non-array
+  variables defined inside a script or function.
+    "register"
+
+storage-class register-global
+  Allocates storage in global-scope registers. This is the storage class of ACS
+  non-array variables defined as global.
+    "register_global"
+
+storage-class register-map
+  Allocates storage in map-scope registers. This is the storage class of ACS
+  non-array variables defined outside any script or function.
+    "register_map"
+
+storage-class register-world
+  Allocates storage in world-scope registers. This is the storage class of ACS
+  non-array variables defined as world.
+    "register_world"
+
+storage-class registerarray-global
+  Allocates storage in global-scope registerarrays. This is the storage class of
+  ACS array variables defined as global.
+    "registerarray_global"
+
+storage-class registerarray-map
+  Allocates storage in map-scope registerarrays. This is the storage class of
+  ACS array variables defined outside any script or function.
+    "registerarray_map"
+
+storage-class registerarray-world
+  Allocates storage in world-scope registerarrays. This is the storage class of
+  ACS array variables defined as world.
+    "registerarray_world"
+
+storage-class static
+  Allocates storage in addressable space.
+    "static"
