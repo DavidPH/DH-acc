@@ -42,48 +42,116 @@ SourceTokenizerDS::~SourceTokenizerDS()
 	}
 }
 
-void SourceTokenizerDS::doCommand(SourceTokenC const & token)
+void SourceTokenizerDS::addDefine(std::string const & name, SourcePosition const & position, std::vector<SourceTokenC> const & tokens)
 {
-	if (token.getType() != SourceTokenC::TT_IDENTIFIER)
-		throw SourceException("expected TT_IDENTIFIER", token.getPosition(), "SourceTokenizerDS");
+	if (hasDefine(name))
+		throw SourceException("attempt to redefine define", position, "SourceTokenizerDS");
 
-	std::string const & command(token.getData());
-
-	if (command == "include") doCommandInclude();
-
-	else throw SourceException("unknown command", token.getPosition(), "SourceTokenizerDS");
+	_defines[name] = tokens;
 }
-void SourceTokenizerDS::doCommandInclude()
-{
-	SourceTokenC includeToken(_in.top());
 
-	if (includeToken.getType() != SourceTokenC::TT_STRING)
-		throw SourceException("expected TT_STRING", includeToken.getPosition(), "SourceTokenizerDS");
+void SourceTokenizerDS::assert(SourceTokenC::TokenType type)
+{
+	if (_token.getType() != type)
+	{
+		std::ostringstream out;
+		out << "expected ";
+		print_debug(&out, type);
+		out << " got ";
+		print_debug(&out, _token.getType());
+
+		throw SourceException(out.str(), _token.getPosition(), "SourceTokenizerDS");
+	}
+}
+
+void SourceTokenizerDS::doCommand()
+{
+	prep(false, SourceTokenC::TT_IDENTIFIER);
+
+	std::string const & command(_token.getData());
+
+	if (command == "define") doCommand_define();
+	else if (command == "include") doCommand_include();
+	else if (command == "undef") doCommand_undef();
+
+	else throw SourceException("unknown command", _token.getPosition(), "SourceTokenizerDS");
+}
+void SourceTokenizerDS::doCommand_define()
+{
+	prep(false, SourceTokenC::TT_IDENTIFIER);
+
+	std::string name(_token.getData());
+	SourcePosition position(_token.getPosition());
+
+	std::vector<SourceTokenC> tokens;
+
+	for (prep(false); _token.getType() != SourceTokenC::TT_OP_HASH; prep(false))
+		tokens.push_back(_token);
+
+	addDefine(name, position, tokens);
+}
+void SourceTokenizerDS::doCommand_include()
+{
+	prep(false, SourceTokenC::TT_STRING);
 
 	try
 	{
-		_in.push(new SourceStream(includeToken.getData(), SourceStream::ST_C));
+		_in.push(new SourceStream(_token.getData(), SourceStream::ST_C));
 	}
 	catch (std::exception & e)
 	{
-		throw SourceException("file not found", includeToken.getPosition(), "SourceTokenizerDS");
+		throw SourceException("file not found", _token.getPosition(), "SourceTokenizerDS");
 	}
 }
+void SourceTokenizerDS::doCommand_undef()
+{
+	prep(false, SourceTokenC::TT_IDENTIFIER);
+	remDefine();
+}
 
-SourceTokenC SourceTokenizerDS::get()
+SourceTokenC const & SourceTokenizerDS::get()
+{
+	prep(true);
+
+	return _token;
+}
+SourceTokenC const & SourceTokenizerDS::get(SourceTokenC::TokenType type)
+{
+	prep(true, type);
+
+	return _token;
+}
+
+bool SourceTokenizerDS::hasDefine()
+{
+	if (_token.getType() != SourceTokenC::TT_IDENTIFIER)
+		return false;
+
+	return hasDefine(_token.getData());
+}
+bool SourceTokenizerDS::hasDefine(std::string const & name)
+{
+	return _defines.find(name) != _defines.end();
+}
+
+SourceTokenC const & SourceTokenizerDS::peek()
+{
+	if (_ungetStack.empty())
+		_ungetStack.push(get());
+
+	return _ungetStack.top();
+}
+
+void SourceTokenizerDS::prep(bool preprocess)
 {
 	if (!_ungetStack.empty())
 	{
-		SourceTokenC token(_ungetStack.top());
+		_token = _ungetStack.top();
 		_ungetStack.pop();
-		return token;
 	}
-
-	SourceTokenC token;
-
-	try
+	else try
 	{
-		token = SourceTokenC(_in.top());
+		_token = SourceTokenC(_in.top());
 	}
 	catch (SourceStream::EndOfStream & e)
 	{
@@ -92,43 +160,44 @@ SourceTokenC SourceTokenizerDS::get()
 		delete _in.top();
 		_in.pop();
 
-		return get();
+		prep(preprocess);
+		return;
 	}
+
+	if (!preprocess) return;
 
 	// Preprocessor directive.
-	if (token.getType() == SourceTokenC::TT_OP_HASH)
+	if (_token.getType() == SourceTokenC::TT_OP_HASH)
 	{
-		doCommand(SourceTokenC(_in.top()));
-
-		return get();
+		doCommand();
+		prep(preprocess);
+		return;
 	}
 
-	return token;
-}
-SourceTokenC SourceTokenizerDS::get(SourceTokenC::TokenType const type)
-{
-	SourceTokenC token(get());
-
-	if (token.getType() != type)
+	if (hasDefine())
 	{
-		std::ostringstream out;
-		out << "expected ";
-		print_debug(&out, type);
-		out << " got ";
-		print_debug(&out, token.getType());
-
-		throw SourceException(out.str(), token.getPosition(), "SourceTokenizerDS");
+		prepDefine();
+		prep(preprocess);
+		return;
 	}
-
-	return token;
+}
+void SourceTokenizerDS::prep(bool preprocess, SourceTokenC::TokenType type)
+{
+	prep(preprocess);
+	assert(type);
 }
 
-SourceTokenC SourceTokenizerDS::peek()
+void SourceTokenizerDS::prepDefine()
 {
-	if (_ungetStack.empty())
-		_ungetStack.push(get());
+	std::vector<SourceTokenC> const & tokens(_defines[_token.getData()]);
 
-	return _ungetStack.top();
+	for (size_t i(tokens.size()); i--;)
+		_ungetStack.push(tokens[i]);
+}
+
+void SourceTokenizerDS::remDefine()
+{
+	_defines.erase(_token.getData());
 }
 
 void SourceTokenizerDS::unget(SourceTokenC const & token)

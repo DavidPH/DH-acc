@@ -49,7 +49,6 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 	case '[': _type = TT_OP_BRACKET_O;     return;
 	case ':': _type = TT_OP_COLON;         return;
 	case ',': _type = TT_OP_COMMA;         return;
-	case '#': _type = TT_OP_HASH;          return;
 	case ')': _type = TT_OP_PARENTHESIS_C; return;
 	case '(': _type = TT_OP_PARENTHESIS_O; return;
 	case '.': _type = TT_OP_PERIOD;        return;
@@ -150,6 +149,24 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 		in->unget(c);
 
 		_type = TT_OP_CMP_LT; return;
+
+	case '#':
+		c = in->get();
+
+		if (c == '#')
+		{
+			c = in->get();
+
+			if (c == '#') {_type = TT_OP_HASH3; return;}
+
+			in->unget(c);
+
+			_type = TT_OP_HASH2; return;
+		}
+
+		in->unget(c);
+
+		_type = TT_OP_HASH; return;
 
 	case '-':
 		c = in->get();
@@ -351,6 +368,9 @@ void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type)
 	case SourceTokenC::TT_OP_COLON:              *out << "TT_OP_COLON";              break;
 	case SourceTokenC::TT_OP_COMMA:              *out << "TT_OP_COMMA";              break;
 	case SourceTokenC::TT_OP_EXCLAMATION:        *out << "TT_OP_EXCLAMATION";        break;
+	case SourceTokenC::TT_OP_HASH:               *out << "TT_OP_HASH";               break;
+	case SourceTokenC::TT_OP_HASH2:              *out << "TT_OP_HASH2";              break;
+	case SourceTokenC::TT_OP_HASH3:              *out << "TT_OP_HASH3";              break;
 	case SourceTokenC::TT_OP_PARENTHESIS_C:      *out << "TT_OP_PARENTHESIS_C";      break;
 	case SourceTokenC::TT_OP_PARENTHESIS_O:      *out << "TT_OP_PARENTHESIS_O";      break;
 	case SourceTokenC::TT_OP_PLUS:               *out << "TT_OP_PLUS";               break;

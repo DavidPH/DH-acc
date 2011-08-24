@@ -24,7 +24,10 @@
 
 #include "SourceTokenC.hpp"
 
+#include <map>
 #include <stack>
+#include <string>
+#include <vector>
 
 class SourceStream;
 
@@ -36,23 +39,42 @@ public:
 	SourceTokenizerDS(SourceStream * const in);
 	~SourceTokenizerDS();
 
-	SourceTokenC get();
-	SourceTokenC get(SourceTokenC::TokenType const type);
+	SourceTokenC const & get();
+	SourceTokenC const & get(SourceTokenC::TokenType type);
 
-	SourceTokenC peek();
+	SourceTokenC const & peek();
 
 	void unget(SourceTokenC const & token);
 
 private:
 	SourceTokenizerDS(SourceTokenizerDS const & tokenizer)/* = delete*/;
 
-	void doCommand(SourceTokenC const & token);
-	void doCommandInclude();
+	void addDefine(std::string const & name, SourcePosition const & position, std::vector<SourceTokenC> const & tokens);
+
+	void assert(SourceTokenC::TokenType type);
+
+	void doCommand();
+	void doCommand_define();
+	void doCommand_include();
+	void doCommand_undef();
+
+	bool hasDefine();
+	bool hasDefine(std::string const & name);
 
 	SourceTokenizerDS & operator = (SourceTokenizerDS const & tokenizer)/* = delete*/;
 
+	void prep(bool preprocess);
+	void prep(bool preprocess, SourceTokenC::TokenType type);
+	void prepDefine();
+
+	void remDefine();
+
+	std::map<std::string, std::vector<SourceTokenC> > _defines;
+
 	std::stack<SourceStream *> _in;
 	std::stack<SourceTokenC> _ungetStack;
+
+	SourceTokenC _token;
 };
 
 

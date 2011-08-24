@@ -72,6 +72,8 @@ public:
 		TT_OP_EQUALS,             // =
 		TT_OP_EXCLAMATION,        // !
 		TT_OP_HASH,               // #
+		TT_OP_HASH2,              // ##
+		TT_OP_HASH3,              // ###
 		TT_OP_MINUS,              // -
 		TT_OP_MINUS_EQUALS,       // -=
 		TT_OP_MINUS_GT,           // ->
