@@ -256,6 +256,8 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 {
 	SourceVariable::StorageClass const sc(SourceVariable::SC_REGISTER);
 
+	if (argCount) *argCount = 0;
+
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 	if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
 	{
