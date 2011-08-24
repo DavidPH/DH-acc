@@ -21,12 +21,9 @@
 
 #include "SourceExpressionDS.hpp"
 
-#include "ObjectExpression.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenizerDS.hpp"
-
-#include <sstream>
 
 
 
@@ -257,25 +254,25 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 }
 void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<VariableType const *> * argTypes, std::vector<std::string> * argNames, int * argCount, SourceContext * argContext, VariableType const * * returnType)
 {
+	SourceVariable::StorageClass const sc(SourceVariable::SC_REGISTER);
+
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 	if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
 	{
-		SourceVariable::StorageClass sc(SourceVariable::SC_REGISTER);
+		VariableType const * argType(make_expression_type(in, blocks, context));
+		if (argCount) *argCount += argType->size();
+		if (argTypes) argTypes->push_back(argType);
 
-		argTypes->push_back(make_expression_type(in, blocks, context));
+		std::string argName;
+		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
+			argName = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+		if (argNames) argNames->push_back(argName);
 
-		if (argNames)
+		if (argContext)
 		{
-			argNames->push_back(in->get(SourceTokenC::TT_IDENTIFIER).getData());
-		}
-		else if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
-		{
-			in->get(SourceTokenC::TT_IDENTIFIER);
-		}
-
-		if (argContext && argNames)
-		{
-			argContext->addVariable(SourceVariable(argContext->makeNameObject(sc, argTypes->back(), argNames->back(), SourcePosition::none), argNames->back(), sc, argTypes->back(), SourcePosition::none));
+			std::string argNameObject(argContext->makeNameObject(sc, argType, argName, SourcePosition::none));
+			SourceVariable argVariable(argNameObject, argName, sc, argType, SourcePosition::none);
+			argContext->addVariable(argVariable);
 		}
 
 		if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
@@ -284,19 +281,6 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 		in->get(SourceTokenC::TT_OP_COMMA);
 	}
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-	if (argCount)
-	{
-		if (argContext)
-			*argCount = argContext->getLimit(SourceVariable::SC_REGISTER);
-		else
-		{
-			*argCount = 0;
-
-			for (size_t i(0); i < argTypes->size(); ++i)
-				*argCount += (*argTypes)[i]->size();
-		}
-	}
 
 	if (returnType)
 	{

@@ -43,12 +43,11 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_extern(Sour
 		// functionLabel
 		std::string functionLabel("function_" + functionNameObject);
 
-		// functionArgTypes/Names/Count functionReturn
+		// functionArgTypes/Count functionReturn
 		std::vector<VariableType const *> functionArgTypes;
-		std::vector<std::string> functionArgNames;
 		int functionArgCount;
 		VariableType const * functionReturn;
-		make_expression_arglist(in, blocks, context, &functionArgTypes, &functionArgNames, &functionArgCount, NULL, &functionReturn);
+		make_expression_arglist(in, blocks, context, &functionArgTypes, NULL, &functionArgCount, NULL, &functionReturn);
 
 		// functionVarType
 		VariableType const * functionVarType(context->getVariableType_function(functionReturn, functionArgTypes));
