@@ -27,6 +27,7 @@
 
 
 
+option::option_sv option_include_dir(1);
 option::option_i option_tab_columns(1);
 
 
@@ -67,7 +68,18 @@ _inQuoteSingle(false)
 		break;
 	}
 
-	_in = new std::ifstream(_filename.c_str());
+	for (option::option_sv::iterator dir(option_include_dir.begin()); !_in && dir != option_include_dir.end(); ++dir)
+	{
+		_in = new std::ifstream((*dir + _filename).c_str());
+
+		if (!*_in)
+		{
+			delete _in;
+			_in = NULL;
+		}
+	}
+
+	if (!_in) throw std::exception();
 }
 SourceStream::~SourceStream()
 {
@@ -114,6 +126,7 @@ long SourceStream::getLineCount() const
 
 void SourceStream::init()
 {
+	option::option_add("include-dir", "input", "Specifies a directory to search for includes in.", &option_include_dir, option::option_handler_default_sv);
 	option::option_add("tab-columns", "input", "How many columns a tab counts for in error reporting.", &option_tab_columns, option::option_handler_default_i);
 }
 
