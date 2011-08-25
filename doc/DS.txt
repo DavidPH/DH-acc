@@ -68,8 +68,9 @@ operator ~
     "~" expression_single
 
 operator type
-  Yields the expression converted to type. In this case, type must be a single
-  identifier.
+  Yields the expression converted to type. In the second form, type must be a
+  single identifier.
+    "(" type ")" expression_single
     type expression_single
 
 operator * (unary)

@@ -131,8 +131,17 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		return create_value_data(SourceContext::global_context.getVariableType(VariableType::VT_VOID), false, token.getPosition());
 
 	case SourceTokenC::TT_OP_PARENTHESIS_O:
-		expr = make_expression(in, blocks, context);
-		in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER && is_expression_type(in->peek().getData(), context))
+		{
+			VariableType const * type(make_expression_type(in, blocks, context));
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+			expr = create_value_cast(make_expression_single(in, blocks, context), type, token.getPosition());
+		}
+		else
+		{
+			expr = make_expression(in, blocks, context);
+			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+		}
 		break;
 
 	case SourceTokenC::TT_OP_PLUS:

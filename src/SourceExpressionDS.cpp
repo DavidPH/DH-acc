@@ -66,6 +66,19 @@ void SourceExpressionDS::init()
 	_expression_single_handlers["while"]    = make_expression_single_while;
 }
 
+bool SourceExpressionDS::is_expression_type(std::string const & data, SourceContext * context)
+{
+	if (data == "array") return true;
+	if (data == "block") return true;
+	if (data == "enum") return true;
+	if (data == "script") return true;
+	if (data == "struct") return true;
+	if (data == "typeof") return true;
+	if (data == "union") return true;
+
+	return context->getVariableTypeNull(data);
+}
+
 SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	SourceExpression::Pointer expr(make_expression_single(in, blocks, context));

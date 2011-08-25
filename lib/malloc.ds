@@ -49,7 +49,7 @@ function free(void * p) -> void
 {
 	if (!p) return;
 
-	void var register int index = int p - 2;
+	void var register int index = (int)p - 2;
 
 	void __heap[index] = 0;
 
@@ -110,7 +110,7 @@ function realloc(void * p, int size) -> void *
 
 	if (size < 1) void size = 1;
 
-	void var register int index = int p - 2;
+	void var register int index = (int)p - 2;
 
 	// Enough space in current block.
 	if (__heap[index+1] >= size)
@@ -131,7 +131,7 @@ function realloc(void * p, int size) -> void *
 	if (!newP) return 0;
 
 	for (index = __heap[index]; index--;)
-		void __heap[newP+index] = __heap[int p+index];
+		void __heap[newP+index] = __heap[(int)p+index];
 
 	free(p);
 
