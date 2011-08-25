@@ -45,6 +45,20 @@ struct __heap_block
 
 
 
+function calloc(int count, int size) -> void *
+{
+	void var register int index = count * size;
+
+	void var register void * p = malloc(index);
+
+	if (!p) return p;
+
+	while (index--)
+		void __heap[(int)p + index] = 0;
+
+	return p;
+};
+
 function free(void * p) -> void
 {
 	if (!p) return;

@@ -23,6 +23,9 @@
 
 
 
+// Attempts to allocate and clear memory, returning NULL on failure.
+void extern function calloc(int count, int size) -> void *;
+
 // De-allocates pointed-to memory. Passing NULL acts as a no-op.
 void extern function free(void *) -> void;
 // De-allocates all memory.
