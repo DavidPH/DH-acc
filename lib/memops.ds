@@ -1,0 +1,109 @@
+/*DS Copyright (C) 2011 David Hill
+**
+** Permission to use, copy, modify, and/or distribute this software for any
+** purpose with or without fee is hereby granted, provided that the above
+** copyright notice and this permission notice appear in all copies.
+**
+** THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+** REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+** AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+** INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+** LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+** OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+** PERFORMANCE OF THIS SOFTWARE.
+*/
+
+/* memops.dh
+**
+** Bulk memory operations.
+*/
+
+[
+
+#include "memops.dh"
+
+#include "malloc.dh"
+
+
+
+function memchr(void * mem, int data, int size) -> void *
+{
+	void var register char * stop = (char*)mem + size;
+
+	for (var register char * it = (char*)mem; it != stop; ++it)
+		if (*it == data)
+			return it;
+
+	return NULL;
+};
+
+function memclr(void * mem, int size) -> void *
+{
+	void var register char * stop = (char*)mem + size;
+
+	for (var register char * it = (char*)mem; it != stop; ++it)
+		void *it = 0;
+
+	return mem;
+};
+
+function memcpy(void * dst, void * src, int size) -> void *
+{
+	void var register char * stop = (char*)dst + size;
+
+	void var register char * dstIt = (char*)dst;
+	void var register char * srcIt = (char*)src;
+
+	while (dstIt != stop)
+		void *dstIt++ = *srcIt++;
+
+	return dst;
+};
+
+function memcmp(void * mem1, void * mem2, int size) -> int
+{
+	void var register char * stop = (char*)mem1 + size;
+
+	void var register char * it1 = (char*)mem1;
+	void var register char * it2 = (char*)mem2;
+
+	while (it1 != stop)
+	{
+		if (*it1 != *it2)
+			return *it1 - *it2;
+
+		++it1;
+		++it2;
+	};
+
+	return 0;
+};
+
+function memmove(void * dst, void * src, int size) -> void *
+{
+	var register void * tmp = malloc(size);
+
+	memcpy(tmp, src, size);
+	memcpy(dst, tmp, size);
+
+	free(tmp);
+
+	return dst;
+};
+
+function memset(void * mem, int data, int size) -> void *
+{
+	void var register char * stop = (char*)mem + size;
+
+	for (var register char * it = (char*)mem; it != stop; ++it)
+		void *it = (char)data;
+
+	return mem;
+};
+
+
+
+]
+
+
+
