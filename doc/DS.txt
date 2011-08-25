@@ -83,6 +83,7 @@ operator & (unary)
 
 operator sizeof
   Yields the size of a type.
+    "sizeof" "(" type ")"
     "sizeof" type
 
 operator * (binary)

@@ -269,7 +269,15 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_return(Sour
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_sizeof(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
-	return create_value_int(make_expression_type(in, blocks, context)->size(), token.getPosition());
+	bool hasParentheses(in->peek().getType() == SourceTokenC::TT_OP_PARENTHESIS_O);
+
+	if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+
+	bigsint size(make_expression_type(in, blocks, context)->size());
+
+	if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+	return create_value_int(size, token.getPosition());
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_type(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
