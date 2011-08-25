@@ -21,6 +21,7 @@
 
 #include "SourceTokenizerDS.hpp"
 
+#include "ObjectExpression.hpp"
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
 
@@ -49,8 +50,13 @@ void SourceTokenizerDS::addDefine(std::string const & name, SourcePosition const
 
 	_defines[name] = tokens;
 }
+void SourceTokenizerDS::addSkip(bool skip)
+{
+	_skipStack.push(skip);
+	_unskipStack.push(!skip);
+}
 
-void SourceTokenizerDS::assert(SourceTokenC::TokenType type)
+void SourceTokenizerDS::doAssert(SourceTokenC::TokenType type)
 {
 	if (_token.getType() != type)
 	{
@@ -76,7 +82,10 @@ void SourceTokenizerDS::doCommand()
 
 	if (command == "define") doCommand_define();
 	else if (command == "else") doCommand_else();
+	else if (command == "elif") doCommand_elif();
 	else if (command == "endif") doCommand_endif();
+	else if (command == "error") doCommand_error();
+	else if (command == "if") doCommand_if();
 	else if (command == "ifdef") doCommand_ifdef();
 	else if (command == "ifndef") doCommand_ifndef();
 	else if (command == "include") doCommand_include();
@@ -109,26 +118,47 @@ void SourceTokenizerDS::doCommand_else()
 	if (_skipStack.empty())
 		throw SourceException("unmatched #else", _token.getPosition(), "SourceTokenizerDS");
 
-	_skipStack.top() = !_skipStack.top();
+	_skipStack.top() = _unskipStack.top();
+	_unskipStack.top() = true; // If it wasn't, it is now.
+}
+void SourceTokenizerDS::doCommand_elif()
+{
+	if (_skipStack.empty())
+		throw SourceException("unmatched #elif", _token.getPosition(), "SourceTokenizerDS");
+
+	bool ifResult(getIf());
+
+	_skipStack.top() = _unskipStack.top() || !ifResult;
+	_unskipStack.top() = _unskipStack.top() || ifResult;
 }
 void SourceTokenizerDS::doCommand_endif()
 {
 	if (_skipStack.empty())
 		throw SourceException("unmatched #endif", _token.getPosition(), "SourceTokenizerDS");
 
-	_skipStack.pop();
+	remSkip();
+}
+void SourceTokenizerDS::doCommand_error()
+{
+	prep(SourceTokenC::TT_STRING);
+
+	throw SourceException(_token.getData(), _token.getPosition(), "#error");
+}
+void SourceTokenizerDS::doCommand_if()
+{
+	addSkip(!getIf());
 }
 void SourceTokenizerDS::doCommand_ifdef()
 {
 	prep(SourceTokenC::TT_IDENTIFIER);
 
-	_skipStack.push(!hasDefine(_token.getData()));
+	addSkip(!hasDefine(_token.getData()));
 }
 void SourceTokenizerDS::doCommand_ifndef()
 {
 	prep(SourceTokenC::TT_IDENTIFIER);
 
-	_skipStack.push(hasDefine(_token.getData()));
+	addSkip(hasDefine(_token.getData()));
 }
 void SourceTokenizerDS::doCommand_include()
 {
@@ -165,6 +195,117 @@ SourceTokenC const & SourceTokenizerDS::get(SourceTokenC::TokenType type)
 	prep(type);
 
 	return _token;
+}
+
+bool SourceTokenizerDS::getIf()
+{
+	_canExpand = true;
+
+	ObjectExpression::Pointer expr(getIfMultiple());
+
+	_canExpand = false;
+
+	return !!expr->resolveInt();
+}
+ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
+{
+	ObjectExpression::Pointer expr(getIfSingle());
+
+	for (prep(); _token.getType() != SourceTokenC::TT_OP_HASH; prep())
+	{
+		SourcePosition position(_token.getPosition());
+
+		switch (_token.getType())
+		{
+		case SourceTokenC::TT_OP_AND:
+			expr = ObjectExpression::create_binary_and(expr, getIfSingle(), position);
+			break;
+
+		case SourceTokenC::TT_OP_ASTERISK:
+			expr = ObjectExpression::create_binary_mul(expr, getIfSingle(), position);
+			break;
+
+		case SourceTokenC::TT_OP_CARET:
+			expr = ObjectExpression::create_binary_xor(expr, getIfSingle(), position);
+			break;
+
+		case SourceTokenC::TT_OP_MINUS:
+			expr = ObjectExpression::create_binary_sub(expr, getIfSingle(), position);
+			break;
+
+		case SourceTokenC::TT_OP_PARENTHESIS_C:
+			return expr;
+
+		case SourceTokenC::TT_OP_PERCENT:
+			expr = ObjectExpression::create_binary_mod(expr, getIfSingle(), position);
+			break;
+
+		case SourceTokenC::TT_OP_PIPE:
+			expr = ObjectExpression::create_binary_ior(expr, getIfSingle(), position);
+			break;
+
+		case SourceTokenC::TT_OP_PLUS:
+			expr = ObjectExpression::create_binary_add(expr, getIfSingle(), position);
+			break;
+
+		case SourceTokenC::TT_OP_SLASH:
+			expr = ObjectExpression::create_binary_div(expr, getIfSingle(), position);
+			break;
+
+		default:
+			throw SourceException("unexpected token type", position, "SourceTokenizerDS::getIfMultiple");
+		}
+	}
+
+	return expr;
+}
+ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
+{
+	prep();
+
+	switch (_token.getType())
+	{
+	case SourceTokenC::TT_IDENTIFIER:
+		if (_token.getData() == "defined")
+		{
+			_canExpand = false;
+
+			prep();
+
+			bool hasParentheses(_token.getType() == SourceTokenC::TT_OP_PARENTHESIS_O);
+
+			if (hasParentheses) prep();
+
+			doAssert(SourceTokenC::TT_IDENTIFIER);
+
+			ObjectExpression::Pointer expr(ObjectExpression::create_value_int(hasDefine(_token.getData()), _token.getPosition()));
+
+			if (hasParentheses) prep(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+			_canExpand = true;
+
+			return expr;
+		}
+		else
+		{
+			return ObjectExpression::create_value_int(0, _token.getPosition());
+		}
+
+	case SourceTokenC::TT_INTEGER:
+		return ObjectExpression::create_value_int(get_bigsint(_token), _token.getPosition());
+
+	case SourceTokenC::TT_OP_PARENTHESIS_O:
+	{
+		ObjectExpression::Pointer expr(getIfMultiple());
+
+		doAssert(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+		return expr;
+	}
+
+	default:
+		throw SourceException("unexpected token type", _token.getPosition(), "SourceTokenizerDS::getIfSingle");
+	}
 }
 
 bool SourceTokenizerDS::hasDefine()
@@ -234,7 +375,7 @@ void SourceTokenizerDS::prep()
 void SourceTokenizerDS::prep(SourceTokenC::TokenType type)
 {
 	prep();
-	assert(type);
+	doAssert(type);
 }
 
 void SourceTokenizerDS::prepDefine()
@@ -248,6 +389,11 @@ void SourceTokenizerDS::prepDefine()
 void SourceTokenizerDS::remDefine()
 {
 	_defines.erase(_token.getData());
+}
+void SourceTokenizerDS::remSkip()
+{
+	_skipStack.pop();
+	_unskipStack.pop();
 }
 
 void SourceTokenizerDS::unget(SourceTokenC const & token)

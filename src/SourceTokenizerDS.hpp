@@ -22,6 +22,7 @@
 #ifndef HPP_SourceTokenizerDS_
 #define HPP_SourceTokenizerDS_
 
+#include "CounterPointer.hpp"
 #include "SourceTokenC.hpp"
 
 #include <map>
@@ -29,6 +30,7 @@
 #include <string>
 #include <vector>
 
+class ObjectExpression;
 class SourceStream;
 
 
@@ -50,17 +52,25 @@ private:
 	SourceTokenizerDS(SourceTokenizerDS const & tokenizer)/* = delete*/;
 
 	void addDefine(std::string const & name, SourcePosition const & position, std::vector<SourceTokenC> const & tokens);
+	void addSkip(bool skip);
 
-	void assert(SourceTokenC::TokenType type);
+	void doAssert(SourceTokenC::TokenType type);
 
 	void doCommand();
 	void doCommand_define();
 	void doCommand_else();
+	void doCommand_elif();
 	void doCommand_endif();
+	void doCommand_error();
+	void doCommand_if();
 	void doCommand_ifdef();
 	void doCommand_ifndef();
 	void doCommand_include();
 	void doCommand_undef();
+
+	bool getIf();
+	CounterPointer<ObjectExpression> getIfMultiple();
+	CounterPointer<ObjectExpression> getIfSingle();
 
 	bool hasDefine();
 	bool hasDefine(std::string const & name);
@@ -74,12 +84,14 @@ private:
 	void prepDefine();
 
 	void remDefine();
+	void remSkip();
 
 	std::map<std::string, std::vector<SourceTokenC> > _defines;
 
 	std::stack<SourceStream *> _in;
 	std::stack<bool> _skipStack;
 	std::stack<SourceTokenC> _ungetStack;
+	std::stack<bool> _unskipStack;
 
 	SourceTokenC _token;
 
