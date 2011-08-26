@@ -71,12 +71,15 @@ VariableType const * SourceContext::getVariableType(VariableType::Type vt, Varia
 
 	VariableType * vartype(new VariableType);
 
-	vartype->vt       = vt;
-	vartype->complete = true;
-	vartype->callType = callType;
-	vartype->refType  = refType;
-	vartype->names    = std::vector<std::string>(types.size(), "");
-	vartype->types    = types;
+	vartype->vt        = vt;
+	vartype->complete  = true;
+	vartype->callType  = callType;
+	vartype->constType = NULL;
+	vartype->refType   = refType;
+	vartype->names     = std::vector<std::string>(types.size(), "");
+	vartype->types     = types;
+
+	vartype->constType = (new VariableType(*vartype))->doConst();
 
 	_types.push_back(vartype);
 	_typenames.push_back("");
@@ -126,10 +129,13 @@ VariableType const * SourceContext::getVariableType_enum(std::string const & nam
 	{
 		vartype = new VariableType;
 
-		vartype->vt       = VariableType::VT_ENUM;
-		vartype->complete = block;
-		vartype->callType = getVariableType(VariableType::VT_VOID);
-		vartype->refType  = getVariableType(VariableType::VT_VOID);
+		vartype->vt        = VariableType::VT_ENUM;
+		vartype->complete  = block;
+		vartype->callType  = getVariableType(VariableType::VT_VOID);
+		vartype->constType = NULL;
+		vartype->refType   = getVariableType(VariableType::VT_VOID);
+
+		vartype->constType = (new VariableType(*vartype))->doConst();
 
 		_enums.push_back(vartype);
 		_enumnames.push_back(name);
@@ -183,10 +189,13 @@ VariableType const * SourceContext::getVariableType_struct(std::string const & n
 	{
 		vartype = new VariableType;
 
-		vartype->vt       = VariableType::VT_STRUCT;
-		vartype->complete = false;
-		vartype->callType = getVariableType(VariableType::VT_VOID);
-		vartype->refType  = getVariableType(VariableType::VT_VOID);
+		vartype->vt        = VariableType::VT_STRUCT;
+		vartype->complete  = false;
+		vartype->callType  = getVariableType(VariableType::VT_VOID);
+		vartype->constType = NULL;
+		vartype->refType   = getVariableType(VariableType::VT_VOID);
+
+		vartype->constType = (new VariableType(*vartype))->doConst();
 
 		_structs.push_back(vartype);
 		_structnames.push_back(name);
@@ -204,19 +213,24 @@ VariableType const * SourceContext::getVariableType_struct(std::string const & n
 			throw SourceException("struct redefined", position, "SourceContext");
 
 		vartype->complete = true;
-		vartype->names = names;
-		vartype->types = types;
+		vartype->names = const_cast<VariableType *>(vartype->constType)->names = names;
+		vartype->types = const_cast<VariableType *>(vartype->constType)->types = types;
+
+		const_cast<VariableType *>(vartype->constType)->doConst();
 	}
 	else
 	{
 		vartype = new VariableType;
 
-		vartype->vt       = VariableType::VT_STRUCT;
-		vartype->complete = true;
-		vartype->callType = getVariableType(VariableType::VT_VOID);
-		vartype->refType  = getVariableType(VariableType::VT_VOID);
-		vartype->names    = names;
-		vartype->types    = types;
+		vartype->vt        = VariableType::VT_STRUCT;
+		vartype->complete  = true;
+		vartype->callType  = getVariableType(VariableType::VT_VOID);
+		vartype->constType = NULL;
+		vartype->refType   = getVariableType(VariableType::VT_VOID);
+		vartype->names     = names;
+		vartype->types     = types;
+
+		vartype->constType = (new VariableType(*vartype))->doConst();
 
 		_structs.push_back(vartype);
 		_structnames.push_back(name);
@@ -261,10 +275,13 @@ VariableType const * SourceContext::getVariableType_union(std::string const & na
 	{
 		vartype = new VariableType;
 
-		vartype->vt       = VariableType::VT_UNION;
-		vartype->complete = false;
-		vartype->callType = getVariableType(VariableType::VT_VOID);
-		vartype->refType  = getVariableType(VariableType::VT_VOID);
+		vartype->vt        = VariableType::VT_UNION;
+		vartype->complete  = false;
+		vartype->callType  = getVariableType(VariableType::VT_VOID);
+		vartype->constType = NULL;
+		vartype->refType   = getVariableType(VariableType::VT_VOID);
+
+		vartype->constType = (new VariableType(*vartype))->doConst();
 
 		_unions.push_back(vartype);
 		_unionnames.push_back(name);
@@ -282,19 +299,24 @@ VariableType const * SourceContext::getVariableType_union(std::string const & na
 			throw SourceException("union redefined", position, "SourceContext");
 
 		vartype->complete = true;
-		vartype->names = names;
-		vartype->types = types;
+		vartype->names = const_cast<VariableType *>(vartype->constType)->names = names;
+		vartype->types = const_cast<VariableType *>(vartype->constType)->types = types;
+
+		const_cast<VariableType *>(vartype->constType)->doConst();
 	}
 	else
 	{
 		vartype = new VariableType;
 
-		vartype->vt       = VariableType::VT_UNION;
-		vartype->complete = true;
-		vartype->callType = getVariableType(VariableType::VT_VOID);
-		vartype->refType  = getVariableType(VariableType::VT_VOID);
-		vartype->names    = names;
-		vartype->types    = types;
+		vartype->vt        = VariableType::VT_UNION;
+		vartype->complete  = true;
+		vartype->callType  = getVariableType(VariableType::VT_VOID);
+		vartype->constType = NULL;
+		vartype->refType   = getVariableType(VariableType::VT_VOID);
+		vartype->names     = names;
+		vartype->types     = types;
+
+		vartype->constType = (new VariableType(*vartype))->doConst();
 
 		_unions.push_back(vartype);
 		_unionnames.push_back(name);

@@ -22,6 +22,8 @@
 #include "Binary.hpp"
 
 #include "../ObjectVector.hpp"
+#include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -65,6 +67,9 @@ void SourceExpression_BinaryAssign::makeObjectsGet(ObjectVector * objects)
 
 	if (evaluations == 1)
 	{
+		if (!exprL->getType()->constType)
+			throw SourceException("attempt to assign const type", position, getName());
+
 		exprR->makeObjectsGet(objects);
 		exprL->makeObjectsSet(objects);
 	}

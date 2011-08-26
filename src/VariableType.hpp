@@ -55,6 +55,8 @@ struct VariableType
 		VT_UNION
 	};
 
+	VariableType const * doConst();
+
 	int getOffset(std::string const & name, SourcePosition const & position) const;
 
 	VariableType const * getType(std::string const & name, SourcePosition const & position) const;
@@ -71,6 +73,9 @@ struct VariableType
 
 	// Type returned when called.
 	VariableType const * callType;
+
+	// Type's constant version.
+	VariableType const * constType;
 
 	// Type returned when dereferenced.
 	VariableType const * refType;

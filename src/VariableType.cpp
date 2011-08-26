@@ -26,6 +26,40 @@
 
 
 
+VariableType const * VariableType::doConst()
+{
+	switch (vt)
+	{
+	case VT_ARRAY:
+	case VT_BLOCK:
+	case VT_STRUCT:
+	case VT_UNION:
+		for (size_t i(0); i < types.size(); ++i)
+			if (types[i]->constType)
+				types[i] = types[i]->constType;
+
+		return this;
+
+	case VT_ASMFUNC:
+	case VT_BOOLHARD:
+	case VT_BOOLSOFT:
+	case VT_CHAR:
+	case VT_ENUM:
+	case VT_FUNCTION:
+	case VT_INT:
+	case VT_LINESPEC:
+	case VT_NATIVE:
+	case VT_POINTER:
+	case VT_REAL:
+	case VT_SCRIPT:
+	case VT_STRING:
+	case VT_VOID:
+		return this;
+	}
+
+	return this;
+}
+
 int VariableType::getOffset(std::string const & name, SourcePosition const & position) const
 {
 	int offset(0);

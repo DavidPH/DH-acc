@@ -26,11 +26,11 @@
 
 
 
-function memchr(void * mem, int data, int size) -> void *
+function memchr(void const * mem, int data, int size) -> void *
 {
-	void var register char * stop = (char*)mem + size;
+	void var register char const * stop = (char const *)mem + size;
 
-	for (var register char * it = (char*)mem; it != stop; ++it)
+	for (var register char const * it = (char const *)mem; it != stop; ++it)
 		if (*it == data)
 			return it;
 
@@ -39,33 +39,33 @@ function memchr(void * mem, int data, int size) -> void *
 
 function memclr(void * mem, int size) -> void *
 {
-	void var register char * stop = (char*)mem + size;
+	void var register char * stop = (char *)mem + size;
 
-	for (var register char * it = (char*)mem; it != stop; ++it)
+	for (var register char * it = (char *)mem; it != stop; ++it)
 		void *it = 0;
 
 	return mem;
 };
 
-function memcpy(void * dst, void * src, int size) -> void *
+function memcpy(void * dst, void const * src, int size) -> void *
 {
-	void var register char * stop = (char*)dst + size;
+	void var register char const * stop = (char const *)src + size;
 
-	void var register char * dstIt = (char*)dst;
-	void var register char * srcIt = (char*)src;
+	void var register char       * dstIt = (char       *)dst;
+	void var register char const * srcIt = (char const *)src;
 
-	while (dstIt != stop)
+	while (srcIt != stop)
 		void *dstIt++ = *srcIt++;
 
 	return dst;
 };
 
-function memcmp(void * mem1, void * mem2, int size) -> int
+function memcmp(void const * mem1, void const * mem2, int size) -> int
 {
-	void var register char * stop = (char*)mem1 + size;
+	void var register char const * stop = (char const *)mem1 + size;
 
-	void var register char * it1 = (char*)mem1;
-	void var register char * it2 = (char*)mem2;
+	void var register char const * it1 = (char const *)mem1;
+	void var register char const * it2 = (char const *)mem2;
 
 	while (it1 != stop)
 	{
@@ -79,7 +79,7 @@ function memcmp(void * mem1, void * mem2, int size) -> int
 	return 0;
 };
 
-function memmove(void * dst, void * src, int size) -> void *
+function memmove(void * dst, void const * src, int size) -> void *
 {
 	var register void * tmp = malloc(size);
 
@@ -93,9 +93,9 @@ function memmove(void * dst, void * src, int size) -> void *
 
 function memset(void * mem, int data, int size) -> void *
 {
-	void var register char * stop = (char*)mem + size;
+	void var register char * stop = (char *)mem + size;
 
-	for (var register char * it = (char*)mem; it != stop; ++it)
+	for (var register char * it = (char *)mem; it != stop; ++it)
 		void *it = (char)data;
 
 	return mem;

@@ -167,14 +167,33 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 		type = context->getVariableType(token);
 	}
 
-	while (in->peek().getType() == SourceTokenC::TT_OP_ASTERISK)
+	while (true) switch (in->peek().getType())
 	{
+	case SourceTokenC::TT_IDENTIFIER:
+		if (in->peek().getData() == "const")
+		{
+			SourceTokenC token(in->get(SourceTokenC::TT_IDENTIFIER));
+
+			if (!type->constType)
+				throw SourceException("const on const", token.getPosition(), "SourceExpressionDS");
+
+			type = type->constType;
+
+			break;
+		}
+		else
+			return type;
+
+	case SourceTokenC::TT_OP_ASTERISK:
 		in->get(SourceTokenC::TT_OP_ASTERISK);
 
 		type = context->getVariableType_pointer(type);
-	}
 
-	return type;
+		break;
+
+	default:
+		return type;
+	}
 }
 
 

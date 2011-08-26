@@ -49,11 +49,15 @@ SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countA
 	for (VariableType::Type vt((VariableType::Type)0); vt < VariableType::VT_VOID; ++vt)
 	{
 		_types[vt] = new VariableType;
-		_types[vt]->vt = vt;
-		_types[vt]->complete = true;
-		_types[vt]->callType = _types[VariableType::VT_VOID];
-		_types[vt]->refType  = _types[VariableType::VT_VOID];
+		_types[vt]->vt        = vt;
+		_types[vt]->complete  = true;
+		_types[vt]->callType  = _types[VariableType::VT_VOID];
+		_types[vt]->constType = NULL;
+		_types[vt]->refType   = _types[VariableType::VT_VOID];
 	}
+
+	for (VariableType::Type vt((VariableType::Type)0); vt <= VariableType::VT_VOID; ++vt)
+		_types[vt]->constType = (new VariableType(*_types[vt]))->doConst();
 
 	_types[VariableType::VT_STRING]->refType = _types[VariableType::VT_CHAR];
 
