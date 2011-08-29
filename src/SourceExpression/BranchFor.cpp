@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -65,16 +66,16 @@ SourceExpression_BranchFor::SourceExpression_BranchFor(SourceExpression * exprIn
 	_labelCond = context->makeLabel() + "_cond";
 
 	if (_exprInit->getType()->vt != VariableType::VT_VOID)
-		_exprInit = create_value_cast(_exprInit, SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
+		_exprInit = create_value_cast(_exprInit, VariableType::get_vt_void(), position);
 
 	if (_exprCond->getType()->vt != VariableType::VT_BOOLSOFT)
-		_exprCond = create_value_cast(_exprCond, SourceContext::global_context.getVariableType(VariableType::VT_BOOLSOFT), position);
+		_exprCond = create_value_cast(_exprCond, VariableType::get_vt_boolsoft(), position);
 
 	if (_exprIter->getType()->vt != VariableType::VT_VOID)
-		_exprIter = create_value_cast(_exprIter, SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
+		_exprIter = create_value_cast(_exprIter, VariableType::get_vt_void(), position);
 
 	if (_exprLoop->getType()->vt != VariableType::VT_VOID)
-		_exprLoop = create_value_cast(_exprLoop, SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
+		_exprLoop = create_value_cast(_exprLoop, VariableType::get_vt_void(), position);
 }
 
 void SourceExpression_BranchFor::makeObjectsGet(ObjectVector * objects)
@@ -126,6 +127,5 @@ void SourceExpression_BranchFor::printDebug(std::ostream * const out) const
 		*out << ")";
 	*out << ")";
 }
-
 
 

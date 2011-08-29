@@ -78,7 +78,6 @@ public:
 	SourceVariable const & getVariable(SourceTokenC const & token) const;
 
 	VariableType const * getVariableType(SourceTokenC const & token);
-	VariableType const * getVariableType(VariableType::Type vt);
 	VariableType const * getVariableType_array(VariableType const * refType, bigsint count);
 	VariableType const * getVariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
 	VariableType const * getVariableType_block(std::vector<VariableType const *> const & types);
@@ -169,6 +168,5 @@ private:
 
 
 #endif /* HPP_SourceContext_ */
-
 
 

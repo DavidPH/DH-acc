@@ -36,47 +36,19 @@ SourceContext SourceContext::global_context;
 
 
 
-SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(NULL), _type(CT_BLOCK), _inheritLocals(false)
+SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(NULL), _returnType(VariableType::get_vt_void()), _type(CT_BLOCK), _inheritLocals(false)
 {
-	_types.resize(VariableType::VT_VOID+1);
-
-	_types[VariableType::VT_VOID] = new VariableType;
-	_types[VariableType::VT_VOID]->vt = VariableType::VT_VOID;
-	_types[VariableType::VT_VOID]->complete = true;
-	_types[VariableType::VT_VOID]->callType = _types[VariableType::VT_VOID];
-	_types[VariableType::VT_VOID]->refType  = _types[VariableType::VT_VOID];
-
-	for (VariableType::Type vt((VariableType::Type)0); vt < VariableType::VT_VOID; ++vt)
-	{
-		_types[vt] = new VariableType;
-		_types[vt]->vt        = vt;
-		_types[vt]->complete  = true;
-		_types[vt]->callType  = _types[VariableType::VT_VOID];
-		_types[vt]->constType = NULL;
-		_types[vt]->refType   = _types[VariableType::VT_VOID];
-	}
-
-	for (VariableType::Type vt((VariableType::Type)0); vt <= VariableType::VT_VOID; ++vt)
-		_types[vt]->constType = (new VariableType(*_types[vt]))->doConst();
-
-	_types[VariableType::VT_STRING]->refType = _types[VariableType::VT_CHAR];
-
-	_typenames.resize(VariableType::VT_VOID+1);
-	_typenames[VariableType::VT_BOOLHARD] = "bool";
-	_typenames[VariableType::VT_BOOLSOFT] = "softbool";
-	_typenames[VariableType::VT_CHAR]     = "char";
-	_typenames[VariableType::VT_INT]      = "int";
-	_typenames[VariableType::VT_REAL]     = "real";
-	_typenames[VariableType::VT_STRING]   = "string";
-	_typenames[VariableType::VT_VOID]     = "void";
-
-	_returnType = _types[VariableType::VT_VOID];
+	getVariableType_typedef("bool",     VariableType::get_vt_boolhard(), SourcePosition());
+	getVariableType_typedef("softbool", VariableType::get_vt_boolsoft(), SourcePosition());
+	getVariableType_typedef("char",     VariableType::get_vt_char(),     SourcePosition());
+	getVariableType_typedef("int",      VariableType::get_vt_int(),      SourcePosition());
+	getVariableType_typedef("real",     VariableType::get_vt_real(),     SourcePosition());
+	getVariableType_typedef("string",   VariableType::get_vt_string(),   SourcePosition());
+	getVariableType_typedef("void",     VariableType::get_vt_void(),     SourcePosition());
 
 
-	_vars.push_back(SourceVariable("false", _types[VariableType::VT_BOOLHARD], ObjectExpression::create_value_int(0, SourcePosition::none), SourcePosition::none));
-	_vars.push_back(SourceVariable("true",  _types[VariableType::VT_BOOLHARD], ObjectExpression::create_value_int(1, SourcePosition::none), SourcePosition::none));
-	_varnames.push_back("false");
-	_varnames.push_back("true");
+	addVariable(SourceVariable("false", VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(0, SourcePosition()), SourcePosition()));
+	addVariable(SourceVariable("true",  VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(1, SourcePosition()), SourcePosition()));
 }
 SourceContext::SourceContext(SourceContext * parent, ContextType type) : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _label(parent->makeLabelShort()), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP || type == CT_SWITCH)
 {
@@ -544,6 +516,5 @@ void SourceContext::setReturnType(VariableType const * returnType)
 {
 	_returnType = returnType;
 }
-
 
 

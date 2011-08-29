@@ -26,6 +26,7 @@
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -128,7 +129,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 	case SourceTokenC::TT_OP_PARENTHESIS_C:
 	case SourceTokenC::TT_OP_SEMICOLON:
 		in->unget(token);
-		return create_value_data(SourceContext::global_context.getVariableType(VariableType::VT_VOID), false, token.getPosition());
+		return create_value_data(VariableType::get_vt_void(), false, token.getPosition());
 
 	case SourceTokenC::TT_OP_PARENTHESIS_O:
 		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER && is_expression_type(in->peek().getData(), context))
@@ -284,18 +285,18 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_type(Source
 	in->unget(token);
 	make_expression_type(in, blocks, context);
 
-	return create_value_data(context->getVariableType(VariableType::VT_VOID), false, token.getPosition());
+	return create_value_data(VariableType::get_vt_void(), false, token.getPosition());
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_typedef(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	VariableType const * type(make_expression_type(in, blocks, context));
 	context->getVariableType_typedef(in->get(SourceTokenC::TT_IDENTIFIER), type);
 
-	return create_value_data(context->getVariableType(VariableType::VT_VOID), false, token.getPosition());
+	return create_value_data(VariableType::get_vt_void(), false, token.getPosition());
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_void(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
-	return create_value_cast(make_expression(in, blocks, context), context->getVariableType(VariableType::VT_VOID), token.getPosition());
+	return create_value_cast(make_expression(in, blocks, context), VariableType::get_vt_void(), token.getPosition());
 }
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_while(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
@@ -307,6 +308,5 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_while(Sourc
 
 	return create_branch_while(exprCondition, exprWhile, &contextWhile, token.getPosition());
 }
-
 
 

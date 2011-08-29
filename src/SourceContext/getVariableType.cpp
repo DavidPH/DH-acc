@@ -34,13 +34,6 @@ VariableType const * SourceContext::getVariableType(SourceTokenC const & token)
 
 	return vartype;
 }
-VariableType const * SourceContext::getVariableType(VariableType::Type vt)
-{
-	// Builtin types always go to the global context.
-	if (_parent) return _parent->getVariableType(vt);
-
-	return _types[(vt <= VariableType::VT_VOID) ? vt : VariableType::VT_VOID];
-}
 VariableType const * SourceContext::getVariableType(VariableType::Type vt, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types)
 {
 	// Anonymous types always go to the global context.
@@ -89,17 +82,17 @@ VariableType const * SourceContext::getVariableType(VariableType::Type vt, Varia
 
 VariableType const * SourceContext::getVariableType_array(VariableType const * refType, bigsint count)
 {
-	return getVariableType(VariableType::VT_ARRAY, getVariableType(VariableType::VT_VOID), refType, std::vector<VariableType const *>(count, refType));
+	return getVariableType(VariableType::VT_ARRAY, VariableType::get_vt_void(), refType, std::vector<VariableType const *>(count, refType));
 }
 
 VariableType const * SourceContext::getVariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
-	return getVariableType(VariableType::VT_ASMFUNC, callType, getVariableType(VariableType::VT_VOID), types);
+	return getVariableType(VariableType::VT_ASMFUNC, callType, VariableType::get_vt_void(), types);
 }
 
 VariableType const * SourceContext::getVariableType_block(std::vector<VariableType const *> const & types)
 {
-	return getVariableType(VariableType::VT_BLOCK, getVariableType(VariableType::VT_VOID), getVariableType(VariableType::VT_VOID), types);
+	return getVariableType(VariableType::VT_BLOCK, VariableType::get_vt_void(), VariableType::get_vt_void(), types);
 }
 
 VariableType * SourceContext::getVariableType_enum(std::string const & name)
@@ -131,9 +124,9 @@ VariableType const * SourceContext::getVariableType_enum(std::string const & nam
 
 		vartype->vt        = VariableType::VT_ENUM;
 		vartype->complete  = block;
-		vartype->callType  = getVariableType(VariableType::VT_VOID);
+		vartype->callType  = VariableType::get_vt_void();
 		vartype->constType = NULL;
-		vartype->refType   = getVariableType(VariableType::VT_VOID);
+		vartype->refType   = VariableType::get_vt_void();
 
 		vartype->constType = (new VariableType(*vartype))->doConst();
 
@@ -146,27 +139,27 @@ VariableType const * SourceContext::getVariableType_enum(std::string const & nam
 
 VariableType const * SourceContext::getVariableType_function(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
-	return getVariableType(VariableType::VT_FUNCTION, callType, getVariableType(VariableType::VT_VOID), types);
+	return getVariableType(VariableType::VT_FUNCTION, callType, VariableType::get_vt_void(), types);
 }
 
 VariableType const * SourceContext::getVariableType_linespec(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
-	return getVariableType(VariableType::VT_LINESPEC, callType, getVariableType(VariableType::VT_VOID), types);
+	return getVariableType(VariableType::VT_LINESPEC, callType, VariableType::get_vt_void(), types);
 }
 
 VariableType const * SourceContext::getVariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
-	return getVariableType(VariableType::VT_NATIVE, callType, getVariableType(VariableType::VT_VOID), types);
+	return getVariableType(VariableType::VT_NATIVE, callType, VariableType::get_vt_void(), types);
 }
 
 VariableType const * SourceContext::getVariableType_pointer(VariableType const * refType)
 {
-	return getVariableType(VariableType::VT_POINTER, getVariableType(VariableType::VT_VOID), refType, std::vector<VariableType const *>());
+	return getVariableType(VariableType::VT_POINTER, VariableType::get_vt_void(), refType, std::vector<VariableType const *>());
 }
 
 VariableType const * SourceContext::getVariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types)
 {
-	return getVariableType(VariableType::VT_SCRIPT, callType, getVariableType(VariableType::VT_VOID), types);
+	return getVariableType(VariableType::VT_SCRIPT, callType, VariableType::get_vt_void(), types);
 }
 
 VariableType * SourceContext::getVariableType_struct(std::string const & name)
@@ -191,9 +184,9 @@ VariableType const * SourceContext::getVariableType_struct(std::string const & n
 
 		vartype->vt        = VariableType::VT_STRUCT;
 		vartype->complete  = false;
-		vartype->callType  = getVariableType(VariableType::VT_VOID);
+		vartype->callType  = VariableType::get_vt_void();
 		vartype->constType = NULL;
-		vartype->refType   = getVariableType(VariableType::VT_VOID);
+		vartype->refType   = VariableType::get_vt_void();
 
 		vartype->constType = (new VariableType(*vartype))->doConst();
 
@@ -224,9 +217,9 @@ VariableType const * SourceContext::getVariableType_struct(std::string const & n
 
 		vartype->vt        = VariableType::VT_STRUCT;
 		vartype->complete  = true;
-		vartype->callType  = getVariableType(VariableType::VT_VOID);
+		vartype->callType  = VariableType::get_vt_void();
 		vartype->constType = NULL;
-		vartype->refType   = getVariableType(VariableType::VT_VOID);
+		vartype->refType   = VariableType::get_vt_void();
 		vartype->names     = names;
 		vartype->types     = types;
 
@@ -277,9 +270,9 @@ VariableType const * SourceContext::getVariableType_union(std::string const & na
 
 		vartype->vt        = VariableType::VT_UNION;
 		vartype->complete  = false;
-		vartype->callType  = getVariableType(VariableType::VT_VOID);
+		vartype->callType  = VariableType::get_vt_void();
 		vartype->constType = NULL;
-		vartype->refType   = getVariableType(VariableType::VT_VOID);
+		vartype->refType   = VariableType::get_vt_void();
 
 		vartype->constType = (new VariableType(*vartype))->doConst();
 
@@ -310,9 +303,9 @@ VariableType const * SourceContext::getVariableType_union(std::string const & na
 
 		vartype->vt        = VariableType::VT_UNION;
 		vartype->complete  = true;
-		vartype->callType  = getVariableType(VariableType::VT_VOID);
+		vartype->callType  = VariableType::get_vt_void();
 		vartype->constType = NULL;
-		vartype->refType   = getVariableType(VariableType::VT_VOID);
+		vartype->refType   = VariableType::get_vt_void();
 		vartype->names     = names;
 		vartype->types     = types;
 
@@ -349,6 +342,5 @@ VariableType const * SourceContext::getVariableTypeNull(std::string const & name
 
 	return NULL;
 }
-
 
 

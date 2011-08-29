@@ -23,7 +23,6 @@
 
 #include "ObjectVector.hpp"
 #include "print_debug.hpp"
-#include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "VariableType.hpp"
 
@@ -81,12 +80,12 @@ VariableType const * SourceExpression::get_promoted_type(VariableType const * ty
 	if (type1->vt == VariableType::VT_BOOLSOFT) return type1;
 	if (type2->vt == VariableType::VT_BOOLSOFT) return type2;
 
-	return SourceContext::global_context.getVariableType(VariableType::VT_VOID);
+	return VariableType::get_vt_void();
 }
 
 VariableType const * SourceExpression::getType() const
 {
-	return SourceContext::global_context.getVariableType(VariableType::VT_VOID);
+	return VariableType::get_vt_void();
 }
 
 CounterPointer<ObjectExpression> SourceExpression::makeObject() const
@@ -101,7 +100,7 @@ CounterPointer<ObjectExpression> SourceExpression::makeObjectAddress() const
 void SourceExpression::makeObjects(ObjectVector * objects)
 {
 	makeObjectsGet(objects);
-	make_objects_cast(objects, getType(), SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
+	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
 }
 
 void SourceExpression::makeObjectsAddress(ObjectVector * objects)
@@ -221,6 +220,5 @@ void print_debug(std::ostream * out, SourceExpression const & in)
 {
 	in.printDebug(out);
 }
-
 
 

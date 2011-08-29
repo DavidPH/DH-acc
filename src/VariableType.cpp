@@ -26,6 +26,24 @@
 
 
 
+VariableType VariableType::vt_boolhard = {VT_BOOLHARD, true, &vtc_void, &vtc_boolhard, &vtc_void};
+VariableType VariableType::vt_boolsoft = {VT_BOOLSOFT, true, &vtc_void, &vtc_boolsoft, &vtc_void};
+VariableType VariableType::vt_char     = {VT_CHAR,     true, &vtc_void, &vtc_char,     &vtc_void};
+VariableType VariableType::vt_int      = {VT_INT,      true, &vtc_void, &vtc_int,      &vtc_void};
+VariableType VariableType::vt_real     = {VT_REAL,     true, &vtc_void, &vtc_real,     &vtc_void};
+VariableType VariableType::vt_string   = {VT_STRING,   true, &vtc_void, &vtc_string,   &vtc_char};
+VariableType VariableType::vt_void     = {VT_VOID,     true, &vtc_void, &vtc_void,     &vtc_void};
+
+VariableType VariableType::vtc_boolhard = {VT_BOOLHARD, true, &vtc_void, NULL, &vtc_void};
+VariableType VariableType::vtc_boolsoft = {VT_BOOLSOFT, true, &vtc_void, NULL, &vtc_void};
+VariableType VariableType::vtc_char     = {VT_CHAR,     true, &vtc_void, NULL, &vtc_void};
+VariableType VariableType::vtc_int      = {VT_INT,      true, &vtc_void, NULL, &vtc_void};
+VariableType VariableType::vtc_real     = {VT_REAL,     true, &vtc_void, NULL, &vtc_void};
+VariableType VariableType::vtc_string   = {VT_STRING,   true, &vtc_void, NULL, &vtc_char};
+VariableType VariableType::vtc_void     = {VT_VOID,     true, &vtc_void, NULL, &vtc_void};
+
+
+
 VariableType const * VariableType::doConst()
 {
 	switch (vt)
@@ -58,6 +76,50 @@ VariableType const * VariableType::doConst()
 	}
 
 	return this;
+}
+
+VariableType const * VariableType::get_vt(Type vt)
+{
+	switch (vt)
+	{
+	case VT_BOOLHARD: return &vt_boolhard;
+	case VT_BOOLSOFT: return &vt_boolsoft;
+	case VT_CHAR:     return &vt_char;
+	case VT_INT:      return &vt_int;
+	case VT_REAL:     return &vt_real;
+	case VT_STRING:   return &vt_string;
+	case VT_VOID:     return &vt_void;
+
+	default: throw "VariableType::get_vt";
+	}
+}
+VariableType const * VariableType::get_vt_boolhard()
+{
+	return &vt_boolhard;
+}
+VariableType const * VariableType::get_vt_boolsoft()
+{
+	return &vt_boolsoft;
+}
+VariableType const * VariableType::get_vt_char()
+{
+	return &vt_char;
+}
+VariableType const * VariableType::get_vt_int()
+{
+	return &vt_int;
+}
+VariableType const * VariableType::get_vt_real()
+{
+	return &vt_real;
+}
+VariableType const * VariableType::get_vt_string()
+{
+	return &vt_string;
+}
+VariableType const * VariableType::get_vt_void()
+{
+	return &vt_void;
 }
 
 int VariableType::getOffset(std::string const & name, SourcePosition const & position) const
@@ -278,6 +340,5 @@ void print_debug(std::ostream * out, VariableType::Type in)
 	case VariableType::VT_VOID:     *out << "VT_VOID";     break;
 	}
 }
-
 
 

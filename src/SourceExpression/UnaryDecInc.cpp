@@ -24,7 +24,6 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
-#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
 
@@ -113,7 +112,7 @@ void SourceExpression_UnaryDecInc::makeObjects(ObjectVector * objects)
 
 		expr->makeObjectsSet(objects);
 
-		make_objects_cast(objects, getType(), SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
+		make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
 	}
 	else
 	{
@@ -158,6 +157,5 @@ void SourceExpression_UnaryDecInc::printDebug(std::ostream * out) const
 		*out << ")";
 	*out << ")";
 }
-
 
 

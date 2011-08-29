@@ -23,7 +23,6 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../SourceContext.hpp"
 #include "../VariableType.hpp"
 
 
@@ -62,7 +61,7 @@ SourceExpression::Pointer SourceExpression::create_binary_array(SourceExpression
 
 
 
-SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, NULL, SourceContext::global_context.getVariableType(VariableType::VT_INT), position)
+SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, NULL, VariableType::get_vt_int(), position)
 {
 
 }
@@ -188,6 +187,5 @@ void SourceExpression_BinaryArray::printDebug(std::ostream * out) const
 	Super::printDebug(out);
 	*out << ")";
 }
-
 
 

@@ -25,6 +25,7 @@
 #include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -75,7 +76,7 @@ SourceExpression_BranchIf::SourceExpression_BranchIf(SourceExpression * exprCond
 	_labelEnd  = label + "_end";
 
 	if (_exprCondition->getType()->vt != VariableType::VT_BOOLSOFT)
-		_exprCondition = create_value_cast(_exprCondition, SourceContext::global_context.getVariableType(VariableType::VT_BOOLSOFT), position);
+		_exprCondition = create_value_cast(_exprCondition, VariableType::get_vt_boolsoft(), position);
 
 	if (_exprElse)
 	{
@@ -138,6 +139,5 @@ void SourceExpression_BranchIf::printDebug(std::ostream * const out) const
 		*out << ")";
 	*out << ")";
 }
-
 
 

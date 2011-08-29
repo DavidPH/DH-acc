@@ -25,6 +25,7 @@
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
 #include "../SourceContext.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -65,10 +66,10 @@ SourceExpression::Pointer SourceExpression::create_branch_switch(SourceExpressio
 SourceExpression_BranchSwitch::SourceExpression_BranchSwitch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position) : Super(position), _expr(expr), _exprCases(exprCases), _cases(context->getCases(position)), _caseLabels(_cases.size()), _caseDefault(context->getLabelCaseDefault(position)), _caseBreak(context->getLabelBreak(position)), _needDefault(!context->hasLabelCaseDefault())
 {
 	if (_expr->getType()->vt != VariableType::VT_INT)
-		_expr = create_value_cast(_expr, SourceContext::global_context.getVariableType(VariableType::VT_INT), position);
+		_expr = create_value_cast(_expr, VariableType::get_vt_int(), position);
 
 	if (_exprCases->getType()->vt != VariableType::VT_VOID)
-		_exprCases = create_value_cast(_exprCases, SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
+		_exprCases = create_value_cast(_exprCases, VariableType::get_vt_void(), position);
 
 	for (size_t i(0); i < _cases.size(); ++i)
 		_caseLabels[i] = context->getLabelCase(_cases[i], position);
@@ -148,6 +149,5 @@ void SourceExpression_BranchSwitch::printDebug(std::ostream * out) const
 		*out << ")";
 	*out << ")";
 }
-
 
 

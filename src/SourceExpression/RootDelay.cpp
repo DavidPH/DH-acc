@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -56,7 +57,7 @@ SourceExpression::Pointer SourceExpression::create_root_delay(SourceExpression *
 SourceExpression_RootDelay::SourceExpression_RootDelay(SourceExpression * expr, SourceContext * context, SourcePosition const & position) : Super(position), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
 {
 	if (_expr->getType()->vt != VariableType::VT_INT)
-		_expr = create_value_cast(_expr, SourceContext::global_context.getVariableType(VariableType::VT_INT), position);
+		_expr = create_value_cast(_expr, VariableType::get_vt_int(), position);
 }
 
 void SourceExpression_RootDelay::makeObjectsGet(ObjectVector * objects)
@@ -83,6 +84,5 @@ void SourceExpression_RootDelay::printDebug(std::ostream * out) const
 		*out << ")";
 	*out << ")";
 }
-
 
 

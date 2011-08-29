@@ -24,6 +24,7 @@
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenizerDS.hpp"
+#include "VariableType.hpp"
 
 
 
@@ -315,7 +316,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expressions(SourceTokenizerDS
 
 	make_expressions(in, &expressions, &blocks, &SourceContext::global_context);
 
-	expressions.push_back(create_branch_return(create_value_data(SourceContext::global_context.getVariableType(VariableType::VT_VOID), true, SourcePosition::none), &SourceContext::global_context, SourcePosition::none));
+	expressions.push_back(create_branch_return(create_value_data(VariableType::get_vt_void(), true, SourcePosition::none), &SourceContext::global_context, SourcePosition::none));
 
 	for (size_t i(0); i < blocks.size(); ++i)
 		expressions.push_back(blocks[i]);
@@ -339,6 +340,5 @@ void SourceExpressionDS::make_expressions(SourceTokenizerDS * in, std::vector<So
 
 	in->get(brackets ? SourceTokenC::TT_OP_BRACKET_C : SourceTokenC::TT_OP_BRACE_C);
 }
-
 
 

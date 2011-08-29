@@ -22,7 +22,6 @@
 #include "../SourceExpression.hpp"
 
 #include "../ObjectExpression.hpp"
-#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
 #include "../VariableType.hpp"
@@ -70,7 +69,7 @@ SourceExpression::Pointer SourceExpression::create_value_char(SourceTokenC const
 	if (token.getData().size() != 1)
 		throw SourceException("invalid length for character literal", token.getPosition(), "SourceExpressionDS");
 
-	VariableType const * charVarType(SourceContext::global_context.getVariableType(VariableType::VT_CHAR));
+	VariableType const * charVarType(VariableType::get_vt_char());
 
 	SourceVariable charVariable("", charVarType, ObjectExpression::create_value_int(token.getData()[0], token.getPosition()), token.getPosition());
 
@@ -78,7 +77,7 @@ SourceExpression::Pointer SourceExpression::create_value_char(SourceTokenC const
 }
 SourceExpression::Pointer SourceExpression::create_value_int(bigsint value, SourcePosition const & position)
 {
-	VariableType const * intVarType(SourceContext::global_context.getVariableType(VariableType::VT_INT));
+	VariableType const * intVarType(VariableType::get_vt_int());
 
 	SourceVariable intVariable("", intVarType, ObjectExpression::create_value_int(value, position), position);
 
@@ -90,7 +89,7 @@ SourceExpression::Pointer SourceExpression::create_value_int(SourceTokenC const 
 }
 SourceExpression::Pointer SourceExpression::create_value_real(SourceTokenC const & token)
 {
-	VariableType const * realVarType(SourceContext::global_context.getVariableType(VariableType::VT_REAL));
+	VariableType const * realVarType(VariableType::get_vt_real());
 
 	SourceVariable realVariable("", realVarType, ObjectExpression::create_value_float(get_bigreal(token), token.getPosition()), token.getPosition());
 
@@ -98,7 +97,7 @@ SourceExpression::Pointer SourceExpression::create_value_real(SourceTokenC const
 }
 SourceExpression::Pointer SourceExpression::create_value_string(SourceTokenC const & token)
 {
-	VariableType const * stringVarType(SourceContext::global_context.getVariableType(VariableType::VT_STRING));
+	VariableType const * stringVarType(VariableType::get_vt_string());
 
 	SourceVariable stringVariable("", stringVarType, ObjectExpression::add_string(token.getData() + '\0'), token.getPosition());
 
@@ -199,6 +198,5 @@ void SourceExpression_ValueVariable::printDebug(std::ostream * out) const
 		*out << ")";
 	*out << ")";
 }
-
 
 

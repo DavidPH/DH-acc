@@ -90,11 +90,36 @@ struct VariableType
 
 	friend void print_debug(std::ostream * out, VariableType const & in);
 	friend void print_debug(std::ostream * out, VariableType::Type in);
+
+	static VariableType const * get_vt(Type vt);
+	static VariableType const * get_vt_boolhard();
+	static VariableType const * get_vt_boolsoft();
+	static VariableType const * get_vt_char();
+	static VariableType const * get_vt_int();
+	static VariableType const * get_vt_real();
+	static VariableType const * get_vt_string();
+	static VariableType const * get_vt_void();
+
+private:
+	static VariableType vt_boolhard;
+	static VariableType vt_boolsoft;
+	static VariableType vt_char;
+	static VariableType vt_int;
+	static VariableType vt_real;
+	static VariableType vt_string;
+	static VariableType vt_void;
+
+	static VariableType vtc_boolhard;
+	static VariableType vtc_boolsoft;
+	static VariableType vtc_char;
+	static VariableType vtc_int;
+	static VariableType vtc_real;
+	static VariableType vtc_string;
+	static VariableType vtc_void;
 };
 
 
 
 #endif /* HPP_VariableType_ */
-
 
 

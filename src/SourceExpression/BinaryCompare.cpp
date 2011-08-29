@@ -21,7 +21,6 @@
 
 #include "BinaryCompare.hpp"
 
-#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
 
@@ -31,7 +30,7 @@ SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression 
 {
 
 }
-SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, bool branchChecked, SourcePosition const & position) : Super(exprL, exprR, SourceContext::global_context.getVariableType(VariableType::VT_BOOLSOFT), SourceContext::global_context.getVariableType(VariableType::VT_BOOLSOFT), position)
+SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, bool branchChecked, SourcePosition const & position) : Super(exprL, exprR, VariableType::get_vt_boolsoft(), VariableType::get_vt_boolsoft(), position)
 {
 
 }
@@ -43,7 +42,7 @@ bool SourceExpression_BinaryCompare::canMakeObject() const
 
 VariableType const * SourceExpression_BinaryCompare::getType() const
 {
-	return SourceContext::global_context.getVariableType(VariableType::VT_BOOLHARD);
+	return VariableType::get_vt_boolhard();
 }
 
 void SourceExpression_BinaryCompare::printDebug(std::ostream * out) const
@@ -52,6 +51,5 @@ void SourceExpression_BinaryCompare::printDebug(std::ostream * out) const
 	Super::printDebug(out);
 	*out << ")";
 }
-
 
 

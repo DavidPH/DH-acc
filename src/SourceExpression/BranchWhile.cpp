@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -59,10 +60,10 @@ SourceExpression::Pointer SourceExpression::create_branch_while(SourceExpression
 SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position) : Super(position), _exprCondition(exprCondition), _exprWhile(exprWhile), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position))
 {
 	if (_exprCondition->getType()->vt != VariableType::VT_BOOLSOFT)
-		_exprCondition = create_value_cast(_exprCondition, SourceContext::global_context.getVariableType(VariableType::VT_BOOLSOFT), position);
+		_exprCondition = create_value_cast(_exprCondition, VariableType::get_vt_boolsoft(), position);
 
 	if (_exprWhile->getType()->vt != VariableType::VT_VOID)
-		_exprWhile = create_value_cast(_exprWhile, SourceContext::global_context.getVariableType(VariableType::VT_VOID), position);
+		_exprWhile = create_value_cast(_exprWhile, VariableType::get_vt_void(), position);
 }
 
 void SourceExpression_BranchWhile::makeObjectsGet(ObjectVector * objects)
@@ -96,6 +97,5 @@ void SourceExpression_BranchWhile::printDebug(std::ostream * const out) const
 		*out << ")";
 	*out << ")";
 }
-
 
 
