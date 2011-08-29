@@ -147,7 +147,7 @@ private:
 
 	ContextType _type;
 
-	std::vector<VariableType *> _types;
+	std::vector<VariableType const *> _types;
 	std::vector<std::string> _typenames;
 
 	std::vector<VariableType *> _enums;

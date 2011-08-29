@@ -39,7 +39,7 @@ VariableType const * SourceContext::getVariableType(VariableType::Type vt, Varia
 	// Anonymous types always go to the global context.
 	if (_parent) return _parent->getVariableType(vt, callType, refType, types);
 
-	for (std::vector<VariableType *>::iterator it(_types.begin()); it != _types.end(); ++it)
+	for (std::vector<VariableType const *>::iterator it(_types.begin()); it != _types.end(); ++it)
 	{
 		VariableType const * vartype(*it);
 
@@ -243,7 +243,7 @@ VariableType const * SourceContext::getVariableType_typedef(std::string const & 
 			throw SourceException("typedef name used '" + name + "'", position, "SourceContext");
 
 	_typenames.push_back(name);
-	_types.push_back(const_cast<VariableType *>(vartype));
+	_types.push_back(vartype);
 
 	return vartype;
 }
