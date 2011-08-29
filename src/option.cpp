@@ -91,7 +91,7 @@ struct option
 
 
 
-static std::map<std::string, std::map<std::string, option> > option_map;
+static std::map<std::string, std::map<std::string, option> > & option_map();
 
 static std::string option_name;
 static std::string option_usage;
@@ -173,36 +173,36 @@ char const * option_exception::what()
 
 void option_add(char const * name, char const * group, char const * description, option_b * data, option_handler_b handler)
 {
-	option_map[group][name] = option(data, handler, description, name);
+	option_map()[group][name] = option(data, handler, description, name);
 }
 void option_add(char const * name, char const * group, char const * description, option_f * data, option_handler_f handler)
 {
-	option_map[group][name] = option(data, handler, description, name);
+	option_map()[group][name] = option(data, handler, description, name);
 }
 void option_add(char const * name, char const * group, char const * description, option_i * data, option_handler_i handler)
 {
-	option_map[group][name] = option(data, handler, description, name);
+	option_map()[group][name] = option(data, handler, description, name);
 }
 void option_add(char const * name, char const * group, char const * description, option_s * data, option_handler_s handler)
 {
-	option_map[group][name] = option(data, handler, description, name);
+	option_map()[group][name] = option(data, handler, description, name);
 }
 
 void option_add(char const * name, char const * group, char const * description, option_bv * data, option_handler_bv handler)
 {
-	option_map[group][name] = option(data, handler, description, name);
+	option_map()[group][name] = option(data, handler, description, name);
 }
 void option_add(char const * name, char const * group, char const * description, option_fv * data, option_handler_fv handler)
 {
-	option_map[group][name] = option(data, handler, description, name);
+	option_map()[group][name] = option(data, handler, description, name);
 }
 void option_add(char const * name, char const * group, char const * description, option_iv * data, option_handler_iv handler)
 {
-	option_map[group][name] = option(data, handler, description, name);
+	option_map()[group][name] = option(data, handler, description, name);
 }
 void option_add(char const * name, char const * group, char const * description, option_sv * data, option_handler_sv handler)
 {
-	option_map[group][name] = option(data, handler, description, name);
+	option_map()[group][name] = option(data, handler, description, name);
 }
 
 void option_assert_arg(char const * name, char const * arg)
@@ -262,6 +262,13 @@ bool option_handler_default_sv(char const * name, char const * arg, bool barg, o
 	data->push_back(arg);
 
 	return true;
+}
+
+static std::map<std::string, std::map<std::string, option> > & option_map()
+{
+	static std::map<std::string, std::map<std::string, option> > _option_map;
+
+	return _option_map;
 }
 
 option_f option_parse_f(char const * name, char const * arg)
@@ -417,7 +424,7 @@ void option_print_help(std::ostream * out)
 			*out << "usage: " << option_name << " " << option_usage << std::endl;
 	}
 
-	for (std::map<std::string, std::map<std::string, option> >::iterator groupIt(option_map.begin()); groupIt != option_map.end(); ++groupIt)
+	for (std::map<std::string, std::map<std::string, option> >::iterator groupIt(option_map().begin()); groupIt != option_map().end(); ++groupIt)
 	{
 		*out << groupIt->first << ":" << std::endl;
 
@@ -467,7 +474,7 @@ void option_print_values(std::ostream * out)
 	option_print(out, option_args);
 	*out << std::endl;
 
-	for (std::map<std::string, std::map<std::string, option> >::iterator groupIt(option_map.begin()); groupIt != option_map.end(); ++groupIt)
+	for (std::map<std::string, std::map<std::string, option> >::iterator groupIt(option_map().begin()); groupIt != option_map().end(); ++groupIt)
 	{
 		*out << groupIt->first << ":" << std::endl;
 
@@ -509,7 +516,7 @@ bool option_process(char const * name, char const * arg)
 		name += 3;
 	}
 
-	for (std::map<std::string, std::map<std::string, option> >::iterator groupIt(option_map.begin()); groupIt != option_map.end(); ++groupIt)
+	for (std::map<std::string, std::map<std::string, option> >::iterator groupIt(option_map().begin()); groupIt != option_map().end(); ++groupIt)
 	{
 		std::map<std::string, option> & group(groupIt->second);
 
@@ -562,6 +569,5 @@ void option_set_version(char const * version)
 
 
 }
-
 
 

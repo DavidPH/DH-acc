@@ -24,6 +24,20 @@
 #include "ObjectExpression.hpp"
 #include "object_io.hpp"
 #include "ObjectToken.hpp"
+#include "option.hpp"
+
+
+
+option::option_b option_opt_nop(false);
+option::option_b option_opt_pushdrop(true);
+
+static struct _ObjectVector_init_s {_ObjectVector_init_s();} _ObjectVector_init;
+
+_ObjectVector_init_s::_ObjectVector_init_s()
+{
+	option::option_add("opt-nop", "optimization", "Strips NOP instructions.", &option_opt_nop, option::option_handler_default_b);
+	option::option_add("opt-pushdrop", "optimization", "Strips PUSH/DROP pairs. On by default.", &option_opt_pushdrop, option::option_handler_default_b);
+}
 
 
 
@@ -113,10 +127,29 @@ ObjectToken const & ObjectVector::operator [] (bigsint index) const
 
 void ObjectVector::optimize()
 {
-	size_t i(0);
+	// NOP removal.
+	// Off by default because NOPs do not normally get generated.
+	if (option_opt_pushdrop) for(size_t i(0); i+1 < _tokens.size();)
+	{
+		if (_tokens[i].getCode() == OCODE_NOP)
+		{
+			std::vector<std::string> labels(_tokens[i].getLabels());
+
+			_tokens[i+1].addLabel(labels);
+
+			for (size_t j(i+1); j < _tokens.size(); ++j)
+				_tokens[j-1] = _tokens[j];
+
+			_tokens.resize(_tokens.size() - 1);
+		}
+		else
+		{
+			++i;
+		}
+	}
 
 	// PUSH/DROP removal.
-	while (i+2 < _tokens.size())
+	if (option_opt_pushdrop) for(size_t i(0); i+2 < _tokens.size();)
 	{
 		if (ocode_is_push(_tokens[i].getCode()) && _tokens[i+1].getCode() == OCODE_DROP)
 		{
@@ -131,8 +164,6 @@ void ObjectVector::optimize()
 				_tokens[j-2] = _tokens[j];
 
 			_tokens.resize(_tokens.size() - 2);
-
-			if (i) --i;
 		}
 		else
 		{
@@ -168,6 +199,5 @@ void write_object(std::ostream * out, ObjectVector const & in)
 	write_object(out, in._labels);
 	write_object(out, in._tokens);
 }
-
 
 
