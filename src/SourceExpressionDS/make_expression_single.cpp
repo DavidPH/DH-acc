@@ -166,7 +166,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 	while (true) switch (in->peek().getType())
 	{
 	case SourceTokenC::TT_OP_BRACKET_O:
-		expr = create_binary_array(expr, make_expression(in, blocks, context), in->get(SourceTokenC::TT_OP_BRACKET_O).getPosition());
+		token = in->get(SourceTokenC::TT_OP_BRACKET_O);
+		expr = create_binary_array(expr, make_expression(in, blocks, context), token.getPosition());
 		in->get(SourceTokenC::TT_OP_BRACKET_C);
 		break;
 

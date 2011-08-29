@@ -26,6 +26,73 @@
 
 
 
+char const * SourceTokenC::_names[SourceTokenC::TT_NONE+1] =
+{
+	"TT_CHARACTER",
+	"TT_FLOAT",
+	"TT_IDENTIFIER",
+	"TT_INTEGER",
+	"TT_STRING",
+
+	"TT_OP_AND",                // &
+	"TT_OP_AND_EQUALS",         // &=
+	"TT_OP_AND2",               // &&
+	"TT_OP_AND2_EQUALS",        // &&=
+	"TT_OP_AT",                 // @
+	"TT_OP_ASTERISK",           // *
+	"TT_OP_ASTERISK_EQUALS",    // *=
+	"TT_OP_BRACE_C",            // }
+	"TT_OP_BRACE_O",            // {
+	"TT_OP_BRACKET_C",          // ]
+	"TT_OP_BRACKET_O",          // [
+	"TT_OP_CARET",              // ^
+	"TT_OP_CARET_EQUALS",       // ^=
+	"TT_OP_CARET2",             // ^^
+	"TT_OP_CARET2_EQUALS",      // ^^=
+	"TT_OP_CMP_EQ",             // ==
+	"TT_OP_CMP_GE",             // >=
+	"TT_OP_CMP_GT",             // >
+	"TT_OP_CMP_GT2",            // >>
+	"TT_OP_CMP_GT2_EQUALS",     // >>=
+	"TT_OP_CMP_LE",             // <=
+	"TT_OP_CMP_LT",             // <
+	"TT_OP_CMP_LT2",            // <<
+	"TT_OP_CMP_LT2_EQUALS",     // <<=
+	"TT_OP_CMP_NE",             // !=
+	"TT_OP_COLON",              // :
+	"TT_OP_COMMA",              // ",
+	"TT_OP_EQUALS",             // =
+	"TT_OP_EXCLAMATION",        // !
+	"TT_OP_HASH",               // #
+	"TT_OP_HASH2",              // ##
+	"TT_OP_HASH3",              // ###
+	"TT_OP_MINUS",              // -
+	"TT_OP_MINUS_EQUALS",       // -=
+	"TT_OP_MINUS_GT",           // ->
+	"TT_OP_MINUS2",             // --
+	"TT_OP_PARENTHESIS_C",      // )
+	"TT_OP_PARENTHESIS_O",      // (
+	"TT_OP_PERCENT",            // %
+	"TT_OP_PERCENT_EQUALS",     // %=
+	"TT_OP_PERIOD",             // .
+	"TT_OP_PIPE",               // |
+	"TT_OP_PIPE_EQUALS",        // |=
+	"TT_OP_PIPE2",              // ||
+	"TT_OP_PIPE2_EQUALS",       // ||=
+	"TT_OP_PLUS",               // +
+	"TT_OP_PLUS_EQUALS",        // +=
+	"TT_OP_PLUS2",              // ++
+	"TT_OP_QUERY",              // ?
+	"TT_OP_SEMICOLON",          // ;
+	"TT_OP_SLASH",              // /
+	"TT_OP_SLASH_EQUALS",       // /=
+	"TT_OP_TILDE",              // ~
+
+	"TT_NONE"
+};
+
+
+
 SourceTokenC::SourceTokenC() : _data(), _position(), _type(TT_NONE)
 {
 
@@ -336,6 +403,11 @@ SourceTokenC::TokenType SourceTokenC::getType() const
 
 
 
+char const * make_string(SourceTokenC::TokenType type)
+{
+	return (type <= SourceTokenC::TT_NONE) ? SourceTokenC::_names[type] : "TT_NONE";
+}
+
 void print_debug(std::ostream * const out, SourceTokenC const & token)
 {
 	*out << "SourceTokenC(";
@@ -352,34 +424,10 @@ void print_debug(std::ostream * const out, SourceTokenC const & token)
 }
 void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type)
 {
-	switch (type)
-	{
-	case SourceTokenC::TT_CHARACTER:             *out << "TT_CHARACTER";             break;
-	case SourceTokenC::TT_FLOAT:                 *out << "TT_FLOAT";                 break;
-	case SourceTokenC::TT_IDENTIFIER:            *out << "TT_IDENTIFIER";            break;
-	case SourceTokenC::TT_INTEGER:               *out << "TT_INTEGER";               break;
-	case SourceTokenC::TT_STRING:                *out << "TT_STRING";                break;
-	case SourceTokenC::TT_OP_AT:                 *out << "TT_OP_AT";                 break;
-	case SourceTokenC::TT_OP_CARET:              *out << "TT_OP_CARET";              break;
-	case SourceTokenC::TT_OP_CARET_EQUALS:       *out << "TT_OP_CARET_EQUALS";       break;
-	case SourceTokenC::TT_OP_CARET2:             *out << "TT_OP_CARET2";             break;
-	case SourceTokenC::TT_OP_CARET2_EQUALS:      *out << "TT_OP_CARET2_EQUALS";      break;
-	case SourceTokenC::TT_OP_CMP_GT2_EQUALS:     *out << "TT_OP_CMP_GT2_EQUALS";     break;
-	case SourceTokenC::TT_OP_COLON:              *out << "TT_OP_COLON";              break;
-	case SourceTokenC::TT_OP_COMMA:              *out << "TT_OP_COMMA";              break;
-	case SourceTokenC::TT_OP_EXCLAMATION:        *out << "TT_OP_EXCLAMATION";        break;
-	case SourceTokenC::TT_OP_HASH:               *out << "TT_OP_HASH";               break;
-	case SourceTokenC::TT_OP_HASH2:              *out << "TT_OP_HASH2";              break;
-	case SourceTokenC::TT_OP_HASH3:              *out << "TT_OP_HASH3";              break;
-	case SourceTokenC::TT_OP_PARENTHESIS_C:      *out << "TT_OP_PARENTHESIS_C";      break;
-	case SourceTokenC::TT_OP_PARENTHESIS_O:      *out << "TT_OP_PARENTHESIS_O";      break;
-	case SourceTokenC::TT_OP_PLUS:               *out << "TT_OP_PLUS";               break;
-	case SourceTokenC::TT_OP_QUERY:              *out << "TT_OP_QUERY";              break;
-	case SourceTokenC::TT_OP_SEMICOLON:          *out << "TT_OP_SEMICOLON";          break;
-	case SourceTokenC::TT_OP_TILDE:              *out << "TT_OP_TILDE";              break;
-	default: *out << "TT_"; break;
-	}
+	if (type <= SourceTokenC::TT_NONE)
+		*out << SourceTokenC::_names[type];
+	else
+		*out << "TT";
 }
-
 
 
