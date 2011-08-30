@@ -34,15 +34,15 @@ class SourceExpression_RootOut : public SourceExpression
 public:
 	SourceExpression_RootOut(SourceExpression * expr, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	SourceExpression::Pointer _expr;
-
 	void doOut(ObjectVector * objects, VariableType const * type) const;
+
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
+	SourceExpression::Pointer _expr;
 };
 
 
@@ -262,19 +262,6 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, VariableType const 
 	objects->addToken(OCODE_PRINTCHARACTER);
 }
 
-void SourceExpression_RootOut::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	_expr->makeObjectsGet(objects);
-
-	objects->setPosition(position);
-
-	objects->addToken(OCODE_BEGINPRINT);
-	doOut(objects, _expr->getType());
-	objects->addToken(OCODE_ENDLOG);
-}
-
 void SourceExpression_RootOut::printDebug(std::ostream * out) const
 {
 	*out << "SourceExpression_RootOut(";
@@ -286,5 +273,17 @@ void SourceExpression_RootOut::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
+void SourceExpression_RootOut::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	_expr->makeObjectsGet(objects);
+
+	objects->setPosition(position);
+
+	objects->addToken(OCODE_BEGINPRINT);
+	doOut(objects, _expr->getType());
+	objects->addToken(OCODE_ENDLOG);
+}
 
 

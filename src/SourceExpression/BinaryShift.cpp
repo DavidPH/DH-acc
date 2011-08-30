@@ -35,12 +35,12 @@ public:
 
 	virtual bool canMakeObject() const;
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	bool _right;
 };
 
@@ -67,18 +67,18 @@ bool SourceExpression_BinaryShift::canMakeObject() const
 	return false;
 }
 
-void SourceExpression_BinaryShift::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	objects->addToken(_right ? OCODE_SHIFTR : OCODE_SHIFTL);
-}
-
 void SourceExpression_BinaryShift::printDebug(std::ostream * out) const
 {
 	*out << "SourceExpression_BinaryShift(";
 	Super::printDebug(out);
 	*out << ")";
+}
+
+void SourceExpression_BinaryShift::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	objects->addToken(_right ? OCODE_SHIFTR : OCODE_SHIFTL);
 }
 
 

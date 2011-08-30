@@ -35,12 +35,12 @@ public:
 
 	virtual VariableType const * getType() const;
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	VariableType const * _type;
 };
 
@@ -63,13 +63,6 @@ VariableType const * SourceExpression_UnaryReference::getType() const
 	return _type;
 }
 
-void SourceExpression_UnaryReference::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	expr->makeObjectsAddress(objects);
-}
-
 void SourceExpression_UnaryReference::printDebug(std::ostream * out) const
 {
 	*out << "SourceExpression_UnaryReference(";
@@ -77,5 +70,11 @@ void SourceExpression_UnaryReference::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
+void SourceExpression_UnaryReference::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	expr->makeObjectsAddress(objects);
+}
 
 

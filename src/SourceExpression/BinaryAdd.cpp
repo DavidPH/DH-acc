@@ -37,10 +37,11 @@ public:
 
 	virtual CounterPointer<ObjectExpression> makeObject() const;
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * const out) const;
+
+private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
 };
 
 
@@ -62,7 +63,14 @@ CounterPointer<ObjectExpression> SourceExpression_BinaryAdd::makeObject() const
 	return ObjectExpression::create_binary_add(exprL->makeObject(), exprR->makeObject(), position);
 }
 
-void SourceExpression_BinaryAdd::makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BinaryAdd::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpression_BinaryAdd(";
+	Super::printDebug(out);
+	*out << ")";
+}
+
+void SourceExpression_BinaryAdd::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
@@ -79,13 +87,5 @@ void SourceExpression_BinaryAdd::makeObjectsGet(ObjectVector * objects)
 		throw SourceException("invalid VT", position, getName());
 	}
 }
-
-void SourceExpression_BinaryAdd::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BinaryAdd(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
 
 

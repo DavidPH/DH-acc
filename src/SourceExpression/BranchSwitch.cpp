@@ -36,12 +36,12 @@ class SourceExpression_BranchSwitch : public SourceExpression
 public:
 	SourceExpression_BranchSwitch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	SourceExpression::Pointer _expr;
 	SourceExpression::Pointer _exprCases;
 
@@ -73,34 +73,6 @@ SourceExpression_BranchSwitch::SourceExpression_BranchSwitch(SourceExpression * 
 
 	for (size_t i(0); i < _cases.size(); ++i)
 		_caseLabels[i] = context->getLabelCase(_cases[i], position);
-}
-
-void SourceExpression_BranchSwitch::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	_expr->makeObjectsGet(objects);
-
-	objects->setPosition(position);
-
-	std::vector<ObjectExpression::Pointer> args;
-	args.reserve(_cases.size() * 2);
-
-	for (size_t i(0); i < _cases.size(); ++i)
-	{
-		args.push_back(objects->getValue(_cases[i]));
-		args.push_back(objects->getValue(_caseLabels[i]));
-	}
-
-	objects->addToken(OCODE_BRANCHTABLE, args);
-
-	objects->addToken(OCODE_BRANCH, objects->getValue(_caseDefault));
-
-	_exprCases->makeObjectsGet(objects);
-
-	if (_needDefault)
-		objects->addLabel(_caseDefault);
-	objects->addLabel(_caseBreak);
 }
 
 void SourceExpression_BranchSwitch::printDebug(std::ostream * out) const
@@ -148,6 +120,34 @@ void SourceExpression_BranchSwitch::printDebug(std::ostream * out) const
 		print_debug(out, _needDefault);
 		*out << ")";
 	*out << ")";
+}
+
+void SourceExpression_BranchSwitch::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	_expr->makeObjectsGet(objects);
+
+	objects->setPosition(position);
+
+	std::vector<ObjectExpression::Pointer> args;
+	args.reserve(_cases.size() * 2);
+
+	for (size_t i(0); i < _cases.size(); ++i)
+	{
+		args.push_back(objects->getValue(_cases[i]));
+		args.push_back(objects->getValue(_caseLabels[i]));
+	}
+
+	objects->addToken(OCODE_BRANCHTABLE, args);
+
+	objects->addToken(OCODE_BRANCH, objects->getValue(_caseDefault));
+
+	_exprCases->makeObjectsGet(objects);
+
+	if (_needDefault)
+		objects->addLabel(_caseDefault);
+	objects->addLabel(_caseBreak);
 }
 
 

@@ -21,6 +21,7 @@
 
 #include "SourceExpression.hpp"
 
+#include "ObjectExpression.hpp"
 #include "ObjectVector.hpp"
 #include "print_debug.hpp"
 #include "SourceException.hpp"
@@ -99,13 +100,23 @@ CounterPointer<ObjectExpression> SourceExpression::makeObjectAddress() const
 
 void SourceExpression::makeObjects(ObjectVector * objects)
 {
-	makeObjectsGet(objects);
-	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
+	if (canMakeObject())
+	{
+		recurse_makeObjects(objects);
+	}
+	else
+		virtual_makeObjects(objects);
 }
 
 void SourceExpression::makeObjectsAddress(ObjectVector * objects)
 {
-	throw SourceException("makeObjectsAddress on invalid expression", position, getName());
+	if (canMakeObjectAddress())
+	{
+		recurse_makeObjectsAddress(objects);
+		objects->addToken(OCODE_PUSHNUMBER, makeObjectAddress());
+	}
+	else
+		virtual_makeObjectsAddress(objects);
 }
 
 void SourceExpression::makeObjectsCast(ObjectVector * objects, VariableType const * type)
@@ -117,36 +128,39 @@ void SourceExpression::makeObjectsCast(ObjectVector * objects, VariableType cons
 		makeObjects(objects);
 	}
 	else
-	{
-		makeObjectsGet(objects);
-		make_objects_cast(objects, getType(), type, position);
-	}
+		virtual_makeObjectsCast(objects, type);
 }
 
 void SourceExpression::makeObjectsGet(ObjectVector * objects)
 {
-	throw SourceException("makeObjectsGet on invalid expression", position, getName());
+	if (canMakeObject())
+	{
+		recurse_makeObjectsGet(objects);
+		objects->addToken(OCODE_PUSHNUMBER, makeObject());
+	}
+	else
+		virtual_makeObjectsGet(objects);
 }
 void SourceExpression::makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
-	throw SourceException("makeObjectsGetArray on invalid expression", position, getName());
+	virtual_makeObjectsGetArray(objects, dimensions);
 }
 void SourceExpression::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
-	throw SourceException("makeObjectsGetMember on invalid expression", position, getName());
+	virtual_makeObjectsGetMember(objects, names);
 }
 
 void SourceExpression::makeObjectsSet(ObjectVector * objects)
 {
-	throw SourceException("makeObjectsSet on invalid expression", position, getName());
+	virtual_makeObjectsSet(objects);
 }
 void SourceExpression::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
-	throw SourceException("makeObjectsSetArray on invalid expression", position, getName());
+	virtual_makeObjectsSetArray(objects, dimensions);
 }
 void SourceExpression::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
-	throw SourceException("makeObjectsSetMember on invalid expression", position, getName());
+	virtual_makeObjectsSetMember(objects, names);
 }
 
 void SourceExpression::printDebug(std::ostream * out) const
@@ -212,6 +226,49 @@ void SourceExpression::recurse_makeObjectsSetArray(ObjectVector * objects, std::
 void SourceExpression::recurse_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
 	recurse_makeObjectsGet(objects);
+}
+
+void SourceExpression::virtual_makeObjects(ObjectVector * objects)
+{
+	makeObjectsGet(objects);
+	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
+}
+
+void SourceExpression::virtual_makeObjectsAddress(ObjectVector * objects)
+{
+	throw SourceException("makeObjectsAddress on invalid expression", position, getName());
+}
+
+void SourceExpression::virtual_makeObjectsCast(ObjectVector * objects, VariableType const * type)
+{
+	makeObjectsGet(objects);
+	make_objects_cast(objects, getType(), type, position);
+}
+
+void SourceExpression::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	throw SourceException("makeObjectsGet on invalid expression", position, getName());
+}
+void SourceExpression::virtual_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
+{
+	throw SourceException("makeObjectsGetArray on invalid expression", position, getName());
+}
+void SourceExpression::virtual_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
+{
+	throw SourceException("makeObjectsGetMember on invalid expression", position, getName());
+}
+
+void SourceExpression::virtual_makeObjectsSet(ObjectVector * objects)
+{
+	throw SourceException("makeObjectsSet on invalid expression", position, getName());
+}
+void SourceExpression::virtual_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
+{
+	throw SourceException("makeObjectsSetArray on invalid expression", position, getName());
+}
+void SourceExpression::virtual_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
+{
+	throw SourceException("makeObjectsSetMember on invalid expression", position, getName());
 }
 
 

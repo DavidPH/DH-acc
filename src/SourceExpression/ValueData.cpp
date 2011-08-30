@@ -35,16 +35,14 @@ class SourceExpression_ValueData : public SourceExpression
 public:
 	SourceExpression_ValueData(VariableType const * type, bool garbage, SourcePosition const & position);
 
-	virtual bool canMakeObject() const;
-
 	virtual VariableType const * getType() const;
-
-	virtual void makeObjectsGet(ObjectVector * objects);
 
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	VariableType const * _type;
 	bool _garbage;
 };
@@ -63,27 +61,9 @@ SourceExpression_ValueData::SourceExpression_ValueData(VariableType const * type
 
 }
 
-bool SourceExpression_ValueData::canMakeObject() const
-{
-	return !_garbage;
-}
-
 VariableType const * SourceExpression_ValueData::getType() const
 {
 	return _type;
-}
-
-void SourceExpression_ValueData::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	for (size_t i(_type->size()); i--;)
-	{
-		if (_garbage)
-			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(0xDEADBEEF));
-		else
-			objects->addTokenPushZero();
-	}
 }
 
 void SourceExpression_ValueData::printDebug(std::ostream * const out) const
@@ -103,5 +83,17 @@ void SourceExpression_ValueData::printDebug(std::ostream * const out) const
 	*out << ")";
 }
 
+void SourceExpression_ValueData::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	for (size_t i(_type->size()); i--;)
+	{
+		if (_garbage)
+			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(0xDEADBEEF));
+		else
+			objects->addTokenPushZero();
+	}
+}
 
 

@@ -34,12 +34,12 @@ class SourceExpression_BranchAnd : public SourceExpression_BinaryCompare
 public:
 	SourceExpression_BranchAnd(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	std::string _label0;
 	std::string _labelEnd;
 };
@@ -61,7 +61,14 @@ SourceExpression_BranchAnd::SourceExpression_BranchAnd(SourceExpression * exprL,
 	_labelEnd = label + "_end";
 }
 
-void SourceExpression_BranchAnd::makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BranchAnd::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpression_BranchAnd(";
+	Super::printDebug(out);
+	*out << ")";
+}
+
+void SourceExpression_BranchAnd::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
@@ -81,13 +88,5 @@ void SourceExpression_BranchAnd::makeObjectsGet(ObjectVector * objects)
 
 	objects->addLabel(_labelEnd);
 }
-
-void SourceExpression_BranchAnd::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BranchAnd(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
 
 

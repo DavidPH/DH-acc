@@ -35,12 +35,12 @@ class SourceExpression_BranchReturn : public SourceExpression
 public:
 	SourceExpression_BranchReturn(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	SourceExpression::Pointer _expr;
 	SourceContext::ContextType _type;
 };
@@ -60,7 +60,18 @@ SourceExpression_BranchReturn::SourceExpression_BranchReturn(SourceExpression * 
 		_expr = SourceExpression::create_value_cast(_expr, context->getReturnType(), position);
 }
 
-void SourceExpression_BranchReturn::makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BranchReturn::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpression_BranchReturn(";
+	Super::printDebug(out);
+	*out << " ";
+		*out << "expr=(";
+		print_debug(out, _expr);
+		*out << ")";
+	*out << ")";
+}
+
+void SourceExpression_BranchReturn::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
@@ -97,17 +108,5 @@ void SourceExpression_BranchReturn::makeObjectsGet(ObjectVector * objects)
 		throw SourceException("invalid CT", position, getName());
 	}
 }
-
-void SourceExpression_BranchReturn::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BranchReturn(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expr=(";
-		print_debug(out, _expr);
-		*out << ")";
-	*out << ")";
-}
-
 
 

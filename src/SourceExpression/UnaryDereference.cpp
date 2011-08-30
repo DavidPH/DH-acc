@@ -38,14 +38,15 @@ public:
 
 	virtual VariableType const * getType() const;
 
-	virtual void makeObjectsAddress(ObjectVector * objects);
-
-	virtual void makeObjectsGet(ObjectVector * objects);
-
-	virtual void makeObjectsSet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * const out) const;
+
+private:
+	virtual void virtual_makeObjectsAddress(ObjectVector * objects);
+
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
+	virtual void virtual_makeObjectsSet(ObjectVector * objects);
 };
 
 
@@ -72,12 +73,19 @@ VariableType const * SourceExpression_UnaryDereference::getType() const
 	return expr->getType()->refType;
 }
 
-void SourceExpression_UnaryDereference::makeObjectsAddress(ObjectVector * objects)
+void SourceExpression_UnaryDereference::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpression_UnaryDereference(";
+	Super::printDebug(out);
+	*out << ")";
+}
+
+void SourceExpression_UnaryDereference::virtual_makeObjectsAddress(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 }
 
-void SourceExpression_UnaryDereference::makeObjectsGet(ObjectVector * objects)
+void SourceExpression_UnaryDereference::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	if (getType()->vt == VariableType::VT_VOID)
 		Super::makeObjectsGet(objects);
@@ -98,7 +106,7 @@ void SourceExpression_UnaryDereference::makeObjectsGet(ObjectVector * objects)
 	}
 }
 
-void SourceExpression_UnaryDereference::makeObjectsSet(ObjectVector * objects)
+void SourceExpression_UnaryDereference::virtual_makeObjectsSet(ObjectVector * objects)
 {
 	if (getType()->vt == VariableType::VT_VOID)
 		Super::makeObjectsSet(objects);
@@ -119,13 +127,5 @@ void SourceExpression_UnaryDereference::makeObjectsSet(ObjectVector * objects)
 			objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
 	}
 }
-
-void SourceExpression_UnaryDereference::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_UnaryDereference(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
 
 

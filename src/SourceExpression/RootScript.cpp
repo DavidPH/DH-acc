@@ -35,12 +35,12 @@ class SourceExpression_RootScript : public SourceExpression
 public:
 	SourceExpression_RootScript(VariableType const * type, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	VariableType const * _type;
 };
 
@@ -58,17 +58,6 @@ SourceExpression_RootScript::SourceExpression_RootScript(VariableType const * ty
 
 }
 
-void SourceExpression_RootScript::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	if (_type->sizeCall() > 3) for (int i(_type->sizeCall() - 3); i--;)
-	{
-		objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
-		objects->addToken(OCODE_ASSIGNSCRIPTVAR, objects->getValue(i+3));
-	}
-}
-
 void SourceExpression_RootScript::printDebug(std::ostream * out) const
 {
 	*out << "SourceExpression_RootScript(";
@@ -80,5 +69,15 @@ void SourceExpression_RootScript::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
+void SourceExpression_RootScript::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	if (_type->sizeCall() > 3) for (int i(_type->sizeCall() - 3); i--;)
+	{
+		objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
+		objects->addToken(OCODE_ASSIGNSCRIPTVAR, objects->getValue(i+3));
+	}
+}
 
 

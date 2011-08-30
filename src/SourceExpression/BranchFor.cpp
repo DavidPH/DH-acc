@@ -35,12 +35,12 @@ class SourceExpression_BranchFor : public SourceExpression
 public:
 	SourceExpression_BranchFor(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	SourceExpression::Pointer _exprInit;
 	SourceExpression::Pointer _exprCond;
 	SourceExpression::Pointer _exprIter;
@@ -78,27 +78,6 @@ SourceExpression_BranchFor::SourceExpression_BranchFor(SourceExpression * exprIn
 		_exprLoop = create_value_cast(_exprLoop, VariableType::get_vt_void(), position);
 }
 
-void SourceExpression_BranchFor::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	_exprInit->makeObjectsGet(objects);
-
-	objects->addLabel(_labelCond);
-	_exprCond->makeObjectsGet(objects);
-	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_labelBreak));
-
-	_exprLoop->makeObjectsGet(objects);
-
-	objects->addLabel(_labelContinue);
-	_exprIter->makeObjectsGet(objects);
-	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCH, objects->getValue(_labelCond));
-
-	objects->addLabel(_labelBreak);
-}
-
 void SourceExpression_BranchFor::printDebug(std::ostream * const out) const
 {
 	*out << "SourceExpression_BranchFor(";
@@ -126,6 +105,27 @@ void SourceExpression_BranchFor::printDebug(std::ostream * const out) const
 		print_debug(out, _exprLoop);
 		*out << ")";
 	*out << ")";
+}
+
+void SourceExpression_BranchFor::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	_exprInit->makeObjectsGet(objects);
+
+	objects->addLabel(_labelCond);
+	_exprCond->makeObjectsGet(objects);
+	objects->setPosition(position);
+	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_labelBreak));
+
+	_exprLoop->makeObjectsGet(objects);
+
+	objects->addLabel(_labelContinue);
+	_exprIter->makeObjectsGet(objects);
+	objects->setPosition(position);
+	objects->addToken(OCODE_BRANCH, objects->getValue(_labelCond));
+
+	objects->addLabel(_labelBreak);
 }
 
 

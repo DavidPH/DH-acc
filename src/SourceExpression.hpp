@@ -56,19 +56,19 @@ public:
 	virtual CounterPointer<ObjectExpression> makeObject() const;
 	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
 
-	virtual void makeObjects(ObjectVector * objects);
+	void makeObjects(ObjectVector * objects);
 
-	virtual void makeObjectsAddress(ObjectVector * objects);
+	void makeObjectsAddress(ObjectVector * objects);
 
-	virtual void makeObjectsCast(ObjectVector * objects, VariableType const * type);
+	void makeObjectsCast(ObjectVector * objects, VariableType const * type);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
-	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
+	void makeObjectsGet(ObjectVector * objects);
+	void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
 
-	virtual void makeObjectsSet(ObjectVector * objects);
-	virtual void makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
-	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names);
+	void makeObjectsSet(ObjectVector * objects);
+	void makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names);
 
 
 
@@ -166,6 +166,20 @@ protected:
 
 private:
 	SourceExpression();
+
+	virtual void virtual_makeObjects(ObjectVector * objects);
+
+	virtual void virtual_makeObjectsAddress(ObjectVector * objects);
+
+	virtual void virtual_makeObjectsCast(ObjectVector * objects, VariableType const * type);
+
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	virtual void virtual_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
+
+	virtual void virtual_makeObjectsSet(ObjectVector * objects);
+	virtual void virtual_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	virtual void virtual_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names);
 
 	std::vector<std::string> _labels;
 

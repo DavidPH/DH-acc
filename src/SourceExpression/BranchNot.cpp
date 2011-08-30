@@ -34,10 +34,11 @@ class SourceExpression_BranchNot : public SourceExpression_Unary
 public:
 	SourceExpression_BranchNot(SourceExpression * expr, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * const out) const;
+
+private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
 };
 
 
@@ -54,18 +55,18 @@ SourceExpression_BranchNot::SourceExpression_BranchNot(SourceExpression * expr, 
 
 }
 
-void SourceExpression_BranchNot::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	objects->addToken(OCODE_LOGICALNOT);
-}
-
 void SourceExpression_BranchNot::printDebug(std::ostream * out) const
 {
 	*out << "SourceExpression_BranchNot(";
 	Super::printDebug(out);
 	*out << ")";
+}
+
+void SourceExpression_BranchNot::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	objects->addToken(OCODE_LOGICALNOT);
 }
 
 

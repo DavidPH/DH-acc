@@ -38,12 +38,12 @@ public:
 
 	virtual VariableType const * getType() const;
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	std::vector<SourceExpression::Pointer> _args;
 	SourceExpression::Pointer _expr;
 	bigsint _stack;
@@ -77,13 +77,6 @@ VariableType const * SourceExpression_BranchCall::getType() const
 	return _expr->getType()->callType;
 }
 
-void SourceExpression_BranchCall::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	make_objects_call(objects, _expr, _args, objects->getValue(_stack), position);
-}
-
 void SourceExpression_BranchCall::printDebug(std::ostream * out) const
 {
 	*out << "SourceExpression_BranchCall(";
@@ -101,5 +94,11 @@ void SourceExpression_BranchCall::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
+void SourceExpression_BranchCall::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	make_objects_call(objects, _expr, _args, objects->getValue(_stack), position);
+}
 
 

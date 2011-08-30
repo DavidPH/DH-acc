@@ -39,12 +39,12 @@ public:
 
 	virtual VariableType const * getType() const;
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	SourceExpression::Pointer _exprCondition;
 	SourceExpression::Pointer _exprIf;
 	SourceExpression::Pointer _exprElse;
@@ -95,28 +95,6 @@ VariableType const * SourceExpression_BranchIf::getType() const
 	return _exprIf->getType();
 }
 
-void SourceExpression_BranchIf::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	_exprCondition->makeObjectsGet(objects);
-	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_exprElse ? _labelElse : _labelEnd));
-
-	objects->addLabel(_labelIf);
-	_exprIf->makeObjectsGet(objects);
-
-	if (_exprElse)
-	{
-		objects->setPosition(position);
-		objects->addToken(OCODE_BRANCH, objects->getValue(_labelEnd));
-		objects->addLabel(_labelElse);
-		_exprElse->makeObjectsGet(objects);
-	}
-
-	objects->addLabel(_labelEnd);
-}
-
 void SourceExpression_BranchIf::printDebug(std::ostream * const out) const
 {
 	*out << "SourceExpression_BranchIf(";
@@ -138,6 +116,28 @@ void SourceExpression_BranchIf::printDebug(std::ostream * const out) const
 		print_debug(out, _exprElse);
 		*out << ")";
 	*out << ")";
+}
+
+void SourceExpression_BranchIf::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	_exprCondition->makeObjectsGet(objects);
+	objects->setPosition(position);
+	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_exprElse ? _labelElse : _labelEnd));
+
+	objects->addLabel(_labelIf);
+	_exprIf->makeObjectsGet(objects);
+
+	if (_exprElse)
+	{
+		objects->setPosition(position);
+		objects->addToken(OCODE_BRANCH, objects->getValue(_labelEnd));
+		objects->addLabel(_labelElse);
+		_exprElse->makeObjectsGet(objects);
+	}
+
+	objects->addLabel(_labelEnd);
 }
 
 

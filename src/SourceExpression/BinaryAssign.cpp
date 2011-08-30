@@ -36,10 +36,11 @@ public:
 
 	virtual bool canMakeObject() const;
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
+
+private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
 };
 
 
@@ -61,7 +62,14 @@ bool SourceExpression_BinaryAssign::canMakeObject() const
 	return false;
 }
 
-void SourceExpression_BinaryAssign::makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BinaryAssign::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpressionDS_BinaryAssign(";
+	Super::printDebug(out);
+	*out << ")";
+}
+
+void SourceExpression_BinaryAssign::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
@@ -78,13 +86,5 @@ void SourceExpression_BinaryAssign::makeObjectsGet(ObjectVector * objects)
 		exprL->makeObjectsGet(objects);
 	}
 }
-
-void SourceExpression_BinaryAssign::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpressionDS_BinaryAssign(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
 
 

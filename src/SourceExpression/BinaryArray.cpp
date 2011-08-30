@@ -40,16 +40,17 @@ public:
 
 	virtual VariableType const * getType() const;
 
-	virtual void makeObjectsAddress(ObjectVector * objects);
-
-	virtual void makeObjectsGet(ObjectVector * objects);
-	virtual void makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
-
-	virtual void makeObjectsSet(ObjectVector * objects);
-	virtual void makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
+
+private:
+	virtual void virtual_makeObjectsAddress(ObjectVector * objects);
+
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+
+	virtual void virtual_makeObjectsSet(ObjectVector * objects);
+	virtual void virtual_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
 };
 
 
@@ -81,7 +82,14 @@ VariableType const * SourceExpression_BinaryArray::getType() const
 	return exprL->getType()->refType;
 }
 
-void SourceExpression_BinaryArray::makeObjectsAddress(ObjectVector * objects)
+void SourceExpression_BinaryArray::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpression_BinaryArray(";
+	Super::printDebug(out);
+	*out << ")";
+}
+
+void SourceExpression_BinaryArray::virtual_makeObjectsAddress(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsAddress(objects);
 
@@ -103,7 +111,7 @@ void SourceExpression_BinaryArray::makeObjectsAddress(ObjectVector * objects)
 	objects->addToken(OCODE_ADD);
 }
 
-void SourceExpression_BinaryArray::makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BinaryArray::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	if (getType()->vt == VariableType::VT_VOID)
 		Super::makeObjectsGet(objects);
@@ -136,7 +144,7 @@ void SourceExpression_BinaryArray::makeObjectsGet(ObjectVector * objects)
 		exprL->makeObjectsGetArray(objects, &dimensions);
 	}
 }
-void SourceExpression_BinaryArray::makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
+void SourceExpression_BinaryArray::virtual_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
 	Super::recurse_makeObjectsGetArray(objects, dimensions);
 
@@ -144,7 +152,7 @@ void SourceExpression_BinaryArray::makeObjectsGetArray(ObjectVector * objects, s
 	exprL->makeObjectsGetArray(objects, dimensions);
 }
 
-void SourceExpression_BinaryArray::makeObjectsSet(ObjectVector * objects)
+void SourceExpression_BinaryArray::virtual_makeObjectsSet(ObjectVector * objects)
 {
 	if (getType()->vt == VariableType::VT_VOID)
 		Super::makeObjectsSet(objects);
@@ -173,19 +181,11 @@ void SourceExpression_BinaryArray::makeObjectsSet(ObjectVector * objects)
 		exprL->makeObjectsSetArray(objects, &dimensions);
 	}
 }
-void SourceExpression_BinaryArray::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
+void SourceExpression_BinaryArray::virtual_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
 	Super::recurse_makeObjectsSetArray(objects, dimensions);
 
 	dimensions->push_back(exprR);
 	exprL->makeObjectsSetArray(objects, dimensions);
 }
-
-void SourceExpression_BinaryArray::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BinaryArray(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
 

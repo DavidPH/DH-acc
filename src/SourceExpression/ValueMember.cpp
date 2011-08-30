@@ -40,18 +40,18 @@ public:
 
 	virtual VariableType const * getType() const;
 
-	virtual void makeObjectsAddress(ObjectVector * objects);
-
-	virtual void makeObjectsGet(ObjectVector * objects);
-	virtual void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
-
-	virtual void makeObjectsSet(ObjectVector * objects);
-	virtual void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsAddress(ObjectVector * objects);
+
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
+
+	virtual void virtual_makeObjectsSet(ObjectVector * objects);
+	virtual void virtual_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names);
+
 	SourceExpression::Pointer _expr;
 	std::string _name;
 };
@@ -80,7 +80,24 @@ VariableType const * SourceExpression_ValueMember::getType() const
 	return _expr->getType()->getType(_name, position);
 }
 
-void SourceExpression_ValueMember::makeObjectsAddress(ObjectVector * objects)
+void SourceExpression_ValueMember::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpression_ValueMember(";
+	Super::printDebug(out);
+	*out << " ";
+		*out << "expr=(";
+		print_debug(out, _expr);
+		*out << ")";
+
+		*out << ", ";
+
+		*out << "name=(";
+		print_debug(out, _name);
+		*out << ")";
+	*out << ")";
+}
+
+void SourceExpression_ValueMember::virtual_makeObjectsAddress(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsAddress(objects);
 
@@ -90,7 +107,7 @@ void SourceExpression_ValueMember::makeObjectsAddress(ObjectVector * objects)
 	objects->addToken(OCODE_ADD);
 }
 
-void SourceExpression_ValueMember::makeObjectsGet(ObjectVector * objects)
+void SourceExpression_ValueMember::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	if (canMakeObjectsAddress())
 	{
@@ -108,7 +125,7 @@ void SourceExpression_ValueMember::makeObjectsGet(ObjectVector * objects)
 		_expr->makeObjectsGetMember(objects, &names);
 	}
 }
-void SourceExpression_ValueMember::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
+void SourceExpression_ValueMember::virtual_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
 	Super::recurse_makeObjectsGetMember(objects, names);
 
@@ -116,7 +133,7 @@ void SourceExpression_ValueMember::makeObjectsGetMember(ObjectVector * objects, 
 	_expr->makeObjectsGetMember(objects, names);
 }
 
-void SourceExpression_ValueMember::makeObjectsSet(ObjectVector * objects)
+void SourceExpression_ValueMember::virtual_makeObjectsSet(ObjectVector * objects)
 {
 	if (canMakeObjectsAddress())
 	{
@@ -137,30 +154,12 @@ void SourceExpression_ValueMember::makeObjectsSet(ObjectVector * objects)
 		_expr->makeObjectsSetMember(objects, &names);
 	}
 }
-void SourceExpression_ValueMember::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
+void SourceExpression_ValueMember::virtual_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
 	Super::recurse_makeObjectsSetMember(objects, names);
 
 	names->push_back(_name);
 	_expr->makeObjectsSetMember(objects, names);
 }
-
-void SourceExpression_ValueMember::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_ValueMember(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expr=(";
-		print_debug(out, _expr);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "name=(";
-		print_debug(out, _name);
-		*out << ")";
-	*out << ")";
-}
-
 
 

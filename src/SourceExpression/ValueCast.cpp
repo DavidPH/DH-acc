@@ -36,12 +36,12 @@ public:
 
 	virtual VariableType const * getType() const;
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	SourceExpression::Pointer _expr;
 	VariableType const * _type;
 };
@@ -65,13 +65,6 @@ VariableType const * SourceExpression_ValueCast::getType() const
 	return _type;
 }
 
-void SourceExpression_ValueCast::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	_expr->makeObjectsCast(objects, _type);
-}
-
 void SourceExpression_ValueCast::printDebug(std::ostream * out) const
 {
 	*out << "SourceExpression_ValueCast(";
@@ -89,5 +82,11 @@ void SourceExpression_ValueCast::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
+void SourceExpression_ValueCast::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	_expr->makeObjectsCast(objects, _type);
+}
 
 

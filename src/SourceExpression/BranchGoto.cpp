@@ -35,12 +35,12 @@ class SourceExpression_BranchGoto : public SourceExpression
 public:
 	SourceExpression_BranchGoto(std::string const & label, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	std::string _label;
 };
 
@@ -66,13 +66,6 @@ SourceExpression_BranchGoto::SourceExpression_BranchGoto(std::string const & lab
 
 }
 
-void SourceExpression_BranchGoto::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	objects->addToken(OCODE_BRANCH, objects->getValue(_label));
-}
-
 void SourceExpression_BranchGoto::printDebug(std::ostream * out) const
 {
 	*out << "SourceExpression_BranchGoto(";
@@ -84,5 +77,11 @@ void SourceExpression_BranchGoto::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
+void SourceExpression_BranchGoto::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	objects->addToken(OCODE_BRANCH, objects->getValue(_label));
+}
 
 

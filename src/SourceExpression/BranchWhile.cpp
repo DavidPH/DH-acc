@@ -35,12 +35,12 @@ class SourceExpression_BranchWhile : public SourceExpression
 public:
 	SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	SourceExpression::Pointer _exprCondition;
 	SourceExpression::Pointer _exprWhile;
 
@@ -66,21 +66,6 @@ SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * ex
 		_exprWhile = create_value_cast(_exprWhile, VariableType::get_vt_void(), position);
 }
 
-void SourceExpression_BranchWhile::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	objects->addLabel(_labelContinue);
-	_exprCondition->makeObjectsGet(objects);
-	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_labelBreak));
-
-	_exprWhile->makeObjectsGet(objects);
-	objects->addToken(OCODE_BRANCH, objects->getValue(_labelContinue));
-
-	objects->addLabel(_labelBreak);
-}
-
 void SourceExpression_BranchWhile::printDebug(std::ostream * const out) const
 {
 	*out << "SourceExpression_BranchWhile(";
@@ -96,6 +81,21 @@ void SourceExpression_BranchWhile::printDebug(std::ostream * const out) const
 		print_debug(out, _exprWhile);
 		*out << ")";
 	*out << ")";
+}
+
+void SourceExpression_BranchWhile::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	objects->addLabel(_labelContinue);
+	_exprCondition->makeObjectsGet(objects);
+	objects->setPosition(position);
+	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_labelBreak));
+
+	_exprWhile->makeObjectsGet(objects);
+	objects->addToken(OCODE_BRANCH, objects->getValue(_labelContinue));
+
+	objects->addLabel(_labelBreak);
 }
 
 

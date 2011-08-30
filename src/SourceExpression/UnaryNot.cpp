@@ -34,10 +34,11 @@ class SourceExpression_UnaryNot : public SourceExpression_Unary
 public:
 	SourceExpression_UnaryNot(SourceExpression * expr, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * const out) const;
+
+private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
 };
 
 
@@ -54,7 +55,14 @@ SourceExpression_UnaryNot::SourceExpression_UnaryNot(SourceExpression * expr, So
 
 }
 
-void SourceExpression_UnaryNot::makeObjectsGet(ObjectVector * objects)
+void SourceExpression_UnaryNot::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpression_UnaryNot(";
+	Super::printDebug(out);
+	*out << ")";
+}
+
+void SourceExpression_UnaryNot::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
@@ -70,13 +78,5 @@ void SourceExpression_UnaryNot::makeObjectsGet(ObjectVector * objects)
 		throw SourceException("invalid VT", position, getName());
 	}
 }
-
-void SourceExpression_UnaryNot::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_UnaryNot(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
 
 

@@ -36,15 +36,15 @@ class SourceExpression_UnaryDecInc : public SourceExpression_Unary
 public:
 	SourceExpression_UnaryDecInc(SourceExpression * expr, bool inc, bool suf, SourcePosition const & position);
 
-	virtual void makeObjects(ObjectVector * objects);
-
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
 	void doDecInc(ObjectVector * objects, bool inc);
+
+	virtual void virtual_makeObjects(ObjectVector * objects);
+
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
 
 	bool _inc;
 	bool _suf;
@@ -100,7 +100,23 @@ void SourceExpression_UnaryDecInc::doDecInc(ObjectVector * objects, bool inc)
 	objects->addToken(inc ? OCODE_ADD : OCODE_SUB);
 }
 
-void SourceExpression_UnaryDecInc::makeObjects(ObjectVector * objects)
+void SourceExpression_UnaryDecInc::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpression_UnaryDecInc(";
+	Super::printDebug(out);
+		*out << "inc=(";
+		print_debug(out, _inc);
+		*out << ")";
+
+		*out << ", ";
+
+		*out << "suf=(";
+		print_debug(out, _suf);
+		*out << ")";
+	*out << ")";
+}
+
+void SourceExpression_UnaryDecInc::virtual_makeObjects(ObjectVector * objects)
 {
 	// Only modify for the first evaluation.
 	// Note that _suf is irrelevant, since nothing is yielded to stack.
@@ -120,7 +136,7 @@ void SourceExpression_UnaryDecInc::makeObjects(ObjectVector * objects)
 	}
 }
 
-void SourceExpression_UnaryDecInc::makeObjectsGet(ObjectVector * objects)
+void SourceExpression_UnaryDecInc::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
@@ -140,22 +156,6 @@ void SourceExpression_UnaryDecInc::makeObjectsGet(ObjectVector * objects)
 	{
 		doDecInc(objects, !_inc);
 	}
-}
-
-void SourceExpression_UnaryDecInc::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_UnaryDecInc(";
-	Super::printDebug(out);
-		*out << "inc=(";
-		print_debug(out, _inc);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "suf=(";
-		print_debug(out, _suf);
-		*out << ")";
-	*out << ")";
 }
 
 

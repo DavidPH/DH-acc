@@ -37,16 +37,16 @@ public:
 
 	virtual VariableType const * getType() const;
 
-	virtual void makeObjects(ObjectVector * objects);
-
-	virtual void makeObjectsCast(ObjectVector * objects, VariableType const * type);
-
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjects(ObjectVector * objects);
+
+	virtual void virtual_makeObjectsCast(ObjectVector * objects, VariableType const * type);
+
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	std::vector<SourceExpression::Pointer> _expressions;
 	VariableType const * _type;
 };
@@ -75,40 +75,6 @@ VariableType const * SourceExpression_ValueBlock::getType() const
 	return _type;
 }
 
-void SourceExpression_ValueBlock::makeObjects(ObjectVector * objects)
-{
-	Super::recurse_makeObjects(objects);
-
-	for (size_t i(0); i < _expressions.size(); ++i)
-		_expressions[i]->makeObjects(objects);
-}
-
-void SourceExpression_ValueBlock::makeObjectsCast(ObjectVector * objects, VariableType const * type)
-{
-	if (type->vt == VariableType::VT_VOID)
-	{
-		makeObjects(objects);
-	}
-	else
-	{
-		Super::recurse_makeObjectsCast(objects, type);
-
-		if (_expressions.size() != type->types.size())
-			throw SourceException("incorrect number of expressions to cast", position, getName());
-
-		for (size_t i(0); i < _expressions.size(); ++i)
-			_expressions[i]->makeObjectsCast(objects, type->types[i]);
-	}
-}
-
-void SourceExpression_ValueBlock::makeObjectsGet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-
-	for (size_t i(0); i < _expressions.size(); ++i)
-		_expressions[i]->makeObjectsGet(objects);
-}
-
 void SourceExpression_ValueBlock::printDebug(std::ostream * out) const
 {
 	*out << "SourceExpression_ValueBlock(";
@@ -126,5 +92,38 @@ void SourceExpression_ValueBlock::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
+void SourceExpression_ValueBlock::virtual_makeObjects(ObjectVector * objects)
+{
+	Super::recurse_makeObjects(objects);
+
+	for (size_t i(0); i < _expressions.size(); ++i)
+		_expressions[i]->makeObjects(objects);
+}
+
+void SourceExpression_ValueBlock::virtual_makeObjectsCast(ObjectVector * objects, VariableType const * type)
+{
+	if (type->vt == VariableType::VT_VOID)
+	{
+		makeObjects(objects);
+	}
+	else
+	{
+		Super::recurse_makeObjectsCast(objects, type);
+
+		if (_expressions.size() != type->types.size())
+			throw SourceException("incorrect number of expressions to cast", position, getName());
+
+		for (size_t i(0); i < _expressions.size(); ++i)
+			_expressions[i]->makeObjectsCast(objects, type->types[i]);
+	}
+}
+
+void SourceExpression_ValueBlock::virtual_makeObjectsGet(ObjectVector * objects)
+{
+	Super::recurse_makeObjectsGet(objects);
+
+	for (size_t i(0); i < _expressions.size(); ++i)
+		_expressions[i]->makeObjectsGet(objects);
+}
 
 

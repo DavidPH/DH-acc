@@ -34,10 +34,11 @@ class SourceExpression_BinaryLE : public SourceExpression_BinaryCompare
 public:
 	SourceExpression_BinaryLE(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
+
+private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
 };
 
 
@@ -54,7 +55,14 @@ SourceExpression_BinaryLE::SourceExpression_BinaryLE(SourceExpression * exprL, S
 
 }
 
-void SourceExpression_BinaryLE::makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BinaryLE::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpression_BinaryLE(";
+	Super::printDebug(out);
+	*out << ")";
+}
+
+void SourceExpression_BinaryLE::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
@@ -76,13 +84,5 @@ void SourceExpression_BinaryLE::makeObjectsGet(ObjectVector * objects)
 		throw SourceException("invalid VT", position, getName());
 	}
 }
-
-void SourceExpression_BinaryLE::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BinaryLE(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
 
 

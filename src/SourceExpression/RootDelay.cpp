@@ -35,12 +35,12 @@ class SourceExpression_RootDelay : public SourceExpression
 public:
 	SourceExpression_RootDelay(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 
-	virtual void makeObjectsGet(ObjectVector * objects);
-
 protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
 	SourceExpression::Pointer _expr;
 	bigsint _stack;
 };
@@ -60,7 +60,18 @@ SourceExpression_RootDelay::SourceExpression_RootDelay(SourceExpression * expr, 
 		_expr = create_value_cast(_expr, VariableType::get_vt_int(), position);
 }
 
-void SourceExpression_RootDelay::makeObjectsGet(ObjectVector * objects)
+void SourceExpression_RootDelay::printDebug(std::ostream * out) const
+{
+	*out << "SourceExpression_RootDelay(";
+	Super::printDebug(out);
+	*out << " ";
+		*out << "expr=(";
+		print_debug(out, _expr);
+		*out << ")";
+	*out << ")";
+}
+
+void SourceExpression_RootDelay::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
@@ -72,17 +83,6 @@ void SourceExpression_RootDelay::makeObjectsGet(ObjectVector * objects)
 	objects->addToken(OCODE_ADDSTACK_IMM, stack);
 	objects->addToken(OCODE_DELAY);
 	objects->addToken(OCODE_SUBSTACK_IMM, stack);
-}
-
-void SourceExpression_RootDelay::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_RootDelay(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expr=(";
-		print_debug(out, _expr);
-		*out << ")";
-	*out << ")";
 }
 
 
