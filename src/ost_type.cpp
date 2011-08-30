@@ -30,63 +30,61 @@ OutputType output_type(OUTPUT_UNKNOWN);
 SourceType source_type(SOURCE_UNKNOWN);
 TargetType target_type(TARGET_UNKNOWN);
 
-bool handle_output(char const * name, char const * arg, bool barg, option::option_s * data)
+option_auto<OutputType> option_output_type("source", "input", "Format of source file(s).", &output_type);
+option_auto<SourceType> option_source_type("target", "output", "Target game.", &source_type);
+option_auto<TargetType> option_target_type("output", "output", "Output type.", &target_type);
+
+
+
+template<> OutputType option_auto<OutputType>::parse(std::string const & name, std::string const & arg)
 {
-	option::option_assert_arg(name, arg);
-
-	std::string args(arg);
-
-	if (args == "ACS0")
-		output_type = OUTPUT_ACS0;
-	else if (args == "ACSE")
-		output_type = OUTPUT_ACSE;
-	else if (args == "object")
-		output_type = OUTPUT_object;
+	if (arg == "ACS0")
+		return OUTPUT_ACS0;
+	else if (arg == "ACSE")
+		return OUTPUT_ACSE;
+	else if (arg == "object")
+		return OUTPUT_object;
 	else
-		throw option::option_exception(name, arg, "unknown type");
+		throw exception(name, arg, "unknown type");
+}
+template<> SourceType option_auto<SourceType>::parse(std::string const & name, std::string const & arg)
+{
+	if (arg == "ASMPLX")
+		return SOURCE_ASMPLX;
+	else if (arg == "DS")
+		return SOURCE_DS;
+	else if (arg == "object")
+		return SOURCE_object;
+	else
+		throw exception(name, arg, "unknown type");
+}
+template<> TargetType option_auto<TargetType>::parse(std::string const & name, std::string const & arg)
+{
+	if (arg == "Hexen")
+		return TARGET_Hexen;
+	else if (arg == "ZDoom")
+		return TARGET_ZDoom;
+	else
+		throw exception(name, arg, "unknown type");
+}
+
+template<> bool option_auto<OutputType>::handler_default(std::string const & name, std::string const & arg, bool barg, OutputType * data)
+{
+	*data = parse(name, arg);
 
 	return true;
 }
-bool handle_source(char const * name, char const * arg, bool barg, option::option_s * data)
+template<> bool option_auto<SourceType>::handler_default(std::string const & name, std::string const & arg, bool barg, SourceType * data)
 {
-	option::option_assert_arg(name, arg);
-
-	std::string args(arg);
-
-	if (args == "ASMPLX")
-		source_type = SOURCE_ASMPLX;
-	else if (args == "DS")
-		source_type = SOURCE_DS;
-	else if (args == "object")
-		source_type = SOURCE_object;
-	else
-		throw option::option_exception(name, arg, "unknown type");
+	*data = parse(name, arg);
 
 	return true;
 }
-bool handle_target(char const * name, char const * arg, bool barg, option::option_s * data)
+template<> bool option_auto<TargetType>::handler_default(std::string const & name, std::string const & arg, bool barg, TargetType * data)
 {
-	option::option_assert_arg(name, arg);
-
-	std::string args(arg);
-
-	if (args == "Hexen")
-		target_type = TARGET_Hexen;
-	else if (args == "ZDoom")
-		target_type = TARGET_ZDoom;
-	else
-		throw option::option_exception(name, arg, "unknown type");
+	*data = parse(name, arg);
 
 	return true;
 }
-
-void ost_init()
-{
-	option::option_add("source", "input", "Format of source file(s).", NULL, handle_source);
-
-	option::option_add("target", "output", "Target game.", NULL, handle_target);
-	option::option_add("output", "output", "Output type.", NULL, handle_output);
-}
-
 
 

@@ -57,11 +57,6 @@ extern TargetType target_type;
 
 
 
-void ost_init();
-
-
-
 #endif /* HPP_ost_type_ */
-
 
 

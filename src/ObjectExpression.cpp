@@ -61,7 +61,7 @@ std::vector<ObjectData_String> ObjectExpression::_string_table;
 std::map<std::string, ObjectExpression::Pointer>        ObjectExpression::_symbol_table;
 std::map<std::string, ObjectExpression::ExpressionType> ObjectExpression::_symbol_type_table;
 
-option::option_b option_string_fold(false);
+option_data<bool> option_string_fold("string-fold", "optimization", "Removes duplicate strings.", false);
 
 
 
@@ -362,11 +362,6 @@ SourcePosition const & ObjectExpression::getPosition() const
 	return position;
 }
 
-void ObjectExpression::init()
-{
-	option::option_add("string-fold", "optimization", "Removes duplicate strings.", &option_string_fold, option::option_handler_default_b);
-}
-
 bool ObjectExpression::is_register_used(std::map<bigsint, bool> * registerUsed, bigsint number, bigsint size)
 {
 	if (size == 0) return false;
@@ -419,6 +414,5 @@ void print_debug(std::ostream * out, ObjectExpression const & in)
 {
 	in.printDebug(out);
 }
-
 
 

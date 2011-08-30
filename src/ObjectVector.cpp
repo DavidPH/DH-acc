@@ -28,16 +28,8 @@
 
 
 
-option::option_b option_opt_nop(false);
-option::option_b option_opt_pushdrop(true);
-
-static struct _ObjectVector_init_s {_ObjectVector_init_s();} _ObjectVector_init;
-
-_ObjectVector_init_s::_ObjectVector_init_s()
-{
-	option::option_add("opt-nop", "optimization", "Strips NOP instructions.", &option_opt_nop, option::option_handler_default_b);
-	option::option_add("opt-pushdrop", "optimization", "Strips PUSH/DROP pairs. On by default.", &option_opt_pushdrop, option::option_handler_default_b);
-}
+option_data<bool> option_opt_nop("opt-nop", "optimization", "Strips NOP instructions.", false);
+option_data<bool> option_opt_pushdrop("opt-pushdrop", "optimization", "Strips PUSH/DROP pairs. On by default.", true);
 
 
 
@@ -129,7 +121,7 @@ void ObjectVector::optimize()
 {
 	// NOP removal.
 	// Off by default because NOPs do not normally get generated.
-	if (option_opt_pushdrop) for(size_t i(0); i+1 < _tokens.size();)
+	if (option_opt_pushdrop.data) for(size_t i(0); i+1 < _tokens.size();)
 	{
 		if (_tokens[i].getCode() == OCODE_NOP)
 		{
@@ -149,7 +141,7 @@ void ObjectVector::optimize()
 	}
 
 	// PUSH/DROP removal.
-	if (option_opt_pushdrop) for(size_t i(0); i+2 < _tokens.size();)
+	if (option_opt_pushdrop.data) for(size_t i(0); i+2 < _tokens.size();)
 	{
 		if (ocode_is_push(_tokens[i].getCode()) && _tokens[i+1].getCode() == OCODE_DROP)
 		{

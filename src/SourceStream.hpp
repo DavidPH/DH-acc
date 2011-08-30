@@ -63,10 +63,6 @@ public:
 
 	void unget(char const c);
 
-
-
-	static void init();
-
 private:
 	int getC();
 
@@ -98,6 +94,5 @@ private:
 
 
 #endif /* HPP_SourceStream_ */
-
 
 

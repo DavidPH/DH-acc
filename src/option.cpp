@@ -22,267 +22,228 @@
 #include "option.hpp"
 
 #include <map>
+#include <set>
 
-namespace option
+
+
+std::string const option::no_arg("\0\0\0NO\0\0_\0\0ARG\0\0\0", 16);
+
+std::string option::program;
+std::string option::usage;
+std::string option::version;
+
+typedef std::map<std::string, option *> _option_map_type;
+static inline _option_map_type & _option_map()
 {
+	static _option_map_type option_map;
 
-
-
-union option_u
-{
-	option_b * b;
-	option_f * f;
-	option_i * i;
-	option_s * s;
-
-	option_bv * bv;
-	option_fv * fv;
-	option_iv * iv;
-	option_sv * sv;
-};
-
-union option_handler_u
-{
-	option_handler_b b;
-	option_handler_f f;
-	option_handler_i i;
-	option_handler_s s;
-
-	option_handler_bv bv;
-	option_handler_fv fv;
-	option_handler_iv iv;
-	option_handler_sv sv;
-};
-
-struct option
-{
-	option();
-
-	option(option_b * data, option_handler_b handler, char const * desc, char const * name);
-	option(option_f * data, option_handler_f handler, char const * desc, char const * name);
-	option(option_i * data, option_handler_i handler, char const * desc, char const * name);
-	option(option_s * data, option_handler_s handler, char const * desc, char const * name);
-
-	option(option_bv * data, option_handler_bv handler, char const * desc, char const * name);
-	option(option_fv * data, option_handler_fv handler, char const * desc, char const * name);
-	option(option_iv * data, option_handler_iv handler, char const * desc, char const * name);
-	option(option_sv * data, option_handler_sv handler, char const * desc, char const * name);
-
-	enum option_t
-	{
-		OPT_B,
-		OPT_F,
-		OPT_I,
-		OPT_S,
-
-		OPT_BV,
-		OPT_FV,
-		OPT_IV,
-		OPT_SV
-	};
-
-	option_t type;
-	option_u data;
-	option_handler_u handler;
-
-	std::string desc;
-	std::string name;
-};
-
-
-
-static std::map<std::string, std::map<std::string, option> > & option_map();
-
-static std::string option_name;
-static std::string option_usage;
-static std::string option_version;
-
-option_sv         option_args;
-option_handler_sv option_args_handler(option_handler_default_sv);
-
-
-
-option::option()
-{
-
+	return option_map;
 }
+typedef std::set<option *, bool (*)(option *, option *)> _option_set_type;
+static inline _option_set_type & _option_set()
+{
+	static _option_set_type option_set(option::less);
 
-option::option(option_b * data, option_handler_b handler, char const * desc, char const * name) : type(OPT_B), desc(desc), name(name)
-{
-	this->data.b    = data;
-	this->handler.b = handler;
-}
-option::option(option_f * data, option_handler_f handler, char const * desc, char const * name) : type(OPT_F), desc(desc), name(name)
-{
-	this->data.f    = data;
-	this->handler.f = handler;
-}
-option::option(option_i * data, option_handler_i handler, char const * desc, char const * name) : type(OPT_I), desc(desc), name(name)
-{
-	this->data.i    = data;
-	this->handler.i = handler;
-}
-option::option(option_s * data, option_handler_s handler, char const * desc, char const * name) : type(OPT_S), desc(desc), name(name)
-{
-	this->data.s    = data;
-	this->handler.s = handler;
-}
-
-option::option(option_bv * data, option_handler_bv handler, char const * desc, char const * name) : type(OPT_BV), desc(desc), name(name)
-{
-	this->data.bv    = data;
-	this->handler.bv = handler;
-}
-option::option(option_fv * data, option_handler_fv handler, char const * desc, char const * name) : type(OPT_FV), desc(desc), name(name)
-{
-	this->data.fv    = data;
-	this->handler.fv = handler;
-}
-option::option(option_iv * data, option_handler_iv handler, char const * desc, char const * name) : type(OPT_IV), desc(desc), name(name)
-{
-	this->data.iv    = data;
-	this->handler.iv = handler;
-}
-option::option(option_sv * data, option_handler_sv handler, char const * desc, char const * name) : type(OPT_SV), desc(desc), name(name)
-{
-	this->data.sv    = data;
-	this->handler.sv = handler;
+	return option_set;
 }
 
 
 
-option_exception::option_exception(char const * name, char const * arg, char const * description) : _what(std::string("(--") + name + "=" + arg + "): " + description)
+option::exception::exception(std::string const & name, std::string const & description) : _what("(--" + name + "): " + description)
 {
 
 }
-option_exception::option_exception(char const * name, char const * description) : _what(std::string("(--") + name + "): " + description)
+option::exception::exception(std::string const & name, std::string const & arg, std::string const & description) : _what("(--" + name + "=" + arg + "): " + description)
 {
 
 }
-option_exception::~option_exception() throw()
+option::exception::~exception() throw()
 {
 
 }
 
-char const * option_exception::what()
+char const * option::exception::what()
 {
 	return _what.c_str();
 }
 
 
 
-void option_add(char const * name, char const * group, char const * description, option_b * data, option_handler_b handler)
+option::option(std::string const & name, std::string const & group, std::string const & description) : description(description), group(group), name(name)
 {
-	option_map()[group][name] = option(data, handler, description, name);
+	_option_map()[name] = this;
+	_option_set().insert(this);
 }
-void option_add(char const * name, char const * group, char const * description, option_f * data, option_handler_f handler)
+option::~option()
 {
-	option_map()[group][name] = option(data, handler, description, name);
-}
-void option_add(char const * name, char const * group, char const * description, option_i * data, option_handler_i handler)
-{
-	option_map()[group][name] = option(data, handler, description, name);
-}
-void option_add(char const * name, char const * group, char const * description, option_s * data, option_handler_s handler)
-{
-	option_map()[group][name] = option(data, handler, description, name);
+	_option_map().erase(name);
+	_option_set().erase(this);
 }
 
-void option_add(char const * name, char const * group, char const * description, option_bv * data, option_handler_bv handler)
+void option::assert_arg(std::string const & name, std::string const & arg)
 {
-	option_map()[group][name] = option(data, handler, description, name);
-}
-void option_add(char const * name, char const * group, char const * description, option_fv * data, option_handler_fv handler)
-{
-	option_map()[group][name] = option(data, handler, description, name);
-}
-void option_add(char const * name, char const * group, char const * description, option_iv * data, option_handler_iv handler)
-{
-	option_map()[group][name] = option(data, handler, description, name);
-}
-void option_add(char const * name, char const * group, char const * description, option_sv * data, option_handler_sv handler)
-{
-	option_map()[group][name] = option(data, handler, description, name);
+	if (arg == no_arg)
+		throw exception(name, "missing argument");
 }
 
-void option_assert_arg(char const * name, char const * arg)
+bool option::less(option * l, option * r)
 {
-	if (!arg) throw option_exception(name, "no arg");
+	if (l->group < r->group) return true;
+	if (l->group > r->group) return false;
+
+	return l->name < r->name;
 }
 
-bool option_handler_default_b(char const * name, char const * arg, bool barg, option_b * data)
+void option::print_help(std::ostream * out)
 {
-	*data = barg;
-
-	return false;
+	print_help(out, 80);
 }
-bool option_handler_default_f(char const * name, char const * arg, bool barg, option_f * data)
+void option::print_help(std::ostream * out, int width)
 {
-	*data = option_parse_f(name, arg);
+	if (!program.empty())
+	{
+		if (version.empty())
+			*out << program << std::endl;
+		else
+			*out << program << " " << version << std::endl;
 
-	return true;
-}
-bool option_handler_default_i(char const * name, char const * arg, bool barg, option_i * data)
-{
-	*data = option_parse_i(name, arg);
+		if (!usage.empty())
+			*out << "usage: " << program << " " << usage << std::endl;
+	}
 
-	return true;
-}
-bool option_handler_default_s(char const * name, char const * arg, bool barg, option_s * data)
-{
-	option_assert_arg(name, arg);
+	typedef _option_set_type::const_iterator optIt_t;
 
-	*data = arg;
+	_option_set_type const & optSet(_option_set());
+	optIt_t optBegin(optSet.begin());
+	optIt_t optEnd(optSet.end());
 
-	return true;
-}
+	std::string group;
+	int padlen;
 
-bool option_handler_default_bv(char const * name, char const * arg, bool barg, option_bv * data)
-{
-	data->push_back(barg);
+	for (optIt_t optIt(optBegin); optIt != optEnd; ++optIt)
+	{
+		option * opt(*optIt);
 
-	return false;
-}
-bool option_handler_default_fv(char const * name, char const * arg, bool barg, option_fv * data)
-{
-	data->push_back(option_parse_f(name, arg));
+		if (opt->group != group)
+		{
+			if (!group.empty()) *out << std::endl;
 
-	return true;
-}
-bool option_handler_default_iv(char const * name, char const * arg, bool barg, option_iv * data)
-{
-	data->push_back(option_parse_i(name, arg));
+			*out << (group = opt->group) << ':' << std::endl;
 
-	return true;
-}
-bool option_handler_default_sv(char const * name, char const * arg, bool barg, option_sv * data)
-{
-	option_assert_arg(name, arg);
+			padlen = 0;
+			for (optIt_t grpIt(optIt); grpIt != optEnd; ++grpIt)
+			{
+				option * grp(*grpIt);
 
-	data->push_back(arg);
+				if (grp->group != group) break;
 
-	return true;
-}
+				int len((int)grp->name.size());
 
-static std::map<std::string, std::map<std::string, option> > & option_map()
-{
-	static std::map<std::string, std::map<std::string, option> > _option_map;
+				if (len > padlen) padlen = len;
+			}
 
-	return _option_map;
+			// Normal prefix+suffix length.
+			padlen += 6;
+		}
+
+		opt->printHelp(out, width, padlen);
+	}
 }
 
-option_f option_parse_f(char const * name, char const * arg)
+void option::printHelp(std::ostream * out, int width, int padlen)
 {
-	option_assert_arg(name, arg);
+	*out << "  --" << name;
+	int len(4 + (int)name.size());
+	while (len++ < padlen) *out << ' '; --len;
 
-	option_f f(0);
+	for (std::string::iterator it(description.begin()); it != description.end(); ++it)
+	{
+		if (++len > width)
+		{
+			*out << std::endl;
+			len = 0;
+			while (len++ < padlen) *out << ' ';
+		}
 
-	char const * s(arg);
+		*out << *it;
+	}
+	*out << std::endl;
+}
+
+void option::process(int argc, char const * const * argv)
+{
+	std::vector<std::string> args;
+	args.reserve(argc);
+
+	for (int i(0); i < argc; ++i)
+		args.push_back(argv[i]);
+
+	process(args);
+}
+bool option::process(std::string const & name, std::string const & arg)
+{
+	char const * name_c(name.c_str());
+
+	if (name_c[0] != '-' || name_c[1] != '-')
+	{
+		args_handler(name, name, true, &args_vector);
+		return false;
+	}
+
+	bool arg_used(true);
+	char const * arg_c(arg.c_str());
+
+	name_c += 2;
+
+	if (arg_c[0] == '-' && arg_c[1] == '-')
+		arg_c = NULL;
+
+	bool barg(true);
+
+	if (name_c[0] == 'n' && name_c[1] == 'o' && name_c[2] == '-')
+	{
+		barg = false;
+		name_c += 3;
+	}
+
+	arg_used = arg_used && arg_c;
+	std::string arg_s(arg_c ? (std::string)arg_c : no_arg);
+
+	std::string name_s(name_c);
+
+	_option_map_type::iterator optIt(_option_map().find(name_s));
+
+	if (optIt != _option_map().end())
+	{
+		return optIt->second->handle(name_s, arg_c, barg) && arg_used;
+	}
+
+	throw exception(name, "unknown name");
+}
+void option::process(std::vector<std::string> const & args)
+{
+	for (std::vector<std::string>::size_type argi(0), argn(1), argc(args.size()); argi < argc; ++argi)
+	{
+		argn = argi + 1;
+
+		argi += process(args[argi], (argn < argc) ? args[argn] : no_arg);
+	}
+}
+
+
+
+template<> float option_auto<float>::parse(std::string const & name, std::string const & arg)
+{
+	assert_arg(name, arg);
+
+	float f(0);
+
+	char const * s(arg.c_str());
 
 	for (; *s && *s != '.'; ++s)
 	{
 		if (!isdigit(*s))
-			throw option_exception(name, arg, "invalid float");
+			throw exception(name, arg, "invalid float");
 
 		f *= 10;
 		f += *s - '0';
@@ -292,12 +253,12 @@ option_f option_parse_f(char const * name, char const * arg)
 	{
 		while (*++s);
 
-		option_f fFrac(0);
+		float fFrac(0);
 
 		while (*--s != '.')
 		{
 			if (!isdigit(*s))
-				throw option_exception(name, arg, "invalid float");
+				throw exception(name, arg, "invalid float");
 
 			fFrac += *s - '0';
 			fFrac /= 10;
@@ -306,16 +267,17 @@ option_f option_parse_f(char const * name, char const * arg)
 
 	return f;
 }
-option_i option_parse_i(char const * name, char const * arg)
+
+template<> int option_auto<int>::parse(std::string const & name, std::string const & arg)
 {
-	option_assert_arg(name, arg);
+	assert_arg(name, arg);
 
-	option_i i(0);
+	int i(0);
 
-	for (char const * s(arg); *s; ++s)
+	for (char const * s(arg.c_str()); *s; ++s)
 	{
 		if (!isdigit(*s))
-			throw option_exception(name, arg, "invalid int");
+			throw exception(name, arg, "invalid int");
 
 		i *= 10;
 		i += *s - '0';
@@ -324,250 +286,45 @@ option_i option_parse_i(char const * name, char const * arg)
 	return i;
 }
 
-void option_print(std::ostream * out, option const & opt)
+template<> bool option_auto<bool>::handler_default(std::string const & name, std::string const & arg, bool barg, bool * data)
 {
-	switch (opt.type)
-	{
-	case option::OPT_B:  if (opt.data.b ) option_print(out, opt.data.b ); break;
-	case option::OPT_F:  if (opt.data.f ) option_print(out, opt.data.f ); break;
-	case option::OPT_I:  if (opt.data.i ) option_print(out, opt.data.i ); break;
-	case option::OPT_S:  if (opt.data.s ) option_print(out, opt.data.s ); break;
-	case option::OPT_BV: if (opt.data.bv) option_print(out, opt.data.bv); break;
-	case option::OPT_FV: if (opt.data.fv) option_print(out, opt.data.fv); break;
-	case option::OPT_IV: if (opt.data.iv) option_print(out, opt.data.iv); break;
-	case option::OPT_SV: if (opt.data.sv) option_print(out, opt.data.sv); break;
-	}
+	*data = barg;
+
+	return false;
 }
-void option_print(std::ostream * out, option_b data)
+template<> bool option_auto<float>::handler_default(std::string const & name, std::string const & arg, bool barg, float * data)
 {
-	*out << (data ? "true" : "false");
+	*data = parse(name, arg);
+
+	return true;
 }
-void option_print(std::ostream * out, option_f data)
+template<> bool option_auto<int>::handler_default(std::string const & name, std::string const & arg, bool barg, int * data)
 {
-	*out << data;
+	*data = parse(name, arg);
+
+	return true;
 }
-void option_print(std::ostream * out, option_i data)
+template<> bool option_auto<std::string>::handler_default(std::string const & name, std::string const & arg, bool barg, std::string * data)
 {
-	*out << data;
+	assert_arg(name, arg);
+
+	*data = arg;
+
+	return true;
 }
-void option_print(std::ostream * out, option_s const & data)
+template<> bool option_auto<std::vector<std::string> >::handler_default(std::string const & name, std::string const & arg, bool barg, std::vector<std::string> * data)
 {
-	*out << data;
-}
-void option_print(std::ostream * out, option_bv const & data)
-{
-	*out << "{";
+	assert_arg(name, arg);
 
-	for (size_t i(0); i < data.size(); ++i)
-	{
-		option_print(out, data[i]);
+	data->push_back(arg);
 
-		if (i != data.size()-1)
-			*out << ", ";
-	}
-
-	*out << "}";
-}
-void option_print(std::ostream * out, option_fv const & data)
-{
-	*out << "{";
-
-	for (size_t i(0); i < data.size(); ++i)
-	{
-		option_print(out, data[i]);
-
-		if (i != data.size()-1)
-			*out << ", ";
-	}
-
-	*out << "}";
-}
-void option_print(std::ostream * out, option_iv const & data)
-{
-	*out << "{";
-
-	for (size_t i(0); i < data.size(); ++i)
-	{
-		option_print(out, data[i]);
-
-		if (i != data.size()-1)
-			*out << ", ";
-	}
-
-	*out << "}";
-}
-void option_print(std::ostream * out, option_sv const & data)
-{
-	*out << "{";
-
-	for (size_t i(0); i < data.size(); ++i)
-	{
-		option_print(out, data[i]);
-
-		if (i != data.size()-1)
-			*out << ", ";
-	}
-
-	*out << "}";
-}
-
-void option_print_help(std::ostream * out)
-{
-	if (!option_name.empty())
-	{
-		if (option_version.empty())
-			*out << option_name << std::endl;
-		else
-			*out << option_name << " " << option_version << std::endl;
-
-		if (!option_usage.empty())
-			*out << "usage: " << option_name << " " << option_usage << std::endl;
-	}
-
-	for (std::map<std::string, std::map<std::string, option> >::iterator groupIt(option_map().begin()); groupIt != option_map().end(); ++groupIt)
-	{
-		*out << groupIt->first << ":" << std::endl;
-
-		std::map<std::string, option> & group(groupIt->second);
-
-		size_t optLen(0);
-
-		for (std::map<std::string, option>::iterator optIt(group.begin()); optIt != group.end(); ++optIt)
-		{
-			if (optIt->first.size() > optLen)
-				optLen = optIt->first.size();
-		}
-
-		for (std::map<std::string, option>::iterator optIt(group.begin()); optIt != group.end(); ++optIt)
-		{
-			*out << "  --" << optIt->first << " ";
-
-			option & opt(optIt->second);
-
-			switch (opt.type)
-			{
-			case option::OPT_B:  *out << "b "; break;
-			case option::OPT_F:  *out << "f "; break;
-			case option::OPT_I:  *out << "i "; break;
-			case option::OPT_S:  *out << "s "; break;
-			case option::OPT_BV: *out << "bv"; break;
-			case option::OPT_FV: *out << "fv"; break;
-			case option::OPT_IV: *out << "iv"; break;
-			case option::OPT_SV: *out << "sv"; break;
-			}
-
-			for (size_t i(optIt->first.size()); i < optLen; ++i)
-				out->put(' ');
-
-			*out << "  " << opt.desc << std::endl;
-		}
-
-		*out << std::endl;
-	}
-
-	*out << std::endl;
-}
-
-void option_print_values(std::ostream * out)
-{
-	*out << "args=";
-	option_print(out, option_args);
-	*out << std::endl;
-
-	for (std::map<std::string, std::map<std::string, option> >::iterator groupIt(option_map().begin()); groupIt != option_map().end(); ++groupIt)
-	{
-		*out << groupIt->first << ":" << std::endl;
-
-		std::map<std::string, option> & group(groupIt->second);
-
-		for (std::map<std::string, option>::iterator optIt(group.begin()); optIt != group.end(); ++optIt)
-		{
-			*out << "  --" << optIt->first << "=";
-
-			option_print(out, optIt->second);
-
-			*out << std::endl;
-		}
-
-		*out << std::endl;
-	}
-
-	*out << std::endl;
-}
-
-bool option_process(char const * name, char const * arg)
-{
-	if (name[0] != '-' || name[1] != '-')
-	{
-		option_args_handler(name, name, true, &option_args);
-		return false;
-	}
-
-	name += 2;
-
-	if (arg && arg[0] == '-' && arg[1] == '-')
-		arg = NULL;
-
-	bool barg(true);
-
-	if (name[0] == 'n' && name[1] == 'o' && name[2] == '-')
-	{
-		barg = false;
-		name += 3;
-	}
-
-	for (std::map<std::string, std::map<std::string, option> >::iterator groupIt(option_map().begin()); groupIt != option_map().end(); ++groupIt)
-	{
-		std::map<std::string, option> & group(groupIt->second);
-
-		std::map<std::string, option>::iterator optIt(group.find(name));
-
-		if (optIt != group.end())
-		{
-			option & opt(optIt->second);
-
-			switch (opt.type)
-			{
-			case option::OPT_B: return opt.handler.b(name, arg, barg, opt.data.b);
-			case option::OPT_F: return opt.handler.f(name, arg, barg, opt.data.f);
-			case option::OPT_I: return opt.handler.i(name, arg, barg, opt.data.i);
-			case option::OPT_S: return opt.handler.s(name, arg, barg, opt.data.s);
-
-			case option::OPT_BV: return opt.handler.bv(name, arg, barg, opt.data.bv);
-			case option::OPT_FV: return opt.handler.fv(name, arg, barg, opt.data.fv);
-			case option::OPT_IV: return opt.handler.iv(name, arg, barg, opt.data.iv);
-			case option::OPT_SV: return opt.handler.sv(name, arg, barg, opt.data.sv);
-			}
-		}
-	}
-
-	throw option_exception(name, "unknown name");
-}
-void option_process(int argc, char const * const * argv)
-{
-	for (int argi(0), argn(1); argi < argc; ++argi)
-	{
-		argn = argi + 1;
-
-		argi += option_process(argv[argi], (argn < argc) ? argv[argn] : NULL);
-	}
-}
-
-void option_set_name(char const * name)
-{
-	option_name = name;
-}
-void option_set_usage(char const * usage)
-{
-	option_usage = usage;
-}
-void option_set_version(char const * version)
-{
-	option_version = version;
+	return true;
 }
 
 
 
-}
+// Must be after template specializations.
+std::vector<std::string> option::args_vector;
+option_auto<std::vector<std::string> >::handler_t option::args_handler(option_auto<std::vector<std::string> >::handler_default);
 
 

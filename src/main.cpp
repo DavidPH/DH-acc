@@ -43,7 +43,7 @@
 
 
 
-static option::option_s option_out;
+option_data<std::string> option_out("out", "output", "Output File.");
 
 
 
@@ -139,36 +139,30 @@ void read_source(std::string const & name, SourceType type, ObjectVector * objec
 
 static inline void _init(int argc, char const * const * argv)
 {
-	ost_init();
-
 	BinaryTokenZDACS::init();
-	ObjectExpression::init();
 	SourceExpressionDS::init();
-	SourceStream::init();
 	SourceTokenASMPLX::init();
 
-	option::option_add("out", "output", "Output file.", &option_out, option::option_handler_default_s);
-
-	option::option_set_name(argv[0]);
+	option::program = argv[0];
 
 	if (argc == 1)
 	{
-		option::option_print_help(&std::cout);
+		option::print_help(&std::cerr);
 		throw 0;
 	}
 
-	option::option_process(argc-1, argv+1);
+	option::process(argc-1, argv+1);
 
-	if (option_out.empty() && !option::option_args.empty())
+	if (option_out.data.empty() && !option::args_vector.empty())
 	{
-		option_out = option::option_args.back();
-		option::option_args.pop_back();
+		option_out.data = option::args_vector.back();
+		option::args_vector.pop_back();
 	}
 
-	if (option::option_args.empty())
+	if (option::args_vector.empty())
 	{
-		option::option_print_help(&std::cout);
-		throw 0;
+		option::print_help(&std::cerr);
+		throw 1;
 	}
 }
 
@@ -177,13 +171,13 @@ static inline int _main()
 	ObjectVector objects;
 
 	// Read source file(s).
-	for (option::option_sv::iterator arg(option::option_args.begin()); arg != option::option_args.end(); ++arg)
+	for (std::vector<std::string>::iterator arg(option::args_vector.begin()); arg != option::args_vector.end(); ++arg)
 		read_source(*arg, source_type, &objects);
 
 	// If doing object output, don't process object data.
 	if (output_type == OUTPUT_object)
 	{
-		std::ofstream ofs(option_out.c_str());
+		std::ofstream ofs(option_out.data.c_str());
 
 		ObjectExpression::write_objects(&ofs, objects);
 
@@ -208,7 +202,7 @@ static inline int _main()
 	}
 
 	// Write output file.
-	std::ofstream ofs(option_out.c_str());
+	std::ofstream ofs(option_out.data.c_str());
 
 	switch (target_type)
 	{
@@ -239,10 +233,10 @@ int main(int argc, char * * argv)
 	{
 		std::cerr << e.where() << " (" << e.who() << "): " << e.what() << std::endl;
 	}
-	catch (option::option_exception & e)
+	catch (option::exception & e)
 	{
-		std::cerr << "(option_exception): " << e.what() << std::endl;
-		option::option_print_help(&std::cout);
+		std::cerr << "(option::exception): " << e.what() << std::endl;
+		option::print_help(&std::cerr);
 	}
 	catch (std::exception & e)
 	{
@@ -264,6 +258,5 @@ int main(int argc, char * * argv)
 
 	return 1;
 }
-
 
 

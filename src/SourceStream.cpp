@@ -27,8 +27,8 @@
 
 
 
-option::option_sv option_include_dir(1);
-option::option_i option_tab_columns(1);
+option_data<std::vector<std::string> > option_include_dir("include-dir", "input", "Specifies a directory to search for includes in.", std::vector<std::string>(1));
+option_data<int> option_tab_columns("tab-columns", "input", "How many columns a tab counts for in error reporting.", 1);
 
 
 
@@ -68,7 +68,7 @@ _inQuoteSingle(false)
 		break;
 	}
 
-	for (option::option_sv::iterator dir(option_include_dir.begin()); !_in && dir != option_include_dir.end(); ++dir)
+	for (std::vector<std::string>::iterator dir(option_include_dir.data.begin()); !_in && dir != option_include_dir.data.end(); ++dir)
 	{
 		_in = new std::ifstream((*dir + _filename).c_str());
 
@@ -124,12 +124,6 @@ long SourceStream::getLineCount() const
 	return _countLine;
 }
 
-void SourceStream::init()
-{
-	option::option_add("include-dir", "input", "Specifies a directory to search for includes in.", &option_include_dir, option::option_handler_default_sv);
-	option::option_add("tab-columns", "input", "How many columns a tab counts for in error reporting.", &option_tab_columns, option::option_handler_default_i);
-}
-
 bool SourceStream::isInComment() const
 {
 	return _inComment || _depthComment;
@@ -160,7 +154,7 @@ void SourceStream::prepareC()
 
 		// \t has special counting
 		if (_curC == '\t')
-			_countColumn += option_tab_columns;
+			_countColumn += option_tab_columns.data;
 		else
 			++_countColumn;
 
@@ -236,11 +230,11 @@ void SourceStream::prepareC()
 			case '\n':
 				_countColumn = 0;
 				++_countLine;
-				_curC = _newC;
+				_curC = newC;
 				break;
 
 			case '\t':
-				_countColumn += option_tab_columns-1;
+				_countColumn += option_tab_columns.data-1;
 			case '\\':
 			case '\'':
 			case '"':
@@ -297,6 +291,5 @@ void SourceStream::unget(char const c)
 	_oldC = -2;
 	_curC = -2;
 }
-
 
 
