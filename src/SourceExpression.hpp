@@ -56,7 +56,7 @@ public:
 	virtual CounterPointer<ObjectExpression> makeObject() const;
 	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
 
-	void makeObjects(ObjectVector * objects);
+	virtual void makeObjects(ObjectVector * objects);
 
 	virtual void makeObjectsAddress(ObjectVector * objects);
 
