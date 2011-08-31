@@ -69,6 +69,7 @@ public:
 		TT_OP_CMP_NE,             // !=
 		TT_OP_COLON,              // :
 		TT_OP_COMMA,              // ,
+		TT_OP_ELLIPSIS,           // ...
 		TT_OP_EQUALS,             // =
 		TT_OP_EXCLAMATION,        // !
 		TT_OP_HASH,               // #

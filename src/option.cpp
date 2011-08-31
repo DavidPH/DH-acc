@@ -35,16 +35,16 @@ std::string option::version;
 typedef std::map<std::string, option *> _option_map_type;
 static inline _option_map_type & _option_map()
 {
-	static _option_map_type option_map;
+	static _option_map_type * option_map(new _option_map_type);
 
-	return option_map;
+	return *option_map;
 }
 typedef std::set<option *, bool (*)(option *, option *)> _option_set_type;
 static inline _option_set_type & _option_set()
 {
-	static _option_set_type option_set(option::less);
+	static _option_set_type * option_set(new _option_set_type(option::less));
 
-	return option_set;
+	return *option_set;
 }
 
 

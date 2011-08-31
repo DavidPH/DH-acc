@@ -60,7 +60,8 @@ char const * SourceTokenC::_names[SourceTokenC::TT_NONE+1] =
 	"TT_OP_CMP_LT2_EQUALS",     // <<=
 	"TT_OP_CMP_NE",             // !=
 	"TT_OP_COLON",              // :
-	"TT_OP_COMMA",              // ",
+	"TT_OP_COMMA",              // ,
+	"TT_OP_ELLIPSIS",           // ...
 	"TT_OP_EQUALS",             // =
 	"TT_OP_EXCLAMATION",        // !
 	"TT_OP_HASH",               // #
@@ -118,7 +119,6 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 	case ',': _type = TT_OP_COMMA;         return;
 	case ')': _type = TT_OP_PARENTHESIS_C; return;
 	case '(': _type = TT_OP_PARENTHESIS_O; return;
-	case '.': _type = TT_OP_PERIOD;        return;
 	case '?': _type = TT_OP_QUERY;         return;
 	case ';': _type = TT_OP_SEMICOLON;     return;
 	case '~': _type = TT_OP_TILDE;         return;
@@ -263,6 +263,24 @@ SourceTokenC::SourceTokenC(SourceStream * const in) : _data(), _position(in->get
 		in->unget(c);
 
 		_type = TT_OP_PERCENT; return;
+
+	case '.':
+		c = in->get();
+
+		if (c == '.')
+		{
+			c = in->get();
+
+			if (c == '.') {_type = TT_OP_ELLIPSIS; return;}
+
+			in->unget(c);
+
+			c = '.';
+		}
+
+		in->unget(c);
+
+		_type = TT_OP_PERIOD; return;
 
 	case '|':
 		c = in->get();
