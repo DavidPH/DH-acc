@@ -25,6 +25,8 @@
 #include <string>
 #include <vector>
 
+#include "bignum.hpp"
+
 class SourcePosition;
 
 
@@ -91,6 +93,15 @@ struct VariableType
 	friend void print_debug(std::ostream * out, VariableType const & in);
 	friend void print_debug(std::ostream * out, VariableType::Type in);
 
+	static VariableType const * get_array(VariableType const * refType, bigsint count);
+	static VariableType const * get_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
+	static VariableType const * get_block(std::vector<VariableType const *> const & types);
+	static VariableType const * get_function(VariableType const * callType, std::vector<VariableType const *> const & types);
+	static VariableType const * get_linespec(VariableType const * callType, std::vector<VariableType const *> const & types);
+	static VariableType const * get_native(VariableType const * callType, std::vector<VariableType const *> const & types);
+	static VariableType const * get_pointer(VariableType const * refType);
+	static VariableType const * get_script(VariableType const * callType, std::vector<VariableType const *> const & types);
+
 	static VariableType const * get_vt(Type vt);
 	static VariableType const * get_vt_boolhard();
 	static VariableType const * get_vt_boolsoft();
@@ -101,6 +112,20 @@ struct VariableType
 	static VariableType const * get_vt_void();
 
 private:
+	static VariableType * create(Type vt, VariableType const * callType, VariableType const * refType);
+	static VariableType * create(Type vt, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types);
+
+	static VariableType const * get_function_like(Type vt, std::vector<VariableType *> * type_vector, VariableType const * callType, std::vector<VariableType const *> const & types);
+
+	static std::vector<VariableType *> type_array;
+	static std::vector<VariableType *> type_asmfunc;
+	static std::vector<VariableType *> type_block;
+	static std::vector<VariableType *> type_function;
+	static std::vector<VariableType *> type_linespec;
+	static std::vector<VariableType *> type_native;
+	static std::vector<VariableType *> type_pointer;
+	static std::vector<VariableType *> type_script;
+
 	static VariableType vt_boolhard;
 	static VariableType vt_boolsoft;
 	static VariableType vt_char;

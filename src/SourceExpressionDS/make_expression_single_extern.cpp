@@ -25,6 +25,7 @@
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -50,7 +51,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_extern(Sour
 		make_expression_arglist(in, blocks, context, &functionArgTypes, NULL, &functionArgCount, NULL, &functionReturn);
 
 		// functionVarType
-		VariableType const * functionVarType(context->getVariableType_function(functionReturn, functionArgTypes));
+		VariableType const * functionVarType(VariableType::get_function(functionReturn, functionArgTypes));
 
 		// functionVariable
 		SourceVariable functionVariable(functionName, functionVarType, functionNameObject, token.getPosition());
@@ -62,6 +63,5 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_extern(Sour
 	else
 		throw SourceException("unknown extern type", externToken.getPosition(), "SourceExpressionDS::make_expression_single_extern");
 }
-
 
 

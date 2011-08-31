@@ -25,6 +25,7 @@
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -46,7 +47,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_linespec(So
 	ObjectExpression::Pointer linespecObject(ObjectExpression::create_value_int(linespecNumber, token.getPosition()));
 
 	// linespecVarType
-	VariableType const * linespecVarType(context->getVariableType_linespec(linespecReturn, linespecArgTypes));
+	VariableType const * linespecVarType(VariableType::get_linespec(linespecReturn, linespecArgTypes));
 
 	// linespecVariable
 	SourceVariable linespecVariable(linespecName, linespecVarType, linespecObject, token.getPosition());
@@ -54,6 +55,5 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_linespec(So
 	context->addVariable(linespecVariable);
 	return create_value_variable(linespecVariable, token.getPosition());
 }
-
 
 

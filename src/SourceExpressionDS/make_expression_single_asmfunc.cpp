@@ -26,6 +26,7 @@
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -48,7 +49,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_asmfunc(Sou
 	make_expression_arglist(in, blocks, context, &asmfuncArgTypes, &asmfuncReturn);
 
 	// asmfuncVarType
-	VariableType const * asmfuncVarType(context->getVariableType_asmfunc(asmfuncReturn, asmfuncArgTypes));
+	VariableType const * asmfuncVarType(VariableType::get_asmfunc(asmfuncReturn, asmfuncArgTypes));
 
 	// asmfuncVariable
 	SourceVariable asmfuncVariable(asmfuncName, asmfuncVarType, asmfuncObject, token.getPosition());
@@ -56,6 +57,5 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_asmfunc(Sou
 	context->addVariable(asmfuncVariable);
 	return create_value_variable(asmfuncVariable, token.getPosition());
 }
-
 
 

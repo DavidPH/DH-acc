@@ -25,6 +25,7 @@
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -56,7 +57,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	blocks->push_back(create_branch_return(create_value_data(functionReturn, true, token.getPosition()), &functionContext, token.getPosition()));
 
 	// functionVarType
-	VariableType const * functionVarType(context->getVariableType_function(functionReturn, functionArgTypes));
+	VariableType const * functionVarType(VariableType::get_function(functionReturn, functionArgTypes));
 
 	// functionVarCount
 	int functionVarCount(functionContext.getLimit(SourceVariable::SC_REGISTER));
@@ -68,6 +69,5 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size());
 	return create_value_variable(functionVariable, token.getPosition());
 }
-
 
 

@@ -21,8 +21,7 @@
 
 #include "Unary.hpp"
 
-#include "../ObjectVector.hpp"
-#include "../SourceContext.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -53,7 +52,7 @@ SourceExpression::Pointer SourceExpression::create_unary_reference(SourceExpress
 
 
 
-SourceExpression_UnaryReference::SourceExpression_UnaryReference(SourceExpression * expr, SourcePosition const & position) : Super(expr, position), _type(SourceContext::global_context.getVariableType_pointer(expr->getType()))
+SourceExpression_UnaryReference::SourceExpression_UnaryReference(SourceExpression * expr, SourcePosition const & position) : Super(expr, position), _type(VariableType::get_pointer(expr->getType()))
 {
 
 }

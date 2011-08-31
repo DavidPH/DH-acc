@@ -25,6 +25,7 @@
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -46,7 +47,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_native(Sour
 	ObjectExpression::Pointer nativeObject(ObjectExpression::create_value_int(nativeNumber, token.getPosition()));
 
 	// nativeVarType
-	VariableType const * nativeVarType(context->getVariableType_native(nativeReturn, nativeArgTypes));
+	VariableType const * nativeVarType(VariableType::get_native(nativeReturn, nativeArgTypes));
 
 	// nativeVariable
 	SourceVariable nativeVariable(nativeName, nativeVarType, nativeObject, token.getPosition());
@@ -54,6 +55,5 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_native(Sour
 	context->addVariable(nativeVariable);
 	return create_value_variable(nativeVariable, token.getPosition());
 }
-
 
 

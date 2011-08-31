@@ -26,6 +26,15 @@
 
 
 
+std::vector<VariableType *> VariableType::type_array;
+std::vector<VariableType *> VariableType::type_asmfunc;
+std::vector<VariableType *> VariableType::type_block;
+std::vector<VariableType *> VariableType::type_function;
+std::vector<VariableType *> VariableType::type_linespec;
+std::vector<VariableType *> VariableType::type_native;
+std::vector<VariableType *> VariableType::type_pointer;
+std::vector<VariableType *> VariableType::type_script;
+
 VariableType VariableType::vt_boolhard = {VT_BOOLHARD, true, &vtc_void, &vtc_boolhard, &vtc_void};
 VariableType VariableType::vt_boolsoft = {VT_BOOLSOFT, true, &vtc_void, &vtc_boolsoft, &vtc_void};
 VariableType VariableType::vt_char     = {VT_CHAR,     true, &vtc_void, &vtc_char,     &vtc_void};
@@ -44,6 +53,41 @@ VariableType VariableType::vtc_void     = {VT_VOID,     true, &vtc_void, NULL, &
 
 
 
+template<typename T> static bool operator == (std::vector<T> const & l, std::vector<T> const & r)
+{
+	if (l.size() != r.size()) return false;
+
+	for (size_t i(l.size()); i--;)
+		if (l[i] != r[i]) return false;
+
+	return true;
+}
+
+
+
+VariableType * VariableType::create(Type vt, VariableType const * callType, VariableType const * refType)
+{
+	static std::vector<VariableType const *> types;
+
+	return create(vt, callType, refType, types);
+}
+VariableType * VariableType::create(Type vt, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types)
+{
+	VariableType * type(new VariableType);
+
+	type->vt        = vt;
+	type->complete  = true;
+	type->callType  = callType;
+	type->constType = NULL;
+	type->refType   = refType;
+	type->names     = std::vector<std::string>(types.size(), "");
+	type->types     = types;
+
+	type->constType = (new VariableType(*type))->doConst();
+
+	return type;
+}
+
 VariableType const * VariableType::doConst()
 {
 	switch (vt)
@@ -56,7 +100,7 @@ VariableType const * VariableType::doConst()
 			if (types[i]->constType)
 				types[i] = types[i]->constType;
 
-		return this;
+		break;
 
 	case VT_ASMFUNC:
 	case VT_BOOLHARD:
@@ -72,10 +116,87 @@ VariableType const * VariableType::doConst()
 	case VT_SCRIPT:
 	case VT_STRING:
 	case VT_VOID:
-		return this;
+		break;
 	}
 
 	return this;
+}
+
+VariableType const * VariableType::get_array(VariableType const * refType, bigsint count)
+{
+	for (std::vector<VariableType *>::iterator it(type_array.begin()); it != type_array.end(); ++it)
+		if ((*it)->refType == refType && (bigsint)(*it)->types.size() == count)
+			return *it;
+
+	VariableType * type(create(VT_ARRAY, &vt_void, refType, std::vector<VariableType const *>(count, refType)));
+
+	type_array.push_back(type);
+
+	return type;
+}
+
+VariableType const * VariableType::get_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	return get_function_like(VT_ASMFUNC, &type_asmfunc, callType, types);
+}
+
+VariableType const * VariableType::get_block(std::vector<VariableType const *> const & types)
+{
+	for (std::vector<VariableType *>::iterator it(type_block.begin()); it != type_block.end(); ++it)
+		if ((*it)->types == types)
+			return *it;
+
+	VariableType * type(create(VT_BLOCK, &vt_void, &vt_void, types));
+
+	type_block.push_back(type);
+
+	return type;
+}
+
+VariableType const * VariableType::get_function(VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	return get_function_like(VT_FUNCTION, &type_function, callType, types);
+}
+
+VariableType const * VariableType::get_function_like(Type vt, std::vector<VariableType *> * type_vector, VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	for (std::vector<VariableType *>::iterator it(type_vector->begin()); it != type_vector->end(); ++it)
+		if ((*it)->callType == callType && (*it)->types == types)
+			return *it;
+
+	VariableType * type(create(vt, callType, &vt_void, types));
+
+	type_vector->push_back(type);
+
+	return type;
+}
+
+VariableType const * VariableType::get_linespec(VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	return get_function_like(VT_LINESPEC, &type_linespec, callType, types);
+}
+
+VariableType const * VariableType::get_native(VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	return get_function_like(VT_NATIVE, &type_native, callType, types);
+}
+
+VariableType const * VariableType::get_pointer(VariableType const * refType)
+{
+	for (std::vector<VariableType *>::iterator it(type_pointer.begin()); it != type_pointer.end(); ++it)
+		if ((*it)->refType == refType)
+			return *it;
+
+	VariableType * type(create(VT_POINTER, &vt_void, refType));
+
+	type_pointer.push_back(type);
+
+	return type;
+}
+
+VariableType const * VariableType::get_script(VariableType const * callType, std::vector<VariableType const *> const & types)
+{
+	return get_function_like(VT_SCRIPT, &type_script, callType, types);
 }
 
 VariableType const * VariableType::get_vt(Type vt)

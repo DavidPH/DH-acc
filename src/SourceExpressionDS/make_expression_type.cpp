@@ -25,6 +25,7 @@
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -44,7 +45,7 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 		in->get(SourceTokenC::TT_OP_BRACKET_O);
 		int count((int)make_expression(in, blocks, context)->makeObject()->resolveInt());
 		in->get(SourceTokenC::TT_OP_BRACKET_C);
-		type = context->getVariableType_array(refType, count);
+		type = VariableType::get_array(refType, count);
 	}
 	else if (token.getData() == "block")
 	{
@@ -62,7 +63,7 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 
 		in->get(SourceTokenC::TT_OP_BRACE_C);
 
-		type = context->getVariableType_block(types);
+		type = VariableType::get_block(types);
 	}
 	else if (token.getData() == "enum")
 	{
@@ -109,7 +110,7 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 	{
 		make_expression_arglist(in, blocks, context, &types, &retn);
 
-		type = context->getVariableType_script(retn, types);
+		type = VariableType::get_script(retn, types);
 	}
 	else if (token.getData() == "struct" || token.getData() == "union")
 	{
@@ -187,7 +188,7 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 	case SourceTokenC::TT_OP_ASTERISK:
 		in->get(SourceTokenC::TT_OP_ASTERISK);
 
-		type = context->getVariableType_pointer(type);
+		type = VariableType::get_pointer(type);
 
 		break;
 
@@ -195,6 +196,5 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 		return type;
 	}
 }
-
 
 

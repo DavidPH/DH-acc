@@ -23,8 +23,8 @@
 
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
-#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -67,7 +67,7 @@ SourceExpression_ValueBlock::SourceExpression_ValueBlock(std::vector<SourceExpre
 	for (size_t i(0); i < _expressions.size(); ++i)
 		types[i] = _expressions[i]->getType();
 
-	_type = SourceContext::global_context.getVariableType_block(types);
+	_type = VariableType::get_block(types);
 }
 
 VariableType const * SourceExpression_ValueBlock::getType() const

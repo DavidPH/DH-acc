@@ -26,6 +26,7 @@
 #include "../print_debug.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
+#include "../VariableType.hpp"
 
 
 

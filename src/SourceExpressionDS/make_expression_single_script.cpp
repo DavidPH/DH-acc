@@ -26,6 +26,7 @@
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../VariableType.hpp"
 
 #include <sstream>
 
@@ -98,7 +99,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	std::string scriptNameObject(scriptLabel + "_id");
 
 	// scriptVarType
-	VariableType const * scriptVarType(context->getVariableType_script(scriptReturn, scriptArgTypes));
+	VariableType const * scriptVarType(VariableType::get_script(scriptReturn, scriptArgTypes));
 
 	// scriptExpression
 	SourceExpression::Pointer scriptExpression(create_root_script(scriptVarType, token.getPosition()));
@@ -122,6 +123,5 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 
 	return create_value_variable(scriptVariable, token.getPosition());
 }
-
 
 

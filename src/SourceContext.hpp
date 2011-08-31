@@ -24,13 +24,13 @@
 
 #include "bignum.hpp"
 #include "SourceVariable.hpp"
-#include "VariableType.hpp"
 
 #include <map>
 #include <string>
 #include <vector>
 
 class SourceTokenC;
+class VariableType;
 
 
 
@@ -78,15 +78,7 @@ public:
 	SourceVariable const & getVariable(SourceTokenC const & token) const;
 
 	VariableType const * getVariableType(SourceTokenC const & token);
-	VariableType const * getVariableType_array(VariableType const * refType, bigsint count);
-	VariableType const * getVariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
-	VariableType const * getVariableType_block(std::vector<VariableType const *> const & types);
 	VariableType const * getVariableType_enum(std::string const & name, bool block, SourcePosition const & position);
-	VariableType const * getVariableType_function(VariableType const * callType, std::vector<VariableType const *> const & types);
-	VariableType const * getVariableType_linespec(VariableType const * callType, std::vector<VariableType const *> const & types);
-	VariableType const * getVariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types);
-	VariableType const * getVariableType_pointer(VariableType const * refType);
-	VariableType const * getVariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types);
 	VariableType const * getVariableType_struct(std::string const & name, SourcePosition const & position);
 	VariableType const * getVariableType_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position);
 	VariableType const * getVariableType_typedef(SourceTokenC const & token, VariableType const * type);
@@ -120,7 +112,6 @@ private:
 
 	SourceVariable const & getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
 
-	VariableType const * getVariableType(VariableType::Type vt, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types);
 	VariableType * getVariableType_enum(std::string const & name);
 	VariableType * getVariableType_struct(std::string const & name);
 	VariableType * getVariableType_union(std::string const & name);

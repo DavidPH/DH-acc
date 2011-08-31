@@ -23,6 +23,7 @@
 
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -33,66 +34,6 @@ VariableType const * SourceContext::getVariableType(SourceTokenC const & token)
 	if (!vartype) throw SourceException("invalid variable-type", token.getPosition(), "SourceContext");
 
 	return vartype;
-}
-VariableType const * SourceContext::getVariableType(VariableType::Type vt, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types)
-{
-	// Anonymous types always go to the global context.
-	if (_parent) return _parent->getVariableType(vt, callType, refType, types);
-
-	for (std::vector<VariableType const *>::iterator it(_types.begin()); it != _types.end(); ++it)
-	{
-		VariableType const * vartype(*it);
-
-		if (vartype->vt != vt) continue;
-		if (vartype->callType != callType) continue;
-		if (vartype->refType != refType) continue;
-		if (vartype->types.size() != types.size()) continue;
-
-		bool matched(true);
-
-		for (size_t j(0); j < vartype->types.size(); ++j)
-		{
-			if (vartype->types[j] != types[j])
-			{
-				matched = false;
-				break;
-			}
-		}
-
-		if (matched) return vartype;
-	}
-
-	VariableType * vartype(new VariableType);
-
-	vartype->vt        = vt;
-	vartype->complete  = true;
-	vartype->callType  = callType;
-	vartype->constType = NULL;
-	vartype->refType   = refType;
-	vartype->names     = std::vector<std::string>(types.size(), "");
-	vartype->types     = types;
-
-	vartype->constType = (new VariableType(*vartype))->doConst();
-
-	_types.push_back(vartype);
-	_typenames.push_back("");
-
-	return vartype;
-}
-
-VariableType const * SourceContext::getVariableType_array(VariableType const * refType, bigsint count)
-{
-	return getVariableType(VariableType::VT_ARRAY, VariableType::get_vt_void(), refType, std::vector<VariableType const *>(count, refType));
-}
-
-VariableType const * SourceContext::getVariableType_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types)
-{
-	return getVariableType(VariableType::VT_ASMFUNC, callType, VariableType::get_vt_void(), types);
-}
-
-VariableType const * SourceContext::getVariableType_block(std::vector<VariableType const *> const & types)
-{
-	return getVariableType(VariableType::VT_BLOCK, VariableType::get_vt_void(), VariableType::get_vt_void(), types);
 }
 
 VariableType * SourceContext::getVariableType_enum(std::string const & name)
@@ -135,31 +76,6 @@ VariableType const * SourceContext::getVariableType_enum(std::string const & nam
 	}
 
 	return vartype;
-}
-
-VariableType const * SourceContext::getVariableType_function(VariableType const * callType, std::vector<VariableType const *> const & types)
-{
-	return getVariableType(VariableType::VT_FUNCTION, callType, VariableType::get_vt_void(), types);
-}
-
-VariableType const * SourceContext::getVariableType_linespec(VariableType const * callType, std::vector<VariableType const *> const & types)
-{
-	return getVariableType(VariableType::VT_LINESPEC, callType, VariableType::get_vt_void(), types);
-}
-
-VariableType const * SourceContext::getVariableType_native(VariableType const * callType, std::vector<VariableType const *> const & types)
-{
-	return getVariableType(VariableType::VT_NATIVE, callType, VariableType::get_vt_void(), types);
-}
-
-VariableType const * SourceContext::getVariableType_pointer(VariableType const * refType)
-{
-	return getVariableType(VariableType::VT_POINTER, VariableType::get_vt_void(), refType, std::vector<VariableType const *>());
-}
-
-VariableType const * SourceContext::getVariableType_script(VariableType const * callType, std::vector<VariableType const *> const & types)
-{
-	return getVariableType(VariableType::VT_SCRIPT, callType, VariableType::get_vt_void(), types);
 }
 
 VariableType * SourceContext::getVariableType_struct(std::string const & name)
