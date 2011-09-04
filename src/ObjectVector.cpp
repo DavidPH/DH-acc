@@ -143,7 +143,7 @@ void ObjectVector::optimize()
 	// PUSH/DROP removal.
 	if (option_opt_pushdrop.data) for(size_t i(0); i+2 < _tokens.size();)
 	{
-		if (ocode_is_push(_tokens[i].getCode()) && _tokens[i+1].getCode() == OCODE_DROP)
+		if (ocode_is_push_noarg(_tokens[i].getCode()) && _tokens[i+1].getCode() == OCODE_DROP)
 		{
 			std::vector<std::string> labels0(_tokens[i+0].getLabels());
 			std::vector<std::string> labels1(_tokens[i+1].getLabels());

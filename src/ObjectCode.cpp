@@ -173,7 +173,7 @@ ObjectCode ocode_get_code(SourceTokenC const & token)
 	return codeIt->second;
 }
 
-bool ocode_is_push(ObjectCode ocode)
+bool ocode_is_push_noarg(ObjectCode ocode)
 {
 	switch (ocode)
 	{

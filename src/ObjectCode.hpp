@@ -153,7 +153,9 @@ struct ObjectCodeSet
 
 ObjectCode ocode_get_code(SourceTokenC const & token);
 
-bool ocode_is_push(ObjectCode ocode);
+// Returns true if the passed ocode pushes something to the stack without taking
+// anything.
+bool ocode_is_push_noarg(ObjectCode ocode);
 
 char const * make_string(ObjectCode ocode);
 
