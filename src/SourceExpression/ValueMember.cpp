@@ -36,9 +36,13 @@ class SourceExpression_ValueMember : public SourceExpression
 public:
 	SourceExpression_ValueMember(SourceExpression * expr, SourceTokenC const & token);
 
+	virtual bool canMakeObjectAddress() const;
+
 	virtual bool canMakeObjectsAddress() const;
 
 	virtual VariableType const * getType() const;
+
+	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
 
 protected:
 	virtual void printDebug(std::ostream * out) const;
@@ -70,6 +74,11 @@ SourceExpression_ValueMember::SourceExpression_ValueMember(SourceExpression * ex
 
 }
 
+bool SourceExpression_ValueMember::canMakeObjectAddress() const
+{
+	return _expr->canMakeObjectAddress();
+}
+
 bool SourceExpression_ValueMember::canMakeObjectsAddress() const
 {
 	return _expr->canMakeObjectsAddress();
@@ -95,6 +104,12 @@ void SourceExpression_ValueMember::printDebug(std::ostream * out) const
 		print_debug(out, _name);
 		*out << ")";
 	*out << ")";
+}
+
+CounterPointer<ObjectExpression> SourceExpression_ValueMember::makeObjectAddress() const
+{
+	ObjectExpression::Pointer objOffset(ObjectExpression::create_value_int(_expr->getType()->getOffset(_name, position), position));
+	return ObjectExpression::create_binary_add(_expr->makeObjectAddress(), objOffset, position);
 }
 
 void SourceExpression_ValueMember::virtual_makeObjectsAddress(ObjectVector * objects)

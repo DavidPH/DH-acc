@@ -34,9 +34,13 @@ class SourceExpression_UnaryDereference : public SourceExpression_Unary
 public:
 	SourceExpression_UnaryDereference(SourceExpression * expr, SourcePosition const & position);
 
+	virtual bool canMakeObjectAddress() const;
+
 	virtual bool canMakeObjectsAddress() const;
 
 	virtual VariableType const * getType() const;
+
+	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
 
 protected:
 	virtual void printDebug(std::ostream * const out) const;
@@ -63,6 +67,11 @@ SourceExpression_UnaryDereference::SourceExpression_UnaryDereference(SourceExpre
 
 }
 
+bool SourceExpression_UnaryDereference::canMakeObjectAddress() const
+{
+	return expr->canMakeObject();
+}
+
 bool SourceExpression_UnaryDereference::canMakeObjectsAddress() const
 {
 	return true;
@@ -71,6 +80,11 @@ bool SourceExpression_UnaryDereference::canMakeObjectsAddress() const
 VariableType const * SourceExpression_UnaryDereference::getType() const
 {
 	return expr->getType()->refType;
+}
+
+CounterPointer<ObjectExpression> SourceExpression_UnaryDereference::makeObjectAddress() const
+{
+	return expr->makeObject();
 }
 
 void SourceExpression_UnaryDereference::printDebug(std::ostream * out) const

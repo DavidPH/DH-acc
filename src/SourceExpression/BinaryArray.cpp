@@ -35,10 +35,13 @@ public:
 	SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
 	virtual bool canMakeObject() const;
+	virtual bool canMakeObjectAddress() const;
 
 	virtual bool canMakeObjectsAddress() const;
 
 	virtual VariableType const * getType() const;
+
+	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
 
 protected:
 	virtual void printDebug(std::ostream * out) const;
@@ -71,6 +74,10 @@ bool SourceExpression_BinaryArray::canMakeObject() const
 {
 	return false;
 }
+bool SourceExpression_BinaryArray::canMakeObjectAddress() const
+{
+	return exprL->canMakeObjectAddress() && exprR->canMakeObject();
+}
 
 bool SourceExpression_BinaryArray::canMakeObjectsAddress() const
 {
@@ -80,6 +87,13 @@ bool SourceExpression_BinaryArray::canMakeObjectsAddress() const
 VariableType const * SourceExpression_BinaryArray::getType() const
 {
 	return exprL->getType()->refType;
+}
+
+CounterPointer<ObjectExpression> SourceExpression_BinaryArray::makeObjectAddress() const
+{
+	ObjectExpression::Pointer objSize(ObjectExpression::create_value_int(getType()->size(), position));
+	ObjectExpression::Pointer objOffset(ObjectExpression::create_binary_mul(exprR->makeObject(), objSize, position));
+	return ObjectExpression::create_binary_add(exprL->makeObjectAddress(), objOffset, position);
 }
 
 void SourceExpression_BinaryArray::printDebug(std::ostream * out) const
