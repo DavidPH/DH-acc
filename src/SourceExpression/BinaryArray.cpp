@@ -120,8 +120,11 @@ void SourceExpression_BinaryArray::virtual_makeObjectsAddress(ObjectVector * obj
 
 	objects->setPosition(position);
 
-	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(getType()->size()));
-	objects->addToken(OCODE_MUL);
+	if (getType()->size() != 1)
+	{
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue(getType()->size()));
+		objects->addToken(OCODE_MUL);
+	}
 	objects->addToken(OCODE_ADD);
 }
 
