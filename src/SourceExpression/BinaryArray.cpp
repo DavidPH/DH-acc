@@ -47,6 +47,9 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjectsAccess(ObjectVector * objects);
+	virtual void virtual_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+
 	virtual void virtual_makeObjectsAddress(ObjectVector * objects);
 
 	virtual void virtual_makeObjectsGet(ObjectVector * objects);
@@ -101,6 +104,43 @@ void SourceExpression_BinaryArray::printDebug(std::ostream * out) const
 	*out << "SourceExpression_BinaryArray(";
 	Super::printDebug(out);
 	*out << ")";
+}
+
+void SourceExpression_BinaryArray::virtual_makeObjectsAccess(ObjectVector * objects)
+{
+	if (getType()->vt == VariableType::VT_VOID)
+		Super::makeObjectsAccess(objects);
+
+	if (exprL->getType()->vt == VariableType::VT_STRING)
+	{
+		Super::makeObjectsAccess(objects);
+	}
+	else if (canMakeObjectsAddress())
+	{
+		makeObjectsAddress(objects);
+
+		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+
+		for (int i(getType()->size()); i--;)
+			objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
+
+		for (int i(0); i < getType()->size(); ++i)
+			objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
+	}
+	else
+	{
+		Super::recurse_makeObjectsAccess(objects);
+
+		std::vector<SourceExpression::Pointer> dimensions(1, exprR);
+		exprL->makeObjectsAccessArray(objects, &dimensions);
+	}
+}
+void SourceExpression_BinaryArray::virtual_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
+{
+	Super::recurse_makeObjectsAccessArray(objects, dimensions);
+
+	dimensions->push_back(exprR);
+	exprL->makeObjectsAccessArray(objects, dimensions);
 }
 
 void SourceExpression_BinaryArray::virtual_makeObjectsAddress(ObjectVector * objects)
@@ -186,9 +226,6 @@ void SourceExpression_BinaryArray::virtual_makeObjectsSet(ObjectVector * objects
 
 		for (int i(getType()->size()); i--;)
 			objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
-
-		for (int i(0); i < getType()->size(); ++i)
-			objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
 	}
 	else
 	{

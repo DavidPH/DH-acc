@@ -37,7 +37,6 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 	int address;
 	makeObjectsSetPrep(objects, NULL, &addressBase, &address);
 	makeObjectsSet(objects, position, _type, addressBase, &address, false);
-	makeObjectsGet(objects, position);
 }
 void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address, bool dimensioned) const
 {
@@ -152,7 +151,6 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, std::vector<Sou
 	int address;
 	makeObjectsSetPrep(objects, dimensions, &addressBase, &address);
 	makeObjectsSetArray(objects, dimensions->size(), position, _type, addressBase, &address);
-	makeObjectsGetArray(objects, dimensions, position);
 }
 void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
 {
@@ -197,10 +195,8 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 
 	ObjectExpression::Pointer addressBase;
 	int address;
-	std::vector<std::string> namesOriginal(*names);
 	makeObjectsSetPrep(objects, NULL, &addressBase, &address);
 	makeObjectsSetMember(objects, names, position, _type, addressBase, &address);
-	makeObjectsGetMember(objects, &namesOriginal, position);
 }
 void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
 {
@@ -252,71 +248,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 
 void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions, ObjectExpression::Pointer * addressBase, int * address) const
 {
-	switch (_sc)
-	{
-	case SC_AUTO:
-	case SC_STATIC:
-	case SC_REGISTERARRAY_GLOBAL:
-	case SC_REGISTERARRAY_MAP:
-	case SC_REGISTERARRAY_WORLD:
-		if (dimensions)
-		{
-			VariableType const * type = _type;
-
-			if ((*dimensions)[0])
-			{
-				for (size_t i(dimensions->size()); i--;)
-				{
-					type = type->refType;
-
-					(*dimensions)[i]->makeObjectsGet(objects);
-					objects->addToken(OCODE_PUSHNUMBER, objects->getValue(type->size()));
-					objects->addToken(OCODE_MUL);
-
-					if (i != (dimensions->size() - 1)) objects->addToken(OCODE_ADD);
-
-					(*dimensions)[i] = NULL;
-				}
-
-				objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
-			}
-			else
-			{
-				// We've already calculated the index, don't
-				// need to do anything but reset address.
-				for (size_t i(dimensions->size()); i--;)
-					type = type->refType;
-			}
-
-			*addressBase = objects->getValue(0);
-			*address = type->size() - 1;
-		}
-		else if (_sc == SC_AUTO)
-		{
-			*addressBase = objects->getValue(_nameObject);
-			*address = _type->size() - 1;
-		}
-		else
-		{
-			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(0));
-
-			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
-
-			*addressBase = objects->getValue(0);
-			*address = _type->size() - 1;
-		}
-
-		break;
-
-	case SC_CONSTANT:
-	case SC_REGISTER:
-	case SC_REGISTER_GLOBAL:
-	case SC_REGISTER_MAP:
-	case SC_REGISTER_WORLD:
-		*addressBase = objects->getValue(_nameObject);
-		*address = _type->size() - 1;
-		break;
-	}
+	makeObjectsAccessPrep(objects, dimensions, addressBase, address);
 }
 
 void SourceVariable::makeObjectsSetSkip(VariableType const * type, int * address) const

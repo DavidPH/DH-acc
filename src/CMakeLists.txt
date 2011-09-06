@@ -113,6 +113,7 @@ add_executable(DH-acc
 	SourceTokenizerDS.cpp
 	SourceVariable.cpp
 	SourceVariable/makeObject.cpp
+	SourceVariable/makeObjectsAccess.cpp
 	SourceVariable/makeObjectsAddress.cpp
 	SourceVariable/makeObjectsGet.cpp
 	SourceVariable/makeObjectsSet.cpp

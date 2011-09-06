@@ -40,6 +40,8 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjects(ObjectVector * objects);
+
 	virtual void virtual_makeObjectsGet(ObjectVector * objects);
 };
 
@@ -69,6 +71,20 @@ void SourceExpression_BinaryAssign::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
+void SourceExpression_BinaryAssign::virtual_makeObjects(ObjectVector * objects)
+{
+	Super::recurse_makeObjects(objects);
+
+	if (evaluations == 1)
+	{
+		if (!exprL->getType()->constType)
+			throw SourceException("attempt to assign const type", position, getName());
+
+		exprR->makeObjectsGet(objects);
+		exprL->makeObjectsSet(objects);
+	}
+}
+
 void SourceExpression_BinaryAssign::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
@@ -79,7 +95,7 @@ void SourceExpression_BinaryAssign::virtual_makeObjectsGet(ObjectVector * object
 			throw SourceException("attempt to assign const type", position, getName());
 
 		exprR->makeObjectsGet(objects);
-		exprL->makeObjectsSet(objects);
+		exprL->makeObjectsAccess(objects);
 	}
 	else
 	{

@@ -46,6 +46,8 @@ protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
+	virtual void virtual_makeObjectsAccess(ObjectVector * objects);
+
 	virtual void virtual_makeObjectsAddress(ObjectVector * objects);
 
 	virtual void virtual_makeObjectsGet(ObjectVector * objects);
@@ -94,6 +96,28 @@ void SourceExpression_UnaryDereference::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
+void SourceExpression_UnaryDereference::virtual_makeObjectsAccess(ObjectVector * objects)
+{
+	if (getType()->vt == VariableType::VT_VOID)
+		Super::makeObjectsAccess(objects);
+
+	if (expr->getType()->vt == VariableType::VT_STRING)
+	{
+		Super::makeObjectsAccess(objects);
+	}
+	else
+	{
+		makeObjectsAddress(objects);
+		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+
+		for (int i(getType()->size()); i--;)
+			objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
+
+		for (int i(0); i < getType()->size(); ++i)
+			objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
+	}
+}
+
 void SourceExpression_UnaryDereference::virtual_makeObjectsAddress(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
@@ -136,9 +160,6 @@ void SourceExpression_UnaryDereference::virtual_makeObjectsSet(ObjectVector * ob
 
 		for (int i(getType()->size()); i--;)
 			objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
-
-		for (int i(0); i < getType()->size(); ++i)
-			objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
 	}
 }
 

@@ -78,6 +78,10 @@ public:
 	CounterPointer<ObjectExpression> makeObject(SourcePosition const & position) const;
 	CounterPointer<ObjectExpression> makeObjectAddress(SourcePosition const & position) const;
 
+	void makeObjectsAccess(ObjectVector * objects, SourcePosition const & position) const;
+	void makeObjectsAccessArray(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, SourcePosition const & position) const;
+	void makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position) const;
+
 	void makeObjectsAddress(ObjectVector * objects, SourcePosition const & position) const;
 
 	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position) const;
@@ -102,6 +106,8 @@ private:
 	SourcePosition _position;
 	StorageClass _sc;
 	VariableType const * _type;
+
+	void makeObjectsAccessPrep(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, CounterPointer<ObjectExpression> * addressBase, int * address) const;
 
 	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address, bool dimensioned) const;
 	void makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const;

@@ -58,6 +58,10 @@ public:
 
 	void makeObjects(ObjectVector * objects);
 
+	void makeObjectsAccess(ObjectVector * objects);
+	void makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	void makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names);
+
 	void makeObjectsAddress(ObjectVector * objects);
 
 	void makeObjectsCast(ObjectVector * objects, VariableType const * type);
@@ -143,6 +147,10 @@ protected:
 
 	void recurse_makeObjects(ObjectVector * objects);
 
+	void recurse_makeObjectsAccess(ObjectVector * objects);
+	void recurse_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	void recurse_makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names);
+
 	void recurse_makeObjectsAddress(ObjectVector * objects);
 
 	void recurse_makeObjectsCast(ObjectVector * objects, VariableType const * type);
@@ -170,6 +178,10 @@ private:
 	void makeObjectsBase(ObjectVector * objects);
 
 	virtual void virtual_makeObjects(ObjectVector * objects);
+
+	virtual void virtual_makeObjectsAccess(ObjectVector * objects);
+	virtual void virtual_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+	virtual void virtual_makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names);
 
 	virtual void virtual_makeObjectsAddress(ObjectVector * objects);
 

@@ -50,6 +50,9 @@ protected:
 private:
 	virtual void virtual_makeObjectsAddress(ObjectVector * objects);
 
+	virtual void virtual_makeObjectsAccess(ObjectVector * objects);
+	virtual void virtual_makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names);
+
 	virtual void virtual_makeObjectsGet(ObjectVector * objects);
 	virtual void virtual_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
 
@@ -112,6 +115,35 @@ CounterPointer<ObjectExpression> SourceExpression_ValueMember::makeObjectAddress
 	return ObjectExpression::create_binary_add(_expr->makeObjectAddress(), objOffset, position);
 }
 
+void SourceExpression_ValueMember::virtual_makeObjectsAccess(ObjectVector * objects)
+{
+	if (canMakeObjectsAddress())
+	{
+		makeObjectsAddress(objects);
+		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+
+		for (int i(getType()->size()); i--;)
+			objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
+
+		for (int i(0); i < getType()->size(); ++i)
+			objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
+	}
+	else
+	{
+		Super::recurse_makeObjectsAccess(objects);
+
+		std::vector<std::string> names(1, _name);
+		_expr->makeObjectsAccessMember(objects, &names);
+	}
+}
+void SourceExpression_ValueMember::virtual_makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names)
+{
+	Super::recurse_makeObjectsAccessMember(objects, names);
+
+	names->push_back(_name);
+	_expr->makeObjectsAccessMember(objects, names);
+}
+
 void SourceExpression_ValueMember::virtual_makeObjectsAddress(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsAddress(objects);
@@ -169,9 +201,6 @@ void SourceExpression_ValueMember::virtual_makeObjectsSet(ObjectVector * objects
 
 		for (int i(getType()->size()); i--;)
 			objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
-
-		for (int i(0); i < getType()->size(); ++i)
-			objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
 	}
 	else
 	{

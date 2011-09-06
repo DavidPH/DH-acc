@@ -280,7 +280,7 @@ void SourceVariable::makeObjectsGetPrep(ObjectVector * objects, std::vector<Coun
 	{
 	case SC_AUTO:
 	case SC_STATIC:
-		makeObjectsSetPrep(objects, dimensions, addressBase, address);
+		makeObjectsAccessPrep(objects, dimensions, addressBase, address);
 		*address = 0;
 		break;
 
@@ -296,7 +296,7 @@ void SourceVariable::makeObjectsGetPrep(ObjectVector * objects, std::vector<Coun
 	case SC_REGISTERARRAY_GLOBAL:
 	case SC_REGISTERARRAY_MAP:
 	case SC_REGISTERARRAY_WORLD:
-		makeObjectsSetPrep(objects, dimensions, addressBase, address);
+		makeObjectsAccessPrep(objects, dimensions, addressBase, address);
 		*addressBase = objects->getValue(0);
 		*address = 0;
 		break;

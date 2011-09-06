@@ -129,8 +129,6 @@ void SourceExpression_UnaryDecInc::virtual_makeObjects(ObjectVector * objects)
 		doDecInc(objects, _inc);
 
 		expr->makeObjectsSet(objects);
-
-		make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
 	}
 }
 
@@ -145,7 +143,7 @@ void SourceExpression_UnaryDecInc::virtual_makeObjectsGet(ObjectVector * objects
 
 		doDecInc(objects, _inc);
 
-		expr->makeObjectsSet(objects);
+		expr->makeObjectsAccess(objects);
 
 		if (_suf) objects->addToken(OCODE_DROP);
 	}

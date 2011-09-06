@@ -110,6 +110,25 @@ void SourceExpression::makeObjects(ObjectVector * objects)
 		virtual_makeObjects(objects);
 }
 
+void SourceExpression::makeObjectsAccess(ObjectVector * objects)
+{
+	makeObjectsBase(objects);
+
+	virtual_makeObjectsAccess(objects);
+}
+void SourceExpression::makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
+{
+	makeObjectsBase(objects);
+
+	virtual_makeObjectsAccessArray(objects, dimensions);
+}
+void SourceExpression::makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names)
+{
+	makeObjectsBase(objects);
+
+	virtual_makeObjectsAccessMember(objects, names);
+}
+
 void SourceExpression::makeObjectsAddress(ObjectVector * objects)
 {
 	makeObjectsBase(objects);
@@ -217,6 +236,19 @@ void SourceExpression::recurse_makeObjects(ObjectVector * objects)
 	objects->setPosition(position);
 }
 
+void SourceExpression::recurse_makeObjectsAccess(ObjectVector * objects)
+{
+	recurse_makeObjects(objects);
+}
+void SourceExpression::recurse_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
+{
+	recurse_makeObjects(objects);
+}
+void SourceExpression::recurse_makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names)
+{
+	recurse_makeObjects(objects);
+}
+
 void SourceExpression::recurse_makeObjectsAddress(ObjectVector * objects)
 {
 	recurse_makeObjects(objects);
@@ -259,6 +291,19 @@ void SourceExpression::virtual_makeObjects(ObjectVector * objects)
 	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
 }
 
+void SourceExpression::virtual_makeObjectsAccess(ObjectVector * objects)
+{
+	throw SourceException("makeObjectsAccess on invalid expression", position, getName());
+}
+void SourceExpression::virtual_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
+{
+	throw SourceException("makeObjectsAccessArray on invalid expression", position, getName());
+}
+void SourceExpression::virtual_makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names)
+{
+	throw SourceException("makeObjectsAccessMember on invalid expression", position, getName());
+}
+
 void SourceExpression::virtual_makeObjectsAddress(ObjectVector * objects)
 {
 	throw SourceException("makeObjectsAddress on invalid expression", position, getName());
@@ -285,15 +330,18 @@ void SourceExpression::virtual_makeObjectsGetMember(ObjectVector * objects, std:
 
 void SourceExpression::virtual_makeObjectsSet(ObjectVector * objects)
 {
-	throw SourceException("makeObjectsSet on invalid expression", position, getName());
+	virtual_makeObjectsAccess(objects);
+	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
 }
 void SourceExpression::virtual_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
-	throw SourceException("makeObjectsSetArray on invalid expression", position, getName());
+	virtual_makeObjectsAccessArray(objects, dimensions);
+	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
 }
 void SourceExpression::virtual_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
-	throw SourceException("makeObjectsSetMember on invalid expression", position, getName());
+	virtual_makeObjectsAccessMember(objects, names);
+	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
 }
 
 
