@@ -197,10 +197,19 @@ void SourceExpression_ValueMember::virtual_makeObjectsSet(ObjectVector * objects
 	if (canMakeObjectsAddress())
 	{
 		makeObjectsAddress(objects);
-		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
-		for (int i(getType()->size()); i--;)
-			objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
+		if (getType()->size() == 1)
+		{
+			objects->addToken(OCODE_SWAP);
+			objects->addToken(OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
+		}
+		else
+		{
+			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+
+			for (int i(getType()->size()); i--;)
+				objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
+		}
 	}
 	else
 	{

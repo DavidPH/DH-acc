@@ -188,10 +188,17 @@ void SourceExpression_BinaryArray::virtual_makeObjectsGet(ObjectVector * objects
 	{
 		makeObjectsAddress(objects);
 
-		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+		if (getType()->size() == 1)
+		{
+			objects->addToken(OCODE_PUSHGLOBALARRAY, objects->getValue(0));
+		}
+		else
+		{
+			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
-		for (int i(0); i < getType()->size(); ++i)
-			objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
+			for (int i(0); i < getType()->size(); ++i)
+				objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
+		}
 	}
 	else
 	{
@@ -222,10 +229,18 @@ void SourceExpression_BinaryArray::virtual_makeObjectsSet(ObjectVector * objects
 	{
 		makeObjectsAddress(objects);
 
-		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+		if (getType()->size() == 1)
+		{
+			objects->addToken(OCODE_SWAP);
+			objects->addToken(OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
+		}
+		else
+		{
+			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
-		for (int i(getType()->size()); i--;)
-			objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
+			for (int i(getType()->size()); i--;)
+				objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
+		}
 	}
 	else
 	{
