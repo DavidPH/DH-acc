@@ -62,6 +62,9 @@ public:
 	ObjectToken const & operator [] (bigsint index) const;
 
 	void optimize();
+	void optimize_nop();
+	void optimize_pushdrop();
+	void optimize_pushpushswap();
 
 	ObjectVector & setPosition(SourcePosition const & position);
 

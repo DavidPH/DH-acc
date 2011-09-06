@@ -54,7 +54,8 @@ public:
 	std::vector<std::string> const & getLabels() const;
 	SourcePosition const & getPosition() const;
 
-	void writeObject(std::ostream * out);
+	// Swaps args and code.
+	void swap(ObjectToken & token);
 
 
 

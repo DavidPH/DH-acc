@@ -30,6 +30,7 @@
 
 option_data<bool> option_opt_nop("opt-nop", "optimization", "Strips NOP instructions.", false);
 option_data<bool> option_opt_pushdrop("opt-pushdrop", "optimization", "Strips PUSH/DROP pairs. On by default.", true);
+option_data<bool> option_opt_pushpushswap("opt-pushpushswap", "optimization", "Removes the SWAP from PUSH/PUSH/SWAP sets. On by default.", true);
 
 
 
@@ -121,7 +122,18 @@ void ObjectVector::optimize()
 {
 	// NOP removal.
 	// Off by default because NOPs do not normally get generated.
-	if (option_opt_pushdrop.data) for(size_t i(0); i+1 < _tokens.size();)
+	if (option_opt_pushdrop.data) optimize_nop();
+
+	// PUSH/DROP removal.
+	if (option_opt_pushdrop.data) optimize_pushdrop();
+
+	// PUSH/PUSH/SWAP fixing.
+	if (option_opt_pushpushswap.data) optimize_pushpushswap();
+}
+void ObjectVector::optimize_nop()
+{
+	// NOP removal.
+	for (size_t i(0); i+1 < _tokens.size();)
 	{
 		if (_tokens[i].getCode() == OCODE_NOP)
 		{
@@ -139,9 +151,11 @@ void ObjectVector::optimize()
 			++i;
 		}
 	}
-
+}
+void ObjectVector::optimize_pushdrop()
+{
 	// PUSH/DROP removal.
-	if (option_opt_pushdrop.data) for(size_t i(0); i+2 < _tokens.size();)
+	for (size_t i(0); i+2 < _tokens.size();)
 	{
 		if (ocode_is_push_noarg(_tokens[i].getCode()) && _tokens[i+1].getCode() == OCODE_DROP)
 		{
@@ -159,6 +173,30 @@ void ObjectVector::optimize()
 
 			// Decrement index in case there was an earlier PUSH.
 			if (i) --i;
+		}
+		else
+		{
+			++i;
+		}
+	}
+}
+void ObjectVector::optimize_pushpushswap()
+{
+	// PUSH/PUSH/SWAP fixing.
+	for (size_t i(0); i+3 < _tokens.size();)
+	{
+		if (ocode_is_push_noarg(_tokens[i].getCode()) &&
+			ocode_is_push_noarg(_tokens[i+1].getCode()) &&
+			_tokens[i+2].getCode() == OCODE_SWAP)
+		{
+			_tokens[i].swap(_tokens[i+1]);
+
+			_tokens[i+3].addLabel(_tokens[i+2].getLabels());
+
+			for (size_t j(i+3); j < _tokens.size(); ++j)
+				_tokens[j-1] = _tokens[j];
+
+			_tokens.resize(_tokens.size() - 1);
 		}
 		else
 		{

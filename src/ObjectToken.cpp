@@ -27,6 +27,8 @@
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 
+#include <algorithm>
+
 
 
 ObjectToken::ObjectToken() : _code(OCODE_NONE)
@@ -75,6 +77,12 @@ std::vector<std::string> const & ObjectToken::getLabels() const
 SourcePosition const & ObjectToken::getPosition() const
 {
 	return _position;
+}
+
+void ObjectToken::swap(ObjectToken & token)
+{
+	std::swap(_args, token._args);
+	std::swap(_code, token._code);
 }
 
 
