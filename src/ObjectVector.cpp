@@ -156,6 +156,9 @@ void ObjectVector::optimize()
 				_tokens[j-2] = _tokens[j];
 
 			_tokens.resize(_tokens.size() - 2);
+
+			// Decrement index in case there was an earlier PUSH.
+			if (i) --i;
 		}
 		else
 		{
