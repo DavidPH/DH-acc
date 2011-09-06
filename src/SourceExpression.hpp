@@ -167,6 +167,8 @@ protected:
 private:
 	SourceExpression();
 
+	void makeObjectsBase(ObjectVector * objects);
+
 	virtual void virtual_makeObjects(ObjectVector * objects);
 
 	virtual void virtual_makeObjectsAddress(ObjectVector * objects);

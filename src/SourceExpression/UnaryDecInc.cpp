@@ -118,21 +118,19 @@ void SourceExpression_UnaryDecInc::printDebug(std::ostream * out) const
 
 void SourceExpression_UnaryDecInc::virtual_makeObjects(ObjectVector * objects)
 {
+	Super::recurse_makeObjects(objects);
+
 	// Only modify for the first evaluation.
 	// Note that _suf is irrelevant, since nothing is yielded to stack.
-	if (evaluations == 0)
+	if (evaluations == 1)
 	{
-		Super::recurse_makeObjectsGet(objects);
+		expr->makeObjectsGet(objects);
 
 		doDecInc(objects, _inc);
 
 		expr->makeObjectsSet(objects);
 
 		make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
-	}
-	else
-	{
-		Super::recurse_makeObjects(objects);
 	}
 }
 

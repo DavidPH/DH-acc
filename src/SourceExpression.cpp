@@ -100,7 +100,9 @@ CounterPointer<ObjectExpression> SourceExpression::makeObjectAddress() const
 
 void SourceExpression::makeObjects(ObjectVector * objects)
 {
-	if (canMakeObject())
+	makeObjectsBase(objects);
+
+	if (_labels.empty() && canMakeObject())
 	{
 		recurse_makeObjects(objects);
 	}
@@ -110,9 +112,12 @@ void SourceExpression::makeObjects(ObjectVector * objects)
 
 void SourceExpression::makeObjectsAddress(ObjectVector * objects)
 {
-	if (canMakeObjectAddress())
+	makeObjectsBase(objects);
+
+	if (_labels.empty() && canMakeObjectAddress())
 	{
 		recurse_makeObjectsAddress(objects);
+
 		objects->addToken(OCODE_PUSHNUMBER, makeObjectAddress());
 	}
 	else
@@ -128,14 +133,27 @@ void SourceExpression::makeObjectsCast(ObjectVector * objects, VariableType cons
 		makeObjects(objects);
 	}
 	else
+	{
+		makeObjectsBase(objects);
+
 		virtual_makeObjectsCast(objects, type);
+	}
+}
+
+void SourceExpression::makeObjectsBase(ObjectVector * objects)
+{
+	if (!evaluations++)
+		objects->addLabel(_labels);
 }
 
 void SourceExpression::makeObjectsGet(ObjectVector * objects)
 {
-	if (canMakeObject())
+	makeObjectsBase(objects);
+
+	if (_labels.empty() && canMakeObject())
 	{
 		recurse_makeObjectsGet(objects);
+
 		objects->addToken(OCODE_PUSHNUMBER, makeObject());
 	}
 	else
@@ -143,23 +161,33 @@ void SourceExpression::makeObjectsGet(ObjectVector * objects)
 }
 void SourceExpression::makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
+	makeObjectsBase(objects);
+
 	virtual_makeObjectsGetArray(objects, dimensions);
 }
 void SourceExpression::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
+	makeObjectsBase(objects);
+
 	virtual_makeObjectsGetMember(objects, names);
 }
 
 void SourceExpression::makeObjectsSet(ObjectVector * objects)
 {
+	makeObjectsBase(objects);
+
 	virtual_makeObjectsSet(objects);
 }
 void SourceExpression::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
+	makeObjectsBase(objects);
+
 	virtual_makeObjectsSetArray(objects, dimensions);
 }
 void SourceExpression::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
+	makeObjectsBase(objects);
+
 	virtual_makeObjectsSetMember(objects, names);
 }
 
@@ -186,51 +214,48 @@ void SourceExpression::printDebug(std::ostream * out) const
 
 void SourceExpression::recurse_makeObjects(ObjectVector * objects)
 {
-	recurse_makeObjectsGet(objects);
+	objects->setPosition(position);
 }
 
 void SourceExpression::recurse_makeObjectsAddress(ObjectVector * objects)
 {
-	recurse_makeObjectsGet(objects);
+	recurse_makeObjects(objects);
 }
 
 void SourceExpression::recurse_makeObjectsCast(ObjectVector * objects, VariableType const * type)
 {
-	recurse_makeObjectsGet(objects);
+	recurse_makeObjects(objects);
 }
 
 void SourceExpression::recurse_makeObjectsGet(ObjectVector * objects)
 {
-	if (!evaluations++)
-		objects->addLabel(_labels);
-
-	objects->setPosition(position);
+	recurse_makeObjects(objects);
 }
 void SourceExpression::recurse_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
-	recurse_makeObjectsGet(objects);
+	recurse_makeObjects(objects);
 }
 void SourceExpression::recurse_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
-	recurse_makeObjectsGet(objects);
+	recurse_makeObjects(objects);
 }
 
 void SourceExpression::recurse_makeObjectsSet(ObjectVector * objects)
 {
-	recurse_makeObjectsGet(objects);
+	recurse_makeObjects(objects);
 }
 void SourceExpression::recurse_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
-	recurse_makeObjectsGet(objects);
+	recurse_makeObjects(objects);
 }
 void SourceExpression::recurse_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
-	recurse_makeObjectsGet(objects);
+	recurse_makeObjects(objects);
 }
 
 void SourceExpression::virtual_makeObjects(ObjectVector * objects)
 {
-	makeObjectsGet(objects);
+	virtual_makeObjectsGet(objects);
 	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
 }
 
@@ -241,7 +266,7 @@ void SourceExpression::virtual_makeObjectsAddress(ObjectVector * objects)
 
 void SourceExpression::virtual_makeObjectsCast(ObjectVector * objects, VariableType const * type)
 {
-	makeObjectsGet(objects);
+	virtual_makeObjectsGet(objects);
 	make_objects_cast(objects, getType(), type, position);
 }
 

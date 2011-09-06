@@ -102,20 +102,13 @@ void SourceExpression_ValueBlock::virtual_makeObjects(ObjectVector * objects)
 
 void SourceExpression_ValueBlock::virtual_makeObjectsCast(ObjectVector * objects, VariableType const * type)
 {
-	if (type->vt == VariableType::VT_VOID)
-	{
-		makeObjects(objects);
-	}
-	else
-	{
-		Super::recurse_makeObjectsCast(objects, type);
+	Super::recurse_makeObjectsCast(objects, type);
 
-		if (_expressions.size() != type->types.size())
-			throw SourceException("incorrect number of expressions to cast", position, getName());
+	if (_expressions.size() != type->types.size())
+		throw SourceException("incorrect number of expressions to cast", position, getName());
 
-		for (size_t i(0); i < _expressions.size(); ++i)
-			_expressions[i]->makeObjectsCast(objects, type->types[i]);
-	}
+	for (size_t i(0); i < _expressions.size(); ++i)
+		_expressions[i]->makeObjectsCast(objects, type->types[i]);
 }
 
 void SourceExpression_ValueBlock::virtual_makeObjectsGet(ObjectVector * objects)
