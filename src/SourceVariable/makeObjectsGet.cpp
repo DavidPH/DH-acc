@@ -34,7 +34,7 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 
 	ObjectExpression::Pointer addressBase;
 	int address;
-	makeObjectsGetPrep(objects, NULL, &addressBase, &address);
+	makeObjectsGetPrep(objects, NULL, &addressBase, &address, position);
 	makeObjectsGet(objects, position, _type, addressBase, &address, false);
 }
 void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address, bool dimensioned) const
@@ -176,7 +176,7 @@ void SourceVariable::makeObjectsGetArray(ObjectVector * objects, std::vector<Cou
 
 	ObjectExpression::Pointer addressBase;
 	int address;
-	makeObjectsGetPrep(objects, dimensions, &addressBase, &address);
+	makeObjectsGetPrep(objects, dimensions, &addressBase, &address, position);
 	makeObjectsGetArray(objects, dimensions->size(), position, _type, addressBase, &address);
 }
 void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
@@ -222,7 +222,7 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 
 	ObjectExpression::Pointer addressBase;
 	int address;
-	makeObjectsGetPrep(objects, NULL, &addressBase, &address);
+	makeObjectsGetPrep(objects, NULL, &addressBase, &address, position);
 	makeObjectsGetMember(objects, names, position, _type, addressBase, &address);
 }
 void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
@@ -274,13 +274,13 @@ void SourceVariable::makeObjectsGetMember(ObjectVector * objects, std::vector<st
 	}
 }
 
-void SourceVariable::makeObjectsGetPrep(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, ObjectExpression::Pointer * addressBase, int * address) const
+void SourceVariable::makeObjectsGetPrep(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, ObjectExpression::Pointer * addressBase, int * address, SourcePosition const & position) const
 {
 	switch (_sc)
 	{
 	case SC_AUTO:
 	case SC_STATIC:
-		makeObjectsAccessPrep(objects, dimensions, addressBase, address);
+		makeObjectsAccessPrep(objects, dimensions, addressBase, address, position);
 		*address = 0;
 		break;
 
@@ -296,7 +296,7 @@ void SourceVariable::makeObjectsGetPrep(ObjectVector * objects, std::vector<Coun
 	case SC_REGISTERARRAY_GLOBAL:
 	case SC_REGISTERARRAY_MAP:
 	case SC_REGISTERARRAY_WORLD:
-		makeObjectsAccessPrep(objects, dimensions, addressBase, address);
+		makeObjectsAccessPrep(objects, dimensions, addressBase, address, position);
 		*addressBase = objects->getValue(0);
 		*address = 0;
 		break;

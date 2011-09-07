@@ -47,7 +47,7 @@ void SourceVariable::makeObjectsAccessMember(ObjectVector * objects, std::vector
 	makeObjectsGetMember(objects, &namesOriginal, position);
 }
 
-void SourceVariable::makeObjectsAccessPrep(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions, ObjectExpression::Pointer * addressBase, int * address) const
+void SourceVariable::makeObjectsAccessPrep(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions, ObjectExpression::Pointer * addressBase, int * address, SourcePosition const & position) const
 {
 	switch (_sc)
 	{
@@ -62,23 +62,18 @@ void SourceVariable::makeObjectsAccessPrep(ObjectVector * objects, std::vector<S
 
 			if ((*dimensions)[0])
 			{
-				for (size_t i(dimensions->size()); i--;)
+				type = type->refType;
+				SourceExpression::Pointer expr((*dimensions)[0]);
+				(*dimensions)[0] = NULL;
+
+				for (size_t i(1); i < dimensions->size(); ++i)
 				{
 					type = type->refType;
-
-					(*dimensions)[i]->makeObjectsGet(objects);
-
-					if (type->size() != 1)
-					{
-						objects->addToken(OCODE_PUSHNUMBER, objects->getValue(type->size()));
-						objects->addToken(OCODE_MUL);
-					}
-
-					if (i != (dimensions->size() - 1)) objects->addToken(OCODE_ADD);
-
+					expr = SourceExpression::create_binary_add(expr, (*dimensions)[i], position);
 					(*dimensions)[i] = NULL;
 				}
 
+				expr->makeObjectsGet(objects);
 				objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 			}
 			else

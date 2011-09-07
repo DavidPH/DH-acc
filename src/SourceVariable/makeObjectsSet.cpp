@@ -35,7 +35,7 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 
 	ObjectExpression::Pointer addressBase;
 	int address;
-	makeObjectsSetPrep(objects, NULL, &addressBase, &address);
+	makeObjectsSetPrep(objects, NULL, &addressBase, &address, position);
 	makeObjectsSet(objects, position, _type, addressBase, &address, false);
 }
 void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address, bool dimensioned) const
@@ -149,7 +149,7 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, std::vector<Sou
 
 	ObjectExpression::Pointer addressBase;
 	int address;
-	makeObjectsSetPrep(objects, dimensions, &addressBase, &address);
+	makeObjectsSetPrep(objects, dimensions, &addressBase, &address, position);
 	makeObjectsSetArray(objects, dimensions->size(), position, _type, addressBase, &address);
 }
 void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
@@ -195,7 +195,7 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 
 	ObjectExpression::Pointer addressBase;
 	int address;
-	makeObjectsSetPrep(objects, NULL, &addressBase, &address);
+	makeObjectsSetPrep(objects, NULL, &addressBase, &address, position);
 	makeObjectsSetMember(objects, names, position, _type, addressBase, &address);
 }
 void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
@@ -246,9 +246,9 @@ void SourceVariable::makeObjectsSetMember(ObjectVector * objects, std::vector<st
 	}
 }
 
-void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions, ObjectExpression::Pointer * addressBase, int * address) const
+void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions, ObjectExpression::Pointer * addressBase, int * address, SourcePosition const & position) const
 {
-	makeObjectsAccessPrep(objects, dimensions, addressBase, address);
+	makeObjectsAccessPrep(objects, dimensions, addressBase, address, position);
 }
 
 void SourceVariable::makeObjectsSetSkip(VariableType const * type, int * address) const

@@ -70,7 +70,8 @@ SourceExpression::Pointer SourceExpression::create_binary_array(SourceExpression
 
 SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, NULL, VariableType::get_vt_int(), position)
 {
-
+	if (getType()->size() != 1)
+		this->exprR = create_binary_mul(exprR, create_value_int(getType()->size(), position), position);
 }
 
 bool SourceExpression_BinaryArray::canMakeObject() const
@@ -94,9 +95,7 @@ VariableType const * SourceExpression_BinaryArray::getType() const
 
 CounterPointer<ObjectExpression> SourceExpression_BinaryArray::makeObjectAddress() const
 {
-	ObjectExpression::Pointer objSize(ObjectExpression::create_value_int(getType()->size(), position));
-	ObjectExpression::Pointer objOffset(ObjectExpression::create_binary_mul(exprR->makeObject(), objSize, position));
-	return ObjectExpression::create_binary_add(exprL->makeObjectAddress(), objOffset, position);
+	return ObjectExpression::create_binary_add(exprL->makeObjectAddress(), exprR->makeObject(), position);
 }
 
 void SourceExpression_BinaryArray::printDebug(std::ostream * out) const
@@ -160,11 +159,6 @@ void SourceExpression_BinaryArray::virtual_makeObjectsAddress(ObjectVector * obj
 
 	objects->setPosition(position);
 
-	if (getType()->size() != 1)
-	{
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue(getType()->size()));
-		objects->addToken(OCODE_MUL);
-	}
 	objects->addToken(OCODE_ADD);
 }
 
