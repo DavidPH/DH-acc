@@ -54,22 +54,57 @@ void SourceExpression_Binary::doCast()
 {
 	VariableType const * type(getType());
 
+	// Pointer arithmetic.
 	if (type->vt == VariableType::VT_POINTER && _arithmetic)
+	{
+		VariableType const * typeL(exprL->getType());
+		VariableType const * typeR(exprR->getType());
+
+		if (typeL->vt == typeR->vt && typeL != typeR)
+			throw SourceException("VT_POINTER mismatch", position, getName());
+
+		if (typeL->vt != VariableType::VT_POINTER)
+		{
+			if (type->refType->size() != 1)
+			{
+				if (typeL->vt != VariableType::VT_INT)
+					exprL = create_value_cast(exprL, VariableType::get_vt_int(), position);
+
+				exprL = create_binary_mul(exprL, create_value_int(type->refType->size(), position), position);
+			}
+
+			exprL = create_value_cast(exprL, type, position);
+		}
+
+		if (typeR->vt != VariableType::VT_POINTER)
+		{
+			if (type->refType->size() != 1)
+			{
+				if (typeR->vt != VariableType::VT_INT)
+					exprR = create_value_cast(exprR, VariableType::get_vt_int(), position);
+
+				exprR = create_binary_mul(exprR, create_value_int(type->refType->size(), position), position);
+			}
+
+			exprR = create_value_cast(exprR, type, position);
+		}
+
 		return;
+	}
 
 	if (exprL->getType() != type)
-		this->exprL = create_value_cast(exprL, type, position);
+		exprL = create_value_cast(exprL, type, position);
 
 	if (exprR->getType() != type)
-		this->exprR = create_value_cast(exprR, type, position);
+		exprR = create_value_cast(exprR, type, position);
 }
 void SourceExpression_Binary::doCast(VariableType const * castL, VariableType const * castR)
 {
 	if (castL && exprL->getType() != castL)
-		this->exprL = create_value_cast(exprL, castL, position);
+		exprL = create_value_cast(exprL, castL, position);
 
 	if (castR && exprR->getType() != castR)
-		this->exprR = create_value_cast(exprR, castR, position);
+		exprR = create_value_cast(exprR, castR, position);
 }
 
 VariableType const * SourceExpression_Binary::getType() const
@@ -101,45 +136,8 @@ void SourceExpression_Binary::recurse_makeObjectsGet(ObjectVector * objects)
 	// Special case, child handles expressions.
 	if (_arithmetic == 2) return;
 
-	VariableType const * type(getType());
-	// Pointer arithmetic.
-	if (type->vt == VariableType::VT_POINTER && _arithmetic)
-	{
-		VariableType const * typeL(exprL->getType());
-		VariableType const * typeR(exprR->getType());
-
-		if (typeL->vt == typeR->vt && typeL != typeR)
-			throw SourceException("VT_POINTER mismatch", position, getName());
-
-		exprL->makeObjectsGet(objects);
-		if (typeL->vt != VariableType::VT_POINTER)
-		{
-			make_objects_cast(objects, typeL, type, position);
-
-			if (type->refType->size() != 1)
-			{
-				objects->addToken(OCODE_PUSHNUMBER, objects->getValue(type->refType->size()));
-				objects->addToken(OCODE_MUL);
-			}
-		}
-
-		exprR->makeObjectsGet(objects);
-		if (typeR->vt != VariableType::VT_POINTER)
-		{
-			make_objects_cast(objects, typeR, type, position);
-
-			if (type->refType->size() != 1)
-			{
-				objects->addToken(OCODE_PUSHNUMBER, objects->getValue(type->refType->size()));
-				objects->addToken(OCODE_MUL);
-			}
-		}
-	}
-	else
-	{
-		exprL->makeObjectsGet(objects);
-		exprR->makeObjectsGet(objects);
-	}
+	exprL->makeObjectsGet(objects);
+	exprR->makeObjectsGet(objects);
 
 	objects->setPosition(position);
 }
