@@ -79,7 +79,7 @@ SourcePosition const & ObjectToken::getPosition() const
 	return _position;
 }
 
-void ObjectToken::swap(ObjectToken & token)
+void ObjectToken::swapData(ObjectToken & token)
 {
 	std::swap(_args, token._args);
 	std::swap(_code, token._code);

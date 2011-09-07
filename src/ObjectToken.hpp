@@ -55,7 +55,7 @@ public:
 	SourcePosition const & getPosition() const;
 
 	// Swaps args and code.
-	void swap(ObjectToken & token);
+	void swapData(ObjectToken & token);
 
 
 

@@ -189,7 +189,7 @@ void ObjectVector::optimize_pushpushswap()
 			ocode_is_push_noarg(_tokens[i+1].getCode()) &&
 			_tokens[i+2].getCode() == OCODE_SWAP)
 		{
-			_tokens[i].swap(_tokens[i+1]);
+			_tokens[i].swapData(_tokens[i+1]);
 
 			_tokens[i+3].addLabel(_tokens[i+2].getLabels());
 
