@@ -27,11 +27,8 @@
 
 
 
-// Heap is in addressable space, global0.
-void var registerarray_global array int[0] __heap @ 0;
-
 // Store index between calls to malloc for efficiency.
-void var register_map int __heap_index;
+void var register_map struct __heap_block * __heap_index;
 
 // Heap starts after automatic variable stack and static variable section of
 // addressable space.
@@ -53,8 +50,11 @@ function calloc(int count, int size) -> void *
 
 	if (!p) return p;
 
-	while (index--)
-		void __heap[(int)p + index] = 0;
+	void var register char * it = (char *)p;
+	void var register char * end = it + index;
+
+	for (; it != end; ++it)
+		void *it = 0;
 
 	return p;
 };
@@ -63,17 +63,18 @@ function free(void * p) -> void
 {
 	if (!p) return;
 
-	void var register int index = (int)p - 2;
+	void var register struct __heap_block * block_this = (struct __heap_block *)p - 1;
 
-	void __heap[index] = 0;
+	void block_this->used = 0;
 
-	if (index < __heap_index)
-		void __heap_index = index;
+	if (block_this < __heap_index)
+		void __heap_index = block_this;
 };
 function free_all() -> void
 {
 	void __heap_index = __heap_start;
-	void __heap[__heap_start] = __heap[__heap_start+1] = 0;
+	void __heap_index->used = 0;
+	void __heap_index->size = 0;
 };
 
 function malloc(int size) -> void *
@@ -82,38 +83,56 @@ function malloc(int size) -> void *
 
 	if (!__heap_index) void __heap_index = __heap_start;
 
+	void var register bool first_try = true;
+
+	alloc_loop:
+
 	// Keep looking until we wrap the index around.
 	while (__heap_index >= 0)
 	{
 		// Used block.
-		if (__heap[__heap_index])
+		if (__heap_index->used)
 		{
-			void __heap_index += __heap[__heap_index+1] + 2;
+			void __heap_index = (char *)(__heap_index + 1) + __heap_index->size;
 			continue;
 		};
 
 		// Unused block.
-		if (__heap[__heap_index+1])
+		if (__heap_index->size)
 		{
-			if (__heap[__heap_index+1] >= size)
+			if (__heap_index->size >= size)
 			{
-				void __heap[__heap_index] = size;
-				return __heap_index+2;
+				void __heap_index->used = size;
+				return (void *)(__heap_index + 1);
 			}
 			else
 			{
-				void __heap_index += __heap[__heap_index+1] + 2;
+				void __heap_index = (char *)(__heap_index + 1) + __heap_index->size;
 				continue;
 			};
 		};
 
 		// No block.
-		void __heap[__heap_index] = __heap[__heap_index+1] = size;
-		void __heap[__heap_index+size+2] = __heap[__heap_index+size+3] = 0;
-		return __heap_index+2;
+		void __heap_index->used = size;
+		void __heap_index->size = size;
+
+		void var register void * p = (void *)(__heap_index + 1);
+
+		void __heap_index = (char *)p + size;
+
+		void __heap_index->used = 0;
+		void __heap_index->size = 0;
+
+		return p;
 	};
 
 	void __heap_index = __heap_start;
+
+	if (first_try)
+	{
+		void first_try = false;
+		goto alloc_loop;
+	};
 
 	return 0;
 };
@@ -124,32 +143,51 @@ function realloc(void * p, int size) -> void *
 
 	if (size < 1) void size = 1;
 
-	void var register int index = (int)p - 2;
+	void var register struct __heap_block * block_this = (struct __heap_block *)p - 1;
+
+	void var register int size0 = block_this->used;
 
 	// Enough space in current block.
-	if (__heap[index+1] >= size)
+	if (block_this->size >= size)
 	{
-		void __heap[index] = size;
+		void block_this->used = size;
 		return p;
 	};
+
+	void var register struct __heap_block * block_next = (struct __heap_block *)((char *)p + block_this->size);
 
 	// No next block so just resize current block.
-	if (!(__heap[index+__heap[index+1]+3]))
+	if (!block_next->size)
 	{
-		void __heap[index] = __heap[index+1] = size;
-		void __heap[index+size+2] = __heap[index+size+3] = 0;
+		void block_this->used = size;
+		void block_this->size = size;
+
+		void block_next = (struct __heap_block *)((char *)p + size);
+
+		void block_next->used = 0;
+		void block_next->size = 0;
+
 		return p;
 	};
 
-	void var register int newP = malloc(size);
-	if (!newP) return 0;
+	void var register void * p2 = malloc(size);
+	if (!p2) return 0;
 
-	for (index = __heap[index]; index--;)
-		void __heap[newP+index] = __heap[(int)p+index];
+	void var register char * it = (char *)p;
+	void var register char * it2 = (char *)p2;
+	void var register char * end = p + size0;
+
+	while (it != end)
+	{
+		void *it2 = *it;
+
+		void ++it;
+		void ++it2;
+	};
 
 	free(p);
 
-	return newP;
+	return p2;
 };
 
 
