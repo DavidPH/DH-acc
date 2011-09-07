@@ -327,10 +327,11 @@ bool SourceTokenizerDS::isSkip()
 
 SourceTokenC const & SourceTokenizerDS::peek()
 {
-	if (_ungetStack.empty())
-		_ungetStack.push(get());
+	prep();
 
-	return _ungetStack.top();
+	_ungetStack.push(_token);
+
+	return _token;
 }
 
 void SourceTokenizerDS::prep()
