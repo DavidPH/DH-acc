@@ -33,7 +33,7 @@ class SourceExpression_ValueVariable : public SourceExpression
 	MAKE_COUNTER_CLASS_BASE(SourceExpression_ValueVariable, SourceExpression);
 
 public:
-	SourceExpression_ValueVariable(SourceVariable const & var, SourcePosition const & position);
+	SourceExpression_ValueVariable(SourceVariable * var, SourcePosition const & position);
 
 	virtual bool canMakeObject() const;
 	virtual bool canMakeObjectAddress() const;
@@ -63,7 +63,7 @@ private:
 	virtual void virtual_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
 	virtual void virtual_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names);
 
-	SourceVariable _var;
+	SourceVariable::Pointer _var;
 };
 
 
@@ -71,19 +71,23 @@ private:
 SourceExpression::Pointer SourceExpression::create_value_char(SourceTokenC const & token)
 {
 	if (token.getData().size() != 1)
-		throw SourceException("invalid length for character literal", token.getPosition(), "SourceExpressionDS");
+		throw SourceException("invalid length for character literal", token.getPosition(), "SourceExpression");
+
+	ObjectExpression::Pointer charVarData(ObjectExpression::create_value_int(token.getData()[0], token.getPosition()));
 
 	VariableType const * charVarType(VariableType::get_vt_char());
 
-	SourceVariable charVariable("", charVarType, ObjectExpression::create_value_int(token.getData()[0], token.getPosition()), token.getPosition());
+	SourceVariable::Pointer charVariable(SourceVariable::create_literal(charVarType, charVarData, token.getPosition()));
 
 	return create_value_variable(charVariable, token.getPosition());
 }
 SourceExpression::Pointer SourceExpression::create_value_int(bigsint value, SourcePosition const & position)
 {
+	ObjectExpression::Pointer intVarData(ObjectExpression::create_value_int(value, position));
+
 	VariableType const * intVarType(VariableType::get_vt_int());
 
-	SourceVariable intVariable("", intVarType, ObjectExpression::create_value_int(value, position), position);
+	SourceVariable::Pointer intVariable(SourceVariable::create_literal(intVarType, intVarData, position));
 
 	return create_value_variable(intVariable, position);
 }
@@ -93,58 +97,62 @@ SourceExpression::Pointer SourceExpression::create_value_int(SourceTokenC const 
 }
 SourceExpression::Pointer SourceExpression::create_value_real(SourceTokenC const & token)
 {
+	ObjectExpression::Pointer realVarData(ObjectExpression::create_value_float(get_bigreal(token), token.getPosition()));
+
 	VariableType const * realVarType(VariableType::get_vt_real());
 
-	SourceVariable realVariable("", realVarType, ObjectExpression::create_value_float(get_bigreal(token), token.getPosition()), token.getPosition());
+	SourceVariable::Pointer realVariable(SourceVariable::create_literal(realVarType, realVarData, token.getPosition()));
 
 	return create_value_variable(realVariable, token.getPosition());
 }
 SourceExpression::Pointer SourceExpression::create_value_string(SourceTokenC const & token)
 {
+	std::string stringVarData(ObjectExpression::add_string(token.getData() + '\0'));
+
 	VariableType const * stringVarType(VariableType::get_vt_string());
 
-	SourceVariable stringVariable("", stringVarType, ObjectExpression::add_string(token.getData() + '\0'), token.getPosition());
+	SourceVariable::Pointer stringVariable(SourceVariable::create_literal(stringVarType, stringVarData, token.getPosition()));
 
 	return create_value_variable(stringVariable, token.getPosition());
 }
-SourceExpression::Pointer SourceExpression::create_value_variable(SourceVariable const & var, SourcePosition const & position)
+SourceExpression::Pointer SourceExpression::create_value_variable(SourceVariable * var, SourcePosition const & position)
 {
 	return new SourceExpression_ValueVariable(var, position);
 }
 
 
 
-SourceExpression_ValueVariable::SourceExpression_ValueVariable(SourceVariable const & var, SourcePosition const & position) : Super(position), _var(var)
+SourceExpression_ValueVariable::SourceExpression_ValueVariable(SourceVariable * var, SourcePosition const & position) : Super(position), _var(var)
 {
 
 }
 
 bool SourceExpression_ValueVariable::canMakeObject() const
 {
-	return _var.canMakeObject();
+	return _var->canMakeObject();
 }
 bool SourceExpression_ValueVariable::canMakeObjectAddress() const
 {
-	return _var.canMakeObjectAddress();
+	return _var->canMakeObjectAddress();
 }
 
 bool SourceExpression_ValueVariable::canMakeObjectsAddress() const
 {
-	return _var.canMakeObjectsAddress();
+	return _var->canMakeObjectsAddress();
 }
 
 VariableType const * SourceExpression_ValueVariable::getType() const
 {
-	return _var.getType();
+	return _var->getType();
 }
 
 CounterPointer<ObjectExpression> SourceExpression_ValueVariable::makeObject() const
 {
-	return _var.makeObject(position);
+	return _var->makeObject(position);
 }
 CounterPointer<ObjectExpression> SourceExpression_ValueVariable::makeObjectAddress() const
 {
-	return _var.makeObjectAddress(position);
+	return _var->makeObjectAddress(position);
 }
 
 void SourceExpression_ValueVariable::printDebug(std::ostream * out) const
@@ -162,64 +170,64 @@ void SourceExpression_ValueVariable::virtual_makeObjectsAccess(ObjectVector * ob
 {
 	Super::recurse_makeObjectsAccess(objects);
 
-	_var.makeObjectsAccess(objects, position);
+	_var->makeObjectsAccess(objects, position);
 }
 void SourceExpression_ValueVariable::virtual_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
 	Super::recurse_makeObjectsAccessArray(objects, dimensions);
 
-	_var.makeObjectsAccessArray(objects, dimensions, position);
+	_var->makeObjectsAccessArray(objects, dimensions, position);
 }
 void SourceExpression_ValueVariable::virtual_makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names)
 {
 	Super::recurse_makeObjectsAccessMember(objects, names);
 
-	_var.makeObjectsAccessMember(objects, names, position);
+	_var->makeObjectsAccessMember(objects, names, position);
 }
 
 void SourceExpression_ValueVariable::virtual_makeObjectsAddress(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsAddress(objects);
 
-	_var.makeObjectsAddress(objects, position);
+	_var->makeObjectsAddress(objects, position);
 }
 
 void SourceExpression_ValueVariable::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	_var.makeObjectsGet(objects, position);
+	_var->makeObjectsGet(objects, position);
 }
 void SourceExpression_ValueVariable::virtual_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
 	Super::recurse_makeObjectsGetArray(objects, dimensions);
 
-	_var.makeObjectsGetArray(objects, dimensions, position);
+	_var->makeObjectsGetArray(objects, dimensions, position);
 }
 void SourceExpression_ValueVariable::virtual_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
 	Super::recurse_makeObjectsGetMember(objects, names);
 
-	_var.makeObjectsGetMember(objects, names, position);
+	_var->makeObjectsGetMember(objects, names, position);
 }
 
 void SourceExpression_ValueVariable::virtual_makeObjectsSet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsSet(objects);
 
-	_var.makeObjectsSet(objects, position);
+	_var->makeObjectsSet(objects, position);
 }
 void SourceExpression_ValueVariable::virtual_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
 {
 	Super::recurse_makeObjectsSetArray(objects, dimensions);
 
-	_var.makeObjectsSetArray(objects, dimensions, position);
+	_var->makeObjectsSetArray(objects, dimensions, position);
 }
 void SourceExpression_ValueVariable::virtual_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
 {
 	Super::recurse_makeObjectsSetMember(objects, names);
 
-	_var.makeObjectsSetMember(objects, names, position);
+	_var->makeObjectsSetMember(objects, names, position);
 }
 
 

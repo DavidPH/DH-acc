@@ -81,7 +81,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 		scriptNumber = -1;
 	}
 
-	// scriptName special cases
+	// scriptNameSource
+	std::string scriptNameSource;
 	if (scriptName == "auto")
 	{
 		if (scriptNumber < 0)
@@ -89,11 +90,17 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 
 		std::ostringstream oss;
 		oss << "script" << scriptNumber;
-		scriptName = oss.str();
+		scriptNameSource = oss.str();
+	}
+	else if (scriptName != "void")
+	{
+		scriptNameSource = scriptName;
 	}
 
 	// scriptLabel
-	std::string scriptLabel(context->getLabel() + "script_" + (scriptName == "void" ? (context->makeLabel() + ObjectExpression::get_filename()) : scriptName));
+	std::string scriptLabel(context->getLabel() + "script_" + scriptNameSource);
+	if (scriptNameSource.empty())
+		scriptLabel += context->makeLabel() + ObjectExpression::get_filename();
 
 	// scriptNameObject
 	std::string scriptNameObject(scriptLabel + "_id");
@@ -112,7 +119,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	int scriptVarCount(scriptContext.getLimit(SourceVariable::SC_REGISTER));
 
 	// scriptVariable
-	SourceVariable scriptVariable(scriptName == "void" ? (std::string)"" : scriptName, scriptVarType, scriptNameObject, token.getPosition());
+	SourceVariable::Pointer scriptVariable(SourceVariable::create_constant(scriptNameSource, scriptVarType, scriptNameObject, token.getPosition()));
 
 	context->addVariable(scriptVariable);
 

@@ -23,7 +23,6 @@
 #define HPP_SourceVariable_
 
 #include "CounterPointer.hpp"
-#include "ObjectCode.hpp"
 #include "SourcePosition.hpp"
 
 #include <ostream>
@@ -38,8 +37,10 @@ class VariableType;
 
 
 
-class SourceVariable
+class SourceVariable : Counter
 {
+	MAKE_COUNTER_CLASS_BASE(SourceVariable, Counter);
+
 public:
 	enum StorageClass
 	{
@@ -56,12 +57,6 @@ public:
 	};
 
 
-
-	SourceVariable();
-	SourceVariable(std::string const & nameObject, std::string const & nameSource, StorageClass sc, VariableType const * type, SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableType const * type, ObjectExpression * expr, SourcePosition const & position);
-	SourceVariable(std::string const & name, VariableType const * type, std::string const & nameObject, SourcePosition const & position);
-	~SourceVariable();
 
 	bool canMakeObject() const;
 	bool canMakeObjectAddress() const;
@@ -97,15 +92,20 @@ public:
 	friend void print_debug(std::ostream * const out, SourceVariable const & in);
 	friend void print_debug(std::ostream * const out, SourceVariable::StorageClass const in);
 
+	static Pointer create_constant(std::string const & nameSource, VariableType const * type, ObjectExpression * expr, SourcePosition const & position);
+	static Pointer create_constant(std::string const & nameSource, VariableType const * type, std::string const & nameObject, SourcePosition const & position);
+	static Pointer create_literal(VariableType const * type, ObjectExpression * expr, SourcePosition const & position);
+	static Pointer create_literal(VariableType const * type, std::string const & nameObject, SourcePosition const & position);
+	static Pointer create_variable(std::string const & nameSource, VariableType const * type, std::string const & nameObject, StorageClass sc, SourcePosition const & position);
+
 	static StorageClass get_StorageClass(SourceTokenC const & token);
 
 private:
-	CounterPointer<ObjectExpression> _expr;
-	std::string _nameObject;
-	std::string _nameSource;
-	SourcePosition _position;
-	StorageClass _sc;
-	VariableType const * _type;
+	SourceVariable(SourceVariable const & var);
+	SourceVariable(std::string const & nameSource, VariableType const * type, ObjectExpression * expr, SourcePosition const & position);
+	SourceVariable(std::string const & nameSource, VariableType const * type, std::string const & nameObject, SourcePosition const & position);
+	SourceVariable(std::string const & nameSource, VariableType const * type, std::string const & nameObject, StorageClass sc, SourcePosition const & position);
+	~SourceVariable();
 
 	void makeObjectsAccessPrep(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, CounterPointer<ObjectExpression> * addressBase, int * address, SourcePosition const & position) const;
 
@@ -120,11 +120,17 @@ private:
 	void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const;
 	void makeObjectsSetPrep(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, CounterPointer<ObjectExpression> * addressBase, int * address, SourcePosition const & position) const;
 	void makeObjectsSetSkip(VariableType const * type, int * address) const;
+
+	CounterPointer<ObjectExpression> _expr;
+	std::string _nameObject;
+	std::string _nameSource;
+	SourcePosition _position;
+	StorageClass _sc;
+	VariableType const * _type;
 };
 
 
 
 #endif /* HPP_SourceVariable_ */
-
 
 

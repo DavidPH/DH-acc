@@ -52,7 +52,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_asmfunc(Sou
 	VariableType const * asmfuncVarType(VariableType::get_asmfunc(asmfuncReturn, asmfuncArgTypes));
 
 	// asmfuncVariable
-	SourceVariable asmfuncVariable(asmfuncName, asmfuncVarType, asmfuncObject, token.getPosition());
+	SourceVariable::Pointer asmfuncVariable(SourceVariable::create_constant(asmfuncName, asmfuncVarType, asmfuncObject, token.getPosition()));
 
 	context->addVariable(asmfuncVariable);
 	return create_value_variable(asmfuncVariable, token.getPosition());

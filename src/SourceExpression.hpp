@@ -136,7 +136,7 @@ public:
 	static Pointer create_value_member(SourceExpression * expr, SourceTokenC const & token);
 	static Pointer create_value_real(SourceTokenC const & token);
 	static Pointer create_value_string(SourceTokenC const & token);
-	static Pointer create_value_variable(SourceVariable const & var, SourcePosition const & position);
+	static Pointer create_value_variable(SourceVariable * var, SourcePosition const & position);
 
 	static VariableType const * get_promoted_type(VariableType const * type1, VariableType const * type2, SourcePosition const & position);
 
@@ -213,6 +213,5 @@ private:
 
 
 #endif /* HPP_SourceExpression_ */
-
 
 

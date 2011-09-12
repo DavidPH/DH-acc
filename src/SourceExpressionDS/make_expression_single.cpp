@@ -239,7 +239,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_const(Sourc
 	in->get(SourceTokenC::TT_OP_EQUALS);
 	SourceExpression::Pointer data(make_expression(in, blocks, context));
 
-	SourceVariable var(name, type, data->makeObject(), token.getPosition());
+	SourceVariable::Pointer var(SourceVariable::create_constant(name, type, data->makeObject(), token.getPosition()));
 
 	context->addVariable(var);
 

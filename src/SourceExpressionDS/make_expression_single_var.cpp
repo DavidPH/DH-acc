@@ -45,12 +45,11 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_var(SourceT
 		nameObject = context->makeNameObject(sc, type, name, token.getPosition());
 	}
 
-	SourceVariable var(nameObject, name, sc, type, token.getPosition());
+	SourceVariable::Pointer var(SourceVariable::create_variable(name, type, nameObject, sc, token.getPosition()));
 
 	context->addVariable(var);
 
 	return create_value_variable(var, token.getPosition());
 }
-
 
 

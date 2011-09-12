@@ -50,7 +50,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_linespec(So
 	VariableType const * linespecVarType(VariableType::get_linespec(linespecReturn, linespecArgTypes));
 
 	// linespecVariable
-	SourceVariable linespecVariable(linespecName, linespecVarType, linespecObject, token.getPosition());
+	SourceVariable::Pointer linespecVariable(SourceVariable::create_constant(linespecName, linespecVarType, linespecObject, token.getPosition()));
 
 	context->addVariable(linespecVariable);
 	return create_value_variable(linespecVariable, token.getPosition());

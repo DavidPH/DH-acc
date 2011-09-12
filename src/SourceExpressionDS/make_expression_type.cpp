@@ -89,9 +89,9 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 					enumVal = make_expression(in, blocks, context)->makeObject()->resolveInt();
 				}
 
-				SourceVariable enumVar(enumTok.getData(), type, ObjectExpression::create_value_int(enumVal++, enumTok.getPosition()), enumTok.getPosition());
+				ObjectExpression::Pointer enumObj(ObjectExpression::create_value_int(enumVal++, enumTok.getPosition()));
 
-				context->addVariable(enumVar);
+				context->addVariable(SourceVariable::create_constant(enumTok.getData(), type, enumObj, enumTok.getPosition()));
 
 				if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
 					break;

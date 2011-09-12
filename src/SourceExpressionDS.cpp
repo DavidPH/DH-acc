@@ -287,7 +287,7 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 		if (argContext)
 		{
 			std::string argNameObject(argContext->makeNameObject(sc, argType, argName, SourcePosition::none));
-			SourceVariable argVariable(argNameObject, argName, sc, argType, SourcePosition::none);
+			SourceVariable::Pointer argVariable(SourceVariable::create_variable(argName, argType, argNameObject, sc, SourcePosition::none));
 			argContext->addVariable(argVariable);
 		}
 

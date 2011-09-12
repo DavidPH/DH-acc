@@ -55,7 +55,7 @@ public:
 	std::string addLabelCaseDefault(SourcePosition const & position);
 	std::string addLabelGoto(SourceTokenC const & token);
 
-	void addVariable(SourceVariable const & var);
+	void addVariable(SourceVariable * var);
 
 	bool getAllowLabel() const;
 
@@ -75,7 +75,7 @@ public:
 	ContextType getType() const;
 	ContextType getTypeRoot() const;
 
-	SourceVariable const & getVariable(SourceTokenC const & token) const;
+	CounterPointer<SourceVariable> getVariable(SourceTokenC const & token) const;
 
 	VariableType const * getVariableType(SourceTokenC const & token);
 	VariableType const * getVariableType_enum(std::string const & name, bool block, SourcePosition const & position);
@@ -110,7 +110,7 @@ private:
 
 	int getCount(SourceVariable::StorageClass sc) const;
 
-	SourceVariable const & getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
+	CounterPointer<SourceVariable> getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
 
 	VariableType * getVariableType_enum(std::string const & name);
 	VariableType * getVariableType_struct(std::string const & name);
@@ -150,7 +150,7 @@ private:
 	std::vector<VariableType *> _unions;
 	std::vector<std::string> _unionnames;
 
-	std::vector<SourceVariable> _vars;
+	std::vector<CounterPointer<SourceVariable> > _vars;
 	std::vector<std::string> _varnames;
 
 	unsigned _inheritLocals : 1;

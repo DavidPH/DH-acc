@@ -27,19 +27,19 @@
 
 
 
-SourceVariable::SourceVariable() : _nameObject(), _nameSource(), _position(), _sc(), _type()
+SourceVariable::SourceVariable(SourceVariable const & var) : _expr(var._expr), _nameObject(var._nameObject), _nameSource(var._nameSource), _position(var._position), _sc(var._sc), _type(var._type)
 {
 
 }
-SourceVariable::SourceVariable(std::string const & nameObject, std::string const & nameSource, StorageClass sc, VariableType const * type, SourcePosition const & position) : _nameObject(nameObject), _nameSource(nameSource), _position(position), _sc(sc), _type(type)
+SourceVariable::SourceVariable(std::string const & nameSource, VariableType const * type, ObjectExpression * expr, SourcePosition const & position) : _expr(expr), _nameSource(nameSource), _position(position), _sc(SC_CONSTANT), _type(type)
 {
 
 }
-SourceVariable::SourceVariable(std::string const & name, VariableType const * type, ObjectExpression * expr, SourcePosition const & position) : _expr(expr), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(type)
+SourceVariable::SourceVariable(std::string const & nameSource, VariableType const * type, std::string const & nameObject, SourcePosition const & position) : _nameObject(nameObject), _nameSource(nameSource), _position(position), _sc(SC_CONSTANT), _type(type)
 {
 
 }
-SourceVariable::SourceVariable(std::string const & name, VariableType const * type, std::string const & nameObject, SourcePosition const & position) : _nameObject(nameObject), _nameSource(name), _position(position), _sc(SC_CONSTANT), _type(type)
+SourceVariable::SourceVariable(std::string const & nameSource, VariableType const * type, std::string const & nameObject, StorageClass sc, SourcePosition const & position) : _nameObject(nameObject), _nameSource(nameSource), _position(position), _sc(sc), _type(type)
 {
 
 }
@@ -60,6 +60,27 @@ bool SourceVariable::canMakeObjectAddress() const
 bool SourceVariable::canMakeObjectsAddress() const
 {
 	return _sc == SC_AUTO || _sc == SC_STATIC;
+}
+
+SourceVariable::Pointer SourceVariable::create_constant(std::string const & nameSource, VariableType const * type, ObjectExpression * expr, SourcePosition const & position)
+{
+	return new SourceVariable(nameSource, type, expr, position);
+}
+SourceVariable::Pointer SourceVariable::create_constant(std::string const & nameSource, VariableType const * type, std::string const & nameObject, SourcePosition const & position)
+{
+	return new SourceVariable(nameSource, type, nameObject, position);
+}
+SourceVariable::Pointer SourceVariable::create_literal(VariableType const * type, ObjectExpression * expr, SourcePosition const & position)
+{
+	return new SourceVariable("", type, expr, position);
+}
+SourceVariable::Pointer SourceVariable::create_literal(VariableType const * type, std::string const & nameObject, SourcePosition const & position)
+{
+	return new SourceVariable("", type, nameObject, position);
+}
+SourceVariable::Pointer SourceVariable::create_variable(std::string const & nameSource, VariableType const * type, std::string const & nameObject, StorageClass sc, SourcePosition const & position)
+{
+	return new SourceVariable(nameSource, type, nameObject, sc, position);
 }
 
 SourceVariable::StorageClass SourceVariable::get_StorageClass(SourceTokenC const & token)
@@ -112,6 +133,5 @@ VariableType const * SourceVariable::getType() const
 {
 	return _type;
 }
-
 
 

@@ -63,7 +63,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	int functionVarCount(functionContext.getLimit(SourceVariable::SC_REGISTER));
 
 	// functionVariable
-	SourceVariable functionVariable(functionName, functionVarType, functionNameObject, token.getPosition());
+	SourceVariable::Pointer functionVariable(SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition()));
 
 	context->addVariable(functionVariable);
 	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size());

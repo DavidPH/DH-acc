@@ -50,7 +50,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_native(Sour
 	VariableType const * nativeVarType(VariableType::get_native(nativeReturn, nativeArgTypes));
 
 	// nativeVariable
-	SourceVariable nativeVariable(nativeName, nativeVarType, nativeObject, token.getPosition());
+	SourceVariable::Pointer nativeVariable(SourceVariable::create_constant(nativeName, nativeVarType, nativeObject, token.getPosition()));
 
 	context->addVariable(nativeVariable);
 	return create_value_variable(nativeVariable, token.getPosition());

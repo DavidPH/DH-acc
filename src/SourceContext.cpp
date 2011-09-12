@@ -47,8 +47,8 @@ SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countA
 	getVariableType_typedef("void",     VariableType::get_vt_void(),     SourcePosition());
 
 
-	addVariable(SourceVariable("false", VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(0, SourcePosition()), SourcePosition()));
-	addVariable(SourceVariable("true",  VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(1, SourcePosition()), SourcePosition()));
+	addVariable(SourceVariable::create_constant("false", VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(0, SourcePosition()), SourcePosition()));
+	addVariable(SourceVariable::create_constant("true",  VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(1, SourcePosition()), SourcePosition()));
 }
 SourceContext::SourceContext(SourceContext * parent, ContextType type) : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _label(parent->makeLabelShort()), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP || type == CT_SWITCH)
 {
@@ -162,12 +162,12 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 	}
 }
 
-void SourceContext::addVariable(SourceVariable const & var)
+void SourceContext::addVariable(SourceVariable * var)
 {
 	_vars.push_back(var);
-	_varnames.push_back(var.getNameSource());
+	_varnames.push_back(var->getNameSource());
 
-	SourceVariable::StorageClass sc(var.getClass());
+	SourceVariable::StorageClass sc(var->getClass());
 	switch (sc)
 	{
 	case SourceVariable::SC_AUTO:
@@ -177,7 +177,7 @@ void SourceContext::addVariable(SourceVariable const & var)
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
 	case SourceVariable::SC_STATIC:
-		addCount(var.getType()->size(), sc);
+		addCount(var->getType()->size(), sc);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_MAP:
@@ -361,17 +361,17 @@ SourceContext::ContextType SourceContext::getTypeRoot() const
 	return _type;
 }
 
-SourceVariable const & SourceContext::getVariable(SourceTokenC const & token) const
+SourceVariable::Pointer SourceContext::getVariable(SourceTokenC const & token) const
 {
 	return getVariable(token.getData(), token.getPosition(), true);
 }
-SourceVariable const & SourceContext::getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const
+SourceVariable::Pointer SourceContext::getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const
 {
 	for (size_t i(_vars.size()); i--;)
 	{
 		if (name == _varnames[i])
 		{
-			switch (_vars[i].getClass())
+			switch (_vars[i]->getClass())
 			{
 			case SourceVariable::SC_AUTO:
 			case SourceVariable::SC_REGISTER:
