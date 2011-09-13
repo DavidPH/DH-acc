@@ -33,7 +33,7 @@ class SourceExpression_BranchWhile : public SourceExpression
 	MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchWhile, SourceExpression);
 
 public:
-	SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position);
+	SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, bool postCondition, SourcePosition const & position);
 
 protected:
 	virtual void printDebug(std::ostream * const out) const;
@@ -46,18 +46,25 @@ private:
 
 	std::string _labelBreak;
 	std::string _labelContinue;
+	std::string _labelLoop;
+
+	bool _postCondition;
 };
 
 
 
+SourceExpression::Pointer SourceExpression::create_branch_do(SourceExpression * exprCondition, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position)
+{
+	return new SourceExpression_BranchWhile(exprCondition, exprLoop, context, true, position);
+}
 SourceExpression::Pointer SourceExpression::create_branch_while(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position)
 {
-	return new SourceExpression_BranchWhile(exprCondition, exprWhile, context, position);
+	return new SourceExpression_BranchWhile(exprCondition, exprWhile, context, false, position);
 }
 
 
 
-SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position) : Super(position), _exprCondition(exprCondition), _exprWhile(exprWhile), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position))
+SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, bool postCondition, SourcePosition const & position) : Super(position), _exprCondition(exprCondition), _exprWhile(exprWhile), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position)), _labelLoop(context->makeLabel() + "_loop"), _postCondition(postCondition)
 {
 	if (_exprCondition->getType()->vt != VariableType::VT_BOOLSOFT)
 		_exprCondition = create_value_cast(_exprCondition, VariableType::get_vt_boolsoft(), position);
@@ -87,13 +94,16 @@ void SourceExpression_BranchWhile::virtual_makeObjectsGet(ObjectVector * objects
 {
 	Super::recurse_makeObjectsGet(objects);
 
+	if (!_postCondition)
+		objects->addToken(OCODE_BRANCH, objects->getValue(_labelContinue));
+
+	objects->addLabel(_labelLoop);
+	_exprWhile->makeObjectsGet(objects);
+
 	objects->addLabel(_labelContinue);
 	_exprCondition->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_labelBreak));
-
-	_exprWhile->makeObjectsGet(objects);
-	objects->addToken(OCODE_BRANCH, objects->getValue(_labelContinue));
+	objects->addToken(OCODE_BRANCHNOTZERO, objects->getValue(_labelLoop));
 
 	objects->addLabel(_labelBreak);
 }
