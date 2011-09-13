@@ -75,11 +75,10 @@ bool override_object(ObjectData_Function * out, ObjectData_Function const & in)
 	if (out->name != in.name)
 		return false;
 
-	if (out->external)
-		*out = in;
+	out->external = out->external && in.external;
 
-	else if (out->number == -1)
-		*out = in;
+	if (out->number == -1)
+		out->number = in.number;
 
 	return true;
 }

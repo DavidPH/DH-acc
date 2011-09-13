@@ -158,6 +158,9 @@ public:
 	static void write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions);
 	static void write_chunk(std::ostream * out, std::ostringstream * chunkout, char const * chunkname);
 	static void write_function(std::ostream * out, ObjectData_Function const & f);
+	static void write_function_name(std::ostream * out, ObjectData_Function const & f);
+	static void write_function_name_count(std::ostream * out, ObjectData_Function const & f);
+	static void write_function_name_offset(std::ostream * out, ObjectData_Function const & f);
 	static void write_registerarray(std::ostream * out, ObjectData_RegisterArray const & r);
 	static void write_script(std::ostream * out, ObjectData_Script const & s);
 	static void write_script_flags(std::ostream * out, ObjectData_Script const & s);
@@ -180,6 +183,5 @@ private:
 
 
 #endif /* HPP_BinaryTokenZDACS_ */
-
 
 

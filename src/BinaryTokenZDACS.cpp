@@ -31,6 +31,8 @@
 
 int BinaryTokenZDACS::_arg_counts[BCODE_NONE];
 
+static uint32_t string_offset;
+
 
 
 BinaryTokenZDACS::BinaryTokenZDACS(BinaryCode code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args) : _args(args), _code(code), _labels(labels), _position(position)
@@ -279,6 +281,19 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 		ObjectExpression::iter_registerarray_map(write_registerarray, &chunkout);
 		write_chunk(out, &chunkout, "ARAY");
 
+		// FNAM - Function Names
+		string_offset = 0;
+		ObjectExpression::iter_function(write_function_name_count, &chunkout);
+
+		if (string_offset)
+			write_32(&chunkout, string_offset/4);
+
+		string_offset += 4;
+
+		ObjectExpression::iter_function(write_function_name_offset, &chunkout);
+		ObjectExpression::iter_function(write_function_name, &chunkout);
+		write_chunk(out, &chunkout, "FNAM");
+
 		// FUNC - Functions
 		ObjectExpression::iter_function(write_function, &chunkout);
 		write_chunk(out, &chunkout, "FUNC");
@@ -342,6 +357,51 @@ void BinaryTokenZDACS::write_function(std::ostream * out, ObjectData_Function co
 
 	default:
 		throw SourceException("unknown output type for function", SourcePosition::none, "BinaryTokenZDACS");
+	}
+}
+
+void BinaryTokenZDACS::write_function_name(std::ostream * out, ObjectData_Function const & f)
+{
+	switch (output_type)
+	{
+	case OUTPUT_ACSE:
+		if (!f.external)
+			*out << f.name << '\0';
+		break;
+
+	default:
+		throw SourceException("unknown output type for function_name", SourcePosition::none, "BinaryTokenZDACS");
+	}
+}
+
+void BinaryTokenZDACS::write_function_name_count(std::ostream * out, ObjectData_Function const & f)
+{
+	switch (output_type)
+	{
+	case OUTPUT_ACSE:
+		if (!f.external)
+			string_offset += 4;
+		break;
+
+	default:
+		throw SourceException("unknown output type for function_name", SourcePosition::none, "BinaryTokenZDACS");
+	}
+}
+
+void BinaryTokenZDACS::write_function_name_offset(std::ostream * out, ObjectData_Function const & f)
+{
+	switch (output_type)
+	{
+	case OUTPUT_ACSE:
+		if (!f.external)
+		{
+			write_32(out, string_offset);
+			string_offset += f.name.size() + 1;
+		}
+		break;
+
+	default:
+		throw SourceException("unknown output type for function_name_offset", SourcePosition::none, "BinaryTokenZDACS");
 	}
 }
 
