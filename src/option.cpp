@@ -218,7 +218,7 @@ bool option::process(std::string const & name, std::string const & arg)
 		return optIt->second->handle(name_s, arg_c, barg) && arg_used;
 	}
 
-	throw exception(name, "unknown name");
+	throw exception(name_c, "unknown name");
 }
 void option::process(std::vector<std::string> const & args)
 {

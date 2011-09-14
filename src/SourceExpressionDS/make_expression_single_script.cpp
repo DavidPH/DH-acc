@@ -74,7 +74,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	if (in->peek().getType() == SourceTokenC::TT_OP_AT)
 	{
 		in->get(SourceTokenC::TT_OP_AT);
-		scriptNumber = get_bigsint(in->get(SourceTokenC::TT_INTEGER));
+		scriptNumber = make_expression_single(in, blocks, context)->makeObject()->resolveInt();
 	}
 	else
 	{
