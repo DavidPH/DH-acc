@@ -62,6 +62,11 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN_ARGS1(BCODE_##CODE, _arg_counts[BCODE_##CODE]);\
 		break
 
+	#define CASE_DIRECTMAP_ZDACS(CODE)\
+	case OCODE_ZDACS_##CODE:\
+		PUSH_TOKEN_ARGS1(BCODE_##CODE, _arg_counts[BCODE_##CODE]);\
+		break
+
 	std::vector<ObjectExpression::Pointer> args;
 
 	BinaryCode bcode;
@@ -154,6 +159,13 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	CASE_DIRECTMAP(SETRESULTVALUE);
 	CASE_DIRECTMAP(STRLEN);
 	CASE_DIRECTMAP(SWAP);
+
+	CASE_DIRECTMAP_ZDACS(INVENTORY_CHECK);
+	CASE_DIRECTMAP_ZDACS(INVENTORY_CHECK_IMM);
+	CASE_DIRECTMAP_ZDACS(INVENTORY_GIVE);
+	CASE_DIRECTMAP_ZDACS(INVENTORY_GIVE_IMM);
+	CASE_DIRECTMAP_ZDACS(INVENTORY_TAKE);
+	CASE_DIRECTMAP_ZDACS(INVENTORY_TAKE_IMM);
 
 	case OCODE_ADDSTACK_IMM:
 		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
