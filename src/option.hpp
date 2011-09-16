@@ -39,7 +39,7 @@ public:
 		exception(std::string const & name, std::string const & arg, std::string const & description);
 		virtual ~exception() throw();
 
-		virtual char const * what();
+		virtual char const * what() const throw();
 
 	private:
 		std::string _what;

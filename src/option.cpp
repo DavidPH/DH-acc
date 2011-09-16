@@ -62,7 +62,7 @@ option::exception::~exception() throw()
 
 }
 
-char const * option::exception::what()
+char const * option::exception::what() const throw()
 {
 	return _what.c_str();
 }
