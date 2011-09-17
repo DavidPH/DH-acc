@@ -22,16 +22,13 @@
 #ifndef HPP_SourceTokenASMPLX_
 #define HPP_SourceTokenASMPLX_
 
+#include "bignum.hpp"
 #include "CounterPointer.hpp"
-#include "ObjectCode.hpp"
 #include "SourcePosition.hpp"
 
-#include <map>
-#include <stdint.h>
 #include <string>
 #include <vector>
 
-class ObjectToken;
 class ObjectExpression;
 class ObjectVector;
 class SourceStream;
@@ -48,19 +45,7 @@ public:
 	SourceTokenASMPLX();
 	SourceTokenASMPLX(SourceStream * const in);
 
-	std::string const & getData(uintptr_t const index) const;
 
-	uintptr_t getDataSize() const;
-
-	std::string const & getName() const;
-
-	SourcePosition const & getPosition() const;
-
-	TokenType getType() const;
-
-
-
-	static void init();
 
 	static void make_objects(std::vector<SourceTokenASMPLX> const & tokens, ObjectVector * objects);
 
@@ -76,16 +61,14 @@ private:
 
 	static bool isexprc(char const c);
 
-	static int32_t char_to_int(char const c, int32_t const base, SourcePosition const & position);
+	static bigsint char_to_int(char c, bigsint base, SourcePosition const & position);
 
 	static CounterPointer<ObjectExpression> make_expression(std::string const & expr, SourcePosition const & position);
 
 	// Returns -1 for number 0.
-	static int32_t string_to_base(std::string const & s, SourcePosition const & position);
-	static int32_t string_to_int(std::string const & s, SourcePosition const & position);
-	static long double string_to_real(std::string const & s, SourcePosition const & position);
-
-	static std::map<std::string, std::pair<ObjectCode, int> > _arg_counts;
+	static bigsint string_to_base(std::string const & s, SourcePosition const & position);
+	static bigsint string_to_int(std::string const & s, SourcePosition const & position);
+	static bigreal string_to_real(std::string const & s, SourcePosition const & position);
 };
 
 

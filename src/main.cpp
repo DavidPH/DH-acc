@@ -141,7 +141,6 @@ static inline void _init(int argc, char const * const * argv)
 {
 	BinaryTokenZDACS::init();
 	SourceExpressionDS::init();
-	SourceTokenASMPLX::init();
 
 	option::program = argv[0];
 
@@ -229,16 +228,16 @@ int main(int argc, char * * argv)
 
 		return _main();
 	}
-	catch (SourceException & e)
+	catch (SourceException const & e)
 	{
 		std::cerr << e.where() << " (" << e.who() << "): " << e.what() << std::endl;
 	}
-	catch (option::exception & e)
+	catch (option::exception const & e)
 	{
 		std::cerr << "(option::exception): " << e.what() << std::endl;
 		option::print_help(&std::cerr);
 	}
-	catch (std::exception & e)
+	catch (std::exception const & e)
 	{
 		std::cerr << "(std::exception): " << e.what() << std::endl;
 	}

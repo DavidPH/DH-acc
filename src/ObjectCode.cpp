@@ -189,10 +189,14 @@ ObjectCodeSet::ObjectCodeSet() : ocode(OCODE_NONE), ocode_imm(OCODE_NONE)
 
 ObjectCode ocode_get_code(SourceTokenC const & token)
 {
-	std::map<std::string, ObjectCode>::iterator codeIt(_ocode_map.find(token.getData()));
+	return ocode_get_code(token.getData(), token.getPosition());
+}
+ObjectCode ocode_get_code(std::string const & data, SourcePosition const & position)
+{
+	std::map<std::string, ObjectCode>::iterator codeIt(_ocode_map.find(data));
 
 	if (codeIt == _ocode_map.end())
-		throw SourceException("no such OCODE '" + token.getData() + "'", token.getPosition(), "ObjectToken");
+		throw SourceException("no such OCODE '" + data + "'", position, "ObjectToken");
 
 	return codeIt->second;
 }
