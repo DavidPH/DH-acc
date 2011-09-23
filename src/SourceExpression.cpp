@@ -63,6 +63,9 @@ VariableType const * SourceExpression::get_promoted_type(VariableType const * ty
 	if (type1->vt == VariableType::VT_POINTER) return type1;
 	if (type2->vt == VariableType::VT_POINTER) return type2;
 
+	if (type1->vt == VariableType::VT_ARRAY) return VariableType::get_pointer(type1->refType);
+	if (type2->vt == VariableType::VT_ARRAY) return VariableType::get_pointer(type2->refType);
+
 	if (type1->vt == VariableType::VT_REAL) return type1;
 	if (type2->vt == VariableType::VT_REAL) return type2;
 
