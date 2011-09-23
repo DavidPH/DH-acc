@@ -86,7 +86,11 @@ void SourceExpression_ValueCast::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	_expr->makeObjectsCast(objects, _type);
+	// Special case for casting an array to a pointer.
+	if (_expr->getType()->vt == VariableType::VT_ARRAY && _type->vt == VariableType::VT_POINTER)
+		_expr->makeObjectsAddress(objects);
+	else
+		_expr->makeObjectsCast(objects, _type);
 }
 
 
