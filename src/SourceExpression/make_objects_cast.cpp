@@ -30,6 +30,10 @@
 
 void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType const * typeFrom, VariableType const * typeTo, SourcePosition const & position)
 {
+	// Don't want to slog through all that if not throwing, but also want to
+	// avoid code duplication. (Especially with the cast-to-std::string.)
+	#define TYPES_STRING ((std::string)make_string(typeFrom->vt) + "->" + make_string(typeTo->vt))
+
 	if (typeFrom == typeTo) return;
 
 	if (typeTo->vt == VariableType::VT_VOID)
@@ -48,7 +52,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 	case VariableType::VT_STRUCT:
 	case VariableType::VT_UNION:
 	case VariableType::VT_VOID:
-		throw SourceException("invalid VT from", position, "SourceExpression");
+		throw SourceException("invalid VT from (" + TYPES_STRING + ")", position, "SourceExpression");
 
 	case VariableType::VT_BOOLHARD:
 	case VariableType::VT_CHAR:
@@ -68,7 +72,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 		case VariableType::VT_STRUCT:
 		case VariableType::VT_UNION:
 		case VariableType::VT_VOID:
-			throw SourceException("invalid VT to", position, "SourceExpression");
+			throw SourceException("invalid VT to (" + TYPES_STRING + ")", position, "SourceExpression");
 
 		case VariableType::VT_BOOLHARD:
 			objects->addToken(OCODE_LOGICALNOT);
@@ -103,7 +107,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 		case VariableType::VT_STRUCT:
 		case VariableType::VT_UNION:
 		case VariableType::VT_VOID:
-			throw SourceException("invalid VT to", position, "SourceExpression");
+			throw SourceException("invalid VT to (" + TYPES_STRING + ")", position, "SourceExpression");
 
 		case VariableType::VT_BOOLHARD:
 		case VariableType::VT_CHAR:
@@ -140,7 +144,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 		case VariableType::VT_STRUCT:
 		case VariableType::VT_UNION:
 		case VariableType::VT_VOID:
-			throw SourceException("invalid VT to", position, "SourceExpression");
+			throw SourceException("invalid VT to (" + TYPES_STRING + ")", position, "SourceExpression");
 
 		case VariableType::VT_BOOLHARD:
 			objects->addToken(OCODE_LOGICALNOT);
@@ -166,7 +170,8 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 		}
 		break;
 	}
-}
 
+	#undef TYPES_STRING
+}
 
 

@@ -60,6 +60,18 @@ void SourceExpression_Binary::doCast()
 		VariableType const * typeL(exprL->getType());
 		VariableType const * typeR(exprR->getType());
 
+		if (typeL->vt == VariableType::VT_ARRAY)
+		{
+			typeL = VariableType::get_pointer(typeL->refType);
+			exprL = create_value_cast(exprL, typeL, position);
+		}
+
+		if (typeR->vt == VariableType::VT_ARRAY)
+		{
+			typeR = VariableType::get_pointer(typeR->refType);
+			exprR = create_value_cast(exprR, typeR, position);
+		}
+
 		if (typeL->vt == typeR->vt && typeL != typeR)
 			throw SourceException("VT_POINTER mismatch", position, getName());
 
@@ -141,6 +153,5 @@ void SourceExpression_Binary::recurse_makeObjectsGet(ObjectVector * objects)
 
 	objects->setPosition(position);
 }
-
 
 

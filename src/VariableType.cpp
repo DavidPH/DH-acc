@@ -256,7 +256,7 @@ int VariableType::getOffset(std::string const & name, SourcePosition const & pos
 		else
 			offset += types[i]->size();
 
-	throw SourceException("invalid member-variable-type", position, "VariableType");
+	throw SourceException("invalid member-variable-type '" + name + "'", position, "VariableType::getOffset");
 }
 
 VariableType const * VariableType::getType(std::string const & name, SourcePosition const & position) const
@@ -265,7 +265,7 @@ VariableType const * VariableType::getType(std::string const & name, SourcePosit
 		if (name == names[i])
 			return types[i];
 
-	throw SourceException("invalid member-variable-type", position, "VariableType");
+	throw SourceException("invalid member-variable-type '" + name + "'", position, "VariableType::getType");
 }
 
 bool VariableType::isVoid() const
@@ -395,6 +395,33 @@ int VariableType::sizeCall() const
 
 
 
+char const * make_string(VariableType::Type vt)
+{
+	switch (vt)
+	{
+	case VariableType::VT_ARRAY:    return "VT_ARRAY";
+	case VariableType::VT_ASMFUNC:  return "VT_ASMFUNC";
+	case VariableType::VT_BLOCK:    return "VT_BLOCK";
+	case VariableType::VT_BOOLHARD: return "VT_BOOLHARD";
+	case VariableType::VT_BOOLSOFT: return "VT_BOOLSOFT";
+	case VariableType::VT_CHAR:     return "VT_CHAR";
+	case VariableType::VT_ENUM:     return "VT_ENUM";
+	case VariableType::VT_FUNCTION: return "VT_FUNCTION";
+	case VariableType::VT_INT:      return "VT_INT";
+	case VariableType::VT_LINESPEC: return "VT_LINESPEC";
+	case VariableType::VT_NATIVE:   return "VT_NATIVE";
+	case VariableType::VT_POINTER:  return "VT_POINTER";
+	case VariableType::VT_REAL:     return "VT_REAL";
+	case VariableType::VT_SCRIPT:   return "VT_SCRIPT";
+	case VariableType::VT_STRING:   return "VT_STRING";
+	case VariableType::VT_STRUCT:   return "VT_STRUCT";
+	case VariableType::VT_UNION:    return "VT_UNION";
+	case VariableType::VT_VOID:     return "VT_VOID";
+	}
+
+	return "VT_";
+}
+
 VariableType::Type & operator ++ (VariableType::Type & vt)
 {
 	if (vt < VariableType::VT_UNION)
@@ -439,27 +466,7 @@ void print_debug(std::ostream * out, VariableType const & in)
 }
 void print_debug(std::ostream * out, VariableType::Type in)
 {
-	switch (in)
-	{
-	case VariableType::VT_ARRAY:    *out << "VT_ARRAY";    break;
-	case VariableType::VT_ASMFUNC:  *out << "VT_ASMFUNC";  break;
-	case VariableType::VT_BLOCK:    *out << "VT_BLOCK";    break;
-	case VariableType::VT_BOOLHARD: *out << "VT_BOOLHARD"; break;
-	case VariableType::VT_BOOLSOFT: *out << "VT_BOOLSOFT"; break;
-	case VariableType::VT_CHAR:     *out << "VT_CHAR";     break;
-	case VariableType::VT_ENUM:     *out << "VT_ENUM";     break;
-	case VariableType::VT_FUNCTION: *out << "VT_FUNCTION"; break;
-	case VariableType::VT_INT:      *out << "VT_INT";      break;
-	case VariableType::VT_LINESPEC: *out << "VT_LINESPEC"; break;
-	case VariableType::VT_NATIVE:   *out << "VT_NATIVE";   break;
-	case VariableType::VT_POINTER:  *out << "VT_POINTER";  break;
-	case VariableType::VT_REAL:     *out << "VT_REAL" ;    break;
-	case VariableType::VT_SCRIPT:   *out << "VT_SCRIPT";   break;
-	case VariableType::VT_STRING:   *out << "VT_STRING";   break;
-	case VariableType::VT_STRUCT:   *out << "VT_STRUCT";   break;
-	case VariableType::VT_UNION:    *out << "VT_UNION";    break;
-	case VariableType::VT_VOID:     *out << "VT_VOID";     break;
-	}
+	*out << make_string(in);
 }
 
 

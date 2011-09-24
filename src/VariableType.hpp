@@ -88,6 +88,8 @@ struct VariableType
 
 
 
+	friend char const * make_string(Type vt);
+
 	friend Type & operator ++ (Type & vt);
 
 	friend void print_debug(std::ostream * out, VariableType const & in);

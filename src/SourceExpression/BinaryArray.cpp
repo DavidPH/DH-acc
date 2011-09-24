@@ -23,6 +23,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceException.hpp"
 #include "../VariableType.hpp"
 
 
@@ -35,13 +36,8 @@ public:
 	SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
 	virtual bool canMakeObject() const;
-	virtual bool canMakeObjectAddress() const;
-
-	virtual bool canMakeObjectsAddress() const;
 
 	virtual VariableType const * getType() const;
-
-	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
 
 protected:
 	virtual void printDebug(std::ostream * out) const;
@@ -49,8 +45,6 @@ protected:
 private:
 	virtual void virtual_makeObjectsAccess(ObjectVector * objects);
 	virtual void virtual_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
-
-	virtual void virtual_makeObjectsAddress(ObjectVector * objects);
 
 	virtual void virtual_makeObjectsGet(ObjectVector * objects);
 	virtual void virtual_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
@@ -63,6 +57,18 @@ private:
 
 SourceExpression::Pointer SourceExpression::create_binary_array(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
 {
+	// This allows C semantics for array access. Specifically that x[y] be
+	// the same as *(x+y).
+	if (
+		exprL->getType()->vt == VariableType::VT_POINTER ||
+		exprR->getType()->vt == VariableType::VT_POINTER ||
+		(exprL->getType()->vt == VariableType::VT_ARRAY && exprL->canMakeObjectsAddress()) ||
+		(exprR->getType()->vt == VariableType::VT_ARRAY && exprR->canMakeObjectsAddress())
+	)
+	{
+		return create_unary_dereference(create_binary_add(exprL, exprR, position), position);
+	}
+
 	return new SourceExpression_BinaryArray(exprL, exprR, position);
 }
 
@@ -70,6 +76,9 @@ SourceExpression::Pointer SourceExpression::create_binary_array(SourceExpression
 
 SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, NULL, VariableType::get_vt_int(), position)
 {
+	if (exprL->getType()->vt != VariableType::VT_ARRAY && exprL->getType()->vt != VariableType::VT_STRING)
+		throw SourceException("expected VT_ARRAY or VT_STRING for exprL got " + (std::string)make_string(exprL->getType()->vt), position, getName());
+
 	if (getType()->size() != 1)
 		this->exprR = create_binary_mul(exprR, create_value_int(getType()->size(), position), position);
 }
@@ -78,24 +87,10 @@ bool SourceExpression_BinaryArray::canMakeObject() const
 {
 	return false;
 }
-bool SourceExpression_BinaryArray::canMakeObjectAddress() const
-{
-	return exprL->canMakeObjectAddress() && exprR->canMakeObject();
-}
-
-bool SourceExpression_BinaryArray::canMakeObjectsAddress() const
-{
-	return exprL->getType()->vt == VariableType::VT_POINTER || exprL->canMakeObjectsAddress();
-}
 
 VariableType const * SourceExpression_BinaryArray::getType() const
 {
 	return exprL->getType()->refType;
-}
-
-CounterPointer<ObjectExpression> SourceExpression_BinaryArray::makeObjectAddress() const
-{
-	return ObjectExpression::create_binary_add(exprL->makeObjectAddress(), exprR->makeObject(), position);
 }
 
 void SourceExpression_BinaryArray::printDebug(std::ostream * out) const
@@ -107,29 +102,14 @@ void SourceExpression_BinaryArray::printDebug(std::ostream * out) const
 
 void SourceExpression_BinaryArray::virtual_makeObjectsAccess(ObjectVector * objects)
 {
-	if (getType()->vt == VariableType::VT_VOID)
-		Super::makeObjectsAccess(objects);
+	Super::recurse_makeObjectsAccess(objects);
 
 	if (exprL->getType()->vt == VariableType::VT_STRING)
 	{
-		Super::makeObjectsAccess(objects);
-	}
-	else if (canMakeObjectsAddress())
-	{
-		makeObjectsAddress(objects);
-
-		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
-
-		for (int i(getType()->size()); i--;)
-			objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
-
-		for (int i(0); i < getType()->size(); ++i)
-			objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
+		throw SourceException("makeObjectsAccess on VT_STRING element", position, getName());
 	}
 	else
 	{
-		Super::recurse_makeObjectsAccess(objects);
-
 		std::vector<SourceExpression::Pointer> dimensions(1, exprR);
 		exprL->makeObjectsAccessArray(objects, &dimensions);
 	}
@@ -142,35 +122,12 @@ void SourceExpression_BinaryArray::virtual_makeObjectsAccessArray(ObjectVector *
 	exprL->makeObjectsAccessArray(objects, dimensions);
 }
 
-void SourceExpression_BinaryArray::virtual_makeObjectsAddress(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsAddress(objects);
-
-	if (exprL->getType()->vt == VariableType::VT_POINTER)
-	{
-		exprL->makeObjectsGet(objects);
-	}
-	else
-	{
-		exprL->makeObjectsAddress(objects);
-	}
-
-	exprR->makeObjectsGet(objects);
-
-	objects->setPosition(position);
-
-	objects->addToken(OCODE_ADD);
-}
-
 void SourceExpression_BinaryArray::virtual_makeObjectsGet(ObjectVector * objects)
 {
-	if (getType()->vt == VariableType::VT_VOID)
-		Super::makeObjectsGet(objects);
+	Super::recurse_makeObjectsGet(objects);
 
 	if (exprL->getType()->vt == VariableType::VT_STRING)
 	{
-		Super::recurse_makeObjectsGet(objects);
-
 		exprL->makeObjectsGet(objects);
 		exprR->makeObjectsGet(objects);
 
@@ -178,26 +135,8 @@ void SourceExpression_BinaryArray::virtual_makeObjectsGet(ObjectVector * objects
 
 		objects->addToken(OCODE_CALLZDFUNC, objects->getValue(2), objects->getValue(15));
 	}
-	else if (canMakeObjectsAddress())
-	{
-		makeObjectsAddress(objects);
-
-		if (getType()->size() == 1)
-		{
-			objects->addToken(OCODE_PUSHGLOBALARRAY, objects->getValue(0));
-		}
-		else
-		{
-			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
-
-			for (int i(0); i < getType()->size(); ++i)
-				objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
-		}
-	}
 	else
 	{
-		Super::recurse_makeObjectsGet(objects);
-
 		std::vector<SourceExpression::Pointer> dimensions(1, exprR);
 		exprL->makeObjectsGetArray(objects, &dimensions);
 	}
@@ -212,34 +151,14 @@ void SourceExpression_BinaryArray::virtual_makeObjectsGetArray(ObjectVector * ob
 
 void SourceExpression_BinaryArray::virtual_makeObjectsSet(ObjectVector * objects)
 {
-	if (getType()->vt == VariableType::VT_VOID)
-		Super::makeObjectsSet(objects);
+	Super::recurse_makeObjectsSet(objects);
 
 	if (exprL->getType()->vt == VariableType::VT_STRING)
 	{
-		Super::makeObjectsSet(objects);
-	}
-	else if (canMakeObjectsAddress())
-	{
-		makeObjectsAddress(objects);
-
-		if (getType()->size() == 1)
-		{
-			objects->addToken(OCODE_SWAP);
-			objects->addToken(OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
-		}
-		else
-		{
-			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
-
-			for (int i(getType()->size()); i--;)
-				objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
-		}
+		throw SourceException("makeObjectsSet on VT_STRING element", position, getName());
 	}
 	else
 	{
-		Super::recurse_makeObjectsSet(objects);
-
 		std::vector<SourceExpression::Pointer> dimensions(1, exprR);
 		exprL->makeObjectsSetArray(objects, &dimensions);
 	}
@@ -251,4 +170,5 @@ void SourceExpression_BinaryArray::virtual_makeObjectsSetArray(ObjectVector * ob
 	dimensions->push_back(exprR);
 	exprL->makeObjectsSetArray(objects, dimensions);
 }
+
 
