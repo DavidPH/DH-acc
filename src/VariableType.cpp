@@ -245,6 +245,9 @@ VariableType const * VariableType::get_vt_void()
 
 int VariableType::getOffset(std::string const & name, SourcePosition const & position) const
 {
+	if (!complete)
+		throw SourceException("incomplete type", position, "VariableType::getOffset");
+
 	int offset(0);
 
 	if (vt == VT_UNION)
@@ -261,6 +264,9 @@ int VariableType::getOffset(std::string const & name, SourcePosition const & pos
 
 VariableType const * VariableType::getType(std::string const & name, SourcePosition const & position) const
 {
+	if (!complete)
+		throw SourceException("incomplete type", position, "VariableType::getType");
+
 	for (size_t i(0); i < names.size(); ++i)
 		if (name == names[i])
 			return types[i];
