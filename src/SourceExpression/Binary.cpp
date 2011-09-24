@@ -77,12 +77,12 @@ void SourceExpression_Binary::doCast()
 
 		if (typeL->vt != VariableType::VT_POINTER)
 		{
-			if (type->refType->size() != 1)
+			if (type->refType->size(position) != 1)
 			{
 				if (typeL->vt != VariableType::VT_INT)
 					exprL = create_value_cast(exprL, VariableType::get_vt_int(), position);
 
-				exprL = create_binary_mul(exprL, create_value_int(type->refType->size(), position), position);
+				exprL = create_binary_mul(exprL, create_value_int(type->refType->size(position), position), position);
 			}
 
 			exprL = create_value_cast(exprL, type, position);
@@ -90,12 +90,12 @@ void SourceExpression_Binary::doCast()
 
 		if (typeR->vt != VariableType::VT_POINTER)
 		{
-			if (type->refType->size() != 1)
+			if (type->refType->size(position) != 1)
 			{
 				if (typeR->vt != VariableType::VT_INT)
 					exprR = create_value_cast(exprR, VariableType::get_vt_int(), position);
 
-				exprR = create_binary_mul(exprR, create_value_int(type->refType->size(), position), position);
+				exprR = create_binary_mul(exprR, create_value_int(type->refType->size(position), position), position);
 			}
 
 			exprR = create_value_cast(exprR, type, position);

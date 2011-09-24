@@ -79,8 +79,8 @@ SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * ex
 	if (exprL->getType()->vt != VariableType::VT_ARRAY && exprL->getType()->vt != VariableType::VT_STRING)
 		throw SourceException("expected VT_ARRAY or VT_STRING for exprL got " + (std::string)make_string(exprL->getType()->vt), position, getName());
 
-	if (getType()->size() != 1)
-		this->exprR = create_binary_mul(exprR, create_value_int(getType()->size(), position), position);
+	if (getType()->size(position) != 1)
+		this->exprR = create_binary_mul(exprR, create_value_int(getType()->size(position), position), position);
 }
 
 bool SourceExpression_BinaryArray::canMakeObject() const

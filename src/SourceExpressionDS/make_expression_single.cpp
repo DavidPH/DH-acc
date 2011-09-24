@@ -275,7 +275,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_sizeof(Sour
 
 	if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
-	bigsint size(make_expression_type(in, blocks, context)->size());
+	bigsint size(make_expression_type(in, blocks, context)->size(token.getPosition()));
 
 	if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 

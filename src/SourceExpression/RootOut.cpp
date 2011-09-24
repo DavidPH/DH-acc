@@ -234,7 +234,7 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, VariableType const 
 		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));
 		objects->addToken(OCODE_PRINTCHARACTER);
 
-		for (int i(type->size()); i--;)
+		for (int i(type->size(position)); i--;)
 		{
 			objects->addToken(OCODE_PRINTHEX);
 

@@ -177,7 +177,7 @@ void SourceContext::addVariable(SourceVariable * var)
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
 	case SourceVariable::SC_STATIC:
-		addCount(var->getType()->size(), sc);
+		addCount(var->getType()->size(SourcePosition::none), sc);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_MAP:
@@ -431,31 +431,31 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Varia
 		throw SourceException("makeNameObject on SC_CONSTANT", position, "SourceContext");
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
-		ObjectExpression::add_register_global(nameObject, type->size());
+		ObjectExpression::add_register_global(nameObject, type->size(position));
 		break;
 
 	case SourceVariable::SC_REGISTER_MAP:
-		ObjectExpression::add_register_map(nameObject, type->size());
+		ObjectExpression::add_register_map(nameObject, type->size(position));
 		break;
 
 	case SourceVariable::SC_REGISTER_WORLD:
-		ObjectExpression::add_register_world(nameObject, type->size());
+		ObjectExpression::add_register_world(nameObject, type->size(position));
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-		ObjectExpression::add_registerarray_global(nameObject, type->size());
+		ObjectExpression::add_registerarray_global(nameObject, type->size(position));
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_MAP:
-		ObjectExpression::add_registerarray_map(nameObject, type->size());
+		ObjectExpression::add_registerarray_map(nameObject, type->size(position));
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
-		ObjectExpression::add_registerarray_world(nameObject, type->size());
+		ObjectExpression::add_registerarray_world(nameObject, type->size(position));
 		break;
 
 	case SourceVariable::SC_STATIC:
-		ObjectExpression::add_static(nameObject, type->size());
+		ObjectExpression::add_static(nameObject, type->size(position));
 		break;
 	}
 
@@ -476,31 +476,31 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Varia
 		throw SourceException("makeNameObject on SC_CONSTANT", position, "SourceContext");
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
-		ObjectExpression::add_register_global(nameObject, type->size(), address);
+		ObjectExpression::add_register_global(nameObject, type->size(position), address);
 		break;
 
 	case SourceVariable::SC_REGISTER_MAP:
-		ObjectExpression::add_register_map(nameObject, type->size(), address);
+		ObjectExpression::add_register_map(nameObject, type->size(position), address);
 		break;
 
 	case SourceVariable::SC_REGISTER_WORLD:
-		ObjectExpression::add_register_world(nameObject, type->size(), address);
+		ObjectExpression::add_register_world(nameObject, type->size(position), address);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-		ObjectExpression::add_registerarray_global(nameObject, type->size(), address);
+		ObjectExpression::add_registerarray_global(nameObject, type->size(position), address);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_MAP:
-		ObjectExpression::add_registerarray_map(nameObject, type->size(), address);
+		ObjectExpression::add_registerarray_map(nameObject, type->size(position), address);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
-		ObjectExpression::add_registerarray_world(nameObject, type->size(), address);
+		ObjectExpression::add_registerarray_world(nameObject, type->size(position), address);
 		break;
 
 	case SourceVariable::SC_STATIC:
-		ObjectExpression::add_static(nameObject, type->size(), address);
+		ObjectExpression::add_static(nameObject, type->size(position), address);
 		break;
 	}
 

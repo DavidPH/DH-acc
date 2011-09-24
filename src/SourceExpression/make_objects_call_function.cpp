@@ -52,21 +52,20 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 	else
 		ocode = OCODE_CALLZDACS;
 
-	if (type->callType->size() > 1)
-		oretn = objects->getValue(type->callType->size() - 1);
+	if (type->callType->size(position) > 1)
+		oretn = objects->getValue(type->callType->size(position) - 1);
 
 	objects->addToken(OCODE_ADDSTACK_IMM, stack);
 	if (oretn) objects->addToken(OCODE_ADDSTACK_IMM, oretn);
 	objects->addToken(ocode, ofunc);
 	if (oretn)
 	{
-		for (int i(-type->callType->size()); ++i;)
+		for (int i(-type->callType->size(position)); ++i;)
 			objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
 
 		objects->addToken(OCODE_SUBSTACK_IMM, oretn);
 	}
 	objects->addToken(OCODE_SUBSTACK_IMM, stack);
 }
-
 
 

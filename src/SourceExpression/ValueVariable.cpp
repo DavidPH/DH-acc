@@ -124,7 +124,8 @@ SourceExpression::Pointer SourceExpression::create_value_variable(SourceVariable
 
 SourceExpression_ValueVariable::SourceExpression_ValueVariable(SourceVariable * var, SourcePosition const & position) : Super(position), _var(var)
 {
-
+	if (!_var->getType()->complete)
+		throw SourceException("incomplete type", position, getName());
 }
 
 bool SourceExpression_ValueVariable::canMakeObject() const

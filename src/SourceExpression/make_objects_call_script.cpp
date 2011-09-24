@@ -51,7 +51,7 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, Variable
 
 	if (type->callType->vt == VariableType::VT_VOID)
 	{
-		switch (type->sizeCall())
+		switch (type->sizeCall(position))
 		{
 		case 0: ocode = OCODE_LSPEC1; break;
 		case 1: ocode = OCODE_LSPEC2; break;
@@ -65,13 +65,13 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, Variable
 		ocode = OCODE_LSPEC5RESULT;
 
 		// Dummy args.
-		for (size_t i(type->sizeCall()); i < 3; ++i)
+		for (size_t i(type->sizeCall(position)); i < 3; ++i)
 			objects->addTokenPushZero();
 	}
 
 	// Extended return data?
-	if (type->callType->size() > 1)
-		oretn = objects->getValue(type->callType->size() - 1);
+	if (type->callType->size(position) > 1)
+		oretn = objects->getValue(type->callType->size(position) - 1);
 
 	// Stack for call.
 	objects->addToken(OCODE_ADDSTACK_IMM, stack);
@@ -80,7 +80,7 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, Variable
 	if (oretn) objects->addToken(OCODE_ADDSTACK_IMM, oretn);
 
 	// Extended call data.
-	if (type->sizeCall() > 3) for (int i(type->sizeCall() - 3); i--;)
+	if (type->sizeCall(position) > 3) for (int i(type->sizeCall(position) - 3); i--;)
 		objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(i));
 
 	// Dummy arg.
@@ -92,7 +92,7 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, Variable
 	// Extended return data.
 	if (oretn)
 	{
-		for (int i(-type->callType->size()); ++i;)
+		for (int i(-type->callType->size(position)); ++i;)
 			objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
 
 		objects->addToken(OCODE_SUBSTACK_IMM, oretn);
@@ -101,6 +101,5 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, Variable
 	// Stack for call.
 	objects->addToken(OCODE_SUBSTACK_IMM, stack);
 }
-
 
 

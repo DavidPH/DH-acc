@@ -66,7 +66,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	SourceVariable::Pointer functionVariable(SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition()));
 
 	context->addVariable(functionVariable);
-	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size());
+	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size(token.getPosition()));
 	return create_value_variable(functionVariable, token.getPosition());
 }
 

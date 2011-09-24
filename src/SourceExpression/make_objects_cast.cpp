@@ -38,7 +38,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 
 	if (typeTo->vt == VariableType::VT_VOID)
 	{
-		for (size_t i(typeFrom->size()); i--;)
+		for (size_t i(typeFrom->size(position)); i--;)
 			objects->addToken(OCODE_DROP);
 
 		return;

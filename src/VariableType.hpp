@@ -63,10 +63,10 @@ struct VariableType
 
 	VariableType const * getType(std::string const & name, SourcePosition const & position) const;
 
-	bool isVoid() const;
+	bool isVoid(SourcePosition const & position) const;
 
-	int size() const;
-	int sizeCall() const;
+	int size(SourcePosition const & position) const;
+	int sizeCall(SourcePosition const & position) const;
 
 	Type vt;
 

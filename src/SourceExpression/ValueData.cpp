@@ -87,7 +87,7 @@ void SourceExpression_ValueData::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	for (size_t i(_type->size()); i--;)
+	for (size_t i(_type->size(position)); i--;)
 	{
 		if (_garbage)
 			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(0xDEADBEEF));

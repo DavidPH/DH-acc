@@ -257,7 +257,7 @@ int VariableType::getOffset(std::string const & name, SourcePosition const & pos
 		if (name == names[i])
 			return offset;
 		else
-			offset += types[i]->size();
+			offset += types[i]->size(position);
 
 	throw SourceException("invalid member-variable-type '" + name + "'", position, "VariableType::getOffset");
 }
@@ -274,8 +274,11 @@ VariableType const * VariableType::getType(std::string const & name, SourcePosit
 	throw SourceException("invalid member-variable-type '" + name + "'", position, "VariableType::getType");
 }
 
-bool VariableType::isVoid() const
+bool VariableType::isVoid(SourcePosition const & position) const
 {
+	if (!complete)
+		throw SourceException("incomplete type", position, "VariableType::isVoid");
+
 	switch (vt)
 	{
 	case VT_ARRAY:
@@ -284,7 +287,7 @@ bool VariableType::isVoid() const
 	case VT_UNION:
 	{
 		for (size_t i(0); i < types.size(); ++i)
-			if (!types[i]->isVoid()) return false;
+			if (!types[i]->isVoid(position)) return false;
 
 		return true;
 	}
@@ -311,8 +314,11 @@ bool VariableType::isVoid() const
 	return 0;
 }
 
-int VariableType::size() const
+int VariableType::size(SourcePosition const & position) const
 {
+	if (!complete)
+		throw SourceException("incomplete type", position, "VariableType::size");
+
 	switch (vt)
 	{
 	case VT_ARRAY:
@@ -322,7 +328,7 @@ int VariableType::size() const
 		int s(0);
 
 		for (size_t i(0); i < types.size(); ++i)
-			s += types[i]->size();
+			s += types[i]->size(position);
 
 		return s;
 	}
@@ -351,8 +357,8 @@ int VariableType::size() const
 
 		for (size_t i(0); i < types.size(); ++i)
 		{
-			if (types[i]->size() > s)
-				s = types[i]->size();
+			if (types[i]->size(position) > s)
+				s = types[i]->size(position);
 		}
 
 		return s;
@@ -362,8 +368,11 @@ int VariableType::size() const
 	return 0;
 }
 
-int VariableType::sizeCall() const
+int VariableType::sizeCall(SourcePosition const & position) const
 {
+	if (!complete)
+		throw SourceException("incomplete type", position, "VariableType::sizeCall");
+
 	switch (vt)
 	{
 	case VT_ARRAY:
@@ -390,7 +399,7 @@ int VariableType::sizeCall() const
 		int s(0);
 
 		for (std::vector<VariableType const *>::const_iterator it(types.begin()); it != types.end(); ++it)
-			s += (*it)->size();
+			s += (*it)->size(position);
 
 		return s;
 	}

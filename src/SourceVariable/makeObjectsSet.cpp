@@ -93,7 +93,7 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 			break;
 
 		case VariableType::VT_UNION:
-			for (int i(type->size()); i--;)
+			for (int i(type->size(position)); i--;)
 			{
 				if (array)
 					objects->addToken(ocode, objects->getValue(_nameObject), objects->getValueAdd(addressBase, (*address)--));
@@ -253,8 +253,7 @@ void SourceVariable::makeObjectsSetPrep(ObjectVector * objects, std::vector<Sour
 
 void SourceVariable::makeObjectsSetSkip(VariableType const * type, int * address) const
 {
-	*address -= type->size();
+	*address -= type->size(_position);
 }
-
 
 

@@ -86,7 +86,7 @@ void SourceExpression_UnaryDecInc::doDecInc(ObjectVector * objects, bool inc)
 		break;
 
 	case VariableType::VT_POINTER:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size()));
+		objects->addToken(OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size(position)));
 		break;
 
 	case VariableType::VT_REAL:

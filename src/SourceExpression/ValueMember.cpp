@@ -122,10 +122,10 @@ void SourceExpression_ValueMember::virtual_makeObjectsAccess(ObjectVector * obje
 		makeObjectsAddress(objects);
 		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
-		for (int i(getType()->size()); i--;)
+		for (int i(getType()->size(position)); i--;)
 			objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
 
-		for (int i(0); i < getType()->size(); ++i)
+		for (int i(0); i < getType()->size(position); ++i)
 			objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
 	}
 	else
@@ -164,7 +164,7 @@ void SourceExpression_ValueMember::virtual_makeObjectsGet(ObjectVector * objects
 	{
 		makeObjectsAddress(objects);
 
-		if (getType()->size() == 1)
+		if (getType()->size(position) == 1)
 		{
 			objects->addToken(OCODE_PUSHGLOBALARRAY, objects->getValue(0));
 		}
@@ -172,7 +172,7 @@ void SourceExpression_ValueMember::virtual_makeObjectsGet(ObjectVector * objects
 		{
 			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
-			for (int i(0); i < getType()->size(); ++i)
+			for (int i(0); i < getType()->size(position); ++i)
 				objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
 		}
 	}
@@ -198,7 +198,7 @@ void SourceExpression_ValueMember::virtual_makeObjectsSet(ObjectVector * objects
 	{
 		makeObjectsAddress(objects);
 
-		if (getType()->size() == 1)
+		if (getType()->size(position) == 1)
 		{
 			objects->addToken(OCODE_SWAP);
 			objects->addToken(OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
@@ -207,7 +207,7 @@ void SourceExpression_ValueMember::virtual_makeObjectsSet(ObjectVector * objects
 		{
 			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
-			for (int i(getType()->size()); i--;)
+			for (int i(getType()->size(position)); i--;)
 				objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
 		}
 	}

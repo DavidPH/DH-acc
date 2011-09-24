@@ -30,7 +30,7 @@
 
 void SourceExpression::make_objects_call_linespec(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
 {
-	if (type->sizeCall() > 5)
+	if (type->sizeCall(position) > 5)
 		throw SourceException("too many args to call linespec", position, "SourceExpression");
 
 	if (args.size() != type->types.size())
@@ -51,7 +51,7 @@ void SourceExpression::make_objects_call_linespec(ObjectVector * objects, Variab
 
 	if (type->callType->vt == VariableType::VT_VOID)
 	{
-		switch (type->sizeCall())
+		switch (type->sizeCall(position))
 		{
 		case 0: ocode = OCODE_LSPEC1; objects->addTokenPushZero(); break;
 		case 1: ocode = OCODE_LSPEC1; break;
@@ -66,12 +66,11 @@ void SourceExpression::make_objects_call_linespec(ObjectVector * objects, Variab
 	{
 		ocode = OCODE_LSPEC5RESULT;
 
-		for (size_t i(type->sizeCall()); i < 5; ++i)
+		for (size_t i(type->sizeCall(position)); i < 5; ++i)
 			objects->addTokenPushZero();
 	}
 
 	objects->addToken(ocode, ospec);
 }
-
 
 

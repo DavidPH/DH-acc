@@ -80,7 +80,7 @@ void SourceExpression_BranchReturn::virtual_makeObjectsGet(ObjectVector * object
 
 	objects->setPosition(position);
 
-	for (int i(1); i < _expr->getType()->size(); ++i)
+	for (int i(1); i < _expr->getType()->size(position); ++i)
 		objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(-i));
 
 	switch (_type)
@@ -90,7 +90,7 @@ void SourceExpression_BranchReturn::virtual_makeObjectsGet(ObjectVector * object
 		break;
 
 	case SourceContext::CT_FUNCTION:
-		if (_expr->getType()->size() == 0)
+		if (_expr->getType()->size(position) == 0)
 			objects->addToken(OCODE_RETURNZDACSVOID);
 		else
 			objects->addToken(OCODE_RETURNZDACS);
@@ -98,7 +98,7 @@ void SourceExpression_BranchReturn::virtual_makeObjectsGet(ObjectVector * object
 		break;
 
 	case SourceContext::CT_SCRIPT:
-		if (_expr->getType()->size() != 0)
+		if (_expr->getType()->size(position) != 0)
 			objects->addToken(OCODE_SETRESULTVALUE);
 
 		objects->addToken(OCODE_TERMINATE);

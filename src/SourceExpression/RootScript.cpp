@@ -73,7 +73,7 @@ void SourceExpression_RootScript::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	if (_type->sizeCall() > 3) for (int i(_type->sizeCall() - 3); i--;)
+	if (_type->sizeCall(position) > 3) for (int i(_type->sizeCall(position) - 3); i--;)
 	{
 		objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
 		objects->addToken(OCODE_ASSIGNSCRIPTVAR, objects->getValue(i+3));

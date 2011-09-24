@@ -80,12 +80,12 @@ SourceExpression_BranchIf::SourceExpression_BranchIf(SourceExpression * exprCond
 
 	if (_exprElse)
 	{
-		if (_exprIf->getType() != _exprElse->getType() && (!_exprIf->getType()->isVoid() || !_exprIf->getType()->isVoid()))
+		if (_exprIf->getType() != _exprElse->getType() && (!_exprIf->getType()->isVoid(position) || !_exprIf->getType()->isVoid(position)))
 			throw SourceException("if/else type mismatch", position, getName());
 	}
 	else
 	{
-		if (!_exprIf->getType()->isVoid())
+		if (!_exprIf->getType()->isVoid(position))
 			throw SourceException("if type nonvoid", position, getName());
 	}
 }

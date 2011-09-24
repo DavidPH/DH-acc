@@ -85,12 +85,12 @@ void SourceVariable::makeObjectsAccessPrep(ObjectVector * objects, std::vector<S
 			}
 
 			*addressBase = objects->getValue(0);
-			*address = type->size() - 1;
+			*address = type->size(position) - 1;
 		}
 		else if (_sc == SC_AUTO)
 		{
 			*addressBase = objects->getValue(_nameObject);
-			*address = _type->size() - 1;
+			*address = _type->size(position) - 1;
 		}
 		else
 		{
@@ -99,7 +99,7 @@ void SourceVariable::makeObjectsAccessPrep(ObjectVector * objects, std::vector<S
 			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
 
 			*addressBase = objects->getValue(0);
-			*address = _type->size() - 1;
+			*address = _type->size(position) - 1;
 		}
 
 		break;
@@ -110,10 +110,9 @@ void SourceVariable::makeObjectsAccessPrep(ObjectVector * objects, std::vector<S
 	case SC_REGISTER_MAP:
 	case SC_REGISTER_WORLD:
 		*addressBase = objects->getValue(_nameObject);
-		*address = _type->size() - 1;
+		*address = _type->size(position) - 1;
 		break;
 	}
 }
-
 
 
