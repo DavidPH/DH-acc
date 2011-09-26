@@ -108,6 +108,11 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 	// scriptVarType
 	VariableType const * scriptVarType(VariableType::get_script(scriptReturn, scriptArgTypes));
 
+	// scriptVariable
+	// Before scriptExpression to enable recursion.
+	SourceVariable::Pointer scriptVariable(SourceVariable::create_constant(scriptNameSource, scriptVarType, scriptNameObject, token.getPosition()));
+	context->addVariable(scriptVariable);
+
 	// scriptExpression
 	SourceExpression::Pointer scriptExpression(create_root_script(scriptVarType, token.getPosition()));
 	scriptExpression->addLabel(scriptLabel);
@@ -117,11 +122,6 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(Sour
 
 	// scriptVarCount
 	int scriptVarCount(scriptContext.getLimit(SourceVariable::SC_REGISTER));
-
-	// scriptVariable
-	SourceVariable::Pointer scriptVariable(SourceVariable::create_constant(scriptNameSource, scriptVarType, scriptNameObject, token.getPosition()));
-
-	context->addVariable(scriptVariable);
 
 	if (scriptNumber < 0)
 		ObjectExpression::add_script(scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount, scriptVarCount);

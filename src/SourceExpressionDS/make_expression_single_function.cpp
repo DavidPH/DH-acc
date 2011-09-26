@@ -50,23 +50,25 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	VariableType const * functionReturn;
 	make_expression_arglist(in, blocks, context, &functionArgTypes, &functionArgNames, &functionArgCount, &functionContext, &functionReturn);
 
+	// functionVarType
+	VariableType const * functionVarType(VariableType::get_function(functionReturn, functionArgTypes));
+
+	// functionVariable
+	// Before functionExpression to enable recursion.
+	SourceVariable::Pointer functionVariable(SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition()));
+	context->addVariable(functionVariable);
+
 	// functionExpression
 	SourceExpression::Pointer functionExpression(make_expression_single(in, blocks, &functionContext));
 	functionExpression->addLabel(functionLabel);
 	blocks->push_back(functionExpression);
 	blocks->push_back(create_branch_return(create_value_data(functionReturn, true, token.getPosition()), &functionContext, token.getPosition()));
 
-	// functionVarType
-	VariableType const * functionVarType(VariableType::get_function(functionReturn, functionArgTypes));
-
 	// functionVarCount
 	int functionVarCount(functionContext.getLimit(SourceVariable::SC_REGISTER));
 
-	// functionVariable
-	SourceVariable::Pointer functionVariable(SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition()));
-
-	context->addVariable(functionVariable);
 	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size(token.getPosition()));
+
 	return create_value_variable(functionVariable, token.getPosition());
 }
 
