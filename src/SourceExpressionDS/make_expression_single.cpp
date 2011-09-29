@@ -159,7 +159,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 
 	default:
 		in->unget(token);
-		throw SourceException("unexpected token type (single)", token.getPosition(), "SourceExpressionDS");
+		throw SourceException("unexpected token type: " + (std::string)make_string(token.getType()), token.getPosition(), "SourceExpressionDS::make_expression_single");
 	}
 
 	// Suffixes.

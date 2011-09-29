@@ -63,11 +63,11 @@ public:
 
 	void unget(char const c);
 
+
+
+	static bool is_HWS(char c);
+
 private:
-	int getC();
-
-	void prepareC();
-
 	int _oldC, _curC, _newC;
 	std::istream * _in;
 	std::string _filename;

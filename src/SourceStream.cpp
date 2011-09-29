@@ -88,60 +88,11 @@ SourceStream::~SourceStream()
 
 char SourceStream::get()
 {
-	prepareC();
-
-	if (_curC == -1) throw EndOfStream();
-
-	return _curC;
-}
-
-int SourceStream::getC()
-{
 	if (!_ungetStack.empty())
 	{
 		char c = _ungetStack.top();
 		_ungetStack.pop();
 		return c;
-	}
-
-	if (_in) return _in->get();
-
-	return -1;
-}
-
-long SourceStream::getColumn() const
-{
-	return _countColumn;
-}
-
-std::string const & SourceStream::getFilename() const
-{
-	return _filename;
-}
-
-long SourceStream::getLineCount() const
-{
-	return _countLine;
-}
-
-bool SourceStream::isInComment() const
-{
-	return _inComment || _depthComment;
-}
-
-bool SourceStream::isInQuote() const
-{
-	return _inQuoteDouble || _inQuoteSingle;
-}
-
-void SourceStream::prepareC()
-{
-	if (!_ungetStack.empty())
-	{
-		_oldC = -2;
-		_curC = _ungetStack.top();
-		_ungetStack.pop();
-		return;
 	}
 
 	while (true)
@@ -252,35 +203,48 @@ void SourceStream::prepareC()
 
 
 
-		return;
+		if (!*_in) throw EndOfStream();
+		return (char)_curC;
 	}
+}
+
+long SourceStream::getColumn() const
+{
+	return _countColumn;
+}
+
+std::string const & SourceStream::getFilename() const
+{
+	return _filename;
+}
+
+long SourceStream::getLineCount() const
+{
+	return _countLine;
+}
+
+bool SourceStream::is_HWS(char c)
+{
+	return c == ' ' || c == '\t';
+}
+
+bool SourceStream::isInComment() const
+{
+	return _inComment || _depthComment;
+}
+
+bool SourceStream::isInQuote() const
+{
+	return _inQuoteDouble || _inQuoteSingle;
 }
 
 bool SourceStream::skipHWS()
 {
 	bool found(false);
+	char c;
 
-	if (_newC == -2) _newC = getC();
-
-	while (!_ungetStack.empty())
-	{
-		char const & c(_ungetStack.top());
-
-		if (c == ' ' || c == '\t')
-		{
-			found = true;
-			_ungetStack.pop();
-		}
-		else
-			return found;
-	}
-
-	while (_newC == ' ' || _newC == '\t')
-	{
-		found = true;
-
-		prepareC();
-	}
+	while (is_HWS(c = get())) found = true;
+	unget(c);
 
 	return found;
 }

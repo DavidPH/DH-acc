@@ -22,6 +22,7 @@
 #ifndef HPP_VariableType_
 #define HPP_VariableType_
 
+#include <ostream>
 #include <string>
 #include <vector>
 
