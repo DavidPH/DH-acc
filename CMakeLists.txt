@@ -29,8 +29,12 @@ TRY_CXX_COMPILER_FLAG_ID(-Wall              FLAG_CXX_Wall              "Clang")
 TRY_CXX_COMPILER_FLAG_ID(-Wall              FLAG_CXX_Wall              "GNU"  )
 TRY_CXX_COMPILER_FLAG_ID(-Wall              FLAG_CXX_Wall              "Intel")
 TRY_CXX_COMPILER_FLAG_ID(-Wcheck            FLAG_CXX_Wcheck            "Intel")
-TRY_CXX_COMPILER_FLAG_ID(-Wextra            FLAG_CXX_Wall              "Clang")
-TRY_CXX_COMPILER_FLAG_ID(-Wextra            FLAG_CXX_Wall              "GNU"  )
+# -Wextra produces warnings that can't be cleanly addressed:
+#   -Wunusued-parameter: Too many cases to justify adding void casts.
+#   -Wmissing-field-initializers: The one instance would require overly verbose
+#     invocation of default vector constructors.
+#TRY_CXX_COMPILER_FLAG_ID(-Wextra            FLAG_CXX_Wall              "Clang")
+#TRY_CXX_COMPILER_FLAG_ID(-Wextra            FLAG_CXX_Wall              "GNU"  )
 TRY_CXX_COMPILER_FLAG_ID(-Wp64              FLAG_CXX_Wp64              "Intel")
 TRY_CXX_COMPILER_FLAG_ID(-Wshorten-64-to-32 FLAG_CXX_Wshorten_64_to_32 "Intel")
 TRY_CXX_COMPILER_FLAG_ID(-ansi              FLAG_CXX_ansi              "GNU"  )
