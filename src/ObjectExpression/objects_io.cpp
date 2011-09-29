@@ -82,6 +82,15 @@ void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
 
 
 
+bool override_object(ObjectExpression::ExpressionType * out, ObjectExpression::ExpressionType const & in)
+{
+	return false;
+}
+bool override_object(ObjectExpression::Pointer * out, ObjectExpression::Pointer const & in)
+{
+	return false;
+}
+
 void read_object(std::istream * in, ObjectExpression::ExpressionType * out)
 {
 	read_object_raw(in, (char *)out, sizeof(*out));
@@ -177,6 +186,5 @@ void write_object(std::ostream * out, ObjectExpression::Pointer const & in)
 {
 	in->writeObject(out);
 }
-
 
 

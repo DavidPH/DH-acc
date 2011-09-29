@@ -23,6 +23,11 @@
 
 
 
+bool override_object(std::string * out, std::string const & in)
+{
+	return false;
+}
+
 void read_object(std::istream * in, bool * out)
 {
 	*out = !!in->get();
@@ -100,6 +105,5 @@ void write_object_raw(std::ostream * out, char const * in, size_t size)
 	while (size--)
 		out->put(*in++);
 }
-
 
 

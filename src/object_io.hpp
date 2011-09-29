@@ -30,7 +30,8 @@
 
 
 
-template<typename T> bool override_object(T * out, T const & in);
+template<typename Tk, typename Tv> bool override_object(std::map<Tk, Tv> * out, std::pair<Tk, Tv> const & in);
+bool override_object(std::string * out, std::string const & in);
 template<typename T> bool override_object(std::vector<T> * out, T const & in);
 
 void read_object(std::istream * in, bool * out);
@@ -61,9 +62,17 @@ void write_object_raw(std::ostream * out, char const * in, size_t size);
 
 
 
-template<typename T> bool override_object(T * out, T const & in)
+template<typename Tk, typename Tv> bool override_object(std::map<Tk, Tv> * out, std::pair<Tk, Tv> const & in)
 {
-	return false;
+	typename std::map<Tk, Tv>::iterator it(out->find(in.first));
+
+	if (it == out->end())
+	{
+		out->insert(in);
+		return false;
+	}
+	else
+		return override_object(&it->second, in.second);
 }
 template<typename T> bool override_object(std::vector<T> * out, T const & in)
 {
@@ -84,12 +93,7 @@ template<typename Tk, typename Tv> void read_object(std::istream * in, std::map<
 		std::pair<Tk, Tv> o;
 		read_object(in, &o);
 
-		typename std::map<Tk, Tv>::iterator it(out->find(o.first));
-
-		if (it == out->end())
-			(*out)[o.first] = o.second;
-		else
-			override_object(&it->second, o.second);
+		override_object(out, o);
 	}
 
 }
@@ -136,6 +140,5 @@ template<typename T> void write_object(std::ostream * out, std::vector<T> const 
 
 
 #endif /* HPP_object_io_ */
-
 
 

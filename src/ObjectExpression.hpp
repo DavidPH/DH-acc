@@ -66,6 +66,9 @@ public:
 
 
 
+	friend bool override_object(ObjectExpression::ExpressionType * out, ObjectExpression::ExpressionType const & in);
+	friend bool override_object(ObjectExpression::Pointer * out, ObjectExpression::Pointer const & in);
+
 	friend void print_debug(std::ostream * out, ObjectExpression const & in);
 
 	friend void read_object(std::istream * in, ExpressionType * out);

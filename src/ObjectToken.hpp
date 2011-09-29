@@ -59,6 +59,7 @@ public:
 
 
 
+	friend bool override_object(ObjectToken * out, ObjectToken const & in);
 	friend void print_debug(std::ostream * const out, ObjectToken const & in);
 	friend void read_object(std::istream * in, ObjectToken * out);
 	friend void write_object(std::ostream * out, ObjectToken const & in);
@@ -73,6 +74,5 @@ private:
 
 
 #endif /* HPP_ObjectToken_ */
-
 
 

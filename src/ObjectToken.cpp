@@ -87,6 +87,11 @@ void ObjectToken::swapData(ObjectToken & token)
 
 
 
+bool override_object(ObjectToken * out, ObjectToken const & in)
+{
+	return false;
+}
+
 void print_debug(std::ostream * const out, ObjectToken const & in)
 {
 	*out << "ObjectToken(";
@@ -114,8 +119,6 @@ void print_debug(std::ostream * const out, ObjectToken const & in)
 	*out << ")";
 }
 
-
-
 void read_object(std::istream * in, ObjectToken * out)
 {
 	read_object(in, &out->_args);
@@ -131,6 +134,5 @@ void write_object(std::ostream * out, ObjectToken const & in)
 	write_object(out, in._labels);
 	write_object(out, in._position);
 }
-
 
 
