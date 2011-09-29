@@ -152,7 +152,7 @@ void SourceVariable::makeObjectsSetArray(ObjectVector * objects, std::vector<Sou
 	makeObjectsSetPrep(objects, dimensions, &addressBase, &address, position);
 	makeObjectsSetArray(objects, dimensions->size(), position, _type, addressBase, &address);
 }
-void SourceVariable::makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
+void SourceVariable::makeObjectsSetArray(ObjectVector * objects, size_t dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
 {
 	if (dimensions == 0)
 	{

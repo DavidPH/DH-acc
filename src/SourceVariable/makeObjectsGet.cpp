@@ -179,7 +179,7 @@ void SourceVariable::makeObjectsGetArray(ObjectVector * objects, std::vector<Cou
 	makeObjectsGetPrep(objects, dimensions, &addressBase, &address, position);
 	makeObjectsGetArray(objects, dimensions->size(), position, _type, addressBase, &address);
 }
-void SourceVariable::makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
+void SourceVariable::makeObjectsGetArray(ObjectVector * objects, size_t dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const
 {
 	if (dimensions == 0)
 	{

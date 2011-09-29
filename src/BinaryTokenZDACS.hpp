@@ -22,11 +22,11 @@
 #ifndef HPP_BinaryTokenZDACS_
 #define HPP_BinaryTokenZDACS_
 
+#include "bignum.hpp"
 #include "CounterPointer.hpp"
 #include "SourcePosition.hpp"
 
 #include <ostream>
-#include <stdint.h>
 #include <vector>
 
 struct ObjectData_Function;
@@ -179,10 +179,10 @@ public:
 	static void make_tokens(ObjectToken const & object, std::vector<BinaryTokenZDACS> * instructions);
 	static void make_tokens(ObjectVector const & objects, std::vector<BinaryTokenZDACS> * instructions);
 
-	static void write_8(std::ostream * const out, uint8_t const i);
-	static void write_16(std::ostream * const out, uint16_t const i);
+	static void write_8(std::ostream * out, bigsint i);
+	static void write_16(std::ostream * out, bigsint i);
 	static void write_32(std::ostream * const out, ObjectExpression const & expr);
-	static void write_32(std::ostream * const out, uint32_t const i);
+	static void write_32(std::ostream * out, bigsint i);
 	static void write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions);
 	static void write_chunk(std::ostream * out, std::ostringstream * chunkout, char const * chunkname);
 	static void write_function(std::ostream * out, ObjectData_Function const & f);

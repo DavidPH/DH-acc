@@ -110,13 +110,13 @@ private:
 	void makeObjectsAccessPrep(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, CounterPointer<ObjectExpression> * addressBase, int * address, SourcePosition const & position) const;
 
 	void makeObjectsGet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address, bool dimensioned) const;
-	void makeObjectsGetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const;
+	void makeObjectsGetArray(ObjectVector * objects, size_t dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const;
 	void makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const;
 	void makeObjectsGetPrep(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, CounterPointer<ObjectExpression> * addressBase, int * address, SourcePosition const & position) const;
 	void makeObjectsGetSkip(VariableType const * type, int * address) const;
 
 	void makeObjectsSet(ObjectVector * objects, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address, bool dimensioned) const;
-	void makeObjectsSetArray(ObjectVector * objects, int dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const;
+	void makeObjectsSetArray(ObjectVector * objects, size_t dimensions, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const;
 	void makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names, SourcePosition const & position, VariableType const * type, ObjectExpression * addressBase, int * address) const;
 	void makeObjectsSetPrep(ObjectVector * objects, std::vector<CounterPointer<SourceExpression> > * dimensions, CounterPointer<ObjectExpression> * addressBase, int * address, SourcePosition const & position) const;
 	void makeObjectsSetSkip(VariableType const * type, int * address) const;

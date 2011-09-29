@@ -304,24 +304,25 @@ bigsint SourceTokenASMPLX::string_to_int(std::string const & s, SourcePosition c
 }
 bigreal SourceTokenASMPLX::string_to_real(std::string const & s, SourcePosition const & position)
 {
-	bigreal base(string_to_base(s, position));
+	bigsint basei(string_to_base(s, position));
 
-	if (base == -1) return 0;
+	if (basei == -1) return 0;
 
+	bigreal basef(basei);
 	size_t index(2);
 
 	bigreal fInt(0);
 	for (; index < s.size() && s[index] != '.'; ++index)
 	{
-		fInt *= base;
-		fInt += char_to_int(s[index], base, position);
+		fInt *= basef;
+		fInt += char_to_int(s[index], basei, position);
 	}
 
 	bigreal fFrac(0); ++index;
 	for (size_t indexFrac(s.size()); --indexFrac != index;)
 	{
-		fFrac += char_to_int(s[indexFrac], base, position);
-		fFrac /= base;
+		fFrac += char_to_int(s[indexFrac], basei, position);
+		fFrac /= basef;
 	}
 
 	return fInt + fFrac;

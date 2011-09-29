@@ -40,12 +40,16 @@ template<typename T> void print_debug(std::ostream * const out, T const * const 
 template<typename T> void print_debug(std::ostream * const out, std::vector<T> const & in)
 {
 	*out << "std::vector({";
-	for (typename std::vector<T>::size_type i(0); i < in.size(); ++i)
+	typename std::vector<T>::const_iterator it(in.begin());
+	if (it != in.end())
 	{
-		print_debug(out, in[i]);
+		print_debug(out, *it);
 
-		if (i < in.size()-1)
+		while (++it != in.end())
+		{
 			*out << ", ";
+			print_debug(out, *it);
+		}
 	}
 	*out << "})";
 }
