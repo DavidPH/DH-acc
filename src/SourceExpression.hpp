@@ -35,7 +35,7 @@ class ObjectExpression;
 class ObjectVector;
 class SourceContext;
 class SourceTokenC;
-class VariableType;
+struct VariableType;
 
 
 

@@ -34,7 +34,7 @@
 #include <string>
 #include <vector>
 
-class ObjectCodeSet;
+struct ObjectCodeSet;
 class ObjectVector;
 class SourceTokenC;
 
@@ -143,6 +143,7 @@ public:
 	static ObjectExpression::Pointer get_symbol(std::string const & symbol, SourcePosition const & position);
 	static ExpressionType get_symbol_type(std::string const & symbol, SourcePosition const & position);
 
+	static void iter_function(void (*iter)(ObjectData_Function const &));
 	static void iter_function(void (*iter)(std::ostream *, ObjectData_Function const &), std::ostream * out);
 
 	static void iter_registerarray_map(void (*iter)(std::ostream *, ObjectData_RegisterArray const &), std::ostream * out);

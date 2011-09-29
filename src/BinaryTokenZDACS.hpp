@@ -29,10 +29,10 @@
 #include <stdint.h>
 #include <vector>
 
-class ObjectData_Function;
-class ObjectData_RegisterArray;
-class ObjectData_Script;
-class ObjectData_String;
+struct ObjectData_Function;
+struct ObjectData_RegisterArray;
+struct ObjectData_Script;
+struct ObjectData_String;
 class ObjectExpression;
 class ObjectToken;
 class ObjectVector;
@@ -187,7 +187,7 @@ public:
 	static void write_chunk(std::ostream * out, std::ostringstream * chunkout, char const * chunkname);
 	static void write_function(std::ostream * out, ObjectData_Function const & f);
 	static void write_function_name(std::ostream * out, ObjectData_Function const & f);
-	static void write_function_name_count(std::ostream * out, ObjectData_Function const & f);
+	static void write_function_name_count(ObjectData_Function const & f);
 	static void write_function_name_offset(std::ostream * out, ObjectData_Function const & f);
 	static void write_registerarray(std::ostream * out, ObjectData_RegisterArray const & r);
 	static void write_script(std::ostream * out, ObjectData_Script const & s);

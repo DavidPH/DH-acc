@@ -311,7 +311,7 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 
 		// FNAM - Function Names
 		string_offset = 0;
-		ObjectExpression::iter_function(write_function_name_count, &chunkout);
+		ObjectExpression::iter_function(write_function_name_count);
 
 		if (string_offset)
 			write_32(&chunkout, string_offset/4);
@@ -402,7 +402,7 @@ void BinaryTokenZDACS::write_function_name(std::ostream * out, ObjectData_Functi
 	}
 }
 
-void BinaryTokenZDACS::write_function_name_count(std::ostream * out, ObjectData_Function const & f)
+void BinaryTokenZDACS::write_function_name_count(ObjectData_Function const & f)
 {
 	switch (output_type)
 	{
@@ -524,6 +524,5 @@ void BinaryTokenZDACS::write_string_offset(std::ostream * out, ObjectData_String
 		throw SourceException("unknown output type for string_offset", SourcePosition::none, "BinaryTokenZDACS");
 	}
 }
-
 
 

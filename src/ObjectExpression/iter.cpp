@@ -23,6 +23,11 @@
 
 
 
+void ObjectExpression::iter_function(void (*iter)(ObjectData_Function const &))
+{
+	for (std::map<std::string, ObjectData_Function>::iterator it(_function_table.begin()); it != _function_table.end(); ++it)
+		iter(it->second);
+}
 void ObjectExpression::iter_function(void (*iter)(std::ostream *, ObjectData_Function const &), std::ostream * out)
 {
 	for (std::map<std::string, ObjectData_Function>::iterator it(_function_table.begin()); it != _function_table.end(); ++it)
@@ -43,6 +48,5 @@ void ObjectExpression::iter_string(void (*iter)(std::ostream *, ObjectData_Strin
 	for (std::vector<ObjectData_String>::iterator it(_string_table.begin()); it != _string_table.end(); ++it)
 		iter(out, *it);
 }
-
 
 

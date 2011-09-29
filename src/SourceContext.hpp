@@ -30,7 +30,7 @@
 #include <vector>
 
 class SourceTokenC;
-class VariableType;
+struct VariableType;
 
 
 

@@ -88,7 +88,7 @@ void ObjectExpression::add_function(std::string const & name, std::string const 
 }
 void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, std::string const & library)
 {
-	ObjectData_Function f = {label, "", name, argCount, -1, retCount, varCount, true};
+	ObjectData_Function f = {label, library, name, argCount, -1, retCount, varCount, true};
 	_function_table[name] = f;
 
 	add_symbol(name, ET_INT);
