@@ -118,7 +118,7 @@ void option::print_help(std::ostream * out, int width)
 	optIt_t optEnd(optSet.end());
 
 	std::string group;
-	int padlen;
+	int padlen(0);
 
 	for (optIt_t optIt(optBegin); optIt != optEnd; ++optIt)
 	{

@@ -27,7 +27,7 @@
 
 
 
-SourceVariable::SourceVariable(SourceVariable const & var) : _expr(var._expr), _nameObject(var._nameObject), _nameSource(var._nameSource), _position(var._position), _sc(var._sc), _type(var._type)
+SourceVariable::SourceVariable(SourceVariable const & var) : Super(var), _expr(var._expr), _nameObject(var._nameObject), _nameSource(var._nameSource), _position(var._position), _sc(var._sc), _type(var._type)
 {
 
 }
