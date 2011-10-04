@@ -61,7 +61,7 @@ SourceExpression::Pointer SourceExpression::create_branch_goto(std::string const
 
 
 
-SourceExpression_BranchGoto::SourceExpression_BranchGoto(std::string const & label, SourcePosition const & position) : Super(position), _label(label)
+SourceExpression_BranchGoto::SourceExpression_BranchGoto(std::string const & label, SourcePosition const & position_) : Super(position_), _label(label)
 {
 
 }

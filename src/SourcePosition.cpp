@@ -33,7 +33,7 @@ SourcePosition::SourcePosition() : filename(), line(0)
 {
 
 }
-SourcePosition::SourcePosition(std::string const & filename, long line, long column) : filename(filename), line(line), column(column)
+SourcePosition::SourcePosition(std::string const & filename_, long line_, long column_) : filename(filename_), line(line_), column(column_)
 {
 
 }
@@ -61,6 +61,5 @@ void write_object(std::ostream * out, SourcePosition const & in)
 	write_object(out, in.line);
 	write_object(out, in.column);
 }
-
 
 

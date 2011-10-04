@@ -50,7 +50,7 @@ SourceExpression::Pointer SourceExpression::create_binary_ne(SourceExpression * 
 
 
 
-SourceExpression_BinaryNE::SourceExpression_BinaryNE(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+SourceExpression_BinaryNE::SourceExpression_BinaryNE(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
 
 }

@@ -27,7 +27,7 @@ SourceException::SourceException() : _what(), _where(), _who()
 {
 
 }
-SourceException::SourceException(std::string const & what, SourcePosition const & where, std::string const & who) : _what(what), _where(where), _who(who)
+SourceException::SourceException(std::string const & what_, SourcePosition const & where_, std::string const & who_) : _what(what_), _where(where_), _who(who_)
 {
 
 }

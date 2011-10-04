@@ -29,7 +29,7 @@
 
 
 
-SourceExpression::SourceExpression(SourcePosition const & position) : evaluations(0), position(position)
+SourceExpression::SourceExpression(SourcePosition const & position_) : evaluations(0), position(position_)
 {
 
 }

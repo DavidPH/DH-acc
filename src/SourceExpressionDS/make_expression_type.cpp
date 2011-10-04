@@ -173,10 +173,10 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 	case SourceTokenC::TT_IDENTIFIER:
 		if (in->peek().getData() == "const")
 		{
-			SourceTokenC token(in->get(SourceTokenC::TT_IDENTIFIER));
+			SourceTokenC tokenConst(in->get(SourceTokenC::TT_IDENTIFIER));
 
 			if (!type->constType)
-				throw SourceException("const on const", token.getPosition(), "SourceExpressionDS");
+				throw SourceException("const on const", tokenConst.getPosition(), "SourceExpressionDS");
 
 			type = type->constType;
 

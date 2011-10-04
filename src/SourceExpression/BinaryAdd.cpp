@@ -53,7 +53,7 @@ SourceExpression::Pointer SourceExpression::create_binary_add(SourceExpression *
 
 
 
-SourceExpression_BinaryAdd::SourceExpression_BinaryAdd(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, true, position)
+SourceExpression_BinaryAdd::SourceExpression_BinaryAdd(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, true, position_)
 {
 
 }

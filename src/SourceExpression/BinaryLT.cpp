@@ -50,7 +50,7 @@ SourceExpression::Pointer SourceExpression::create_binary_lt(SourceExpression * 
 
 
 
-SourceExpression_BinaryLT::SourceExpression_BinaryLT(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+SourceExpression_BinaryLT::SourceExpression_BinaryLT(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
 
 }

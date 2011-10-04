@@ -52,7 +52,7 @@ SourceExpression::Pointer SourceExpression::create_unary_reference(SourceExpress
 
 
 
-SourceExpression_UnaryReference::SourceExpression_UnaryReference(SourceExpression * expr, SourcePosition const & position) : Super(expr, position), _type(VariableType::get_pointer(expr->getType()))
+SourceExpression_UnaryReference::SourceExpression_UnaryReference(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, position_), _type(VariableType::get_pointer(expr->getType()))
 {
 
 }

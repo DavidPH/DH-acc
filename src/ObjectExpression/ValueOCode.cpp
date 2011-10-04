@@ -59,7 +59,7 @@ ObjectExpression::Pointer ObjectExpression::create_value_ocode(std::istream * in
 
 
 
-ObjectExpression_ValueOCode::ObjectExpression_ValueOCode(ObjectCodeSet const & value, SourcePosition const & position) : Super(position), _value(value)
+ObjectExpression_ValueOCode::ObjectExpression_ValueOCode(ObjectCodeSet const & value, SourcePosition const & position_) : Super(position_), _value(value)
 {
 
 }
@@ -97,6 +97,5 @@ void ObjectExpression_ValueOCode::writeObject(std::ostream * out) const
 
 	write_object(out, _value);
 }
-
 
 

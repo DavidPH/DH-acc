@@ -25,11 +25,11 @@
 
 
 
-SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr, SourcePosition const & position) : Super(position), expr(expr), _make(false)
+SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr_, SourcePosition const & position_) : Super(position_), expr(expr_), _make(false)
 {
 
 }
-SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr, VariableType const * cast, SourcePosition const & position) : Super(position), expr(expr), _make(true)
+SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr_, VariableType const * cast, SourcePosition const & position_) : Super(position_), expr(expr_), _make(true)
 {
 	if (cast && expr->getType() != cast)
 		this->expr = create_value_cast(expr, cast, position);
@@ -62,6 +62,5 @@ void SourceExpression_Unary::recurse_makeObjectsGet(ObjectVector * objects)
 		objects->setPosition(position);
 	}
 }
-
 
 

@@ -50,7 +50,7 @@ SourceExpression::Pointer SourceExpression::create_binary_ge(SourceExpression * 
 
 
 
-SourceExpression_BinaryGE::SourceExpression_BinaryGE(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+SourceExpression_BinaryGE::SourceExpression_BinaryGE(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
 
 }

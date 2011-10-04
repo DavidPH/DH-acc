@@ -49,11 +49,11 @@ static inline _option_set_type & _option_set()
 
 
 
-option::exception::exception(std::string const & name, std::string const & description) : _what("(--" + name + "): " + description)
+option::exception::exception(std::string const & name_, std::string const & description_) : _what("(--" + name_ + "): " + description_)
 {
 
 }
-option::exception::exception(std::string const & name, std::string const & arg, std::string const & description) : _what("(--" + name + "=" + arg + "): " + description)
+option::exception::exception(std::string const & name_, std::string const & arg, std::string const & description_) : _what("(--" + name_ + "=" + arg + "): " + description_)
 {
 
 }
@@ -69,7 +69,7 @@ char const * option::exception::what() const throw()
 
 
 
-option::option(std::string const & name, std::string const & group, std::string const & description) : description(description), group(group), name(name)
+option::option(std::string const & name_, std::string const & group_, std::string const & description_) : description(description_), group(group_), name(name_)
 {
 	_option_map()[name] = this;
 	_option_set().insert(this);

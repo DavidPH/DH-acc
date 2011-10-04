@@ -61,7 +61,7 @@ ObjectExpression::Pointer ObjectExpression::create_value_symbol(std::istream * i
 
 
 
-ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position) : Super(position), _value(value)
+ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position_) : Super(position_), _value(value)
 {
 
 }
@@ -103,6 +103,5 @@ void ObjectExpression_ValueSymbol::writeObject(std::ostream * out) const
 
 	write_object(out, _value);
 }
-
 
 

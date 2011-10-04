@@ -58,7 +58,7 @@ SourceExpression::Pointer SourceExpression::create_branch_xor(SourceExpression *
 
 
 
-SourceExpression_BranchXOr::SourceExpression_BranchXOr(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position) : Super(exprL, exprR, true, position)
+SourceExpression_BranchXOr::SourceExpression_BranchXOr(SourceExpression * exprL_, SourceExpression * exprR_, SourceContext * context, SourcePosition const & position_) : Super(exprL_, exprR_, true, position_)
 {
 	std::string label(context->makeLabel());
 

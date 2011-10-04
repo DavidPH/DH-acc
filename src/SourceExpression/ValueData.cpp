@@ -56,7 +56,7 @@ SourceExpression::Pointer SourceExpression::create_value_data(VariableType const
 
 
 
-SourceExpression_ValueData::SourceExpression_ValueData(VariableType const * type, bool garbage, SourcePosition const & position) : Super(position), _type(type), _garbage(garbage)
+SourceExpression_ValueData::SourceExpression_ValueData(VariableType const * type, bool garbage, SourcePosition const & position_) : Super(position_), _type(type), _garbage(garbage)
 {
 
 }

@@ -53,7 +53,7 @@ ObjectExpression::Pointer ObjectExpression::create_binary_div(std::istream * in)
 
 
 
-ObjectExpression_BinaryDiv::ObjectExpression_BinaryDiv(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+ObjectExpression_BinaryDiv::ObjectExpression_BinaryDiv(ObjectExpression * exprL_, ObjectExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
 
 }
@@ -88,6 +88,5 @@ void ObjectExpression_BinaryDiv::writeObject(std::ostream * out) const
 
 	Super::writeObject(out);
 }
-
 
 

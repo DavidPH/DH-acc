@@ -25,7 +25,7 @@
 
 
 
-ObjectExpression_Binary::ObjectExpression_Binary(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR)
+ObjectExpression_Binary::ObjectExpression_Binary(ObjectExpression * exprL_, ObjectExpression * exprR_, SourcePosition const & position_) : Super(position_), exprL(exprL_), exprR(exprR_)
 {
 	if (exprL->getType() != exprR->getType())
 		throw SourceException("type mismatch", position, getName());
@@ -65,6 +65,5 @@ void ObjectExpression_Binary::writeObject(std::ostream * out) const
 	write_object(out, exprL);
 	write_object(out, exprR);
 }
-
 
 

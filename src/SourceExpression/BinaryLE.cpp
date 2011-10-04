@@ -50,7 +50,7 @@ SourceExpression::Pointer SourceExpression::create_binary_le(SourceExpression * 
 
 
 
-SourceExpression_BinaryLE::SourceExpression_BinaryLE(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+SourceExpression_BinaryLE::SourceExpression_BinaryLE(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
 
 }

@@ -59,7 +59,7 @@ ObjectExpression::Pointer ObjectExpression::create_value_int(std::istream * in)
 
 
 
-ObjectExpression_ValueInt::ObjectExpression_ValueInt(bigsint value, SourcePosition const & position) : Super(position), _value(value)
+ObjectExpression_ValueInt::ObjectExpression_ValueInt(bigsint value, SourcePosition const & position_) : Super(position_), _value(value)
 {
 
 }
@@ -97,6 +97,5 @@ void ObjectExpression_ValueInt::writeObject(std::ostream * out) const
 
 	write_object(out, _value);
 }
-
 
 

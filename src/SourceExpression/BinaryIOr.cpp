@@ -53,7 +53,7 @@ SourceExpression::Pointer SourceExpression::create_binary_ior(SourceExpression *
 
 
 
-SourceExpression_BinaryIOr::SourceExpression_BinaryIOr(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, false, position)
+SourceExpression_BinaryIOr::SourceExpression_BinaryIOr(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, false, position_)
 {
 
 }

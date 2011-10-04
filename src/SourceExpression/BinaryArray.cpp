@@ -74,7 +74,7 @@ SourceExpression::Pointer SourceExpression::create_binary_array(SourceExpression
 
 
 
-SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, NULL, VariableType::get_vt_int(), position)
+SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, NULL, VariableType::get_vt_int(), position_)
 {
 	if (exprL->getType()->vt != VariableType::VT_ARRAY && exprL->getType()->vt != VariableType::VT_STRING)
 		throw SourceException("expected VT_ARRAY or VT_STRING for exprL got " + (std::string)make_string(exprL->getType()->vt), position, getName());

@@ -53,7 +53,7 @@ SourceExpression::Pointer SourceExpression::create_root_script(VariableType cons
 
 
 
-SourceExpression_RootScript::SourceExpression_RootScript(VariableType const * type, SourcePosition const & position) : Super(position), _type(type)
+SourceExpression_RootScript::SourceExpression_RootScript(VariableType const * type, SourcePosition const & position_) : Super(position_), _type(type)
 {
 
 }

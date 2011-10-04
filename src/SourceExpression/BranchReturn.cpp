@@ -55,7 +55,7 @@ SourceExpression::Pointer SourceExpression::create_branch_return(SourceExpressio
 
 
 
-SourceExpression_BranchReturn::SourceExpression_BranchReturn(SourceExpression * expr, SourceContext * context, SourcePosition const & position) : Super(position), _expr(expr), _type(context->getTypeRoot())
+SourceExpression_BranchReturn::SourceExpression_BranchReturn(SourceExpression * expr, SourceContext * context, SourcePosition const & position_) : Super(position_), _expr(expr), _type(context->getTypeRoot())
 {
 	if (_expr->getType() != context->getReturnType())
 		_expr = SourceExpression::create_value_cast(_expr, context->getReturnType(), position);

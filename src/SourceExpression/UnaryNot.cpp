@@ -50,7 +50,7 @@ SourceExpression::Pointer SourceExpression::create_unary_not(SourceExpression * 
 
 
 
-SourceExpression_UnaryNot::SourceExpression_UnaryNot(SourceExpression * expr, SourcePosition const & position) : Super(expr, NULL, position)
+SourceExpression_UnaryNot::SourceExpression_UnaryNot(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, NULL, position_)
 {
 
 }

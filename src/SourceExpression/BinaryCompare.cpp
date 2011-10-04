@@ -26,13 +26,13 @@
 
 
 
-SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, false, position)
+SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL, exprR, false, position)
 {
 
 }
-SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, bool branchChecked, SourcePosition const & position) : Super(exprL, exprR, VariableType::get_vt_boolsoft(), VariableType::get_vt_boolsoft(), position)
+SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL_, SourceExpression * exprR_, bool branchChecked, SourcePosition const & position_) : Super(exprL_, exprR_, VariableType::get_vt_boolsoft(), VariableType::get_vt_boolsoft(), position_)
 {
-
+	(void)branchChecked; // dummy arg
 }
 
 bool SourceExpression_BinaryCompare::canMakeObject() const

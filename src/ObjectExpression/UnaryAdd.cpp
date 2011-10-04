@@ -53,7 +53,7 @@ ObjectExpression::Pointer ObjectExpression::create_unary_add(std::istream * in)
 
 
 
-ObjectExpression_UnaryAdd::ObjectExpression_UnaryAdd(ObjectExpression * expr, SourcePosition const & position) : Super(expr, position)
+ObjectExpression_UnaryAdd::ObjectExpression_UnaryAdd(ObjectExpression * expr_, SourcePosition const & position_) : Super(expr_, position_)
 {
 
 }
@@ -88,6 +88,5 @@ void ObjectExpression_UnaryAdd::writeObject(std::ostream * out) const
 
 	Super::writeObject(out);
 }
-
 
 

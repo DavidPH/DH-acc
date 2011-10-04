@@ -54,7 +54,7 @@ SourceExpression::Pointer SourceExpression::create_root_out(SourceExpression * e
 
 
 
-SourceExpression_RootOut::SourceExpression_RootOut(SourceExpression * expr, SourcePosition const & position) : Super(position), _expr(expr)
+SourceExpression_RootOut::SourceExpression_RootOut(SourceExpression * expr, SourcePosition const & position_) : Super(position_), _expr(expr)
 {
 
 }

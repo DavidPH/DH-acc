@@ -60,7 +60,7 @@ SourceExpression::Pointer SourceExpression::create_value_block(std::vector<Sourc
 
 
 
-SourceExpression_ValueBlock::SourceExpression_ValueBlock(std::vector<SourceExpression::Pointer> const & expressions, SourcePosition const & position) : Super(position), _expressions(expressions)
+SourceExpression_ValueBlock::SourceExpression_ValueBlock(std::vector<SourceExpression::Pointer> const & expressions, SourcePosition const & position_) : Super(position_), _expressions(expressions)
 {
 	std::vector<VariableType const *> types(_expressions.size());
 

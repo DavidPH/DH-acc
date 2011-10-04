@@ -138,35 +138,35 @@ private:
 
 
 
-template<typename T> option_auto<T>::option_auto(std::string const & name, std::string const & group, std::string const & description, option_t * data) : option(name, group, description), data_p(data), handler(handler_default)
+template<typename T> option_auto<T>::option_auto(std::string const & name_, std::string const & group_, std::string const & description_, option_t * data) : option(name_, group_, description_), data_p(data), handler(handler_default)
 {
 
 }
-template<typename T> option_auto<T>::option_auto(std::string const & name, std::string const & group, std::string const & description, option_t * data, handler_t handler) : option(name, group, description), data_p(data), handler(handler)
+template<typename T> option_auto<T>::option_auto(std::string const & name_, std::string const & group_, std::string const & description_, option_t * data, handler_t handler_) : option(name_, group_, description_), data_p(data), handler(handler_)
 {
 
 }
 
-template<typename T> bool option_auto<T>::handle(std::string const & name, std::string const & arg, bool barg)
+template<typename T> bool option_auto<T>::handle(std::string const & name_, std::string const & arg, bool barg)
 {
-	return handler(name, arg, barg, data_p);
+	return handler(name_, arg, barg, data_p);
 }
 
 
 
-template<typename T> option_data<T>::option_data(std::string const & name, std::string const & group, std::string const & description) : option_auto<T>(name, group, description, &data)
+template<typename T> option_data<T>::option_data(std::string const & name_, std::string const & group_, std::string const & description_) : option_auto<T>(name_, group_, description_, &data)
 {
 
 }
-template<typename T> option_data<T>::option_data(std::string const & name, std::string const & group, std::string const & description, handler_t handler) : option_auto<T>(name, group, description, &data, handler)
+template<typename T> option_data<T>::option_data(std::string const & name_, std::string const & group_, std::string const & description_, handler_t handler) : option_auto<T>(name_, group_, description_, &data, handler)
 {
 
 }
-template<typename T> option_data<T>::option_data(std::string const & name, std::string const & group, std::string const & description, option_t const & data) : option_auto<T>(name, group, description, &this->data), data(data)
+template<typename T> option_data<T>::option_data(std::string const & name_, std::string const & group_, std::string const & description_, option_t const & data_) : option_auto<T>(name_, group_, description_, &data), data(data_)
 {
 
 }
-template<typename T> option_data<T>::option_data(std::string const & name, std::string const & group, std::string const & description, option_t const & data, handler_t handler) : option_auto<T>(name, group, description, &this->data, handler), data(data)
+template<typename T> option_data<T>::option_data(std::string const & name_, std::string const & group_, std::string const & description_, option_t const & data_, handler_t handler) : option_auto<T>(name_, group_, description_, &data, handler), data(data_)
 {
 
 }

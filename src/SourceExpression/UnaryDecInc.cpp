@@ -71,7 +71,7 @@ SourceExpression::Pointer SourceExpression::create_unary_inc_suf(SourceExpressio
 
 
 
-SourceExpression_UnaryDecInc::SourceExpression_UnaryDecInc(SourceExpression * expr, bool inc, bool suf, SourcePosition const & position) : Super(expr, NULL, position), _inc(inc), _suf(suf)
+SourceExpression_UnaryDecInc::SourceExpression_UnaryDecInc(SourceExpression * expr_, bool inc, bool suf, SourcePosition const & position_) : Super(expr_, NULL, position_), _inc(inc), _suf(suf)
 {
 
 }

@@ -64,7 +64,7 @@ SourceExpression::Pointer SourceExpression::create_branch_while(SourceExpression
 
 
 
-SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, bool postCondition, SourcePosition const & position) : Super(position), _exprCondition(exprCondition), _exprWhile(exprWhile), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position)), _labelLoop(context->makeLabel() + "_loop"), _postCondition(postCondition)
+SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, bool postCondition, SourcePosition const & position_) : Super(position_), _exprCondition(exprCondition), _exprWhile(exprWhile), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position)), _labelLoop(context->makeLabel() + "_loop"), _postCondition(postCondition)
 {
 	if (_exprCondition->getType()->vt != VariableType::VT_BOOLSOFT)
 		_exprCondition = create_value_cast(_exprCondition, VariableType::get_vt_boolsoft(), position);

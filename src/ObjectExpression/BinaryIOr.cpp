@@ -52,7 +52,7 @@ ObjectExpression::Pointer ObjectExpression::create_binary_ior(std::istream * in)
 
 
 
-ObjectExpression_BinaryIOr::ObjectExpression_BinaryIOr(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+ObjectExpression_BinaryIOr::ObjectExpression_BinaryIOr(ObjectExpression * exprL_, ObjectExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
 
 }
@@ -81,6 +81,5 @@ void ObjectExpression_BinaryIOr::writeObject(std::ostream * out) const
 
 	Super::writeObject(out);
 }
-
 
 

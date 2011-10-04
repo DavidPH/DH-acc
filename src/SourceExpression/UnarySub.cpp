@@ -55,7 +55,7 @@ SourceExpression::Pointer SourceExpression::create_unary_sub(SourceExpression * 
 
 
 
-SourceExpression_UnarySub::SourceExpression_UnarySub(SourceExpression * expr, SourcePosition const & position) : Super(expr, NULL, position)
+SourceExpression_UnarySub::SourceExpression_UnarySub(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, NULL, position_)
 {
 
 }

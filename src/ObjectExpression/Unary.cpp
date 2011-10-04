@@ -25,7 +25,7 @@
 
 
 
-ObjectExpression_Unary::ObjectExpression_Unary(ObjectExpression * expr, SourcePosition const & position) : Super(position), expr(expr)
+ObjectExpression_Unary::ObjectExpression_Unary(ObjectExpression * expr_, SourcePosition const & position_) : Super(position_), expr(expr_)
 {
 
 }
@@ -56,6 +56,5 @@ void ObjectExpression_Unary::writeObject(std::ostream * out) const
 
 	write_object(out, expr);
 }
-
 
 

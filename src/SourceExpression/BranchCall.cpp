@@ -59,7 +59,7 @@ SourceExpression::Pointer SourceExpression::create_branch_call(SourceExpression 
 
 
 
-SourceExpression_BranchCall::SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position) : Super(position), _args(args), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
+SourceExpression_BranchCall::SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position_) : Super(position_), _args(args), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
 {
 	VariableType const * type(_expr->getType());
 

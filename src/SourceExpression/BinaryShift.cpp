@@ -57,7 +57,7 @@ SourceExpression::Pointer SourceExpression::create_binary_shiftr(SourceExpressio
 
 
 
-SourceExpression_BinaryShift::SourceExpression_BinaryShift(SourceExpression * exprL, SourceExpression * exprR, bool right, SourcePosition const & position) : Super(exprL, exprR, VariableType::get_vt_int(), VariableType::get_vt_int(), false, position), _right(right)
+SourceExpression_BinaryShift::SourceExpression_BinaryShift(SourceExpression * exprL_, SourceExpression * exprR_, bool right, SourcePosition const & position_) : Super(exprL_, exprR_, VariableType::get_vt_int(), VariableType::get_vt_int(), false, position_), _right(right)
 {
 
 }

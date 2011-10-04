@@ -67,7 +67,7 @@ SourceExpression::Pointer SourceExpression::create_branch_if(SourceExpression * 
 
 
 
-SourceExpression_BranchIf::SourceExpression_BranchIf(SourceExpression * exprCondition, SourceExpression * exprIf, SourceExpression * exprElse, SourceContext * context, SourcePosition const & position) : Super(position), _exprCondition(exprCondition), _exprIf(exprIf), _exprElse(exprElse)
+SourceExpression_BranchIf::SourceExpression_BranchIf(SourceExpression * exprCondition, SourceExpression * exprIf, SourceExpression * exprElse, SourceContext * context, SourcePosition const & position_) : Super(position_), _exprCondition(exprCondition), _exprIf(exprIf), _exprElse(exprElse)
 {
 	std::string label(context->makeLabel());
 

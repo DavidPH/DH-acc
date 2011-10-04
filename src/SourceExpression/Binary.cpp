@@ -28,19 +28,19 @@
 
 
 
-SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(2)
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(position_), exprL(exprL_), exprR(exprR_), _arithmetic(2)
 {
 	doCast();
 }
-SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, bool arithmetic, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(arithmetic)
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL_, SourceExpression * exprR_, bool arithmetic, SourcePosition const & position_) : Super(position_), exprL(exprL_), exprR(exprR_), _arithmetic(arithmetic)
 {
 	doCast();
 }
-SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, VariableType const * castL, VariableType const * castR, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(2)
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL_, SourceExpression * exprR_, VariableType const * castL, VariableType const * castR, SourcePosition const & position_) : Super(position_), exprL(exprL_), exprR(exprR_), _arithmetic(2)
 {
 	doCast(castL, castR);
 }
-SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, VariableType const * castL, VariableType const * castR, bool arithmetic, SourcePosition const & position) : Super(position), exprL(exprL), exprR(exprR), _arithmetic(arithmetic)
+SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL_, SourceExpression * exprR_, VariableType const * castL, VariableType const * castR, bool arithmetic, SourcePosition const & position_) : Super(position_), exprL(exprL_), exprR(exprR_), _arithmetic(arithmetic)
 {
 	doCast(castL, castR);
 }

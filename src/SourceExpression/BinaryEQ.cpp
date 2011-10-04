@@ -50,7 +50,7 @@ SourceExpression::Pointer SourceExpression::create_binary_eq(SourceExpression * 
 
 
 
-SourceExpression_BinaryEQ::SourceExpression_BinaryEQ(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position) : Super(exprL, exprR, position)
+SourceExpression_BinaryEQ::SourceExpression_BinaryEQ(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
 
 }

@@ -55,7 +55,7 @@ SourceExpression::Pointer SourceExpression::create_value_cast(SourceExpression *
 
 
 
-SourceExpression_ValueCast::SourceExpression_ValueCast(SourceExpression * expr, VariableType const * type, SourcePosition const & position) : Super(position), _expr(expr), _type(type)
+SourceExpression_ValueCast::SourceExpression_ValueCast(SourceExpression * expr, VariableType const * type, SourcePosition const & position_) : Super(position_), _expr(expr), _type(type)
 {
 
 }

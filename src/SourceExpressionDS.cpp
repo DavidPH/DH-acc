@@ -32,7 +32,7 @@ std::map<std::string, SourceExpressionDS::expression_single_handler> SourceExpre
 
 
 
-SourceExpressionDS::SourceExpressionDS(SourcePosition const & position) : Super(position)
+SourceExpressionDS::SourceExpressionDS(SourcePosition const & position_) : Super(position_)
 {
 
 }

@@ -54,7 +54,7 @@ SourceExpression::Pointer SourceExpression::create_root_delay(SourceExpression *
 
 
 
-SourceExpression_RootDelay::SourceExpression_RootDelay(SourceExpression * expr, SourceContext * context, SourcePosition const & position) : Super(position), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
+SourceExpression_RootDelay::SourceExpression_RootDelay(SourceExpression * expr, SourceContext * context, SourcePosition const & position_) : Super(position_), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
 {
 	if (_expr->getType()->vt != VariableType::VT_INT)
 		_expr = create_value_cast(_expr, VariableType::get_vt_int(), position);

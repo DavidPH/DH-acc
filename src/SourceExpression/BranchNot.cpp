@@ -50,7 +50,7 @@ SourceExpression::Pointer SourceExpression::create_branch_not(SourceExpression *
 
 
 
-SourceExpression_BranchNot::SourceExpression_BranchNot(SourceExpression * expr, SourcePosition const & position) : Super(expr, VariableType::get_vt_boolsoft(), position)
+SourceExpression_BranchNot::SourceExpression_BranchNot(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, VariableType::get_vt_boolsoft(), position_)
 {
 
 }

@@ -65,7 +65,7 @@ option_data<bool> option_string_fold("string-fold", "optimization", "Removes dup
 
 
 
-ObjectExpression::ObjectExpression(SourcePosition const & position) : position(position)
+ObjectExpression::ObjectExpression(SourcePosition const & position_) : position(position_)
 {
 
 }
