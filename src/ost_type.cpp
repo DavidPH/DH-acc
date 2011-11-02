@@ -62,6 +62,8 @@ template<> TargetType option_auto<TargetType>::parse(std::string const & name, s
 {
 	if (arg == "Hexen")
 		return TARGET_Hexen;
+	else if (arg == "HexPP")
+		return TARGET_HexPP;
 	else if (arg == "ZDoom")
 		return TARGET_ZDoom;
 	else

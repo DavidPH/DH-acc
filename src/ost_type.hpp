@@ -46,6 +46,7 @@ enum SourceType
 enum TargetType
 {
 	TARGET_Hexen,
+	TARGET_HexPP,
 	TARGET_ZDoom,
 
 	TARGET_UNKNOWN

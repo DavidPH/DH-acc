@@ -19,6 +19,7 @@
 ** Program start point.
 */
 
+#include "BinaryTokenPPACS.hpp"
 #include "BinaryTokenZDACS.hpp"
 #include "ObjectExpression.hpp"
 #include "ObjectToken.hpp"
@@ -139,6 +140,7 @@ void read_source(std::string const & name, SourceType type, ObjectVector * objec
 
 static inline void _init(int argc, char const * const * argv)
 {
+	BinaryTokenPPACS::init();
 	BinaryTokenZDACS::init();
 	SourceExpressionDS::init();
 
@@ -196,6 +198,7 @@ static inline int _main()
 	if (output_type == OUTPUT_UNKNOWN) switch (target_type)
 	{
 	case TARGET_Hexen: output_type = OUTPUT_ACS0; break;
+	case TARGET_HexPP: output_type = OUTPUT_ACS0; break;
 	case TARGET_ZDoom: output_type = OUTPUT_ACSE; break;
 	case TARGET_UNKNOWN: break;
 	}
@@ -205,6 +208,14 @@ static inline int _main()
 
 	switch (target_type)
 	{
+	case TARGET_HexPP:
+	{
+		std::vector<BinaryTokenPPACS> instructions;
+		BinaryTokenPPACS::make_tokens(objects, &instructions);
+		BinaryTokenPPACS::write_all(&ofs, instructions);
+	}
+		break;
+
 	case TARGET_ZDoom:
 	{
 		std::vector<BinaryTokenZDACS> instructions;
