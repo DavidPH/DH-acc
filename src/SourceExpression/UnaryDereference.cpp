@@ -23,6 +23,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../ost_type.hpp"
 #include "../VariableType.hpp"
 
 
@@ -138,7 +139,8 @@ void SourceExpression_UnaryDereference::virtual_makeObjectsGet(ObjectVector * ob
 	{
 		makeObjectsAddress(objects);
 
-		if (getType()->size(position) == 1)
+		// TODO: Similar optimization for Hex++.
+		if (target_type != TARGET_HexPP && getType()->size(position) == 1)
 		{
 			objects->addToken(OCODE_PUSHGLOBALARRAY, objects->getValue(0));
 		}
@@ -165,7 +167,8 @@ void SourceExpression_UnaryDereference::virtual_makeObjectsSet(ObjectVector * ob
 	{
 		makeObjectsAddress(objects);
 
-		if (getType()->size(position) == 1)
+		// TODO: Similar optimization for Hex++.
+		if (target_type != TARGET_HexPP && getType()->size(position) == 1)
 		{
 			objects->addToken(OCODE_SWAP);
 			objects->addToken(OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));

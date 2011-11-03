@@ -67,6 +67,11 @@ void BinaryTokenPPACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN_ARGS1(BCODE_##CODE, _arg_counts[BCODE_##CODE]);\
 		break
 
+	#define CASE_REMAP(OCODE, BCODE)\
+	case OCODE_##OCODE:\
+		PUSH_TOKEN_ARGS1(BCODE_##BCODE, _arg_counts[BCODE_##BCODE]);\
+		break
+
 	std::vector<ObjectExpression::Pointer> args;
 
 	SourcePosition const & position(object.getPosition());
@@ -137,9 +142,39 @@ void BinaryTokenPPACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	CASE_DIRECTMAP_ACS(THING_COUNT_IMM);
 	CASE_DIRECTMAP_ACS(TIMER);
 
+	CASE_REMAP(ASSIGNSTACKVAR,  SET_AUTO_VAR);
+	CASE_REMAP(ASSIGNSTATICVAR, SET_STATIC_VAR);
+
+	CASE_REMAP(PUSHSTACKADDRESS, GET_AUTO_ADDRESS);
+	CASE_REMAP(PUSHSTACKVAR,     GET_AUTO_VAR);
+	CASE_REMAP(PUSHSTATICVAR,    GET_STATIC_VAR);
+
+	case OCODE_ADDSTACK_IMM:
+		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
+		PUSH_TOKEN(BCODE_ADD_AUTO_ADDRESS);
+		break;
+
+	case OCODE_SUBSTACK_IMM:
+		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
+		PUSH_TOKEN(BCODE_SUB_AUTO_ADDRESS);
+		break;
+
+	case OCODE_ASSIGNPOINTER:
+		args.push_back(ObjectExpression::create_value_int(1, SourcePosition::none));
+		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
+		PUSH_TOKEN_ARGS1(BCODE_SET_POINTER_VAR, 1);
+		break;
+
+	case OCODE_PUSHPOINTER:
+		args.push_back(ObjectExpression::create_value_int(1, SourcePosition::none));
+		PUSH_TOKEN(BCODE_PUSHWORLDVAR);
+		PUSH_TOKEN_ARGS1(BCODE_GET_POINTER_VAR, 1);
+		break;
+
 	case OCODE_LOGICALXOR:
 	case OCODE_NONE:
-		throw SourceException("unknown OCODE", position, "BinaryTokenPPACS");
+	default:
+		throw SourceException("unknown OCODE: " + (std::string)make_string(object.getCode()), position, "BinaryTokenPPACS");
 	}
 
 	#undef CASE_DIRECTMAP

@@ -22,6 +22,7 @@
 #include "../SourceVariable.hpp"
 
 #include "../ObjectExpression.hpp"
+#include "../ost_type.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
 
@@ -116,11 +117,13 @@ ObjectExpression::Pointer SourceVariable::makeObjectAddress(SourcePosition const
 		throw SourceException("makeObjectAddress on register", position, "SourceVariable");
 
 	case SC_STATIC:
-		return ObjectExpression::create_binary_add(ObjectExpression::create_value_symbol(_nameObject, position), ObjectExpression::static_offset, position);
+		if (target_type == TARGET_HexPP)
+			return ObjectExpression::create_value_symbol(_nameObject, position);
+		else
+			return ObjectExpression::create_binary_add(ObjectExpression::create_value_symbol(_nameObject, position), ObjectExpression::static_offset, position);
 	}
 
 	throw SourceException("makeObjectAddress", _position, "SourceVariable");
 }
-
 
 
