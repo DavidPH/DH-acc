@@ -281,6 +281,16 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_BRANCHTABLE);
 		break;
 
+	case OCODE_GET_POINTER_VAR:
+		if (object.getArg(0)->resolveInt())
+		{
+			PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
+			PUSH_TOKEN(BCODE_ADD);
+		}
+		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
+		PUSH_TOKEN(BCODE_PUSHGLOBALARRAY);
+		break;
+
 	pusharray_case:
 		PUSH_TOKEN_ARGS2(BCODE_PUSHNUMBER, 1, 2);
 		args.push_back(ObjectExpression::create_value_int(1, SourcePosition::none));
@@ -355,6 +365,17 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	case OCODE_PUSHWORLDARRAY2:
 		bcode = BCODE_PUSHWORLDARRAY;
 		goto pusharray_case;
+
+	case OCODE_SET_POINTER_VAR:
+		if (object.getArg(0)->resolveInt())
+		{
+			PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);
+			PUSH_TOKEN(BCODE_ADD);
+		}
+		PUSH_TOKEN(BCODE_SWAP);
+		args.push_back(ObjectExpression::create_value_int(0, SourcePosition::none));
+		PUSH_TOKEN(BCODE_ASSIGNGLOBALARRAY);
+		break;
 
 	case OCODE_SUBSTACK_IMM:
 		PUSH_TOKEN_ARGS1(BCODE_PUSHNUMBER, 1);

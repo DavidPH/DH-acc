@@ -178,6 +178,10 @@ _ocode_init_s::_ocode_init_s()
 	DO_INIT(PUSHWORLDARRAY2,    2);
 	DO_INIT(SUBSTACK_IMM,       1);
 
+	DO_INIT(GET_POINTER_VAR, 1);
+
+	DO_INIT(SET_POINTER_VAR, 1);
+
 	DO_INIT(NONE, 0);
 
 	#undef DO_INIT

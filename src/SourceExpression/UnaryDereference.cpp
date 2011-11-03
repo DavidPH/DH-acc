@@ -139,10 +139,9 @@ void SourceExpression_UnaryDereference::virtual_makeObjectsGet(ObjectVector * ob
 	{
 		makeObjectsAddress(objects);
 
-		// TODO: Similar optimization for Hex++.
-		if (target_type != TARGET_HexPP && getType()->size(position) == 1)
+		if (getType()->size(position) == 1)
 		{
-			objects->addToken(OCODE_PUSHGLOBALARRAY, objects->getValue(0));
+			objects->addToken(OCODE_GET_POINTER_VAR, objects->getValue(0));
 		}
 		else
 		{
@@ -167,11 +166,9 @@ void SourceExpression_UnaryDereference::virtual_makeObjectsSet(ObjectVector * ob
 	{
 		makeObjectsAddress(objects);
 
-		// TODO: Similar optimization for Hex++.
-		if (target_type != TARGET_HexPP && getType()->size(position) == 1)
+		if (getType()->size(position) == 1)
 		{
-			objects->addToken(OCODE_SWAP);
-			objects->addToken(OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
+			objects->addToken(OCODE_SET_POINTER_VAR, objects->getValue(0));
 		}
 		else
 		{

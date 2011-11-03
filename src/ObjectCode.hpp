@@ -168,6 +168,12 @@ enum ObjectCode
 	OCODE_PUSHWORLDARRAY2,
 	OCODE_SUBSTACK_IMM,
 
+	/* a:offset s:addr->value */
+	OCODE_GET_POINTER_VAR,
+
+	/* a:offset s:addr,value */
+	OCODE_SET_POINTER_VAR,
+
 	OCODE_NONE
 };
 
