@@ -26,7 +26,7 @@
 
 
 
-SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL, exprR, false, position)
+SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, false, position_)
 {
 
 }
