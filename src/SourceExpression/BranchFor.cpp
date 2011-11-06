@@ -47,6 +47,7 @@ private:
 	SourceExpression::Pointer _exprLoop;
 
 	std::string _labelCond;
+	std::string _labelLoop;
 
 	std::string _labelBreak;
 	std::string _labelContinue;
@@ -63,7 +64,9 @@ SourceExpression::Pointer SourceExpression::create_branch_for(SourceExpression *
 
 SourceExpression_BranchFor::SourceExpression_BranchFor(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position_) : Super(position_), _exprInit(exprInit), _exprCond(exprCond), _exprIter(exprIter), _exprLoop(exprLoop), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position))
 {
-	_labelCond = context->makeLabel() + "_cond";
+	std::string label(context->makeLabel());
+	_labelCond = label + "_cond";
+	_labelLoop = label + "_loop";
 
 	if (_exprInit->getType()->vt != VariableType::VT_VOID)
 		_exprInit = create_value_cast(_exprInit, VariableType::get_vt_void(), position);
@@ -112,18 +115,19 @@ void SourceExpression_BranchFor::virtual_makeObjectsGet(ObjectVector * objects)
 	Super::recurse_makeObjectsGet(objects);
 
 	_exprInit->makeObjectsGet(objects);
-
-	objects->addLabel(_labelCond);
-	_exprCond->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_labelBreak));
+	objects->addToken(OCODE_BRANCH_IMM, objects->getValue(_labelCond));
 
+	objects->addLabel(_labelLoop);
 	_exprLoop->makeObjectsGet(objects);
 
 	objects->addLabel(_labelContinue);
 	_exprIter->makeObjectsGet(objects);
+
+	objects->addLabel(_labelCond);
+	_exprCond->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCH_IMM, objects->getValue(_labelCond));
+	objects->addToken(OCODE_BRANCHNOTZERO, objects->getValue(_labelLoop));
 
 	objects->addLabel(_labelBreak);
 }
