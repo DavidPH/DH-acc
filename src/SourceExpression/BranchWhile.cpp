@@ -95,7 +95,7 @@ void SourceExpression_BranchWhile::virtual_makeObjectsGet(ObjectVector * objects
 	Super::recurse_makeObjectsGet(objects);
 
 	if (!_postCondition)
-		objects->addToken(OCODE_BRANCH, objects->getValue(_labelContinue));
+		objects->addToken(OCODE_BRANCH_IMM, objects->getValue(_labelContinue));
 
 	objects->addLabel(_labelLoop);
 	_exprWhile->makeObjectsGet(objects);

@@ -52,7 +52,7 @@ _ocode_init_s::_ocode_init_s()
 	DO_INIT(ASSIGNSCRIPTVAR,     1);
 	DO_INIT(ASSIGNWORLDVAR,      1);
 	DO_INIT(BEGINPRINT,          0);
-	DO_INIT(BRANCH,              1);
+	DO_INIT(BRANCH_IMM,          1);
 	DO_INIT(BRANCHCASE,          2);
 	DO_INIT(BRANCHNOTZERO,       1);
 	DO_INIT(BRANCHZERO,          1);
@@ -177,6 +177,8 @@ _ocode_init_s::_ocode_init_s()
 	DO_INIT(PUSHSTATICVAR,      1);
 	DO_INIT(PUSHWORLDARRAY2,    2);
 	DO_INIT(SUBSTACK_IMM,       1);
+
+	DO_INIT(BRANCH, 0);
 
 	DO_INIT(GET_POINTER_VAR, 1);
 

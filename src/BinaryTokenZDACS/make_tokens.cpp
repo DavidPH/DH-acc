@@ -89,7 +89,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	CASE_DIRECTMAP(ASSIGNSCRIPTVAR);
 	CASE_DIRECTMAP(ASSIGNWORLDVAR);
 	CASE_DIRECTMAP(BEGINPRINT);
-	CASE_DIRECTMAP(BRANCH);
+	CASE_DIRECTMAP(BRANCH_IMM);
 	CASE_DIRECTMAP(BRANCHCASE);
 	CASE_DIRECTMAP(BRANCHNOTZERO);
 	CASE_DIRECTMAP(BRANCHZERO);
@@ -383,6 +383,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_SUBWORLDVAR);
 		break;
 
+	case OCODE_BRANCH:
 	case OCODE_LOGICALXOR:
 	case OCODE_NONE:
 		throw SourceException("unknown OCODE", position, "BinaryTokenZDACS");

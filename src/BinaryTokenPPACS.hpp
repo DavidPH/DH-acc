@@ -75,7 +75,7 @@ public:
 		BCODE_PUSHWORLDVAR       =  30,
 		BCODE_ADDWORLDVAR        =  33,
 		BCODE_SUBWORLDVAR        =  36,
-		BCODE_BRANCH             =  52,
+		BCODE_BRANCH_IMM         =  52,
 		BCODE_BRANCHNOTZERO      =  53,
 		BCODE_DROP               =  54,
 		BCODE_DELAY              =  55,
@@ -111,6 +111,7 @@ public:
 		BCODE_GET_AUTO_ADDRESS   = 108,
 		BCODE_ADD_AUTO_ADDRESS   = 109,
 		BCODE_SUB_AUTO_ADDRESS   = 110,
+		BCODE_BRANCH             = 111,
 
 		BCODE_NONE
 	};

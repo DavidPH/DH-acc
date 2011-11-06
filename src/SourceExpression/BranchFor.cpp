@@ -123,7 +123,7 @@ void SourceExpression_BranchFor::virtual_makeObjectsGet(ObjectVector * objects)
 	objects->addLabel(_labelContinue);
 	_exprIter->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCH, objects->getValue(_labelCond));
+	objects->addToken(OCODE_BRANCH_IMM, objects->getValue(_labelCond));
 
 	objects->addLabel(_labelBreak);
 }

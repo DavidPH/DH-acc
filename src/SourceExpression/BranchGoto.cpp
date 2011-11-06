@@ -81,7 +81,7 @@ void SourceExpression_BranchGoto::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	objects->addToken(OCODE_BRANCH, objects->getValue(_label));
+	objects->addToken(OCODE_BRANCH_IMM, objects->getValue(_label));
 }
 
 

@@ -84,7 +84,7 @@ void SourceExpression_BranchIOr::virtual_makeObjectsGet(ObjectVector * objects)
 	objects->addToken(OCODE_BRANCHNOTZERO, objects->getValue(_label1));
 
 	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(0));
-	objects->addToken(OCODE_BRANCH, objects->getValue(_labelEnd));
+	objects->addToken(OCODE_BRANCH_IMM, objects->getValue(_labelEnd));
 
 	objects->addLabel(_label1);
 	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(1));
