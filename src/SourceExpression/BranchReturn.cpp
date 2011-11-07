@@ -23,6 +23,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
@@ -80,8 +81,18 @@ void SourceExpression_BranchReturn::virtual_makeObjectsGet(ObjectVector * object
 
 	objects->setPosition(position);
 
-	for (int i(1); i < _expr->getType()->size(position); ++i)
-		objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(-i));
+	bigsint retnSize(_expr->getType()->size(position));
+
+	if (target_type == TARGET_HexPP)
+	{
+		for (bigsint i(1); i <= retnSize; ++i)
+			objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(-i));
+	}
+	else
+	{
+		for (bigsint i(1); i < retnSize; ++i)
+			objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(-i));
+	}
 
 	switch (_type)
 	{
@@ -90,7 +101,9 @@ void SourceExpression_BranchReturn::virtual_makeObjectsGet(ObjectVector * object
 		break;
 
 	case SourceContext::CT_FUNCTION:
-		if (_expr->getType()->size(position) == 0)
+		if (target_type == TARGET_HexPP)
+			objects->addToken(OCODE_BRANCH);
+		else if (retnSize == 0)
 			objects->addToken(OCODE_RETURNZDACSVOID);
 		else
 			objects->addToken(OCODE_RETURNZDACS);
@@ -98,7 +111,7 @@ void SourceExpression_BranchReturn::virtual_makeObjectsGet(ObjectVector * object
 		break;
 
 	case SourceContext::CT_SCRIPT:
-		if (_expr->getType()->size(position) != 0)
+		if (retnSize != 0)
 			objects->addToken(OCODE_SETRESULTVALUE);
 
 		objects->addToken(OCODE_TERMINATE);

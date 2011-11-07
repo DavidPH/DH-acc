@@ -22,6 +22,7 @@
 #include "../SourceExpressionDS.hpp"
 
 #include "../ObjectExpression.hpp"
+#include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
@@ -31,6 +32,14 @@
 
 SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
+	// functionArgClass
+	SourceVariable::StorageClass functionArgClass;
+
+	if (target_type == TARGET_HexPP)
+		functionArgClass = SourceVariable::SC_AUTO;
+	else
+		functionArgClass = SourceVariable::SC_REGISTER;
+
 	// functionContext
 	SourceContext functionContext(context, SourceContext::CT_FUNCTION);
 
@@ -48,14 +57,18 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	std::vector<std::string> functionArgNames;
 	int functionArgCount;
 	VariableType const * functionReturn;
-	make_expression_arglist(in, blocks, context, &functionArgTypes, &functionArgNames, &functionArgCount, &functionContext, &functionReturn);
+	make_expression_arglist(in, blocks, context, &functionArgTypes, &functionArgNames, &functionArgCount, &functionContext, &functionReturn, functionArgClass);
 
 	// functionVarType
 	VariableType const * functionVarType(VariableType::get_function(functionReturn, functionArgTypes));
 
 	// functionVariable
 	// Before functionExpression to enable recursion.
-	SourceVariable::Pointer functionVariable(SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition()));
+	SourceVariable::Pointer functionVariable;
+	if (target_type == TARGET_HexPP)
+		functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionLabel, token.getPosition());
+	else
+		functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition());
 	context->addVariable(functionVariable);
 
 	// functionExpression
@@ -65,7 +78,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	blocks->push_back(create_branch_return(create_value_data(functionReturn, true, token.getPosition()), &functionContext, token.getPosition()));
 
 	// functionVarCount
-	int functionVarCount(functionContext.getLimit(SourceVariable::SC_REGISTER));
+	int functionVarCount(functionContext.getLimit(functionArgClass));
 
 	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size(token.getPosition()));
 

@@ -23,49 +23,122 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../ost_type.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
 
 
 
-void SourceExpression::make_objects_call_function(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position)
+void SourceExpression::make_objects_call_function(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, std::string const & labelReturn, SourcePosition const & position)
 {
 	if (args.size() != type->types.size())
-		throw SourceException("incorrect arg count to call function", position, "SourceExpressionDS");
+		throw SourceException("incorrect arg count to call function", position, "SourceExpression");
 
 	for (size_t i(0); i < args.size(); ++i)
 	{
 		if (args[i]->getType() != type->types[i])
-			throw SourceException("incorrect arg type to call function", args[i]->position, "SourceExpressionDS");
+			throw SourceException("incorrect arg type to call function", args[i]->position, "SourceExpression");
 
 		args[i]->makeObjectsGet(objects);
 	}
 
 	objects->setPosition(position);
 
+	// Determine which OCODE to use.
 	ObjectCode ocode;
-	ObjectExpression::Pointer ofunc(data);
-	ObjectExpression::Pointer oretn;
-
-	if (type->callType->vt == VariableType::VT_VOID)
+	if (target_type == TARGET_HexPP)
+		ocode = OCODE_BRANCH_IMM;
+	else if (type->callType->vt == VariableType::VT_VOID)
 		ocode = OCODE_CALLZDACSDISCARD;
 	else
 		ocode = OCODE_CALLZDACS;
 
-	if (type->callType->size(position) > 1)
-		oretn = objects->getValue(type->callType->size(position) - 1);
+	// Determine how many bytes of the return to handle.
+	bigsint retnSize(type->callType->size(position));
+	// ZDoom handles one of the return bytes for us.
+	if (target_type == TARGET_ZDoom && retnSize >= 1)
+		--retnSize;
 
-	objects->addToken(OCODE_ADDSTACK_IMM, stack);
-	if (oretn) objects->addToken(OCODE_ADDSTACK_IMM, oretn);
-	objects->addToken(ocode, ofunc);
-	if (oretn)
+	ObjectExpression::Pointer ostack(objects->getValueAdd(stack, retnSize));
+
+	// Advance the stack-pointer.
+	objects->addToken(OCODE_ADDSTACK_IMM, ostack);
+
+	// For Hex++...
+	if (target_type == TARGET_HexPP)
 	{
-		for (int i(-type->callType->size(position)); ++i;)
-			objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
+		// ... Determine how many bytes of the call to handle.
+		bigsint callSize(type->sizeCall(position));
 
-		objects->addToken(OCODE_SUBSTACK_IMM, oretn);
+		// ... Place args in auto vars.
+		for (bigsint i(callSize); i--;)
+			objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(i));
+
+		// ... Push return address.
+		objects->addToken(OCODE_PUSHNUMBER, ObjectExpression::create_value_symbol(labelReturn, position));
 	}
-	objects->addToken(OCODE_SUBSTACK_IMM, stack);
+
+	// The actual call. Data being the jump target.
+	objects->addToken(ocode, data);
+	objects->addLabel(labelReturn);
+
+	// For any return bytes we're handling, push them onto the stack.
+	for (bigsint i(-retnSize); i; ++i)
+		objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
+
+	// Reset the stack-pointer.
+	objects->addToken(OCODE_SUBSTACK_IMM, ostack);
+}
+
+void SourceExpression::make_objects_call_function(ObjectVector * objects, VariableType const * type, SourceExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, std::string const & labelReturn, SourcePosition const & position)
+{
+	if (args.size() != type->types.size())
+		throw SourceException("incorrect arg count to call function", position, "SourceExpression");
+
+	// Must push return address before target address.
+	objects->addToken(OCODE_PUSHNUMBER, ObjectExpression::create_value_symbol(labelReturn, position));
+
+	// Determine jump target.
+	data->makeObjectsGet(objects);
+
+	for (size_t i(0); i < args.size(); ++i)
+	{
+		if (args[i]->getType() != type->types[i])
+			throw SourceException("incorrect arg type to call function", args[i]->position, "SourceExpression");
+
+		args[i]->makeObjectsGet(objects);
+	}
+
+	objects->setPosition(position);
+
+	// Determine which OCODE to use.
+	ObjectCode ocode(OCODE_BRANCH);
+
+	// Determine how many bytes of the return to handle.
+	bigsint retnSize(type->callType->size(position));
+
+	ObjectExpression::Pointer ostack(objects->getValueAdd(stack, retnSize));
+
+	// Advance the stack-pointer.
+	objects->addToken(OCODE_ADDSTACK_IMM, ostack);
+
+	// Determine how many bytes of the call to handle.
+	bigsint callSize(type->sizeCall(position));
+
+	// Place args in auto vars.
+	for (bigsint i(callSize); i--;)
+		objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(i));
+
+	// The actual call.
+	objects->addToken(ocode);
+	objects->addLabel(labelReturn);
+
+	// For any return bytes we're handling, push them onto the stack.
+	for (bigsint i(-retnSize); i; ++i)
+		objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
+
+	// Reset the stack-pointer.
+	objects->addToken(OCODE_SUBSTACK_IMM, ostack);
 }
 
 

@@ -169,7 +169,7 @@ protected:
 
 
 
-	static void make_objects_call(ObjectVector * objects, SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
+	static void make_objects_call(ObjectVector * objects, SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, std::string const & labelReturn, SourcePosition const & position);
 
 	static void make_objects_cast(ObjectVector * objects, VariableType const * typeFrom, VariableType const * typeTo, SourcePosition const & position);
 
@@ -202,7 +202,8 @@ private:
 
 	static void make_objects_call_asmfunc(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
 
-	static void make_objects_call_function(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position);
+	static void make_objects_call_function(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, std::string const & labelReturn, SourcePosition const & position);
+	static void make_objects_call_function(ObjectVector * objects, VariableType const * type, SourceExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, std::string const & labelReturn, SourcePosition const & position);
 
 	static void make_objects_call_linespec(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position);
 

@@ -263,14 +263,12 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 	}
 }
 
-void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<VariableType const *> * argTypes, VariableType const * * returnType)
+void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<VariableType const *> * argTypes, VariableType const * * returnType, SourceVariable::StorageClass argClass)
 {
-	make_expression_arglist(in, blocks, context, argTypes, NULL, NULL, NULL, returnType);
+	make_expression_arglist(in, blocks, context, argTypes, NULL, NULL, NULL, returnType, argClass);
 }
-void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<VariableType const *> * argTypes, std::vector<std::string> * argNames, int * argCount, SourceContext * argContext, VariableType const * * returnType)
+void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<VariableType const *> * argTypes, std::vector<std::string> * argNames, int * argCount, SourceContext * argContext, VariableType const * * returnType, SourceVariable::StorageClass argClass)
 {
-	SourceVariable::StorageClass const sc(SourceVariable::SC_REGISTER);
-
 	if (argCount) *argCount = 0;
 
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
@@ -287,8 +285,8 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 
 		if (argContext)
 		{
-			std::string argNameObject(argContext->makeNameObject(sc, argType, argName, SourcePosition::none));
-			SourceVariable::Pointer argVariable(SourceVariable::create_variable(argName, argType, argNameObject, sc, SourcePosition::none));
+			std::string argNameObject(argContext->makeNameObject(argClass, argType, argName, SourcePosition::none));
+			SourceVariable::Pointer argVariable(SourceVariable::create_variable(argName, argType, argNameObject, argClass, SourcePosition::none));
 			argContext->addVariable(argVariable);
 		}
 

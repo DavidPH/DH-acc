@@ -27,7 +27,7 @@
 
 
 
-void SourceExpression::make_objects_call(ObjectVector * objects, SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position)
+void SourceExpression::make_objects_call(ObjectVector * objects, SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, std::string const & labelReturn, SourcePosition const & position)
 {
 	VariableType const * type(expr->getType());
 
@@ -42,9 +42,9 @@ void SourceExpression::make_objects_call(ObjectVector * objects, SourceExpressio
 
 	case VariableType::VT_FUNCTION:
 		if (expr->canMakeObject())
-			make_objects_call_function(objects, type, expr->makeObject(), args, stack, position);
+			make_objects_call_function(objects, type, expr->makeObject(), args, stack, labelReturn, position);
 		else
-			throw SourceException("non-constant functions not yet supported", position, "SourceVariable");
+			make_objects_call_function(objects, type, expr, args, stack, labelReturn, position);
 		break;
 
 	case VariableType::VT_LINESPEC:

@@ -48,6 +48,8 @@ private:
 	std::vector<SourceExpression::Pointer> _args;
 	SourceExpression::Pointer _expr;
 	bigsint _stack;
+
+	std::string _labelReturn;
 };
 
 
@@ -61,6 +63,8 @@ SourceExpression::Pointer SourceExpression::create_branch_call(SourceExpression 
 
 SourceExpression_BranchCall::SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position_) : Super(position_), _args(args), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
 {
+	_labelReturn = context->makeLabel() + "_retn";
+
 	VariableType const * type(_expr->getType());
 
 	if (_args.size() != type->types.size())
@@ -99,7 +103,7 @@ void SourceExpression_BranchCall::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	make_objects_call(objects, _expr, _args, objects->getValue(_stack), position);
+	make_objects_call(objects, _expr, _args, objects->getValue(_stack), _labelReturn, position);
 }
 
 
