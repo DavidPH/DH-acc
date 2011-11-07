@@ -166,7 +166,7 @@ void SourceExpression_ValueMember::virtual_makeObjectsGet(ObjectVector * objects
 
 		if (getType()->size(position) == 1)
 		{
-			objects->addToken(OCODE_PUSHGLOBALARRAY, objects->getValue(0));
+			objects->addToken(OCODE_GET_POINTER_VAR, objects->getValue(0));
 		}
 		else
 		{
@@ -200,8 +200,7 @@ void SourceExpression_ValueMember::virtual_makeObjectsSet(ObjectVector * objects
 
 		if (getType()->size(position) == 1)
 		{
-			objects->addToken(OCODE_SWAP);
-			objects->addToken(OCODE_ASSIGNGLOBALARRAY, objects->getValue(0));
+			objects->addToken(OCODE_SET_POINTER_VAR, objects->getValue(0));
 		}
 		else
 		{
