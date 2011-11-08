@@ -93,6 +93,20 @@ enum ObjectCode
 	OCODE_TERMINATE,
 	OCODE_XOR,
 
+	// BinaryTokenPPACS
+
+	/* s:->mid */
+	OCODE_PPACS_GET_ACTIVATOR_MID,
+
+	/* s:var,mid->val */
+	OCODE_PPACS_GET_MOBJ_VAR,
+
+	/* s:mid */
+	OCODE_PPACS_SET_ACTIVATOR_MID,
+
+	/* s:val,var,mid */
+	OCODE_PPACS_SET_MOBJ_VAR,
+
 	// BinaryTokenZDACS
 	OCODE_ASSIGNGLOBALARRAY,
 	OCODE_ASSIGNGLOBALVAR,
@@ -174,7 +188,7 @@ enum ObjectCode
 	/* a:offset s:addr->value */
 	OCODE_GET_POINTER_VAR,
 
-	/* a:offset s:addr,value */
+	/* a:offset s:value,addr */
 	OCODE_SET_POINTER_VAR,
 
 	OCODE_NONE

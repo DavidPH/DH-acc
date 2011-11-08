@@ -385,10 +385,16 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 
 	case OCODE_BRANCH:
 	case OCODE_LOGICALXOR:
+	case OCODE_PPACS_GET_ACTIVATOR_MID:
+	case OCODE_PPACS_GET_MOBJ_VAR:
+	case OCODE_PPACS_SET_ACTIVATOR_MID:
+	case OCODE_PPACS_SET_MOBJ_VAR:
 	case OCODE_NONE:
 		throw SourceException("unknown OCODE", position, "BinaryTokenZDACS");
 	}
 
+	#undef CASE_DIRECTMAP_ZDACS
+	#undef CASE_DIRECTMAP_ACS
 	#undef CASE_DIRECTMAP
 
 	#undef PUSH_TOKEN_ARGS2

@@ -67,6 +67,11 @@ void BinaryTokenPPACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN_ARGS1(BCODE_##CODE, _arg_counts[BCODE_##CODE]);\
 		break
 
+	#define CASE_DIRECTMAP_PPACS(CODE)\
+	case OCODE_PPACS_##CODE:\
+		PUSH_TOKEN_ARGS1(BCODE_##CODE, _arg_counts[BCODE_##CODE]);\
+		break
+
 	#define CASE_REMAP(OCODE, BCODE)\
 	case OCODE_##OCODE:\
 		PUSH_TOKEN_ARGS1(BCODE_##BCODE, _arg_counts[BCODE_##BCODE]);\
@@ -146,6 +151,11 @@ void BinaryTokenPPACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	CASE_DIRECTMAP_ACS(THING_COUNT_IMM);
 	CASE_DIRECTMAP_ACS(TIMER);
 
+	CASE_DIRECTMAP_PPACS(GET_ACTIVATOR_MID);
+	CASE_DIRECTMAP_PPACS(GET_MOBJ_VAR);
+	CASE_DIRECTMAP_PPACS(SET_ACTIVATOR_MID);
+	CASE_DIRECTMAP_PPACS(SET_MOBJ_VAR);
+
 	CASE_REMAP(ASSIGNSTACKVAR,  SET_AUTO_VAR);
 	CASE_REMAP(ASSIGNSTATICVAR, SET_STATIC_VAR);
 
@@ -181,6 +191,10 @@ void BinaryTokenPPACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		throw SourceException("unknown OCODE: " + (std::string)make_string(object.getCode()), position, "BinaryTokenPPACS");
 	}
 
+	#undef CASE_REMAP
+
+	#undef CASE_DIRECTMAP_PPACS
+	#undef CASE_DIRECTMAP_ACS
 	#undef CASE_DIRECTMAP
 
 	#undef PUSH_TOKEN_ARGS2
