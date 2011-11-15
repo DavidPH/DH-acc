@@ -119,6 +119,8 @@ public:
 		BCODE_MUL_FIXED          = 116,
 		BCODE_DIV_FIXED          = 117,
 		BCODE_PRINT_FIXED        = 118,
+		BCODE_PRINT_END_LOG      = 119,
+		BCODE_PRINT_END_ERROR    = 120,
 
 		BCODE_NONE
 	};

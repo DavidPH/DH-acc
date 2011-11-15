@@ -188,6 +188,8 @@ _ocode_init_s::_ocode_init_s()
 
 	DO_INIT(GET_POINTER_VAR, 1);
 
+	DO_INIT(PRINT_END_ERROR, 0);
+
 	DO_INIT(SET_POINTER_VAR, 1);
 
 	DO_INIT(NONE, 0);

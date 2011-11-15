@@ -188,6 +188,9 @@ enum ObjectCode
 	/* a:offset s:addr->value */
 	OCODE_GET_POINTER_VAR,
 
+	/* noreturn */
+	OCODE_PRINT_END_ERROR,
+
 	/* a:offset s:value,addr */
 	OCODE_SET_POINTER_VAR,
 

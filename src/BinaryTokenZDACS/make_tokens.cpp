@@ -385,6 +385,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 
 	case OCODE_BRANCH:
 	case OCODE_LOGICALXOR:
+	case OCODE_PRINT_END_ERROR:
 	case OCODE_PPACS_GET_ACTIVATOR_MID:
 	case OCODE_PPACS_GET_MOBJ_VAR:
 	case OCODE_PPACS_SET_ACTIVATOR_MID:
