@@ -29,7 +29,9 @@
 #include <ostream>
 #include <vector>
 
+struct ObjectData_Auto;
 struct ObjectData_Script;
+struct ObjectData_Static;
 struct ObjectData_String;
 class ObjectExpression;
 class ObjectToken;
@@ -145,7 +147,10 @@ public:
 	static void make_tokens(ObjectVector const & objects, std::vector<BinaryTokenPPACS> * instructions);
 
 	static void write_all(std::ostream * out, std::vector<BinaryTokenPPACS> const & instructions);
+	static void write_auto(std::ostream * out, ObjectData_Auto const & a);
+	static void write_label(std::ostream * out, std::string const & label);
 	static void write_script(std::ostream * out, ObjectData_Script const & s);
+	static void write_static(std::ostream * out, ObjectData_Static const & s);
 	static void write_string(std::ostream * out, ObjectData_String const & s);
 	static void write_string(std::ostream * out, std::string const & s);
 	static void write_string_offset(std::ostream * out, ObjectData_String const & s);

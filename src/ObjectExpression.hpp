@@ -64,6 +64,8 @@ public:
 	virtual bigsint resolveInt() const;
 	virtual ObjectCodeSet resolveOCode() const;
 
+	virtual void writeACSP(std::ostream * out) const;
+
 
 
 	friend bool override_object(ObjectExpression::ExpressionType * out, ObjectExpression::ExpressionType const & in);
@@ -78,6 +80,8 @@ public:
 	friend void write_object(std::ostream * out, Pointer const & in);
 
 	static void add_address_count(bigsint const addressCount);
+
+	static void add_auto(std::string const & name, bigsint size, bigsint number);
 
 	static void add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount);
 	static void add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, std::string const & library);
@@ -146,12 +150,16 @@ public:
 	static ObjectExpression::Pointer get_symbol(std::string const & symbol, SourcePosition const & position);
 	static ExpressionType get_symbol_type(std::string const & symbol, SourcePosition const & position);
 
+	static void iter_auto(void (*iter)(std::ostream *, ObjectData_Auto const &), std::ostream * out);
+
 	static void iter_function(void (*iter)(ObjectData_Function const &));
 	static void iter_function(void (*iter)(std::ostream *, ObjectData_Function const &), std::ostream * out);
 
 	static void iter_registerarray_map(void (*iter)(std::ostream *, ObjectData_RegisterArray const &), std::ostream * out);
 
 	static void iter_script(void (*iter)(std::ostream *, ObjectData_Script const &), std::ostream * out);
+
+	static void iter_static(void (*iter)(std::ostream *, ObjectData_Static const &), std::ostream * out);
 
 	static void iter_string(void (*iter)(std::ostream *, ObjectData_String const &), std::ostream * out);
 
@@ -237,6 +245,8 @@ private:
 	static bigsint _address_count;
 
 	static std::string _filename;
+
+	static std::map<std::string, ObjectData_Auto> _auto_table;
 
 	static std::map<std::string, ObjectData_Function> _function_table;
 

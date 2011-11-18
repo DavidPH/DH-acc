@@ -14,51 +14,52 @@
 ** along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* ost_type.hpp
+/* ACSP.hpp
 **
-** Declares functions, variables, and enums for dealing with output, source, and
-** target types.
+** Constants relating to ACS+.
 */
 
-#ifndef HPP_ost_type_
-#define HPP_ost_type_
+#ifndef HPP_ACSP_
+#define HPP_ACSP_
 
 
 
-enum OutputType
+enum
 {
-	OUTPUT_ACS0,
-	OUTPUT_ACSE,
-	OUTPUT_ACSP,
-	OUTPUT_object,
-
-	OUTPUT_UNKNOWN
+	ACSP_EXPR_LITERAL,
+	ACSP_EXPR_SYMBOL,
+	ACSP_EXPR_ADD,
+	ACSP_EXPR_SUB,
+	ACSP_EXPR_MUL,
+	ACSP_EXPR_DIV,
+	ACSP_EXPR_MOD,
+	ACSP_EXPR_BAND,
+	ACSP_EXPR_BIOR,
+	ACSP_EXPR_BXOR,
+	ACSP_EXPR_BNOT,
+	ACSP_EXPR_LAND,
+	ACSP_EXPR_LIOR,
+	ACSP_EXPR_LXOR,
+	ACSP_EXPR_LNOT,
+	ACSP_EXPR_NEGATE,
+	ACSP_EXPR_FMUL,
+	ACSP_EXPR_FDIV,
+	ACSP_EXPR_I2F,
+	ACSP_EXPR_F2I
 };
 
-enum SourceType
+enum
 {
-	SOURCE_ASMPLX,
-	SOURCE_DS,
-	SOURCE_object,
-
-	SOURCE_UNKNOWN
+	ACSP_TOKEN_EOF,
+	ACSP_TOKEN_INSTRUCTION,
+	ACSP_TOKEN_SCRIPT,
+	ACSP_TOKEN_STRING,
+	ACSP_TOKEN_SYMBOL,
+	ACSP_TOKEN_LABEL,
+	ACSP_TOKEN_ALLOCATE
 };
 
-enum TargetType
-{
-	TARGET_Hexen,
-	TARGET_HexPP,
-	TARGET_ZDoom,
-
-	TARGET_UNKNOWN
-};
-
-extern OutputType output_type;
-extern SourceType source_type;
-extern TargetType target_type;
 
 
-
-#endif /* HPP_ost_type_ */
-
+#endif//HPP_ACSP_
 

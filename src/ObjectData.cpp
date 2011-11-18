@@ -70,6 +70,16 @@ ObjectData_Script::ScriptType odata_get_ScriptType(SourceTokenC const & token)
 	throw SourceException("invalid script-type", token.getPosition(), "ObjectData");
 }
 
+bool override_object(ObjectData_Auto * out, ObjectData_Auto const & in)
+{
+	if (out->name != in.name)
+		return false;
+
+	if (out->number == -1)
+		*out = in;
+
+	return true;
+}
 bool override_object(ObjectData_Function * out, ObjectData_Function const & in)
 {
 	if (out->name != in.name)
@@ -130,6 +140,12 @@ bool override_object(ObjectData_String * out, ObjectData_String const & in)
 	return true;
 }
 
+void read_object(std::istream * in, ObjectData_Auto * out)
+{
+	read_object(in, &out->name);
+	read_object(in, &out->number);
+	read_object(in, &out->size);
+}
 void read_object(std::istream * in, ObjectData_Function * out)
 {
 	read_object(in, &out->label);
@@ -183,6 +199,12 @@ void read_object(std::istream * in, ObjectData_String * out)
 	read_object(in, &out->offset);
 }
 
+void write_object(std::ostream * out, ObjectData_Auto const & in)
+{
+	write_object(out, in.name);
+	write_object(out, in.number);
+	write_object(out, in.size);
+}
 void write_object(std::ostream * out, ObjectData_Function const & in)
 {
 	write_object(out, in.label);

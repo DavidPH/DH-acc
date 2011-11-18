@@ -21,6 +21,9 @@
 
 #include "Binary.hpp"
 
+#include "../ACSP.hpp"
+#include "../BinaryTokenZDACS.hpp"
+
 
 
 class ObjectExpression_BinaryAdd : public ObjectExpression_Binary
@@ -35,6 +38,8 @@ public:
 
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
+
+	virtual void writeACSP(std::ostream * out) const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
@@ -80,6 +85,14 @@ bigsint ObjectExpression_BinaryAdd::resolveInt() const
 	if (getType() == ET_INT) return exprL->resolveInt() + exprR->resolveInt();
 
 	return Super::resolveInt();
+}
+
+void ObjectExpression_BinaryAdd::writeACSP(std::ostream * out) const
+{
+	BinaryTokenZDACS::write_32(out, ACSP_EXPR_ADD);
+
+	exprL->writeACSP(out);
+	exprR->writeACSP(out);
 }
 
 void ObjectExpression_BinaryAdd::writeObject(std::ostream * out) const

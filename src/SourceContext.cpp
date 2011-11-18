@@ -424,7 +424,8 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Varia
 	{
 	case SourceVariable::SC_AUTO:
 	case SourceVariable::SC_REGISTER:
-		ObjectExpression::add_symbol(nameObject, ObjectExpression::create_value_int(getCount(sc), position));
+		// TODO: Need a separate list for register at some point eventually, but it's not that important.
+		ObjectExpression::add_auto(nameObject, type->size(position), getCount(sc));
 		break;
 
 	case SourceVariable::SC_CONSTANT:
@@ -469,7 +470,8 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Varia
 	{
 	case SourceVariable::SC_AUTO:
 	case SourceVariable::SC_REGISTER:
-		ObjectExpression::add_symbol(nameObject, ObjectExpression::create_value_int(getCount(sc), position));
+		// TODO: Need a separate list for register at some point eventually, but it's not that important.
+		ObjectExpression::add_auto(nameObject, type->size(position), address);
 		break;
 
 	case SourceVariable::SC_CONSTANT:

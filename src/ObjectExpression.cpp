@@ -33,6 +33,8 @@ bigsint ObjectExpression::_address_count;
 
 std::string ObjectExpression::_filename;
 
+std::map<std::string, ObjectData_Auto> ObjectExpression::_auto_table;
+
 std::map<std::string, ObjectData_Function> ObjectExpression::_function_table;
 
 std::map<std::string, ObjectData_Register> ObjectExpression::_register_global_table;
@@ -77,6 +79,14 @@ ObjectExpression::ObjectExpression(std::istream * in)
 void ObjectExpression::add_address_count(bigsint const addressCount)
 {
 	_address_count += addressCount;
+}
+
+void ObjectExpression::add_auto(std::string const & name, bigsint size, bigsint number)
+{
+	ObjectData_Auto s = {name, number, size};
+	_auto_table[name] = s;
+
+	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
 void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount)
@@ -391,6 +401,11 @@ bigsint ObjectExpression::resolveInt() const
 ObjectCodeSet ObjectExpression::resolveOCode() const
 {
 	throw SourceException("cannot resolve ocode", position, getName());
+}
+
+void ObjectExpression::writeACSP(std::ostream * out) const
+{
+	throw SourceException("cannot write ACS+", position, getName());
 }
 
 void ObjectExpression::set_address_count(bigsint addressCount)

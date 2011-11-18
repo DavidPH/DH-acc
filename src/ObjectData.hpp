@@ -32,6 +32,13 @@ class SourceTokenC;
 
 
 
+struct ObjectData_Auto
+{
+	std::string name;
+	bigsint number;
+	bigsint size;
+};
+
 struct ObjectData_Function
 {
 	std::string label;
@@ -109,6 +116,7 @@ struct ObjectData_String
 extern ObjectData_Script::ScriptFlag odata_get_ScriptFlag(SourceTokenC const & token);
 extern ObjectData_Script::ScriptType odata_get_ScriptType(SourceTokenC const & token);
 
+extern bool override_object(ObjectData_Auto          * out, ObjectData_Auto          const & in);
 extern bool override_object(ObjectData_Function      * out, ObjectData_Function      const & in);
 extern bool override_object(ObjectData_Register      * out, ObjectData_Register      const & in);
 extern bool override_object(ObjectData_RegisterArray * out, ObjectData_RegisterArray const & in);
@@ -116,6 +124,7 @@ extern bool override_object(ObjectData_Script        * out, ObjectData_Script   
 extern bool override_object(ObjectData_Static        * out, ObjectData_Static        const & in);
 extern bool override_object(ObjectData_String        * out, ObjectData_String        const & in);
 
+extern void read_object(std::istream * in, ObjectData_Auto               * out);
 extern void read_object(std::istream * in, ObjectData_Function           * out);
 extern void read_object(std::istream * in, ObjectData_Register           * out);
 extern void read_object(std::istream * in, ObjectData_RegisterArray      * out);
@@ -124,6 +133,7 @@ extern void read_object(std::istream * in, ObjectData_Script::ScriptType * out);
 extern void read_object(std::istream * in, ObjectData_Static             * out);
 extern void read_object(std::istream * in, ObjectData_String             * out);
 
+extern void write_object(std::ostream * out, ObjectData_Auto               const & in);
 extern void write_object(std::ostream * out, ObjectData_Function           const & in);
 extern void write_object(std::ostream * out, ObjectData_Register           const & in);
 extern void write_object(std::ostream * out, ObjectData_RegisterArray      const & in);

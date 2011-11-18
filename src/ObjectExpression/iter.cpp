@@ -23,6 +23,11 @@
 
 
 
+void ObjectExpression::iter_auto(void (*iter)(std::ostream *, ObjectData_Auto const &), std::ostream * out)
+{
+	for (std::map<std::string, ObjectData_Auto>::iterator it(_auto_table.begin()); it != _auto_table.end(); ++it)
+		iter(out, it->second);
+}
 void ObjectExpression::iter_function(void (*iter)(ObjectData_Function const &))
 {
 	for (std::map<std::string, ObjectData_Function>::iterator it(_function_table.begin()); it != _function_table.end(); ++it)
@@ -41,6 +46,11 @@ void ObjectExpression::iter_registerarray_map(void (*iter)(std::ostream *, Objec
 void ObjectExpression::iter_script(void (*iter)(std::ostream *, ObjectData_Script const &), std::ostream * out)
 {
 	for (std::map<std::string, ObjectData_Script>::iterator it(_script_table.begin()); it != _script_table.end(); ++it)
+		iter(out, it->second);
+}
+void ObjectExpression::iter_static(void (*iter)(std::ostream *, ObjectData_Static const &), std::ostream * out)
+{
+	for (std::map<std::string, ObjectData_Static>::iterator it(_static_table.begin()); it != _static_table.end(); ++it)
 		iter(out, it->second);
 }
 void ObjectExpression::iter_string(void (*iter)(std::ostream *, ObjectData_String const &), std::ostream * out)

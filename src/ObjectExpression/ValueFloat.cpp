@@ -21,6 +21,8 @@
 
 #include "../ObjectExpression.hpp"
 
+#include "../ACSP.hpp"
+#include "../BinaryTokenZDACS.hpp"
 #include "../object_io.hpp"
 
 
@@ -38,6 +40,8 @@ public:
 	virtual void printDebug(std::ostream * out) const;
 
 	virtual bigreal resolveFloat() const;
+
+	virtual void writeACSP(std::ostream * out) const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
@@ -87,6 +91,12 @@ void ObjectExpression_ValueFloat::printDebug(std::ostream * out) const
 bigreal ObjectExpression_ValueFloat::resolveFloat() const
 {
 	return _value;
+}
+
+void ObjectExpression_ValueFloat::writeACSP(std::ostream * out) const
+{
+	BinaryTokenZDACS::write_32(out, ACSP_EXPR_LITERAL);
+	BinaryTokenZDACS::write_32(out, *this);
 }
 
 void ObjectExpression_ValueFloat::writeObject(std::ostream * out) const
