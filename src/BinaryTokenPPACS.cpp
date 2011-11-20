@@ -241,6 +241,9 @@ void BinaryTokenPPACS::write_all(std::ostream * out, std::vector<BinaryTokenPPAC
 		ObjectExpression::iter_static(write_static, out);
 		ObjectExpression::iter_string(write_string, out);
 
+		BinaryTokenZDACS::write_32(out, ACSP_TOKEN_EOF);
+		BinaryTokenZDACS::write_32(out, 0);
+
 		break;
 
 	default:
