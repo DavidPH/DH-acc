@@ -42,7 +42,7 @@ template<> OutputType option_auto<OutputType>::parse(std::string const & name, s
 		return OUTPUT_ACS0;
 	else if (arg == "ACSE")
 		return OUTPUT_ACSE;
-	else if (arg == "ACSP")
+	else if (arg == "ACS+")
 		return OUTPUT_ACSP;
 	else if (arg == "object")
 		return OUTPUT_object;
