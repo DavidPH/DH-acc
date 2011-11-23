@@ -21,6 +21,8 @@
 
 #include "../ObjectExpression.hpp"
 
+#include "../ost_type.hpp"
+
 
 
 void ObjectExpression::do_deferred_allocation()
@@ -28,6 +30,7 @@ void ObjectExpression::do_deferred_allocation()
 	// Deferred function allocation.
 	// TODO: libraries
 	// TODO: explicit allocation
+	if (target_type == TARGET_ZDoom)
 	{
 		bigsint number(0);
 
@@ -58,6 +61,9 @@ void ObjectExpression::do_deferred_allocation()
 	do_deferred_allocation_registerarray(&_registerarray_global_table, &_registerarray_global_used);
 	do_deferred_allocation_registerarray(&_registerarray_map_table, &_registerarray_map_used);
 	do_deferred_allocation_registerarray(&_registerarray_world_table, &_registerarray_world_used);
+
+	// For ACS+, all this allocation is done by the linker.
+	if (output_type == OUTPUT_ACSP) return;
 
 	// Deferred script allocation.
 	for (std::map<std::string, ObjectData_Script>::iterator it(_script_table.begin()); it != _script_table.end(); ++it)

@@ -331,9 +331,19 @@ void BinaryTokenPPACS::write_static(std::ostream * out, ObjectData_Static const 
 	{
 	case OUTPUT_ACSP:
 		write_string(&token, s.name);
-		BinaryTokenZDACS::write_32(&token, s.size);
 
-		BinaryTokenZDACS::write_32(out, ACSP_TOKEN_ALLOCATE);
+		if (s.number == -1)
+		{
+			BinaryTokenZDACS::write_32(&token, s.size);
+			BinaryTokenZDACS::write_32(out, ACSP_TOKEN_ALLOCATE);
+		}
+		else
+		{
+			BinaryTokenZDACS::write_32(&token, ACSP_EXPR_LITERAL);
+			BinaryTokenZDACS::write_32(&token, s.number);
+			BinaryTokenZDACS::write_32(out, ACSP_TOKEN_SYMBOL);
+		}
+
 		BinaryTokenZDACS::write_32(out, token.str().size());
 		*out << token.str();
 		break;

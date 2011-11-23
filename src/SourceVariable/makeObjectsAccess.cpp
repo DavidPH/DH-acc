@@ -87,7 +87,7 @@ void SourceVariable::makeObjectsAccessPrep(ObjectVector * objects, std::vector<S
 			*addressBase = objects->getValue(0);
 			*address = type->size(position) - 1;
 		}
-		else if (_sc == SC_AUTO)
+		else if (_sc == SC_AUTO || _sc == SC_STATIC)
 		{
 			*addressBase = objects->getValue(_nameObject);
 			*address = _type->size(position) - 1;
