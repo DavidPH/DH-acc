@@ -257,7 +257,7 @@ std::string SourceContext::getLabel() const
 	if (_parent)
 		return _parent->getLabel() + _label;
 	else
-		return _label;
+		return ObjectExpression::get_filename() + _label;
 }
 std::string SourceContext::getLabelBreak(SourcePosition const & position) const
 {

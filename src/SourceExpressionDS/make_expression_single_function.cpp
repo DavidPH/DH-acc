@@ -47,7 +47,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(So
 	std::string functionName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
 	// functionNameObject
-	std::string functionNameObject(context->getLabel() + functionName);
+	std::string functionNameObject(functionName);
 
 	// functionLabel
 	std::string functionLabel("function_" + functionNameObject);

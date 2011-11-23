@@ -22,6 +22,7 @@
 #include "../SourceExpressionDS.hpp"
 
 #include "../ObjectExpression.hpp"
+#include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenizerDS.hpp"
@@ -54,9 +55,13 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_extern(Sour
 		VariableType const * functionVarType(VariableType::get_function(functionReturn, functionArgTypes));
 
 		// functionVariable
-		SourceVariable::Pointer functionVariable(SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition()));
-
+		SourceVariable::Pointer functionVariable;
+		if (target_type == TARGET_HexPP)
+			functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionLabel, token.getPosition());
+		else
+			functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition());
 		context->addVariable(functionVariable);
+
 		ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionArgCount, functionReturn->size(token.getPosition()), "");
 		return create_value_variable(functionVariable, token.getPosition());
 	}

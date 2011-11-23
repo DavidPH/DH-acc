@@ -21,6 +21,9 @@
 
 #include "Unary.hpp"
 
+#include "../ACSP.hpp"
+#include "../BinaryTokenZDACS.hpp"
+
 
 
 class ObjectExpression_UnarySub : public ObjectExpression_Unary
@@ -35,6 +38,8 @@ public:
 
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
+
+	virtual void writeACSP(std::ostream * out) const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
@@ -80,6 +85,13 @@ bigsint ObjectExpression_UnarySub::resolveInt() const
 	if (getType() == ET_INT) return -expr->resolveInt();
 
 	return Super::resolveInt();
+}
+
+void ObjectExpression_UnarySub::writeACSP(std::ostream * out) const
+{
+	BinaryTokenZDACS::write_32(out, ACSP_EXPR_NEGATE);
+
+	expr->writeACSP(out);
 }
 
 void ObjectExpression_UnarySub::writeObject(std::ostream * out) const
