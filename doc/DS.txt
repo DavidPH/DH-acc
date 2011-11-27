@@ -302,6 +302,11 @@ operator struct
   Defines a struct. Yields void.
     "struct" [ name ] [ "{" [ type name ";" ]... "}" ]
 
+operator symbol
+  Creates a literal out of a low-level symbol. Yields that literal. This is
+  meant for "system" headers and is not normally useful in user code.
+    "__symbol" "(" type "," string ")"
+
 operator typedef
   Defines a type. Yields void.
     "typedef" type name
