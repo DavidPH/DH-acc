@@ -27,7 +27,7 @@
 
 
 
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_var(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SourceExpression::Pointer SourceExpressionDS::make_expression_single_variable(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	SourceVariable::StorageClass sc(SourceVariable::get_StorageClass(in->get(SourceTokenC::TT_IDENTIFIER)));
 	VariableType const * type(make_expression_type(in, blocks, context));

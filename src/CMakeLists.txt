@@ -106,7 +106,7 @@ add_executable(DH-acc
 	SourceExpressionDS/make_expression_single_script.cpp
 	SourceExpressionDS/make_expression_single_switch.cpp
 	SourceExpressionDS/make_expression_single_symbol.cpp
-	SourceExpressionDS/make_expression_single_var.cpp
+	SourceExpressionDS/make_expression_single_variable.cpp
 	SourceExpressionDS/make_expression_type.cpp
 	SourceBlockC.cpp
 	SourcePosition.cpp
