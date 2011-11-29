@@ -39,34 +39,37 @@ SourceExpressionDS::SourceExpressionDS(SourcePosition const & position_) : Super
 
 void SourceExpressionDS::init()
 {
-	_expression_single_handlers["asmfunc"]  = make_expression_single_asmfunc;
-	_expression_single_handlers["break"]    = make_expression_single_break;
-	_expression_single_handlers["case"]     = make_expression_single_case;
-	_expression_single_handlers["const"]    = make_expression_single_const;
-	_expression_single_handlers["continue"] = make_expression_single_continue;
-	_expression_single_handlers["default"]  = make_expression_single_default;
-	_expression_single_handlers["delay"]    = make_expression_single_delay;
-	_expression_single_handlers["do"]       = make_expression_single_do;
-	_expression_single_handlers["enum"]     = make_expression_single_type;
-	_expression_single_handlers["extern"]   = make_expression_single_extern;
-	_expression_single_handlers["for"]      = make_expression_single_for;
-	_expression_single_handlers["function"] = make_expression_single_function;
-	_expression_single_handlers["goto"]     = make_expression_single_goto;
-	_expression_single_handlers["if"]       = make_expression_single_if;
-	_expression_single_handlers["linespec"] = make_expression_single_linespec;
-	_expression_single_handlers["native"]   = make_expression_single_native;
-	_expression_single_handlers["out"]      = make_expression_single_output;
-	_expression_single_handlers["return"]   = make_expression_single_return;
-	_expression_single_handlers["script"]   = make_expression_single_script;
-	_expression_single_handlers["sizeof"]   = make_expression_single_sizeof;
-	_expression_single_handlers["struct"]   = make_expression_single_type;
-	_expression_single_handlers["switch"]   = make_expression_single_switch;
-	_expression_single_handlers["__symbol"] = make_expression_single_symbol;
-	_expression_single_handlers["typedef"]  = make_expression_single_typedef;
-	_expression_single_handlers["union"]    = make_expression_single_type;
-	_expression_single_handlers["var"]      = make_expression_single_variable;
-	_expression_single_handlers["void"]     = make_expression_single_void;
-	_expression_single_handlers["while"]    = make_expression_single_while;
+	_expression_single_handlers["__asmfunc"]  = make_expression_single_asmfunc;
+	_expression_single_handlers[  "break"]    = make_expression_single_break;
+	_expression_single_handlers[  "case"]     = make_expression_single_case;
+	_expression_single_handlers[  "const"]    = make_expression_single_const;
+	_expression_single_handlers[  "continue"] = make_expression_single_continue;
+	_expression_single_handlers[  "default"]  = make_expression_single_default;
+	_expression_single_handlers["__delay"]    = make_expression_single_delay;
+	_expression_single_handlers[  "do"]       = make_expression_single_do;
+	_expression_single_handlers[  "enum"]     = make_expression_single_type;
+	_expression_single_handlers["__extfunc"]  = make_expression_single_variable;
+	_expression_single_handlers[  "extern"]   = make_expression_single_extern;
+	_expression_single_handlers["__extscript"]= make_expression_single_script;
+	_expression_single_handlers["__extvar"]   = make_expression_single_variable;
+	_expression_single_handlers[  "for"]      = make_expression_single_for;
+	_expression_single_handlers["__function"] = make_expression_single_function;
+	_expression_single_handlers[  "goto"]     = make_expression_single_goto;
+	_expression_single_handlers[  "if"]       = make_expression_single_if;
+	_expression_single_handlers["__linespec"] = make_expression_single_linespec;
+	_expression_single_handlers["__native"]   = make_expression_single_native;
+	_expression_single_handlers["__output"]   = make_expression_single_output;
+	_expression_single_handlers[  "return"]   = make_expression_single_return;
+	_expression_single_handlers["__script"]   = make_expression_single_script;
+	_expression_single_handlers[  "sizeof"]   = make_expression_single_sizeof;
+	_expression_single_handlers[  "struct"]   = make_expression_single_type;
+	_expression_single_handlers[  "switch"]   = make_expression_single_switch;
+	_expression_single_handlers["__symbol"]   = make_expression_single_symbol;
+	_expression_single_handlers[  "typedef"]  = make_expression_single_typedef;
+	_expression_single_handlers[  "union"]    = make_expression_single_type;
+	_expression_single_handlers["__variable"] = make_expression_single_variable;
+	_expression_single_handlers[  "void"]     = make_expression_single_void;
+	_expression_single_handlers[  "while"]    = make_expression_single_while;
 }
 
 bool SourceExpressionDS::is_expression_type(std::string const & data, SourceContext * context)

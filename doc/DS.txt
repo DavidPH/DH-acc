@@ -202,7 +202,7 @@ operator :
 operator asmfunc
   Defines a function executed as a single instruction. Yields a pointer to the
   function, which is a void type.
-    "asmfunc" name ocode ocode_imm arglist_return
+    "__asmfunc" name ocode ocode_imm arglist_return
 
 operator break
   Branches out of the current loop or switch. Yields void.
@@ -228,7 +228,7 @@ operator default
 operator delay
   Delays execution for a specified number of clocks (sometimes referred to tics
   or ticks). Yields void.
-    "delay" expression
+    "__delay" expression
 
 operator enum
   Defines an enumeration. Yields void.
@@ -238,7 +238,7 @@ operator enum
 
 operator extern
   Performs forward-declaration. Yields the thing declared.
-    "extern" "function" name arglist_return
+    "extern" "__function" name arglist_return
 
 operator for
   Performs iteration. Yields void. Creates a new context for initializer based
@@ -250,8 +250,10 @@ operator for
 
 operator function
   Defines a function. Yields a pointer to the function. Creates a new context
-  for expression based on current context.
-    "function" name arglist_return expression_single
+  for expression based on current context. The first form makes a function that
+  can be exposed globally using extern.
+    "__extfunc"  name arglist_return expression_single
+    "__function" name arglist_return expression_single
 
 operator goto
   Branches to a label or case. Yields void.
@@ -266,21 +268,21 @@ operator if
   current context, and new contexts for remaining expressions based on condition
   context.
     "if" expression_single(condition) expression_single(if-branch)
-    [ "else" expression_single(else-branch) ]
+      [ "else" expression_single(else-branch) ]
 
 operator linespec
   Defines a function executed as a line special. Yields a pointer to the
   function.
-    "linespec" name arglist_return @ integer
+    "__linespec" name arglist_return @ integer
 
 operator native
   Defines a function executed as a native function. Yields a pointer to the
   function.
-    "native" name arglist_return @ integer
+    "__native" name arglist_return @ integer
 
-operator out
+operator output
   Prints expression for debugging. Yields void.
-    "out" expression
+    "__output" expression
 
 operator return
   Returns a value. Yields void.
@@ -288,9 +290,12 @@ operator return
 
 operator script
   Defines a script. Yields a pointer to the script. Creates a new context for
-  expression based on current context.
-    "script" name [ type [ flag... ] ] arglist_return [ "@" integer ]
-    expression_single
+  expression based on current context. The first form makes a script that can be
+  exposed globally using extern.
+    "__extscript" name [ type [ flag... ] ] arglist_return [ "@" integer ]
+      expression_single
+    "__script" name [ type [ flag... ] ] arglist_return [ "@" integer ]
+      expression_single
 
 operator switch
   Performs a jump into a jump table. Yields void. Creates a new context for
@@ -315,9 +320,11 @@ operator union
   Defines a union. Yields void.
     "union" [ name ] [ "{" [ type name ";" ]... "}" ]
 
-operator var
-  Declares a variable. Yields the variable.
-    "var" storage_class type name [ "@" integer ]
+operator variable
+  Declares a variable. Yields the variable. The first form makes a variable that
+  can be exposed globally using extern.
+    "__extvar"   storage_class type name [ "@" integer ]
+    "__variable" storage_class type name [ "@" integer ]
 
 operator void
   Drops the result of expression. Yields void.

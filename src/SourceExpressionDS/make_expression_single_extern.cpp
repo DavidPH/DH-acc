@@ -34,7 +34,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern)
 {
 	SourceTokenC externToken(in->get(SourceTokenC::TT_IDENTIFIER));
 
-	if (externToken.getData() == "function")
+	if (externToken.getData() == "__function")
 	{
 		// functionName
 		std::string functionName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
