@@ -30,22 +30,22 @@
 
 
 // Finds a value in a chunk of memory.
-void extern function memchr(void const * mem, int data, int size) -> void *;
+void extern __function memchr(void const * mem, int data, int size) -> void *;
 
 // Clears a chunk of memory.
-void extern function memclr(void * mem, int size) -> void *;
+void extern __function memclr(void * mem, int size) -> void *;
 
 // Copies a chunk of memory.
-void extern function memcpy(void * dst, void const * src, int size) -> void *;
+void extern __function memcpy(void * dst, void const * src, int size) -> void *;
 
 // Compares two chunks of memory.
-void extern function memcmp(void const * mem1, void const * mem2, int size) -> int;
+void extern __function memcmp(void const * mem1, void const * mem2, int size) -> int;
 
 // Copies a chunk of memory.
-void extern function memmove(void * dst, void const * src, int size) -> void *;
+void extern __function memmove(void * dst, void const * src, int size) -> void *;
 
 // Sets a chunk of memory.
-void extern function memset(void * mem, int data, int size) -> void *;
+void extern __function memset(void * mem, int data, int size) -> void *;
 
 
 

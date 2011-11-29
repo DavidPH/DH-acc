@@ -28,7 +28,7 @@
 
 
 // Store index between calls to malloc for efficiency.
-void var register_map struct __heap_block * __heap_index;
+void __variable register_map struct __heap_block * __heap_index;
 
 // Heap starts after automatic variable stack and static variable section of
 // addressable space.
@@ -42,16 +42,16 @@ struct __heap_block
 
 
 
-function calloc(int count, int size) -> void *
+__extfunc calloc(int count, int size) -> void *
 {
-	void var register int index = count * size;
+	void __variable register int index = count * size;
 
-	void var register void * p = malloc(index);
+	void __variable register void * p = malloc(index);
 
 	if (!p) return p;
 
-	void var register char * it = (char *)p;
-	void var register char * end = it + index;
+	void __variable register char * it = (char *)p;
+	void __variable register char * end = it + index;
 
 	for (; it != end; ++it)
 		void *it = 0;
@@ -59,31 +59,31 @@ function calloc(int count, int size) -> void *
 	return p;
 };
 
-function free(void * p) -> void
+__extfunc free(void * p) -> void
 {
 	if (!p) return;
 
-	void var register struct __heap_block * block_this = (struct __heap_block *)p - 1;
+	void __variable register struct __heap_block * block_this = (struct __heap_block *)p - 1;
 
 	void block_this->used = 0;
 
 	if (block_this < __heap_index)
 		void __heap_index = block_this;
 };
-function free_all() -> void
+__extfunc free_all() -> void
 {
 	void __heap_index = __heap_start;
 	void __heap_index->used = 0;
 	void __heap_index->size = 0;
 };
 
-function malloc(int size) -> void *
+__extfunc malloc(int size) -> void *
 {
 	if (size < 1) void size = 1;
 
 	if (!__heap_index) void __heap_index = __heap_start;
 
-	void var register bool first_try = true;
+	void __variable register bool first_try = true;
 
 	alloc_loop:
 
@@ -116,7 +116,7 @@ function malloc(int size) -> void *
 		void __heap_index->used = size;
 		void __heap_index->size = size;
 
-		void var register void * p = (void *)(__heap_index + 1);
+		void __variable register void * p = (void *)(__heap_index + 1);
 
 		void __heap_index = (char *)p + size;
 
@@ -137,15 +137,15 @@ function malloc(int size) -> void *
 	return 0;
 };
 
-function realloc(void * p, int size) -> void *
+__extfunc realloc(void * p, int size) -> void *
 {
 	if (!p) return malloc(size);
 
 	if (size < 1) void size = 1;
 
-	void var register struct __heap_block * block_this = (struct __heap_block *)p - 1;
+	void __variable register struct __heap_block * block_this = (struct __heap_block *)p - 1;
 
-	void var register int size0 = block_this->used;
+	void __variable register int size0 = block_this->used;
 
 	// Enough space in current block.
 	if (block_this->size >= size)
@@ -154,7 +154,7 @@ function realloc(void * p, int size) -> void *
 		return p;
 	};
 
-	void var register struct __heap_block * block_next = (struct __heap_block *)((char *)p + block_this->size);
+	void __variable register struct __heap_block * block_next = (struct __heap_block *)((char *)p + block_this->size);
 
 	// No next block so just resize current block.
 	if (!block_next->size)
@@ -170,12 +170,12 @@ function realloc(void * p, int size) -> void *
 		return p;
 	};
 
-	void var register void * p2 = malloc(size);
+	void __variable register void * p2 = malloc(size);
 	if (!p2) return 0;
 
-	void var register char * it = (char *)p;
-	void var register char * it2 = (char *)p2;
-	void var register char * end = p + size0;
+	void __variable register char * it = (char *)p;
+	void __variable register char * it2 = (char *)p2;
+	void __variable register char * end = p + size0;
 
 	while (it != end)
 	{

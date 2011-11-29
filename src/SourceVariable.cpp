@@ -112,7 +112,7 @@ SourceVariable::StorageClass SourceVariable::get_StorageClass(SourceTokenC const
 	if (token.getData() == "static")
 		return SC_STATIC;
 
-	throw SourceException("invalid storage-class", token.getPosition(), "SourceVariable");
+	throw SourceException("invalid storage-class '" + token.getData() + "'", token.getPosition(), "SourceVariable");
 }
 
 SourceVariable::StorageClass SourceVariable::getClass() const

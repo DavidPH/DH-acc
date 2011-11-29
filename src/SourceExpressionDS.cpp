@@ -48,7 +48,7 @@ void SourceExpressionDS::init()
 	_expression_single_handlers["__delay"]    = make_expression_single_delay;
 	_expression_single_handlers[  "do"]       = make_expression_single_do;
 	_expression_single_handlers[  "enum"]     = make_expression_single_type;
-	_expression_single_handlers["__extfunc"]  = make_expression_single_variable;
+	_expression_single_handlers["__extfunc"]  = make_expression_single_function;
 	_expression_single_handlers[  "extern"]   = make_expression_single_extern;
 	_expression_single_handlers["__extscript"]= make_expression_single_script;
 	_expression_single_handlers["__extvar"]   = make_expression_single_variable;
