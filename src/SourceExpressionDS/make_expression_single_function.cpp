@@ -30,7 +30,7 @@
 
 
 
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_function(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(function)
 {
 	// functionArgClass
 	SourceVariable::StorageClass functionArgClass;

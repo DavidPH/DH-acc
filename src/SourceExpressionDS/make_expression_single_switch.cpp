@@ -27,7 +27,7 @@
 
 
 
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_switch(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(switch)
 {
 	SourceContext contextSwitch(context, SourceContext::CT_BLOCK);
 	SourceExpression::Pointer exprSwitch(make_expression_single(in, blocks, &contextSwitch));

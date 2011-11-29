@@ -32,7 +32,7 @@
 
 
 
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_script(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(script)
 {
 	// scriptContext
 	SourceContext scriptContext(context, SourceContext::CT_SCRIPT);

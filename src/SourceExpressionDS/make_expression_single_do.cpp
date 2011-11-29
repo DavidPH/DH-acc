@@ -27,7 +27,7 @@
 
 
 
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_do(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(do)
 {
 	SourceContext contextLoop(context, SourceContext::CT_LOOP);
 	SourceExpression::Pointer exprLoop(make_expression_single(in, blocks, &contextLoop));

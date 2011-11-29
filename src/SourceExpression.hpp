@@ -125,7 +125,7 @@ public:
 	static Pointer create_unary_sub(SourceExpression * expr, SourcePosition const & position);
 
 	static Pointer create_root_delay(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
-	static Pointer create_root_out(SourceExpression * expr, SourcePosition const & position);
+	static Pointer create_root_output(SourceExpression * expr, SourcePosition const & position);
 	static Pointer create_root_script(VariableType const * type, SourcePosition const & position);
 
 	static Pointer create_value_block(std::vector<SourceExpression::Pointer> const & expressions, SourcePosition const & position);

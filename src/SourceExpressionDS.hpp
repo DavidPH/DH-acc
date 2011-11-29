@@ -30,6 +30,21 @@ class SourceTokenizerDS;
 
 
 
+#define SRCEXPDS_EXPRSINGLE_ARGS                            \
+	SourceTokenizerDS * in, SourceTokenC const & token, \
+	std::vector<SourceExpression::Pointer> * blocks,    \
+	SourceContext * context
+
+#define SRCEXPDS_EXPRSINGLE_DECL(NAME)   \
+	static SourceExpression::Pointer \
+	make_expression_single_##NAME(SRCEXPDS_EXPRSINGLE_ARGS)
+
+#define SRCEXPDS_EXPRSINGLE_DEFN(NAME)                 \
+	SourceExpression::Pointer SourceExpressionDS:: \
+	make_expression_single_##NAME(SRCEXPDS_EXPRSINGLE_ARGS)
+
+
+
 class SourceExpressionDS : public SourceExpression
 {
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpressionDS, SourceExpression);
@@ -54,32 +69,33 @@ private:
 	static void make_expressions(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * expressions, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
 
 	static SourceExpression::Pointer make_expression_single(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_asmfunc(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_break(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_case(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_const(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_continue(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_default(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_delay(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_do(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_extern(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_for(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_function(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_goto(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_if(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_linespec(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_native(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_out(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_return(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_script(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_sizeof(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_switch(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_symbol(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_type(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_typedef(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_variable(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_void(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static SourceExpression::Pointer make_expression_single_while(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
+
+	SRCEXPDS_EXPRSINGLE_DECL(asmfunc);
+	SRCEXPDS_EXPRSINGLE_DECL(break);
+	SRCEXPDS_EXPRSINGLE_DECL(case);
+	SRCEXPDS_EXPRSINGLE_DECL(const);
+	SRCEXPDS_EXPRSINGLE_DECL(continue);
+	SRCEXPDS_EXPRSINGLE_DECL(default);
+	SRCEXPDS_EXPRSINGLE_DECL(delay);
+	SRCEXPDS_EXPRSINGLE_DECL(do);
+	SRCEXPDS_EXPRSINGLE_DECL(extern);
+	SRCEXPDS_EXPRSINGLE_DECL(for);
+	SRCEXPDS_EXPRSINGLE_DECL(function);
+	SRCEXPDS_EXPRSINGLE_DECL(goto);
+	SRCEXPDS_EXPRSINGLE_DECL(if);
+	SRCEXPDS_EXPRSINGLE_DECL(linespec);
+	SRCEXPDS_EXPRSINGLE_DECL(native);
+	SRCEXPDS_EXPRSINGLE_DECL(output);
+	SRCEXPDS_EXPRSINGLE_DECL(return);
+	SRCEXPDS_EXPRSINGLE_DECL(script);
+	SRCEXPDS_EXPRSINGLE_DECL(sizeof);
+	SRCEXPDS_EXPRSINGLE_DECL(switch);
+	SRCEXPDS_EXPRSINGLE_DECL(symbol);
+	SRCEXPDS_EXPRSINGLE_DECL(type);
+	SRCEXPDS_EXPRSINGLE_DECL(typedef);
+	SRCEXPDS_EXPRSINGLE_DECL(variable);
+	SRCEXPDS_EXPRSINGLE_DECL(void);
+	SRCEXPDS_EXPRSINGLE_DECL(while);
 
 	static VariableType const * make_expression_type(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
 

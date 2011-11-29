@@ -216,11 +216,11 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		return expr;
 	}
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_break(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(break)
 {
 	return create_branch_break(context, token.getPosition());
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_case(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(case)
 {
 	context->setAllowLabel(false);
 	bigsint value(make_expression(in, blocks, context)->makeObject()->resolveInt());
@@ -232,7 +232,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_case(Source
 	expr->addLabel(context->addLabelCase(value, token.getPosition()));
 	return expr;
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_const(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(const)
 {
 	VariableType const * type(make_expression_type(in, blocks, context));
 	std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
@@ -245,11 +245,11 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_const(Sourc
 
 	return create_value_variable(var, token.getPosition());
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_continue(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(continue)
 {
 	return create_branch_continue(context, token.getPosition());
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_default(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(default)
 {
 	in->get(SourceTokenC::TT_OP_COLON);
 
@@ -257,19 +257,19 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_default(Sou
 	expr->addLabel(context->addLabelCaseDefault(token.getPosition()));
 	return expr;
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_delay(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(delay)
 {
 	return create_root_delay(make_expression(in, blocks, context), context, token.getPosition());
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_out(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(output)
 {
-	return create_root_out(make_expression(in, blocks, context), token.getPosition());
+	return create_root_output(make_expression(in, blocks, context), token.getPosition());
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_return(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(return)
 {
 	return create_branch_return(make_expression(in, blocks, context), context, token.getPosition());
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_sizeof(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(sizeof)
 {
 	bool hasParentheses(in->peek().getType() == SourceTokenC::TT_OP_PARENTHESIS_O);
 
@@ -281,25 +281,25 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single_sizeof(Sour
 
 	return create_value_int(size, token.getPosition());
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_type(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(type)
 {
 	in->unget(token);
 	make_expression_type(in, blocks, context);
 
 	return create_value_data(VariableType::get_vt_void(), false, token.getPosition());
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_typedef(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(typedef)
 {
 	VariableType const * type(make_expression_type(in, blocks, context));
 	context->getVariableType_typedef(in->get(SourceTokenC::TT_IDENTIFIER), type);
 
 	return create_value_data(VariableType::get_vt_void(), false, token.getPosition());
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_void(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(void)
 {
 	return create_value_cast(make_expression(in, blocks, context), VariableType::get_vt_void(), token.getPosition());
 }
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_while(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(while)
 {
 	SourceContext contextCondition(context, SourceContext::CT_BLOCK);
 	SourceExpression::Pointer exprCondition(make_expression_single(in, blocks, &contextCondition));

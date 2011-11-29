@@ -29,7 +29,7 @@
 
 
 
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_linespec(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(linespec)
 {
 	// linespecName
 	std::string linespecName(in->get(SourceTokenC::TT_IDENTIFIER).getData());

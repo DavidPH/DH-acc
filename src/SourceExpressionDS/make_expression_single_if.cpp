@@ -27,7 +27,7 @@
 
 
 
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_if(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(if)
 {
 	SourceContext contextCondition(context, SourceContext::CT_BLOCK);
 	SourceExpression::Pointer exprCondition(make_expression_single(in, blocks, &contextCondition));

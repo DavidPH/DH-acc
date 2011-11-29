@@ -16,7 +16,7 @@
 
 /* SourceExpression/RootOut.cpp
 **
-** Defines the SourceExpression_RootOut class and methods.
+** Defines the SourceExpression_RootOutput class and methods.
 */
 
 #include "../SourceExpression.hpp"
@@ -27,12 +27,12 @@
 
 
 
-class SourceExpression_RootOut : public SourceExpression
+class SourceExpression_RootOutput : public SourceExpression
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_RootOut, SourceExpression);
+	MAKE_COUNTER_CLASS_BASE(SourceExpression_RootOutput, SourceExpression);
 
 public:
-	SourceExpression_RootOut(SourceExpression * expr, SourcePosition const & position);
+	SourceExpression_RootOutput(SourceExpression * expr, SourcePosition const & position);
 
 protected:
 	virtual void printDebug(std::ostream * out) const;
@@ -47,19 +47,19 @@ private:
 
 
 
-SourceExpression::Pointer SourceExpression::create_root_out(SourceExpression * expr, SourcePosition const & position)
+SourceExpression::Pointer SourceExpression::create_root_output(SourceExpression * expr, SourcePosition const & position)
 {
-	return new SourceExpression_RootOut(expr, position);
+	return new SourceExpression_RootOutput(expr, position);
 }
 
 
 
-SourceExpression_RootOut::SourceExpression_RootOut(SourceExpression * expr, SourcePosition const & position_) : Super(position_), _expr(expr)
+SourceExpression_RootOutput::SourceExpression_RootOutput(SourceExpression * expr, SourcePosition const & position_) : Super(position_), _expr(expr)
 {
 
 }
 
-void SourceExpression_RootOut::doOut(ObjectVector * objects, VariableType const * type) const
+void SourceExpression_RootOutput::doOut(ObjectVector * objects, VariableType const * type) const
 {
 	switch (type->vt)
 	{
@@ -262,9 +262,9 @@ void SourceExpression_RootOut::doOut(ObjectVector * objects, VariableType const 
 	objects->addToken(OCODE_PRINTCHARACTER);
 }
 
-void SourceExpression_RootOut::printDebug(std::ostream * out) const
+void SourceExpression_RootOutput::printDebug(std::ostream * out) const
 {
-	*out << "SourceExpression_RootOut(";
+	*out << "SourceExpression_RootOutput(";
 	Super::printDebug(out);
 	*out << " ";
 		*out << "expr=(";
@@ -273,7 +273,7 @@ void SourceExpression_RootOut::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_RootOut::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_RootOutput::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 

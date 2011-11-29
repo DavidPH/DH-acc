@@ -28,7 +28,7 @@
 
 
 
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_goto(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(goto)
 {
 	SourceTokenC gotoToken(in->get(SourceTokenC::TT_IDENTIFIER));
 

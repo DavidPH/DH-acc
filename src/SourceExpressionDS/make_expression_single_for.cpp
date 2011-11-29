@@ -26,7 +26,7 @@
 
 
 
-SourceExpression::Pointer SourceExpressionDS::make_expression_single_for(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+SRCEXPDS_EXPRSINGLE_DEFN(for)
 {
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
