@@ -171,6 +171,10 @@ static inline int _main()
 {
 	ObjectVector objects;
 
+	// Default target.
+	if (target_type == TARGET_UNKNOWN)
+		target_type = TARGET_Hexen;
+
 	// Read source file(s).
 	for (std::vector<std::string>::iterator arg(option::args_vector.begin()); arg != option::args_vector.end(); ++arg)
 		read_source(*arg, source_type, &objects);
@@ -189,16 +193,11 @@ static inline int _main()
 	ObjectExpression::do_deferred_allocation();
 	objects.optimize();
 
-	// Default target.
-	// TODO: Default to Hexen.
-	if (target_type == TARGET_UNKNOWN)
-		target_type = TARGET_ZDoom;
-
 	// Default output.
 	if (output_type == OUTPUT_UNKNOWN) switch (target_type)
 	{
 	case TARGET_Hexen: output_type = OUTPUT_ACS0; break;
-	case TARGET_HexPP: output_type = OUTPUT_ACS0; break;
+	case TARGET_HexPP: output_type = OUTPUT_ACSP; break;
 	case TARGET_ZDoom: output_type = OUTPUT_ACSE; break;
 	case TARGET_UNKNOWN: break;
 	}
