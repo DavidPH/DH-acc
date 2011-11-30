@@ -84,6 +84,7 @@ public:
 	static Pointer create_binary_and(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_array(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_assign(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+	static Pointer create_binary_assign_const(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_div(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_eq(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_ge(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);

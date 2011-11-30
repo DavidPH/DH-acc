@@ -39,6 +39,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_variable)
 
 	return create_value_variable(var, token.getPosition());
 }
+
 SRCEXPDS_EXPRSINGLE_DEFN(variable)
 {
 	bool external(token.getData() == "__extvar");
@@ -63,7 +64,16 @@ SRCEXPDS_EXPRSINGLE_DEFN(variable)
 
 	context->addVariable(var);
 
-	return create_value_variable(var, token.getPosition());
+	SourceExpression::Pointer expr(create_value_variable(var, token.getPosition()));
+
+	// Semi-hack so that const vars can be initialized.
+	if (in->peek().getType() == SourceTokenC::TT_OP_EQUALS)
+	{
+		in->get(SourceTokenC::TT_OP_EQUALS);
+		expr = create_binary_assign_const(expr, make_expression(in, blocks, context), token.getPosition());
+	}
+
+	return expr;
 }
 
 

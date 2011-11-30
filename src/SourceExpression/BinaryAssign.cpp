@@ -32,7 +32,7 @@ class SourceExpression_BinaryAssign : public SourceExpression_Binary
 	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryAssign, SourceExpression_Binary);
 
 public:
-	SourceExpression_BinaryAssign(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+	SourceExpression_BinaryAssign(SourceExpression * exprL, SourceExpression * exprR, bool allowConst, SourcePosition const & position);
 
 	virtual bool canMakeObject() const;
 
@@ -43,18 +43,24 @@ private:
 	virtual void virtual_makeObjects(ObjectVector * objects);
 
 	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+
+	bool _allowConst;
 };
 
 
 
 SourceExpression::Pointer SourceExpression::create_binary_assign(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
 {
-	return new SourceExpression_BinaryAssign(exprL, exprR, position);
+	return new SourceExpression_BinaryAssign(exprL, exprR, false, position);
+}
+SourceExpression::Pointer SourceExpression::create_binary_assign_const(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
+{
+	return new SourceExpression_BinaryAssign(exprL, exprR, true, position);
 }
 
 
 
-SourceExpression_BinaryAssign::SourceExpression_BinaryAssign(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, NULL, exprL_->getType(), position_)
+SourceExpression_BinaryAssign::SourceExpression_BinaryAssign(SourceExpression * exprL_, SourceExpression * exprR_, bool allowConst, SourcePosition const & position_) : Super(exprL_, exprR_, NULL, exprL_->getType(), position_), _allowConst(allowConst)
 {
 
 }
@@ -77,7 +83,7 @@ void SourceExpression_BinaryAssign::virtual_makeObjects(ObjectVector * objects)
 
 	if (evaluations == 1)
 	{
-		if (!exprL->getType()->constType)
+		if (!_allowConst && !exprL->getType()->constType)
 			throw SourceException("attempt to assign const type", position, getName());
 
 		exprR->makeObjectsGet(objects);
@@ -91,7 +97,7 @@ void SourceExpression_BinaryAssign::virtual_makeObjectsGet(ObjectVector * object
 
 	if (evaluations == 1)
 	{
-		if (!exprL->getType()->constType)
+		if (!_allowConst && !exprL->getType()->constType)
 			throw SourceException("attempt to assign const type", position, getName());
 
 		exprR->makeObjectsGet(objects);
