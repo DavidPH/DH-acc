@@ -25,11 +25,12 @@
 
 
 
-SourcePosition const SourcePosition::none;
+SourcePosition const SourcePosition::builtin("__builtin__", 0, 0);
+SourcePosition const SourcePosition::none("(none)", 0, 0);
 
 
 
-SourcePosition::SourcePosition() : filename(), line(0)
+SourcePosition::SourcePosition() : filename(), line(0), column(0)
 {
 
 }
