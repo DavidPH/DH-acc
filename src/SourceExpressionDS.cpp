@@ -242,7 +242,9 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 		case SourceTokenC::TT_OP_QUERY:
 		{
 			SourceContext contextIf(context, SourceContext::CT_BLOCK);
+			contextIf.setAllowLabel(false);
 			SourceExpression::Pointer exprIf(make_expression_single(in, blocks, &contextIf));
+			contextIf.setAllowLabel(true);
 
 			in->get(SourceTokenC::TT_OP_COLON);
 
