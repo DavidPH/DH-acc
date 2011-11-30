@@ -35,11 +35,11 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
 	// functionName
 	std::string functionName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
-	// functionNameObject
-	std::string functionNameObject(functionName);
-
 	// functionLabel
-	std::string functionLabel("function_" + functionNameObject);
+	std::string functionLabel("function_" + functionName);
+
+	// functionNameObject
+	std::string functionNameObject(functionLabel + "_id");
 
 	// functionArgTypes/Count functionReturn
 	std::vector<VariableType const *> functionArgTypes;
@@ -78,15 +78,15 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 	// functionName
 	std::string functionName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
-	// functionNameObject
-	std::string functionNameObject(functionName);
-
 	// functionLabel
 	std::string functionLabel;
 	if (token.getData() != "__extfunc")
 		functionLabel += context->makeLabel();
 	functionLabel += "function_";
-	functionLabel += functionNameObject;
+	functionLabel += functionName;
+
+	// functionNameObject
+	std::string functionNameObject(functionLabel + "_id");
 
 	// functionArgTypes/Names/Count functionReturn
 	std::vector<VariableType const *> functionArgTypes;
@@ -114,7 +114,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 	blocks->push_back(create_branch_return(create_value_data(functionReturn, true, token.getPosition()), &functionContext, token.getPosition()));
 
 	// functionVarCount
-	int functionVarCount(functionContext.getLimit(functionArgClass));
+	int functionVarCount(functionContext.getLimit(SourceVariable::SC_REGISTER));
 
 	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size(token.getPosition()));
 

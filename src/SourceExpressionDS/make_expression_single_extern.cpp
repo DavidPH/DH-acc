@@ -34,12 +34,12 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern)
 {
 	SourceTokenC externToken(in->get(SourceTokenC::TT_IDENTIFIER));
 
-	expression_single_handler_map::iterator it(_expression_single_handlers.find(externToken.getData()));
+	expression_single_handler_map::iterator it(_expression_single_extern_handlers.find(externToken.getData()));
 
 	if (it == _expression_single_handlers.end())
 		throw SourceException("unknown extern type", externToken.getPosition(), "SourceExpressionDS::make_expression_single_extern");
 
-	return it->second(in, token, blocks, context);
+	return it->second(in, externToken, blocks, context);
 }
 
 
