@@ -30,6 +30,38 @@
 
 
 
+SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
+{
+	// functionName
+	std::string functionName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+
+	// functionNameObject
+	std::string functionNameObject(functionName);
+
+	// functionLabel
+	std::string functionLabel("function_" + functionNameObject);
+
+	// functionArgTypes/Count functionReturn
+	std::vector<VariableType const *> functionArgTypes;
+	int functionArgCount;
+	VariableType const * functionReturn;
+	make_expression_arglist(in, blocks, context, &functionArgTypes, NULL, &functionArgCount, NULL, &functionReturn);
+
+	// functionVarType
+	VariableType const * functionVarType(VariableType::get_function(functionReturn, functionArgTypes));
+
+	// functionVariable
+	SourceVariable::Pointer functionVariable;
+	if (target_type == TARGET_HexPP)
+		functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionLabel, token.getPosition());
+	else
+		functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition());
+	context->addVariable(functionVariable);
+
+	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionArgCount, functionReturn->size(token.getPosition()), "");
+	return create_value_variable(functionVariable, token.getPosition());
+}
+
 SRCEXPDS_EXPRSINGLE_DEFN(function)
 {
 	// functionArgClass
@@ -50,7 +82,11 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 	std::string functionNameObject(functionName);
 
 	// functionLabel
-	std::string functionLabel("function_" + functionNameObject);
+	std::string functionLabel;
+	if (token.getData() != "__extfunc")
+		functionLabel += context->makeLabel();
+	functionLabel += "function_";
+	functionLabel += functionNameObject;
 
 	// functionArgTypes/Names/Count functionReturn
 	std::vector<VariableType const *> functionArgTypes;

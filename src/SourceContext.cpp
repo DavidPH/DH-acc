@@ -416,9 +416,12 @@ std::string SourceContext::makeLabelShort()
 	return oss.str();
 }
 
-std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const
+std::string SourceContext::makeNameObject(bool external, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const
 {
-	std::string nameObject(getLabel() + nameSource);
+	std::string nameObject;
+	if (!external)
+		nameObject += getLabel();
+	nameObject += nameSource;
 
 	switch (sc)
 	{
@@ -462,9 +465,12 @@ std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, Varia
 
 	return nameObject;
 }
-std::string SourceContext::makeNameObject(SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const
+std::string SourceContext::makeNameObject(bool external, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const
 {
-	std::string nameObject(getLabel() + nameSource);
+	std::string nameObject;
+	if (!external)
+		nameObject += getLabel();
+	nameObject += nameSource;
 
 	switch (sc)
 	{

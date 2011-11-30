@@ -239,6 +239,8 @@ operator enum
 operator extern
   Performs forward-declaration. Yields the thing declared.
     "extern" "__function" name arglist_return
+    "extern" "__script" name arglist_return
+    "extern" "__variable" storage_class type name
 
 operator for
   Performs iteration. Yields void. Creates a new context for initializer based

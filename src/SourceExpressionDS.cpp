@@ -28,7 +28,8 @@
 
 
 
-std::map<std::string, SourceExpressionDS::expression_single_handler> SourceExpressionDS::_expression_single_handlers;
+SourceExpressionDS::expression_single_handler_map SourceExpressionDS::_expression_single_handlers;
+SourceExpressionDS::expression_single_handler_map SourceExpressionDS::_expression_single_extern_handlers;
 
 
 
@@ -70,6 +71,10 @@ void SourceExpressionDS::init()
 	_expression_single_handlers["__variable"] = make_expression_single_variable;
 	_expression_single_handlers[  "void"]     = make_expression_single_void;
 	_expression_single_handlers[  "while"]    = make_expression_single_while;
+
+	_expression_single_extern_handlers["__function"] = make_expression_single_extern_function;
+	_expression_single_extern_handlers["__script"]   = make_expression_single_extern_script;
+	_expression_single_extern_handlers["__variable"] = make_expression_single_extern_variable;
 }
 
 bool SourceExpressionDS::is_expression_type(std::string const & data, SourceContext * context)
@@ -289,7 +294,7 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 
 		if (argContext)
 		{
-			std::string argNameObject(argContext->makeNameObject(argClass, argType, argName, SourcePosition::none));
+			std::string argNameObject(argContext->makeNameObject(false, argClass, argType, argName, SourcePosition::none));
 			SourceVariable::Pointer argVariable(SourceVariable::create_variable(argName, argType, argNameObject, argClass, SourcePosition::none));
 			argContext->addVariable(argVariable);
 		}

@@ -91,8 +91,8 @@ public:
 
 	std::string makeLabel();
 
-	std::string makeNameObject(SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const;
-	std::string makeNameObject(SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const;
+	std::string makeNameObject(bool external, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const;
+	std::string makeNameObject(bool external, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const;
 
 	void setAllowLabel(bool allow);
 

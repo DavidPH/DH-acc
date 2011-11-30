@@ -32,6 +32,33 @@
 
 
 
+SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
+{
+	// scriptName
+	std::string scriptName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+
+	// scriptArgTypes/Names/Count scriptReturn
+	std::vector<VariableType const *> scriptArgTypes;
+	int scriptArgCount;
+	VariableType const * scriptReturn;
+	make_expression_arglist(in, blocks, context, &scriptArgTypes, NULL, &scriptArgCount, NULL, &scriptReturn);
+
+	// scriptLabel
+	std::string scriptLabel("script_" + scriptName);
+
+	// scriptNameObject
+	std::string scriptNameObject(scriptLabel + "_id");
+
+	// scriptVarType
+	VariableType const * scriptVarType(VariableType::get_script(scriptReturn, scriptArgTypes));
+
+	// scriptVariable
+	SourceVariable::Pointer scriptVariable(SourceVariable::create_constant(scriptName, scriptVarType, scriptNameObject, token.getPosition()));
+	context->addVariable(scriptVariable);
+
+	return create_value_variable(scriptVariable, token.getPosition());
+}
+
 SRCEXPDS_EXPRSINGLE_DEFN(script)
 {
 	// scriptContext
@@ -98,9 +125,11 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 	}
 
 	// scriptLabel
-	std::string scriptLabel(context->getLabel() + "script_" + scriptNameSource);
-	if (scriptNameSource.empty())
-		scriptLabel += context->makeLabel() + ObjectExpression::get_filename();
+	std::string scriptLabel;
+	if (token.getData() != "__extscript")
+		scriptLabel += context->makeLabel();
+	scriptLabel += "script_";
+	scriptLabel += scriptNameSource;
 
 	// scriptNameObject
 	std::string scriptNameObject(scriptLabel + "_id");

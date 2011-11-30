@@ -57,7 +57,8 @@ public:
 	static SourceExpression::Pointer make_expressions(SourceTokenizerDS * tokenizer);
 
 private:
-	typedef SourceExpression::Pointer (*expression_single_handler)(SourceTokenizerDS * in, SourceTokenC const & token, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
+	typedef SourceExpression::Pointer (*expression_single_handler)(SRCEXPDS_EXPRSINGLE_ARGS);
+	typedef std::map<std::string, expression_single_handler> expression_single_handler_map;
 
 
 
@@ -79,6 +80,9 @@ private:
 	SRCEXPDS_EXPRSINGLE_DECL(delay);
 	SRCEXPDS_EXPRSINGLE_DECL(do);
 	SRCEXPDS_EXPRSINGLE_DECL(extern);
+	SRCEXPDS_EXPRSINGLE_DECL(extern_function);
+	SRCEXPDS_EXPRSINGLE_DECL(extern_script);
+	SRCEXPDS_EXPRSINGLE_DECL(extern_variable);
 	SRCEXPDS_EXPRSINGLE_DECL(for);
 	SRCEXPDS_EXPRSINGLE_DECL(function);
 	SRCEXPDS_EXPRSINGLE_DECL(goto);
@@ -99,7 +103,8 @@ private:
 
 	static VariableType const * make_expression_type(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
 
-	static std::map<std::string, expression_single_handler> _expression_single_handlers;
+	static expression_single_handler_map _expression_single_handlers;
+	static expression_single_handler_map _expression_single_extern_handlers;
 };
 
 

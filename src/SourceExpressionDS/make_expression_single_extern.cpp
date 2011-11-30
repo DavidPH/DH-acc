@@ -34,39 +34,12 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern)
 {
 	SourceTokenC externToken(in->get(SourceTokenC::TT_IDENTIFIER));
 
-	if (externToken.getData() == "__function")
-	{
-		// functionName
-		std::string functionName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+	expression_single_handler_map::iterator it(_expression_single_handlers.find(externToken.getData()));
 
-		// functionNameObject
-		std::string functionNameObject(functionName);
-
-		// functionLabel
-		std::string functionLabel("function_" + functionNameObject);
-
-		// functionArgTypes/Count functionReturn
-		std::vector<VariableType const *> functionArgTypes;
-		int functionArgCount;
-		VariableType const * functionReturn;
-		make_expression_arglist(in, blocks, context, &functionArgTypes, NULL, &functionArgCount, NULL, &functionReturn);
-
-		// functionVarType
-		VariableType const * functionVarType(VariableType::get_function(functionReturn, functionArgTypes));
-
-		// functionVariable
-		SourceVariable::Pointer functionVariable;
-		if (target_type == TARGET_HexPP)
-			functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionLabel, token.getPosition());
-		else
-			functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition());
-		context->addVariable(functionVariable);
-
-		ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionArgCount, functionReturn->size(token.getPosition()), "");
-		return create_value_variable(functionVariable, token.getPosition());
-	}
-	else
+	if (it == _expression_single_handlers.end())
 		throw SourceException("unknown extern type", externToken.getPosition(), "SourceExpressionDS::make_expression_single_extern");
+
+	return it->second(in, token, blocks, context);
 }
 
 
