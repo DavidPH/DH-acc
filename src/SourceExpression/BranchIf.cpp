@@ -124,7 +124,7 @@ void SourceExpression_BranchIf::virtual_makeObjectsGet(ObjectVector * objects)
 
 	_exprCondition->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCHZERO, objects->getValue(_exprElse ? _labelElse : _labelEnd));
+	objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(_exprElse ? _labelElse : _labelEnd));
 
 	objects->addLabel(_labelIf);
 	_exprIf->makeObjectsGet(objects);
@@ -132,7 +132,7 @@ void SourceExpression_BranchIf::virtual_makeObjectsGet(ObjectVector * objects)
 	if (_exprElse)
 	{
 		objects->setPosition(position);
-		objects->addToken(OCODE_BRANCH_IMM, objects->getValue(_labelEnd));
+		objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_labelEnd));
 		objects->addLabel(_labelElse);
 		_exprElse->makeObjectsGet(objects);
 	}

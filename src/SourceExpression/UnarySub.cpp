@@ -86,8 +86,11 @@ void SourceExpression_UnarySub::virtual_makeObjectsGet(ObjectVector * objects)
 	case VariableType::VT_CHAR:
 	case VariableType::VT_INT:
 	case VariableType::VT_POINTER:
+		objects->addToken(OCODE_MISC_NEGATE32I);
+		break;
+
 	case VariableType::VT_REAL:
-		objects->addToken(OCODE_NEGATE);
+		objects->addToken(OCODE_MISC_NEGATE32F);
 		break;
 
 	default:

@@ -74,10 +74,13 @@ void SourceExpression_BinaryEQ::virtual_makeObjectsGet(ObjectVector * objects)
 	case VariableType::VT_LINESPEC:
 	case VariableType::VT_NATIVE:
 	case VariableType::VT_POINTER:
-	case VariableType::VT_REAL:
 	case VariableType::VT_SCRIPT:
 	case VariableType::VT_STRING:
-		objects->addToken(OCODE_CMPEQ);
+		objects->addToken(OCODE_CMP_EQ32I);
+		break;
+
+	case VariableType::VT_REAL:
+		objects->addToken(OCODE_CMP_EQ32F);
 		break;
 
 	default:

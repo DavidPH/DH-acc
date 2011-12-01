@@ -39,7 +39,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 	if (typeTo->vt == VariableType::VT_VOID)
 	{
 		for (size_t i(typeFrom->size(position)); i--;)
-			objects->addToken(OCODE_DROP);
+			objects->addToken(OCODE_STACK_DROP32);
 
 		return;
 	}
@@ -75,8 +75,8 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 			throw SourceException("invalid VT to (" + TYPES_STRING + ")", position, "SourceExpression");
 
 		case VariableType::VT_BOOLHARD:
-			objects->addToken(OCODE_LOGICALNOT);
-			objects->addToken(OCODE_LOGICALNOT);
+			objects->addToken(OCODE_LOGICAL_NOT32I);
+			objects->addToken(OCODE_LOGICAL_NOT32I);
 			break;
 
 		case VariableType::VT_BOOLSOFT:
@@ -92,8 +92,8 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 			break;
 
 		case VariableType::VT_REAL:
-			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(16));
-			objects->addToken(OCODE_SHIFTL);
+			objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(16));
+			objects->addToken(OCODE_BITWISE_SHIFTL32);
 			break;
 		}
 		break;
@@ -119,18 +119,18 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 		case VariableType::VT_POINTER:
 		case VariableType::VT_SCRIPT:
 		case VariableType::VT_STRING:
-			objects->addToken(OCODE_LOGICALNOT);
-			objects->addToken(OCODE_LOGICALNOT);
+			objects->addToken(OCODE_LOGICAL_NOT32I);
+			objects->addToken(OCODE_LOGICAL_NOT32I);
 			break;
 
 		case VariableType::VT_BOOLSOFT:
 			break;
 
 		case VariableType::VT_REAL:
-			objects->addToken(OCODE_LOGICALNOT);
-			objects->addToken(OCODE_LOGICALNOT);
-			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(16));
-			objects->addToken(OCODE_SHIFTL);
+			objects->addToken(OCODE_LOGICAL_NOT32I);
+			objects->addToken(OCODE_LOGICAL_NOT32I);
+			objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(16));
+			objects->addToken(OCODE_BITWISE_SHIFTL32);
 			break;
 		}
 		break;
@@ -147,8 +147,8 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 			throw SourceException("invalid VT to (" + TYPES_STRING + ")", position, "SourceExpression");
 
 		case VariableType::VT_BOOLHARD:
-			objects->addToken(OCODE_LOGICALNOT);
-			objects->addToken(OCODE_LOGICALNOT);
+			objects->addToken(OCODE_LOGICAL_NOT32F);
+			objects->addToken(OCODE_LOGICAL_NOT32F);
 			break;
 
 		case VariableType::VT_BOOLSOFT:
@@ -164,8 +164,8 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 		case VariableType::VT_POINTER:
 		case VariableType::VT_SCRIPT:
 		case VariableType::VT_STRING:
-			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(16));
-			objects->addToken(OCODE_SHIFTR);
+			objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(16));
+			objects->addToken(OCODE_BITWISE_SHIFTR32);
 			break;
 		}
 		break;

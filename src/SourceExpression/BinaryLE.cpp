@@ -69,15 +69,21 @@ void SourceExpression_BinaryLE::virtual_makeObjectsGet(ObjectVector * objects)
 	switch (exprL->getType()->vt)
 	{
 	case VariableType::VT_CHAR:
-	case VariableType::VT_FUNCTION:
 	case VariableType::VT_INT:
+		objects->addToken(OCODE_CMP_LE32I);
+		break;
+
+	case VariableType::VT_FUNCTION:
 	case VariableType::VT_LINESPEC:
 	case VariableType::VT_NATIVE:
 	case VariableType::VT_POINTER:
-	case VariableType::VT_REAL:
 	case VariableType::VT_SCRIPT:
 	case VariableType::VT_STRING:
-		objects->addToken(OCODE_CMPLE);
+		objects->addToken(OCODE_CMP_LE32U);
+		break;
+
+	case VariableType::VT_REAL:
+		objects->addToken(OCODE_CMP_LE32F);
 		break;
 
 	default:

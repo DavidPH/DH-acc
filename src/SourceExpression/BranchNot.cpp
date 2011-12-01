@@ -66,7 +66,8 @@ void SourceExpression_BranchNot::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	objects->addToken(OCODE_LOGICALNOT);
+	// FIXME: Shuld be based on type.
+	objects->addToken(OCODE_LOGICAL_NOT32I);
 }
 
 

@@ -74,7 +74,7 @@ void SourceVariable::makeObjectsAccessPrep(ObjectVector * objects, std::vector<S
 				}
 
 				expr->makeObjectsGet(objects);
-				objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+				objects->addToken(OCODE_SET_TEMP_VAR);
 			}
 			else
 			{
@@ -94,9 +94,8 @@ void SourceVariable::makeObjectsAccessPrep(ObjectVector * objects, std::vector<S
 		}
 		else
 		{
-			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(0));
-
-			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+			objects->addTokenPushZero();
+			objects->addToken(OCODE_SET_TEMP_VAR);
 
 			*addressBase = objects->getValue(0);
 			*address = _type->size(position) - 1;

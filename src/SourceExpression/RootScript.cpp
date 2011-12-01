@@ -75,8 +75,9 @@ void SourceExpression_RootScript::virtual_makeObjectsGet(ObjectVector * objects)
 
 	if (_type->sizeCall(position) > 3) for (int i(_type->sizeCall(position) - 3); i--;)
 	{
-		objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
-		objects->addToken(OCODE_ASSIGNSCRIPTVAR, objects->getValue(i+3));
+		// FIXME: Should be based on type.
+		objects->addToken(OCODE_GET_AUTO_VAR32I, objects->getValue(i));
+		objects->addToken(OCODE_SET_REGISTER_VAR32I, objects->getValue(i+3));
 	}
 }
 

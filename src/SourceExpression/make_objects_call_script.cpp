@@ -53,16 +53,16 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, Variable
 	{
 		switch (type->sizeCall(position))
 		{
-		case 0: ocode = OCODE_LSPEC1; break;
-		case 1: ocode = OCODE_LSPEC2; break;
-		case 2: ocode = OCODE_LSPEC3; break;
-		case 3: ocode = OCODE_LSPEC4; break;
-		default: ocode = OCODE_LSPEC4; break;
+		case  0: ocode = OCODE_ACS_LINESPEC1; break;
+		case  1: ocode = OCODE_ACS_LINESPEC2; break;
+		case  2: ocode = OCODE_ACS_LINESPEC3; break;
+		case  3: ocode = OCODE_ACS_LINESPEC4; break;
+		default: ocode = OCODE_ACS_LINESPEC4; break;
 		}
 	}
 	else
 	{
-		ocode = OCODE_LSPEC5RESULT;
+		ocode = OCODE_ACSE_LINESPEC5RESULT;
 
 		// Dummy args.
 		for (size_t i(type->sizeCall(position)); i < 3; ++i)
@@ -74,17 +74,18 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, Variable
 		oretn = objects->getValue(type->callType->size(position) - 1);
 
 	// Stack for call.
-	objects->addToken(OCODE_ADDSTACK_IMM, stack);
+	objects->addToken(OCODE_ADDR_STACK_ADD_IMM, stack);
 
 	// Stack for extended return data.
-	if (oretn) objects->addToken(OCODE_ADDSTACK_IMM, oretn);
+	if (oretn) objects->addToken(OCODE_ADDR_STACK_ADD_IMM, oretn);
 
 	// Extended call data.
+	// FIXME: Should be based on type.
 	if (type->sizeCall(position) > 3) for (int i(type->sizeCall(position) - 3); i--;)
-		objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(i));
+		objects->addToken(OCODE_SET_AUTO_VAR32I, objects->getValue(i));
 
 	// Dummy arg.
-	if (ocode == OCODE_LSPEC5RESULT) objects->addTokenPushZero();
+	if (ocode == OCODE_ACSE_LINESPEC5RESULT) objects->addTokenPushZero();
 
 	// Call.
 	objects->addToken(ocode, ospec);
@@ -92,14 +93,15 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, Variable
 	// Extended return data.
 	if (oretn)
 	{
+		// FIXME: Should be based on type.
 		for (int i(-type->callType->size(position)); ++i;)
-			objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
+			objects->addToken(OCODE_GET_AUTO_VAR32I, objects->getValue(i));
 
-		objects->addToken(OCODE_SUBSTACK_IMM, oretn);
+		objects->addToken(OCODE_ADDR_STACK_SUB_IMM, oretn);
 	}
 
 	// Stack for call.
-	objects->addToken(OCODE_SUBSTACK_IMM, stack);
+	objects->addToken(OCODE_ADDR_STACK_SUB_IMM, stack);
 }
 
 

@@ -85,37 +85,38 @@ void SourceExpression_BranchReturn::virtual_makeObjectsGet(ObjectVector * object
 
 	if (target_type == TARGET_HexPP)
 	{
+		// FIXME: Should be based on type.
 		for (bigsint i(1); i <= retnSize; ++i)
-			objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(-i));
+			objects->addToken(OCODE_SET_AUTO_VAR32I, objects->getValue(-i));
 	}
 	else
 	{
+		// FIXME: Should be based on type.
 		for (bigsint i(1); i < retnSize; ++i)
-			objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(-i));
+			objects->addToken(OCODE_SET_AUTO_VAR32I, objects->getValue(-i));
 	}
 
 	switch (_type)
 	{
 	case SourceContext::CT_BLOCK:
-		objects->addToken(OCODE_TERMINATE);
+		objects->addToken(OCODE_ACS_SCRIPT_TERMINATE);
 		break;
 
 	case SourceContext::CT_FUNCTION:
 		if (target_type == TARGET_HexPP)
-			objects->addToken(OCODE_BRANCH);
+			objects->addToken(OCODE_BRANCH_GOTO);
 		else if (retnSize == 0)
-			objects->addToken(OCODE_RETURNZDACSVOID);
+			objects->addToken(OCODE_ACSE_RETNFUNCVOID);
 		else
-			objects->addToken(OCODE_RETURNZDACS);
+			objects->addToken(OCODE_ACSE_RETNFUNC);
 
 		break;
 
 	case SourceContext::CT_SCRIPT:
 		if (retnSize != 0)
-			objects->addToken(OCODE_SETRESULTVALUE);
+			objects->addToken(OCODE_ACSE_SCRIPT_SETRETURN);
 
-		objects->addToken(OCODE_TERMINATE);
-
+		objects->addToken(OCODE_ACS_SCRIPT_TERMINATE);
 		break;
 
 	default:

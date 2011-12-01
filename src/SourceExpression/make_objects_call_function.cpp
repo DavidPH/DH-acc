@@ -47,11 +47,11 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 	// Determine which OCODE to use.
 	ObjectCode ocode;
 	if (target_type == TARGET_HexPP)
-		ocode = OCODE_BRANCH_IMM;
+		ocode = OCODE_BRANCH_GOTO_IMM;
 	else if (type->callType->vt == VariableType::VT_VOID)
-		ocode = OCODE_CALLZDACSDISCARD;
+		ocode = OCODE_ACSE_CALLFUNCVOID_IMM;
 	else
-		ocode = OCODE_CALLZDACS;
+		ocode = OCODE_ACSE_CALLFUNC_IMM;
 
 	// Determine how many bytes of the return to handle.
 	bigsint retnSize(type->callType->size(position));
@@ -62,7 +62,7 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 	ObjectExpression::Pointer ostack(objects->getValueAdd(stack, retnSize));
 
 	// Advance the stack-pointer.
-	objects->addToken(OCODE_ADDSTACK_IMM, ostack);
+	objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
 
 	// For Hex++...
 	if (target_type == TARGET_HexPP)
@@ -71,11 +71,12 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 		bigsint callSize(type->sizeCall(position));
 
 		// ... Place args in auto vars.
+		// FIXME: Should be based on type.
 		for (bigsint i(callSize); i--;)
-			objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(i));
+			objects->addToken(OCODE_SET_AUTO_VAR32I, objects->getValue(i));
 
 		// ... Push return address.
-		objects->addToken(OCODE_PUSHNUMBER, ObjectExpression::create_value_symbol(labelReturn, position));
+		objects->addToken(OCODE_GET_LITERAL32I, ObjectExpression::create_value_symbol(labelReturn, position));
 	}
 
 	// The actual call. Data being the jump target.
@@ -83,11 +84,12 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 	objects->addLabel(labelReturn);
 
 	// For any return bytes we're handling, push them onto the stack.
+	// FIXME: Should be based on type.
 	for (bigsint i(-retnSize); i; ++i)
-		objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
+		objects->addToken(OCODE_GET_AUTO_VAR32I, objects->getValue(i));
 
 	// Reset the stack-pointer.
-	objects->addToken(OCODE_SUBSTACK_IMM, ostack);
+	objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
 }
 
 void SourceExpression::make_objects_call_function(ObjectVector * objects, VariableType const * type, SourceExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, std::string const & labelReturn, SourcePosition const & position)
@@ -96,7 +98,7 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 		throw SourceException("incorrect arg count to call function", position, "SourceExpression");
 
 	// Must push return address before target address.
-	objects->addToken(OCODE_PUSHNUMBER, ObjectExpression::create_value_symbol(labelReturn, position));
+	objects->addToken(OCODE_GET_LITERAL32I, ObjectExpression::create_value_symbol(labelReturn, position));
 
 	// Determine jump target.
 	data->makeObjectsGet(objects);
@@ -112,7 +114,7 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 	objects->setPosition(position);
 
 	// Determine which OCODE to use.
-	ObjectCode ocode(OCODE_BRANCH);
+	ObjectCode ocode(OCODE_BRANCH_GOTO);
 
 	// Determine how many bytes of the return to handle.
 	bigsint retnSize(type->callType->size(position));
@@ -120,25 +122,27 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 	ObjectExpression::Pointer ostack(objects->getValueAdd(stack, retnSize));
 
 	// Advance the stack-pointer.
-	objects->addToken(OCODE_ADDSTACK_IMM, ostack);
+	objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
 
 	// Determine how many bytes of the call to handle.
 	bigsint callSize(type->sizeCall(position));
 
 	// Place args in auto vars.
+	// FIXME: Should be based on type.
 	for (bigsint i(callSize); i--;)
-		objects->addToken(OCODE_ASSIGNSTACKVAR, objects->getValue(i));
+		objects->addToken(OCODE_SET_AUTO_VAR32I, objects->getValue(i));
 
 	// The actual call.
 	objects->addToken(ocode);
 	objects->addLabel(labelReturn);
 
 	// For any return bytes we're handling, push them onto the stack.
+	// FIXME: Should be based on type.
 	for (bigsint i(-retnSize); i; ++i)
-		objects->addToken(OCODE_PUSHSTACKVAR, objects->getValue(i));
+		objects->addToken(OCODE_GET_AUTO_VAR32I, objects->getValue(i));
 
 	// Reset the stack-pointer.
-	objects->addToken(OCODE_SUBSTACK_IMM, ostack);
+	objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
 }
 
 

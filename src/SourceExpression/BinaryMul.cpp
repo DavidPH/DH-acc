@@ -79,12 +79,15 @@ void SourceExpression_BinaryMul::virtual_makeObjectsGet(ObjectVector * objects)
 	{
 	case VariableType::VT_CHAR:
 	case VariableType::VT_INT:
+		objects->addToken(OCODE_MUL32I);
+		break;
+
 	case VariableType::VT_POINTER:
-		objects->addToken(OCODE_MUL);
+		objects->addToken(OCODE_MUL32U);
 		break;
 
 	case VariableType::VT_REAL:
-		objects->addToken(OCODE_MULFIXED);
+		objects->addToken(OCODE_MUL32F);
 		break;
 
 	default:

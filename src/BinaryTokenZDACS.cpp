@@ -50,121 +50,151 @@ void BinaryTokenZDACS::init()
 	#define DO_INIT(NAME,ARGC)\
 	_arg_counts[BCODE_##NAME] = ARGC
 
-	// BinaryTokenACS
-	DO_INIT(ADD,             0);
-	DO_INIT(ADDWORLDVAR,     1);
-	DO_INIT(AND,             0);
-	DO_INIT(ASSIGNMAPVAR,    1);
-	DO_INIT(ASSIGNSCRIPTVAR, 1);
-	DO_INIT(ASSIGNWORLDVAR,  1);
-	DO_INIT(BEGINPRINT,      0);
-	DO_INIT(BRANCH_IMM,      1);
-	DO_INIT(BRANCHCASE,      2);
-	DO_INIT(BRANCHNOTZERO,   1);
-	DO_INIT(BRANCHZERO,      1);
-	DO_INIT(CMPEQ,           0);
-	DO_INIT(CMPGE,           0);
-	DO_INIT(CMPGT,           0);
-	DO_INIT(CMPLE,           0);
-	DO_INIT(CMPLT,           0);
-	DO_INIT(CMPNE,           0);
-	DO_INIT(DELAY,           0);
-	DO_INIT(DELAY_IMM,       1);
-	DO_INIT(DIV,             0);
-	DO_INIT(DROP,            0);
-	DO_INIT(ENDPRINT,        0);
-	DO_INIT(IOR,             0);
-	DO_INIT(LOGICALAND,      0);
-	DO_INIT(LOGICALIOR,      0);
-	DO_INIT(LOGICALNOT,      0);
-	DO_INIT(LSPEC1,          1);
-	DO_INIT(LSPEC1_IMM,      2);
-	DO_INIT(LSPEC2,          1);
-	DO_INIT(LSPEC2_IMM,      3);
-	DO_INIT(LSPEC3,          1);
-	DO_INIT(LSPEC3_IMM,      4);
-	DO_INIT(LSPEC4,          1);
-	DO_INIT(LSPEC4_IMM,      5);
-	DO_INIT(LSPEC5,          1);
-	DO_INIT(LSPEC5_IMM,      6);
-	DO_INIT(MUL,             0);
-	DO_INIT(MOD,             0);
-	DO_INIT(NEGATE,          0);
-	DO_INIT(NOP,             0);
-	DO_INIT(PRINTCHARACTER,  0);
-	DO_INIT(PRINTNUMBER,     0);
-	DO_INIT(PRINTSTRING,     0);
-	DO_INIT(PUSHMAPVAR,      1);
-	DO_INIT(PUSHNUMBER,      1);
-	DO_INIT(PUSHSCRIPTVAR,   1);
-	DO_INIT(PUSHWORLDVAR,    1);
-	DO_INIT(RANDOM,          0);
-	DO_INIT(RANDOM_IMM,      2);
-	DO_INIT(RESTART,         0);
-	DO_INIT(SHIFTL,          0);
-	DO_INIT(SHIFTR,          0);
-	DO_INIT(SUB,             0);
-	DO_INIT(SUBWORLDVAR,     1);
-	DO_INIT(SUSPEND,         0);
-	DO_INIT(TERMINATE,       0);
-	DO_INIT(THING_COUNT,     0);
-	DO_INIT(THING_COUNT_IMM, 2);
-	DO_INIT(TIMER,           0);
-	DO_INIT(XOR,             0);
+	DO_INIT(NOP, 0);
 
-	// BinaryTokenZDACS
-	DO_INIT(ACTIVATOR_TID,       0);
-	DO_INIT(ASSIGNGLOBALARRAY,   1);
-	DO_INIT(ASSIGNGLOBALVAR,     1);
-	DO_INIT(ASSIGNMAPARRAY,      1);
-	DO_INIT(ASSIGNWORLDARRAY,    1);
-	DO_INIT(CALLZDACS,           1);
-	DO_INIT(CALLZDACSDISCARD,    1);
-	DO_INIT(CALLZDFUNC,          2);
-	DO_INIT(DIVFIXED,            0);
-	DO_INIT(DUP,                 0);
-	DO_INIT(ENDLOG,              0);
-	DO_INIT(GET_ACTOR_ANGLE,     0);
-	DO_INIT(GET_ACTOR_PITCH,     0);
-	DO_INIT(GET_ACTOR_PROPERTY,  0);
-	DO_INIT(GET_ACTOR_X,         0);
-	DO_INIT(GET_ACTOR_Y,         0);
-	DO_INIT(GET_ACTOR_Z,         0);
+	// Arithmetic
+	DO_INIT(ADD,       0);
+	DO_INIT(DIV,       0);
+	DO_INIT(DIV_FIXED, 0);
+	DO_INIT(MOD,       0);
+	DO_INIT(MUL,       0);
+	DO_INIT(MUL_FIXED, 0);
+	DO_INIT(SUB,       0);
+
+	// Bitwise
+	DO_INIT(BITWISE_AND,    0);
+	DO_INIT(BITWISE_IOR,    0);
+	DO_INIT(BITWISE_NOT,    0);
+	DO_INIT(BITWISE_SHIFTL, 0);
+	DO_INIT(BITWISE_SHIFTR, 0);
+	DO_INIT(BITWISE_XOR,    0);
+
+	// Branching
+	DO_INIT(BRANCH_CASE,     2);
+	DO_INIT(BRANCH_GOTO_IMM, 1);
+	DO_INIT(BRANCH_TRUE,     1);
+	DO_INIT(BRANCH_ZERO,     1);
+
+	// Comparison
+	DO_INIT(CMP_EQ, 0);
+	DO_INIT(CMP_GE, 0);
+	DO_INIT(CMP_GT, 0);
+	DO_INIT(CMP_LE, 0);
+	DO_INIT(CMP_LT, 0);
+	DO_INIT(CMP_NE, 0);
+
+	// Logical
+	DO_INIT(LOGICAL_AND, 0);
+	DO_INIT(LOGICAL_IOR, 0);
+	DO_INIT(LOGICAL_NOT, 0);
+
+	// Stack-ops
+	DO_INIT(STACK_DROP, 0);
+	DO_INIT(STACK_DUP,  0);
+	DO_INIT(STACK_SWAP, 0);
+
+	// Trigonometry
+	DO_INIT(TRIG_COS, 0);
+	DO_INIT(TRIG_SIN, 0);
+
+	// Variable Address
+
+	// Variable Get
+	DO_INIT(GET_GLOBALARRAY_VAR,    1);
+	DO_INIT(GET_GLOBALREGISTER_VAR, 1);
+	DO_INIT(GET_LITERAL,            1);
+	DO_INIT(GET_MAPARRAY_VAR,       1);
+	DO_INIT(GET_MAPREGISTER_VAR,    1);
+	DO_INIT(GET_REGISTER_VAR,       1);
+	DO_INIT(GET_TID_VAR,            0);
+	DO_INIT(GET_WORLDARRAY_VAR,     1);
+	DO_INIT(GET_WORLDREGISTER_VAR,  1);
+
+	// Variable Set
+	DO_INIT(SET_GLOBALARRAY_VAR,    1);
+	DO_INIT(SET_GLOBALREGISTER_VAR, 1);
+	DO_INIT(SET_MAPARRAY_VAR,       1);
+	DO_INIT(SET_MAPREGISTER_VAR,    1);
+	DO_INIT(SET_REGISTER_VAR,       1);
+	DO_INIT(SET_TID_VAR,            0);
+	DO_INIT(SET_WORLDARRAY_VAR,     1);
+	DO_INIT(SET_WORLDREGISTER_VAR,  1);
+
+	// Miscellaneous
+	DO_INIT(MISC_DELAY,      0);
+	DO_INIT(MISC_DELAY_IMM,  2);
+	DO_INIT(MISC_NATIVE,     2);
+	DO_INIT(MISC_NEGATE,     0);
+	DO_INIT(MISC_RANDOM,     0);
+	DO_INIT(MISC_RANDOM_IMM, 2);
+	DO_INIT(MISC_STRLEN,     0);
+
+	// ACS
+	DO_INIT(LINESPEC1,        1);
+	DO_INIT(LINESPEC1_IMM,    2);
+	DO_INIT(LINESPEC2,        1);
+	DO_INIT(LINESPEC2_IMM,    3);
+	DO_INIT(LINESPEC3,        1);
+	DO_INIT(LINESPEC3_IMM,    4);
+	DO_INIT(LINESPEC4,        1);
+	DO_INIT(LINESPEC4_IMM,    5);
+	DO_INIT(LINESPEC5,        1);
+	DO_INIT(LINESPEC5_IMM,    6);
+	DO_INIT(SCRIPT_RESTART,   0);
+	DO_INIT(SCRIPT_SUSPEND,   0);
+	DO_INIT(SCRIPT_TERMINATE, 0);
+	DO_INIT(THINGCOUNT,       0);
+	DO_INIT(THINGCOUNT_IMM,   2);
+	DO_INIT(TIMER,            0);
+
+	// ACS Common Extensions
+
+	// ACS Extensions
+	DO_INIT(CALLFUNC_IMM,        1);
+	DO_INIT(CALLFUNCVOID_IMM,    1);
+	DO_INIT(GET_ACTIVATOR_TID,   0);
 	DO_INIT(GET_AMMO_CAPACITY,   0);
+	DO_INIT(GET_TID_ANGLE,       0);
+	DO_INIT(GET_TID_PITCH,       0);
+	DO_INIT(GET_TID_X,           0);
+	DO_INIT(GET_TID_Y,           0);
+	DO_INIT(GET_TID_Z,           0);
 	DO_INIT(INVENTORY_CHECK,     0);
 	DO_INIT(INVENTORY_CHECK_IMM, 1);
 	DO_INIT(INVENTORY_GIVE,      0);
 	DO_INIT(INVENTORY_GIVE_IMM,  2);
 	DO_INIT(INVENTORY_TAKE,      0);
 	DO_INIT(INVENTORY_TAKE_IMM,  2);
-	DO_INIT(LSPEC5RESULT,        1);
-	DO_INIT(MULFIXED,            0);
-	DO_INIT(NOT,                 0);
-	DO_INIT(PLAYER_NUMBER,       0);
-	DO_INIT(PRINTFIXED,          0);
-	DO_INIT(PRINTHEX,            0);
-	DO_INIT(PUSHGLOBALARRAY,     1);
-	DO_INIT(PUSHGLOBALVAR,       1);
-	DO_INIT(PUSHMAPARRAY,        1);
-	DO_INIT(PUSHWORLDARRAY,      1);
-	DO_INIT(RETURNZDACS,         0);
-	DO_INIT(RETURNZDACSVOID,     0);
-	DO_INIT(SET_ACTOR_ANGLE,     0);
-	DO_INIT(SET_ACTOR_PITCH,     0);
-	DO_INIT(SET_ACTOR_POSITION,  0);
-	DO_INIT(SET_ACTOR_PROPERTY,  0);
+	DO_INIT(LINESPEC5RESULT,     1);
+	DO_INIT(PLAYERNUMBER,        0);
+	DO_INIT(RETNFUNC,            0);
+	DO_INIT(RETNFUNCVOID,        0);
+	DO_INIT(SCRIPT_SETRETURN,    0);
 	DO_INIT(SET_AMMO_CAPACITY,   0);
-	DO_INIT(SETRESULTVALUE,      0);
+	DO_INIT(SET_TID_ANGLE,       0);
+	DO_INIT(SET_TID_PITCH,       0);
+	DO_INIT(SET_TID_POSITION,    0);
 	DO_INIT(SPAWN,               0);
 	DO_INIT(SPAWN_IMM,           6);
 	DO_INIT(SPAWN_PROJECTILE,    0);
-	DO_INIT(STRLEN,              0);
-	DO_INIT(SWAP,                0);
-	DO_INIT(TRIG_COS,            0);
-	DO_INIT(TRIG_SIN,            0);
+
+	// ACS Printing
+	DO_INIT(PRINT_CHARACTER, 0);
+	DO_INIT(PRINT_END,       0);
+	DO_INIT(PRINT_END_BOLD,  0);
+	DO_INIT(PRINT_END_LOG,   0);
+	DO_INIT(PRINT_FIXED,     0);
+	DO_INIT(PRINT_NUM_DEC,   0);
+	DO_INIT(PRINT_NUM_HEX,   0);
+	DO_INIT(PRINT_START,     0);
+	DO_INIT(PRINT_STRING,    0);
 
 	// Other
-	DO_INIT(BRANCHTABLE, -1);
+	DO_INIT(BRANCH_TABLE, -1);
+
+	// Unsorted
+	DO_INIT(ADD_WORLDREGISTER_VAR, 1);
+	DO_INIT(SUB_WORLDREGISTER_VAR, 1);
 
 	#undef DO_INIT
 }
@@ -173,7 +203,7 @@ size_t BinaryTokenZDACS::size() const
 {
 	if (_arg_counts[_code] < 0) switch (_code)
 	{
-	case BCODE_BRANCHTABLE:
+	case BCODE_BRANCH_TABLE:
 		return _args.size()*6 + 4;
 
 	default:
@@ -187,17 +217,17 @@ void BinaryTokenZDACS::write(std::ostream * const out) const
 {
 	if (_arg_counts[_code] < 0) switch (_code)
 	{
-	case BCODE_BRANCHTABLE:
+	case BCODE_BRANCH_TABLE:
 		// TODO: BCODE_BRANCHCASESORTED
 
 		for (size_t i(0); i < _args.size(); i += 2)
 		{
-			write_32(out, BCODE_BRANCHCASE);
+			write_32(out, BCODE_BRANCH_CASE);
 			write_32(out, *_args[i+0]);
 			write_32(out, *_args[i+1]);
 		}
 
-		write_32(out, BCODE_DROP);
+		write_32(out, BCODE_STACK_DROP);
 
 		break;
 

@@ -80,9 +80,9 @@ void SourceExpression_RootDelay::virtual_makeObjectsGet(ObjectVector * objects)
 	objects->setPosition(position);
 
 	ObjectExpression::Pointer stack(objects->getValue(_stack));
-	objects->addToken(OCODE_ADDSTACK_IMM, stack);
-	objects->addToken(OCODE_DELAY);
-	objects->addToken(OCODE_SUBSTACK_IMM, stack);
+	objects->addToken(OCODE_ADDR_STACK_ADD_IMM, stack);
+	objects->addToken(OCODE_MISC_DELAY32);
+	objects->addToken(OCODE_ADDR_STACK_SUB_IMM, stack);
 }
 
 

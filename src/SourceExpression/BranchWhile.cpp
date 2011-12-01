@@ -95,7 +95,7 @@ void SourceExpression_BranchWhile::virtual_makeObjectsGet(ObjectVector * objects
 	Super::recurse_makeObjectsGet(objects);
 
 	if (!_postCondition)
-		objects->addToken(OCODE_BRANCH_IMM, objects->getValue(_labelContinue));
+		objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_labelContinue));
 
 	objects->addLabel(_labelLoop);
 	_exprWhile->makeObjectsGet(objects);
@@ -103,7 +103,7 @@ void SourceExpression_BranchWhile::virtual_makeObjectsGet(ObjectVector * objects
 	objects->addLabel(_labelContinue);
 	_exprCondition->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCHNOTZERO, objects->getValue(_labelLoop));
+	objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(_labelLoop));
 
 	objects->addLabel(_labelBreak);
 }

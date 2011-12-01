@@ -89,8 +89,9 @@ void SourceExpression_ValueData::virtual_makeObjectsGet(ObjectVector * objects)
 
 	for (size_t i(_type->size(position)); i--;)
 	{
+		// FIXME: Should be based on type.
 		if (_garbage)
-			objects->addToken(OCODE_PUSHNUMBER, objects->getValue(0xDEADBEEF));
+			objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0xDEADBEEF));
 		else
 			objects->addTokenPushZero();
 	}

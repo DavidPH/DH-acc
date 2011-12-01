@@ -53,18 +53,18 @@ void SourceExpression::make_objects_call_linespec(ObjectVector * objects, Variab
 	{
 		switch (type->sizeCall(position))
 		{
-		case 0: ocode = OCODE_LSPEC1; objects->addTokenPushZero(); break;
-		case 1: ocode = OCODE_LSPEC1; break;
-		case 2: ocode = OCODE_LSPEC2; break;
-		case 3: ocode = OCODE_LSPEC3; break;
-		case 4: ocode = OCODE_LSPEC4; break;
-		case 5: ocode = OCODE_LSPEC5; break;
+		case 0: ocode = OCODE_ACS_LINESPEC1; objects->addTokenPushZero(); break;
+		case 1: ocode = OCODE_ACS_LINESPEC1; break;
+		case 2: ocode = OCODE_ACS_LINESPEC2; break;
+		case 3: ocode = OCODE_ACS_LINESPEC3; break;
+		case 4: ocode = OCODE_ACS_LINESPEC4; break;
+		case 5: ocode = OCODE_ACS_LINESPEC5; break;
 		default: throw SourceException("unexpected arg count to call linespec", position, "SourceExpression");
 		}
 	}
 	else
 	{
-		ocode = OCODE_LSPEC5RESULT;
+		ocode = OCODE_ACSE_LINESPEC5RESULT;
 
 		for (size_t i(type->sizeCall(position)); i < 5; ++i)
 			objects->addTokenPushZero();

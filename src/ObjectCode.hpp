@@ -31,178 +31,385 @@ class SourceTokenC;
 
 enum ObjectCode
 {
-	// BinaryTokenACS
-	OCODE_ACS_THING_COUNT,
-	OCODE_ACS_THING_COUNT_IMM,
-	OCODE_ACS_TIMER,
-	OCODE_ADD,
-	OCODE_ADDWORLDVAR,
-	OCODE_AND,
-	OCODE_ASSIGNMAPVAR,
-	OCODE_ASSIGNSCRIPTVAR,
-	OCODE_ASSIGNWORLDVAR,
-	OCODE_BEGINPRINT,
-	OCODE_BRANCH_IMM,
-	OCODE_BRANCHCASE,
-	OCODE_BRANCHNOTZERO,
-	OCODE_BRANCHZERO,
-	OCODE_CMPEQ,
-	OCODE_CMPGE,
-	OCODE_CMPGT,
-	OCODE_CMPLE,
-	OCODE_CMPLT,
-	OCODE_CMPNE,
-	OCODE_DELAY,
-	OCODE_DELAY_IMM,
-	OCODE_DIV,
-	OCODE_DROP,
-	OCODE_ENDPRINT,
-	OCODE_IOR,
-	OCODE_LOGICALAND,
-	OCODE_LOGICALIOR,
-	OCODE_LOGICALNOT,
-	OCODE_LSPEC1,
-	OCODE_LSPEC1_IMM,
-	OCODE_LSPEC2,
-	OCODE_LSPEC2_IMM,
-	OCODE_LSPEC3,
-	OCODE_LSPEC3_IMM,
-	OCODE_LSPEC4,
-	OCODE_LSPEC4_IMM,
-	OCODE_LSPEC5,
-	OCODE_LSPEC5_IMM,
-	OCODE_MUL,
-	OCODE_MOD,
-	OCODE_NEGATE,
-	OCODE_NOP,
-	OCODE_PRINTCHARACTER,
-	OCODE_PRINTNUMBER,
-	OCODE_PRINTSTRING,
-	OCODE_PUSHMAPVAR,
-	OCODE_PUSHNUMBER,
-	OCODE_PUSHSCRIPTVAR,
-	OCODE_PUSHWORLDVAR,
-	OCODE_RANDOM,
-	OCODE_RANDOM_IMM,
-	OCODE_RESTART,
-	OCODE_SHIFTL,
-	OCODE_SHIFTR,
-	OCODE_SUB,
-	OCODE_SUBWORLDVAR,
-	OCODE_SUSPEND,
-	OCODE_TERMINATE,
-	OCODE_XOR,
+   OCODE_NOP,
 
-	// BinaryTokenPPACS
+   // =========================================================================
+   // Arithmetic                                                              |
 
-	/* s:->mid */
-	OCODE_PPACS_GET_ACTIVATOR_MID,
+   OCODE_ADD32F,
+   OCODE_ADD32I,
+   OCODE_ADD32U,
 
-	/* s:var,mid->val */
-	OCODE_PPACS_GET_MOBJ_VAR,
+   OCODE_DIV32F,
+   OCODE_DIV32I,
+   OCODE_DIV32U,
 
-	/* s:mid */
-	OCODE_PPACS_SET_ACTIVATOR_MID,
+   OCODE_MOD32F,
+   OCODE_MOD32I,
+   OCODE_MOD32U,
 
-	/* s:val,var,mid */
-	OCODE_PPACS_SET_MOBJ_VAR,
+   OCODE_MUL32F,
+   OCODE_MUL32I,
+   OCODE_MUL32U,
 
-	// BinaryTokenZDACS
-	OCODE_ASSIGNGLOBALARRAY,
-	OCODE_ASSIGNGLOBALVAR,
-	OCODE_ASSIGNMAPARRAY,
-	OCODE_ASSIGNWORLDARRAY,
-	OCODE_CALLZDACS,
-	OCODE_CALLZDACSDISCARD,
-	OCODE_CALLZDFUNC,
-	OCODE_DIVFIXED,
-	OCODE_DUP,
-	OCODE_ENDLOG,
-	OCODE_LSPEC5RESULT,
-	OCODE_MULFIXED,
-	OCODE_NOT,
-	OCODE_PRINTFIXED,
-	OCODE_PRINTHEX,
-	OCODE_PUSHGLOBALARRAY,
-	OCODE_PUSHGLOBALVAR,
-	OCODE_PUSHMAPARRAY,
-	OCODE_PUSHWORLDARRAY,
-	OCODE_RETURNZDACS,
-	OCODE_RETURNZDACSVOID,
-	OCODE_SETRESULTVALUE,
-	OCODE_STRLEN,
-	OCODE_SWAP,
-	OCODE_ZDACS_ACTIVATOR_TID,
-	OCODE_ZDACS_GET_ACTOR_ANGLE,
-	OCODE_ZDACS_GET_ACTOR_PITCH,
-	OCODE_ZDACS_GET_ACTOR_PROPERTY,
-	OCODE_ZDACS_GET_ACTOR_X,
-	OCODE_ZDACS_GET_ACTOR_Y,
-	OCODE_ZDACS_GET_ACTOR_Z,
-	OCODE_ZDACS_GET_AMMO_CAPACITY,
-	OCODE_ZDACS_INVENTORY_CHECK,
-	OCODE_ZDACS_INVENTORY_CHECK_IMM,
-	OCODE_ZDACS_INVENTORY_GIVE,
-	OCODE_ZDACS_INVENTORY_GIVE_IMM,
-	OCODE_ZDACS_INVENTORY_TAKE,
-	OCODE_ZDACS_INVENTORY_TAKE_IMM,
-	OCODE_ZDACS_PLAYER_NUMBER,
-	OCODE_ZDACS_SET_ACTOR_ANGLE,
-	OCODE_ZDACS_SET_ACTOR_PITCH,
-	OCODE_ZDACS_SET_ACTOR_POSITION,
-	OCODE_ZDACS_SET_ACTOR_PROPERTY,
-	OCODE_ZDACS_SET_AMMO_CAPACITY,
-	OCODE_ZDACS_SPAWN,
-	OCODE_ZDACS_SPAWN_IMM,
-	OCODE_ZDACS_SPAWN_PROJECTILE,
+   OCODE_SUB32F,
+   OCODE_SUB32I,
+   OCODE_SUB32U,
 
-	OCODE_TRIG_COS,
-	OCODE_TRIG_SIN,
 
-	// ObjectToken
-	OCODE_ADDSTACK_IMM,
-	OCODE_ASSIGNGLOBALARRAY2,
-	OCODE_ASSIGNMAPARRAY2,
-	OCODE_ASSIGNPOINTER,
-	OCODE_ASSIGNSTACKARRAY2,
-	OCODE_ASSIGNSTACKVAR,
-	OCODE_ASSIGNSTATICARRAY2,
-	OCODE_ASSIGNSTATICVAR,
-	OCODE_ASSIGNWORLDARRAY2,
-	OCODE_BRANCHTABLE,
-	OCODE_LOGICALXOR,
-	OCODE_PUSHGLOBALARRAY2,
-	OCODE_PUSHMAPARRAY2,
-	OCODE_PUSHPOINTER,
-	OCODE_PUSHSTACKADDRESS,
-	OCODE_PUSHSTACKARRAY2,
-	OCODE_PUSHSTACKVAR,
-	OCODE_PUSHSTATICARRAY2,
-	OCODE_PUSHSTATICVAR,
-	OCODE_PUSHWORLDARRAY2,
-	OCODE_SUBSTACK_IMM,
+   // =========================================================================
+   // Bitwise                                                                 |
 
-	/* s:addr */
-	OCODE_BRANCH,
+   OCODE_BITWISE_AND32,
+   OCODE_BITWISE_IOR32,
+   OCODE_BITWISE_NOT32,
+   OCODE_BITWISE_SHIFTL32,
+   OCODE_BITWISE_SHIFTR32,
+   OCODE_BITWISE_XOR32,
 
-	/* a:offset s:addr->value */
-	OCODE_GET_POINTER_VAR,
 
-	/* noreturn */
-	OCODE_PRINT_END_ERROR,
+   // =========================================================================
+   // Branching                                                               |
 
-	/* a:offset s:value,addr */
-	OCODE_SET_POINTER_VAR,
+   OCODE_BRANCH_CASE,
+   OCODE_BRANCH_GOTO,
+   OCODE_BRANCH_GOTO_IMM,
+   OCODE_BRANCH_TABLE,
+   OCODE_BRANCH_TRUE,
+   OCODE_BRANCH_ZERO,
 
-	OCODE_NONE
+
+   // =========================================================================
+   // Comparison                                                              |
+
+   OCODE_CMP_EQ32F,
+   OCODE_CMP_EQ32I,
+
+   OCODE_CMP_GE32F,
+   OCODE_CMP_GE32I,
+   OCODE_CMP_GE32U,
+
+   OCODE_CMP_GT32F,
+   OCODE_CMP_GT32I,
+   OCODE_CMP_GT32U,
+
+   OCODE_CMP_LE32F,
+   OCODE_CMP_LE32I,
+   OCODE_CMP_LE32U,
+
+   OCODE_CMP_LT32F,
+   OCODE_CMP_LT32I,
+   OCODE_CMP_LT32U,
+
+   OCODE_CMP_NE32F,
+   OCODE_CMP_NE32I,
+
+
+   // =========================================================================
+   // Logical                                                                 |
+
+   OCODE_LOGICAL_AND32F,
+   OCODE_LOGICAL_AND32I,
+
+   OCODE_LOGICAL_IOR32F,
+   OCODE_LOGICAL_IOR32I,
+
+   OCODE_LOGICAL_NOT32F,
+   OCODE_LOGICAL_NOT32I,
+
+   OCODE_LOGICAL_XOR32F,
+   OCODE_LOGICAL_XOR32I,
+
+
+   // =========================================================================
+   // Stack-ops                                                               |
+
+   OCODE_STACK_DROP32,
+   OCODE_STACK_DUP32,
+   OCODE_STACK_SWAP32,
+
+
+   // =========================================================================
+   // Trigonometry                                                            |
+
+   OCODE_TRIG_COS32F,
+   OCODE_TRIG_SIN32F,
+
+
+   // =========================================================================
+   // Variable Address                                                        |
+
+   OCODE_ADDR_STACK_ADD,
+   OCODE_ADDR_STACK_ADD_IMM,
+
+   OCODE_ADDR_STACK_SUB,
+   OCODE_ADDR_STACK_SUB_IMM,
+
+   /* a:offset s:->addr */
+   OCODE_ADDR_STACK_VAR,
+
+
+   // =========================================================================
+   // Variable Get                                                            |
+
+   OCODE_GET_AUTO_VAR32F,
+   OCODE_GET_AUTO_VAR32I,
+
+   /* a:array s:addr->value */
+   OCODE_GET_GLOBALARRAY_VAR32F,
+   OCODE_GET_GLOBALARRAY_VAR32I,
+
+   /* a:array,offset s:->value */
+   OCODE_GET_GLOBALARRAYTEMP_VAR32F,
+   OCODE_GET_GLOBALARRAYTEMP_VAR32I,
+
+   OCODE_GET_GLOBALREGISTER_VAR32F,
+   OCODE_GET_GLOBALREGISTER_VAR32I,
+
+   OCODE_GET_LITERAL32F,
+   OCODE_GET_LITERAL32I,
+
+   /* a:array s:addr->value */
+   OCODE_GET_MAPARRAY_VAR32F,
+   OCODE_GET_MAPARRAY_VAR32I,
+
+   /* a:array,offset s:->value */
+   OCODE_GET_MAPARRAYTEMP_VAR32F,
+   OCODE_GET_MAPARRAYTEMP_VAR32I,
+
+   OCODE_GET_MAPREGISTER_VAR32F,
+   OCODE_GET_MAPREGISTER_VAR32I,
+
+   /* s:var,mid->val */
+   OCODE_GET_MOBJ_VAR32F,
+   OCODE_GET_MOBJ_VAR32I,
+
+   /* a:offset s:->value */
+   OCODE_GET_POINTER_VAR32F,
+   OCODE_GET_POINTER_VAR32I,
+
+   /* a:offset s:->value */
+   OCODE_GET_POINTERTEMP_VAR32F,
+   OCODE_GET_POINTERTEMP_VAR32I,
+
+   OCODE_GET_REGISTER_VAR32F,
+   OCODE_GET_REGISTER_VAR32I,
+
+   OCODE_GET_STATIC_VAR32F,
+   OCODE_GET_STATIC_VAR32I,
+
+   /* s:tid,var->val */
+   OCODE_GET_TID_VAR32F,
+   OCODE_GET_TID_VAR32I,
+
+   /* a:array s:addr->value */
+   OCODE_GET_WORLDARRAY_VAR32F,
+   OCODE_GET_WORLDARRAY_VAR32I,
+
+   /* a:array,offset s:->value */
+   OCODE_GET_WORLDARRAYTEMP_VAR32F,
+   OCODE_GET_WORLDARRAYTEMP_VAR32I,
+
+   OCODE_GET_WORLDREGISTER_VAR32F,
+   OCODE_GET_WORLDREGISTER_VAR32I,
+
+
+   // =========================================================================
+   // Variable Set                                                            |
+
+   OCODE_SET_AUTO_VAR32F,
+   OCODE_SET_AUTO_VAR32I,
+
+   /* a:array s:addr,value */
+   OCODE_SET_GLOBALARRAY_VAR32F,
+   OCODE_SET_GLOBALARRAY_VAR32I,
+
+   /* a:array,offset s:value */
+   OCODE_SET_GLOBALARRAYTEMP_VAR32F,
+   OCODE_SET_GLOBALARRAYTEMP_VAR32I,
+
+   OCODE_SET_GLOBALREGISTER_VAR32F,
+   OCODE_SET_GLOBALREGISTER_VAR32I,
+
+   /* a:array s:addr,value */
+   OCODE_SET_MAPARRAY_VAR32F,
+   OCODE_SET_MAPARRAY_VAR32I,
+
+   /* a:array,offset s:value */
+   OCODE_SET_MAPARRAYTEMP_VAR32F,
+   OCODE_SET_MAPARRAYTEMP_VAR32I,
+
+   OCODE_SET_MAPREGISTER_VAR32F,
+   OCODE_SET_MAPREGISTER_VAR32I,
+
+   /* s:val,var,mid */
+   OCODE_SET_MOBJ_VAR32F,
+   OCODE_SET_MOBJ_VAR32I,
+
+   /* a:offset s:value,addr */
+   OCODE_SET_POINTER_VAR32F,
+   OCODE_SET_POINTER_VAR32I,
+
+   /* a:offset s:value */
+   OCODE_SET_POINTERTEMP_VAR32F,
+   OCODE_SET_POINTERTEMP_VAR32I,
+
+   OCODE_SET_REGISTER_VAR32F,
+   OCODE_SET_REGISTER_VAR32I,
+
+   OCODE_SET_STATIC_VAR32F,
+   OCODE_SET_STATIC_VAR32I,
+
+   OCODE_SET_TEMP_VAR,
+
+   /* s:tid,var,val */
+   OCODE_SET_TID_VAR32F,
+   OCODE_SET_TID_VAR32I,
+
+   /* a:array s:addr,value */
+   OCODE_SET_WORLDARRAY_VAR32F,
+   OCODE_SET_WORLDARRAY_VAR32I,
+
+   /* a:array,offset s:value */
+   OCODE_SET_WORLDARRAYTEMP_VAR32F,
+   OCODE_SET_WORLDARRAYTEMP_VAR32I,
+
+   OCODE_SET_WORLDREGISTER_VAR32F,
+   OCODE_SET_WORLDREGISTER_VAR32I,
+
+
+   // =========================================================================
+   // Miscellaneous                                                           |
+
+   OCODE_MISC_DELAY32,
+   OCODE_MISC_DELAY32_IMM,
+
+   /* target-dependent */
+   OCODE_MISC_NATIVE,
+
+   OCODE_MISC_NEGATE32F,
+   OCODE_MISC_NEGATE32I,
+
+   OCODE_MISC_RANDOM32F,
+   OCODE_MISC_RANDOM32F_IMM,
+   OCODE_MISC_RANDOM32I,
+   OCODE_MISC_RANDOM32I_IMM,
+   OCODE_MISC_RANDOM32U,
+   OCODE_MISC_RANDOM32U_IMM,
+
+   OCODE_MISC_STRLEN,
+
+
+   // =========================================================================
+   // ACS                                                                     |
+
+   OCODE_ACS_LINESPEC1,
+   OCODE_ACS_LINESPEC1_IMM,
+   OCODE_ACS_LINESPEC2,
+   OCODE_ACS_LINESPEC2_IMM,
+   OCODE_ACS_LINESPEC3,
+   OCODE_ACS_LINESPEC3_IMM,
+   OCODE_ACS_LINESPEC4,
+   OCODE_ACS_LINESPEC4_IMM,
+   OCODE_ACS_LINESPEC5,
+   OCODE_ACS_LINESPEC5_IMM,
+   OCODE_ACS_SCRIPT_RESTART,
+   OCODE_ACS_SCRIPT_SUSPEND,
+   OCODE_ACS_SCRIPT_TERMINATE,
+   OCODE_ACS_THINGCOUNT,
+   OCODE_ACS_THINGCOUNT_IMM,
+   OCODE_ACS_TIMER,
+
+
+   // =========================================================================
+   // ACS Common Extensions                                                   |
+
+
+   // =========================================================================
+   // ACS Extensions                                                          |
+
+   OCODE_ACSE_CALLFUNC_IMM,
+   OCODE_ACSE_CALLFUNCVOID_IMM,
+
+   /* s:->mid */
+   OCODE_ACSE_GET_ACTIVATOR_MID,
+
+   /* s:->tid */
+   OCODE_ACSE_GET_ACTIVATOR_TID,
+
+   OCODE_ACSE_GET_AMMO_CAPACITY,
+
+   OCODE_ACSE_GET_TID_ANGLE,
+   OCODE_ACSE_GET_TID_PITCH,
+   OCODE_ACSE_GET_TID_X,
+   OCODE_ACSE_GET_TID_Y,
+   OCODE_ACSE_GET_TID_Z,
+
+   OCODE_ACSE_INVENTORY_CHECK,
+   OCODE_ACSE_INVENTORY_CHECK_IMM,
+   OCODE_ACSE_INVENTORY_GIVE,
+   OCODE_ACSE_INVENTORY_GIVE_IMM,
+   OCODE_ACSE_INVENTORY_TAKE,
+   OCODE_ACSE_INVENTORY_TAKE_IMM,
+
+   OCODE_ACSE_LINESPEC5RESULT,
+
+   OCODE_ACSE_PLAYERNUMBER,
+
+   OCODE_ACSE_RETNFUNC,
+   OCODE_ACSE_RETNFUNCVOID,
+
+   OCODE_ACSE_SCRIPT_RETURN,
+   OCODE_ACSE_SCRIPT_SETRETURN,
+
+   /* s:mid */
+   OCODE_ACSE_SET_ACTIVATOR_MID,
+
+   OCODE_ACSE_SET_AMMO_CAPACITY,
+
+   OCODE_ACSE_SET_TID_ANGLE,
+   OCODE_ACSE_SET_TID_PITCH,
+   OCODE_ACSE_SET_TID_POSITION,
+
+   OCODE_ACSE_SPAWN,
+   OCODE_ACSE_SPAWN_IMM,
+   OCODE_ACSE_SPAWN_PROJECTILE,
+
+
+   // =========================================================================
+   // ACS Printing                                                            |
+
+   OCODE_ACSP_CHARACTER,
+
+   OCODE_ACSP_END,
+   OCODE_ACSP_END_BOLD,
+   /* noreturn */
+   OCODE_ACSP_END_ERROR,
+   OCODE_ACSP_END_LOG,
+
+   OCODE_ACSP_NUM_DEC32F,
+   OCODE_ACSP_NUM_DEC32I,
+   OCODE_ACSP_NUM_DEC32U,
+
+   OCODE_ACSP_NUM_HEX32F,
+   OCODE_ACSP_NUM_HEX32I,
+   OCODE_ACSP_NUM_HEX32U,
+
+   OCODE_ACSP_START,
+
+   OCODE_ACSP_STRING,
+
+
+
+   OCODE_NONE
 };
 
 struct ObjectCodeSet
 {
-	ObjectCodeSet();
+   ObjectCodeSet();
 
-	ObjectCode ocode;
-	ObjectCode ocode_imm;
+   ObjectCode ocode;
+   ObjectCode ocode_imm;
 };
 
 

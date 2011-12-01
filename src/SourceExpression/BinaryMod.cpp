@@ -78,9 +78,15 @@ void SourceExpression_BinaryMod::virtual_makeObjectsGet(ObjectVector * objects)
 	{
 	case VariableType::VT_CHAR:
 	case VariableType::VT_INT:
+		objects->addToken(OCODE_MOD32I);
+		break;
+
 	case VariableType::VT_POINTER:
+		objects->addToken(OCODE_MOD32U);
+		break;
+
 	case VariableType::VT_REAL:
-		objects->addToken(OCODE_MOD);
+		objects->addToken(OCODE_MOD32F);
 		break;
 
 	default:

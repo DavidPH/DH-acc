@@ -116,7 +116,7 @@ void SourceExpression_BranchFor::virtual_makeObjectsGet(ObjectVector * objects)
 
 	_exprInit->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCH_IMM, objects->getValue(_labelCond));
+	objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_labelCond));
 
 	objects->addLabel(_labelLoop);
 	_exprLoop->makeObjectsGet(objects);
@@ -127,7 +127,7 @@ void SourceExpression_BranchFor::virtual_makeObjectsGet(ObjectVector * objects)
 	objects->addLabel(_labelCond);
 	_exprCond->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCHNOTZERO, objects->getValue(_labelLoop));
+	objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(_labelLoop));
 
 	objects->addLabel(_labelBreak);
 }

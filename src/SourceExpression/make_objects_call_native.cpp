@@ -43,7 +43,7 @@ void SourceExpression::make_objects_call_native(ObjectVector * objects, Variable
 
 	objects->setPosition(position);
 
-	ObjectCode ocode(OCODE_CALLZDFUNC);
+	ObjectCode ocode(OCODE_MISC_NATIVE);
 	ObjectExpression::Pointer oargc(objects->getValue((int)args.size()));
 	ObjectExpression::Pointer ofunc(data);
 

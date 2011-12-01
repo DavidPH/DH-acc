@@ -109,13 +109,15 @@ void SourceExpression_UnaryDereference::virtual_makeObjectsAccess(ObjectVector *
 	else
 	{
 		makeObjectsAddress(objects);
-		objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+		objects->addToken(OCODE_SET_TEMP_VAR);
 
+		// FIXME: Should be based on type.
 		for (int i(getType()->size(position)); i--;)
-			objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
+			objects->addToken(OCODE_SET_POINTERTEMP_VAR32I, objects->getValue(i));
 
+		// FIXME: Should be based on type.
 		for (int i(0); i < getType()->size(position); ++i)
-			objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
+			objects->addToken(OCODE_GET_POINTERTEMP_VAR32I, objects->getValue(i));
 	}
 }
 
@@ -133,7 +135,7 @@ void SourceExpression_UnaryDereference::virtual_makeObjectsGet(ObjectVector * ob
 	{
 		Super::recurse_makeObjectsGet(objects);
 		objects->addTokenPushZero();
-		objects->addToken(OCODE_CALLZDFUNC, objects->getValue(2), objects->getValue(15));
+		objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2), objects->getValue(15));
 	}
 	else
 	{
@@ -141,14 +143,16 @@ void SourceExpression_UnaryDereference::virtual_makeObjectsGet(ObjectVector * ob
 
 		if (getType()->size(position) == 1)
 		{
-			objects->addToken(OCODE_GET_POINTER_VAR, objects->getValue(0));
+			// FIXME: Should be based on type.
+			objects->addToken(OCODE_GET_POINTER_VAR32I, objects->getValue(0));
 		}
 		else
 		{
-			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+			objects->addToken(OCODE_SET_TEMP_VAR);
 
+			// FIXME: Should be based on type.
 			for (int i(0); i < getType()->size(position); ++i)
-				objects->addToken(OCODE_PUSHPOINTER, objects->getValue(i));
+				objects->addToken(OCODE_GET_POINTERTEMP_VAR32I, objects->getValue(i));
 		}
 	}
 }
@@ -168,14 +172,16 @@ void SourceExpression_UnaryDereference::virtual_makeObjectsSet(ObjectVector * ob
 
 		if (getType()->size(position) == 1)
 		{
-			objects->addToken(OCODE_SET_POINTER_VAR, objects->getValue(0));
+			// FIXME: Should be based on type.
+			objects->addToken(OCODE_SET_POINTER_VAR32I, objects->getValue(0));
 		}
 		else
 		{
-			objects->addToken(OCODE_ASSIGNWORLDVAR, objects->getValue(1));
+			objects->addToken(OCODE_SET_TEMP_VAR);
 
+			// FIXME: Should be based on type.
 			for (int i(getType()->size(position)); i--;)
-				objects->addToken(OCODE_ASSIGNPOINTER, objects->getValue(i));
+				objects->addToken(OCODE_SET_POINTERTEMP_VAR32I, objects->getValue(i));
 		}
 	}
 }

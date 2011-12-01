@@ -76,7 +76,7 @@ void ObjectVector::addToken(ObjectCode code, ObjectExpression * arg0, ObjectExpr
 }
 void ObjectVector::addTokenPushZero()
 {
-	addToken(OCODE_PUSHNUMBER, getValue(0));
+	addToken(OCODE_GET_LITERAL32I, getValue(0));
 }
 
 ObjectExpression::Pointer ObjectVector::getValue(bigreal f) const
@@ -157,7 +157,7 @@ void ObjectVector::optimize_pushdrop()
 	// PUSH/DROP removal.
 	for (size_t i(0); i+2 < _tokens.size();)
 	{
-		if (ocode_is_push_noarg(_tokens[i].getCode()) && _tokens[i+1].getCode() == OCODE_DROP)
+		if (ocode_is_push_noarg(_tokens[i].getCode()) && _tokens[i+1].getCode() == OCODE_STACK_DROP32)
 		{
 			std::vector<std::string> labels0(_tokens[i+0].getLabels());
 			std::vector<std::string> labels1(_tokens[i+1].getLabels());
@@ -187,7 +187,7 @@ void ObjectVector::optimize_pushpushswap()
 	{
 		if (ocode_is_push_noarg(_tokens[i].getCode()) &&
 			ocode_is_push_noarg(_tokens[i+1].getCode()) &&
-			_tokens[i+2].getCode() == OCODE_SWAP)
+			_tokens[i+2].getCode() == OCODE_STACK_SWAP32)
 		{
 			_tokens[i].swapData(_tokens[i+1]);
 

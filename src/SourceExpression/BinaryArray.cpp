@@ -133,7 +133,8 @@ void SourceExpression_BinaryArray::virtual_makeObjectsGet(ObjectVector * objects
 
 		objects->setPosition(position);
 
-		objects->addToken(OCODE_CALLZDFUNC, objects->getValue(2), objects->getValue(15));
+		// 2 = arg count, 15 = native get_char
+		objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2), objects->getValue(15));
 	}
 	else
 	{

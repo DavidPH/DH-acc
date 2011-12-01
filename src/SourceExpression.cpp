@@ -140,7 +140,7 @@ void SourceExpression::makeObjectsAddress(ObjectVector * objects)
 	{
 		recurse_makeObjectsAddress(objects);
 
-		objects->addToken(OCODE_PUSHNUMBER, makeObjectAddress());
+		objects->addToken(OCODE_GET_LITERAL32I, makeObjectAddress());
 	}
 	else
 		virtual_makeObjectsAddress(objects);
@@ -176,7 +176,8 @@ void SourceExpression::makeObjectsGet(ObjectVector * objects)
 	{
 		recurse_makeObjectsGet(objects);
 
-		objects->addToken(OCODE_PUSHNUMBER, makeObject());
+		// FIXME: Should be based on type.
+		objects->addToken(OCODE_GET_LITERAL32I, makeObject());
 	}
 	else
 		virtual_makeObjectsGet(objects);

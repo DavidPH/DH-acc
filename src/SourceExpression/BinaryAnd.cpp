@@ -79,7 +79,7 @@ void SourceExpression_BinaryAnd::virtual_makeObjectsGet(ObjectVector * objects)
 	case VariableType::VT_CHAR:
 	case VariableType::VT_INT:
 	case VariableType::VT_POINTER:
-		objects->addToken(OCODE_AND);
+		objects->addToken(OCODE_BITWISE_AND32);
 		break;
 
 	default:

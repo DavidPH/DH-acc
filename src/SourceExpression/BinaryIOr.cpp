@@ -79,7 +79,7 @@ void SourceExpression_BinaryIOr::virtual_makeObjectsGet(ObjectVector * objects)
 	case VariableType::VT_CHAR:
 	case VariableType::VT_INT:
 	case VariableType::VT_POINTER:
-		objects->addToken(OCODE_IOR);
+		objects->addToken(OCODE_BITWISE_IOR32);
 		break;
 
 	default:

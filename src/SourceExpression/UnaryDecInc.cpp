@@ -82,22 +82,23 @@ void SourceExpression_UnaryDecInc::doDecInc(ObjectVector * objects, bool inc)
 	{
 	case VariableType::VT_CHAR:
 	case VariableType::VT_INT:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue(1));
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));
 		break;
 
 	case VariableType::VT_POINTER:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue(getType()->refType->size(position)));
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(getType()->refType->size(position)));
 		break;
 
 	case VariableType::VT_REAL:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue(1.0));
+		objects->addToken(OCODE_GET_LITERAL32F, objects->getValue(1.0));
 		break;
 
 	default:
 		throw SourceException("invalid VT", position, getName());
 	}
 
-	objects->addToken(inc ? OCODE_ADD : OCODE_SUB);
+	// FIXME: Should be based on type.
+	objects->addToken(inc ? OCODE_ADD32I : OCODE_SUB32I);
 }
 
 void SourceExpression_UnaryDecInc::printDebug(std::ostream * out) const
@@ -139,13 +140,13 @@ void SourceExpression_UnaryDecInc::virtual_makeObjectsGet(ObjectVector * objects
 	// Only modify for the first evaluation.
 	if (evaluations == 1)
 	{
-		if (_suf) objects->addToken(OCODE_DUP);
+		if (_suf) objects->addToken(OCODE_STACK_DUP32);
 
 		doDecInc(objects, _inc);
 
 		expr->makeObjectsAccess(objects);
 
-		if (_suf) objects->addToken(OCODE_DROP);
+		if (_suf) objects->addToken(OCODE_STACK_DROP32);
 	}
 	// Have undo the inc/dec when re-evaluating.
 	else if (_suf)

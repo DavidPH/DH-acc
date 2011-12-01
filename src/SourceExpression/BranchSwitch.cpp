@@ -139,9 +139,9 @@ void SourceExpression_BranchSwitch::virtual_makeObjectsGet(ObjectVector * object
 		args.push_back(objects->getValue(_caseLabels[i]));
 	}
 
-	objects->addToken(OCODE_BRANCHTABLE, args);
+	objects->addToken(OCODE_BRANCH_TABLE, args);
 
-	objects->addToken(OCODE_BRANCH_IMM, objects->getValue(_caseDefault));
+	objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_caseDefault));
 
 	_exprCases->makeObjectsGet(objects);
 

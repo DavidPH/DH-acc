@@ -23,6 +23,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../ost_type.hpp"
 #include "../VariableType.hpp"
 
 
@@ -64,10 +65,10 @@ void SourceExpression_RootOutput::doOut(ObjectVector * objects, VariableType con
 	switch (type->vt)
 	{
 	case VariableType::VT_ARRAY:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('A'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('A'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('{'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 
 		for (size_t i(type->types.size()); i--;)
 		{
@@ -75,30 +76,30 @@ void SourceExpression_RootOutput::doOut(ObjectVector * objects, VariableType con
 
 			if (i)
 			{
-				objects->addToken(OCODE_PUSHNUMBER, objects->getValue(' '));
-				objects->addToken(OCODE_PRINTCHARACTER);
+				objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(' '));
+				objects->addToken(OCODE_ACSP_CHARACTER);
 			}
 		}
 
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('}'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('A'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('}'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('A'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 
 		break;
 
 	case VariableType::VT_ASMFUNC:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('A'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('A'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_BLOCK:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('B'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('B'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('{'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 
 		for (size_t i(type->types.size()); i--;)
 		{
@@ -106,109 +107,109 @@ void SourceExpression_RootOutput::doOut(ObjectVector * objects, VariableType con
 
 			if (i)
 			{
-				objects->addToken(OCODE_PUSHNUMBER, objects->getValue(' '));
-				objects->addToken(OCODE_PRINTCHARACTER);
+				objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(' '));
+				objects->addToken(OCODE_ACSP_CHARACTER);
 			}
 		}
 
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('}'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('B'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('}'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('B'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 
 		break;
 
 	case VariableType::VT_BOOLHARD:
-		objects->addToken(OCODE_PRINTNUMBER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('B'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_ACSP_NUM_DEC32I);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('B'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_BOOLSOFT:
-		objects->addToken(OCODE_PRINTNUMBER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('B'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('S'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_ACSP_NUM_DEC32I);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('B'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('S'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_CHAR:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('\''));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('\''));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('\''));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('\''));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_ENUM:
-		objects->addToken(OCODE_PRINTNUMBER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('E'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_ACSP_NUM_DEC32I);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('E'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_FUNCTION:
-		objects->addToken(OCODE_PRINTNUMBER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('F'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_ACSP_NUM_DEC32U);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('F'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_INT:
-		objects->addToken(OCODE_PRINTNUMBER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('I'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_ACSP_NUM_DEC32I);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('I'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_LINESPEC:
-		objects->addToken(OCODE_PRINTNUMBER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('L'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_ACSP_NUM_DEC32U);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('L'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_NATIVE:
-		objects->addToken(OCODE_PRINTNUMBER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('N'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_ACSP_NUM_DEC32U);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('N'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_POINTER:
-		objects->addToken(OCODE_PRINTHEX);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_ACSP_NUM_HEX32U);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_REAL:
-		objects->addToken(OCODE_PRINTFIXED);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('F'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_ACSP_NUM_DEC32F);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('F'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_SCRIPT:
-		objects->addToken(OCODE_PRINTNUMBER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('P'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('S'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_ACSP_NUM_DEC32U);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('S'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_STRING:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('"'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PRINTSTRING);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('"'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('"'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_ACSP_STRING);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('"'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
 	case VariableType::VT_STRUCT:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('S'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('S'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('{'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 
 		for (size_t i(type->types.size()); i--;)
 		{
@@ -216,50 +217,50 @@ void SourceExpression_RootOutput::doOut(ObjectVector * objects, VariableType con
 
 			if (i)
 			{
-				objects->addToken(OCODE_PUSHNUMBER, objects->getValue(' '));
-				objects->addToken(OCODE_PRINTCHARACTER);
+				objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(' '));
+				objects->addToken(OCODE_ACSP_CHARACTER);
 			}
 		}
 
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('}'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('S'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('}'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('S'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 
 		break;
 
 	case VariableType::VT_UNION:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('U'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('{'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('U'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('{'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 
 		for (int i(type->size(position)); i--;)
 		{
-			objects->addToken(OCODE_PRINTHEX);
+			objects->addToken(OCODE_ACSP_NUM_HEX32U);
 
 			if (i)
 			{
-				objects->addToken(OCODE_PUSHNUMBER, objects->getValue(' '));
-				objects->addToken(OCODE_PRINTCHARACTER);
+				objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(' '));
+				objects->addToken(OCODE_ACSP_CHARACTER);
 			}
 		}
 
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('}'));
-		objects->addToken(OCODE_PRINTCHARACTER);
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('U'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('}'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('U'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 
 		break;
 
 	case VariableType::VT_VOID:
-		objects->addToken(OCODE_PUSHNUMBER, objects->getValue('V'));
-		objects->addToken(OCODE_PRINTCHARACTER);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('V'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 	}
 
-	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(';'));
-	objects->addToken(OCODE_PRINTCHARACTER);
+	objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(';'));
+	objects->addToken(OCODE_ACSP_CHARACTER);
 }
 
 void SourceExpression_RootOutput::printDebug(std::ostream * out) const
@@ -281,9 +282,14 @@ void SourceExpression_RootOutput::virtual_makeObjectsGet(ObjectVector * objects)
 
 	objects->setPosition(position);
 
-	objects->addToken(OCODE_BEGINPRINT);
+	objects->addToken(OCODE_ACSP_START);
+
 	doOut(objects, _expr->getType());
-	objects->addToken(OCODE_ENDLOG);
+
+	if (target_type == TARGET_Hexen)
+		objects->addToken(OCODE_ACSP_END);
+	else
+		objects->addToken(OCODE_ACSP_END_LOG);
 }
 
 

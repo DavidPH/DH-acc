@@ -47,19 +47,16 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 	{
 	case SC_AUTO:
 		if (dimensioned)
-		{
-			array = true;
-			ocode = OCODE_ASSIGNSTACKARRAY2;
-		}
-		else
-			ocode = OCODE_ASSIGNSTACKVAR;
+			throw SourceException("dimensioned SC_AUTO", position, "SourceVariable");
+
+		ocode = OCODE_SET_AUTO_VAR32I;
 		goto sc_register_case;
 
 	case SC_CONSTANT:
 		throw SourceException("makeObjectsSet on SC_CONSTANT", position, "SourceVariable");
 
 	case SC_REGISTER:
-		ocode = OCODE_ASSIGNSCRIPTVAR;
+		ocode = OCODE_SET_REGISTER_VAR32I;
 	sc_register_case:
 		switch (type->vt)
 		{
@@ -105,40 +102,37 @@ void SourceVariable::makeObjectsSet(ObjectVector * objects, SourcePosition const
 		break;
 
 	case SC_REGISTER_GLOBAL:
-		ocode = OCODE_ASSIGNGLOBALVAR;
+		ocode = OCODE_SET_GLOBALREGISTER_VAR32I;
 		goto sc_register_case;
 
 	case SC_REGISTER_MAP:
-		ocode = OCODE_ASSIGNMAPVAR;
+		ocode = OCODE_SET_MAPREGISTER_VAR32I;
 		goto sc_register_case;
 
 	case SC_REGISTER_WORLD:
-		ocode = OCODE_ASSIGNWORLDVAR;
+		ocode = OCODE_SET_WORLDREGISTER_VAR32I;
 		goto sc_register_case;
 
 	case SC_REGISTERARRAY_GLOBAL:
 		array = true;
-		ocode = OCODE_ASSIGNGLOBALARRAY2;
+		ocode = OCODE_SET_GLOBALARRAYTEMP_VAR32I;
 		goto sc_register_case;
 
 	case SC_REGISTERARRAY_MAP:
 		array = true;
-		ocode = OCODE_ASSIGNMAPARRAY2;
+		ocode = OCODE_SET_MAPARRAYTEMP_VAR32I;
 		goto sc_register_case;
 
 	case SC_REGISTERARRAY_WORLD:
 		array = true;
-		ocode = OCODE_ASSIGNWORLDARRAY2;
+		ocode = OCODE_SET_WORLDARRAYTEMP_VAR32I;
 		goto sc_register_case;
 
 	case SC_STATIC:
 		if (dimensioned)
-		{
-			array = true;
-			ocode = OCODE_ASSIGNSTATICARRAY2;
-		}
-		else
-			ocode = OCODE_ASSIGNSTATICVAR;
+			throw SourceException("dimensioned SC_STATIC", position, "SourceVariable");
+
+		ocode = OCODE_SET_STATIC_VAR32I;
 		goto sc_register_case;
 	}
 }

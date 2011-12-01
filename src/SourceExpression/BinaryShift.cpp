@@ -78,7 +78,7 @@ void SourceExpression_BinaryShift::virtual_makeObjectsGet(ObjectVector * objects
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	objects->addToken(_right ? OCODE_SHIFTR : OCODE_SHIFTL);
+	objects->addToken(_right ? OCODE_BITWISE_SHIFTR32 : OCODE_BITWISE_SHIFTL32);
 }
 
 

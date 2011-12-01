@@ -77,17 +77,17 @@ void SourceExpression_BranchIOr::virtual_makeObjectsGet(ObjectVector * objects)
 
 	exprL->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCHNOTZERO, objects->getValue(_label1));
+	objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(_label1));
 
 	exprR->makeObjectsGet(objects);
 	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCHNOTZERO, objects->getValue(_label1));
+	objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(_label1));
 
-	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(0));
-	objects->addToken(OCODE_BRANCH_IMM, objects->getValue(_labelEnd));
+	objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0));
+	objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_labelEnd));
 
 	objects->addLabel(_label1);
-	objects->addToken(OCODE_PUSHNUMBER, objects->getValue(1));
+	objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));
 
 	objects->addLabel(_labelEnd);
 }
