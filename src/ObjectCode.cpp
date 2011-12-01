@@ -111,6 +111,12 @@ _ocode_init_s::_ocode_init_s()
 	DO_INIT(CMP_NE32I);
 
 
+	// Conversion
+
+	DO_INIT(CONVERT_32F_32I);
+	DO_INIT(CONVERT_32I_32F);
+
+
 	// Logical
 
 	DO_INIT(LOGICAL_AND32F);

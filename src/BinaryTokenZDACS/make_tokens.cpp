@@ -36,6 +36,8 @@
 
 void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<BinaryTokenZDACS> * instructions)
 {
+	static ObjectExpression::Pointer const fracbits(ObjectExpression::create_value_int(16, SourcePosition::builtin));
+
 	static ObjectExpression::Pointer const indexAddr(ObjectExpression::create_value_int(0, SourcePosition::builtin));
 	static ObjectExpression::Pointer const indexStack(ObjectExpression::create_value_int(0, SourcePosition::builtin));
 	static ObjectExpression::Pointer const indexTemp(ObjectExpression::create_value_int(1, SourcePosition::builtin));
@@ -276,6 +278,20 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		if (args.size() % 2)
 			throw SourceException("uneven OCODE_BRANCH_TABLE", position, "BinaryTokenZDACS");
 		PUSH_TOKEN(BCODE_BRANCH_TABLE);
+		break;
+
+	// Conversion
+
+	case OCODE_CONVERT_32F_32I:
+		args.push_back(fracbits);
+		PUSH_TOKEN(BCODE_GET_LITERAL);
+		PUSH_TOKEN(BCODE_BITWISE_SHIFTR);
+		break;
+
+	case OCODE_CONVERT_32I_32F:
+		args.push_back(fracbits);
+		PUSH_TOKEN(BCODE_GET_LITERAL);
+		PUSH_TOKEN(BCODE_BITWISE_SHIFTL);
 		break;
 
 	// Variable Address

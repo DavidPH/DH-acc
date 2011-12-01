@@ -36,6 +36,8 @@
 
 void BinaryTokenPPACS::make_tokens(ObjectToken const & object, std::vector<BinaryTokenPPACS> * instructions)
 {
+	static ObjectExpression::Pointer const fracbits(ObjectExpression::create_value_int(16, SourcePosition::builtin));
+
 	static ObjectExpression::Pointer const indexTemp(ObjectExpression::create_value_int(1, SourcePosition::builtin));
 
 	static std::vector<std::string> const nolabels;
@@ -230,6 +232,20 @@ void BinaryTokenPPACS::make_tokens(ObjectToken const & object, std::vector<Binar
 
 	// Translations
 
+
+	// Conversion
+
+	case OCODE_CONVERT_32F_32I:
+		args.push_back(fracbits);
+		PUSH_TOKEN(BCODE_GET_LITERAL);
+		PUSH_TOKEN(BCODE_BITWISE_SHIFTR);
+		break;
+
+	case OCODE_CONVERT_32I_32F:
+		args.push_back(fracbits);
+		PUSH_TOKEN(BCODE_GET_LITERAL);
+		PUSH_TOKEN(BCODE_BITWISE_SHIFTL);
+		break;
 
 	// Variable Address
 

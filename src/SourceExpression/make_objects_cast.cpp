@@ -92,8 +92,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 			break;
 
 		case VariableType::VT_REAL:
-			objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(16));
-			objects->addToken(OCODE_BITWISE_SHIFTL32);
+			objects->addToken(OCODE_CONVERT_32I_32F);
 			break;
 		}
 		break;
@@ -129,8 +128,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 		case VariableType::VT_REAL:
 			objects->addToken(OCODE_LOGICAL_NOT32I);
 			objects->addToken(OCODE_LOGICAL_NOT32I);
-			objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(16));
-			objects->addToken(OCODE_BITWISE_SHIFTL32);
+			objects->addToken(OCODE_CONVERT_32I_32F);
 			break;
 		}
 		break;
@@ -164,8 +162,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 		case VariableType::VT_POINTER:
 		case VariableType::VT_SCRIPT:
 		case VariableType::VT_STRING:
-			objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(16));
-			objects->addToken(OCODE_BITWISE_SHIFTR32);
+			objects->addToken(OCODE_CONVERT_32F_32I);
 			break;
 		}
 		break;
