@@ -22,8 +22,8 @@
 #include "../ObjectExpression.hpp"
 
 #include "../ACSP.hpp"
+#include "../BinaryTokenACS.hpp"
 #include "../BinaryTokenPPACS.hpp"
-#include "../BinaryTokenZDACS.hpp"
 #include "../object_io.hpp"
 #include "../print_debug.hpp"
 
@@ -102,7 +102,7 @@ bigsint ObjectExpression_ValueSymbol::resolveInt() const
 
 void ObjectExpression_ValueSymbol::writeACSP(std::ostream * out) const
 {
-	BinaryTokenZDACS::write_32(out, ACSP_EXPR_SYMBOL);
+	BinaryTokenACS::write_32(out, ACSP_EXPR_SYMBOL);
 	BinaryTokenPPACS::write_string(out, _value);
 }
 

@@ -19,6 +19,7 @@
 ** Program start point.
 */
 
+#include "BinaryTokenACS.hpp"
 #include "BinaryTokenPPACS.hpp"
 #include "BinaryTokenZDACS.hpp"
 #include "ObjectExpression.hpp"
@@ -207,6 +208,14 @@ static inline int _main()
 
 	switch (target_type)
 	{
+	case TARGET_Hexen:
+	{
+		std::vector<BinaryTokenACS> instructions;
+		BinaryTokenACS::make_tokens(objects, &instructions);
+		BinaryTokenACS::write_all(&ofs, instructions);
+	}
+		break;
+
 	case TARGET_HexPP:
 	{
 		std::vector<BinaryTokenPPACS> instructions;

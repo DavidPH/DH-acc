@@ -2,6 +2,8 @@ add_executable(DH-acc
 	main.cpp
 
 	bignum.cpp
+	BinaryTokenACS.cpp
+	BinaryTokenACS/make_tokens.cpp
 	BinaryTokenPPACS.cpp
 	BinaryTokenPPACS/make_tokens.cpp
 	BinaryTokenZDACS.cpp

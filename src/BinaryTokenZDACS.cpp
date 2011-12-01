@@ -21,6 +21,7 @@
 
 #include "BinaryTokenZDACS.hpp"
 
+#include "BinaryTokenACS.hpp"
 #include "ObjectExpression.hpp"
 #include "ost_type.hpp"
 #include "SourceException.hpp"
@@ -222,12 +223,12 @@ void BinaryTokenZDACS::write(std::ostream * const out) const
 
 		for (size_t i(0); i < _args.size(); i += 2)
 		{
-			write_32(out, BCODE_BRANCH_CASE);
-			write_32(out, *_args[i+0]);
-			write_32(out, *_args[i+1]);
+			BinaryTokenACS::write_32(out, BCODE_BRANCH_CASE);
+			BinaryTokenACS::write_32(out, *_args[i+0]);
+			BinaryTokenACS::write_32(out, *_args[i+1]);
 		}
 
-		write_32(out, BCODE_STACK_DROP);
+		BinaryTokenACS::write_32(out, BCODE_STACK_DROP);
 
 		break;
 
@@ -236,49 +237,16 @@ void BinaryTokenZDACS::write(std::ostream * const out) const
 	}
 	else
 	{
-		write_32(out, _code);
+		BinaryTokenACS::write_32(out, _code);
 
 		for (int i(0); i < _arg_counts[_code]; ++i)
 		{
 			if ((size_t)i < _args.size())
-				write_32(out, *_args[i]);
+				BinaryTokenACS::write_32(out, *_args[i]);
 			else
-				write_32(out, 0);
+				BinaryTokenACS::write_32(out, 0);
 		}
 	}
-}
-
-void BinaryTokenZDACS::write_8(std::ostream * out, bigsint i)
-{
-	out->put(char((i >> 0) & 0xFF));
-}
-void BinaryTokenZDACS::write_16(std::ostream * out, bigsint i)
-{
-	out->put(char((i >> 0) & 0xFF));
-	out->put(char((i >> 8) & 0xFF));
-}
-void BinaryTokenZDACS::write_32(std::ostream * const out, ObjectExpression const & expr)
-{
-	switch (expr.getType())
-	{
-	case ObjectExpression::ET_FLOAT:
-		write_32(out, (bigsint)(expr.resolveFloat() * 65536.0));
-		break;
-
-	case ObjectExpression::ET_INT:
-		write_32(out, expr.resolveInt());
-		break;
-
-	default:
-		throw SourceException("invalid ET", SourcePosition::none, "BinaryTokenZDACS::write_32");
-	}
-}
-void BinaryTokenZDACS::write_32(std::ostream * out, bigsint i)
-{
-	out->put(char((i >>  0) & 0xFF));
-	out->put(char((i >>  8) & 0xFF));
-	out->put(char((i >> 16) & 0xFF));
-	out->put(char((i >> 24) & 0xFF));
 }
 
 void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions)
@@ -303,20 +271,20 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 	case OUTPUT_ACS0:
 		// 0
 		*out << 'A' << 'C' << 'S' << '\0';
-		write_32(out, ObjectExpression::get_address_count());
+		BinaryTokenACS::write_32(out, ObjectExpression::get_address_count());
 
 		// 8
 		for (std::vector<BinaryTokenZDACS>::const_iterator instr(instructions.begin()); instr != instructions.end(); ++instr)
 			instr->write(out);
 
 		// directoryOffset
-		write_32(out, scriptCount);
+		BinaryTokenACS::write_32(out, scriptCount);
 
 		// directoryOffset+4
 		ObjectExpression::iter_script(write_script, out);
 
 		// directoryOffset+4+(scriptCount*12)
-		write_32(out, stringCount);
+		BinaryTokenACS::write_32(out, stringCount);
 
 		// directoryOffset+4+(scriptCount*12)+4
 		ObjectExpression::iter_string(write_string_offset, out);
@@ -329,7 +297,7 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 	case OUTPUT_ACSE:
 		// Header
 		*out << 'A' << 'C' << 'S' << 'E';
-		write_32(out, ObjectExpression::get_address_count());
+		BinaryTokenACS::write_32(out, ObjectExpression::get_address_count());
 
 		// Instructions
 		for (std::vector<BinaryTokenZDACS>::const_iterator instr(instructions.begin()); instr != instructions.end(); ++instr)
@@ -344,7 +312,7 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 		ObjectExpression::iter_function(write_function_name_count);
 
 		if (string_offset)
-			write_32(&chunkout, string_offset/4);
+			BinaryTokenACS::write_32(&chunkout, string_offset/4);
 
 		string_offset += 4;
 
@@ -367,9 +335,9 @@ void BinaryTokenZDACS::write_all(std::ostream * const out, std::vector<BinaryTok
 		// STRL - String Literals
 		if (stringCount)
 		{
-			write_32(&chunkout, 0);
-			write_32(&chunkout, stringCount);
-			write_32(&chunkout, 0);
+			BinaryTokenACS::write_32(&chunkout, 0);
+			BinaryTokenACS::write_32(&chunkout, stringCount);
+			BinaryTokenACS::write_32(&chunkout, 0);
 		}
 
 		ObjectExpression::iter_string(write_string_offset, &chunkout);
@@ -394,7 +362,7 @@ void BinaryTokenZDACS::write_chunk(std::ostream * out, std::ostringstream * chun
 	if (chunk.size())
 	{
 		*out << chunkname;
-		write_32(out, chunk.size());
+		BinaryTokenACS::write_32(out, chunk.size());
 		*out << chunk;
 	}
 
@@ -406,11 +374,11 @@ void BinaryTokenZDACS::write_function(std::ostream * out, ObjectData_Function co
 	switch (output_type)
 	{
 	case OUTPUT_ACSE:
-		write_8 (out, f.argCount);
-		write_8 (out, f.varCount);
-		write_8 (out, !!f.retCount);
-		write_8 (out, 0);
-		write_32(out, *ObjectExpression::get_symbol(f.label, SourcePosition::none));
+		BinaryTokenACS::write_8 (out, f.argCount);
+		BinaryTokenACS::write_8 (out, f.varCount);
+		BinaryTokenACS::write_8 (out, !!f.retCount);
+		BinaryTokenACS::write_8 (out, 0);
+		BinaryTokenACS::write_32(out, *ObjectExpression::get_symbol(f.label, SourcePosition::none));
 		break;
 
 	default:
@@ -453,7 +421,7 @@ void BinaryTokenZDACS::write_function_name_offset(std::ostream * out, ObjectData
 	case OUTPUT_ACSE:
 		if (!f.external)
 		{
-			write_32(out, string_offset);
+			BinaryTokenACS::write_32(out, string_offset);
 			string_offset += f.name.size() + 1;
 		}
 		break;
@@ -468,8 +436,8 @@ void BinaryTokenZDACS::write_registerarray(std::ostream * out, ObjectData_Regist
 	switch (output_type)
 	{
 	case OUTPUT_ACSE:
-		write_32(out, r.number);
-		write_32(out, r.size);
+		BinaryTokenACS::write_32(out, r.number);
+		BinaryTokenACS::write_32(out, r.size);
 		break;
 
 	default:
@@ -482,16 +450,16 @@ void BinaryTokenZDACS::write_script(std::ostream * out, ObjectData_Script const 
 	switch (output_type)
 	{
 	case OUTPUT_ACS0:
-		write_32(out, (s.stype * 1000) + s.number);
-		write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
-		write_32(out, s.argCount <= 3 ? s.argCount : 3);
+		BinaryTokenACS::write_32(out, (s.stype * 1000) + s.number);
+		BinaryTokenACS::write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
+		BinaryTokenACS::write_32(out, s.argCount <= 3 ? s.argCount : 3);
 		break;
 
 	case OUTPUT_ACSE:
-		write_16(out, s.number);
-		write_16(out, s.stype);
-		write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
-		write_32(out, s.argCount <= 3 ? s.argCount : 3);
+		BinaryTokenACS::write_16(out, s.number);
+		BinaryTokenACS::write_16(out, s.stype);
+		BinaryTokenACS::write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
+		BinaryTokenACS::write_32(out, s.argCount <= 3 ? s.argCount : 3);
 		break;
 
 	default:
@@ -505,8 +473,8 @@ void BinaryTokenZDACS::write_script_flags(std::ostream * out, ObjectData_Script 
 	{
 	case OUTPUT_ACSE:
 		if (!s.flags) break;
-		write_16(out, s.number);
-		write_16(out, s.flags);
+		BinaryTokenACS::write_16(out, s.number);
+		BinaryTokenACS::write_16(out, s.flags);
 		break;
 
 	default:
@@ -521,8 +489,8 @@ void BinaryTokenZDACS::write_script_vars(std::ostream * out, ObjectData_Script c
 	case OUTPUT_ACSE:
 		if (s.varCount <= 10) break;
 		if (s.varCount <= 20 && target_type == TARGET_ZDoom) break;
-		write_16(out, s.number);
-		write_16(out, s.varCount);
+		BinaryTokenACS::write_16(out, s.number);
+		BinaryTokenACS::write_16(out, s.varCount);
 		break;
 
 	default:
@@ -543,11 +511,11 @@ void BinaryTokenZDACS::write_string_offset(std::ostream * out, ObjectData_String
 	switch (output_type)
 	{
 	case OUTPUT_ACS0:
-		write_32(out, ObjectExpression::get_address_count() + 4 + (ObjectExpression::get_script_count() * 12) + 4 + (ObjectExpression::get_string_count() * 4) + s.offset);
+		BinaryTokenACS::write_32(out, ObjectExpression::get_address_count() + 4 + (ObjectExpression::get_script_count() * 12) + 4 + (ObjectExpression::get_string_count() * 4) + s.offset);
 		break;
 
 	case OUTPUT_ACSE:
-		write_32(out, 12 + (ObjectExpression::get_string_count() * 4) + s.offset);
+		BinaryTokenACS::write_32(out, 12 + (ObjectExpression::get_string_count() * 4) + s.offset);
 		break;
 
 	default:

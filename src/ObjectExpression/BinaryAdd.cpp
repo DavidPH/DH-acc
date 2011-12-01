@@ -22,7 +22,7 @@
 #include "Binary.hpp"
 
 #include "../ACSP.hpp"
-#include "../BinaryTokenZDACS.hpp"
+#include "../BinaryTokenACS.hpp"
 
 
 
@@ -89,7 +89,7 @@ bigsint ObjectExpression_BinaryAdd::resolveInt() const
 
 void ObjectExpression_BinaryAdd::writeACSP(std::ostream * out) const
 {
-	BinaryTokenZDACS::write_32(out, ACSP_EXPR_ADD);
+	BinaryTokenACS::write_32(out, ACSP_EXPR_ADD);
 
 	exprL->writeACSP(out);
 	exprR->writeACSP(out);

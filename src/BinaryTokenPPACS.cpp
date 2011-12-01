@@ -22,7 +22,7 @@
 #include "BinaryTokenPPACS.hpp"
 
 #include "ACSP.hpp"
-#include "BinaryTokenZDACS.hpp"
+#include "BinaryTokenACS.hpp"
 #include "ObjectExpression.hpp"
 #include "ost_type.hpp"
 #include "SourceException.hpp"
@@ -178,14 +178,14 @@ void BinaryTokenPPACS::write(std::ostream * out) const
 	switch (output_type)
 	{
 	case OUTPUT_ACS0:
-		BinaryTokenZDACS::write_32(out, _code);
+		BinaryTokenACS::write_32(out, _code);
 
 		for (int i(0); i < _arg_counts[_code]; ++i)
 		{
 			if ((size_t)i < _args.size())
-				BinaryTokenZDACS::write_32(out, *_args[i]);
+				BinaryTokenACS::write_32(out, *_args[i]);
 			else
-				BinaryTokenZDACS::write_32(out, 0);
+				BinaryTokenACS::write_32(out, 0);
 		}
 		break;
 
@@ -193,7 +193,7 @@ void BinaryTokenPPACS::write(std::ostream * out) const
 		for (size_t i(0); i < _labels.size(); ++i)
 			write_label(out, _labels[i]);
 
-		BinaryTokenZDACS::write_32(&token, _code);
+		BinaryTokenACS::write_32(&token, _code);
 
 		for (int i(0); i < _arg_counts[_code]; ++i)
 		{
@@ -201,13 +201,13 @@ void BinaryTokenPPACS::write(std::ostream * out) const
 				_args[i]->writeACSP(&token);
 			else
 			{
-				BinaryTokenZDACS::write_32(&token, ACSP_EXPR_LITERAL);
-				BinaryTokenZDACS::write_32(&token, 0);
+				BinaryTokenACS::write_32(&token, ACSP_EXPR_LITERAL);
+				BinaryTokenACS::write_32(&token, 0);
 			}
 		}
 
-		BinaryTokenZDACS::write_32(out, ACSP_TOKEN_INSTRUCTION);
-		BinaryTokenZDACS::write_32(out, token.str().size());
+		BinaryTokenACS::write_32(out, ACSP_TOKEN_INSTRUCTION);
+		BinaryTokenACS::write_32(out, token.str().size());
 		*out << token.str();
 		break;
 
@@ -236,20 +236,20 @@ void BinaryTokenPPACS::write_all(std::ostream * out, std::vector<BinaryTokenPPAC
 	case OUTPUT_ACS0:
 		// 0
 		*out << 'A' << 'C' << 'S' << '\0';
-		BinaryTokenZDACS::write_32(out, ObjectExpression::get_address_count());
+		BinaryTokenACS::write_32(out, ObjectExpression::get_address_count());
 
 		// 8
 		for (std::vector<BinaryTokenPPACS>::const_iterator instr(instructions.begin()); instr != instructions.end(); ++instr)
 			instr->write(out);
 
 		// directoryOffset
-		BinaryTokenZDACS::write_32(out, scriptCount);
+		BinaryTokenACS::write_32(out, scriptCount);
 
 		// directoryOffset+4
 		ObjectExpression::iter_script(write_script, out);
 
 		// directoryOffset+4+(scriptCount*12)
-		BinaryTokenZDACS::write_32(out, stringCount);
+		BinaryTokenACS::write_32(out, stringCount);
 
 		// directoryOffset+4+(scriptCount*12)+4
 		ObjectExpression::iter_string(write_string_offset, out);
@@ -271,8 +271,8 @@ void BinaryTokenPPACS::write_all(std::ostream * out, std::vector<BinaryTokenPPAC
 		ObjectExpression::iter_static(write_static, out);
 		ObjectExpression::iter_string(write_string, out);
 
-		BinaryTokenZDACS::write_32(out, ACSP_TOKEN_EOF);
-		BinaryTokenZDACS::write_32(out, 0);
+		BinaryTokenACS::write_32(out, ACSP_TOKEN_EOF);
+		BinaryTokenACS::write_32(out, 0);
 
 		break;
 
@@ -289,11 +289,11 @@ void BinaryTokenPPACS::write_auto(std::ostream * out, ObjectData_Auto const & a)
 	{
 	case OUTPUT_ACSP:
 		write_string(&token, a.name);
-		BinaryTokenZDACS::write_32(&token, ACSP_EXPR_LITERAL);
-		BinaryTokenZDACS::write_32(&token, a.number);
+		BinaryTokenACS::write_32(&token, ACSP_EXPR_LITERAL);
+		BinaryTokenACS::write_32(&token, a.number);
 
-		BinaryTokenZDACS::write_32(out, ACSP_TOKEN_SYMBOL);
-		BinaryTokenZDACS::write_32(out, token.str().size());
+		BinaryTokenACS::write_32(out, ACSP_TOKEN_SYMBOL);
+		BinaryTokenACS::write_32(out, token.str().size());
 		*out << token.str();
 		break;
 
@@ -311,8 +311,8 @@ void BinaryTokenPPACS::write_label(std::ostream * out, std::string const & label
 	case OUTPUT_ACSP:
 		write_string(&token, label);
 
-		BinaryTokenZDACS::write_32(out, ACSP_TOKEN_LABEL);
-		BinaryTokenZDACS::write_32(out, token.str().size());
+		BinaryTokenACS::write_32(out, ACSP_TOKEN_LABEL);
+		BinaryTokenACS::write_32(out, token.str().size());
 		*out << token.str();
 		break;
 
@@ -328,23 +328,23 @@ void BinaryTokenPPACS::write_script(std::ostream * out, ObjectData_Script const 
 	switch (output_type)
 	{
 	case OUTPUT_ACS0:
-		BinaryTokenZDACS::write_32(out, (s.stype * 1000) + s.number);
-		BinaryTokenZDACS::write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
-		BinaryTokenZDACS::write_32(out, s.argCount <= 3 ? s.argCount : 3);
+		BinaryTokenACS::write_32(out, (s.stype * 1000) + s.number);
+		BinaryTokenACS::write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
+		BinaryTokenACS::write_32(out, s.argCount <= 3 ? s.argCount : 3);
 		break;
 
 	case OUTPUT_ACSP:
 		write_string(&token, s.name);
-		BinaryTokenZDACS::write_32(&token, ACSP_EXPR_SYMBOL);
+		BinaryTokenACS::write_32(&token, ACSP_EXPR_SYMBOL);
 		write_string(&token, s.label);
-		BinaryTokenZDACS::write_32(&token, s.number);
-		BinaryTokenZDACS::write_32(&token, s.stype);
-		BinaryTokenZDACS::write_32(&token, s.flags);
-		BinaryTokenZDACS::write_32(&token, s.argCount);
-		BinaryTokenZDACS::write_32(&token, s.varCount);
+		BinaryTokenACS::write_32(&token, s.number);
+		BinaryTokenACS::write_32(&token, s.stype);
+		BinaryTokenACS::write_32(&token, s.flags);
+		BinaryTokenACS::write_32(&token, s.argCount);
+		BinaryTokenACS::write_32(&token, s.varCount);
 
-		BinaryTokenZDACS::write_32(out, ACSP_TOKEN_SCRIPT);
-		BinaryTokenZDACS::write_32(out, token.str().size());
+		BinaryTokenACS::write_32(out, ACSP_TOKEN_SCRIPT);
+		BinaryTokenACS::write_32(out, token.str().size());
 		*out << token.str();
 		break;
 
@@ -364,17 +364,17 @@ void BinaryTokenPPACS::write_static(std::ostream * out, ObjectData_Static const 
 
 		if (s.number == -1)
 		{
-			BinaryTokenZDACS::write_32(&token, s.size);
-			BinaryTokenZDACS::write_32(out, ACSP_TOKEN_ALLOCATE);
+			BinaryTokenACS::write_32(&token, s.size);
+			BinaryTokenACS::write_32(out, ACSP_TOKEN_ALLOCATE);
 		}
 		else
 		{
-			BinaryTokenZDACS::write_32(&token, ACSP_EXPR_LITERAL);
-			BinaryTokenZDACS::write_32(&token, s.number);
-			BinaryTokenZDACS::write_32(out, ACSP_TOKEN_SYMBOL);
+			BinaryTokenACS::write_32(&token, ACSP_EXPR_LITERAL);
+			BinaryTokenACS::write_32(&token, s.number);
+			BinaryTokenACS::write_32(out, ACSP_TOKEN_SYMBOL);
 		}
 
-		BinaryTokenZDACS::write_32(out, token.str().size());
+		BinaryTokenACS::write_32(out, token.str().size());
 		*out << token.str();
 		break;
 
@@ -397,8 +397,8 @@ void BinaryTokenPPACS::write_string(std::ostream * out, ObjectData_String const 
 		write_string(&token, s.name);
 		write_string(&token, s.string);
 
-		BinaryTokenZDACS::write_32(out, ACSP_TOKEN_STRING);
-		BinaryTokenZDACS::write_32(out, token.str().size());
+		BinaryTokenACS::write_32(out, ACSP_TOKEN_STRING);
+		BinaryTokenACS::write_32(out, token.str().size());
 		*out << token.str();
 		break;
 
@@ -420,7 +420,7 @@ void BinaryTokenPPACS::write_string(std::ostream * out, std::string const & s)
 	case OUTPUT_ACSP:
 		length = (s.size() + 4) & ~3;
 		extra = length - s.size();
-		BinaryTokenZDACS::write_32(out, length);
+		BinaryTokenACS::write_32(out, length);
 		*out << s;
 		while (extra--) *out << '\0';
 		break;
@@ -434,7 +434,7 @@ void BinaryTokenPPACS::write_string_offset(std::ostream * out, ObjectData_String
 	switch (output_type)
 	{
 	case OUTPUT_ACS0:
-		BinaryTokenZDACS::write_32(out, ObjectExpression::get_address_count() + 4 + (ObjectExpression::get_script_count() * 12) + 4 + (ObjectExpression::get_string_count() * 4) + s.offset);
+		BinaryTokenACS::write_32(out, ObjectExpression::get_address_count() + 4 + (ObjectExpression::get_script_count() * 12) + 4 + (ObjectExpression::get_string_count() * 4) + s.offset);
 		break;
 
 	default:
