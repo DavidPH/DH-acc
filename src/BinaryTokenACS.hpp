@@ -125,6 +125,7 @@ public:
 
 
 	static void init();
+	static void init(int * argCounts);
 
 	static void make_tokens(ObjectToken const & object, std::vector<BinaryTokenACS> * instructions);
 	static void make_tokens(ObjectVector const & objects, std::vector<BinaryTokenACS> * instructions);

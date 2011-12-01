@@ -45,8 +45,12 @@ void BinaryTokenACS::addLabel(std::string const & label)
 
 void BinaryTokenACS::init()
 {
+	init(_arg_counts);
+}
+void BinaryTokenACS::init(int * argCounts)
+{
 	#define DO_INIT(NAME,ARGC)\
-	_arg_counts[BCODE_##NAME] = ARGC
+	argCounts[BCODE_##NAME] = ARGC
 
 	DO_INIT(NOP, 0);
 

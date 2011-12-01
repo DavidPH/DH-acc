@@ -22,7 +22,6 @@
 #include "BinaryTokenPPACS.hpp"
 
 #include "ACSP.hpp"
-#include "BinaryTokenACS.hpp"
 #include "ObjectExpression.hpp"
 #include "ost_type.hpp"
 #include "SourceException.hpp"
@@ -47,49 +46,25 @@ void BinaryTokenPPACS::addLabel(std::string const & label)
 
 void BinaryTokenPPACS::init()
 {
+	BinaryTokenACS::init(_arg_counts);
+
 	#define DO_INIT(NAME,ARGC)\
 	_arg_counts[BCODE_##NAME] = ARGC
 
-	DO_INIT(NOP, 0);
-
 	// Arithmetic
-	DO_INIT(ADD,       0);
-	DO_INIT(DIV,       0);
 	DO_INIT(DIV_FIXED, 0);
-	DO_INIT(MOD,       0);
-	DO_INIT(MUL,       0);
 	DO_INIT(MUL_FIXED, 0);
-	DO_INIT(SUB,       0);
 
 	// Bitwise
-	DO_INIT(BITWISE_AND,    0);
-	DO_INIT(BITWISE_IOR,    0);
-	DO_INIT(BITWISE_SHIFTL, 0);
-	DO_INIT(BITWISE_SHIFTR, 0);
-	DO_INIT(BITWISE_XOR,    0);
 
 	// Branching
-	DO_INIT(BRANCH_CASE,     2);
-	DO_INIT(BRANCH_GOTO,     0);
-	DO_INIT(BRANCH_GOTO_IMM, 1);
-	DO_INIT(BRANCH_TRUE,     1);
-	DO_INIT(BRANCH_ZERO,     1);
+	DO_INIT(BRANCH_GOTO, 0);
 
 	// Comparison
-	DO_INIT(CMP_EQ, 0);
-	DO_INIT(CMP_GE, 0);
-	DO_INIT(CMP_GT, 0);
-	DO_INIT(CMP_LE, 0);
-	DO_INIT(CMP_LT, 0);
-	DO_INIT(CMP_NE, 0);
 
 	// Logical
-	DO_INIT(LOGICAL_AND, 0);
-	DO_INIT(LOGICAL_IOR, 0);
-	DO_INIT(LOGICAL_NOT, 0);
 
 	// Stack-ops
-	DO_INIT(STACK_DROP, 0);
 
 	// Trigonometry
 
@@ -99,48 +74,20 @@ void BinaryTokenPPACS::init()
 	DO_INIT(ADDR_STACK_VAR, 1);
 
 	// Variable Get
-	DO_INIT(GET_AUTO_VAR,          1);
-	DO_INIT(GET_LITERAL,           1);
-	DO_INIT(GET_MAPREGISTER_VAR,   1);
-	DO_INIT(GET_MOBJ_VAR,          0);
-	DO_INIT(GET_POINTER_VAR,       1);
-	DO_INIT(GET_REGISTER_VAR,      1);
-	DO_INIT(GET_STATIC_VAR,        1);
-	DO_INIT(GET_WORLDREGISTER_VAR, 1);
+	DO_INIT(GET_AUTO_VAR,    1);
+	DO_INIT(GET_MOBJ_VAR,    0);
+	DO_INIT(GET_POINTER_VAR, 1);
+	DO_INIT(GET_STATIC_VAR,  1);
 
 	// Variable Set
-	DO_INIT(SET_AUTO_VAR,          1);
-	DO_INIT(SET_MAPREGISTER_VAR,   1);
-	DO_INIT(SET_MOBJ_VAR,          0);
-	DO_INIT(SET_POINTER_VAR,       1);
-	DO_INIT(SET_REGISTER_VAR,      1);
-	DO_INIT(SET_STATIC_VAR,        1);
-	DO_INIT(SET_WORLDREGISTER_VAR, 1);
+	DO_INIT(SET_AUTO_VAR,    1);
+	DO_INIT(SET_MOBJ_VAR,    0);
+	DO_INIT(SET_POINTER_VAR, 1);
+	DO_INIT(SET_STATIC_VAR,  1);
 
 	// Miscellaneous
-	DO_INIT(MISC_DELAY,      0);
-	DO_INIT(MISC_DELAY_IMM,  2);
-	DO_INIT(MISC_NEGATE,     0);
-	DO_INIT(MISC_RANDOM,     0);
-	DO_INIT(MISC_RANDOM_IMM, 2);
 
 	// ACS
-	DO_INIT(LINESPEC1,        1);
-	DO_INIT(LINESPEC1_IMM,    2);
-	DO_INIT(LINESPEC2,        1);
-	DO_INIT(LINESPEC2_IMM,    3);
-	DO_INIT(LINESPEC3,        1);
-	DO_INIT(LINESPEC3_IMM,    4);
-	DO_INIT(LINESPEC4,        1);
-	DO_INIT(LINESPEC4_IMM,    5);
-	DO_INIT(LINESPEC5,        1);
-	DO_INIT(LINESPEC5_IMM,    6);
-	DO_INIT(SCRIPT_RESTART,   0);
-	DO_INIT(SCRIPT_SUSPEND,   0);
-	DO_INIT(SCRIPT_TERMINATE, 0);
-	DO_INIT(THINGCOUNT,       0);
-	DO_INIT(THINGCOUNT_IMM,   2);
-	DO_INIT(TIMER,            0);
 
 	// ACS Common Extensions
 
@@ -149,19 +96,11 @@ void BinaryTokenPPACS::init()
 	DO_INIT(SET_ACTIVATOR_MID, 0);
 
 	// ACS Printing
-	DO_INIT(PRINT_CHARACTER, 0);
-	DO_INIT(PRINT_END,       0);
-	DO_INIT(PRINT_END_BOLD,  0);
 	DO_INIT(PRINT_END_ERROR, 0);
 	DO_INIT(PRINT_END_LOG,   0);
 	DO_INIT(PRINT_FIXED,     0);
-	DO_INIT(PRINT_NUM_DEC,   0);
-	DO_INIT(PRINT_START,     0);
-	DO_INIT(PRINT_STRING,    0);
 
 	// Unsorted
-	DO_INIT(ADD_WORLDREGISTER_VAR, 1);
-	DO_INIT(SUB_WORLDREGISTER_VAR, 1);
 
 	#undef DO_INIT
 }
