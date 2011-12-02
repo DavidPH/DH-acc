@@ -133,6 +133,7 @@ public:
 	static void write_ACSE_function_name(std::ostream * out, ObjectData_Function const & f);
 	static void write_ACSE_function_name_count(std::ostream * out, ObjectData_Function const & f);
 	static void write_ACSE_function_name_offset(std::ostream * out, ObjectData_Function const & f);
+	static void write_ACSE_library(std::ostream * out, std::string const & lib);
 	static void write_ACSE_registerarray(std::ostream * out, ObjectData_RegisterArray const & r);
 	static void write_ACSE_script(std::ostream * out, ObjectData_Script const & s);
 	static void write_ACSE_script_flags(std::ostream * out, ObjectData_Script const & s);

@@ -62,6 +62,10 @@ template<typename T> void BinaryTokenZDACS::output_ACSE(std::ostream * out, std:
 	ObjectExpression::iter_function(write_ACSE_function, &chunkout);
 	write_ACSE_chunk(out, &chunkout, "FUNC");
 
+	// LOAD - Load Libraries
+	ObjectExpression::iter_library(write_ACSE_library, &chunkout);
+	write_ACSE_chunk(out, &chunkout, "LOAD");
+
 	// SPTR - Script Pointers
 	ObjectExpression::iter_script(write_ACSE_script, &chunkout);
 	write_ACSE_chunk(out, &chunkout, "SPTR");

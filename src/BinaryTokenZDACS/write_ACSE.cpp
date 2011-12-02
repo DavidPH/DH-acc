@@ -45,6 +45,8 @@ void BinaryTokenZDACS::write_ACSE_chunk(std::ostream * out, std::ostringstream *
 
 void BinaryTokenZDACS::write_ACSE_function(std::ostream * out, ObjectData_Function const & f)
 {
+	if (f.external) return;
+
 	BinaryTokenACS::write_ACS0_8 (out, f.argCount);
 	BinaryTokenACS::write_ACS0_8 (out, f.varCount);
 	BinaryTokenACS::write_ACS0_8 (out, !!f.retCount);
@@ -72,6 +74,11 @@ void BinaryTokenZDACS::write_ACSE_function_name_offset(std::ostream * out, Objec
 
 	BinaryTokenACS::write_ACS0_32(out, _string_offset);
 	_string_offset += f.name.size() + 1;
+}
+
+void BinaryTokenZDACS::write_ACSE_library(std::ostream * out, std::string const & lib)
+{
+	*out << lib << '\0';
 }
 
 void BinaryTokenZDACS::write_ACSE_registerarray(std::ostream * out, ObjectData_RegisterArray const & r)
