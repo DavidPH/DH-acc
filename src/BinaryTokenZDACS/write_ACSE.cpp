@@ -45,33 +45,27 @@ void BinaryTokenZDACS::write_ACSE_chunk(std::ostream * out, std::ostringstream *
 
 void BinaryTokenZDACS::write_ACSE_function(std::ostream * out, ObjectData_Function const & f)
 {
-	if (f.external) return;
+	static ObjectExpression::Pointer const externalAddr(ObjectExpression::create_value_int(0, SourcePosition::none));
 
 	BinaryTokenACS::write_ACS0_8 (out, f.argCount);
 	BinaryTokenACS::write_ACS0_8 (out, f.varCount);
 	BinaryTokenACS::write_ACS0_8 (out, !!f.retCount);
 	BinaryTokenACS::write_ACS0_8 (out, 0);
-	BinaryTokenACS::write_ACS0_32(out, *ObjectExpression::get_symbol(f.label, SourcePosition::none));
+	BinaryTokenACS::write_ACS0_32(out, f.external ? *externalAddr : *ObjectExpression::get_symbol(f.label, SourcePosition::none));
 }
 
 void BinaryTokenZDACS::write_ACSE_function_name(std::ostream * out, ObjectData_Function const & f)
 {
-	if (f.external) return;
-
 	*out << f.name << '\0';
 }
 
 void BinaryTokenZDACS::write_ACSE_function_name_count(std::ostream * out, ObjectData_Function const & f)
 {
-	if (f.external) return;
-
 	_string_offset += 4;
 }
 
 void BinaryTokenZDACS::write_ACSE_function_name_offset(std::ostream * out, ObjectData_Function const & f)
 {
-	if (f.external) return;
-
 	BinaryTokenACS::write_ACS0_32(out, _string_offset);
 	_string_offset += f.name.size() + 1;
 }
