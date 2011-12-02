@@ -33,6 +33,10 @@ bigsint ObjectExpression::_address_count;
 
 std::string ObjectExpression::_filename;
 
+std::string ObjectExpression::_library_current;
+std::string ObjectExpression::_library_original;
+std::set<std::string> ObjectExpression::_library_table;
+
 std::map<std::string, ObjectData_Auto> ObjectExpression::_auto_table;
 
 std::map<std::string, ObjectData_Function> ObjectExpression::_function_table;
@@ -89,16 +93,9 @@ void ObjectExpression::add_auto(std::string const & name, bigsint size, bigsint 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount)
+void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, bool external)
 {
-	ObjectData_Function f = {label, "", name, argCount, -1, retCount, varCount, false};
-	_function_table[name] = f;
-
-	add_symbol(name, ET_INT);
-}
-void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, std::string const & library)
-{
-	ObjectData_Function f = {label, library, name, argCount, -1, retCount, varCount, true};
+	ObjectData_Function f = {label, _library_current, name, argCount, -1, retCount, varCount, external};
 	_function_table[name] = f;
 
 	add_symbol(name, ET_INT);
@@ -416,6 +413,16 @@ void ObjectExpression::set_address_count(bigsint addressCount)
 void ObjectExpression::set_filename(std::string const & filename)
 {
 	_filename = filename;
+}
+
+void ObjectExpression::set_library(std::string const & library)
+{
+	_library_current = library;
+
+	if (_library_original.empty())
+		_library_original = library;
+
+	_library_table.insert(library);
 }
 
 void ObjectExpression::writeObject(std::ostream * out) const

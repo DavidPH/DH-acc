@@ -272,6 +272,10 @@ operator if
     "if" expression_single(condition) expression_single(if-branch)
       [ "else" expression_single(else-branch) ]
 
+operator library
+  Sets the current ACSE library. Yields void.
+    "__library" "(" string ")"
+
 operator linespec
   Defines a function executed as a line special. Yields a pointer to the
   function.

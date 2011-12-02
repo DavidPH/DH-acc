@@ -31,6 +31,7 @@
 #include <istream>
 #include <map>
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -83,8 +84,7 @@ public:
 
 	static void add_auto(std::string const & name, bigsint size, bigsint number);
 
-	static void add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount);
-	static void add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, std::string const & library);
+	static void add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, bool external);
 
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
@@ -152,8 +152,9 @@ public:
 
 	static void iter_auto(void (*iter)(std::ostream *, ObjectData_Auto const &), std::ostream * out);
 
-	static void iter_function(void (*iter)(ObjectData_Function const &));
 	static void iter_function(void (*iter)(std::ostream *, ObjectData_Function const &), std::ostream * out);
+
+	static void iter_library(void (*iter)(std::ostream *, std::string const &), std::ostream * out);
 
 	static void iter_registerarray_map(void (*iter)(std::ostream *, ObjectData_RegisterArray const &), std::ostream * out);
 
@@ -169,6 +170,8 @@ public:
 
 	// Sets the current filename, translating to make it a valid symbol.
 	static void set_filename(std::string const & filename);
+
+	static void set_library(std::string const & library);
 
 	static void write_objects(std::ostream * out, ObjectVector const & objects);
 
@@ -228,6 +231,7 @@ protected:
 	static Pointer create_value_symbol(std::istream * in);
 
 private:
+	static void do_deferred_allocation_function(bigsint * number, ObjectData_Function & f);
 	static void do_deferred_allocation_register(std::map<std::string, ObjectData_Register> * registerTable, std::map<bigsint, bool> * registerUsed);
 	static void do_deferred_allocation_registerarray(std::map<std::string, ObjectData_RegisterArray> * registerarrayTable, std::map<bigsint, bool> * registerarrayUsed);
 
@@ -245,6 +249,10 @@ private:
 	static bigsint _address_count;
 
 	static std::string _filename;
+
+	static std::string _library_current;
+	static std::string _library_original;
+	static std::set<std::string> _library_table;
 
 	static std::map<std::string, ObjectData_Auto> _auto_table;
 

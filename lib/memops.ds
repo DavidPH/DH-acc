@@ -24,6 +24,8 @@
 
 #include "malloc.dh"
 
+__library("memops");
+
 
 
 __extfunc memchr(void const * mem, int data, int size) -> void *

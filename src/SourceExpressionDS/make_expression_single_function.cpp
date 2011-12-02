@@ -58,7 +58,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
 		functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition());
 	context->addVariable(functionVariable);
 
-	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionArgCount, functionReturn->size(token.getPosition()), "");
+	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionArgCount, functionReturn->size(token.getPosition()), true);
 	return create_value_variable(functionVariable, token.getPosition());
 }
 
@@ -116,7 +116,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 	// functionVarCount
 	int functionVarCount(functionContext.getLimit(SourceVariable::SC_REGISTER));
 
-	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size(token.getPosition()));
+	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size(token.getPosition()), false);
 
 	return create_value_variable(functionVariable, token.getPosition());
 }

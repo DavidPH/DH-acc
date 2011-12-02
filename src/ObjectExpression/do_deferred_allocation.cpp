@@ -21,6 +21,8 @@
 
 #include "../ObjectExpression.hpp"
 
+#include "iter.hpp"
+
 #include "../ost_type.hpp"
 
 
@@ -28,20 +30,11 @@
 void ObjectExpression::do_deferred_allocation()
 {
 	// Deferred function allocation.
-	// TODO: libraries
-	// TODO: explicit allocation
 	if (target_type == TARGET_ZDoom)
 	{
 		bigsint number(0);
 
-		for (std::map<std::string, ObjectData_Function>::iterator it(_function_table.begin()); it != _function_table.end(); ++it)
-		{
-			ObjectData_Function & f(it->second);
-
-			f.number = number++;
-
-			add_symbol(f.name, create_value_int(f.number, SourcePosition::none));
-		}
+		_iterator_function(_function_table, do_deferred_allocation_function, &number, _library_original);
 	}
 
 	// Stack pointer.
@@ -130,6 +123,12 @@ void ObjectExpression::do_deferred_allocation()
 		_string_table[0].offset = 0;
 	for (size_t i(1); i < _string_table.size(); ++i)
 		_string_table[i].offset = _string_table[i-1].offset + _string_table[i-1].string.size();
+}
+void ObjectExpression::do_deferred_allocation_function(bigsint * number, ObjectData_Function & f)
+{
+	f.number = (*number)++;
+
+	add_symbol(f.name, create_value_int(f.number, SourcePosition::none));
 }
 void ObjectExpression::do_deferred_allocation_register(std::map<std::string, ObjectData_Register> * registerTable, std::map<bigsint, bool> * registerUsed)
 {

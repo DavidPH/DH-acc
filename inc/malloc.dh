@@ -23,6 +23,8 @@
 
 
 
+__library("malloc");
+
 // Attempts to allocate and clear memory, returning NULL on failure.
 void extern __function calloc(int count, int size) -> void *;
 

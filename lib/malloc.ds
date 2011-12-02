@@ -25,6 +25,8 @@
 
 #include "malloc.dh"
 
+__library("malloc");
+
 
 
 // Store index between calls to malloc for efficiency.

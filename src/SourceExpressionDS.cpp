@@ -57,6 +57,7 @@ void SourceExpressionDS::init()
 	_expression_single_handlers["__function"] = make_expression_single_function;
 	_expression_single_handlers[  "goto"]     = make_expression_single_goto;
 	_expression_single_handlers[  "if"]       = make_expression_single_if;
+	_expression_single_handlers["__library"]  = make_expression_single_library;
 	_expression_single_handlers["__linespec"] = make_expression_single_linespec;
 	_expression_single_handlers["__native"]   = make_expression_single_native;
 	_expression_single_handlers["__output"]   = make_expression_single_output;

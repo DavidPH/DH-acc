@@ -29,6 +29,8 @@
 
 
 
+__library("memops");
+
 // Finds a value in a chunk of memory.
 void extern __function memchr(void const * mem, int data, int size) -> void *;
 

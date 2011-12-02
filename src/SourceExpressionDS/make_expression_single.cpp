@@ -261,6 +261,14 @@ SRCEXPDS_EXPRSINGLE_DEFN(delay)
 {
 	return create_root_delay(make_expression(in, blocks, context), context, token.getPosition());
 }
+SRCEXPDS_EXPRSINGLE_DEFN(library)
+{
+	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+	ObjectExpression::set_library(in->get(SourceTokenC::TT_STRING).getData());
+	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+	return create_value_data(VariableType::get_vt_void(), false, token.getPosition());
+}
 SRCEXPDS_EXPRSINGLE_DEFN(output)
 {
 	return create_root_output(make_expression(in, blocks, context), token.getPosition());

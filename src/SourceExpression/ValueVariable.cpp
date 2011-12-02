@@ -49,6 +49,8 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
+	virtual void virtual_makeObjects(ObjectVector * objects);
+
 	virtual void virtual_makeObjectsAccess(ObjectVector * objects);
 	virtual void virtual_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
 	virtual void virtual_makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names);
@@ -165,6 +167,13 @@ void SourceExpression_ValueVariable::printDebug(std::ostream * out) const
 		print_debug(out, _var);
 		*out << ")";
 	*out << ")";
+}
+
+void SourceExpression_ValueVariable::virtual_makeObjects(ObjectVector * objects)
+{
+	Super::recurse_makeObjects(objects);
+
+	//_var->makeObjects(objects, position);
 }
 
 void SourceExpression_ValueVariable::virtual_makeObjectsAccess(ObjectVector * objects)
