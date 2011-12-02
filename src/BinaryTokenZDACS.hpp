@@ -102,6 +102,8 @@ public:
 		BCODE_NONE
 	};
 
+	typedef std::vector<std::string>::const_iterator label_iterator;
+
 
 
 	BinaryTokenZDACS(BinaryCode code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<CounterPointer<ObjectExpression> > const & args);
@@ -110,9 +112,12 @@ public:
 
 	size_t getArgCount() const;
 
+	label_iterator label_begin() const;
+	label_iterator label_end() const;
+
 	size_t size() const;
 
-	void write(std::ostream * const out) const;
+	void writeACS0(std::ostream * const out) const;
 
 
 
@@ -121,19 +126,21 @@ public:
 	static void make_tokens(ObjectToken const & object, std::vector<BinaryTokenZDACS> * instructions);
 	static void make_tokens(ObjectVector const & objects, std::vector<BinaryTokenZDACS> * instructions);
 
+	template<typename T> static void output_ACSE(std::ostream * out, std::vector<T> const & instructions);
+
+	static void write_ACSE_chunk(std::ostream * out, std::ostringstream * chunkout, char const * chunkname);
+	static void write_ACSE_function(std::ostream * out, ObjectData_Function const & f);
+	static void write_ACSE_function_name(std::ostream * out, ObjectData_Function const & f);
+	static void write_ACSE_function_name_count(std::ostream * out, ObjectData_Function const & f);
+	static void write_ACSE_function_name_offset(std::ostream * out, ObjectData_Function const & f);
+	static void write_ACSE_registerarray(std::ostream * out, ObjectData_RegisterArray const & r);
+	static void write_ACSE_script(std::ostream * out, ObjectData_Script const & s);
+	static void write_ACSE_script_flags(std::ostream * out, ObjectData_Script const & s);
+	static void write_ACSE_script_vars(std::ostream * out, ObjectData_Script const & s);
+	static void write_ACSE_string(std::ostream * out, ObjectData_String const & s);
+	static void write_ACSE_string_offset(std::ostream * out, ObjectData_String const & s);
+
 	static void write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions);
-	static void write_chunk(std::ostream * out, std::ostringstream * chunkout, char const * chunkname);
-	static void write_function(std::ostream * out, ObjectData_Function const & f);
-	static void write_function_name(std::ostream * out, ObjectData_Function const & f);
-	static void write_function_name_count(ObjectData_Function const & f);
-	static void write_function_name_offset(std::ostream * out, ObjectData_Function const & f);
-	static void write_registerarray(std::ostream * out, ObjectData_RegisterArray const & r);
-	static void write_script(std::ostream * out, ObjectData_Script const & s);
-	static void write_script_flags(std::ostream * out, ObjectData_Script const & s);
-	static void write_script_vars(std::ostream * out, ObjectData_Script const & s);
-	static void write_string(std::ostream * out, ObjectData_String const & s);
-	static void write_string(std::ostream * const out, std::string const & s);
-	static void write_string_offset(std::ostream * out, ObjectData_String const & s);
 
 private:
 	std::vector<CounterPointer<ObjectExpression> > _args;
@@ -144,6 +151,8 @@ private:
 
 
 	static int _arg_counts[BCODE_NONE];
+
+	static bigsint _string_offset;
 };
 
 

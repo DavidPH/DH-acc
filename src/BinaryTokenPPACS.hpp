@@ -70,6 +70,8 @@ public:
 		BCODE_NONE
 	};
 
+	typedef std::vector<std::string>::const_iterator label_iterator;
+
 
 
 	BinaryTokenPPACS(BinaryCode code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<CounterPointer<ObjectExpression> > const & args);
@@ -78,9 +80,13 @@ public:
 
 	size_t getArgCount() const;
 
+	label_iterator label_begin() const;
+	label_iterator label_end() const;
+
 	size_t size() const;
 
-	void write(std::ostream * out) const;
+	void writeACS0(std::ostream * out) const;
+	void writeACSP(std::ostream * out) const;
 
 
 
@@ -89,14 +95,16 @@ public:
 	static void make_tokens(ObjectToken const & object, std::vector<BinaryTokenPPACS> * instructions);
 	static void make_tokens(ObjectVector const & objects, std::vector<BinaryTokenPPACS> * instructions);
 
+	template<typename T> static void output_ACSP(std::ostream * out, std::vector<T> const & instructions);
+
+	static void write_ACSP_auto(std::ostream * out, ObjectData_Auto const & a);
+	static void write_ACSP_label(std::ostream * out, std::string const & label);
+	static void write_ACSP_script(std::ostream * out, ObjectData_Script const & s);
+	static void write_ACSP_static(std::ostream * out, ObjectData_Static const & s);
+	static void write_ACSP_string(std::ostream * out, ObjectData_String const & s);
+	static void write_ACSP_string(std::ostream * out, std::string const & s);
+
 	static void write_all(std::ostream * out, std::vector<BinaryTokenPPACS> const & instructions);
-	static void write_auto(std::ostream * out, ObjectData_Auto const & a);
-	static void write_label(std::ostream * out, std::string const & label);
-	static void write_script(std::ostream * out, ObjectData_Script const & s);
-	static void write_static(std::ostream * out, ObjectData_Static const & s);
-	static void write_string(std::ostream * out, ObjectData_String const & s);
-	static void write_string(std::ostream * out, std::string const & s);
-	static void write_string_offset(std::ostream * out, ObjectData_String const & s);
 
 private:
 	std::vector<CounterPointer<ObjectExpression> > _args;

@@ -102,8 +102,8 @@ bigsint ObjectExpression_ValueSymbol::resolveInt() const
 
 void ObjectExpression_ValueSymbol::writeACSP(std::ostream * out) const
 {
-	BinaryTokenACS::write_32(out, ACSP_EXPR_SYMBOL);
-	BinaryTokenPPACS::write_string(out, _value);
+	BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_SYMBOL);
+	BinaryTokenPPACS::write_ACSP_string(out, _value);
 }
 
 void ObjectExpression_ValueSymbol::writeObject(std::ostream * out) const

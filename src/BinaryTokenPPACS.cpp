@@ -105,279 +105,73 @@ void BinaryTokenPPACS::init()
 	#undef DO_INIT
 }
 
+BinaryTokenPPACS::label_iterator BinaryTokenPPACS::label_begin() const
+{
+	return _labels.begin();
+}
+BinaryTokenPPACS::label_iterator BinaryTokenPPACS::label_end() const
+{
+	return _labels.end();
+}
+
 size_t BinaryTokenPPACS::size() const
 {
 	return _arg_counts[_code]*4 + 4;
 }
 
-void BinaryTokenPPACS::write(std::ostream * out) const
+void BinaryTokenPPACS::writeACS0(std::ostream * out) const
+{
+	BinaryTokenACS::write_ACS0_32(out, _code);
+
+	for (int i(0); i < _arg_counts[_code]; ++i)
+	{
+		if ((size_t)i < _args.size())
+			BinaryTokenACS::write_ACS0_32(out, *_args[i]);
+		else
+			BinaryTokenACS::write_ACS0_32(out, 0);
+	}
+}
+void BinaryTokenPPACS::writeACSP(std::ostream * out) const
 {
 	std::ostringstream token;
 
-	switch (output_type)
+	for (size_t i(0); i < _labels.size(); ++i)
+		write_ACSP_label(out, _labels[i]);
+
+	BinaryTokenACS::write_ACS0_32(&token, _code);
+
+	for (int i(0); i < _arg_counts[_code]; ++i)
 	{
-	case OUTPUT_ACS0:
-		BinaryTokenACS::write_32(out, _code);
-
-		for (int i(0); i < _arg_counts[_code]; ++i)
+		if ((size_t)i < _args.size())
+			_args[i]->writeACSP(&token);
+		else
 		{
-			if ((size_t)i < _args.size())
-				BinaryTokenACS::write_32(out, *_args[i]);
-			else
-				BinaryTokenACS::write_32(out, 0);
+			BinaryTokenACS::write_ACS0_32(&token, ACSP_EXPR_LITERAL);
+			BinaryTokenACS::write_ACS0_32(&token, 0);
 		}
-		break;
-
-	case OUTPUT_ACSP:
-		for (size_t i(0); i < _labels.size(); ++i)
-			write_label(out, _labels[i]);
-
-		BinaryTokenACS::write_32(&token, _code);
-
-		for (int i(0); i < _arg_counts[_code]; ++i)
-		{
-			if ((size_t)i < _args.size())
-				_args[i]->writeACSP(&token);
-			else
-			{
-				BinaryTokenACS::write_32(&token, ACSP_EXPR_LITERAL);
-				BinaryTokenACS::write_32(&token, 0);
-			}
-		}
-
-		BinaryTokenACS::write_32(out, ACSP_TOKEN_INSTRUCTION);
-		BinaryTokenACS::write_32(out, token.str().size());
-		*out << token.str();
-		break;
-
-	default:
-		throw SourceException("unknown output type for instruction", SourcePosition::none, "BinaryTokenPPACS");
 	}
+
+	BinaryTokenACS::write_ACS0_32(out, ACSP_TOKEN_INSTRUCTION);
+	BinaryTokenACS::write_ACS0_32(out, token.str().size());
+	*out << token.str();
 }
 
 void BinaryTokenPPACS::write_all(std::ostream * out, std::vector<BinaryTokenPPACS> const & instructions)
 {
-	ObjectExpression::set_address_count(8);
-
-	for (std::vector<BinaryTokenPPACS>::const_iterator instr(instructions.begin()); instr != instructions.end(); ++instr)
-	{
-		for (std::vector<std::string>::const_iterator label(instr->_labels.begin()); label != instr->_labels.end(); ++label)
-			ObjectExpression::add_label(*label);
-
-		ObjectExpression::add_address_count(instr->size());
-	}
-
-	bigsint const scriptCount(ObjectExpression::get_script_count());
-	bigsint const stringCount(ObjectExpression::get_string_count());
+	BinaryTokenACS::output_prep(instructions);
 
 	switch (output_type)
 	{
 	case OUTPUT_ACS0:
-		// 0
-		*out << 'A' << 'C' << 'S' << '\0';
-		BinaryTokenACS::write_32(out, ObjectExpression::get_address_count());
-
-		// 8
-		for (std::vector<BinaryTokenPPACS>::const_iterator instr(instructions.begin()); instr != instructions.end(); ++instr)
-			instr->write(out);
-
-		// directoryOffset
-		BinaryTokenACS::write_32(out, scriptCount);
-
-		// directoryOffset+4
-		ObjectExpression::iter_script(write_script, out);
-
-		// directoryOffset+4+(scriptCount*12)
-		BinaryTokenACS::write_32(out, stringCount);
-
-		// directoryOffset+4+(scriptCount*12)+4
-		ObjectExpression::iter_string(write_string_offset, out);
-
-		// directoryOffset+4+(scriptCount*12)+4+(stringCount*4)
-		ObjectExpression::iter_string(write_string, out);
-
+		BinaryTokenACS::output_ACS0(out, instructions);
 		break;
 
 	case OUTPUT_ACSP:
-		// 0
-		*out << 'A' << 'C' << 'S' << '+';
-
-		for (std::vector<BinaryTokenPPACS>::const_iterator instr(instructions.begin()); instr != instructions.end(); ++instr)
-			instr->write(out);
-
-		ObjectExpression::iter_auto(write_auto, out);
-		ObjectExpression::iter_script(write_script, out);
-		ObjectExpression::iter_static(write_static, out);
-		ObjectExpression::iter_string(write_string, out);
-
-		BinaryTokenACS::write_32(out, ACSP_TOKEN_EOF);
-		BinaryTokenACS::write_32(out, 0);
-
+		output_ACSP(out, instructions);
 		break;
 
 	default:
 		throw SourceException("unknown output type", SourcePosition::none, "BinaryTokenPPACS");
-	}
-}
-
-void BinaryTokenPPACS::write_auto(std::ostream * out, ObjectData_Auto const & a)
-{
-	std::ostringstream token;
-
-	switch (output_type)
-	{
-	case OUTPUT_ACSP:
-		write_string(&token, a.name);
-		BinaryTokenACS::write_32(&token, ACSP_EXPR_LITERAL);
-		BinaryTokenACS::write_32(&token, a.number);
-
-		BinaryTokenACS::write_32(out, ACSP_TOKEN_SYMBOL);
-		BinaryTokenACS::write_32(out, token.str().size());
-		*out << token.str();
-		break;
-
-	default:
-		throw SourceException("unknown output type for string_offset", SourcePosition::none, "BinaryTokenPPACS");
-	}
-}
-
-void BinaryTokenPPACS::write_label(std::ostream * out, std::string const & label)
-{
-	std::ostringstream token;
-
-	switch (output_type)
-	{
-	case OUTPUT_ACSP:
-		write_string(&token, label);
-
-		BinaryTokenACS::write_32(out, ACSP_TOKEN_LABEL);
-		BinaryTokenACS::write_32(out, token.str().size());
-		*out << token.str();
-		break;
-
-	default:
-		throw SourceException("unknown output type for label", SourcePosition::none, "BinaryTokenPPACS");
-	}
-}
-
-void BinaryTokenPPACS::write_script(std::ostream * out, ObjectData_Script const & s)
-{
-	std::ostringstream token;
-
-	switch (output_type)
-	{
-	case OUTPUT_ACS0:
-		BinaryTokenACS::write_32(out, (s.stype * 1000) + s.number);
-		BinaryTokenACS::write_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
-		BinaryTokenACS::write_32(out, s.argCount <= 3 ? s.argCount : 3);
-		break;
-
-	case OUTPUT_ACSP:
-		write_string(&token, s.name);
-		BinaryTokenACS::write_32(&token, ACSP_EXPR_SYMBOL);
-		write_string(&token, s.label);
-		BinaryTokenACS::write_32(&token, s.number);
-		BinaryTokenACS::write_32(&token, s.stype);
-		BinaryTokenACS::write_32(&token, s.flags);
-		BinaryTokenACS::write_32(&token, s.argCount);
-		BinaryTokenACS::write_32(&token, s.varCount);
-
-		BinaryTokenACS::write_32(out, ACSP_TOKEN_SCRIPT);
-		BinaryTokenACS::write_32(out, token.str().size());
-		*out << token.str();
-		break;
-
-	default:
-		throw SourceException("unknown output type for script", SourcePosition::none, "BinaryTokenPPACS");
-	}
-}
-
-void BinaryTokenPPACS::write_static(std::ostream * out, ObjectData_Static const & s)
-{
-	std::ostringstream token;
-
-	switch (output_type)
-	{
-	case OUTPUT_ACSP:
-		write_string(&token, s.name);
-
-		if (s.number == -1)
-		{
-			BinaryTokenACS::write_32(&token, s.size);
-			BinaryTokenACS::write_32(out, ACSP_TOKEN_ALLOCATE);
-		}
-		else
-		{
-			BinaryTokenACS::write_32(&token, ACSP_EXPR_LITERAL);
-			BinaryTokenACS::write_32(&token, s.number);
-			BinaryTokenACS::write_32(out, ACSP_TOKEN_SYMBOL);
-		}
-
-		BinaryTokenACS::write_32(out, token.str().size());
-		*out << token.str();
-		break;
-
-	default:
-		throw SourceException("unknown output type for string_offset", SourcePosition::none, "BinaryTokenPPACS");
-	}
-}
-
-void BinaryTokenPPACS::write_string(std::ostream * out, ObjectData_String const & s)
-{
-	std::ostringstream token;
-
-	switch (output_type)
-	{
-	case OUTPUT_ACS0:
-		write_string(out, s.string);
-		break;
-
-	case OUTPUT_ACSP:
-		write_string(&token, s.name);
-		write_string(&token, s.string);
-
-		BinaryTokenACS::write_32(out, ACSP_TOKEN_STRING);
-		BinaryTokenACS::write_32(out, token.str().size());
-		*out << token.str();
-		break;
-
-	default:
-		throw SourceException("unknown output type for string_offset", SourcePosition::none, "BinaryTokenPPACS");
-	}
-}
-void BinaryTokenPPACS::write_string(std::ostream * out, std::string const & s)
-{
-	size_t extra;
-	size_t length;
-
-	switch (output_type)
-	{
-	case OUTPUT_ACS0:
-		*out << s;
-		break;
-
-	case OUTPUT_ACSP:
-		length = (s.size() + 4) & ~3;
-		extra = length - s.size();
-		BinaryTokenACS::write_32(out, length);
-		*out << s;
-		while (extra--) *out << '\0';
-		break;
-
-	default:
-		throw SourceException("unknown output type for string_offset", SourcePosition::none, "BinaryTokenPPACS");
-	}
-}
-void BinaryTokenPPACS::write_string_offset(std::ostream * out, ObjectData_String const & s)
-{
-	switch (output_type)
-	{
-	case OUTPUT_ACS0:
-		BinaryTokenACS::write_32(out, ObjectExpression::get_address_count() + 4 + (ObjectExpression::get_script_count() * 12) + 4 + (ObjectExpression::get_string_count() * 4) + s.offset);
-		break;
-
-	default:
-		throw SourceException("unknown output type for string_offset", SourcePosition::none, "BinaryTokenPPACS");
 	}
 }
 

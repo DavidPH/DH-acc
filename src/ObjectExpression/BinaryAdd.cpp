@@ -89,7 +89,7 @@ bigsint ObjectExpression_BinaryAdd::resolveInt() const
 
 void ObjectExpression_BinaryAdd::writeACSP(std::ostream * out) const
 {
-	BinaryTokenACS::write_32(out, ACSP_EXPR_ADD);
+	BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_ADD);
 
 	exprL->writeACSP(out);
 	exprR->writeACSP(out);

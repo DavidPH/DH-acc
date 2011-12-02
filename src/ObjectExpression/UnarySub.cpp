@@ -89,7 +89,7 @@ bigsint ObjectExpression_UnarySub::resolveInt() const
 
 void ObjectExpression_UnarySub::writeACSP(std::ostream * out) const
 {
-	BinaryTokenACS::write_32(out, ACSP_EXPR_NEGATE);
+	BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_NEGATE);
 
 	expr->writeACSP(out);
 }

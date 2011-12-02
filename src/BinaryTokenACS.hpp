@@ -110,6 +110,8 @@ public:
 		BCODE_NONE
 	};
 
+	typedef std::vector<std::string>::const_iterator label_iterator;
+
 
 
 	BinaryTokenACS(BinaryCode code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<CounterPointer<ObjectExpression> > const & args);
@@ -118,9 +120,12 @@ public:
 
 	size_t getArgCount() const;
 
+	label_iterator label_begin() const;
+	label_iterator label_end() const;
+
 	size_t size() const;
 
-	void write(std::ostream * const out) const;
+	void writeACS0(std::ostream * out) const;
 
 
 
@@ -130,15 +135,19 @@ public:
 	static void make_tokens(ObjectToken const & object, std::vector<BinaryTokenACS> * instructions);
 	static void make_tokens(ObjectVector const & objects, std::vector<BinaryTokenACS> * instructions);
 
-	static void write_8(std::ostream * out, bigsint i);
-	static void write_16(std::ostream * out, bigsint i);
-	static void write_32(std::ostream * const out, ObjectExpression const & expr);
-	static void write_32(std::ostream * out, bigsint i);
-	static void write_all(std::ostream * const out, std::vector<BinaryTokenACS> const & instructions);
-	static void write_script(std::ostream * out, ObjectData_Script const & s);
-	static void write_string(std::ostream * out, ObjectData_String const & s);
-	static void write_string(std::ostream * const out, std::string const & s);
-	static void write_string_offset(std::ostream * out, ObjectData_String const & s);
+	template<typename T> static void output_ACS0(std::ostream * out, std::vector<T> const & instructions);
+	template<typename T> static void output_prep(std::vector<T> const & instructions);
+
+	static void write_ACS0_8(std::ostream * out, bigsint i);
+	static void write_ACS0_16(std::ostream * out, bigsint i);
+	static void write_ACS0_32(std::ostream * out, ObjectExpression const & expr);
+	static void write_ACS0_32(std::ostream * out, bigsint i);
+	static void write_ACS0_script(std::ostream * out, ObjectData_Script const & s);
+	static void write_ACS0_string(std::ostream * out, ObjectData_String const & s);
+	static void write_ACS0_string(std::ostream * out, std::string const & s);
+	static void write_ACS0_string_offset(std::ostream * out, ObjectData_String const & s);
+
+	static void write_all(std::ostream * out, std::vector<BinaryTokenACS> const & instructions);
 
 private:
 	std::vector<CounterPointer<ObjectExpression> > _args;

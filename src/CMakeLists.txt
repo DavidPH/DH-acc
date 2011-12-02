@@ -4,10 +4,16 @@ add_executable(DH-acc
 	bignum.cpp
 	BinaryTokenACS.cpp
 	BinaryTokenACS/make_tokens.cpp
+	BinaryTokenACS/output.cpp
+	BinaryTokenACS/write_ACS0.cpp
 	BinaryTokenPPACS.cpp
 	BinaryTokenPPACS/make_tokens.cpp
+	BinaryTokenPPACS/output.cpp
+	BinaryTokenPPACS/write_ACSP.cpp
 	BinaryTokenZDACS.cpp
 	BinaryTokenZDACS/make_tokens.cpp
+	BinaryTokenZDACS/output.cpp
+	BinaryTokenZDACS/write_ACSE.cpp
 	ObjectCode.cpp
 	ObjectData.cpp
 	ObjectExpression.cpp
