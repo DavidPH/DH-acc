@@ -141,6 +141,7 @@ void read_source(std::string const & name, SourceType type, ObjectVector * objec
 
 static inline void _init(int argc, char const * const * argv)
 {
+	BinaryTokenACS::init();
 	BinaryTokenPPACS::init();
 	BinaryTokenZDACS::init();
 	SourceExpressionDS::init();
