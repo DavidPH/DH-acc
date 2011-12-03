@@ -42,7 +42,6 @@ struct ObjectData_Auto
 struct ObjectData_Function
 {
 	std::string label;
-	std::string library;
 	std::string name;
 	bigsint argCount;
 	bigsint number;

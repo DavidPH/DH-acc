@@ -30,7 +30,7 @@ void ObjectExpression::iter_auto(void (*iter)(std::ostream *, ObjectData_Auto co
 }
 void ObjectExpression::iter_function(void (*iter)(std::ostream *, ObjectData_Function const &), std::ostream * out)
 {
-	_iterator_function(_function_table, iter, out, _library_original);
+	_iterator_map(_function_table, iter, out);
 }
 void ObjectExpression::iter_library(void (*iter)(std::ostream *, std::string const &), std::ostream * out)
 {

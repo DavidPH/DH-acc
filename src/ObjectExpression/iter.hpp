@@ -27,34 +27,6 @@
 
 
 template<typename TableType, typename IterFunc, typename IterData>
-static inline void _iterator_function(TableType & table, IterFunc iterFunc, IterData iterData, std::string const & library)
-{
-	typedef std::vector<ObjectData_Function *> vec_t;
-	typedef std::map<std::string, vec_t> map_t;
-
-	typename vec_t::iterator vecit;
-	typename map_t::iterator mapit;
-
-	vec_t internals;
-	map_t externals;
-
-	for (typename TableType::iterator it(table.begin()); it != table.end(); ++it)
-	{
-		if (!it->second.external || it->second.library.empty() || it->second.library == library)
-			internals.push_back(&it->second);
-		else
-			externals[it->second.library].push_back(&it->second);
-	}
-
-	for (vecit = internals.begin(); vecit != internals.end(); ++vecit)
-		iterFunc(iterData, **vecit);
-
-	for (mapit = externals.begin(); mapit != externals.end(); ++mapit)
-		for (vecit = mapit->second.begin(); vecit != mapit->second.end(); ++vecit)
-			iterFunc(iterData, **vecit);
-}
-
-template<typename TableType, typename IterFunc, typename IterData>
 static inline void _iterator_map(TableType & table, IterFunc iterFunc, IterData iterData)
 {
 	for (typename TableType::iterator it(table.begin()); it != table.end(); ++it)

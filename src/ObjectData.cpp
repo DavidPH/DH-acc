@@ -149,7 +149,6 @@ void read_object(std::istream * in, ObjectData_Auto * out)
 void read_object(std::istream * in, ObjectData_Function * out)
 {
 	read_object(in, &out->label);
-	read_object(in, &out->library);
 	read_object(in, &out->name);
 	read_object(in, &out->argCount);
 	read_object(in, &out->number);
@@ -208,7 +207,6 @@ void write_object(std::ostream * out, ObjectData_Auto const & in)
 void write_object(std::ostream * out, ObjectData_Function const & in)
 {
 	write_object(out, in.label);
-	write_object(out, in.library);
 	write_object(out, in.name);
 	write_object(out, in.argCount);
 	write_object(out, in.number);

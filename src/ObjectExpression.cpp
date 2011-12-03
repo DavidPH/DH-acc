@@ -33,7 +33,6 @@ bigsint ObjectExpression::_address_count;
 
 std::string ObjectExpression::_filename;
 
-std::string ObjectExpression::_library_current;
 std::string ObjectExpression::_library_original;
 std::set<std::string> ObjectExpression::_library_table;
 
@@ -42,25 +41,17 @@ std::map<std::string, ObjectData_Auto> ObjectExpression::_auto_table;
 std::map<std::string, ObjectData_Function> ObjectExpression::_function_table;
 
 std::map<std::string, ObjectData_Register> ObjectExpression::_register_global_table;
-std::map<bigsint, bool>                    ObjectExpression::_register_global_used;
 std::map<std::string, ObjectData_Register> ObjectExpression::_register_map_table;
-std::map<bigsint, bool>                    ObjectExpression::_register_map_used;
 std::map<std::string, ObjectData_Register> ObjectExpression::_register_world_table;
-std::map<bigsint, bool>                    ObjectExpression::_register_world_used;
 
 std::map<std::string, ObjectData_RegisterArray> ObjectExpression::_registerarray_global_table;
-std::map<bigsint, bool>                         ObjectExpression::_registerarray_global_used;
 std::map<std::string, ObjectData_RegisterArray> ObjectExpression::_registerarray_map_table;
-std::map<bigsint, bool>                         ObjectExpression::_registerarray_map_used;
 std::map<std::string, ObjectData_RegisterArray> ObjectExpression::_registerarray_world_table;
-std::map<bigsint, bool>                         ObjectExpression::_registerarray_world_used;
 
 std::map<std::string, ObjectData_Script> ObjectExpression::_script_table;
-std::map<bigsint, bool>                  ObjectExpression::_script_used;
 
 ObjectExpression::Pointer                ObjectExpression:: static_offset(create_value_int(8192, SourcePosition()));
 std::map<std::string, ObjectData_Static> ObjectExpression::_static_table;
-std::map<bigsint, bool>                  ObjectExpression::_static_used;
 
 std::vector<ObjectData_String> ObjectExpression::_string_table;
 
@@ -95,7 +86,7 @@ void ObjectExpression::add_auto(std::string const & name, bigsint size, bigsint 
 
 void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, bool external)
 {
-	ObjectData_Function f = {label, _library_current, name, argCount, -1, retCount, varCount, external};
+	ObjectData_Function f = {label, name, argCount, -1, retCount, varCount, external};
 	_function_table[name] = f;
 
 	add_symbol(name, ET_INT);
@@ -281,52 +272,9 @@ std::string const & ObjectExpression::get_filename()
 	return _filename;
 }
 
-bigsint ObjectExpression::get_register_number(std::map<bigsint, bool> * registerUsed, bigsint size)
-{
-	bigsint registerUsedLast(0);
-
-	while (is_register_used(registerUsed, registerUsedLast, size) && registerUsedLast < 65535) ++registerUsedLast;
-
-	if (registerUsedLast == 65535) throw SourceException("no more register numbers", SourcePosition::none, "ObjectExpression");
-
-	for (bigsint i(0); i < size; ++i)
-		(*registerUsed)[registerUsedLast+i] = true;
-
-	return registerUsedLast;
-}
-
-bigsint ObjectExpression::get_registerarray_number(std::map<bigsint, bool> * registerarrayUsed)
-{
-	bigsint registerarrayUsedLast(0);
-
-	while (registerarrayUsed->find(registerarrayUsedLast) != registerarrayUsed->end() && registerarrayUsedLast < 65535) ++registerarrayUsedLast;
-
-	if (registerarrayUsedLast == 65535) throw SourceException("no more registerarray numbers", SourcePosition::none, "ObjectExpression");
-
-	(*registerarrayUsed)[registerarrayUsedLast] = true;
-	return registerarrayUsedLast;
-}
-
 bigsint ObjectExpression::get_script_count()
 {
 	return (bigsint)_script_table.size();
-}
-
-bigsint ObjectExpression::get_script_number()
-{
-	bigsint scriptUsedLast(0);
-
-	while (_script_used.find(scriptUsedLast) != _script_used.end() && scriptUsedLast < 1000) ++scriptUsedLast;
-
-	if (scriptUsedLast == 1000) throw SourceException("no more script numbers", SourcePosition::none, "ObjectExpression");
-
-	_script_used[scriptUsedLast] = true;
-	return scriptUsedLast;
-}
-
-bigsint ObjectExpression::get_static_number(bigsint size)
-{
-	return get_register_number(&_static_used, size);
 }
 
 bigsint ObjectExpression::get_string(std::string const & s)
@@ -369,15 +317,6 @@ SourcePosition const & ObjectExpression::getPosition() const
 	return position;
 }
 
-bool ObjectExpression::is_register_used(std::map<bigsint, bool> * registerUsed, bigsint number, bigsint size)
-{
-	if (size == 0) return false;
-
-	std::map<bigsint, bool>::iterator it(registerUsed->find(number+size-1));
-
-	return (it != registerUsed->end() && it->second) || is_register_used(registerUsed, number, size-1);
-}
-
 void ObjectExpression::printDebug(std::ostream * const out) const
 {
 	*out << "ObjectExpression(";
@@ -417,8 +356,6 @@ void ObjectExpression::set_filename(std::string const & filename)
 
 void ObjectExpression::set_library(std::string const & library)
 {
-	_library_current = library;
-
 	if (_library_original.empty())
 		_library_original = library;
 
