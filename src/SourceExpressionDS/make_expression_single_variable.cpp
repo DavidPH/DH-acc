@@ -29,11 +29,15 @@
 
 SRCEXPDS_EXPRSINGLE_DEFN(extern_variable)
 {
+	SourceContext::NameType const nameType(SourceContext::NT_EXTERN);
+
 	SourceVariable::StorageClass sc(SourceVariable::get_StorageClass(in->get(SourceTokenC::TT_IDENTIFIER)));
 	VariableType const * type(make_expression_type(in, blocks, context));
 	std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
 
-	SourceVariable::Pointer var(SourceVariable::create_variable(name, type, name, sc, token.getPosition()));
+	std::string nameObject(context->makeNameObject(nameType, sc, type, name, token.getPosition()));
+
+	SourceVariable::Pointer var(SourceVariable::create_variable(name, type, nameObject, sc, token.getPosition()));
 
 	context->addVariable(var);
 
@@ -43,6 +47,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_variable)
 SRCEXPDS_EXPRSINGLE_DEFN(variable)
 {
 	bool external(token.getData() == "__extvar");
+	SourceContext::NameType nameType(external ? SourceContext::NT_EXTLOCAL : SourceContext::NT_LOCAL);
 
 	SourceVariable::StorageClass sc(SourceVariable::get_StorageClass(in->get(SourceTokenC::TT_IDENTIFIER)));
 	VariableType const * type(make_expression_type(in, blocks, context));
@@ -53,11 +58,11 @@ SRCEXPDS_EXPRSINGLE_DEFN(variable)
 	{
 		in->get(SourceTokenC::TT_OP_AT);
 		bigsint address = get_bigsint(in->get(SourceTokenC::TT_INTEGER));
-		nameObject = context->makeNameObject(external, sc, type, name, address, token.getPosition());
+		nameObject = context->makeNameObject(nameType, sc, type, name, address, token.getPosition());
 	}
 	else
 	{
-		nameObject = context->makeNameObject(external, sc, type, name, token.getPosition());
+		nameObject = context->makeNameObject(nameType, sc, type, name, token.getPosition());
 	}
 
 	SourceVariable::Pointer var(SourceVariable::create_variable(name, type, nameObject, sc, token.getPosition()));

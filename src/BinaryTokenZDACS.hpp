@@ -31,6 +31,7 @@
 #include <vector>
 
 struct ObjectData_Function;
+struct ObjectData_Register;
 struct ObjectData_RegisterArray;
 struct ObjectData_Script;
 struct ObjectData_String;
@@ -129,17 +130,20 @@ public:
 	template<typename T> static void output_ACSE(std::ostream * out, std::vector<T> const & instructions);
 
 	static void write_ACSE_chunk(std::ostream * out, std::ostringstream * chunkout, char const * chunkname);
-	static void write_ACSE_function(std::ostream * out, ObjectData_Function const & f);
-	static void write_ACSE_function_name(std::ostream * out, ObjectData_Function const & f);
-	static void write_ACSE_function_name_count(std::ostream * out, ObjectData_Function const & f);
-	static void write_ACSE_function_name_offset(std::ostream * out, ObjectData_Function const & f);
+	static void write_ACSE_function_FUNC(std::ostream * out, ObjectData_Function const & f);
+	static void write_ACSE_function_FNAM(std::ostream * out, ObjectData_Function const & f);
 	static void write_ACSE_library(std::ostream * out, std::string const & lib);
-	static void write_ACSE_registerarray(std::ostream * out, ObjectData_RegisterArray const & r);
+	static void write_ACSE_register_MEXP(std::ostream * out, ObjectData_Register const & r);
+	static void write_ACSE_register_MIMP(std::ostream * out, ObjectData_Register const & r);
+	static void write_ACSE_registerarray_ARAY(std::ostream * out, ObjectData_RegisterArray const & r);
+	static void write_ACSE_registerarray_AIMP(std::ostream * out, ObjectData_RegisterArray const & r);
+	static void write_ACSE_registerarray_AIMP_counter(std::ostream * out, ObjectData_RegisterArray const & r);
+	static void write_ACSE_registerarray_MEXP(std::ostream * out, ObjectData_RegisterArray const & r);
 	static void write_ACSE_script(std::ostream * out, ObjectData_Script const & s);
 	static void write_ACSE_script_flags(std::ostream * out, ObjectData_Script const & s);
 	static void write_ACSE_script_vars(std::ostream * out, ObjectData_Script const & s);
-	static void write_ACSE_string(std::ostream * out, ObjectData_String const & s);
-	static void write_ACSE_string_offset(std::ostream * out, ObjectData_String const & s);
+	static void write_ACSE_string_STRL(std::ostream * out, ObjectData_String const & s);
+	static void write_ACSE_stringtable(std::ostream * out, bool junk);
 
 	static void write_all(std::ostream * const out, std::vector<BinaryTokenZDACS> const & instructions);
 
@@ -153,7 +157,7 @@ private:
 
 	static int _arg_counts[BCODE_NONE];
 
-	static bigsint _string_offset;
+	static bigsint _temp_counter;
 };
 
 

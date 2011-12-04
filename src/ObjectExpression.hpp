@@ -84,28 +84,28 @@ public:
 
 	static void add_auto(std::string const & name, bigsint size, bigsint number);
 
-	static void add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, bool external);
+	static void add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, bool externDef);
 
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
 
-	static void add_register_global(std::string const & name, bigsint size);
-	static void add_register_global(std::string const & name, bigsint size, bigsint number);
+	static void add_register_global(std::string const & name, bigsint size, bool externDef, bool externVis);
+	static void add_register_global(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
 
-	static void add_register_map(std::string const & name, bigsint size);
-	static void add_register_map(std::string const & name, bigsint size, bigsint number);
+	static void add_register_map(std::string const & name, bigsint size, bool externDef, bool externVis);
+	static void add_register_map(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
 
-	static void add_register_world(std::string const & name, bigsint size);
-	static void add_register_world(std::string const & name, bigsint size, bigsint number);
+	static void add_register_world(std::string const & name, bigsint size, bool externDef, bool externVis);
+	static void add_register_world(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
 
-	static void add_registerarray_global(std::string const & name, bigsint size);
-	static void add_registerarray_global(std::string const & name, bigsint size, bigsint number);
+	static void add_registerarray_global(std::string const & name, bigsint size, bool externDef, bool externVis);
+	static void add_registerarray_global(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
 
-	static void add_registerarray_map(std::string const & name, bigsint size);
-	static void add_registerarray_map(std::string const & name, bigsint size, bigsint number);
+	static void add_registerarray_map(std::string const & name, bigsint size, bool externDef, bool externVis);
+	static void add_registerarray_map(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
 
-	static void add_registerarray_world(std::string const & name, bigsint size);
-	static void add_registerarray_world(std::string const & name, bigsint size, bigsint number);
+	static void add_registerarray_world(std::string const & name, bigsint size, bool externDef, bool externVis);
+	static void add_registerarray_world(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
 
 	static void add_script(std::string const & name, std::string const & label, ObjectData_Script::ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount);
 	static void add_script(std::string const & name, std::string const & label, ObjectData_Script::ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount, bigsint number);
@@ -155,6 +155,8 @@ public:
 	static void iter_function(void (*iter)(std::ostream *, ObjectData_Function const &), std::ostream * out);
 
 	static void iter_library(void (*iter)(std::ostream *, std::string const &), std::ostream * out);
+
+	static void iter_register_map(void (*iter)(std::ostream *, ObjectData_Register const &), std::ostream * out);
 
 	static void iter_registerarray_map(void (*iter)(std::ostream *, ObjectData_RegisterArray const &), std::ostream * out);
 

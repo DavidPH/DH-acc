@@ -47,7 +47,7 @@ struct ObjectData_Function
 	bigsint number;
 	bigsint retCount;
 	bigsint varCount;
-	bool external;
+	bool externDef;
 };
 
 struct ObjectData_Register
@@ -55,6 +55,8 @@ struct ObjectData_Register
 	std::string name;
 	bigsint number;
 	bigsint size;
+	bool externDef;
+	bool externVis;
 };
 
 struct ObjectData_RegisterArray
@@ -62,6 +64,8 @@ struct ObjectData_RegisterArray
 	std::string name;
 	bigsint number;
 	bigsint size;
+	bool externDef;
+	bool externVis;
 };
 
 struct ObjectData_Script

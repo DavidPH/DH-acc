@@ -416,10 +416,10 @@ std::string SourceContext::makeLabelShort()
 	return oss.str();
 }
 
-std::string SourceContext::makeNameObject(bool external, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const
+std::string SourceContext::makeNameObject(NameType nameType, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const
 {
 	std::string nameObject;
-	if (!external)
+	if (nameType == NT_LOCAL)
 		nameObject += getLabel();
 	nameObject += nameSource;
 
@@ -435,27 +435,27 @@ std::string SourceContext::makeNameObject(bool external, SourceVariable::Storage
 		throw SourceException("makeNameObject on SC_CONSTANT", position, "SourceContext");
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
-		ObjectExpression::add_register_global(nameObject, type->size(position));
+		ObjectExpression::add_register_global(nameObject, type->size(position), nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_REGISTER_MAP:
-		ObjectExpression::add_register_map(nameObject, type->size(position));
+		ObjectExpression::add_register_map(nameObject, type->size(position), nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_REGISTER_WORLD:
-		ObjectExpression::add_register_world(nameObject, type->size(position));
+		ObjectExpression::add_register_world(nameObject, type->size(position), nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-		ObjectExpression::add_registerarray_global(nameObject, type->size(position));
+		ObjectExpression::add_registerarray_global(nameObject, type->size(position), nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_MAP:
-		ObjectExpression::add_registerarray_map(nameObject, type->size(position));
+		ObjectExpression::add_registerarray_map(nameObject, type->size(position), nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
-		ObjectExpression::add_registerarray_world(nameObject, type->size(position));
+		ObjectExpression::add_registerarray_world(nameObject, type->size(position), nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_STATIC:
@@ -465,10 +465,10 @@ std::string SourceContext::makeNameObject(bool external, SourceVariable::Storage
 
 	return nameObject;
 }
-std::string SourceContext::makeNameObject(bool external, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const
+std::string SourceContext::makeNameObject(NameType nameType, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const
 {
 	std::string nameObject;
-	if (!external)
+	if (nameType == NT_LOCAL)
 		nameObject += getLabel();
 	nameObject += nameSource;
 
@@ -484,27 +484,27 @@ std::string SourceContext::makeNameObject(bool external, SourceVariable::Storage
 		throw SourceException("makeNameObject on SC_CONSTANT", position, "SourceContext");
 
 	case SourceVariable::SC_REGISTER_GLOBAL:
-		ObjectExpression::add_register_global(nameObject, type->size(position), address);
+		ObjectExpression::add_register_global(nameObject, type->size(position), address, nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_REGISTER_MAP:
-		ObjectExpression::add_register_map(nameObject, type->size(position), address);
+		ObjectExpression::add_register_map(nameObject, type->size(position), address, nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_REGISTER_WORLD:
-		ObjectExpression::add_register_world(nameObject, type->size(position), address);
+		ObjectExpression::add_register_world(nameObject, type->size(position), address, nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-		ObjectExpression::add_registerarray_global(nameObject, type->size(position), address);
+		ObjectExpression::add_registerarray_global(nameObject, type->size(position), address, nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_MAP:
-		ObjectExpression::add_registerarray_map(nameObject, type->size(position), address);
+		ObjectExpression::add_registerarray_map(nameObject, type->size(position), address, nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_WORLD:
-		ObjectExpression::add_registerarray_world(nameObject, type->size(position), address);
+		ObjectExpression::add_registerarray_world(nameObject, type->size(position), address, nameType == NT_EXTERN, nameType != NT_LOCAL);
 		break;
 
 	case SourceVariable::SC_STATIC:

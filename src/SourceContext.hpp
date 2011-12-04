@@ -46,6 +46,13 @@ public:
 		CT_SWITCH
 	};
 
+	enum NameType
+	{
+		NT_LOCAL,    // __variable
+		NT_EXTERN,   // extern __variable
+		NT_EXTLOCAL, // __extvar
+	};
+
 
 
 	SourceContext(SourceContext * parent, ContextType type);
@@ -91,8 +98,8 @@ public:
 
 	std::string makeLabel();
 
-	std::string makeNameObject(bool external, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const;
-	std::string makeNameObject(bool external, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const;
+	std::string makeNameObject(NameType nameType, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const;
+	std::string makeNameObject(NameType nameType, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const;
 
 	void setAllowLabel(bool allow);
 

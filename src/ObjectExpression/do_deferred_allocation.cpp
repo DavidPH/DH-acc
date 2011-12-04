@@ -129,11 +129,33 @@ void ObjectExpression::do_deferred_allocation()
 	UsedMap used;
 
 
-	// mapregisters
-	used.clear();
+	// mapregisters and maparrays
+	if (output_type == OUTPUT_ACSE)
+	{
+		// ACSE's MEXP uses the same addresses for both.
+		// TODO: !externVis registers/arrays should not reserve the
+		// corresponding arrays/registers.
+		used.clear();
 
-	_iterator_map(_register_map_table, allocate_pre_size<ObjectData_Register>, &used);
-	_iterator_map(_register_map_table, allocate_size<ObjectData_Register>, &used);
+		_iterator_map(_register_map_table, allocate_pre_size<ObjectData_Register>, &used);
+		_iterator_map(_registerarray_map_table, allocate_pre<ObjectData_RegisterArray>, &used);
+		_iterator_map(_register_map_table, allocate_size<ObjectData_Register>, &used);
+		_iterator_map(_registerarray_map_table, allocate<ObjectData_RegisterArray>, &used);
+	}
+	else
+	{
+		// mapregisters
+		used.clear();
+
+		_iterator_map(_register_map_table, allocate_pre_size<ObjectData_Register>, &used);
+		_iterator_map(_register_map_table, allocate_size<ObjectData_Register>, &used);
+
+		// maparrays
+		used.clear();
+
+		_iterator_map(_registerarray_map_table, allocate_pre<ObjectData_RegisterArray>, &used);
+		_iterator_map(_registerarray_map_table, allocate<ObjectData_RegisterArray>, &used);
+	}
 
 
 	// worldregisters
@@ -150,13 +172,6 @@ void ObjectExpression::do_deferred_allocation()
 
 	_iterator_map(_register_global_table, allocate_pre_size<ObjectData_Register>, &used);
 	_iterator_map(_register_global_table, allocate_size<ObjectData_Register>, &used);
-
-
-	// maparrays
-	used.clear();
-
-	_iterator_map(_registerarray_map_table, allocate_pre<ObjectData_RegisterArray>, &used);
-	_iterator_map(_registerarray_map_table, allocate<ObjectData_RegisterArray>, &used);
 
 
 	// worldarrays

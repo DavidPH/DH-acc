@@ -28,7 +28,7 @@
 
 
 int BinaryTokenZDACS::_arg_counts[BCODE_NONE];
-bigsint BinaryTokenZDACS::_string_offset;
+bigsint BinaryTokenZDACS::_temp_counter;
 
 
 

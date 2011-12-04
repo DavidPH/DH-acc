@@ -84,9 +84,9 @@ void ObjectExpression::add_auto(std::string const & name, bigsint size, bigsint 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, bool external)
+void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, bool externDef)
 {
-	ObjectData_Function f = {label, name, argCount, -1, retCount, varCount, external};
+	ObjectData_Function f = {label, name, argCount, -1, retCount, varCount, externDef};
 	_function_table[name] = f;
 
 	add_symbol(name, ET_INT);
@@ -97,91 +97,91 @@ void ObjectExpression::add_label(std::string const & symbol)
 	add_symbol(symbol, create_value_int(_address_count, SourcePosition::none));
 }
 
-void ObjectExpression::add_register_global(std::string const & name, bigsint size)
+void ObjectExpression::add_register_global(std::string const & name, bigsint size, bool externDef, bool externVis)
 {
-	ObjectData_Register r = {name, -1, size};
+	ObjectData_Register r = {name, -1, size, externDef, externVis};
 	_register_global_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_register_global(std::string const & name, bigsint size, bigsint number)
+void ObjectExpression::add_register_global(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number)
 {
-	ObjectData_Register r = {name, number, size};
+	ObjectData_Register r = {name, number, size, externDef, externVis};
 	_register_global_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_register_map(std::string const & name, bigsint size)
+void ObjectExpression::add_register_map(std::string const & name, bigsint size, bool externDef, bool externVis)
 {
-	ObjectData_Register r = {name, -1, size};
+	ObjectData_Register r = {name, -1, size, externDef, externVis};
 	_register_map_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_register_map(std::string const & name, bigsint size, bigsint number)
+void ObjectExpression::add_register_map(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number)
 {
-	ObjectData_Register r = {name, number, size};
+	ObjectData_Register r = {name, number, size, externDef, externVis};
 	_register_map_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_register_world(std::string const & name, bigsint size)
+void ObjectExpression::add_register_world(std::string const & name, bigsint size, bool externDef, bool externVis)
 {
-	ObjectData_Register r = {name, -1, size};
+	ObjectData_Register r = {name, -1, size, externDef, externVis};
 	_register_world_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_register_world(std::string const & name, bigsint size, bigsint number)
+void ObjectExpression::add_register_world(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number)
 {
-	ObjectData_Register r = {name, number, size};
+	ObjectData_Register r = {name, number, size, externDef, externVis};
 	_register_world_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_registerarray_global(std::string const & name, bigsint size)
+void ObjectExpression::add_registerarray_global(std::string const & name, bigsint size, bool externDef, bool externVis)
 {
-	ObjectData_RegisterArray r = {name, -1, size};
+	ObjectData_RegisterArray r = {name, -1, size, externDef, externVis};
 	_registerarray_global_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_registerarray_global(std::string const & name, bigsint size, bigsint number)
+void ObjectExpression::add_registerarray_global(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number)
 {
-	ObjectData_RegisterArray r = {name, number, size};
+	ObjectData_RegisterArray r = {name, number, size, externDef, externVis};
 	_registerarray_global_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_registerarray_map(std::string const & name, bigsint size)
+void ObjectExpression::add_registerarray_map(std::string const & name, bigsint size, bool externDef, bool externVis)
 {
-	ObjectData_RegisterArray r = {name, -1, size};
+	ObjectData_RegisterArray r = {name, -1, size, externDef, externVis};
 	_registerarray_map_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_registerarray_map(std::string const & name, bigsint size, bigsint number)
+void ObjectExpression::add_registerarray_map(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number)
 {
-	ObjectData_RegisterArray r = {name, number, size};
+	ObjectData_RegisterArray r = {name, number, size, externDef, externVis};
 	_registerarray_map_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-void ObjectExpression::add_registerarray_world(std::string const & name, bigsint size)
+void ObjectExpression::add_registerarray_world(std::string const & name, bigsint size, bool externDef, bool externVis)
 {
-	ObjectData_RegisterArray r = {name, -1, size};
+	ObjectData_RegisterArray r = {name, -1, size, externDef, externVis};
 	_registerarray_world_table[name] = r;
 
 	add_symbol(name, ET_INT);
 }
-void ObjectExpression::add_registerarray_world(std::string const & name, bigsint size, bigsint number)
+void ObjectExpression::add_registerarray_world(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number)
 {
-	ObjectData_RegisterArray r = {name, number, size};
+	ObjectData_RegisterArray r = {name, number, size, externDef, externVis};
 	_registerarray_world_table[name] = r;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none));

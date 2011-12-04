@@ -85,7 +85,7 @@ bool override_object(ObjectData_Function * out, ObjectData_Function const & in)
 	if (out->name != in.name)
 		return false;
 
-	out->external = out->external && in.external;
+	out->externDef = out->externDef && in.externDef;
 
 	if (out->number == -1)
 		out->number = in.number;
@@ -97,6 +97,9 @@ bool override_object(ObjectData_Register * out, ObjectData_Register const & in)
 	if (out->name != in.name)
 		return false;
 
+	out->externDef = out->externDef && in.externDef;
+	out->externVis = out->externVis || in.externVis;
+
 	if (out->number == -1)
 		*out = in;
 
@@ -106,6 +109,9 @@ bool override_object(ObjectData_RegisterArray * out, ObjectData_RegisterArray co
 {
 	if (out->name != in.name)
 		return false;
+
+	out->externDef = out->externDef && in.externDef;
+	out->externVis = out->externVis || in.externVis;
 
 	if (out->number == -1)
 		*out = in;
@@ -154,19 +160,23 @@ void read_object(std::istream * in, ObjectData_Function * out)
 	read_object(in, &out->number);
 	read_object(in, &out->retCount);
 	read_object(in, &out->varCount);
-	read_object(in, &out->external);
+	read_object(in, &out->externDef);
 }
 void read_object(std::istream * in, ObjectData_Register * out)
 {
 	read_object(in, &out->name);
 	read_object(in, &out->number);
 	read_object(in, &out->size);
+	read_object(in, &out->externDef);
+	read_object(in, &out->externVis);
 }
 void read_object(std::istream * in, ObjectData_RegisterArray * out)
 {
 	read_object(in, &out->name);
 	read_object(in, &out->number);
 	read_object(in, &out->size);
+	read_object(in, &out->externDef);
+	read_object(in, &out->externVis);
 }
 void read_object(std::istream * in, ObjectData_Script * out)
 {
@@ -212,19 +222,23 @@ void write_object(std::ostream * out, ObjectData_Function const & in)
 	write_object(out, in.number);
 	write_object(out, in.retCount);
 	write_object(out, in.varCount);
-	write_object(out, in.external);
+	write_object(out, in.externDef);
 }
 void write_object(std::ostream * out, ObjectData_Register const & in)
 {
 	write_object(out, in.name);
 	write_object(out, in.number);
 	write_object(out, in.size);
+	write_object(out, in.externDef);
+	write_object(out, in.externVis);
 }
 void write_object(std::ostream * out, ObjectData_RegisterArray const & in)
 {
 	write_object(out, in.name);
 	write_object(out, in.number);
 	write_object(out, in.size);
+	write_object(out, in.externDef);
+	write_object(out, in.externVis);
 }
 void write_object(std::ostream * out, ObjectData_Script const & in)
 {

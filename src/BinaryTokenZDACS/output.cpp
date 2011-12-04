@@ -31,8 +31,6 @@ template<typename T> void BinaryTokenZDACS::output_ACSE(std::ostream * out, std:
 {
 	std::ostringstream chunkout;
 
-	bigsint stringCount(ObjectExpression::get_string_count());
-
 	// Header
 	*out << 'A' << 'C' << 'S' << 'E';
 	BinaryTokenACS::write_ACS0_32(out, ObjectExpression::get_address_count());
@@ -41,30 +39,42 @@ template<typename T> void BinaryTokenZDACS::output_ACSE(std::ostream * out, std:
 	for (typename std::vector<T>::const_iterator instr(instructions.begin()); instr != instructions.end(); ++instr)
 		instr->writeACS0(out);
 
+	// AIMP - Map Array Imports
+	_temp_counter = 0;
+	ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_AIMP_counter, &chunkout);
+
+	if (_temp_counter)
+		BinaryTokenACS::write_ACS0_32(&chunkout, _temp_counter);
+
+	ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_AIMP, &chunkout);
+	write_ACSE_chunk(out, &chunkout, "AIMP");
+
 	// ARAY - Map Array Declarations
-	ObjectExpression::iter_registerarray_map(write_ACSE_registerarray, &chunkout);
+	ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_ARAY, &chunkout);
 	write_ACSE_chunk(out, &chunkout, "ARAY");
 
 	// FNAM - Function Names
-	_string_offset = 0;
-	ObjectExpression::iter_function(write_ACSE_function_name_count, NULL);
-
-	if (_string_offset)
-		BinaryTokenACS::write_ACS0_32(&chunkout, _string_offset/4);
-
-	_string_offset += 4;
-
-	ObjectExpression::iter_function(write_ACSE_function_name_offset, &chunkout);
-	ObjectExpression::iter_function(write_ACSE_function_name, &chunkout);
+	ObjectExpression::iter_function(write_ACSE_function_FNAM, NULL);
+	write_ACSE_stringtable(&chunkout, false);
 	write_ACSE_chunk(out, &chunkout, "FNAM");
 
 	// FUNC - Functions
-	ObjectExpression::iter_function(write_ACSE_function, &chunkout);
+	ObjectExpression::iter_function(write_ACSE_function_FUNC, &chunkout);
 	write_ACSE_chunk(out, &chunkout, "FUNC");
 
 	// LOAD - Load Libraries
 	ObjectExpression::iter_library(write_ACSE_library, &chunkout);
 	write_ACSE_chunk(out, &chunkout, "LOAD");
+
+	// MEXP - Map Register Exports
+	ObjectExpression::iter_register_map(write_ACSE_register_MEXP, NULL);
+	ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_MEXP, NULL);
+	write_ACSE_stringtable(&chunkout, false);
+	write_ACSE_chunk(out, &chunkout, "MEXP");
+
+	// MIMP - Map Register Imports
+	ObjectExpression::iter_register_map(write_ACSE_register_MIMP, &chunkout);
+	write_ACSE_chunk(out, &chunkout, "MIMP");
 
 	// SPTR - Script Pointers
 	ObjectExpression::iter_script(write_ACSE_script, &chunkout);
@@ -75,15 +85,8 @@ template<typename T> void BinaryTokenZDACS::output_ACSE(std::ostream * out, std:
 	write_ACSE_chunk(out, &chunkout, "SFLG");
 
 	// STRL - String Literals
-	if (stringCount)
-	{
-		BinaryTokenACS::write_ACS0_32(&chunkout, 0);
-		BinaryTokenACS::write_ACS0_32(&chunkout, stringCount);
-		BinaryTokenACS::write_ACS0_32(&chunkout, 0);
-	}
-
-	ObjectExpression::iter_string(write_ACSE_string_offset, &chunkout);
-	ObjectExpression::iter_string(write_ACSE_string, &chunkout);
+	ObjectExpression::iter_string(write_ACSE_string_STRL, NULL);
+	write_ACSE_stringtable(&chunkout, true);
 	write_ACSE_chunk(out, &chunkout, "STRL");
 
 	// SVCT - Script Variable Counts

@@ -38,6 +38,10 @@ void ObjectExpression::iter_library(void (*iter)(std::ostream *, std::string con
 		if (*it != _library_original)
 			iter(out, *it);
 }
+void ObjectExpression::iter_register_map(void (*iter)(std::ostream *, ObjectData_Register const &), std::ostream * out)
+{
+	_iterator_map(_register_map_table, iter, out);
+}
 void ObjectExpression::iter_registerarray_map(void (*iter)(std::ostream *, ObjectData_RegisterArray const &), std::ostream * out)
 {
 	_iterator_map(_registerarray_map_table, iter, out);
