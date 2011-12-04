@@ -231,11 +231,6 @@ void ObjectExpression::do_deferred_allocation()
 
 		++i;
 	}
-	// Wait until after possible folding to do offset calculations.
-	if (!_string_table.empty())
-		_string_table[0].offset = 0;
-	for (size_t i(1); i < _string_table.size(); ++i)
-		_string_table[i].offset = _string_table[i-1].offset + _string_table[i-1].string.size();
 }
 
 

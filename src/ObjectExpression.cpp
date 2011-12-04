@@ -228,7 +228,7 @@ std::string ObjectExpression::add_string(std::string const & value)
 }
 void ObjectExpression::add_string(std::string const & name, std::string const & value)
 {
-	ObjectData_String s = {name, value, 0};
+	ObjectData_String s = {name, value};
 	_string_table.push_back(s);
 
 	add_symbol(name, ET_INT);
@@ -272,11 +272,6 @@ std::string const & ObjectExpression::get_filename()
 	return _filename;
 }
 
-bigsint ObjectExpression::get_script_count()
-{
-	return (bigsint)_script_table.size();
-}
-
 bigsint ObjectExpression::get_string(std::string const & s)
 {
 	for (size_t i(0); i < _string_table.size(); ++i)
@@ -286,11 +281,6 @@ bigsint ObjectExpression::get_string(std::string const & s)
 	}
 
 	return -1;
-}
-
-bigsint ObjectExpression::get_string_count()
-{
-	return (bigsint)_string_table.size();
 }
 
 ObjectExpression::Pointer ObjectExpression::get_symbol(std::string const & symbol, SourcePosition const & position)

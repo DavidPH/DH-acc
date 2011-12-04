@@ -190,7 +190,7 @@ void BinaryTokenZDACS::write_ACSE_stringtable(std::ostream * out, bool junk)
 	// Strings
 	for (it = _strings_temp.begin(); it != _strings_temp.end(); ++it)
 	{
-		BinaryTokenACS::write_ACS0_string(out, *it);
+		*out << *it;
 
 		// Ensure null termination.
 		if (it->size() == 0 || (*it)[it->size()-1])

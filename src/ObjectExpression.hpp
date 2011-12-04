@@ -143,10 +143,6 @@ public:
 
 	static std::string const & get_filename();
 
-	static bigsint get_script_count();
-
-	static bigsint get_string_count();
-
 	static ObjectExpression::Pointer get_symbol(std::string const & symbol, SourcePosition const & position);
 	static ExpressionType get_symbol_type(std::string const & symbol, SourcePosition const & position);
 

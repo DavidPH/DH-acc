@@ -26,6 +26,12 @@
 
 
 
+static bigsint _script_count = 0;
+static bigsint _string_count = 0;
+static bigsint _string_offset = 0;
+
+
+
 void BinaryTokenACS::write_ACS0_8(std::ostream * out, bigsint i)
 {
 	out->put(char((i >> 0) & 0xFF));
@@ -66,22 +72,41 @@ void BinaryTokenACS::write_ACS0_script(std::ostream * out, ObjectData_Script con
 	write_ACS0_32(out, s.argCount <= 3 ? s.argCount : 3);
 }
 
+void BinaryTokenACS::write_ACS0_script_count(std::ostream * out)
+{
+	write_ACS0_32(out, _script_count);
+}
+
+void BinaryTokenACS::write_ACS0_script_counter(std::ostream * out, ObjectData_Script const & s)
+{
+	++_script_count;
+}
+
 void BinaryTokenACS::write_ACS0_string(std::ostream * out, ObjectData_String const & s)
 {
-	write_ACS0_string(out, s.string);
+	*out << s.string;
 }
-void BinaryTokenACS::write_ACS0_string(std::ostream * out, std::string const & s)
+
+void BinaryTokenACS::write_ACS0_string_count(std::ostream * out)
 {
-	*out << s;
+	write_ACS0_32(out, _string_count);
 }
+
+void BinaryTokenACS::write_ACS0_string_counter(std::ostream * out, ObjectData_String const & s)
+{
+	++_string_count;
+}
+
 void BinaryTokenACS::write_ACS0_string_offset(std::ostream * out, ObjectData_String const & s)
 {
 	bigsint base_offset =
 		ObjectExpression::get_address_count() +
-		4 + (ObjectExpression::get_script_count() * 12) +
-		4 + (ObjectExpression::get_string_count() * 4);
+		4 + (_script_count * 12) +
+		4 + (_string_count * 4);
 
-	write_ACS0_32(out, base_offset + s.offset);
+	write_ACS0_32(out, base_offset + _string_offset);
+
+	_string_offset += s.string.size();
 }
 
 

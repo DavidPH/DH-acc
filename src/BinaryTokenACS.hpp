@@ -143,8 +143,11 @@ public:
 	static void write_ACS0_32(std::ostream * out, ObjectExpression const & expr);
 	static void write_ACS0_32(std::ostream * out, bigsint i);
 	static void write_ACS0_script(std::ostream * out, ObjectData_Script const & s);
+	static void write_ACS0_script_count(std::ostream * out);
+	static void write_ACS0_script_counter(std::ostream * out, ObjectData_Script const & s);
 	static void write_ACS0_string(std::ostream * out, ObjectData_String const & s);
-	static void write_ACS0_string(std::ostream * out, std::string const & s);
+	static void write_ACS0_string_count(std::ostream * out);
+	static void write_ACS0_string_counter(std::ostream * out, ObjectData_String const & s);
 	static void write_ACS0_string_offset(std::ostream * out, ObjectData_String const & s);
 
 	static void write_all(std::ostream * out, std::vector<BinaryTokenACS> const & instructions);

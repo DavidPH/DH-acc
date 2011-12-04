@@ -111,7 +111,6 @@ struct ObjectData_String
 {
 	std::string name;
 	std::string string;
-	bigsint offset;
 };
 
 

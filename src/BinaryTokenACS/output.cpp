@@ -30,9 +30,6 @@
 
 template<typename T> void BinaryTokenACS::output_ACS0(std::ostream * out, std::vector<T> const & instructions)
 {
-	bigsint scriptCount(ObjectExpression::get_script_count());
-	bigsint stringCount(ObjectExpression::get_string_count());
-
 	// 0
 	*out << 'A' << 'C' << 'S' << '\0';
 	write_ACS0_32(out, ObjectExpression::get_address_count());
@@ -42,13 +39,15 @@ template<typename T> void BinaryTokenACS::output_ACS0(std::ostream * out, std::v
 		instr->writeACS0(out);
 
 	// directoryOffset
-	write_ACS0_32(out, scriptCount);
+	ObjectExpression::iter_script(write_ACS0_script_counter, NULL);
+	write_ACS0_script_count(out);
 
 	// directoryOffset+4
 	ObjectExpression::iter_script(write_ACS0_script, out);
 
 	// directoryOffset+4+(scriptCount*12)
-	write_ACS0_32(out, stringCount);
+	ObjectExpression::iter_string(write_ACS0_string_counter, NULL);
+	write_ACS0_string_count(out);
 
 	// directoryOffset+4+(scriptCount*12)+4
 	ObjectExpression::iter_string(write_ACS0_string_offset, out);

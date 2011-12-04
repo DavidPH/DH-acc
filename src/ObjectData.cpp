@@ -205,7 +205,6 @@ void read_object(std::istream * in, ObjectData_String * out)
 {
 	read_object(in, &out->name);
 	read_object(in, &out->string);
-	read_object(in, &out->offset);
 }
 
 void write_object(std::ostream * out, ObjectData_Auto const & in)
@@ -264,7 +263,6 @@ void write_object(std::ostream * out, ObjectData_String const & in)
 {
 	write_object(out, in.name);
 	write_object(out, in.string);
-	write_object(out, in.offset);
 }
 
 
