@@ -109,7 +109,7 @@ SourceExpression::Pointer SourceExpression::create_value_real(SourceTokenC const
 }
 SourceExpression::Pointer SourceExpression::create_value_string(SourceTokenC const & token)
 {
-	std::string stringVarData(ObjectExpression::add_string(token.getData() + '\0'));
+	std::string stringVarData(ObjectData_String::add(token.getData()));
 
 	VariableType const * stringVarType(VariableType::get_vt_string());
 

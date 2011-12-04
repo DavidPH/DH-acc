@@ -113,10 +113,6 @@ public:
 	static void add_static(std::string const & name, bigsint size);
 	static void add_static(std::string const & name, bigsint size, bigsint number);
 
-	// Adds a string using an auto-generated name and returns that name.
-	static std::string add_string(std::string const & value);
-	static void add_string(std::string const & name, std::string const & value);
-
 	static void add_symbol(std::string const & symbol, ObjectExpression * value);
 	static void add_symbol(std::string const & symbol, ExpressionType type);
 
@@ -159,8 +155,6 @@ public:
 	static void iter_script(void (*iter)(std::ostream *, ObjectData_Script const &), std::ostream * out);
 
 	static void iter_static(void (*iter)(std::ostream *, ObjectData_Static const &), std::ostream * out);
-
-	static void iter_string(void (*iter)(std::ostream *, ObjectData_String const &), std::ostream * out);
 
 	static void read_objects(std::istream * in, ObjectVector * objects);
 
@@ -229,10 +223,6 @@ protected:
 	static Pointer create_value_symbol(std::istream * in);
 
 private:
-	static bool do_string_fold(size_t index);
-
-	static bigsint get_string(std::string const & s);
-
 	static bigsint _address_count;
 
 	static std::string _filename;
@@ -255,8 +245,6 @@ private:
 	static std::map<std::string, ObjectData_Script> _script_table;
 
 	static std::map<std::string, ObjectData_Static> _static_table;
-
-	static std::vector<ObjectData_String> _string_table;
 
 	static std::map<std::string, ObjectExpression::Pointer> _symbol_table;
 	static std::map<std::string, ExpressionType>            _symbol_type_table;

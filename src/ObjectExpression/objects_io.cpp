@@ -20,10 +20,9 @@
 */
 
 #include "../ObjectExpression.hpp"
+
 #include "../ObjectVector.hpp"
 #include "../object_io.hpp"
-
-#include <iostream>
 
 
 
@@ -47,10 +46,10 @@ void ObjectExpression::write_objects(std::ostream * out, ObjectVector const & ob
 
 	write_object(out, _static_table);
 
-	write_object(out, _string_table);
-
 	write_object(out, _symbol_table);
 	write_object(out, _symbol_type_table);
+
+	ObjectData_String::write_objects(out);
 }
 
 void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
@@ -74,10 +73,10 @@ void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
 
 	read_object(in, &_static_table);
 
-	read_object(in, &_string_table);
-
 	read_object(in, &_symbol_table);
 	read_object(in, &_symbol_type_table);
+
+	ObjectData_String::read_objects(in);
 }
 
 

@@ -53,8 +53,6 @@ std::map<std::string, ObjectData_Script> ObjectExpression::_script_table;
 ObjectExpression::Pointer                ObjectExpression:: static_offset(create_value_int(8192, SourcePosition()));
 std::map<std::string, ObjectData_Static> ObjectExpression::_static_table;
 
-std::vector<ObjectData_String> ObjectExpression::_string_table;
-
 std::map<std::string, ObjectExpression::Pointer>        ObjectExpression::_symbol_table;
 std::map<std::string, ObjectExpression::ExpressionType> ObjectExpression::_symbol_type_table;
 
@@ -217,23 +215,6 @@ void ObjectExpression::add_static(std::string const & name, bigsint size, bigsin
 	add_symbol(name, create_value_int(number, SourcePosition::none));
 }
 
-std::string ObjectExpression::add_string(std::string const & value)
-{
-	std::ostringstream oss;
-	oss << "__string_" << _filename << "_" << _string_table.size();
-	std::string symbol(oss.str());
-
-	add_string(symbol, value);
-	return symbol;
-}
-void ObjectExpression::add_string(std::string const & name, std::string const & value)
-{
-	ObjectData_String s = {name, value};
-	_string_table.push_back(s);
-
-	add_symbol(name, ET_INT);
-}
-
 void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression * value)
 {
 	add_symbol(symbol, value->getType());
@@ -244,24 +225,6 @@ void ObjectExpression::add_symbol(std::string const & symbol, ExpressionType typ
 	_symbol_type_table[symbol] = type;
 }
 
-bool ObjectExpression::do_string_fold(size_t index)
-{
-	for (size_t i(0); i < index; ++i)
-	{
-		if (_string_table[index].string == _string_table[i].string)
-		{
-			for (size_t j(index+1); j < _string_table.size(); ++j)
-				_string_table[j-1] = _string_table[j];
-
-			_string_table.pop_back();
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
 bigsint ObjectExpression::get_address_count()
 {
 	return _address_count;
@@ -270,17 +233,6 @@ bigsint ObjectExpression::get_address_count()
 std::string const & ObjectExpression::get_filename()
 {
 	return _filename;
-}
-
-bigsint ObjectExpression::get_string(std::string const & s)
-{
-	for (size_t i(0); i < _string_table.size(); ++i)
-	{
-		if (_string_table[i].string == s)
-			return (bigsint)i;
-	}
-
-	return -1;
 }
 
 ObjectExpression::Pointer ObjectExpression::get_symbol(std::string const & symbol, SourcePosition const & position)

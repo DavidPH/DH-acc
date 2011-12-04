@@ -236,7 +236,11 @@ void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & toke
 				for (std::vector<std::string>::const_iterator it(token->_data.begin()); it != token->_data.end(); ++it)
 					value += (char)string_to_int(*it, token->_position);
 
-				ObjectExpression::add_string(token->_name, value);
+				std::string const & name(ObjectData_String::add(value));
+
+				ObjectExpression::Pointer expr(ObjectExpression::create_value_symbol(name, token->_position));
+
+				ObjectExpression::add_symbol(token->_name, expr);
 			}
 		}
 	}

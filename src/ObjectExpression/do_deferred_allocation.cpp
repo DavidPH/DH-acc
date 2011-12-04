@@ -216,21 +216,8 @@ void ObjectExpression::do_deferred_allocation()
 	_iterator_map(_static_table, allocate<ObjectData_Static>, &used);
 
 
-	// Deferred string allocation.
-	for (size_t i(0); i < _string_table.size(); ++i)
-	{
-		if (option_string_fold.data)
-			add_symbol(_string_table[i].name, create_value_int(get_string(_string_table[i].string), SourcePosition::none));
-		else
-			add_symbol(_string_table[i].name, create_value_int((bigsint)i, SourcePosition::none));
-	}
-	if (option_string_fold.data) for (size_t i(0); i < _string_table.size();)
-	{
-		if (do_string_fold(i))
-			continue;
-
-		++i;
-	}
+	// strings
+	ObjectData_String::generate_symbols();
 }
 
 

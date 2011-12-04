@@ -46,14 +46,14 @@ template<typename T> void BinaryTokenACS::output_ACS0(std::ostream * out, std::v
 	ObjectExpression::iter_script(write_ACS0_script, out);
 
 	// directoryOffset+4+(scriptCount*12)
-	ObjectExpression::iter_string(write_ACS0_string_counter, NULL);
+	ObjectData_String::iterate(write_ACS0_string_counter, NULL);
 	write_ACS0_string_count(out);
 
 	// directoryOffset+4+(scriptCount*12)+4
-	ObjectExpression::iter_string(write_ACS0_string_offset, out);
+	ObjectData_String::iterate(write_ACS0_string_offset, out);
 
 	// directoryOffset+4+(scriptCount*12)+4+(stringCount*4)
-	ObjectExpression::iter_string(write_ACS0_string, out);
+	ObjectData_String::iterate(write_ACS0_string, out);
 }
 template void BinaryTokenACS::output_ACS0<BinaryTokenACS  >(std::ostream * out, std::vector<BinaryTokenACS  > const & instructions);
 template void BinaryTokenACS::output_ACS0<BinaryTokenPPACS>(std::ostream * out, std::vector<BinaryTokenPPACS> const & instructions);

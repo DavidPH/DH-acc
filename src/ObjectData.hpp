@@ -111,6 +111,18 @@ struct ObjectData_String
 {
 	std::string name;
 	std::string string;
+
+	// Returns the new string's name.
+	static std::string const & add(std::string const & string);
+
+	static void generate_symbols();
+
+	typedef void (*IterFunc)(std::ostream *, ObjectData_String const &);
+	static void iterate(IterFunc iterFunc, std::ostream * out);
+
+	static void read_objects(std::istream * in);
+
+	static void write_objects(std::ostream * out);
 };
 
 

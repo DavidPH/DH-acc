@@ -54,10 +54,5 @@ void ObjectExpression::iter_static(void (*iter)(std::ostream *, ObjectData_Stati
 {
 	_iterator_map(_static_table, iter, out);
 }
-void ObjectExpression::iter_string(void (*iter)(std::ostream *, ObjectData_String const &), std::ostream * out)
-{
-	for (std::vector<ObjectData_String>::iterator it(_string_table.begin()); it != _string_table.end(); ++it)
-		iter(out, *it);
-}
 
 

@@ -85,7 +85,7 @@ template<typename T> void BinaryTokenZDACS::output_ACSE(std::ostream * out, std:
 	write_ACSE_chunk(out, &chunkout, "SFLG");
 
 	// STRL - String Literals
-	ObjectExpression::iter_string(write_ACSE_string_STRL, NULL);
+	ObjectData_String::iterate(write_ACSE_string_STRL, NULL);
 	write_ACSE_stringtable(&chunkout, true);
 	write_ACSE_chunk(out, &chunkout, "STRL");
 
