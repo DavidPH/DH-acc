@@ -54,7 +54,7 @@ void BinaryTokenACS::write_ACS0_32(std::ostream * out, ObjectExpression const & 
 		break;
 
 	default:
-		throw SourceException("invalid ET", SourcePosition::none, "BinaryTokenACS::write_ACS0_32");
+		throw SourceException("invalid ET", SourcePosition::none(), "BinaryTokenACS::write_ACS0_32");
 	}
 }
 void BinaryTokenACS::write_ACS0_32(std::ostream * out, bigsint i)
@@ -68,7 +68,7 @@ void BinaryTokenACS::write_ACS0_32(std::ostream * out, bigsint i)
 void BinaryTokenACS::write_ACS0_script(std::ostream * out, ObjectData_Script const & s)
 {
 	write_ACS0_32(out, (s.stype * 1000) + s.number);
-	write_ACS0_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none));
+	write_ACS0_32(out, *ObjectExpression::get_symbol(s.label, SourcePosition::none()));
 	write_ACS0_32(out, s.argCount <= 3 ? s.argCount : 3);
 }
 

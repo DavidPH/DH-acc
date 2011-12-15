@@ -56,7 +56,7 @@ std::vector<ObjectExpression::Pointer> const & ObjectToken::getArgs() const
 }
 ObjectExpression::Pointer ObjectToken::getArg(size_t index) const
 {
-	static ObjectExpression::Pointer expr(ObjectExpression::create_value_int(0, SourcePosition::none));
+	static ObjectExpression::Pointer expr(ObjectExpression::create_value_int(0, SourcePosition::none()));
 
 	if (index < _args.size())
 		return _args[index];

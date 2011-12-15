@@ -287,7 +287,7 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 	if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
 	{
 		VariableType const * argType(make_expression_type(in, blocks, context));
-		if (argCount) *argCount += argType->size(SourcePosition::none);
+		if (argCount) *argCount += argType->size(SourcePosition::none());
 		if (argTypes) argTypes->push_back(argType);
 
 		std::string argName;
@@ -297,8 +297,8 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 
 		if (argContext)
 		{
-			std::string argNameObject(argContext->makeNameObject(SourceContext::NT_LOCAL, argClass, argType, argName, SourcePosition::none));
-			SourceVariable::Pointer argVariable(SourceVariable::create_variable(argName, argType, argNameObject, argClass, SourcePosition::none));
+			std::string argNameObject(argContext->makeNameObject(SourceContext::NT_LOCAL, argClass, argType, argName, SourcePosition::none()));
+			SourceVariable::Pointer argVariable(SourceVariable::create_variable(argName, argType, argNameObject, argClass, SourcePosition::none()));
 			argContext->addVariable(argVariable);
 		}
 
@@ -325,9 +325,9 @@ SourceExpression::Pointer SourceExpressionDS::make_expressions(SourceTokenizerDS
 	std::vector<SourceExpression::Pointer> expressions;
 	std::vector<SourceExpression::Pointer> blocks;
 
-	make_expressions(in, &expressions, &blocks, &SourceContext::global_context);
+	make_expressions(in, &expressions, &blocks, SourceContext::global_context);
 
-	expressions.push_back(create_branch_return(create_value_data(VariableType::get_vt_void(), true, SourcePosition::none), &SourceContext::global_context, SourcePosition::none));
+	expressions.push_back(create_branch_return(create_value_data(VariableType::get_vt_void(), true, SourcePosition::none()), SourceContext::global_context, SourcePosition::none()));
 
 	for (size_t i(0); i < blocks.size(); ++i)
 		expressions.push_back(blocks[i]);

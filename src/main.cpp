@@ -120,7 +120,7 @@ void read_source(std::string const & name, SourceType type, ObjectVector * objec
 
 			expressions->addLabel(mainName);
 
-			ObjectExpression::add_script(mainName + "_id", mainName, ObjectData_Script::ST_OPEN, 0, 0, SourceContext::global_context.getLimit(SourceVariable::SC_REGISTER));
+			ObjectExpression::add_script(mainName + "_id", mainName, ObjectData_Script::ST_OPEN, 0, 0, SourceContext::global_context->getLimit(SourceVariable::SC_REGISTER));
 		}
 
 		expressions->makeObjects(objects);
@@ -144,6 +144,7 @@ static inline void _init(int argc, char const * const * argv)
 	BinaryTokenACS::init();
 	BinaryTokenPPACS::init();
 	BinaryTokenZDACS::init();
+	SourceContext::init();
 	SourceExpressionDS::init();
 
 	option::program = argv[0];

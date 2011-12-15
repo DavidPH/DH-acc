@@ -107,7 +107,9 @@ public:
 
 
 
-	static SourceContext global_context;
+	static void init();
+
+	static SourceContext *global_context;
 
 private:
 	SourceContext();

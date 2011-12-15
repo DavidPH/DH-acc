@@ -43,8 +43,8 @@ public:
 	friend void read_object(std::istream * in, SourcePosition * out);
 	friend void write_object(std::ostream * out, SourcePosition const & in);
 
-	static SourcePosition const builtin;
-	static SourcePosition const none;
+	static SourcePosition const &builtin();
+	static SourcePosition const &none();
 };
 
 

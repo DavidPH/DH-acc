@@ -187,7 +187,7 @@ void BinaryTokenACS::write_all(std::ostream * out, std::vector<BinaryTokenACS> c
 		break;
 
 	default:
-		throw SourceException("unknown output type", SourcePosition::none, "BinaryTokenACS");
+		throw SourceException("unknown output type", SourcePosition::none(), "BinaryTokenACS");
 	}
 }
 

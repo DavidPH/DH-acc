@@ -67,7 +67,7 @@ static bigsint get_used(UsedMap * used, bigsint size)
 	while (is_used(used, number, size) && number < 65535) ++number;
 
 	if (number == 65535)
-		throw SourceException("no more used", SourcePosition::none, "ObjectExpression");
+		throw SourceException("no more used", SourcePosition::none(), "ObjectExpression");
 
 	set_used(used, number, size);
 
@@ -100,7 +100,7 @@ template<typename T> static void allocate(UsedMap * used, T & data)
 	if (data.number == -1)
 		data.number = get_used(used, 1);
 
-	ObjectExpression::add_symbol(data.name, ObjectExpression::create_value_int(data.number, SourcePosition::none));
+	ObjectExpression::add_symbol(data.name, ObjectExpression::create_value_int(data.number, SourcePosition::none()));
 }
 
 //
@@ -111,7 +111,7 @@ template<typename T> static void allocate_size(UsedMap * used, T & data)
 	if (data.number == -1)
 		data.number = get_used(used, data.size);
 
-	ObjectExpression::add_symbol(data.name, ObjectExpression::create_value_int(data.number, SourcePosition::none));
+	ObjectExpression::add_symbol(data.name, ObjectExpression::create_value_int(data.number, SourcePosition::none()));
 }
 
 //
@@ -121,7 +121,7 @@ static void allocate_Function(bigsint * number, ObjectData_Function & f)
 {
 	f.number = (*number)++;
 
-	ObjectExpression::add_symbol(f.name, ObjectExpression::create_value_int(f.number, SourcePosition::none));
+	ObjectExpression::add_symbol(f.name, ObjectExpression::create_value_int(f.number, SourcePosition::none()));
 }
 
 void ObjectExpression::do_deferred_allocation()

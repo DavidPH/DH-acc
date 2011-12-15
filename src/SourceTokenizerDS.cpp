@@ -34,10 +34,10 @@ SourceTokenizerDS::SourceTokenizerDS(SourceStream * const in) : _canCommand(true
 {
 	switch (target_type)
 	{
-	case TARGET_Hexen: addDefine("__TARGET_Hexen__", SourcePosition::none, std::vector<SourceTokenC>()); break;
-	case TARGET_HexPP: addDefine("__TARGET_HexPP__", SourcePosition::none, std::vector<SourceTokenC>()); break;
-	case TARGET_ZDoom: addDefine("__TARGET_ZDoom__", SourcePosition::none, std::vector<SourceTokenC>()); break;
-	case TARGET_UNKNOWN: addDefine("__TARGET_UNKNOWN__", SourcePosition::none, std::vector<SourceTokenC>()); break;
+	case TARGET_Hexen: addDefine("__TARGET_Hexen__", SourcePosition::builtin(), std::vector<SourceTokenC>()); break;
+	case TARGET_HexPP: addDefine("__TARGET_HexPP__", SourcePosition::builtin(), std::vector<SourceTokenC>()); break;
+	case TARGET_ZDoom: addDefine("__TARGET_ZDoom__", SourcePosition::builtin(), std::vector<SourceTokenC>()); break;
+	case TARGET_UNKNOWN: addDefine("__TARGET_UNKNOWN__", SourcePosition::builtin(), std::vector<SourceTokenC>()); break;
 	}
 
 	_in.push(in);

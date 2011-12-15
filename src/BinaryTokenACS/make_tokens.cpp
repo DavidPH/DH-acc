@@ -35,7 +35,7 @@
 
 void BinaryTokenACS::make_tokens(ObjectToken const & object, std::vector<BinaryTokenACS> * instructions)
 {
-	static ObjectExpression::Pointer const fracbits(ObjectExpression::create_value_int(16, SourcePosition::builtin));
+	static ObjectExpression::Pointer const fracbits(ObjectExpression::create_value_int(16, SourcePosition::builtin()));
 
 	static std::vector<std::string> const nolabels;
 

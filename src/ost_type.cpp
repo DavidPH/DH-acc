@@ -30,9 +30,9 @@ OutputType output_type(OUTPUT_UNKNOWN);
 SourceType source_type(SOURCE_UNKNOWN);
 TargetType target_type(TARGET_UNKNOWN);
 
-option_auto<OutputType> option_output_type("output", "input", "Format of source file(s).", &output_type);
-option_auto<SourceType> option_source_type("source", "output", "Target game.", &source_type);
-option_auto<TargetType> option_target_type("target", "output", "Output type.", &target_type);
+option_auto<OutputType> option_output_type("output", "input", "Output type.", &output_type);
+option_auto<SourceType> option_source_type("source", "output", "Format of source file(s).", &source_type);
+option_auto<TargetType> option_target_type("target", "output", "Target game.", &target_type);
 
 
 

@@ -171,7 +171,7 @@ void BinaryTokenPPACS::write_all(std::ostream * out, std::vector<BinaryTokenPPAC
 		break;
 
 	default:
-		throw SourceException("unknown output type", SourcePosition::none, "BinaryTokenPPACS");
+		throw SourceException("unknown output type", SourcePosition::none(), "BinaryTokenPPACS");
 	}
 }
 

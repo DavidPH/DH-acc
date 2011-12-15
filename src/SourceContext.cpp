@@ -32,23 +32,23 @@
 
 
 
-SourceContext SourceContext::global_context;
+SourceContext *SourceContext::global_context = NULL;
 
 
 
 SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(NULL), _returnType(VariableType::get_vt_void()), _type(CT_BLOCK), _inheritLocals(false)
 {
-	getVariableType_typedef("bool",     VariableType::get_vt_boolhard(), SourcePosition());
-	getVariableType_typedef("softbool", VariableType::get_vt_boolsoft(), SourcePosition());
-	getVariableType_typedef("char",     VariableType::get_vt_char(),     SourcePosition());
-	getVariableType_typedef("int",      VariableType::get_vt_int(),      SourcePosition());
-	getVariableType_typedef("real",     VariableType::get_vt_real(),     SourcePosition());
-	getVariableType_typedef("string",   VariableType::get_vt_string(),   SourcePosition());
-	getVariableType_typedef("void",     VariableType::get_vt_void(),     SourcePosition());
+	getVariableType_typedef("bool",     VariableType::get_vt_boolhard(), SourcePosition::builtin());
+	getVariableType_typedef("softbool", VariableType::get_vt_boolsoft(), SourcePosition::builtin());
+	getVariableType_typedef("char",     VariableType::get_vt_char(),     SourcePosition::builtin());
+	getVariableType_typedef("int",      VariableType::get_vt_int(),      SourcePosition::builtin());
+	getVariableType_typedef("real",     VariableType::get_vt_real(),     SourcePosition::builtin());
+	getVariableType_typedef("string",   VariableType::get_vt_string(),   SourcePosition::builtin());
+	getVariableType_typedef("void",     VariableType::get_vt_void(),     SourcePosition::builtin());
 
 
-	addVariable(SourceVariable::create_constant("false", VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(0, SourcePosition()), SourcePosition()));
-	addVariable(SourceVariable::create_constant("true",  VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(1, SourcePosition()), SourcePosition()));
+	addVariable(SourceVariable::create_constant("false", VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(0, SourcePosition::builtin()), SourcePosition::builtin()));
+	addVariable(SourceVariable::create_constant("true",  VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(1, SourcePosition::builtin()), SourcePosition::builtin()));
 }
 SourceContext::SourceContext(SourceContext * parent, ContextType type) : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _label(parent->makeLabelShort()), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP || type == CT_SWITCH)
 {
@@ -177,7 +177,7 @@ void SourceContext::addVariable(SourceVariable * var)
 	case SourceVariable::SC_REGISTER_MAP:
 	case SourceVariable::SC_REGISTER_WORLD:
 	case SourceVariable::SC_STATIC:
-		addCount(var->getType()->size(SourcePosition::none), sc);
+		addCount(var->getType()->size(SourcePosition::none()), sc);
 		break;
 
 	case SourceVariable::SC_REGISTERARRAY_MAP:
@@ -249,7 +249,7 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
 		return 0;
 	}
 
-	throw SourceException("getCount", SourcePosition::none, "SourceContext");
+	throw SourceException("getCount", SourcePosition::none(), "SourceContext");
 }
 
 std::string SourceContext::getLabel() const
@@ -335,7 +335,7 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 		return 0;
 	}
 
-	throw SourceException("getCount", SourcePosition::none, "SourceContext");
+	throw SourceException("getCount", SourcePosition::none(), "SourceContext");
 }
 
 VariableType const * SourceContext::getReturnType() const
@@ -401,6 +401,11 @@ SourceVariable::Pointer SourceContext::getVariable(std::string const & name, Sou
 bool SourceContext::hasLabelCaseDefault() const
 {
 	return _caseDefault;
+}
+
+void SourceContext::init()
+{
+	global_context = new SourceContext;
 }
 
 std::string SourceContext::makeLabel()

@@ -50,7 +50,7 @@ std::map<std::string, ObjectData_RegisterArray> ObjectExpression::_registerarray
 
 std::map<std::string, ObjectData_Script> ObjectExpression::_script_table;
 
-ObjectExpression::Pointer                ObjectExpression:: static_offset(create_value_int(8192, SourcePosition()));
+ObjectExpression::Pointer                ObjectExpression:: static_offset(create_value_int(8192, SourcePosition::none()));
 std::map<std::string, ObjectData_Static> ObjectExpression::_static_table;
 
 std::map<std::string, ObjectExpression::Pointer>        ObjectExpression::_symbol_table;
@@ -79,7 +79,7 @@ void ObjectExpression::add_auto(std::string const & name, bigsint size, bigsint 
 	ObjectData_Auto s = {name, number, size};
 	_auto_table[name] = s;
 
-	add_symbol(name, create_value_int(number, SourcePosition::none));
+	add_symbol(name, create_value_int(number, SourcePosition::none()));
 }
 
 void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, bool externDef)
@@ -92,7 +92,7 @@ void ObjectExpression::add_function(std::string const & name, std::string const 
 
 void ObjectExpression::add_label(std::string const & symbol)
 {
-	add_symbol(symbol, create_value_int(_address_count, SourcePosition::none));
+	add_symbol(symbol, create_value_int(_address_count, SourcePosition::none()));
 }
 
 void ObjectExpression::add_register_global(std::string const & name, bigsint size, bool externDef, bool externVis)
@@ -107,7 +107,7 @@ void ObjectExpression::add_register_global(std::string const & name, bigsint siz
 	ObjectData_Register r = {name, number, size, externDef, externVis};
 	_register_global_table[name] = r;
 
-	add_symbol(name, create_value_int(number, SourcePosition::none));
+	add_symbol(name, create_value_int(number, SourcePosition::none()));
 }
 
 void ObjectExpression::add_register_map(std::string const & name, bigsint size, bool externDef, bool externVis)
@@ -122,7 +122,7 @@ void ObjectExpression::add_register_map(std::string const & name, bigsint size, 
 	ObjectData_Register r = {name, number, size, externDef, externVis};
 	_register_map_table[name] = r;
 
-	add_symbol(name, create_value_int(number, SourcePosition::none));
+	add_symbol(name, create_value_int(number, SourcePosition::none()));
 }
 
 void ObjectExpression::add_register_world(std::string const & name, bigsint size, bool externDef, bool externVis)
@@ -137,7 +137,7 @@ void ObjectExpression::add_register_world(std::string const & name, bigsint size
 	ObjectData_Register r = {name, number, size, externDef, externVis};
 	_register_world_table[name] = r;
 
-	add_symbol(name, create_value_int(number, SourcePosition::none));
+	add_symbol(name, create_value_int(number, SourcePosition::none()));
 }
 
 void ObjectExpression::add_registerarray_global(std::string const & name, bigsint size, bool externDef, bool externVis)
@@ -152,7 +152,7 @@ void ObjectExpression::add_registerarray_global(std::string const & name, bigsin
 	ObjectData_RegisterArray r = {name, number, size, externDef, externVis};
 	_registerarray_global_table[name] = r;
 
-	add_symbol(name, create_value_int(number, SourcePosition::none));
+	add_symbol(name, create_value_int(number, SourcePosition::none()));
 }
 
 void ObjectExpression::add_registerarray_map(std::string const & name, bigsint size, bool externDef, bool externVis)
@@ -167,7 +167,7 @@ void ObjectExpression::add_registerarray_map(std::string const & name, bigsint s
 	ObjectData_RegisterArray r = {name, number, size, externDef, externVis};
 	_registerarray_map_table[name] = r;
 
-	add_symbol(name, create_value_int(number, SourcePosition::none));
+	add_symbol(name, create_value_int(number, SourcePosition::none()));
 }
 
 void ObjectExpression::add_registerarray_world(std::string const & name, bigsint size, bool externDef, bool externVis)
@@ -182,7 +182,7 @@ void ObjectExpression::add_registerarray_world(std::string const & name, bigsint
 	ObjectData_RegisterArray r = {name, number, size, externDef, externVis};
 	_registerarray_world_table[name] = r;
 
-	add_symbol(name, create_value_int(number, SourcePosition::none));
+	add_symbol(name, create_value_int(number, SourcePosition::none()));
 }
 
 void ObjectExpression::add_script(std::string const & name, std::string const & label, ObjectData_Script::ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount)
@@ -197,7 +197,7 @@ void ObjectExpression::add_script(std::string const & name, std::string const & 
 	ObjectData_Script s = {label, name, stype, argCount, flags, number, varCount};
 	_script_table[name] = s;
 
-	add_symbol(name, create_value_int(number, SourcePosition::none));
+	add_symbol(name, create_value_int(number, SourcePosition::none()));
 }
 
 void ObjectExpression::add_static(std::string const & name, bigsint size)
@@ -212,7 +212,7 @@ void ObjectExpression::add_static(std::string const & name, bigsint size, bigsin
 	ObjectData_Static s = {name, number, size};
 	_static_table[name] = s;
 
-	add_symbol(name, create_value_int(number, SourcePosition::none));
+	add_symbol(name, create_value_int(number, SourcePosition::none()));
 }
 
 void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression * value)

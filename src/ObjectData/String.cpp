@@ -61,7 +61,7 @@ void ObjectData_String::generate_symbols()
 
 	for (it = _string_table.begin(); it != _string_table.end(); ++it)
 	{
-		expr = ObjectExpression::create_value_int(i++, SourcePosition::none);
+		expr = ObjectExpression::create_value_int(i++, SourcePosition::none());
 		ObjectExpression::add_symbol(it->second.name, expr);
 	}
 }

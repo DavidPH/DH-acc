@@ -36,11 +36,11 @@
 
 void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<BinaryTokenZDACS> * instructions)
 {
-	static ObjectExpression::Pointer const fracbits(ObjectExpression::create_value_int(16, SourcePosition::builtin));
+	static ObjectExpression::Pointer const fracbits(ObjectExpression::create_value_int(16, SourcePosition::builtin()));
 
-	static ObjectExpression::Pointer const indexAddr(ObjectExpression::create_value_int(0, SourcePosition::builtin));
-	static ObjectExpression::Pointer const indexStack(ObjectExpression::create_value_int(0, SourcePosition::builtin));
-	static ObjectExpression::Pointer const indexTemp(ObjectExpression::create_value_int(1, SourcePosition::builtin));
+	static ObjectExpression::Pointer const indexAddr(ObjectExpression::create_value_int(0, SourcePosition::builtin()));
+	static ObjectExpression::Pointer const indexStack(ObjectExpression::create_value_int(0, SourcePosition::builtin()));
+	static ObjectExpression::Pointer const indexTemp(ObjectExpression::create_value_int(1, SourcePosition::builtin()));
 
 	static std::vector<std::string> const nolabels;
 
@@ -239,7 +239,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 
 	case OCODE_GET_STATIC_VAR32F:
 	case OCODE_GET_STATIC_VAR32I:
-		args.push_back(ObjectExpression::create_binary_add(object.getArg(0), ObjectExpression::static_offset, SourcePosition::none));
+		args.push_back(ObjectExpression::create_binary_add(object.getArg(0), ObjectExpression::static_offset, SourcePosition::none()));
 		PUSH_TOKEN(BCODE_GET_LITERAL);
 		args.push_back(indexAddr);
 		PUSH_TOKEN(BCODE_GET_GLOBALARRAY_VAR);
@@ -300,7 +300,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 
 	case OCODE_SET_STATIC_VAR32F:
 	case OCODE_SET_STATIC_VAR32I:
-		args.push_back(ObjectExpression::create_binary_add(object.getArg(0), ObjectExpression::static_offset, SourcePosition::none));
+		args.push_back(ObjectExpression::create_binary_add(object.getArg(0), ObjectExpression::static_offset, SourcePosition::none()));
 		PUSH_TOKEN(BCODE_GET_LITERAL);
 		PUSH_TOKEN(BCODE_STACK_SWAP);
 		args.push_back(indexAddr);

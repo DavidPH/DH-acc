@@ -25,11 +25,6 @@
 
 
 
-SourcePosition const SourcePosition::builtin("__builtin__", 0, 0);
-SourcePosition const SourcePosition::none("(none)", 0, 0);
-
-
-
 SourcePosition::SourcePosition() : filename(), line(0), column(0)
 {
 
@@ -37,6 +32,18 @@ SourcePosition::SourcePosition() : filename(), line(0), column(0)
 SourcePosition::SourcePosition(std::string const & filename_, long line_, long column_) : filename(filename_), line(line_), column(column_)
 {
 
+}
+
+SourcePosition const &SourcePosition::builtin()
+{
+   static SourcePosition const position("__builtin__", 0, 0);
+   return position;
+}
+
+SourcePosition const &SourcePosition::none()
+{
+   static SourcePosition const position("(none)", 0, 0);
+   return position;
 }
 
 
