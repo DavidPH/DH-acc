@@ -81,11 +81,11 @@ void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
 
 
 
-bool override_object(ObjectExpression::ExpressionType * out, ObjectExpression::ExpressionType const & in)
+bool override_object(ObjectExpression::ExpressionType *, ObjectExpression::ExpressionType const &)
 {
 	return false;
 }
-bool override_object(ObjectExpression::Pointer * out, ObjectExpression::Pointer const & in)
+bool override_object(ObjectExpression::Pointer *, ObjectExpression::Pointer const &)
 {
 	return false;
 }

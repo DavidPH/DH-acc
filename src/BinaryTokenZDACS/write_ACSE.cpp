@@ -58,7 +58,7 @@ void BinaryTokenZDACS::write_ACSE_function_FUNC(std::ostream * out, ObjectData_F
 	BinaryTokenACS::write_ACS0_32(out, f.externDef ? *externalAddr : *ObjectExpression::get_symbol(f.label, SourcePosition::none));
 }
 
-void BinaryTokenZDACS::write_ACSE_function_FNAM(std::ostream * out, ObjectData_Function const & f)
+void BinaryTokenZDACS::write_ACSE_function_FNAM(std::ostream *, ObjectData_Function const & f)
 {
 	_strings_temp.push_back(f.name);
 }
@@ -80,14 +80,14 @@ void BinaryTokenZDACS::write_ACSE_register_MIMP(std::ostream * out, ObjectData_R
 	}
 }
 
-void BinaryTokenZDACS::write_ACSE_register_MEXP(std::ostream * out, ObjectData_Register const & r)
+void BinaryTokenZDACS::write_ACSE_register_MEXP(std::ostream *, ObjectData_Register const & r)
 {
 	if (!r.externVis) return;
 
 	std::string s(r.name);
 	s += '\0';
 
-	if (_strings_temp.size() < r.number + r.size)
+	if (_strings_temp.size() < static_cast<size_t>(r.number + r.size))
 		_strings_temp.resize(r.number + r.size);
 
 	// A bit of a hack, really.
@@ -115,18 +115,18 @@ void BinaryTokenZDACS::write_ACSE_registerarray_AIMP(std::ostream * out, ObjectD
 	*out << r.name << '\0';
 }
 
-void BinaryTokenZDACS::write_ACSE_registerarray_AIMP_counter(std::ostream * out, ObjectData_RegisterArray const & r)
+void BinaryTokenZDACS::write_ACSE_registerarray_AIMP_counter(std::ostream *, ObjectData_RegisterArray const & r)
 {
 	if (!r.externDef) return;
 
 	++_temp_counter;
 }
 
-void BinaryTokenZDACS::write_ACSE_registerarray_MEXP(std::ostream * out, ObjectData_RegisterArray const & r)
+void BinaryTokenZDACS::write_ACSE_registerarray_MEXP(std::ostream *, ObjectData_RegisterArray const & r)
 {
 	if (!r.externDef) return;
 
-	if (_strings_temp.size() < r.number + 1)
+	if (_strings_temp.size() < static_cast<size_t>(r.number + 1))
 		_strings_temp.resize(r.number + 1);
 
 	_strings_temp[r.number] = r.name;
@@ -157,7 +157,7 @@ void BinaryTokenZDACS::write_ACSE_script_vars(std::ostream * out, ObjectData_Scr
 	BinaryTokenACS::write_ACS0_16(out, s.varCount);
 }
 
-void BinaryTokenZDACS::write_ACSE_string_STRL(std::ostream * out, ObjectData_String const & s)
+void BinaryTokenZDACS::write_ACSE_string_STRL(std::ostream *, ObjectData_String const & s)
 {
 	_strings_temp.push_back(s.string);
 }

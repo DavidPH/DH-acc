@@ -87,7 +87,7 @@ void ObjectToken::swapData(ObjectToken & token)
 
 
 
-bool override_object(ObjectToken * out, ObjectToken const & in)
+bool override_object(ObjectToken *, ObjectToken const &)
 {
 	return false;
 }

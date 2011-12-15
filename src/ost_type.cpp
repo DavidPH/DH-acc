@@ -72,19 +72,19 @@ template<> TargetType option_auto<TargetType>::parse(std::string const & name, s
 		throw exception(name, arg, "unknown type");
 }
 
-template<> bool option_auto<OutputType>::handler_default(std::string const & name, std::string const & arg, bool barg, OutputType * data)
+template<> bool option_auto<OutputType>::handler_default(std::string const & name, std::string const & arg, bool, OutputType * data)
 {
 	*data = parse(name, arg);
 
 	return true;
 }
-template<> bool option_auto<SourceType>::handler_default(std::string const & name, std::string const & arg, bool barg, SourceType * data)
+template<> bool option_auto<SourceType>::handler_default(std::string const & name, std::string const & arg, bool, SourceType * data)
 {
 	*data = parse(name, arg);
 
 	return true;
 }
-template<> bool option_auto<TargetType>::handler_default(std::string const & name, std::string const & arg, bool barg, TargetType * data)
+template<> bool option_auto<TargetType>::handler_default(std::string const & name, std::string const & arg, bool, TargetType * data)
 {
 	*data = parse(name, arg);
 

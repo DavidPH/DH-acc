@@ -286,25 +286,25 @@ template<> int option_auto<int>::parse(std::string const & name, std::string con
 	return i;
 }
 
-template<> bool option_auto<bool>::handler_default(std::string const & name, std::string const & arg, bool barg, bool * data)
+template<> bool option_auto<bool>::handler_default(std::string const &, std::string const &, bool barg, bool * data)
 {
 	*data = barg;
 
 	return false;
 }
-template<> bool option_auto<float>::handler_default(std::string const & name, std::string const & arg, bool barg, float * data)
+template<> bool option_auto<float>::handler_default(std::string const & name, std::string const & arg, bool, float * data)
 {
 	*data = parse(name, arg);
 
 	return true;
 }
-template<> bool option_auto<int>::handler_default(std::string const & name, std::string const & arg, bool barg, int * data)
+template<> bool option_auto<int>::handler_default(std::string const & name, std::string const & arg, bool, int * data)
 {
 	*data = parse(name, arg);
 
 	return true;
 }
-template<> bool option_auto<std::string>::handler_default(std::string const & name, std::string const & arg, bool barg, std::string * data)
+template<> bool option_auto<std::string>::handler_default(std::string const & name, std::string const & arg, bool, std::string * data)
 {
 	assert_arg(name, arg);
 
@@ -312,7 +312,7 @@ template<> bool option_auto<std::string>::handler_default(std::string const & na
 
 	return true;
 }
-template<> bool option_auto<std::vector<std::string> >::handler_default(std::string const & name, std::string const & arg, bool barg, std::vector<std::string> * data)
+template<> bool option_auto<std::vector<std::string> >::handler_default(std::string const & name, std::string const & arg, bool, std::vector<std::string> * data)
 {
 	assert_arg(name, arg);
 

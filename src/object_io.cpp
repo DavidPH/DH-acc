@@ -23,7 +23,7 @@
 
 
 
-bool override_object(std::string * out, std::string const & in)
+bool override_object(std::string *, std::string const &)
 {
 	return false;
 }

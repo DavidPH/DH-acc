@@ -43,7 +43,7 @@ private:
 
 
 
-SourceExpression::Pointer SourceExpression::create_branch_not(SourceExpression * expr, SourceContext * context, SourcePosition const & position)
+SourceExpression::Pointer SourceExpression::create_branch_not(SourceExpression * expr, SourceContext *, SourcePosition const & position)
 {
 	return new SourceExpression_BranchNot(expr, position);
 }

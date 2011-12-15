@@ -90,7 +90,7 @@ VariableType * SourceContext::getVariableType_struct(std::string const & name)
 
 	return NULL;
 }
-VariableType const * SourceContext::getVariableType_struct(std::string const & name, SourcePosition const & position)
+VariableType const * SourceContext::getVariableType_struct(std::string const & name, SourcePosition const &)
 {
 	VariableType * vartype(getVariableType_struct(name));
 
@@ -176,7 +176,7 @@ VariableType * SourceContext::getVariableType_union(std::string const & name)
 
 	return NULL;
 }
-VariableType const * SourceContext::getVariableType_union(std::string const & name, SourcePosition const & position)
+VariableType const * SourceContext::getVariableType_union(std::string const & name, SourcePosition const &)
 {
 	VariableType * vartype(getVariableType_union(name));
 

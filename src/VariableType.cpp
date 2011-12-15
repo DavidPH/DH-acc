@@ -35,21 +35,23 @@ std::vector<VariableType *> VariableType::type_native;
 std::vector<VariableType *> VariableType::type_pointer;
 std::vector<VariableType *> VariableType::type_script;
 
-VariableType VariableType::vt_boolhard = {VT_BOOLHARD, true, &vtc_void, &vtc_boolhard, &vtc_void};
-VariableType VariableType::vt_boolsoft = {VT_BOOLSOFT, true, &vtc_void, &vtc_boolsoft, &vtc_void};
-VariableType VariableType::vt_char     = {VT_CHAR,     true, &vtc_void, &vtc_char,     &vtc_void};
-VariableType VariableType::vt_int      = {VT_INT,      true, &vtc_void, &vtc_int,      &vtc_void};
-VariableType VariableType::vt_real     = {VT_REAL,     true, &vtc_void, &vtc_real,     &vtc_void};
-VariableType VariableType::vt_string   = {VT_STRING,   true, &vtc_void, &vtc_string,   &vtc_char};
-VariableType VariableType::vt_void     = {VT_VOID,     true, &vtc_void, &vtc_void,     &vtc_void};
+#define VT_INIT(NAME,VT,VTR)                                        \
+VariableType VariableType::vt_##NAME  = { VT_##VT, true, &vtc_void, \
+&vtc_##NAME, &vtc_##VTR, std::vector<std::string>(),                \
+std::vector<VariableType const *>() };                              \
+VariableType VariableType::vtc_##NAME = { VT_##VT, true, &vtc_void, \
+NULL,        &vtc_##VTR, std::vector<std::string>(),                \
+std::vector<VariableType const *>() }
 
-VariableType VariableType::vtc_boolhard = {VT_BOOLHARD, true, &vtc_void, NULL, &vtc_void};
-VariableType VariableType::vtc_boolsoft = {VT_BOOLSOFT, true, &vtc_void, NULL, &vtc_void};
-VariableType VariableType::vtc_char     = {VT_CHAR,     true, &vtc_void, NULL, &vtc_void};
-VariableType VariableType::vtc_int      = {VT_INT,      true, &vtc_void, NULL, &vtc_void};
-VariableType VariableType::vtc_real     = {VT_REAL,     true, &vtc_void, NULL, &vtc_void};
-VariableType VariableType::vtc_string   = {VT_STRING,   true, &vtc_void, NULL, &vtc_char};
-VariableType VariableType::vtc_void     = {VT_VOID,     true, &vtc_void, NULL, &vtc_void};
+VT_INIT(boolhard, BOOLHARD, void);
+VT_INIT(boolsoft, BOOLSOFT, void);
+VT_INIT(char,     CHAR,     void);
+VT_INIT(int,      INT,      void);
+VT_INIT(real,     REAL,     void);
+VT_INIT(string,   STRING,   void);
+VT_INIT(void,     VOID,     void);
+
+#undef VT_INIT
 
 
 

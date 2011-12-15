@@ -77,7 +77,7 @@ void BinaryTokenACS::write_ACS0_script_count(std::ostream * out)
 	write_ACS0_32(out, _script_count);
 }
 
-void BinaryTokenACS::write_ACS0_script_counter(std::ostream * out, ObjectData_Script const & s)
+void BinaryTokenACS::write_ACS0_script_counter(std::ostream *, ObjectData_Script const &)
 {
 	++_script_count;
 }
@@ -92,7 +92,7 @@ void BinaryTokenACS::write_ACS0_string_count(std::ostream * out)
 	write_ACS0_32(out, _string_count);
 }
 
-void BinaryTokenACS::write_ACS0_string_counter(std::ostream * out, ObjectData_String const & s)
+void BinaryTokenACS::write_ACS0_string_counter(std::ostream *, ObjectData_String const &)
 {
 	++_string_count;
 }

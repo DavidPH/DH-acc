@@ -54,7 +54,7 @@ SourceExpression::Pointer SourceExpression::create_branch_continue(SourceContext
 {
 	return new SourceExpression_BranchGoto(context->getLabelContinue(position), position);
 }
-SourceExpression::Pointer SourceExpression::create_branch_goto(std::string const & label, SourceContext * context, SourcePosition const & position)
+SourceExpression::Pointer SourceExpression::create_branch_goto(std::string const & label, SourceContext *, SourcePosition const & position)
 {
 	return new SourceExpression_BranchGoto(label, position);
 }

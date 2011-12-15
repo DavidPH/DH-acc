@@ -281,7 +281,7 @@ ObjectCodeSet ObjectExpression::resolveOCode() const
 	throw SourceException("cannot resolve ocode", position, getName());
 }
 
-void ObjectExpression::writeACSP(std::ostream * out) const
+void ObjectExpression::writeACSP(std::ostream *) const
 {
 	throw SourceException("cannot write ACS+", position, getName());
 }

@@ -218,6 +218,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 }
 SRCEXPDS_EXPRSINGLE_DEFN(break)
 {
+	(void)in; (void)blocks;
+
 	return create_branch_break(context, token.getPosition());
 }
 SRCEXPDS_EXPRSINGLE_DEFN(case)
@@ -247,6 +249,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(const)
 }
 SRCEXPDS_EXPRSINGLE_DEFN(continue)
 {
+	(void)in; (void)blocks;
+
 	return create_branch_continue(context, token.getPosition());
 }
 SRCEXPDS_EXPRSINGLE_DEFN(default)
@@ -263,6 +267,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(delay)
 }
 SRCEXPDS_EXPRSINGLE_DEFN(library)
 {
+	(void)blocks; (void)context;
+
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 	ObjectExpression::set_library(in->get(SourceTokenC::TT_STRING).getData());
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);

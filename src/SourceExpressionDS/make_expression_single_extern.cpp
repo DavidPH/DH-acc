@@ -32,6 +32,8 @@
 
 SRCEXPDS_EXPRSINGLE_DEFN(extern)
 {
+	(void)token;
+
 	SourceTokenC externToken(in->get(SourceTokenC::TT_IDENTIFIER));
 
 	expression_single_handler_map::iterator it(_expression_single_extern_handlers.find(externToken.getData()));
