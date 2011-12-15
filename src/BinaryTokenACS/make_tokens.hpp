@@ -22,7 +22,7 @@
 #ifndef HPP_make_tokens__BinaryTokenACS_
 #define HPP_make_tokens__BinaryTokenACS_
 
-#include "../BinaryToken/make_tokens_macros.hpp"
+#include "../BinaryToken/make_tokens.hpp"
 
 
 
