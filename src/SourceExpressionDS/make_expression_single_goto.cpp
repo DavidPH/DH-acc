@@ -54,5 +54,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(goto)
 	return create_branch_goto(label, context, token.getPosition());
 }
 
-
+SRCEXPDS_EXPRSINGLE_DEFN(goto_dyn)
+{
+	return create_branch_goto(make_expression_single(in, blocks, context), context, token.getPosition());
+}
 

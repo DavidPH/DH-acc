@@ -25,6 +25,7 @@
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
 #include "../SourceContext.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -34,6 +35,7 @@ class SourceExpression_BranchGoto : public SourceExpression
 
 public:
 	SourceExpression_BranchGoto(std::string const & label, SourcePosition const & position);
+	SourceExpression_BranchGoto(SourceExpression *expr, SourcePosition const &position);
 
 protected:
 	virtual void printDebug(std::ostream * out) const;
@@ -41,6 +43,7 @@ protected:
 private:
 	virtual void virtual_makeObjectsGet(ObjectVector * objects);
 
+	SourceExpression::Pointer expr;
 	std::string _label;
 };
 
@@ -58,12 +61,21 @@ SourceExpression::Pointer SourceExpression::create_branch_goto(std::string const
 {
 	return new SourceExpression_BranchGoto(label, position);
 }
+SourceExpression::Pointer SourceExpression::create_branch_goto(SourceExpression *expr, SourceContext *, SourcePosition const &position)
+{
+	return new SourceExpression_BranchGoto(expr, position);
+}
 
 
 
 SourceExpression_BranchGoto::SourceExpression_BranchGoto(std::string const & label, SourcePosition const & position_) : Super(position_), _label(label)
 {
 
+}
+SourceExpression_BranchGoto::SourceExpression_BranchGoto(SourceExpression *_expr, SourcePosition const &_position) : Super(_position), expr(_expr)
+{
+	if (expr->getType()->vt != VariableType::VT_LABEL)
+		expr = create_value_cast(expr, VariableType::get_vt_label(), position);
 }
 
 void SourceExpression_BranchGoto::printDebug(std::ostream * out) const
@@ -81,7 +93,20 @@ void SourceExpression_BranchGoto::virtual_makeObjectsGet(ObjectVector * objects)
 {
 	Super::recurse_makeObjectsGet(objects);
 
-	objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_label));
+	if (expr)
+	{
+		if (expr->canMakeObject())
+		{
+			objects->addToken(OCODE_BRANCH_GOTO_IMM, expr->makeObject());
+		}
+		else
+		{
+			expr->makeObjectsGet(objects);
+			objects->setPosition(position);
+			objects->addToken(OCODE_BRANCH_GOTO);
+		}
+	}
+	else
+		objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_label));
 }
-
 

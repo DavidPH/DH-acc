@@ -91,6 +91,33 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		expr = create_unary_reference(make_expression_single(in, blocks, context), token.getPosition());
 		break;
 
+	case SourceTokenC::TT_OP_AND2:
+	{
+		SourceTokenC labelToken(in->get(SourceTokenC::TT_IDENTIFIER));
+
+		std::string label;
+
+		if (labelToken.getData() == "case")
+		{
+			if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER && in->peek().getData() == "default")
+			{
+				in->get(SourceTokenC::TT_IDENTIFIER);
+				label = context->getLabelCaseDefault(token.getPosition());
+			}
+			else
+			{
+				label = context->getLabelCase(make_expression_single(in, blocks, context)->makeObject()->resolveInt(), token.getPosition());
+			}
+		}
+		else
+		{
+			label = context->getLabelGoto(labelToken);
+		}
+
+		expr = create_value_variable(SourceVariable::create_literal(VariableType::get_vt_label(), label, labelToken.getPosition()), token.getPosition());
+	}
+		break;
+
 	case SourceTokenC::TT_OP_ASTERISK:
 		expr = create_unary_dereference(make_expression_single(in, blocks, context), token.getPosition());
 		break;

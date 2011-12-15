@@ -81,6 +81,12 @@ operator & (unary)
   Yields a pointer to expression.
     "&" expression_single
 
+operator && (unary)
+  Yields a pointer to label or case.
+    "&&" "case" "default"
+    "&&" "case" expression_single
+    "&&" identifier
+
 operator sizeof
   Yields the size of a type.
     "sizeof" "(" type ")"
@@ -134,7 +140,7 @@ operator ^ (binary)
 operator | (binary)
     expression "|" expression_single
 
-operator &&
+operator && (binary)
     expression "&&" expression_single
 
 operator ^^
@@ -262,6 +268,10 @@ operator goto
     "goto" "case" "default"
     "goto" "case" expression_single
     "goto" identifier
+
+operator goto_dyn
+  Branches to a label-pointer. Yields void.
+    "__goto_dyn" expression_single
 
 operator if
   Performs a conditional branch. Yields the result of if-branch or else-branch.

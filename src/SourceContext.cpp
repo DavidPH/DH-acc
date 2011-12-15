@@ -42,6 +42,7 @@ SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countA
 	getVariableType_typedef("softbool", VariableType::get_vt_boolsoft(), SourcePosition::builtin());
 	getVariableType_typedef("char",     VariableType::get_vt_char(),     SourcePosition::builtin());
 	getVariableType_typedef("int",      VariableType::get_vt_int(),      SourcePosition::builtin());
+	getVariableType_typedef("__label",  VariableType::get_vt_label(),    SourcePosition::builtin());
 	getVariableType_typedef("real",     VariableType::get_vt_real(),     SourcePosition::builtin());
 	getVariableType_typedef("string",   VariableType::get_vt_string(),   SourcePosition::builtin());
 	getVariableType_typedef("void",     VariableType::get_vt_void(),     SourcePosition::builtin());

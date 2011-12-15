@@ -68,6 +68,7 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		case VariableType::VT_ENUM:
 		case VariableType::VT_FUNCTION:
 		case VariableType::VT_INT:
+		case VariableType::VT_LABEL:
 		case VariableType::VT_LINESPEC:
 		case VariableType::VT_NATIVE:
 		case VariableType::VT_POINTER:
@@ -104,6 +105,7 @@ void SourceVariable::makeObjectsGet(ObjectVector * objects, SourcePosition const
 		case VariableType::VT_ENUM:
 		case VariableType::VT_FUNCTION:
 		case VariableType::VT_INT:
+		case VariableType::VT_LABEL:
 		case VariableType::VT_LINESPEC:
 		case VariableType::VT_NATIVE:
 		case VariableType::VT_POINTER:

@@ -161,6 +161,12 @@ void SourceExpression_RootOutput::doOut(ObjectVector * objects, VariableType con
 		objects->addToken(OCODE_ACSP_CHARACTER);
 		break;
 
+	case VariableType::VT_LABEL:
+		objects->addToken(OCODE_ACSP_NUM_HEX32U);
+		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('L'));
+		objects->addToken(OCODE_ACSP_CHARACTER);
+		break;
+
 	case VariableType::VT_LINESPEC:
 		objects->addToken(OCODE_ACSP_NUM_DEC32U);
 		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));

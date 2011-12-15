@@ -47,8 +47,9 @@ VT_INIT(boolhard, BOOLHARD, void);
 VT_INIT(boolsoft, BOOLSOFT, void);
 VT_INIT(char,     CHAR,     void);
 VT_INIT(int,      INT,      void);
+VT_INIT(label,    LABEL,    void);
 VT_INIT(real,     REAL,     void);
-VT_INIT(string,   STRING,   void);
+VT_INIT(string,   STRING,   char);
 VT_INIT(void,     VOID,     void);
 
 #undef VT_INIT
@@ -111,6 +112,7 @@ VariableType const * VariableType::doConst()
 	case VT_ENUM:
 	case VT_FUNCTION:
 	case VT_INT:
+	case VT_LABEL:
 	case VT_LINESPEC:
 	case VT_NATIVE:
 	case VT_POINTER:
@@ -209,6 +211,7 @@ VariableType const * VariableType::get_vt(Type vt)
 	case VT_BOOLSOFT: return &vt_boolsoft;
 	case VT_CHAR:     return &vt_char;
 	case VT_INT:      return &vt_int;
+	case VT_LABEL:    return &vt_label;
 	case VT_REAL:     return &vt_real;
 	case VT_STRING:   return &vt_string;
 	case VT_VOID:     return &vt_void;
@@ -231,6 +234,10 @@ VariableType const * VariableType::get_vt_char()
 VariableType const * VariableType::get_vt_int()
 {
 	return &vt_int;
+}
+VariableType const * VariableType::get_vt_label()
+{
+	return &vt_label;
 }
 VariableType const * VariableType::get_vt_real()
 {
@@ -304,6 +311,7 @@ bool VariableType::isVoid(SourcePosition const & position) const
 	case VT_ENUM:
 	case VT_FUNCTION:
 	case VT_INT:
+	case VT_LABEL:
 	case VT_LINESPEC:
 	case VT_NATIVE:
 	case VT_POINTER:
@@ -345,6 +353,7 @@ int VariableType::size(SourcePosition const & position) const
 	case VT_ENUM:
 	case VT_FUNCTION:
 	case VT_INT:
+	case VT_LABEL:
 	case VT_LINESPEC:
 	case VT_NATIVE:
 	case VT_POINTER:
@@ -384,6 +393,7 @@ int VariableType::sizeCall(SourcePosition const & position) const
 	case VT_CHAR:
 	case VT_ENUM:
 	case VT_INT:
+	case VT_LABEL:
 	case VT_POINTER:
 	case VT_REAL:
 	case VT_STRING:
@@ -425,6 +435,7 @@ char const * make_string(VariableType::Type vt)
 	case VariableType::VT_ENUM:     return "VT_ENUM";
 	case VariableType::VT_FUNCTION: return "VT_FUNCTION";
 	case VariableType::VT_INT:      return "VT_INT";
+	case VariableType::VT_LABEL:    return "VT_LABEL";
 	case VariableType::VT_LINESPEC: return "VT_LINESPEC";
 	case VariableType::VT_NATIVE:   return "VT_NATIVE";
 	case VariableType::VT_POINTER:  return "VT_POINTER";

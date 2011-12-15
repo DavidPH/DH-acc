@@ -40,6 +40,7 @@ struct VariableType
 		VT_BOOLSOFT,
 		VT_CHAR,
 		VT_INT,
+		VT_LABEL,
 		VT_REAL,
 		VT_STRING,
 
@@ -110,6 +111,7 @@ struct VariableType
 	static VariableType const * get_vt_boolsoft();
 	static VariableType const * get_vt_char();
 	static VariableType const * get_vt_int();
+	static VariableType const * get_vt_label();
 	static VariableType const * get_vt_real();
 	static VariableType const * get_vt_string();
 	static VariableType const * get_vt_void();
@@ -133,6 +135,7 @@ private:
 	static VariableType vt_boolsoft;
 	static VariableType vt_char;
 	static VariableType vt_int;
+	static VariableType vt_label;
 	static VariableType vt_real;
 	static VariableType vt_string;
 	static VariableType vt_void;
@@ -141,6 +144,7 @@ private:
 	static VariableType vtc_boolsoft;
 	static VariableType vtc_char;
 	static VariableType vtc_int;
+	static VariableType vtc_label;
 	static VariableType vtc_real;
 	static VariableType vtc_string;
 	static VariableType vtc_void;

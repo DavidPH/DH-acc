@@ -107,6 +107,7 @@ public:
 	static Pointer create_branch_do(SourceExpression * exprCondition, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_for(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_goto(std::string const & label, SourceContext * context, SourcePosition const & position);
+	static Pointer create_branch_goto(SourceExpression *expr, SourceContext *context, SourcePosition const &position);
 	static Pointer create_branch_if(SourceExpression * exprCondition, SourceExpression * exprIf, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_if(SourceExpression * exprCondition, SourceExpression * exprIf, SourceExpression * exprElse, SourceContext * context, SourcePosition const & position);
 	static Pointer create_branch_ior(SourceExpression * exprL, SourceExpression * exprR, SourceContext * context, SourcePosition const & position);

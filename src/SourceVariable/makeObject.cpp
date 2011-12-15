@@ -51,6 +51,7 @@ ObjectExpression::Pointer SourceVariable::makeObject(SourcePosition const & posi
 		case VariableType::VT_CHAR:
 		case VariableType::VT_FUNCTION:
 		case VariableType::VT_INT:
+		case VariableType::VT_LABEL:
 		case VariableType::VT_LINESPEC:
 		case VariableType::VT_NATIVE:
 		case VariableType::VT_REAL:
