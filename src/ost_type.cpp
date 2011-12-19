@@ -62,7 +62,9 @@ template<> SourceType option_auto<SourceType>::parse(std::string const & name, s
 }
 template<> TargetType option_auto<TargetType>::parse(std::string const & name, std::string const & arg)
 {
-	if (arg == "Hexen")
+	if (arg == "Eternity")
+		return TARGET_Eternity;
+	else if (arg == "Hexen")
 		return TARGET_Hexen;
 	else if (arg == "HexPP")
 		return TARGET_HexPP;

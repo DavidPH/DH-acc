@@ -199,9 +199,10 @@ static inline int _main()
 	// Default output.
 	if (output_type == OUTPUT_UNKNOWN) switch (target_type)
 	{
-	case TARGET_Hexen: output_type = OUTPUT_ACS0; break;
-	case TARGET_HexPP: output_type = OUTPUT_ACSP; break;
-	case TARGET_ZDoom: output_type = OUTPUT_ACSE; break;
+	case TARGET_Eternity: output_type = OUTPUT_ACS0; break;
+	case TARGET_Hexen:    output_type = OUTPUT_ACS0; break;
+	case TARGET_HexPP:    output_type = OUTPUT_ACSP; break;
+	case TARGET_ZDoom:    output_type = OUTPUT_ACSE; break;
 	case TARGET_UNKNOWN: break;
 	}
 
@@ -218,6 +219,7 @@ static inline int _main()
 	}
 		break;
 
+	case TARGET_Eternity:
 	case TARGET_HexPP:
 	{
 		std::vector<BinaryTokenPPACS> instructions;

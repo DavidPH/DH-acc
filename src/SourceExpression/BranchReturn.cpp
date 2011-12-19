@@ -83,7 +83,7 @@ void SourceExpression_BranchReturn::virtual_makeObjectsGet(ObjectVector * object
 
 	bigsint retnSize(_expr->getType()->size(position));
 
-	if (target_type == TARGET_HexPP)
+	if (target_type != TARGET_ZDoom)
 	{
 		// FIXME: Should be based on type.
 		for (bigsint i(1); i <= retnSize; ++i)
@@ -103,7 +103,7 @@ void SourceExpression_BranchReturn::virtual_makeObjectsGet(ObjectVector * object
 		break;
 
 	case SourceContext::CT_FUNCTION:
-		if (target_type == TARGET_HexPP)
+		if (target_type != TARGET_ZDoom)
 			objects->addToken(OCODE_BRANCH_GOTO);
 		else if (retnSize == 0)
 			objects->addToken(OCODE_ACSE_RETNFUNCVOID);

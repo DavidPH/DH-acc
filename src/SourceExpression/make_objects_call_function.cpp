@@ -46,7 +46,7 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 
 	// Determine which OCODE to use.
 	ObjectCode ocode;
-	if (target_type == TARGET_HexPP)
+	if (target_type != TARGET_ZDoom)
 		ocode = OCODE_BRANCH_GOTO_IMM;
 	else if (type->callType->vt == VariableType::VT_VOID)
 		ocode = OCODE_ACSE_CALLFUNCVOID_IMM;
@@ -64,8 +64,8 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 	// Advance the stack-pointer.
 	objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
 
-	// For Hex++...
-	if (target_type == TARGET_HexPP)
+	// For not ZDoom...
+	if (target_type != TARGET_ZDoom)
 	{
 		// ... Determine how many bytes of the call to handle.
 		bigsint callSize(type->sizeCall(position));

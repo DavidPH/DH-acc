@@ -52,7 +52,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
 
 	// functionVariable
 	SourceVariable::Pointer functionVariable;
-	if (target_type == TARGET_HexPP)
+	if (target_type != TARGET_ZDoom)
 		functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionLabel, token.getPosition());
 	else
 		functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition());
@@ -67,7 +67,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 	// functionArgClass
 	SourceVariable::StorageClass functionArgClass;
 
-	if (target_type == TARGET_HexPP)
+	if (target_type != TARGET_ZDoom)
 		functionArgClass = SourceVariable::SC_AUTO;
 	else
 		functionArgClass = SourceVariable::SC_REGISTER;
@@ -101,7 +101,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 	// functionVariable
 	// Before functionExpression to enable recursion.
 	SourceVariable::Pointer functionVariable;
-	if (target_type == TARGET_HexPP)
+	if (target_type != TARGET_ZDoom)
 		functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionLabel, token.getPosition());
 	else
 		functionVariable = SourceVariable::create_constant(functionName, functionVarType, functionNameObject, token.getPosition());

@@ -32,15 +32,25 @@
 
 SourceTokenizerDS::SourceTokenizerDS(SourceStream * const in) : _canCommand(true), _canExpand(true), _canSkip(true)
 {
-	switch (target_type)
-	{
-	case TARGET_Hexen: addDefine("__TARGET_Hexen__", SourcePosition::builtin(), std::vector<SourceTokenC>()); break;
-	case TARGET_HexPP: addDefine("__TARGET_HexPP__", SourcePosition::builtin(), std::vector<SourceTokenC>()); break;
-	case TARGET_ZDoom: addDefine("__TARGET_ZDoom__", SourcePosition::builtin(), std::vector<SourceTokenC>()); break;
-	case TARGET_UNKNOWN: addDefine("__TARGET_UNKNOWN__", SourcePosition::builtin(), std::vector<SourceTokenC>()); break;
-	}
+   #define CASE_TARGET(TARGET)                \
+   case TARGET_##TARGET:                      \
+      addDefine("__TARGET_"#TARGET"__",       \
+                SourcePosition::builtin(),    \
+                std::vector<SourceTokenC>()); \
+      break
 
-	_in.push(in);
+   switch (target_type)
+   {
+   CASE_TARGET(Eternity);
+   CASE_TARGET(Hexen);
+   CASE_TARGET(HexPP);
+   CASE_TARGET(ZDoom);
+   CASE_TARGET(UNKNOWN);
+   }
+
+   #undef CASE_TARGET
+
+   _in.push(in);
 }
 SourceTokenizerDS::~SourceTokenizerDS()
 {
