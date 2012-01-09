@@ -227,7 +227,7 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
    case VariableData::MT_STATIC:
       for (bigsint i = 0; i < src->size; ++i)
          objects->addToken(OCODE_GET_STATIC_VAR32I,
-                           objects->getValueAdd(dst->address, i));
+                           objects->getValueAdd(src->address, i));
       break;
 
    case VariableData::MT_VOID:
