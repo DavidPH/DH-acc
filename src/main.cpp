@@ -37,6 +37,8 @@
 #include "SourceTokenASMPLX.hpp"
 #include "SourceTokenizerC.hpp"
 #include "SourceTokenizerDS.hpp"
+#include "VariableData.hpp"
+#include "VariableType.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -123,7 +125,7 @@ void read_source(std::string const & name, SourceType type, ObjectVector * objec
 			ObjectExpression::add_script(mainName + "_id", mainName, ObjectData_Script::ST_OPEN, 0, 0, SourceContext::global_context->getLimit(SourceVariable::SC_REGISTER));
 		}
 
-		expressions->makeObjects(objects);
+		expressions->makeObjects(objects, VariableData::create_void(expressions->getType()->size(SourcePosition::none())));
 	}
 		break;
 

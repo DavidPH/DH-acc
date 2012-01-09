@@ -24,23 +24,28 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
 
-void SourceExpression::make_objects_call_script(ObjectVector * objects, VariableType const * type, SourceExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, SourcePosition const & position)
+void SourceExpression::make_objects_call_script(ObjectVector *objects, VariableData *dst, VariableType const *type, SourceExpression *data, std::vector<SourceExpression::Pointer> const &args, ObjectExpression *stack, SourcePosition const &position)
 {
 	if (args.size() != type->types.size())
 		throw SourceException("incorrect arg count to call script", position, "SourceExpression");
 
-	data->makeObjectsGet(objects);
+	VariableData::Pointer src = VariableData::create_stack(type->callType->size(position));
+
+	make_objects_memcpy_prep(objects, dst, src, position);
+
+	data->makeObjects(objects, VariableData::create_stack(type->size(position)));
 
 	for (size_t i(0); i < args.size(); ++i)
 	{
 		if (args[i]->getType() != type->types[i])
 			throw SourceException("incorrect arg type to call script", args[i]->position, "SourceExpression");
 
-		args[i]->makeObjectsGet(objects);
+		args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->size(position)));
 	}
 
 	objects->setPosition(position);
@@ -102,6 +107,8 @@ void SourceExpression::make_objects_call_script(ObjectVector * objects, Variable
 
 	// Stack for call.
 	objects->addToken(OCODE_ADDR_STACK_SUB_IMM, stack);
+
+	make_objects_memcpy_post(objects, dst, VariableData::create_stack(type->callType->size(position)), position);
 }
 
 

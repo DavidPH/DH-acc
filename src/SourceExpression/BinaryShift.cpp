@@ -22,6 +22,7 @@
 #include "Binary.hpp"
 
 #include "../ObjectVector.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -39,7 +40,7 @@ protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	bool _right;
 };
@@ -74,11 +75,13 @@ void SourceExpression_BinaryShift::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_BinaryShift::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BinaryShift::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
 	objects->addToken(_right ? OCODE_BITWISE_SHIFTR32 : OCODE_BITWISE_SHIFTL32);
+
+	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
 }
 
 

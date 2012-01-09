@@ -22,6 +22,8 @@
 #include "Unary.hpp"
 
 #include "../ObjectVector.hpp"
+#include "../VariableData.hpp"
+#include "../VariableType.hpp"
 
 
 
@@ -51,16 +53,19 @@ void SourceExpression_Unary::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_Unary::recurse_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_Unary::recurse_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
-	if (_make)
-	{
-		expr->makeObjectsGet(objects);
+	// Special case, child handles expression.
+	if (!_make) return;
 
-		objects->setPosition(position);
-	}
+	VariableData::Pointer src = VariableData::create_stack(getType()->size(position));
+
+	make_objects_memcpy_prep(objects, dst, src, position);
+	expr->makeObjects(objects, src);
+
+	objects->setPosition(position);
 }
 
 

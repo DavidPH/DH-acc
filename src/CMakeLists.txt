@@ -84,6 +84,7 @@ add_executable(DH-acc
 	SourceExpression/make_objects_call_native.cpp
 	SourceExpression/make_objects_call_script.cpp
 	SourceExpression/make_objects_cast.cpp
+	SourceExpression/make_objects_memcpy.cpp
 	SourceExpression/RootDelay.cpp
 	SourceExpression/RootOutput.cpp
 	SourceExpression/RootScript.cpp
@@ -125,12 +126,7 @@ add_executable(DH-acc
 	SourceTokenizerC.cpp
 	SourceTokenizerDS.cpp
 	SourceVariable.cpp
-	SourceVariable/makeObject.cpp
-	SourceVariable/makeObjectsAccess.cpp
-	SourceVariable/makeObjectsAddress.cpp
-	SourceVariable/makeObjectsGet.cpp
-	SourceVariable/makeObjectsSet.cpp
-	SourceVariable/print_debug.cpp
+	VariableData.cpp
 	VariableType.cpp
 )
 

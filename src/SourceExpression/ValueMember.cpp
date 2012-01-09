@@ -1,235 +1,181 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/ValueMember.cpp
-**
-** Defines the SourceExpression_ValueMember class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of "operator .".
+//
+//-----------------------------------------------------------------------------
 
 #include "../SourceExpression.hpp"
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
+#include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
 
+//
+// SourceExpression_ValueMember
+//
 class SourceExpression_ValueMember : public SourceExpression
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_ValueMember, SourceExpression);
+   MAKE_COUNTER_CLASS_BASE(SourceExpression_ValueMember, SourceExpression);
 
 public:
-	SourceExpression_ValueMember(SourceExpression * expr, SourceTokenC const & token);
+   SourceExpression_ValueMember(SourceExpression *expr,
+                                SourceTokenC const &token);
 
-	virtual bool canMakeObjectAddress() const;
+   virtual bool canGetData() const;
 
-	virtual bool canMakeObjectsAddress() const;
+   virtual VariableData::Pointer getData() const;
 
-	virtual VariableType const * getType() const;
-
-	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
+   virtual VariableType const *getType() const;
 
 protected:
-	virtual void printDebug(std::ostream * out) const;
+   virtual void printDebug(std::ostream *out) const;
 
 private:
-	virtual void virtual_makeObjectsAddress(ObjectVector * objects);
-
-	virtual void virtual_makeObjectsAccess(ObjectVector * objects);
-	virtual void virtual_makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names);
-
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
-	virtual void virtual_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names);
-
-	virtual void virtual_makeObjectsSet(ObjectVector * objects);
-	virtual void virtual_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names);
-
-	SourceExpression::Pointer _expr;
-	std::string _name;
+   SourceExpression::Pointer expr;
+   std::string name;
 };
 
 
 
-SourceExpression::Pointer SourceExpression::create_value_member(SourceExpression * expr, SourceTokenC const & token)
+//
+// SourceExpression::create_value_member
+//
+SourceExpression::Pointer SourceExpression::
+create_value_member(SourceExpression *expr, SourceTokenC const &token)
 {
-	return new SourceExpression_ValueMember(expr, token);
+   return new SourceExpression_ValueMember(expr, token);
 }
 
 
 
-SourceExpression_ValueMember::SourceExpression_ValueMember(SourceExpression * expr, SourceTokenC const & token) : Super(token.getPosition()), _expr(expr), _name(token.getData())
+//
+// SourceExpression_ValueMember::SourceExpression_ValueMember
+//
+SourceExpression_ValueMember::
+SourceExpression_ValueMember(SourceExpression *_expr, SourceTokenC const &token)
+                             : Super(token.getPosition()), expr(_expr),
+                               name(token.getData())
 {
-
 }
 
-bool SourceExpression_ValueMember::canMakeObjectAddress() const
+//
+// SourceExpression_ValueMember::canGetData
+//
+bool SourceExpression_ValueMember::canGetData() const
 {
-	return _expr->canMakeObjectAddress();
+   return true;
 }
 
-bool SourceExpression_ValueMember::canMakeObjectsAddress() const
+//
+// SourceExpression_ValueMember::getData
+//
+VariableData::Pointer SourceExpression_ValueMember::getData() const
 {
-	return _expr->canMakeObjectsAddress();
+   VariableData::Pointer data;
+
+   VariableData::Pointer src     = expr->getData();
+   VariableType const   *srcType = expr->getType();
+
+   if (!src->address)
+      throw SourceException("cannot getData", position, getName());
+
+   // Member data.
+   bigsint             memberOffset = srcType->getOffset(name, position);
+   VariableType const *memberType   = srcType->getType(name, position);
+   bigsint             memberSize   = memberType->size(position);
+
+   if (src->type == VariableData::MT_REGISTERARRAY)
+   {
+      SourceExpression::Pointer memberOffsetExpr =
+         create_value_int(memberOffset, position);
+
+      SourceExpression::Pointer offset =
+         create_binary_add(src->offsetExpr, memberOffsetExpr, position);
+
+      return VariableData::create_registerarray(memberSize, src->sectionRA,
+                                                src->address, offset);
+   }
+
+   ObjectExpression::Pointer memberOffsetObj =
+      ObjectExpression::create_value_int(memberOffset, position);
+
+   ObjectExpression::Pointer address =
+      ObjectExpression::create_binary_add(src->address, memberOffsetObj,
+                                          position);
+
+   switch (src->type)
+   {
+   case VariableData::MT_AUTO:
+      return VariableData::create_auto(memberSize, address);
+
+   case VariableData::MT_POINTER:
+      return VariableData::create_pointer(memberSize, address, src->offsetExpr);
+
+   case VariableData::MT_REGISTER:
+      return VariableData::create_register(memberSize, src->sectionR, address);
+
+   case VariableData::MT_STATIC:
+      return VariableData::create_static(memberSize, address);
+
+   default:
+      throw SourceException("cannot getData", position, getName());
+   }
+
+   return data;
 }
 
-VariableType const * SourceExpression_ValueMember::getType() const
+//
+// SourceExpression_ValueMember::getType
+//
+VariableType const *SourceExpression_ValueMember::getType() const
 {
-	return _expr->getType()->getType(_name, position);
+   return expr->getType()->getType(name, position);
 }
 
-void SourceExpression_ValueMember::printDebug(std::ostream * out) const
+//
+// SourceExpression_ValueMember::printDebug
+//
+void SourceExpression_ValueMember::printDebug(std::ostream *out) const
 {
-	*out << "SourceExpression_ValueMember(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expr=(";
-		print_debug(out, _expr);
-		*out << ")";
+   *out << "SourceExpression_ValueMember(";
+   Super::printDebug(out);
+   *out << " ";
+      *out << "expr=(";
+      print_debug(out, expr);
+      *out << ")";
 
-		*out << ", ";
+      *out << ", ";
 
-		*out << "name=(";
-		print_debug(out, _name);
-		*out << ")";
-	*out << ")";
+      *out << "name=(";
+      print_debug(out, name);
+      *out << ")";
+   *out << ")";
 }
 
-CounterPointer<ObjectExpression> SourceExpression_ValueMember::makeObjectAddress() const
-{
-	ObjectExpression::Pointer objOffset(ObjectExpression::create_value_int(_expr->getType()->getOffset(_name, position), position));
-	return ObjectExpression::create_binary_add(_expr->makeObjectAddress(), objOffset, position);
-}
 
-void SourceExpression_ValueMember::virtual_makeObjectsAccess(ObjectVector * objects)
-{
-	if (canMakeObjectsAddress())
-	{
-		makeObjectsAddress(objects);
-		objects->addToken(OCODE_SET_TEMP_VAR);
 
-		// FIXME: Should be based on type.
-		for (int i(getType()->size(position)); i--;)
-			objects->addToken(OCODE_SET_POINTERTEMP_VAR32I, objects->getValue(i));
-
-		// FIXME: Should be based on type.
-		for (int i(0); i < getType()->size(position); ++i)
-			objects->addToken(OCODE_GET_POINTERTEMP_VAR32I, objects->getValue(i));
-	}
-	else
-	{
-		Super::recurse_makeObjectsAccess(objects);
-
-		std::vector<std::string> names(1, _name);
-		_expr->makeObjectsAccessMember(objects, &names);
-	}
-}
-void SourceExpression_ValueMember::virtual_makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names)
-{
-	Super::recurse_makeObjectsAccessMember(objects, names);
-
-	names->push_back(_name);
-	_expr->makeObjectsAccessMember(objects, names);
-}
-
-void SourceExpression_ValueMember::virtual_makeObjectsAddress(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsAddress(objects);
-
-	_expr->makeObjectsAddress(objects);
-	objects->setPosition(position);
-
-	if (_expr->getType()->getOffset(_name, position) != 0)
-	{
-		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(_expr->getType()->getOffset(_name, position)));
-		objects->addToken(OCODE_ADD32U);
-	}
-}
-
-void SourceExpression_ValueMember::virtual_makeObjectsGet(ObjectVector * objects)
-{
-	if (canMakeObjectsAddress())
-	{
-		makeObjectsAddress(objects);
-
-		if (getType()->size(position) == 1)
-		{
-			// FIXME: Should be based on type.
-			objects->addToken(OCODE_GET_POINTER_VAR32I, objects->getValue(0));
-		}
-		else
-		{
-			objects->addToken(OCODE_SET_TEMP_VAR);
-
-			// FIXME: Should be based on type.
-			for (int i(0); i < getType()->size(position); ++i)
-				objects->addToken(OCODE_GET_POINTERTEMP_VAR32I, objects->getValue(i));
-		}
-	}
-	else
-	{
-		Super::recurse_makeObjectsGet(objects);
-
-		std::vector<std::string> names(1, _name);
-		_expr->makeObjectsGetMember(objects, &names);
-	}
-}
-void SourceExpression_ValueMember::virtual_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
-{
-	Super::recurse_makeObjectsGetMember(objects, names);
-
-	names->push_back(_name);
-	_expr->makeObjectsGetMember(objects, names);
-}
-
-void SourceExpression_ValueMember::virtual_makeObjectsSet(ObjectVector * objects)
-{
-	if (canMakeObjectsAddress())
-	{
-		makeObjectsAddress(objects);
-
-		if (getType()->size(position) == 1)
-		{
-			// FIXME: Should be based on type.
-			objects->addToken(OCODE_SET_POINTER_VAR32I, objects->getValue(0));
-		}
-		else
-		{
-			objects->addToken(OCODE_SET_TEMP_VAR);
-
-			// FIXME: Should be based on type.
-			for (int i(getType()->size(position)); i--;)
-				objects->addToken(OCODE_SET_POINTERTEMP_VAR32I, objects->getValue(i));
-		}
-	}
-	else
-	{
-		Super::recurse_makeObjectsSet(objects);
-
-		std::vector<std::string> names(1, _name);
-		_expr->makeObjectsSetMember(objects, &names);
-	}
-}
-void SourceExpression_ValueMember::virtual_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
-{
-	Super::recurse_makeObjectsSetMember(objects, names);
-
-	names->push_back(_name);
-	_expr->makeObjectsSetMember(objects, names);
-}
-
+// EOF
 

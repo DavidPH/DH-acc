@@ -25,6 +25,7 @@
 #include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -43,7 +44,7 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	SourceExpression::Pointer _exprCondition;
 	SourceExpression::Pointer _exprIf;
@@ -118,23 +119,25 @@ void SourceExpression_BranchIf::printDebug(std::ostream * const out) const
 	*out << ")";
 }
 
-void SourceExpression_BranchIf::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BranchIf::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	VariableData::Pointer src = VariableData::create_stack(_exprCondition->getType()->size(position));
 
-	_exprCondition->makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
+
+	_exprCondition->makeObjects(objects, src);
 	objects->setPosition(position);
 	objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(_exprElse ? _labelElse : _labelEnd));
 
 	objects->addLabel(_labelIf);
-	_exprIf->makeObjectsGet(objects);
+	_exprIf->makeObjects(objects, dst);
 
 	if (_exprElse)
 	{
 		objects->setPosition(position);
 		objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_labelEnd));
 		objects->addLabel(_labelElse);
-		_exprElse->makeObjectsGet(objects);
+		_exprElse->makeObjects(objects, dst);
 	}
 
 	objects->addLabel(_labelEnd);

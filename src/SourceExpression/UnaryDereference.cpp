@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../ost_type.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -35,9 +36,13 @@ class SourceExpression_UnaryDereference : public SourceExpression_Unary
 public:
 	SourceExpression_UnaryDereference(SourceExpression * expr, SourcePosition const & position);
 
+	virtual bool canGetData() const;
+
 	virtual bool canMakeObjectAddress() const;
 
 	virtual bool canMakeObjectsAddress() const;
+
+	virtual VariableData::Pointer getData() const;
 
 	virtual VariableType const * getType() const;
 
@@ -47,13 +52,9 @@ protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
-	virtual void virtual_makeObjectsAccess(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	virtual void virtual_makeObjectsAddress(ObjectVector * objects);
-
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
-
-	virtual void virtual_makeObjectsSet(ObjectVector * objects);
+	virtual void virtual_makeObjectsAddress(ObjectVector *objects, VariableData *dst);
 };
 
 
@@ -65,9 +66,17 @@ SourceExpression::Pointer SourceExpression::create_unary_dereference(SourceExpre
 
 
 
-SourceExpression_UnaryDereference::SourceExpression_UnaryDereference(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, NULL, position_)
+SourceExpression_UnaryDereference::SourceExpression_UnaryDereference(SourceExpression *_expr, SourcePosition const &_position) : Super(_expr, _position)
 {
 
+}
+
+//
+// SourceExpression_UnaryDereference::canGetData
+//
+bool SourceExpression_UnaryDereference::canGetData() const
+{
+   return getType()->vt != VariableType::VT_STRING;
 }
 
 bool SourceExpression_UnaryDereference::canMakeObjectAddress() const
@@ -78,6 +87,16 @@ bool SourceExpression_UnaryDereference::canMakeObjectAddress() const
 bool SourceExpression_UnaryDereference::canMakeObjectsAddress() const
 {
 	return true;
+}
+
+//
+// SourceExpression_UnaryDereference::getData
+//
+VariableData::Pointer SourceExpression_UnaryDereference::getData() const
+{
+   return VariableData::
+      create_pointer(getType()->size(position),
+                     ObjectExpression::create_value_int(0, position), expr);
 }
 
 VariableType const * SourceExpression_UnaryDereference::getType() const
@@ -97,93 +116,36 @@ void SourceExpression_UnaryDereference::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_UnaryDereference::virtual_makeObjectsAccess(ObjectVector * objects)
+void SourceExpression_UnaryDereference::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	if (getType()->vt == VariableType::VT_VOID)
-		Super::makeObjectsAccess(objects);
+	Super::recurse_makeObjects(objects, dst);
 
 	if (expr->getType()->vt == VariableType::VT_STRING)
 	{
-		Super::makeObjectsAccess(objects);
-	}
-	else
-	{
-		makeObjectsAddress(objects);
-		objects->addToken(OCODE_SET_TEMP_VAR);
+		VariableData::Pointer tmp = VariableData::create_stack(getType()->size(position));
 
-		// FIXME: Should be based on type.
-		for (int i(getType()->size(position)); i--;)
-			objects->addToken(OCODE_SET_POINTERTEMP_VAR32I, objects->getValue(i));
+		make_objects_memcpy_prep(objects, dst, tmp, position);
 
-		// FIXME: Should be based on type.
-		for (int i(0); i < getType()->size(position); ++i)
-			objects->addToken(OCODE_GET_POINTERTEMP_VAR32I, objects->getValue(i));
-	}
-}
-
-void SourceExpression_UnaryDereference::virtual_makeObjectsAddress(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsGet(objects);
-}
-
-void SourceExpression_UnaryDereference::virtual_makeObjectsGet(ObjectVector * objects)
-{
-	if (getType()->vt == VariableType::VT_VOID)
-		Super::makeObjectsGet(objects);
-
-	if (expr->getType()->vt == VariableType::VT_STRING)
-	{
-		Super::recurse_makeObjectsGet(objects);
+		expr->makeObjects(objects, VariableData::create_stack(expr->getType()->size(position)));
 		objects->addTokenPushZero();
 		objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2), objects->getValue(15));
-	}
-	else
-	{
-		makeObjectsAddress(objects);
 
-		if (getType()->size(position) == 1)
-		{
-			// FIXME: Should be based on type.
-			objects->addToken(OCODE_GET_POINTER_VAR32I, objects->getValue(0));
-		}
-		else
-		{
-			objects->addToken(OCODE_SET_TEMP_VAR);
+		make_objects_memcpy_post(objects, dst, tmp, position);
 
-			// FIXME: Should be based on type.
-			for (int i(0); i < getType()->size(position); ++i)
-				objects->addToken(OCODE_GET_POINTERTEMP_VAR32I, objects->getValue(i));
-		}
+		return;
 	}
+
+	VariableData::Pointer src = getData();
+
+	make_objects_memcpy_prep(objects, dst, src, position);
+	make_objects_memcpy_post(objects, dst, src, position);
 }
 
-void SourceExpression_UnaryDereference::virtual_makeObjectsSet(ObjectVector * objects)
+void SourceExpression_UnaryDereference::virtual_makeObjectsAddress(ObjectVector *objects, VariableData *dst)
 {
-	if (getType()->vt == VariableType::VT_VOID)
-		Super::makeObjectsSet(objects);
+	Super::recurse_makeObjectsAddress(objects, dst);
 
-	if (expr->getType()->vt == VariableType::VT_STRING)
-	{
-		Super::makeObjectsSet(objects);
-	}
-	else
-	{
-		makeObjectsAddress(objects);
-
-		if (getType()->size(position) == 1)
-		{
-			// FIXME: Should be based on type.
-			objects->addToken(OCODE_SET_POINTER_VAR32I, objects->getValue(0));
-		}
-		else
-		{
-			objects->addToken(OCODE_SET_TEMP_VAR);
-
-			// FIXME: Should be based on type.
-			for (int i(getType()->size(position)); i--;)
-				objects->addToken(OCODE_SET_POINTERTEMP_VAR32I, objects->getValue(i));
-		}
-	}
+	expr->makeObjects(objects, dst);
 }
 
 

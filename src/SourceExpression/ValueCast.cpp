@@ -40,7 +40,7 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	SourceExpression::Pointer _expr;
 	VariableType const * _type;
@@ -82,15 +82,15 @@ void SourceExpression_ValueCast::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_ValueCast::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_ValueCast::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
 	// Special case for casting an array to a pointer.
 	if (_expr->getType()->vt == VariableType::VT_ARRAY && _type->vt == VariableType::VT_POINTER)
-		_expr->makeObjectsAddress(objects);
+		_expr->makeObjectsAddress(objects, dst);
 	else
-		_expr->makeObjectsCast(objects, _type);
+		_expr->makeObjectsCast(objects, dst, _type);
 }
 
 

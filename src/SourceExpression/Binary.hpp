@@ -41,7 +41,7 @@ protected:
 	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, VariableType const * castL, VariableType const * castR, SourcePosition const & position);
 	SourceExpression_Binary(SourceExpression * exprL, SourceExpression * exprR, VariableType const * castL, VariableType const * castR, bool arithmetic, SourcePosition const & position);
 
-	void recurse_makeObjectsGet(ObjectVector * objects);
+	void recurse_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	virtual void printDebug(std::ostream * out) const;
 

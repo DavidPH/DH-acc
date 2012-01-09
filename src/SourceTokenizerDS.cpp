@@ -161,6 +161,8 @@ void SourceTokenizerDS::doCommand_error()
 {
 	prep(SourceTokenC::TT_STRING);
 
+	if (isSkip()) return;
+
 	throw SourceException(_token.getData(), _token.getPosition(), "#error");
 }
 void SourceTokenizerDS::doCommand_if()

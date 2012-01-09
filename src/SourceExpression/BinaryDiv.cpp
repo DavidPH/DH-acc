@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -41,7 +42,7 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
 
@@ -70,9 +71,9 @@ void SourceExpression_BinaryDiv::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_BinaryDiv::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BinaryDiv::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
 	switch (getType()->vt)
 	{
@@ -92,6 +93,8 @@ void SourceExpression_BinaryDiv::virtual_makeObjectsGet(ObjectVector * objects)
 	default:
 		throw SourceException("invalid VT", position, getName());
 	}
+
+	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
 }
 
 

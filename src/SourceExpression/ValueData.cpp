@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -41,7 +42,7 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	VariableType const * _type;
 	bool _garbage;
@@ -83,11 +84,19 @@ void SourceExpression_ValueData::printDebug(std::ostream * const out) const
 	*out << ")";
 }
 
-void SourceExpression_ValueData::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_ValueData::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
-	for (size_t i(_type->size(position)); i--;)
+	if (dst->type == VariableData::MT_VOID) return;
+
+	bigsint srcSize = _type->size(position);
+
+	VariableData::Pointer src = VariableData::create_stack(srcSize);
+
+	make_objects_memcpy_prep(objects, dst, src, position);
+
+	for (bigsint i = srcSize; i--;)
 	{
 		// FIXME: Should be based on type.
 		if (_garbage)
@@ -95,6 +104,8 @@ void SourceExpression_ValueData::virtual_makeObjectsGet(ObjectVector * objects)
 		else
 			objects->addTokenPushZero();
 	}
+
+	make_objects_memcpy_post(objects, dst, src, position);
 }
 
 

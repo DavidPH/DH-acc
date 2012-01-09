@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -39,7 +40,7 @@ protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	SourceExpression::Pointer _exprCondition;
 	SourceExpression::Pointer _exprWhile;
@@ -90,18 +91,18 @@ void SourceExpression_BranchWhile::printDebug(std::ostream * const out) const
 	*out << ")";
 }
 
-void SourceExpression_BranchWhile::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BranchWhile::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
 	if (!_postCondition)
 		objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_labelContinue));
 
 	objects->addLabel(_labelLoop);
-	_exprWhile->makeObjectsGet(objects);
+	_exprWhile->makeObjects(objects, VariableData::create_void(0));
 
 	objects->addLabel(_labelContinue);
-	_exprCondition->makeObjectsGet(objects);
+	_exprCondition->makeObjects(objects, VariableData::create_stack(_exprCondition->getType()->size(position)));
 	objects->setPosition(position);
 	objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(_labelLoop));
 

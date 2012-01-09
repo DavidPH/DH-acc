@@ -23,6 +23,7 @@
 
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -38,7 +39,7 @@ protected:
 	virtual void printDebug(std::ostream * const out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
 
@@ -62,12 +63,14 @@ void SourceExpression_BranchNot::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_BranchNot::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BranchNot::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
 	// FIXME: Shuld be based on type.
 	objects->addToken(OCODE_LOGICAL_NOT32I);
+
+	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
 }
 
 

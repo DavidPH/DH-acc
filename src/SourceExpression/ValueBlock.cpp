@@ -1,122 +1,219 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/ValueBlock.cpp
-**
-** Defines the SourceExpression_ValueBlock class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of blocks of expressions.
+//
+//-----------------------------------------------------------------------------
 
 #include "../SourceExpression.hpp"
 
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
 
+//
+// SourceExpression_ValueBlock
+//
 class SourceExpression_ValueBlock : public SourceExpression
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_ValueBlock, SourceExpression);
+   MAKE_COUNTER_CLASS_BASE(SourceExpression_ValueBlock, SourceExpression);
 
 public:
-	SourceExpression_ValueBlock(std::vector<SourceExpression::Pointer> const & expressions, SourcePosition const & position);
+   SourceExpression_ValueBlock(
+      std::vector<SourceExpression::Pointer> const &expressions,
+      SourcePosition const &position);
 
-	virtual VariableType const * getType() const;
+   virtual VariableType const * getType() const;
 
 protected:
-	virtual void printDebug(std::ostream * out) const;
+   virtual void printDebug(std::ostream * out) const;
 
 private:
-	virtual void virtual_makeObjects(ObjectVector * objects);
+   void makeVoid(ObjectVector *objects) const;
 
-	virtual void virtual_makeObjectsCast(ObjectVector * objects, VariableType const * type);
+   virtual void
+   virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+   virtual void
+   virtual_makeObjectsCast(ObjectVector *objects, VariableData *dst,
+                           VariableType const *dstType);
 
-	std::vector<SourceExpression::Pointer> _expressions;
-	VariableType const * _type;
+   std::vector<SourceExpression::Pointer> expressions;
+   VariableType const *type;
 };
 
 
 
-SourceExpression::Pointer SourceExpression::create_value_block(std::vector<SourceExpression::Pointer> const & expressions, SourcePosition const & position)
+//
+// SourceExpression::create_value_block
+//
+SourceExpression::Pointer SourceExpression::
+create_value_block(std::vector<SourceExpression::Pointer> const &expressions,
+                   SourcePosition const & position)
 {
-	return new SourceExpression_ValueBlock(expressions, position);
+   return new SourceExpression_ValueBlock(expressions, position);
 }
 
 
 
-SourceExpression_ValueBlock::SourceExpression_ValueBlock(std::vector<SourceExpression::Pointer> const & expressions, SourcePosition const & position_) : Super(position_), _expressions(expressions)
+//
+// SourceExpression_ValueBlock::SourceExpression_ValueBlock
+//
+SourceExpression_ValueBlock::
+SourceExpression_ValueBlock(
+   std::vector<SourceExpression::Pointer> const &_expressions,
+   SourcePosition const &_position)
+   : Super(_position), expressions(_expressions)
 {
-	std::vector<VariableType const *> types(_expressions.size());
+   std::vector<VariableType const *> types(expressions.size());
 
-	for (size_t i(0); i < _expressions.size(); ++i)
-		types[i] = _expressions[i]->getType();
+   for (size_t i(0); i < expressions.size(); ++i)
+      types[i] = expressions[i]->getType();
 
-	_type = VariableType::get_block(types);
+   type = VariableType::get_block(types);
 }
 
+//
+// SourceExpression_ValueBlock::getType
+//
 VariableType const * SourceExpression_ValueBlock::getType() const
 {
-	return _type;
+   return type;
 }
 
-void SourceExpression_ValueBlock::printDebug(std::ostream * out) const
+//
+// SourceExpression_ValueBlock::makeVoid
+//
+void SourceExpression_ValueBlock::makeVoid(ObjectVector *objects) const
 {
-	*out << "SourceExpression_ValueBlock(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expressions=(";
-		print_debug(out, _expressions);
-		*out << ")";
+   VariableData::Pointer dstPart;
+   bigsint               dstPartSize;
+   VariableType const   *dstPartType;
 
-		*out << ", ";
-
-		*out << "type=(";
-		print_debug(out, _type);
-		*out << ")";
-	*out << ")";
+   for (size_t i(0); i < expressions.size(); ++i)
+   {
+      dstPartType = expressions[i]->getType();
+      dstPartSize = dstPartType->size(position);
+      dstPart = VariableData::create_void(dstPartSize);
+      expressions[i]->makeObjects(objects, dstPart);
+   }
 }
 
-void SourceExpression_ValueBlock::virtual_makeObjects(ObjectVector * objects)
+//
+// SourceExpression_ValueBlock::printDebug
+//
+void SourceExpression_ValueBlock::printDebug(std::ostream *out) const
 {
-	Super::recurse_makeObjects(objects);
+   *out << "SourceExpression_ValueBlock(";
+   Super::printDebug(out);
+   *out << " ";
+      *out << "expressions=(";
+      print_debug(out, expressions);
+      *out << ")";
 
-	for (size_t i(0); i < _expressions.size(); ++i)
-		_expressions[i]->makeObjects(objects);
+      *out << ", ";
+
+      *out << "type=(";
+      print_debug(out, type);
+      *out << ")";
+   *out << ")";
 }
 
-void SourceExpression_ValueBlock::virtual_makeObjectsCast(ObjectVector * objects, VariableType const * type)
+//
+// SourceExpression_ValueBlock::virtual_makeObjects
+//
+void SourceExpression_ValueBlock::
+virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsCast(objects, type);
+   Super::recurse_makeObjects(objects, dst);
 
-	if (_expressions.size() != type->types.size())
-		throw SourceException("incorrect number of expressions to cast", position, getName());
+   if (dst->type == VariableData::MT_VOID)
+   {
+      makeVoid(objects);
+      return;
+   }
 
-	for (size_t i(0); i < _expressions.size(); ++i)
-		_expressions[i]->makeObjectsCast(objects, type->types[i]);
+   bigsint               tmpSize = type->size(position);
+   VariableData::Pointer tmp     = VariableData::create_stack(tmpSize);
+
+   VariableData::Pointer dstPart;
+   bigsint               dstPartSize;
+   VariableType const   *dstPartType;
+
+   make_objects_memcpy_prep(objects, dst, tmp, position);
+
+   for (size_t i(0); i < expressions.size(); ++i)
+   {
+      dstPartType = expressions[i]->getType();
+      dstPartSize = dstPartType->size(position);
+      dstPart = VariableData::create_stack(dstPartSize);
+      expressions[i]->makeObjects(objects, dstPart);
+   }
+
+   make_objects_memcpy_post(objects, dst, tmp, position);
 }
 
-void SourceExpression_ValueBlock::virtual_makeObjectsGet(ObjectVector * objects)
+//
+// SourceExpression_ValueBlock::virtual_makeObjectsCast
+//
+void SourceExpression_ValueBlock::
+virtual_makeObjectsCast(ObjectVector *objects, VariableData *dst,
+                        VariableType const *dstType)
 {
-	Super::recurse_makeObjectsGet(objects);
+   Super::recurse_makeObjectsCast(objects, dst, dstType);
 
-	for (size_t i(0); i < _expressions.size(); ++i)
-		_expressions[i]->makeObjectsGet(objects);
+   if (dst->type == VariableData::MT_VOID
+    || dstType->vt == VariableType::VT_VOID)
+   {
+      makeVoid(objects);
+      return;
+   }
+
+   if (expressions.size() != dstType->types.size())
+      throw SourceException("incorrect number of expressions to cast",
+                            position, getName());
+
+   bigsint               tmpSize = type->size(position);
+   VariableData::Pointer tmp     = VariableData::create_stack(tmpSize);
+
+   VariableData::Pointer dstPart;
+   bigsint               dstPartSize;
+   VariableType const   *dstPartType;
+
+   make_objects_memcpy_prep(objects, dst, tmp, position);
+
+   for (size_t i(0); i < expressions.size(); ++i)
+   {
+      dstPartType = expressions[i]->getType();
+      dstPartSize = dstPartType->size(position);
+      dstPart = VariableData::create_stack(dstPartSize);
+      expressions[i]->makeObjectsCast(objects, dstPart, dstType->types[i]);
+   }
+
+   make_objects_memcpy_post(objects, dst, tmp, position);
 }
 
+
+
+// EOF
 

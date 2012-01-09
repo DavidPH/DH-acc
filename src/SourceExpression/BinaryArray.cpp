@@ -1,175 +1,207 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/BinaryArray.cpp
-**
-** Defines the SourceExpression_BinaryArray class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of "operator []".
+//
+//-----------------------------------------------------------------------------
 
 #include "Binary.hpp"
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
 
+//
+// SourceExpression_BinaryArray
+//
 class SourceExpression_BinaryArray : public SourceExpression_Binary
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryArray, SourceExpression_Binary);
+   MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryArray,
+                           SourceExpression_Binary);
 
 public:
-	SourceExpression_BinaryArray(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+   SourceExpression_BinaryArray(SourceExpression *exprL,
+                                SourceExpression *exprR,
+                                SourcePosition const &position);
 
-	virtual bool canMakeObject() const;
+   virtual bool canGetData() const;
 
-	virtual VariableType const * getType() const;
+   virtual VariableData::Pointer getData() const;
+
+   virtual VariableType const *getType() const;
 
 protected:
-	virtual void printDebug(std::ostream * out) const;
+   virtual void printDebug(std::ostream *out) const;
 
 private:
-	virtual void virtual_makeObjectsAccess(ObjectVector * objects);
-	virtual void virtual_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
-
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
-	virtual void virtual_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
-
-	virtual void virtual_makeObjectsSet(ObjectVector * objects);
-	virtual void virtual_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions);
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
 
 
-SourceExpression::Pointer SourceExpression::create_binary_array(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
+//
+// SourceExpression::create_binary_array
+//
+SourceExpression::Pointer SourceExpression::
+create_binary_array(SourceExpression *exprL, SourceExpression *exprR,
+                    SourcePosition const &position)
 {
-	// This allows C semantics for array access. Specifically that x[y] be
-	// the same as *(x+y).
-	if (
-		exprL->getType()->vt == VariableType::VT_POINTER ||
-		exprR->getType()->vt == VariableType::VT_POINTER ||
-		(exprL->getType()->vt == VariableType::VT_ARRAY && exprL->canMakeObjectsAddress()) ||
-		(exprR->getType()->vt == VariableType::VT_ARRAY && exprR->canMakeObjectsAddress())
-	)
-	{
-		return create_unary_dereference(create_binary_add(exprL, exprR, position), position);
-	}
+   VariableType const *typeL = exprL->getType();
+   VariableType const *typeR = exprR->getType();
 
-	return new SourceExpression_BinaryArray(exprL, exprR, position);
+   // This allows C semantics for array access. Specifically that x[y] be the
+   // same as *(x+y).
+   if (
+      typeL->vt == VariableType::VT_POINTER ||
+      typeR->vt == VariableType::VT_POINTER ||
+      (typeL->vt == VariableType::VT_ARRAY && exprL->canMakeObjectsAddress()) ||
+      (typeR->vt == VariableType::VT_ARRAY && exprR->canMakeObjectsAddress())
+   )
+   {
+      return create_unary_dereference(create_binary_add(exprL, exprR, position),
+                                      position);
+   }
+
+   return new SourceExpression_BinaryArray(exprL, exprR, position);
 }
 
 
 
-SourceExpression_BinaryArray::SourceExpression_BinaryArray(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, NULL, VariableType::get_vt_int(), position_)
+//
+// SourceExpression_BinaryArray::SourceExpression_BinaryArray
+//
+SourceExpression_BinaryArray::
+SourceExpression_BinaryArray(SourceExpression *_exprL,
+                             SourceExpression *_exprR,
+                             SourcePosition const &_position)
+                             : Super(_exprL, _exprR, _position)
 {
-	if (exprL->getType()->vt != VariableType::VT_ARRAY && exprL->getType()->vt != VariableType::VT_STRING)
-		throw SourceException("expected VT_ARRAY or VT_STRING for exprL got " + (std::string)make_string(exprL->getType()->vt), position, getName());
+   // Can only be done for VT_ARRAY or VT_STRING.
+   if (exprL->getType()->vt != VariableType::VT_ARRAY
+    && exprL->getType()->vt != VariableType::VT_STRING)
+      throw SourceException("expected VT_ARRAY or VT_STRING for exprL got "
+                            + (std::string)make_string(exprL->getType()->vt),
+                            position, getName());
 
-	if (getType()->size(position) != 1)
-		this->exprR = create_binary_mul(exprR, create_value_int(getType()->size(position), position), position);
+   if (exprR->getType()->vt != VariableType::VT_INT)
+      exprR = create_value_cast(exprR, VariableType::get_vt_int(), position);
 }
 
-bool SourceExpression_BinaryArray::canMakeObject() const
+//
+// SourceExpression_BinaryArray::canGetData
+//
+bool SourceExpression_BinaryArray::canGetData() const
 {
-	return false;
+   return true;
 }
 
-VariableType const * SourceExpression_BinaryArray::getType() const
+//
+// SourceExpression_BinaryArray::getData
+//
+VariableData::Pointer SourceExpression_BinaryArray::getData() const
 {
-	return exprL->getType()->refType;
+   VariableData::Pointer src = exprL->getData();
+   VariableType const *type = getType();
+   bigsint typeSize = type->size(position);
+
+   if (src->type != VariableData::MT_REGISTERARRAY)
+      throw SourceException("cannot getData", position, getName());
+
+   SourceExpression::Pointer offset = exprR;
+
+   // If the type's size isn't 1, need to multiply the offset.
+   if (typeSize != 1)
+   {
+      offset = create_binary_mul(offset, create_value_int(typeSize, position),
+                                 position);
+   }
+
+   // If there is already an offset, add it.
+   if (src->offsetExpr)
+      offset = create_binary_add(src->offsetExpr, offset, position);
+
+   return VariableData::create_registerarray(type->size(position),
+                                             src->sectionRA, src->address,
+                                             offset);
 }
 
-void SourceExpression_BinaryArray::printDebug(std::ostream * out) const
+//
+// SourceExpression_BinaryArray::getType
+//
+VariableType const *SourceExpression_BinaryArray::getType() const
 {
-	*out << "SourceExpression_BinaryArray(";
-	Super::printDebug(out);
-	*out << ")";
+   return exprL->getType()->refType;
 }
 
-void SourceExpression_BinaryArray::virtual_makeObjectsAccess(ObjectVector * objects)
+//
+// SourceExpression_BinaryArray::printDebug
+//
+void SourceExpression_BinaryArray::printDebug(std::ostream *out) const
 {
-	Super::recurse_makeObjectsAccess(objects);
-
-	if (exprL->getType()->vt == VariableType::VT_STRING)
-	{
-		throw SourceException("makeObjectsAccess on VT_STRING element", position, getName());
-	}
-	else
-	{
-		std::vector<SourceExpression::Pointer> dimensions(1, exprR);
-		exprL->makeObjectsAccessArray(objects, &dimensions);
-	}
-}
-void SourceExpression_BinaryArray::virtual_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
-{
-	Super::recurse_makeObjectsAccessArray(objects, dimensions);
-
-	dimensions->push_back(exprR);
-	exprL->makeObjectsAccessArray(objects, dimensions);
+   *out << "SourceExpression_BinaryArray(";
+   Super::printDebug(out);
+   *out << ")";
 }
 
-void SourceExpression_BinaryArray::virtual_makeObjectsGet(ObjectVector * objects)
+//
+// SourceExpression_BinaryArray::virtual_makeObjects
+//
+void SourceExpression_BinaryArray::
+virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+   Super::recurse_makeObjects(objects, dst);
 
-	if (exprL->getType()->vt == VariableType::VT_STRING)
-	{
-		exprL->makeObjectsGet(objects);
-		exprR->makeObjectsGet(objects);
+   if (exprL->getType()->vt == VariableType::VT_STRING)
+   {
+      bigsint typeSize = getType()->size(position);
+      bigsint sizeL = exprL->getType()->size(position);
+      bigsint sizeR = exprR->getType()->size(position);
 
-		objects->setPosition(position);
+      VariableData::Pointer src = VariableData::create_stack(typeSize);
 
-		// 2 = arg count, 15 = native get_char
-		objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2), objects->getValue(15));
-	}
-	else
-	{
-		std::vector<SourceExpression::Pointer> dimensions(1, exprR);
-		exprL->makeObjectsGetArray(objects, &dimensions);
-	}
-}
-void SourceExpression_BinaryArray::virtual_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
-{
-	Super::recurse_makeObjectsGetArray(objects, dimensions);
+      make_objects_memcpy_prep(objects, dst, src, position);
 
-	dimensions->push_back(exprR);
-	exprL->makeObjectsGetArray(objects, dimensions);
-}
+      exprL->makeObjects(objects, VariableData::create_stack(sizeL));
+      exprR->makeObjects(objects, VariableData::create_stack(sizeR));
 
-void SourceExpression_BinaryArray::virtual_makeObjectsSet(ObjectVector * objects)
-{
-	Super::recurse_makeObjectsSet(objects);
+      objects->setPosition(position);
 
-	if (exprL->getType()->vt == VariableType::VT_STRING)
-	{
-		throw SourceException("makeObjectsSet on VT_STRING element", position, getName());
-	}
-	else
-	{
-		std::vector<SourceExpression::Pointer> dimensions(1, exprR);
-		exprL->makeObjectsSetArray(objects, &dimensions);
-	}
-}
-void SourceExpression_BinaryArray::virtual_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
-{
-	Super::recurse_makeObjectsSetArray(objects, dimensions);
+      // 2 = arg count, 15 = native get_char
+      objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2),
+                        objects->getValue(15));
 
-	dimensions->push_back(exprR);
-	exprL->makeObjectsSetArray(objects, dimensions);
+      make_objects_memcpy_post(objects, dst, src, position);
+   }
+   else
+   {
+      VariableData::Pointer src = getData();
+
+      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_post(objects, dst, src, position);
+   }
 }
 
+
+
+// EOF
 

@@ -39,7 +39,7 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	VariableType const * _type;
 };
@@ -69,9 +69,9 @@ void SourceExpression_RootScript::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_RootScript::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_RootScript::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
 	if (_type->sizeCall(position) > 3) for (int i(_type->sizeCall(position) - 3); i--;)
 	{

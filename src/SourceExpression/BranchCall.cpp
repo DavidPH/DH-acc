@@ -43,7 +43,7 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	std::vector<SourceExpression::Pointer> _args;
 	SourceExpression::Pointer _expr;
@@ -99,11 +99,11 @@ void SourceExpression_BranchCall::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_BranchCall::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BranchCall::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
-	make_objects_call(objects, _expr, _args, objects->getValue(_stack), _labelReturn, position);
+	make_objects_call(objects, dst, _expr, _args, objects->getValue(_stack), _labelReturn, position);
 }
 
 

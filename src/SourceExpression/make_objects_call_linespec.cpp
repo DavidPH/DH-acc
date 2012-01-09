@@ -24,11 +24,12 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
 
-void SourceExpression::make_objects_call_linespec(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
+void SourceExpression::make_objects_call_linespec(ObjectVector *objects, VariableData *dst, VariableType const *type, ObjectExpression *data, std::vector<SourceExpression::Pointer> const &args, SourcePosition const &position)
 {
 	if (type->sizeCall(position) > 5)
 		throw SourceException("too many args to call linespec", position, "SourceExpression");
@@ -36,12 +37,16 @@ void SourceExpression::make_objects_call_linespec(ObjectVector * objects, Variab
 	if (args.size() != type->types.size())
 		throw SourceException("incorrect arg count to call linespec", position, "SourceExpression");
 
+	VariableData::Pointer src = VariableData::create_stack(type->callType->size(position));
+
+	make_objects_memcpy_prep(objects, dst, src, position);
+
 	for (size_t i(0); i < args.size(); ++i)
 	{
 		if (args[i]->getType() != type->types[i])
 			throw SourceException("incorrect arg type to call lnpsec", args[i]->position, "SourceExpression");
 
-		args[i]->makeObjectsGet(objects);
+		args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->size(position)));
 	}
 
 	objects->setPosition(position);
@@ -71,6 +76,8 @@ void SourceExpression::make_objects_call_linespec(ObjectVector * objects, Variab
 	}
 
 	objects->addToken(ocode, ospec);
+
+	make_objects_memcpy_post(objects, dst, src, position);
 }
 
 

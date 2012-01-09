@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression.cpp
-**
-** Defines the SourceExpression methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Base class for source-level expression handling.
+//
+//-----------------------------------------------------------------------------
 
 #include "SourceExpression.hpp"
 
@@ -25,334 +27,393 @@
 #include "ObjectVector.hpp"
 #include "print_debug.hpp"
 #include "SourceException.hpp"
+#include "VariableData.hpp"
 #include "VariableType.hpp"
 
 
 
-SourceExpression::SourceExpression(SourcePosition const & position_) : evaluations(0), position(position_)
+//
+// SourceExpression::SourceExpression
+//
+SourceExpression::
+SourceExpression(SourcePosition const &_position)
+                 : position(_position), evaluated(false)
 {
-
 }
 
-void SourceExpression::addLabel(std::string const & label)
+//
+// SourceExpression::addLabel
+//
+void SourceExpression::addLabel(std::string const &label)
 {
-	_labels.push_back(label);
+   labels.push_back(label);
 }
 
+//
+// SourceExpression::canGetData
+//
+bool SourceExpression::canGetData() const
+{
+   return false;
+}
+
+//
+// SourceExpression::canMakeObject
+//
 bool SourceExpression::canMakeObject() const
 {
-	return false;
+   return canGetData() && getData()->type == VariableData::MT_LITERAL;
 }
+
+//
+// SourceExpression::canMakeObjectAddress
+//
 bool SourceExpression::canMakeObjectAddress() const
 {
-	return false;
+   return canGetData() && getData()->type == VariableData::MT_STATIC;
 }
 
+//
+// SourceExpression::canMakeObjectsAddress
+//
 bool SourceExpression::canMakeObjectsAddress() const
 {
-	return false;
+   if (!canGetData()) return false;
+
+   switch (getData()->type)
+   {
+   case VariableData::MT_AUTO:
+   case VariableData::MT_POINTER:
+   case VariableData::MT_STATIC:
+      return true;
+
+   default:
+      return false;
+   }
 }
 
-VariableType const * SourceExpression::get_promoted_type(VariableType const * type1, VariableType const * type2, SourcePosition const &)
+//
+// SourceExpression::get_promoted_type
+//
+VariableType const *SourceExpression::
+get_promoted_type(VariableType const *type1, VariableType const* type2,
+                  SourcePosition const &)
 {
-	if (type1 == type2) return type1;
+   if (type1 == type2) return type1;
 
-	if (type1->vt == VariableType::VT_VOID) return type1;
-	if (type2->vt == VariableType::VT_VOID) return type2;
+   if (type1->vt == VariableType::VT_VOID) return type1;
+   if (type2->vt == VariableType::VT_VOID) return type2;
 
-	if (type1->vt == VariableType::VT_POINTER) return type1;
-	if (type2->vt == VariableType::VT_POINTER) return type2;
+   if (type1->vt == VariableType::VT_POINTER) return type1;
+   if (type2->vt == VariableType::VT_POINTER) return type2;
 
-	if (type1->vt == VariableType::VT_ARRAY) return VariableType::get_pointer(type1->refType);
-	if (type2->vt == VariableType::VT_ARRAY) return VariableType::get_pointer(type2->refType);
+   if (type1->vt == VariableType::VT_ARRAY) return VariableType::get_pointer(type1->refType);
+   if (type2->vt == VariableType::VT_ARRAY) return VariableType::get_pointer(type2->refType);
 
-	if (type1->vt == VariableType::VT_REAL) return type1;
-	if (type2->vt == VariableType::VT_REAL) return type2;
+   if (type1->vt == VariableType::VT_REAL) return type1;
+   if (type2->vt == VariableType::VT_REAL) return type2;
 
-	if (type1->vt == VariableType::VT_INT) return type1;
-	if (type2->vt == VariableType::VT_INT) return type2;
+   if (type1->vt == VariableType::VT_INT) return type1;
+   if (type2->vt == VariableType::VT_INT) return type2;
 
-	if (type1->vt == VariableType::VT_CHAR) return type1;
-	if (type2->vt == VariableType::VT_CHAR) return type2;
+   if (type1->vt == VariableType::VT_CHAR) return type1;
+   if (type2->vt == VariableType::VT_CHAR) return type2;
 
-	if (type1->vt == VariableType::VT_STRING) return type1;
-	if (type2->vt == VariableType::VT_STRING) return type2;
+   if (type1->vt == VariableType::VT_STRING) return type1;
+   if (type2->vt == VariableType::VT_STRING) return type2;
 
-	if (type1->vt == VariableType::VT_BOOLHARD) return type1;
-	if (type2->vt == VariableType::VT_BOOLHARD) return type2;
+   if (type1->vt == VariableType::VT_BOOLHARD) return type1;
+   if (type2->vt == VariableType::VT_BOOLHARD) return type2;
 
-	if (type1->vt == VariableType::VT_BOOLSOFT) return type1;
-	if (type2->vt == VariableType::VT_BOOLSOFT) return type2;
+   if (type1->vt == VariableType::VT_BOOLSOFT) return type1;
+   if (type2->vt == VariableType::VT_BOOLSOFT) return type2;
 
-	return VariableType::get_vt_void();
+   return VariableType::get_vt_void();
 }
 
-VariableType const * SourceExpression::getType() const
+//
+// SourceExpression::getData
+//
+VariableData::Pointer SourceExpression::getData() const
 {
-	return VariableType::get_vt_void();
+   throw SourceException("getData on invalid expression", position, getName());
 }
 
+//
+// SourceExpression::getType
+//
+VariableType const *SourceExpression::getType() const
+{
+   return VariableType::get_vt_void();
+}
+
+//
+// SourceExpression::makeObject
+//
 CounterPointer<ObjectExpression> SourceExpression::makeObject() const
 {
-	throw SourceException("makeObject on invalid expression", position, getName());
+   VariableData::Pointer src = getData();
+
+   if (src->type != VariableData::MT_LITERAL)
+      throw SourceException("makeObject on invalid expression", position,
+                            getName());
+
+   return src->address;
 }
+
+//
+// SourceExpression::makeObjectAddress
+//
 CounterPointer<ObjectExpression> SourceExpression::makeObjectAddress() const
 {
-	throw SourceException("makeObjectAddress on invalid expression", position, getName());
+   VariableData::Pointer src = getData();
+
+   if (src->type != VariableData::MT_STATIC)
+      throw SourceException("makeObjectAddress on invalid expression",
+                            position, getName());
+
+   return src->address;
 }
 
-void SourceExpression::makeObjects(ObjectVector * objects)
+//
+// SourceExpression::makeObjects
+//
+void SourceExpression::
+makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	makeObjectsBase(objects);
+   makeObjectsBase(objects, dst);
 
-	if (_labels.empty() && canMakeObject())
-	{
-		recurse_makeObjects(objects);
-	}
-	else
-		virtual_makeObjects(objects);
+   if (canMakeObject())
+   {
+      recurse_makeObjects(objects, dst);
+
+      VariableData::Pointer src =
+         VariableData::create_literal(getType()->size(position), makeObject());
+
+      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_post(objects, dst, src, position);
+   }
+   else
+      virtual_makeObjects(objects, dst);
 }
 
-void SourceExpression::makeObjectsAccess(ObjectVector * objects)
+//
+// SourceExpression::makeObjectsAddress
+//
+void SourceExpression::
+makeObjectsAddress(ObjectVector *objects, VariableData *dst)
 {
-	makeObjectsBase(objects);
+   makeObjectsBase(objects, dst);
 
-	virtual_makeObjectsAccess(objects);
-}
-void SourceExpression::makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
-{
-	makeObjectsBase(objects);
+   if (canMakeObjectAddress())
+   {
+      recurse_makeObjectsAddress(objects, dst);
 
-	virtual_makeObjectsAccessArray(objects, dimensions);
-}
-void SourceExpression::makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> * names)
-{
-	makeObjectsBase(objects);
+      // This should properly determine the size of a pointer.
+      VariableData::Pointer src =
+         VariableData::create_literal(1, makeObjectAddress());
 
-	virtual_makeObjectsAccessMember(objects, names);
-}
-
-void SourceExpression::makeObjectsAddress(ObjectVector * objects)
-{
-	makeObjectsBase(objects);
-
-	if (_labels.empty() && canMakeObjectAddress())
-	{
-		recurse_makeObjectsAddress(objects);
-
-		objects->addToken(OCODE_GET_LITERAL32I, makeObjectAddress());
-	}
-	else
-		virtual_makeObjectsAddress(objects);
+      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_post(objects, dst, src, position);
+   }
+   else
+      virtual_makeObjectsAddress(objects, dst);
 }
 
-void SourceExpression::makeObjectsCast(ObjectVector * objects, VariableType const * type)
+//
+// SourceExpression::makeObjectsBase
+//
+void SourceExpression::
+makeObjectsBase(ObjectVector *objects, VariableData *)
 {
-	if (type->vt == VariableType::VT_VOID)
-	{
-		// If casting to void, use makeObjects so as to take advantage
-		// of any related optimization.
-		makeObjects(objects);
-	}
-	else
-	{
-		makeObjectsBase(objects);
+   //if (evaluated)
+   //   throw SourceException("multiple-evaluation", position, getName());
 
-		virtual_makeObjectsCast(objects, type);
-	}
+   evaluated = true;
+
+   objects->addLabel(labels);
 }
 
-void SourceExpression::makeObjectsBase(ObjectVector * objects)
+//
+// SourceExpression::makeObjectsCast
+//
+void SourceExpression::
+makeObjectsCast(ObjectVector *objects, VariableData *dst,
+                VariableType const *type)
 {
-	if (!evaluations++)
-		objects->addLabel(_labels);
-}
+   // If casting to void, just use a void destination for better codegen.
+   if (type->vt == VariableType::VT_VOID && !dst->offsetTemp)
+   {
+      makeObjects(objects, VariableData::create_void(dst->size));
 
-void SourceExpression::makeObjectsGet(ObjectVector * objects)
-{
-	makeObjectsBase(objects);
+      // If there's an offset temp, it needs to be dealt with. (Well, only if
+      // it's on the stack, but this ensures anything is handled.)
+      if (dst->offsetTemp)
+         make_objects_memcpy_void(objects, dst->offsetTemp, position);
+   }
+   else
+   {
+      makeObjectsBase(objects, dst);
 
-	if (_labels.empty() && canMakeObject())
-	{
-		recurse_makeObjectsGet(objects);
-
-		// FIXME: Should be based on type.
-		objects->addToken(OCODE_GET_LITERAL32I, makeObject());
-	}
-	else
-		virtual_makeObjectsGet(objects);
-}
-void SourceExpression::makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
-{
-	makeObjectsBase(objects);
-
-	virtual_makeObjectsGetArray(objects, dimensions);
-}
-void SourceExpression::makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> * names)
-{
-	makeObjectsBase(objects);
-
-	virtual_makeObjectsGetMember(objects, names);
-}
-
-void SourceExpression::makeObjectsSet(ObjectVector * objects)
-{
-	makeObjectsBase(objects);
-
-	virtual_makeObjectsSet(objects);
-}
-void SourceExpression::makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
-{
-	makeObjectsBase(objects);
-
-	virtual_makeObjectsSetArray(objects, dimensions);
-}
-void SourceExpression::makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
-{
-	makeObjectsBase(objects);
-
-	virtual_makeObjectsSetMember(objects, names);
+      virtual_makeObjectsCast(objects, dst, type);
+   }
 }
 
 void SourceExpression::printDebug(std::ostream * out) const
 {
-	*out << "SourceExpressionDS(";
-		*out << "evaluations=(";
-		print_debug(out, evaluations);
-		*out << ")";
+   *out << "SourceExpressionDS(";
+      *out << "evaluations=(";
+      print_debug(out, evaluated);
+      *out << ")";
 
-		*out << ", ";
+      *out << ", ";
 
-		*out << "labels=(";
-		print_debug(out, _labels);
-		*out << ")";
+      *out << "labels=(";
+      print_debug(out, labels);
+      *out << ")";
 
-		*out << ", ";
+      *out << ", ";
 
-		*out << "position=(";
-		print_debug(out, position);
-		*out << ")";
-	*out << ")";
-}
-
-void SourceExpression::recurse_makeObjects(ObjectVector * objects)
-{
-	objects->setPosition(position);
+      *out << "position=(";
+      print_debug(out, position);
+      *out << ")";
+   *out << ")";
 }
 
-void SourceExpression::recurse_makeObjectsAccess(ObjectVector * objects)
+//
+// SourceExpression::recurse_makeObjects
+//
+void SourceExpression::
+recurse_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	recurse_makeObjects(objects);
-}
-void SourceExpression::recurse_makeObjectsAccessArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> *)
-{
-	recurse_makeObjects(objects);
-}
-void SourceExpression::recurse_makeObjectsAccessMember(ObjectVector * objects, std::vector<std::string> *)
-{
-	recurse_makeObjects(objects);
+   recurse_makeObjectsBase(objects, dst);
 }
 
-void SourceExpression::recurse_makeObjectsAddress(ObjectVector * objects)
+//
+// SourceExpression::recurse_makeObjectsAddress
+//
+void SourceExpression::
+recurse_makeObjectsAddress(ObjectVector *objects, VariableData *dst)
 {
-	recurse_makeObjects(objects);
+   recurse_makeObjectsBase(objects, dst);
 }
 
-void SourceExpression::recurse_makeObjectsCast(ObjectVector * objects, VariableType const *)
+//
+// SourceExpression::recurse_makeObjectsBase
+//
+void SourceExpression::
+recurse_makeObjectsBase(ObjectVector *objects, VariableData *)
 {
-	recurse_makeObjects(objects);
+   objects->setPosition(position);
 }
 
-void SourceExpression::recurse_makeObjectsGet(ObjectVector * objects)
+//
+// SourceExpression::recurse_makeObjectsCast
+//
+void SourceExpression::
+recurse_makeObjectsCast(ObjectVector *objects, VariableData *dst,
+                        VariableType const *)
 {
-	recurse_makeObjects(objects);
-}
-void SourceExpression::recurse_makeObjectsGetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> *)
-{
-	recurse_makeObjects(objects);
-}
-void SourceExpression::recurse_makeObjectsGetMember(ObjectVector * objects, std::vector<std::string> *)
-{
-	recurse_makeObjects(objects);
+   recurse_makeObjectsBase(objects, dst);
 }
 
-void SourceExpression::recurse_makeObjectsSet(ObjectVector * objects)
+//
+// SourceExpression::virtual_makeObjects
+//
+void SourceExpression::
+virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	recurse_makeObjects(objects);
-}
-void SourceExpression::recurse_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> *)
-{
-	recurse_makeObjects(objects);
-}
-void SourceExpression::recurse_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> *)
-{
-	recurse_makeObjects(objects);
+   recurse_makeObjects(objects, dst);
+
+   VariableData::Pointer src = getData();
+
+   make_objects_memcpy_prep(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, position);
 }
 
-void SourceExpression::virtual_makeObjects(ObjectVector * objects)
+//
+// SourceExpression::virtual_makeObjectsAddress
+//
+void SourceExpression::
+virtual_makeObjectsAddress(ObjectVector *objects, VariableData *dst)
 {
-	virtual_makeObjectsGet(objects);
-	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
+   recurse_makeObjectsAddress(objects, dst);
+
+   VariableData::Pointer src = getData();
+   VariableData::Pointer tmp =
+      VariableData::create_stack(
+         VariableType::get_pointer(
+            VariableType::get_vt_char())->size(position));
+
+   make_objects_memcpy_prep(objects, dst, tmp, position);
+
+   switch (src->type)
+   {
+   case VariableData::MT_AUTO:
+      objects->addToken(OCODE_ADDR_STACK_VAR, src->address);
+      break;
+
+   case VariableData::MT_POINTER:
+      src->offsetExpr->makeObjects(objects, tmp);
+
+      if (src->address->resolveInt())
+      {
+         objects->setPosition(position);
+         objects->addToken(OCODE_GET_LITERAL32I, src->address);
+         objects->addToken(OCODE_ADD32U);
+      }
+      break;
+
+   case VariableData::MT_STATIC:
+      objects->addToken(OCODE_GET_LITERAL32I, src->address);
+      break;
+
+   default:
+      throw SourceException("makeObjectsAddress on invalid expression",
+                            position, getName());
+   }
+
+   make_objects_memcpy_post(objects, dst, tmp, position);
 }
 
-void SourceExpression::virtual_makeObjectsAccess(ObjectVector *)
+//
+// SourceExpression::virtual_makeObjectsCast
+//
+void SourceExpression::
+virtual_makeObjectsCast(ObjectVector * objects, VariableData *dst,
+                        VariableType const *dstType)
 {
-	throw SourceException("makeObjectsAccess on invalid expression", position, getName());
-}
-void SourceExpression::virtual_makeObjectsAccessArray(ObjectVector *, std::vector<SourceExpression::Pointer> *)
-{
-	throw SourceException("makeObjectsAccessArray on invalid expression", position, getName());
-}
-void SourceExpression::virtual_makeObjectsAccessMember(ObjectVector *, std::vector<std::string> *)
-{
-	throw SourceException("makeObjectsAccessMember on invalid expression", position, getName());
-}
+   VariableType const *srcType = getType();
 
-void SourceExpression::virtual_makeObjectsAddress(ObjectVector *)
-{
-	throw SourceException("makeObjectsAddress on invalid expression", position, getName());
-}
+   if (canGetData())
+   {
+      VariableData::Pointer src = getData();
 
-void SourceExpression::virtual_makeObjectsCast(ObjectVector * objects, VariableType const * type)
-{
-	virtual_makeObjectsGet(objects);
-	make_objects_cast(objects, getType(), type, position);
-}
+      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_cast(objects, dst, src, dstType, srcType, position);
+   }
+   else
+   {
+      VariableData::Pointer src =
+         VariableData::create_stack(srcType->size(position));
 
-void SourceExpression::virtual_makeObjectsGet(ObjectVector *)
-{
-	throw SourceException("makeObjectsGet on invalid expression", position, getName());
-}
-void SourceExpression::virtual_makeObjectsGetArray(ObjectVector *, std::vector<SourceExpression::Pointer> *)
-{
-	throw SourceException("makeObjectsGetArray on invalid expression", position, getName());
-}
-void SourceExpression::virtual_makeObjectsGetMember(ObjectVector *, std::vector<std::string> *)
-{
-	throw SourceException("makeObjectsGetMember on invalid expression", position, getName());
-}
-
-void SourceExpression::virtual_makeObjectsSet(ObjectVector * objects)
-{
-	virtual_makeObjectsAccess(objects);
-	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
-}
-void SourceExpression::virtual_makeObjectsSetArray(ObjectVector * objects, std::vector<SourceExpression::Pointer> * dimensions)
-{
-	virtual_makeObjectsAccessArray(objects, dimensions);
-	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
-}
-void SourceExpression::virtual_makeObjectsSetMember(ObjectVector * objects, std::vector<std::string> * names)
-{
-	virtual_makeObjectsAccessMember(objects, names);
-	make_objects_cast(objects, getType(), VariableType::get_vt_void(), position);
+      make_objects_memcpy_prep(objects, dst, src, position);
+      virtual_makeObjects(objects, src);
+      make_objects_memcpy_cast(objects, dst, src, dstType, srcType, position);
+   }
 }
 
 
 
-void print_debug(std::ostream * out, SourceExpression const & in)
+//
+// print_debug<SourceExpression>
+//
+void print_debug(std::ostream *out, SourceExpression const &in)
 {
-	in.printDebug(out);
+   in.printDebug(out);
 }
 
+
+
+// EOF
 

@@ -25,21 +25,26 @@
 #include "../ObjectVector.hpp"
 #include "../ost_type.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
 
-void SourceExpression::make_objects_call_function(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, std::string const & labelReturn, SourcePosition const & position)
+void SourceExpression::make_objects_call_function(ObjectVector *objects, VariableData *dst, VariableType const *type, ObjectExpression *data, std::vector<SourceExpression::Pointer> const &args, ObjectExpression *stack, std::string const &labelReturn, SourcePosition const &position)
 {
 	if (args.size() != type->types.size())
 		throw SourceException("incorrect arg count to call function", position, "SourceExpression");
+
+	VariableData::Pointer src = VariableData::create_stack(type->callType->size(position));
+
+	make_objects_memcpy_prep(objects, dst, src, position);
 
 	for (size_t i(0); i < args.size(); ++i)
 	{
 		if (args[i]->getType() != type->types[i])
 			throw SourceException("incorrect arg type to call function", args[i]->position, "SourceExpression");
 
-		args[i]->makeObjectsGet(objects);
+		args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->size(position)));
 	}
 
 	objects->setPosition(position);
@@ -90,25 +95,31 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 
 	// Reset the stack-pointer.
 	objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
+
+	make_objects_memcpy_post(objects, dst, src, position);
 }
 
-void SourceExpression::make_objects_call_function(ObjectVector * objects, VariableType const * type, SourceExpression * data, std::vector<SourceExpression::Pointer> const & args, ObjectExpression * stack, std::string const & labelReturn, SourcePosition const & position)
+void SourceExpression::make_objects_call_function(ObjectVector *objects, VariableData *dst, VariableType const *type, SourceExpression *data, std::vector<SourceExpression::Pointer> const &args, ObjectExpression *stack, std::string const &labelReturn, SourcePosition const &position)
 {
 	if (args.size() != type->types.size())
 		throw SourceException("incorrect arg count to call function", position, "SourceExpression");
+
+	VariableData::Pointer src = VariableData::create_stack(type->callType->size(position));
+
+	make_objects_memcpy_prep(objects, dst, src, position);
 
 	// Must push return address before target address.
 	objects->addToken(OCODE_GET_LITERAL32I, ObjectExpression::create_value_symbol(labelReturn, position));
 
 	// Determine jump target.
-	data->makeObjectsGet(objects);
+	data->makeObjects(objects, VariableData::create_stack(type->size(position)));
 
 	for (size_t i(0); i < args.size(); ++i)
 	{
 		if (args[i]->getType() != type->types[i])
 			throw SourceException("incorrect arg type to call function", args[i]->position, "SourceExpression");
 
-		args[i]->makeObjectsGet(objects);
+		args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->size(position)));
 	}
 
 	objects->setPosition(position);
@@ -143,6 +154,8 @@ void SourceExpression::make_objects_call_function(ObjectVector * objects, Variab
 
 	// Reset the stack-pointer.
 	objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
+
+	make_objects_memcpy_post(objects, dst, src, position);
 }
 
 

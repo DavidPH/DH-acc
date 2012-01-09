@@ -24,27 +24,49 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
 
-void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType const * typeFrom, VariableType const * typeTo, SourcePosition const & position)
+void SourceExpression::make_objects_memcpy_cast(ObjectVector *objects, VariableData *dst, VariableData *src, VariableType const *dstType, VariableType const *srcType, SourcePosition const &position)
 {
 	// Don't want to slog through all that if not throwing, but also want to
 	// avoid code duplication. (Especially with the cast-to-std::string.)
-	#define TYPES_STRING ((std::string)make_string(typeFrom->vt) + "->" + make_string(typeTo->vt))
+	#define TYPES_STRING ((std::string)make_string(srcType->vt) + "->" + make_string(dstType->vt))
 
-	if (typeFrom == typeTo) return;
-
-	if (typeTo->vt == VariableType::VT_VOID)
+	// If no cast, this just becomes a memcpy.
+	if (dstType == srcType)
 	{
-		for (size_t i(typeFrom->size(position)); i--;)
-			objects->addToken(OCODE_STACK_DROP32);
+		// This must already have been done.
+		//make_objects_memcpy_prep(objects, dst, src, position);
+		make_objects_memcpy_post(objects, dst, src, position);
 
 		return;
 	}
 
-	switch (typeFrom->vt)
+	// If casting to void, just memcpy to void.
+	if (dstType->vt == VariableType::VT_VOID)
+	{
+		make_objects_memcpy_void(objects, src, position);
+
+		// If there's an offset temp, it needs to be dealt with.
+		if (dst->offsetTemp)
+			make_objects_memcpy_void(objects, dst->offsetTemp, position);
+
+		return;
+	}
+
+	// All casting is stack-ops.
+	VariableData::Pointer tmp = VariableData::create_stack(src->size);
+
+	// This must already have been done.
+	//make_objects_memcpy_prep(objects, dst, tmp, position);
+
+	make_objects_memcpy_prep(objects, tmp, src, position);
+	make_objects_memcpy_post(objects, tmp, src, position);
+
+	switch (srcType->vt)
 	{
 	case VariableType::VT_ARRAY:
 	case VariableType::VT_ASMFUNC:
@@ -65,7 +87,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 	case VariableType::VT_POINTER:
 	case VariableType::VT_SCRIPT:
 	case VariableType::VT_STRING:
-		switch (typeTo->vt)
+		switch (dstType->vt)
 		{
 		case VariableType::VT_ARRAY:
 		case VariableType::VT_ASMFUNC:
@@ -100,7 +122,7 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 		break;
 
 	case VariableType::VT_BOOLSOFT:
-		switch (typeTo->vt)
+		switch (dstType->vt)
 		{
 		case VariableType::VT_ARRAY:
 		case VariableType::VT_ASMFUNC:
@@ -129,15 +151,15 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 			break;
 
 		case VariableType::VT_REAL:
-			objects->addToken(OCODE_LOGICAL_NOT32I);
-			objects->addToken(OCODE_LOGICAL_NOT32I);
+			objects->addToken(OCODE_LOGICAL_NOT32F);
+			objects->addToken(OCODE_LOGICAL_NOT32F);
 			objects->addToken(OCODE_CONVERT_32I_32F);
 			break;
 		}
 		break;
 
 	case VariableType::VT_REAL:
-		switch (typeTo->vt)
+		switch (dstType->vt)
 		{
 		case VariableType::VT_ARRAY:
 		case VariableType::VT_ASMFUNC:
@@ -171,6 +193,8 @@ void SourceExpression::make_objects_cast(ObjectVector * objects, VariableType co
 		}
 		break;
 	}
+
+	make_objects_memcpy_post(objects, dst, tmp, position);
 
 	#undef TYPES_STRING
 }

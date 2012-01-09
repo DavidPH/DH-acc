@@ -25,6 +25,7 @@
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
 #include "../SourceContext.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -40,7 +41,7 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	SourceExpression::Pointer _expr;
 	SourceExpression::Pointer _exprCases;
@@ -122,11 +123,11 @@ void SourceExpression_BranchSwitch::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_BranchSwitch::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BranchSwitch::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
-	_expr->makeObjectsGet(objects);
+	_expr->makeObjects(objects, VariableData::create_stack(_expr->getType()->size(position)));
 
 	objects->setPosition(position);
 
@@ -143,7 +144,7 @@ void SourceExpression_BranchSwitch::virtual_makeObjectsGet(ObjectVector * object
 
 	objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_caseDefault));
 
-	_exprCases->makeObjectsGet(objects);
+	_exprCases->makeObjects(objects, VariableData::create_void(0));
 
 	if (_needDefault)
 		objects->addLabel(_caseDefault);

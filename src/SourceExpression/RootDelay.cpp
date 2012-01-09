@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceContext.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -39,7 +40,7 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	SourceExpression::Pointer _expr;
 	bigsint _stack;
@@ -71,11 +72,11 @@ void SourceExpression_RootDelay::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_RootDelay::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_RootDelay::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
-	_expr->makeObjectsGet(objects);
+	_expr->makeObjects(objects, VariableData::create_stack(_expr->getType()->size(position)));
 
 	objects->setPosition(position);
 

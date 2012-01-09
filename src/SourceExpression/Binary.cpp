@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -141,15 +142,18 @@ void SourceExpression_Binary::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_Binary::recurse_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_Binary::recurse_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
 	// Special case, child handles expressions.
 	if (_arithmetic == 2) return;
 
-	exprL->makeObjectsGet(objects);
-	exprR->makeObjectsGet(objects);
+	VariableData::Pointer src = VariableData::create_stack(getType()->size(position));
+
+	make_objects_memcpy_prep(objects, dst, src, position);
+	exprL->makeObjects(objects, src);
+	exprR->makeObjects(objects, src);
 
 	objects->setPosition(position);
 }

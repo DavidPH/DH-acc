@@ -26,6 +26,7 @@
 #include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -41,7 +42,7 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	SourceExpression::Pointer _expr;
 	SourceContext::ContextType _type;
@@ -73,11 +74,16 @@ void SourceExpression_BranchReturn::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_BranchReturn::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BranchReturn::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
-	_expr->makeObjectsGet(objects);
+	bigsint srcSize = _expr->getType()->size(position);
+	if (srcSize && target_type == TARGET_ZDoom)
+		--srcSize;
+	VariableData::Pointer src = VariableData::create_stack(srcSize);
+
+	_expr->makeObjects(objects, src);
 
 	objects->setPosition(position);
 

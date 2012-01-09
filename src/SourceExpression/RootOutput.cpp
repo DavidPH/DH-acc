@@ -24,6 +24,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../ost_type.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -41,7 +42,7 @@ protected:
 private:
 	void doOut(ObjectVector * objects, VariableType const * type) const;
 
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	SourceExpression::Pointer _expr;
 };
@@ -280,11 +281,11 @@ void SourceExpression_RootOutput::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_RootOutput::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_RootOutput::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
-	_expr->makeObjectsGet(objects);
+	_expr->makeObjects(objects, VariableData::create_stack(_expr->getType()->size(position)));
 
 	objects->setPosition(position);
 

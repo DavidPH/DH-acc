@@ -25,6 +25,7 @@
 #include "../ObjectVector.hpp"
 #include "../print_debug.hpp"
 #include "../SourceContext.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -41,7 +42,7 @@ protected:
 	virtual void printDebug(std::ostream * out) const;
 
 private:
-	virtual void virtual_makeObjectsGet(ObjectVector * objects);
+	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	SourceExpression::Pointer expr;
 	std::string _label;
@@ -89,9 +90,9 @@ void SourceExpression_BranchGoto::printDebug(std::ostream * out) const
 	*out << ")";
 }
 
-void SourceExpression_BranchGoto::virtual_makeObjectsGet(ObjectVector * objects)
+void SourceExpression_BranchGoto::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsGet(objects);
+	Super::recurse_makeObjects(objects, dst);
 
 	if (expr)
 	{
@@ -101,7 +102,9 @@ void SourceExpression_BranchGoto::virtual_makeObjectsGet(ObjectVector * objects)
 		}
 		else
 		{
-			expr->makeObjectsGet(objects);
+			VariableData::Pointer src = VariableData::create_stack(expr->getType()->size(position));
+
+			expr->makeObjects(objects, src);
 			objects->setPosition(position);
 			objects->addToken(OCODE_BRANCH_GOTO);
 		}

@@ -24,14 +24,15 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
 
-void SourceExpression::make_objects_call_asmfunc(ObjectVector * objects, VariableType const * type, ObjectExpression * data, std::vector<SourceExpression::Pointer> const & args, SourcePosition const & position)
+void SourceExpression::make_objects_call_asmfunc(ObjectVector *objects, VariableData *dst, VariableType const *type, ObjectExpression *data, std::vector<SourceExpression::Pointer> const &args, SourcePosition const &position)
 {
 	if (args.size() != type->types.size())
-		throw SourceException("incorrect arg count to call asmfunc", position, "SourceExpressionDS");
+		throw SourceException("incorrect arg count to call asmfunc", position, "SourceExpression");
 
 	ObjectCodeSet ocode(data->resolveOCode());
 
@@ -40,10 +41,14 @@ void SourceExpression::make_objects_call_asmfunc(ObjectVector * objects, Variabl
 	for (size_t i(0); i < args.size(); ++i)
 	{
 		if (args[i]->getType() != type->types[i])
-			throw SourceException("incorrect arg type to call asmfunc", args[i]->position, "SourceExpressionDS");
+			throw SourceException("incorrect arg type to call asmfunc", args[i]->position, "SourceExpression");
 
 		immediate = immediate && args[i]->canMakeObject();
 	}
+
+	VariableData::Pointer src = VariableData::create_stack(type->callType->size(position));
+
+	make_objects_memcpy_prep(objects, dst, src, position);
 
 	if (immediate)
 	{
@@ -57,13 +62,15 @@ void SourceExpression::make_objects_call_asmfunc(ObjectVector * objects, Variabl
 	else
 	{
 		if (ocode.ocode == OCODE_NONE)
-			throw SourceException("no ocode", position, "SourceExpressionDS");
+			throw SourceException("no ocode", position, "SourceExpression");
 
 		for (size_t i(0); i < args.size(); ++i)
-			args[i]->makeObjectsGet(objects);
+			args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->size(position)));
 
 		objects->setPosition(position).addToken(ocode.ocode);
 	}
+
+	make_objects_memcpy_post(objects, dst, src, position);
 }
 
 

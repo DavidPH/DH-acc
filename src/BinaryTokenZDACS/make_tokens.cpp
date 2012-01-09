@@ -110,6 +110,8 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	CASE_REMAP_PRE(SET, WORLDARRAY_VAR32F, WORLDARRAY_VAR);
 	CASE_REMAP_PRE(SET, WORLDARRAY_VAR32I, WORLDARRAY_VAR);
 
+	// Variable Set Op
+
 	// Miscellaneous
 	CASE_REMAP_PRE(MISC, NATIVE, NATIVE);
 
@@ -158,7 +160,7 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	// Translations
 
 
-	BINTOKACS_TOKENS_TRAN_ALL_ALL();
+	BINTOKACS_TOKENS_TRAN_ALL();
 
 	// Branching
 
@@ -175,14 +177,14 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
 	case OCODE_ADDR_STACK_ADD:
 		args.push_back(indexStack);
-		PUSH_TOKEN(BCODE_ADD_WORLDREGISTER_VAR);
+		PUSH_TOKEN(BCODE_SETOP_ADD_WORLDREGISTER_VAR);
 		break;
 
 	case OCODE_ADDR_STACK_SUB_IMM:
 		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
 	case OCODE_ADDR_STACK_SUB:
 		args.push_back(indexStack);
-		PUSH_TOKEN(BCODE_SUB_WORLDREGISTER_VAR);
+		PUSH_TOKEN(BCODE_SETOP_SUB_WORLDREGISTER_VAR);
 		break;
 
 	case OCODE_ADDR_STACK_VAR:

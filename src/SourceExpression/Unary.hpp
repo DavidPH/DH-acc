@@ -39,7 +39,7 @@ protected:
 
 	virtual void printDebug(std::ostream * out) const;
 
-	virtual void recurse_makeObjectsGet(ObjectVector * objects);
+	void recurse_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	SourceExpression::Pointer expr;
 
