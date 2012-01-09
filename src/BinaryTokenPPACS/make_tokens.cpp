@@ -194,26 +194,12 @@ void BinaryTokenPPACS::make_tokens(ObjectToken const & object, std::vector<Binar
 
 	// Variable Get
 
-	case OCODE_GET_POINTERTEMP_VAR32F:
-	case OCODE_GET_POINTERTEMP_VAR32I:
-		args.push_back(indexTemp);
-		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		PUSH_TOKEN_ARGS1(BCODE_GET_POINTER_VAR, 1);
-		break;
-
 	case OCODE_GET_TEMP_VAR:
 		args.push_back(indexTemp);
 		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
 		break;
 
 	// Variable Set
-
-	case OCODE_SET_POINTERTEMP_VAR32F:
-	case OCODE_SET_POINTERTEMP_VAR32I:
-		args.push_back(indexTemp);
-		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		PUSH_TOKEN_ARGS1(BCODE_SET_POINTER_VAR, 1);
-		break;
 
 	case OCODE_SET_TEMP_VAR:
 		args.push_back(indexTemp);

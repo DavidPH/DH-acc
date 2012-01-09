@@ -46,8 +46,6 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 
 	std::vector<ObjectExpression::Pointer> args;
 
-	BinaryCode bcode;
-
 	SourcePosition const & position(object.getPosition());
 
 	std::vector<std::string> const * labels(&object.getLabels());
@@ -206,28 +204,6 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_GET_GLOBALARRAY_VAR);
 		break;
 
-	get_array_case:
-		PUSH_TOKEN_ARGS2(BCODE_GET_LITERAL, 1, 2);
-		args.push_back(indexTemp);
-		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		PUSH_TOKEN(BCODE_ADD);
-		PUSH_TOKEN_ARGS2(bcode, 0, 1);
-		break;
-
-	case OCODE_GET_GLOBALARRAYTEMP_VAR32F:
-	case OCODE_GET_GLOBALARRAYTEMP_VAR32I:
-		bcode = BCODE_GET_GLOBALARRAY_VAR;
-		goto get_array_case;
-
-	case OCODE_GET_MAPARRAYTEMP_VAR32F:
-	case OCODE_GET_MAPARRAYTEMP_VAR32I:
-		bcode = BCODE_GET_MAPARRAY_VAR;
-		goto get_array_case;
-
-	case OCODE_GET_POINTERTEMP_VAR32F:
-	case OCODE_GET_POINTERTEMP_VAR32I:
-		args.push_back(indexTemp);
-		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
 	case OCODE_GET_POINTER_VAR32F:
 	case OCODE_GET_POINTER_VAR32I:
 		if (object.getArg(0)->resolveInt())
@@ -247,11 +223,6 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		PUSH_TOKEN(BCODE_GET_GLOBALARRAY_VAR);
 		break;
 
-	case OCODE_GET_WORLDARRAYTEMP_VAR32F:
-	case OCODE_GET_WORLDARRAYTEMP_VAR32I:
-		bcode = BCODE_GET_WORLDARRAY_VAR;
-		goto get_array_case;
-
 	// Variable Set
 
 	case OCODE_SET_AUTO_VAR32F:
@@ -260,34 +231,10 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		args.push_back(indexStack);
 		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
 		PUSH_TOKEN(BCODE_ADD);
-		PUSH_TOKEN(BCODE_STACK_SWAP);
 		args.push_back(indexAddr);
 		PUSH_TOKEN(BCODE_SET_GLOBALARRAY_VAR);
 		break;
 
-	set_array_case:
-		PUSH_TOKEN_ARGS2(BCODE_GET_LITERAL, 1, 2);
-		args.push_back(indexTemp);
-		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		PUSH_TOKEN(BCODE_ADD);
-		PUSH_TOKEN(BCODE_STACK_SWAP);
-		PUSH_TOKEN_ARGS2(bcode, 0, 1);
-		break;
-
-	case OCODE_SET_GLOBALARRAYTEMP_VAR32F:
-	case OCODE_SET_GLOBALARRAYTEMP_VAR32I:
-		bcode = BCODE_SET_GLOBALARRAY_VAR;
-		goto set_array_case;
-
-	case OCODE_SET_MAPARRAYTEMP_VAR32F:
-	case OCODE_SET_MAPARRAYTEMP_VAR32I:
-		bcode = BCODE_SET_MAPARRAY_VAR;
-		goto set_array_case;
-
-	case OCODE_SET_POINTERTEMP_VAR32F:
-	case OCODE_SET_POINTERTEMP_VAR32I:
-		args.push_back(indexTemp);
-		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
 	case OCODE_SET_POINTER_VAR32F:
 	case OCODE_SET_POINTER_VAR32I:
 		if (object.getArg(0)->resolveInt())
@@ -295,7 +242,6 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 			PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
 			PUSH_TOKEN(BCODE_ADD);
 		}
-		PUSH_TOKEN(BCODE_STACK_SWAP);
 		args.push_back(indexAddr);
 		PUSH_TOKEN(BCODE_SET_GLOBALARRAY_VAR);
 		break;
@@ -304,7 +250,6 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 	case OCODE_SET_STATIC_VAR32I:
 		args.push_back(ObjectExpression::create_binary_add(object.getArg(0), ObjectExpression::static_offset, SourcePosition::none()));
 		PUSH_TOKEN(BCODE_GET_LITERAL);
-		PUSH_TOKEN(BCODE_STACK_SWAP);
 		args.push_back(indexAddr);
 		PUSH_TOKEN(BCODE_SET_GLOBALARRAY_VAR);
 		break;
@@ -313,11 +258,6 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		args.push_back(indexTemp);
 		PUSH_TOKEN(BCODE_SET_WORLDREGISTER_VAR);
 		break;
-
-	case OCODE_SET_WORLDARRAYTEMP_VAR32F:
-	case OCODE_SET_WORLDARRAYTEMP_VAR32I:
-		bcode = BCODE_SET_WORLDARRAY_VAR;
-		goto set_array_case;
 
 	case OCODE_NONE:
 	default:
