@@ -50,7 +50,6 @@ std::map<std::string, ObjectData_RegisterArray> ObjectExpression::_registerarray
 
 std::map<std::string, ObjectData_Script> ObjectExpression::_script_table;
 
-ObjectExpression::Pointer                ObjectExpression:: static_offset(create_value_int(8192, SourcePosition::none()));
 std::map<std::string, ObjectData_Static> ObjectExpression::_static_table;
 
 std::map<std::string, ObjectExpression::Pointer>        ObjectExpression::_symbol_table;

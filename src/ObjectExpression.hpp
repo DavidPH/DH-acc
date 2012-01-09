@@ -167,8 +167,6 @@ public:
 
 	static void write_objects(std::ostream * out, ObjectVector const & objects);
 
-	static ObjectExpression::Pointer static_offset;
-
 protected:
 	enum ObjectType
 	{

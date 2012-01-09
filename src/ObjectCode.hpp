@@ -231,7 +231,7 @@ enum ObjectCode
    OCODE_SET_MOBJ_VAR32F,
    OCODE_SET_MOBJ_VAR32I,
 
-   /* a:offset s:addr,value */
+   /* a:offset s:value,addr */
    OCODE_SET_POINTER_VAR32F,
    OCODE_SET_POINTER_VAR32I,
 

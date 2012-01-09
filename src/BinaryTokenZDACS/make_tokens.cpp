@@ -186,20 +186,26 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 		break;
 
 	case OCODE_ADDR_STACK_VAR:
-		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
 		args.push_back(indexStack);
 		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		PUSH_TOKEN(BCODE_ADD);
+		if (object.getArg(0)->resolveInt())
+		{
+			PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+			PUSH_TOKEN(BCODE_ADD);
+		}
 		break;
 
 	// Variable Get
 
 	case OCODE_GET_AUTO_VAR32F:
 	case OCODE_GET_AUTO_VAR32I:
-		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
 		args.push_back(indexStack);
 		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		PUSH_TOKEN(BCODE_ADD);
+		if (object.getArg(0)->resolveInt())
+		{
+			PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+			PUSH_TOKEN(BCODE_ADD);
+		}
 		args.push_back(indexAddr);
 		PUSH_TOKEN(BCODE_GET_GLOBALARRAY_VAR);
 		break;
@@ -217,20 +223,28 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 
 	case OCODE_GET_STATIC_VAR32F:
 	case OCODE_GET_STATIC_VAR32I:
-		args.push_back(ObjectExpression::create_binary_add(object.getArg(0), ObjectExpression::static_offset, SourcePosition::none()));
-		PUSH_TOKEN(BCODE_GET_LITERAL);
+		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
 		args.push_back(indexAddr);
 		PUSH_TOKEN(BCODE_GET_GLOBALARRAY_VAR);
+		break;
+
+	case OCODE_GET_TEMP_VAR:
+		args.push_back(indexTemp);
+		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
 		break;
 
 	// Variable Set
 
 	case OCODE_SET_AUTO_VAR32F:
 	case OCODE_SET_AUTO_VAR32I:
-		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
 		args.push_back(indexStack);
 		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		PUSH_TOKEN(BCODE_ADD);
+		if (object.getArg(0)->resolveInt())
+		{
+			PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+			PUSH_TOKEN(BCODE_ADD);
+		}
+		PUSH_TOKEN(BCODE_STACK_SWAP);
 		args.push_back(indexAddr);
 		PUSH_TOKEN(BCODE_SET_GLOBALARRAY_VAR);
 		break;
@@ -242,14 +256,15 @@ void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<Binar
 			PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
 			PUSH_TOKEN(BCODE_ADD);
 		}
+		PUSH_TOKEN(BCODE_STACK_SWAP);
 		args.push_back(indexAddr);
 		PUSH_TOKEN(BCODE_SET_GLOBALARRAY_VAR);
 		break;
 
 	case OCODE_SET_STATIC_VAR32F:
 	case OCODE_SET_STATIC_VAR32I:
-		args.push_back(ObjectExpression::create_binary_add(object.getArg(0), ObjectExpression::static_offset, SourcePosition::none()));
-		PUSH_TOKEN(BCODE_GET_LITERAL);
+		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+		PUSH_TOKEN(BCODE_STACK_SWAP);
 		args.push_back(indexAddr);
 		PUSH_TOKEN(BCODE_SET_GLOBALARRAY_VAR);
 		break;

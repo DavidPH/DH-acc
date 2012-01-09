@@ -45,10 +45,13 @@ make_objects_memcpy_prep(ObjectVector *objects, VariableData *dst,
 
    objects->setPosition(position);
 
-   // Set up destination.
-   switch (dst->type)
+   // Set up destination by pushing the address onto the stack now. This way it
+   // is there before the data. Of course, this only works with single-byte
+   // sources.
+   if (dst->size == 1) switch (dst->type)
    {
    case VariableData::MT_AUTO:
+   case VariableData::MT_POINTER:
    case VariableData::MT_REGISTER:
    case VariableData::MT_STACK:
    case VariableData::MT_STATIC:
@@ -61,7 +64,6 @@ make_objects_memcpy_prep(ObjectVector *objects, VariableData *dst,
    case VariableData::MT_NONE:
       throw SourceException("MT_NONE as dst", position, "SourceExpression");
 
-   case VariableData::MT_POINTER:
    case VariableData::MT_REGISTERARRAY:
       if (!dst->offsetTemp)
          dst->offsetTemp = VariableData::create_stack(ptrSize);
@@ -71,16 +73,9 @@ make_objects_memcpy_prep(ObjectVector *objects, VariableData *dst,
       else
          objects->addTokenPushZero();
 
-      for (bigsint i = dst->size - 1; i--;)
-      {
-         objects->addToken(OCODE_STACK_DUP32);
-
-         if (dst->type != VariableData::MT_POINTER)
-         {
-            objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));
-            objects->addToken(OCODE_ADD32U);
-         }
-      }
+      if (dst->offsetTemp->type != VariableData::MT_STACK)
+         throw SourceException("offsetTemp not MT_STACK", position,
+                               "SourceExpression::make_objects_memcpy_prep");
 
       break;
    }
@@ -142,20 +137,29 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
       throw SourceException("MT_NONE as src", position, "SourceExpression");
 
    case VariableData::MT_POINTER:
+      // A bit of a hack, but the only time this is already set is from
+      // UnaryDecInc.
       if (!src->offsetTemp)
       {
          if (src->offsetExpr)
             src->offsetExpr->makeObjects(objects, ptrStack);
          else
             objects->addTokenPushZero();
-
-         for (bigsint i = src->size - 1; i--;)
-            objects->addToken(OCODE_STACK_DUP32);
       }
 
-      for (bigsint i = 0; i < src->size; ++i)
-         objects->addToken(OCODE_GET_POINTER_VAR32I,
-                           objects->getValueAdd(src->address, i));
+      if (src->size == 1)
+         objects->addToken(OCODE_GET_POINTER_VAR32I, src->address);
+      else
+      {
+         objects->addToken(OCODE_SET_TEMP_VAR);
+
+         for (bigsint i = 0; i < src->size; ++i)
+         {
+            objects->addToken(OCODE_GET_TEMP_VAR);
+            objects->addToken(OCODE_GET_POINTER_VAR32I,
+                              objects->getValueAdd(src->address, i));
+         }
+      }
       break;
 
    case VariableData::MT_REGISTER:
@@ -192,17 +196,8 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
       else
          objects->addTokenPushZero();
 
-      for (bigsint i = src->size - 1; i--;)
-         objects->addToken(OCODE_STACK_DUP32);
-
-      for (bigsint i = 0; i < src->size; ++i)
+      if (src->size == 1)
       {
-         if (i != 0)
-         {
-            objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(i));
-            objects->addToken(OCODE_ADD32U);
-         }
-
          switch (src->sectionRA)
          {
          case VariableData::SRA_MAP:
@@ -216,6 +211,36 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
          case VariableData::SRA_GLOBAL:
             objects->addToken(OCODE_GET_GLOBALARRAY_VAR32I, src->address);
             break;
+         }
+      }
+      else
+      {
+         objects->addToken(OCODE_SET_TEMP_VAR);
+
+         for (bigsint i = 0; i < src->size; ++i)
+         {
+            objects->addToken(OCODE_GET_TEMP_VAR);
+
+            if (i != 0)
+            {
+               objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(i));
+               objects->addToken(OCODE_ADD32U);
+            }
+
+            switch (src->sectionRA)
+            {
+            case VariableData::SRA_MAP:
+               objects->addToken(OCODE_GET_MAPARRAY_VAR32I, src->address);
+               break;
+
+            case VariableData::SRA_WORLD:
+               objects->addToken(OCODE_GET_WORLDARRAY_VAR32I, src->address);
+               break;
+
+            case VariableData::SRA_GLOBAL:
+               objects->addToken(OCODE_GET_GLOBALARRAY_VAR32I, src->address);
+               break;
+            }
          }
       }
       break;
@@ -251,15 +276,32 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
       throw SourceException("MT_NONE as dst", position, "SourceExpression");
 
    case VariableData::MT_POINTER:
+      if (!dst->offsetTemp)
+         dst->offsetTemp = VariableData::create_stack(ptrSize);
+
       if (dst->offsetTemp->type != VariableData::MT_STACK)
       {
          throw SourceException("offsetTemp not MT_STACK", position,
-                               "SourceExpression");
+                               "SourceExpression::make_objects_memcpy_prep");
       }
 
-      for (bigsint i = dst->size; i--;)
-         objects->addToken(OCODE_SET_POINTER_VAR32I,
-                           objects->getValueAdd(dst->address, i));
+      dst->offsetExpr->makeObjects(objects, dst->offsetTemp);
+
+      if (dst->size == 1)
+      {
+         objects->addToken(OCODE_SET_POINTER_VAR32I, dst->address);
+      }
+      else
+      {
+         objects->addToken(OCODE_SET_TEMP_VAR);
+
+         for (bigsint i = dst->size; i--;)
+         {
+            objects->addToken(OCODE_GET_TEMP_VAR);
+            objects->addToken(OCODE_SET_POINTER_VAR32I,
+                              objects->getValueAdd(dst->address, i));
+         }
+      }
       break;
 
    case VariableData::MT_REGISTER:
@@ -291,13 +333,16 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
       break;
 
    case VariableData::MT_REGISTERARRAY:
+      if (!dst->offsetTemp)
+         dst->offsetTemp = VariableData::create_stack(ptrSize);
+
       if (dst->offsetTemp->type != VariableData::MT_STACK)
       {
          throw SourceException("offsetTemp not MT_STACK", position,
-                               "SourceExpression");
+                               "SourceExpression::make_objects_memcpy_prep");
       }
 
-      for (bigsint i = dst->size; i--;)
+      if (dst->size == 1)
       {
          switch (src->sectionRA)
          {
@@ -312,6 +357,40 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
          case VariableData::SRA_GLOBAL:
             objects->addToken(OCODE_SET_GLOBALARRAY_VAR32I, src->address);
             break;
+         }
+      }
+      else
+      {
+         dst->offsetExpr->makeObjects(objects, dst->offsetTemp);
+
+         objects->addToken(OCODE_SET_TEMP_VAR);
+
+         for (bigsint i = dst->size; i--;)
+         {
+            objects->addToken(OCODE_GET_TEMP_VAR);
+
+            if (i)
+            {
+               objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(i));
+               objects->addToken(OCODE_ADD32U);
+            }
+
+            objects->addToken(OCODE_STACK_SWAP32);
+
+            switch (src->sectionRA)
+            {
+            case VariableData::SRA_MAP:
+               objects->addToken(OCODE_SET_MAPARRAY_VAR32I, src->address);
+               break;
+
+            case VariableData::SRA_WORLD:
+               objects->addToken(OCODE_SET_WORLDARRAY_VAR32I, src->address);
+               break;
+
+            case VariableData::SRA_GLOBAL:
+               objects->addToken(OCODE_SET_GLOBALARRAY_VAR32I, src->address);
+               break;
+            }
          }
       }
       break;

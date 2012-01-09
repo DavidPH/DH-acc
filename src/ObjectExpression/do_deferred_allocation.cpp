@@ -212,6 +212,10 @@ void ObjectExpression::do_deferred_allocation()
 	// statics
 	used.clear();
 
+	// A bit of a hack to create an offset.
+	for (bigsint i = 8192; i--;)
+		used.insert(i);
+
 	_iterator_map(_static_table, allocate_pre<ObjectData_Static>, &used);
 	_iterator_map(_static_table, allocate<ObjectData_Static>, &used);
 
