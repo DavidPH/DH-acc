@@ -32,6 +32,12 @@
 
 
 
+#define DELTA_F 0
+#define DELTA_I 1
+#define DELTA_U 2
+#define DELTA_MASK 3
+#define DELTA_EXPR 4
+
 //
 // SourceExpression_UnaryDecInc
 //
@@ -50,8 +56,9 @@ protected:
    virtual void printDebug(std::ostream *out) const;
 
 private:
+   int doDelta(ObjectVector *objects);
    void doDst(ObjectVector *objects, VariableData *dst, VariableData *src);
-   void doSrc(ObjectVector *objects, VariableData *src);
+   void doSrc(ObjectVector *objects, VariableData *src, int deltaType);
 
    virtual void
    virtual_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -111,6 +118,55 @@ SourceExpression_UnaryDecInc(SourceExpression *_expr, bool _inc, bool _suf,
 }
 
 //
+// SourceExpression_UnaryDecInc::doDelta
+//
+int SourceExpression_UnaryDecInc::
+doDelta(ObjectVector *objects)
+{
+   ObjectExpression::Pointer deltaExpr;
+   int deltaType = 0; // OCODE offset. Order is always F I U.
+
+   VariableType const *type = getType();
+
+   switch (type->vt)
+   {
+   case VariableType::VT_CHAR:
+   case VariableType::VT_INT:
+      deltaType |= DELTA_I;
+      break;
+
+   case VariableType::VT_POINTER:
+   {
+      bigsint i = type->refType->size(position);
+      if (i != 1)
+      {
+         deltaExpr = objects->getValue(i);
+         deltaType |= DELTA_EXPR;
+      }
+   }
+      deltaType |= DELTA_U;
+      break;
+
+   case VariableType::VT_REAL:
+      deltaExpr = objects->getValue(1.0);
+      deltaType |= DELTA_F|DELTA_EXPR;
+      break;
+
+   default:
+      throw SourceException("invalid VT", position, getName());
+   }
+
+   if (deltaExpr)
+   {
+      objects->addToken(deltaType == DELTA_F ? OCODE_GET_LITERAL32F
+                                             : OCODE_GET_LITERAL32I,
+                        deltaExpr);
+   }
+
+   return deltaType;
+}
+
+//
 // SourceExpression_UnaryDecInc::doDst
 //
 void SourceExpression_UnaryDecInc::
@@ -124,46 +180,14 @@ doDst(ObjectVector *objects, VariableData *dst, VariableData *src)
 // SourceExpression_UnaryDecInc::doSrc
 //
 void SourceExpression_UnaryDecInc::
-doSrc(ObjectVector *objects, VariableData *src)
+doSrc(ObjectVector *objects, VariableData *src, int deltaType)
 {
-   ObjectExpression::Pointer deltaExpr;
-   int deltaType; // OCODE offset. Order is always F I U.
-
    ObjectCode ocode = OCODE_NONE;
-
-   VariableData::ConstPointer tmp = VariableData::create_stack(src->size);
-
-   VariableType const *type = getType();
-
-   switch (type->vt)
-   {
-   case VariableType::VT_CHAR:
-   case VariableType::VT_INT:
-      deltaType = 1;
-      break;
-
-   case VariableType::VT_POINTER:
-   {
-      bigsint i = type->refType->size(position);
-      if (i != 1)
-         deltaExpr = objects->getValue(i);
-   }
-      deltaType = 2;
-      break;
-
-   case VariableType::VT_REAL:
-      deltaExpr = objects->getValue(1.0);
-      deltaType = 0;
-      break;
-
-   default:
-      throw SourceException("invalid VT", position, getName());
-   }
 
    switch (src->type)
    {
    case VariableData::MT_AUTO:
-      if (deltaExpr)
+      if (deltaType & DELTA_EXPR)
          ocode = inc ? OCODE_SETOP_ADD_AUTO_VAR32F
                      : OCODE_SETOP_SUB_AUTO_VAR32F;
       else
@@ -172,7 +196,7 @@ doSrc(ObjectVector *objects, VariableData *src)
       break;
 
    case VariableData::MT_POINTER:
-      if (deltaExpr)
+      if (deltaType & DELTA_EXPR)
          ocode = inc ? OCODE_SETOP_ADD_POINTER_VAR32F
                      : OCODE_SETOP_SUB_POINTER_VAR32F;
       else
@@ -184,7 +208,7 @@ doSrc(ObjectVector *objects, VariableData *src)
       switch (src->sectionR)
       {
       case VariableData::SR_LOCAL:
-         if (deltaExpr)
+         if (deltaType & DELTA_EXPR)
             ocode = inc ? OCODE_SETOP_ADD_REGISTER_VAR32F
                         : OCODE_SETOP_SUB_REGISTER_VAR32F;
          else
@@ -193,7 +217,7 @@ doSrc(ObjectVector *objects, VariableData *src)
          break;
 
       case VariableData::SR_MAP:
-         if (deltaExpr)
+         if (deltaType & DELTA_EXPR)
             ocode = inc ? OCODE_SETOP_ADD_MAPREGISTER_VAR32F
                         : OCODE_SETOP_SUB_MAPREGISTER_VAR32F;
          else
@@ -202,7 +226,7 @@ doSrc(ObjectVector *objects, VariableData *src)
          break;
 
       case VariableData::SR_WORLD:
-         if (deltaExpr)
+         if (deltaType & DELTA_EXPR)
             ocode = inc ? OCODE_SETOP_ADD_WORLDREGISTER_VAR32F
                         : OCODE_SETOP_SUB_WORLDREGISTER_VAR32F;
          else
@@ -211,7 +235,7 @@ doSrc(ObjectVector *objects, VariableData *src)
          break;
 
       case VariableData::SR_GLOBAL:
-         if (deltaExpr)
+         if (deltaType & DELTA_EXPR)
             ocode = inc ? OCODE_SETOP_ADD_GLOBALREGISTER_VAR32F
                         : OCODE_SETOP_SUB_GLOBALREGISTER_VAR32F;
          else
@@ -225,7 +249,7 @@ doSrc(ObjectVector *objects, VariableData *src)
       switch (src->sectionRA)
       {
       case VariableData::SRA_MAP:
-         if (deltaExpr)
+         if (deltaType & DELTA_EXPR)
             ocode = inc ? OCODE_SETOP_ADD_MAPARRAY_VAR32F
                         : OCODE_SETOP_SUB_MAPARRAY_VAR32F;
          else
@@ -234,7 +258,7 @@ doSrc(ObjectVector *objects, VariableData *src)
          break;
 
       case VariableData::SRA_WORLD:
-         if (deltaExpr)
+         if (deltaType & DELTA_EXPR)
             ocode = inc ? OCODE_SETOP_ADD_WORLDARRAY_VAR32F
                         : OCODE_SETOP_SUB_WORLDARRAY_VAR32F;
          else
@@ -243,7 +267,7 @@ doSrc(ObjectVector *objects, VariableData *src)
          break;
 
       case VariableData::SRA_GLOBAL:
-         if (deltaExpr)
+         if (deltaType & DELTA_EXPR)
             ocode = inc ? OCODE_SETOP_ADD_GLOBALARRAY_VAR32F
                         : OCODE_SETOP_SUB_GLOBALARRAY_VAR32F;
          else
@@ -254,7 +278,7 @@ doSrc(ObjectVector *objects, VariableData *src)
       break;
 
    case VariableData::MT_STATIC:
-      if (deltaExpr)
+      if (deltaType & DELTA_EXPR)
          ocode = inc ? OCODE_SETOP_ADD_STATIC_VAR32F
                      : OCODE_SETOP_SUB_STATIC_VAR32F;
       else
@@ -269,14 +293,7 @@ doSrc(ObjectVector *objects, VariableData *src)
       throw SourceException("invalid MT", position, getName());
    }
 
-   if (deltaExpr)
-   {
-      objects->addToken(deltaType == 0 ? OCODE_GET_LITERAL32F
-                                       : OCODE_GET_LITERAL32I,
-                        deltaExpr);
-   }
-
-   ocode = static_cast<ObjectCode>(ocode + deltaType);
+   ocode = static_cast<ObjectCode>(ocode + (deltaType & DELTA_MASK));
    objects->addToken(ocode, src->address);
 }
 
@@ -307,10 +324,26 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
+   int deltaType = 0;
+
    VariableData::Pointer src = expr->getData();
 
-   if (src->type == VariableData::MT_POINTER
-    || src->type == VariableData::MT_REGISTERARRAY)
+   bool offset = src->type == VariableData::MT_POINTER
+              || src->type == VariableData::MT_REGISTERARRAY;
+
+   // For non-registerarray sources, need to put any possible delta on the
+   // stack before the src address.
+   if (src->type != VariableData::MT_REGISTERARRAY)
+   {
+      // If void dst, then just do it now regardless.
+      // Don't delta if prefix, because the extra address will be in the way.
+      // Or if doing stack dst, because the result will be in the way.
+      if (dst->type == VariableData::MT_VOID
+       || (suf && dst->type != VariableData::MT_STACK))
+         deltaType = doDelta(objects);
+   }
+
+   if (offset)
    {
       src->offsetTemp = VariableData::create_stack(
                                   src->offsetExpr->getType()->size(position) );
@@ -318,23 +351,44 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       src->offsetExpr->makeObjects(objects, src->offsetTemp);
 
       if (dst->type != VariableData::MT_VOID)
-         objects->addToken(OCODE_STACK_DUP32);
+      {
+         // If we couldn't do delta because prefix, we do it now.
+         if (src->type != VariableData::MT_REGISTERARRAY && !suf)
+         {
+            objects->addToken(OCODE_SET_TEMP_VAR);
+            objects->addToken(OCODE_GET_TEMP_VAR);
+            deltaType = doDelta(objects);
+            objects->addToken(OCODE_GET_TEMP_VAR);
+         }
+         else
+         {
+            objects->addToken(OCODE_STACK_DUP32);
+         }
+      }
    }
 
    if (suf && dst->type != VariableData::MT_VOID)
    {
       // If stashing the offset on the stack, and pushing the result to the
       // stack, need to keep the offset in front of the result.
-      if (src->offsetTemp && dst->type == VariableData::MT_STACK)
+      if (offset && dst->type == VariableData::MT_STACK)
          objects->addToken(OCODE_SET_TEMP_VAR);
 
       doDst(objects, dst, src);
 
-      if (src->offsetTemp && dst->type == VariableData::MT_STACK)
+      // If we couldn't do delta because stack dst, we do it now.
+      if (src->type != VariableData::MT_REGISTERARRAY
+       && dst->type == VariableData::MT_STACK)
+            deltaType = doDelta(objects);
+
+      if (offset && dst->type == VariableData::MT_STACK)
          objects->addToken(OCODE_GET_TEMP_VAR);
    }
 
-   doSrc(objects, src);
+   if (!deltaType)
+      deltaType = doDelta(objects);
+
+   doSrc(objects, src, deltaType);
 
    if (!suf && dst->type != VariableData::MT_VOID)
       doDst(objects, dst, src);
