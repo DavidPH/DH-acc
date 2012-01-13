@@ -22,7 +22,6 @@
 #include "../SourceExpression.hpp"
 
 #include "../ObjectVector.hpp"
-#include "../print_debug.hpp"
 #include "../VariableType.hpp"
 
 
@@ -35,9 +34,6 @@ public:
 	SourceExpression_ValueCast(SourceExpression * expr, VariableType const * type, SourcePosition const & postion);
 
 	virtual VariableType const * getType() const;
-
-protected:
-	virtual void printDebug(std::ostream * out) const;
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -53,33 +49,13 @@ SourceExpression::Pointer SourceExpression::create_value_cast(SourceExpression *
 	return new SourceExpression_ValueCast(expr, type, position);
 }
 
-
-
 SourceExpression_ValueCast::SourceExpression_ValueCast(SourceExpression * expr, VariableType const * type, SourcePosition const & position_) : Super(position_), _expr(expr), _type(type)
 {
-
 }
 
 VariableType const * SourceExpression_ValueCast::getType() const
 {
 	return _type;
-}
-
-void SourceExpression_ValueCast::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_ValueCast(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expr=(";
-		print_debug(out, _expr);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "type=(";
-		print_debug(out, _type);
-		*out << ")";
-	*out << ")";
 }
 
 void SourceExpression_ValueCast::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -93,4 +69,5 @@ void SourceExpression_ValueCast::virtual_makeObjects(ObjectVector *objects, Vari
 		_expr->makeObjectsCast(objects, dst, _type);
 }
 
+// EOF
 

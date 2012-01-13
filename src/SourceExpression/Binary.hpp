@@ -43,8 +43,6 @@ protected:
 
 	void recurse_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	virtual void printDebug(std::ostream * out) const;
-
 	SourceExpression::Pointer exprL;
 	SourceExpression::Pointer exprR;
 
@@ -55,9 +53,5 @@ private:
 	int _arithmetic;
 };
 
-
-
 #endif /* HPP_Binary__SourceExpression_ */
-
-
 

@@ -94,9 +94,6 @@ struct VariableType
 
 	friend Type & operator ++ (Type & vt);
 
-	friend void print_debug(std::ostream * out, VariableType const & in);
-	friend void print_debug(std::ostream * out, VariableType::Type in);
-
 	static VariableType const * get_array(VariableType const * refType, bigsint count);
 	static VariableType const * get_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
 	static VariableType const * get_block(std::vector<VariableType const *> const & types);
@@ -150,8 +147,5 @@ private:
 	static VariableType vtc_void;
 };
 
-
-
 #endif /* HPP_VariableType_ */
-
 

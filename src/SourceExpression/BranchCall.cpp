@@ -23,7 +23,6 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../print_debug.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
@@ -38,9 +37,6 @@ public:
 	SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position);
 
 	virtual VariableType const * getType() const;
-
-protected:
-	virtual void printDebug(std::ostream * out) const;
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -58,8 +54,6 @@ SourceExpression::Pointer SourceExpression::create_branch_call(SourceExpression 
 {
 	return new SourceExpression_BranchCall(expr, args, context, position);
 }
-
-
 
 SourceExpression_BranchCall::SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position_) : Super(position_), _args(args), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
 {
@@ -82,23 +76,6 @@ VariableType const * SourceExpression_BranchCall::getType() const
 	return _expr->getType()->callType;
 }
 
-void SourceExpression_BranchCall::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BranchCall(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "args=(";
-		print_debug(out, _args);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "expr=(";
-		print_debug(out, _expr);
-		*out << ")";
-	*out << ")";
-}
-
 void SourceExpression_BranchCall::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
@@ -106,4 +83,5 @@ void SourceExpression_BranchCall::virtual_makeObjects(ObjectVector *objects, Var
 	make_objects_call(objects, dst, _expr, _args, objects->getValue(_stack), _labelReturn, position);
 }
 
+// EOF
 

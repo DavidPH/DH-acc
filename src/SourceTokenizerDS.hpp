@@ -100,9 +100,5 @@ private:
 	unsigned _canSkip    : 1;
 };
 
-
-
 #endif /* HPP_SourceTokenizerDS_ */
-
-
 

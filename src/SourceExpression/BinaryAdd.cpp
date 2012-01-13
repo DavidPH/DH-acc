@@ -38,9 +38,6 @@ public:
 
 	virtual CounterPointer<ObjectExpression> makeObject() const;
 
-protected:
-	virtual void printDebug(std::ostream * const out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
@@ -52,23 +49,13 @@ SourceExpression::Pointer SourceExpression::create_binary_add(SourceExpression *
 	return new SourceExpression_BinaryAdd(exprL, exprR, position);
 }
 
-
-
 SourceExpression_BinaryAdd::SourceExpression_BinaryAdd(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, true, position_)
 {
-
 }
 
 CounterPointer<ObjectExpression> SourceExpression_BinaryAdd::makeObject() const
 {
 	return ObjectExpression::create_binary_add(exprL->makeObject(), exprR->makeObject(), position);
-}
-
-void SourceExpression_BinaryAdd::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BinaryAdd(";
-	Super::printDebug(out);
-	*out << ")";
 }
 
 void SourceExpression_BinaryAdd::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -97,4 +84,5 @@ void SourceExpression_BinaryAdd::virtual_makeObjects(ObjectVector *objects, Vari
 	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
 }
 
+// EOF
 

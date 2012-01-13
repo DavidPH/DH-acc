@@ -42,7 +42,7 @@ add_executable(DH-acc
 	object_io.cpp
 	option.cpp
 	ost_type.cpp
-	print_debug.cpp
+#	SourceBlockC.cpp
 	SourceContext.cpp
 	SourceContext/getVariableType.cpp
 	SourceException.cpp
@@ -118,7 +118,6 @@ add_executable(DH-acc
 	SourceExpressionDS/make_expression_single_symbol.cpp
 	SourceExpressionDS/make_expression_single_variable.cpp
 	SourceExpressionDS/make_expression_type.cpp
-	SourceBlockC.cpp
 	SourcePosition.cpp
 	SourceStream.cpp
 	SourceTokenASMPLX.cpp

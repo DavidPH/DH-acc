@@ -24,7 +24,6 @@
 #include "../SourceExpression.hpp"
 
 #include "../ObjectVector.hpp"
-#include "../print_debug.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -44,9 +43,6 @@ public:
       SourcePosition const &position);
 
    virtual VariableType const * getType() const;
-
-protected:
-   virtual void printDebug(std::ostream * out) const;
 
 private:
    void makeVoid(ObjectVector *objects) const;
@@ -73,8 +69,6 @@ create_value_block(std::vector<SourceExpression::Pointer> const &expressions,
 {
    return new SourceExpression_ValueBlock(expressions, position);
 }
-
-
 
 //
 // SourceExpression_ValueBlock::SourceExpression_ValueBlock
@@ -117,26 +111,6 @@ void SourceExpression_ValueBlock::makeVoid(ObjectVector *objects) const
       dstPart = VariableData::create_void(dstPartSize);
       expressions[i]->makeObjects(objects, dstPart);
    }
-}
-
-//
-// SourceExpression_ValueBlock::printDebug
-//
-void SourceExpression_ValueBlock::printDebug(std::ostream *out) const
-{
-   *out << "SourceExpression_ValueBlock(";
-   Super::printDebug(out);
-   *out << " ";
-      *out << "expressions=(";
-      print_debug(out, expressions);
-      *out << ")";
-
-      *out << ", ";
-
-      *out << "type=(";
-      print_debug(out, type);
-      *out << ")";
-   *out << ")";
 }
 
 //
@@ -212,8 +186,6 @@ virtual_makeObjectsCast(ObjectVector *objects, VariableData *dst,
 
    make_objects_memcpy_post(objects, dst, tmp, position);
 }
-
-
 
 // EOF
 

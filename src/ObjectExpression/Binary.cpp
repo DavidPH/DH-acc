@@ -24,40 +24,39 @@
 #include "../SourceException.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// ObjectExpression_Binary::ObjectExpression_Binary
+//
 ObjectExpression_Binary::ObjectExpression_Binary(ObjectExpression * exprL_, ObjectExpression * exprR_, SourcePosition const & position_) : Super(position_), exprL(exprL_), exprR(exprR_)
 {
 	if (exprL->getType() != exprR->getType())
 		throw SourceException("type mismatch", position, getName());
 }
+
+//
+// ObjectExpression_Binary::ObjectExpression_Binary
+//
 ObjectExpression_Binary::ObjectExpression_Binary(std::istream * in) : Super(in)
 {
 	read_object(in, &exprL);
 	read_object(in, &exprR);
 }
 
+//
+// ObjectExpression_Binary::getType
+//
 ObjectExpression::ExpressionType ObjectExpression_Binary::getType() const
 {
 	return exprL->getType();
 }
 
-void ObjectExpression_Binary::printDebug(std::ostream * out) const
-{
-	*out << "ObjectExpression_Binary(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "exprL=(";
-		print_debug(out, *exprL);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "exprR=(";
-		print_debug(out, *exprR);
-		*out << ")";
-	*out << ")";
-}
-
+//
+// ObjectExpression_Binary::writeObject
+//
 void ObjectExpression_Binary::writeObject(std::ostream * out) const
 {
 	Super::writeObject(out);
@@ -66,4 +65,5 @@ void ObjectExpression_Binary::writeObject(std::ostream * out) const
 	write_object(out, exprR);
 }
 
+// EOF
 

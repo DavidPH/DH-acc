@@ -23,7 +23,6 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../print_debug.hpp"
 #include "../SourceContext.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -38,9 +37,6 @@ public:
 	SourceExpression_BranchGoto(std::string const & label, SourcePosition const & position);
 	SourceExpression_BranchGoto(SourceExpression *expr, SourcePosition const &position);
 
-protected:
-	virtual void printDebug(std::ostream * out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
@@ -54,14 +50,17 @@ SourceExpression::Pointer SourceExpression::create_branch_break(SourceContext * 
 {
 	return new SourceExpression_BranchGoto(context->getLabelBreak(position), position);
 }
+
 SourceExpression::Pointer SourceExpression::create_branch_continue(SourceContext * context, SourcePosition const & position)
 {
 	return new SourceExpression_BranchGoto(context->getLabelContinue(position), position);
 }
+
 SourceExpression::Pointer SourceExpression::create_branch_goto(std::string const & label, SourceContext *, SourcePosition const & position)
 {
 	return new SourceExpression_BranchGoto(label, position);
 }
+
 SourceExpression::Pointer SourceExpression::create_branch_goto(SourceExpression *expr, SourceContext *, SourcePosition const &position)
 {
 	return new SourceExpression_BranchGoto(expr, position);
@@ -71,23 +70,12 @@ SourceExpression::Pointer SourceExpression::create_branch_goto(SourceExpression 
 
 SourceExpression_BranchGoto::SourceExpression_BranchGoto(std::string const & label, SourcePosition const & position_) : Super(position_), _label(label)
 {
-
 }
+
 SourceExpression_BranchGoto::SourceExpression_BranchGoto(SourceExpression *_expr, SourcePosition const &_position) : Super(_position), expr(_expr)
 {
 	if (expr->getType()->vt != VariableType::VT_LABEL)
 		expr = create_value_cast(expr, VariableType::get_vt_label(), position);
-}
-
-void SourceExpression_BranchGoto::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BranchGoto(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "label=(";
-		print_debug(out, _label);
-		*out << ")";
-	*out << ")";
 }
 
 void SourceExpression_BranchGoto::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -112,4 +100,6 @@ void SourceExpression_BranchGoto::virtual_makeObjects(ObjectVector *objects, Var
 	else
 		objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_label));
 }
+
+// EOF
 

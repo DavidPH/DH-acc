@@ -28,6 +28,9 @@
 #include <sstream>
 
 
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
 
 bigsint ObjectExpression::_address_count;
 
@@ -58,6 +61,9 @@ std::map<std::string, ObjectExpression::ExpressionType> ObjectExpression::_symbo
 option_data<bool> option_string_fold("string-fold", "optimization", "Removes duplicate strings.", false);
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 ObjectExpression::ObjectExpression(SourcePosition const & position_) : position(position_)
 {
@@ -258,15 +264,6 @@ SourcePosition const & ObjectExpression::getPosition() const
 	return position;
 }
 
-void ObjectExpression::printDebug(std::ostream * const out) const
-{
-	*out << "ObjectExpression(";
-		*out << "position=(";
-		print_debug(out, position);
-		*out << ")";
-	*out << ")";
-}
-
 bigreal ObjectExpression::resolveFloat() const
 {
 	throw SourceException("cannot resolve float", position, getName());
@@ -308,11 +305,5 @@ void ObjectExpression::writeObject(std::ostream * out) const
 	write_object(out, position);
 }
 
-
-
-void print_debug(std::ostream * out, ObjectExpression const & in)
-{
-	in.printDebug(out);
-}
-
+// EOF
 

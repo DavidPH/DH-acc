@@ -40,9 +40,6 @@ public:
 
 	virtual CounterPointer<ObjectExpression> makeObject() const;
 
-protected:
-	virtual void printDebug(std::ostream * const out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
@@ -54,11 +51,8 @@ SourceExpression::Pointer SourceExpression::create_unary_sub(SourceExpression * 
 	return new SourceExpression_UnarySub(expr, position);
 }
 
-
-
 SourceExpression_UnarySub::SourceExpression_UnarySub(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, NULL, position_)
 {
-
 }
 
 bool SourceExpression_UnarySub::canMakeObject() const
@@ -69,13 +63,6 @@ bool SourceExpression_UnarySub::canMakeObject() const
 CounterPointer<ObjectExpression> SourceExpression_UnarySub::makeObject() const
 {
 	return ObjectExpression::create_unary_sub(expr->makeObject(), position);
-}
-
-void SourceExpression_UnarySub::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_UnarySub(";
-	Super::printDebug(out);
-	*out << ")";
 }
 
 void SourceExpression_UnarySub::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -101,4 +88,5 @@ void SourceExpression_UnarySub::virtual_makeObjects(ObjectVector *objects, Varia
 	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
 }
 
+// EOF
 

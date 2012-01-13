@@ -22,7 +22,13 @@
 #include "Binary.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// ObjectExpression_BinaryIOr
+//
 class ObjectExpression_BinaryIOr : public ObjectExpression_Binary
 {
 	MAKE_COUNTER_CLASS_BASE(ObjectExpression_BinaryIOr, ObjectExpression_Binary);
@@ -31,8 +37,6 @@ public:
 	ObjectExpression_BinaryIOr(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 	ObjectExpression_BinaryIOr(std::istream * in);
 
-	virtual void printDebug(std::ostream * out) const;
-
 	virtual bigsint resolveInt() const;
 
 protected:
@@ -40,34 +44,43 @@ protected:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// ObjectExpression::create_binary_ior
+//
 ObjectExpression::Pointer ObjectExpression::create_binary_ior(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position)
 {
 	return new ObjectExpression_BinaryIOr(exprL, exprR, position);
 }
+
+//
+// ObjectExpression::create_binary_ior
+//
 ObjectExpression::Pointer ObjectExpression::create_binary_ior(std::istream * in)
 {
 	return new ObjectExpression_BinaryIOr(in);
 }
 
-
-
+//
+// ObjectExpression_BinaryIOr::ObjectExpression_BinaryIOr
+//
 ObjectExpression_BinaryIOr::ObjectExpression_BinaryIOr(ObjectExpression * exprL_, ObjectExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
-
 }
+
+//
+// ObjectExpression_BinaryIOr::ObjectExpression_BinaryIOr
+//
 ObjectExpression_BinaryIOr::ObjectExpression_BinaryIOr(std::istream * in) : Super(in)
 {
-
 }
 
-void ObjectExpression_BinaryIOr::printDebug(std::ostream * out) const
-{
-	*out << "ObjectExpression_BinaryIOr(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
+//
+// ObjectExpression_BinaryIOr::resolveInt
+//
 bigsint ObjectExpression_BinaryIOr::resolveInt() const
 {
 	if (getType() == ET_INT) return exprL->resolveInt() | exprR->resolveInt();
@@ -75,6 +88,9 @@ bigsint ObjectExpression_BinaryIOr::resolveInt() const
 	return Super::resolveInt();
 }
 
+//
+// ObjectExpression_BinaryIOr::writeObject
+//
 void ObjectExpression_BinaryIOr::writeObject(std::ostream * out) const
 {
 	write_object(out, OT_BINARY_IOR);
@@ -82,4 +98,5 @@ void ObjectExpression_BinaryIOr::writeObject(std::ostream * out) const
 	Super::writeObject(out);
 }
 
+// EOF
 

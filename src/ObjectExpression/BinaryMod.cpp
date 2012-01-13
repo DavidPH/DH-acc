@@ -24,7 +24,13 @@
 #include <cmath>
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// ObjectExpression_BinaryMod
+//
 class ObjectExpression_BinaryMod : public ObjectExpression_Binary
 {
 	MAKE_COUNTER_CLASS_BASE(ObjectExpression_BinaryMod, ObjectExpression_Binary);
@@ -32,8 +38,6 @@ class ObjectExpression_BinaryMod : public ObjectExpression_Binary
 public:
 	ObjectExpression_BinaryMod(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 	ObjectExpression_BinaryMod(std::istream * in);
-
-	virtual void printDebug(std::ostream * out) const;
 
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
@@ -43,40 +47,53 @@ protected:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// ObjectExpression::create_binary_mod
+//
 ObjectExpression::Pointer ObjectExpression::create_binary_mod(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position)
 {
 	return new ObjectExpression_BinaryMod(exprL, exprR, position);
 }
+
+//
+// ObjectExpression::create_binary_mod
+//
 ObjectExpression::Pointer ObjectExpression::create_binary_mod(std::istream * in)
 {
 	return new ObjectExpression_BinaryMod(in);
 }
 
-
-
+//
+// ObjectExpression_BinaryMod::ObjectExpression_BinaryMod
+//
 ObjectExpression_BinaryMod::ObjectExpression_BinaryMod(ObjectExpression * exprL_, ObjectExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
-
 }
+
+//
+// ObjectExpression_BinaryMod::ObjectExpression_BinaryMod
+//
 ObjectExpression_BinaryMod::ObjectExpression_BinaryMod(std::istream * in) : Super(in)
 {
-
 }
 
-void ObjectExpression_BinaryMod::printDebug(std::ostream * out) const
-{
-	*out << "ObjectExpression_BinaryMod(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
+//
+// ObjectExpression_BinaryMod::resolveFloat
+//
 bigreal ObjectExpression_BinaryMod::resolveFloat() const
 {
 	if (getType() == ET_FLOAT) return std::fmod(exprL->resolveFloat(), exprR->resolveFloat());
 
 	return Super::resolveFloat();
 }
+
+//
+// ObjectExpression_BinaryMod::resolveInt
+//
 bigsint ObjectExpression_BinaryMod::resolveInt() const
 {
 	if (getType() == ET_INT) return exprL->resolveInt() % exprR->resolveInt();
@@ -84,6 +101,9 @@ bigsint ObjectExpression_BinaryMod::resolveInt() const
 	return Super::resolveInt();
 }
 
+//
+// ObjectExpression_BinaryMod::writeObject
+//
 void ObjectExpression_BinaryMod::writeObject(std::ostream * out) const
 {
 	write_object(out, OT_BINARY_MOD);
@@ -91,4 +111,5 @@ void ObjectExpression_BinaryMod::writeObject(std::ostream * out) const
 	Super::writeObject(out);
 }
 
+// EOF
 

@@ -75,9 +75,6 @@ public:
 
 
 
-   friend void print_debug(std::ostream *out, SourceVariable const &in);
-   friend void print_debug(std::ostream *out, StorageClass in);
-
    static Pointer
    create_constant(std::string const &nameSource, VariableType const *type,
                    ObjectExpression *expr, SourcePosition const &position);
@@ -124,8 +121,6 @@ private:
    VariableType const *type;
    StorageClass sc;
 };
-
-
 
 #endif//HPP_SourceVariable_
 

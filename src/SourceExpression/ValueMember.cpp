@@ -25,7 +25,6 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../print_debug.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
 #include "../VariableData.hpp"
@@ -50,9 +49,6 @@ public:
 
    virtual VariableType const *getType() const;
 
-protected:
-   virtual void printDebug(std::ostream *out) const;
-
 private:
    SourceExpression::Pointer expr;
    std::string name;
@@ -68,8 +64,6 @@ create_value_member(SourceExpression *expr, SourceTokenC const &token)
 {
    return new SourceExpression_ValueMember(expr, token);
 }
-
-
 
 //
 // SourceExpression_ValueMember::SourceExpression_ValueMember
@@ -154,28 +148,6 @@ VariableType const *SourceExpression_ValueMember::getType() const
 {
    return expr->getType()->getType(name, position);
 }
-
-//
-// SourceExpression_ValueMember::printDebug
-//
-void SourceExpression_ValueMember::printDebug(std::ostream *out) const
-{
-   *out << "SourceExpression_ValueMember(";
-   Super::printDebug(out);
-   *out << " ";
-      *out << "expr=(";
-      print_debug(out, expr);
-      *out << ")";
-
-      *out << ", ";
-
-      *out << "name=(";
-      print_debug(out, name);
-      *out << ")";
-   *out << ")";
-}
-
-
 
 // EOF
 

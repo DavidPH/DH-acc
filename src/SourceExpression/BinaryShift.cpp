@@ -36,9 +36,6 @@ public:
 
 	virtual bool canMakeObject() const;
 
-protected:
-	virtual void printDebug(std::ostream * const out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
@@ -51,28 +48,19 @@ SourceExpression::Pointer SourceExpression::create_binary_shiftl(SourceExpressio
 {
 	return new SourceExpression_BinaryShift(exprL, exprR, false, position);
 }
+
 SourceExpression::Pointer SourceExpression::create_binary_shiftr(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
 {
 	return new SourceExpression_BinaryShift(exprL, exprR, true, position);
 }
 
-
-
 SourceExpression_BinaryShift::SourceExpression_BinaryShift(SourceExpression * exprL_, SourceExpression * exprR_, bool right, SourcePosition const & position_) : Super(exprL_, exprR_, VariableType::get_vt_int(), VariableType::get_vt_int(), false, position_), _right(right)
 {
-
 }
 
 bool SourceExpression_BinaryShift::canMakeObject() const
 {
 	return false;
-}
-
-void SourceExpression_BinaryShift::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BinaryShift(";
-	Super::printDebug(out);
-	*out << ")";
 }
 
 void SourceExpression_BinaryShift::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -84,4 +72,5 @@ void SourceExpression_BinaryShift::virtual_makeObjects(ObjectVector *objects, Va
 	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
 }
 
+// EOF
 

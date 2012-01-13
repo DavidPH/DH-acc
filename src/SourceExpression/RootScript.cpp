@@ -23,7 +23,6 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../print_debug.hpp"
 #include "../VariableType.hpp"
 
 
@@ -34,9 +33,6 @@ class SourceExpression_RootScript : public SourceExpression
 
 public:
 	SourceExpression_RootScript(VariableType const * type, SourcePosition const & position);
-
-protected:
-	virtual void printDebug(std::ostream * out) const;
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -51,22 +47,8 @@ SourceExpression::Pointer SourceExpression::create_root_script(VariableType cons
 	return new SourceExpression_RootScript(type, position);
 }
 
-
-
 SourceExpression_RootScript::SourceExpression_RootScript(VariableType const * type, SourcePosition const & position_) : Super(position_), _type(type)
 {
-
-}
-
-void SourceExpression_RootScript::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_RootScript(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "type=(";
-		print_debug(out, _type);
-		*out << ")";
-	*out << ")";
 }
 
 void SourceExpression_RootScript::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -81,4 +63,5 @@ void SourceExpression_RootScript::virtual_makeObjects(ObjectVector *objects, Var
 	}
 }
 
+// EOF
 

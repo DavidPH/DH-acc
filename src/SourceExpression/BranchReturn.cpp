@@ -38,9 +38,6 @@ class SourceExpression_BranchReturn : public SourceExpression
 public:
 	SourceExpression_BranchReturn(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 
-protected:
-	virtual void printDebug(std::ostream * out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
@@ -55,23 +52,10 @@ SourceExpression::Pointer SourceExpression::create_branch_return(SourceExpressio
 	return new SourceExpression_BranchReturn(expr, context, position);
 }
 
-
-
 SourceExpression_BranchReturn::SourceExpression_BranchReturn(SourceExpression * expr, SourceContext * context, SourcePosition const & position_) : Super(position_), _expr(expr), _type(context->getTypeRoot())
 {
 	if (_expr->getType() != context->getReturnType())
 		_expr = SourceExpression::create_value_cast(_expr, context->getReturnType(), position);
-}
-
-void SourceExpression_BranchReturn::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BranchReturn(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expr=(";
-		print_debug(out, _expr);
-		*out << ")";
-	*out << ")";
 }
 
 void SourceExpression_BranchReturn::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -130,4 +114,5 @@ void SourceExpression_BranchReturn::virtual_makeObjects(ObjectVector *objects, V
 	}
 }
 
+// EOF
 

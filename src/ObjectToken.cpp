@@ -23,7 +23,6 @@
 
 #include "ObjectExpression.hpp"
 #include "object_io.hpp"
-#include "print_debug.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 
@@ -33,11 +32,9 @@
 
 ObjectToken::ObjectToken() : _code(OCODE_NONE)
 {
-
 }
 ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args) : _args(args), _code(code), _labels(labels), _position(position)
 {
-
 }
 
 void ObjectToken::addLabel(std::string const & label)
@@ -85,38 +82,9 @@ void ObjectToken::swapData(ObjectToken & token)
 	std::swap(_code, token._code);
 }
 
-
-
 bool override_object(ObjectToken *, ObjectToken const &)
 {
 	return false;
-}
-
-void print_debug(std::ostream * const out, ObjectToken const & in)
-{
-	*out << "ObjectToken(";
-		*out << "args=(";
-		print_debug(out, in._args);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "code=(";
-		print_debug(out, in._code);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "labels=(";
-		print_debug(out, in._labels);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "position=(";
-		print_debug(out, in._position);
-		*out << ")";
-	*out << ")";
 }
 
 void read_object(std::istream * in, ObjectToken * out)
@@ -135,4 +103,5 @@ void write_object(std::ostream * out, ObjectToken const & in)
 	write_object(out, in._position);
 }
 
+// EOF
 

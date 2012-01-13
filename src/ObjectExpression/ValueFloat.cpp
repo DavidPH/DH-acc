@@ -37,8 +37,6 @@ public:
 
 	virtual ExpressionType getType() const;
 
-	virtual void printDebug(std::ostream * out) const;
-
 	virtual bigreal resolveFloat() const;
 
 	virtual void writeACSP(std::ostream * out) const;
@@ -56,17 +54,16 @@ ObjectExpression::Pointer ObjectExpression::create_value_float(bigreal value, So
 {
 	return new ObjectExpression_ValueFloat(value, position);
 }
+
 ObjectExpression::Pointer ObjectExpression::create_value_float(std::istream * in)
 {
 	return new ObjectExpression_ValueFloat(in);
 }
 
-
-
 ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(bigreal value, SourcePosition const & position_) : Super(position_), _value(value)
 {
-
 }
+
 ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(std::istream * in) : Super(in)
 {
 	read_object(in, &_value);
@@ -75,17 +72,6 @@ ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(std::istream * in) : Su
 ObjectExpression::ExpressionType ObjectExpression_ValueFloat::getType() const
 {
 	return ET_FLOAT;
-}
-
-void ObjectExpression_ValueFloat::printDebug(std::ostream * out) const
-{
-	*out << "ObjectExpression_ValueFloat(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "value=(";
-		*out << _value;
-		*out << ")";
-	*out << ")";
 }
 
 bigreal ObjectExpression_ValueFloat::resolveFloat() const
@@ -108,4 +94,5 @@ void ObjectExpression_ValueFloat::writeObject(std::ostream * out) const
 	write_object(out, _value);
 }
 
+// EOF
 

@@ -25,10 +25,15 @@
 #include "../BinaryTokenACS.hpp"
 #include "../BinaryTokenPPACS.hpp"
 #include "../object_io.hpp"
-#include "../print_debug.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// ObjectExpression_ValueSymbol
+//
 class ObjectExpression_ValueSymbol : public ObjectExpression
 {
 	MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueSymbol, ObjectExpression);
@@ -38,8 +43,6 @@ public:
 	ObjectExpression_ValueSymbol(std::istream * in);
 
 	virtual ExpressionType getType() const;
-
-	virtual void printDebug(std::ostream * out) const;
 
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
@@ -54,58 +57,77 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// ObjectExpression::create_value_symbol
+//
 ObjectExpression::Pointer ObjectExpression::create_value_symbol(std::string const & value, SourcePosition const & position)
 {
 	return new ObjectExpression_ValueSymbol(value, position);
 }
+
+//
+// ObjectExpression::create_value_symbol
+//
 ObjectExpression::Pointer ObjectExpression::create_value_symbol(std::istream * in)
 {
 	return new ObjectExpression_ValueSymbol(in);
 }
 
-
-
+//
+// ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol
+//
 ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position_) : Super(position_), _value(value)
 {
-
 }
+
+//
+// ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol
+//
 ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::istream * in) : Super(in)
 {
 	read_object(in, &_value);
 }
 
+//
+// ObjectExpression_ValueSymbol::getType
+//
 ObjectExpression::ExpressionType ObjectExpression_ValueSymbol::getType() const
 {
 	return ObjectExpression::get_symbol_type(_value, position);
 }
 
-void ObjectExpression_ValueSymbol::printDebug(std::ostream * out) const
-{
-	*out << "ObjectExpression_ValueSymbol(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "value=(";
-		print_debug(out, _value);
-		*out << ")";
-	*out << ")";
-}
-
+//
+// ObjectExpression_ValueSymbol::resolveFloat
+//
 bigreal ObjectExpression_ValueSymbol::resolveFloat() const
 {
 	return ObjectExpression::get_symbol(_value, position)->resolveFloat();
 }
+
+//
+// ObjectExpression_ValueSymbol::resolveInt
+//
 bigsint ObjectExpression_ValueSymbol::resolveInt() const
 {
 	return ObjectExpression::get_symbol(_value, position)->resolveInt();
 }
 
+//
+// ObjectExpression_ValueSymbol::writeACSP
+//
 void ObjectExpression_ValueSymbol::writeACSP(std::ostream * out) const
 {
 	BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_SYMBOL);
 	BinaryTokenPPACS::write_ACSP_string(out, _value);
 }
 
+//
+// ObjectExpression_ValueSymbol::writeObject
+//
 void ObjectExpression_ValueSymbol::writeObject(std::ostream * out) const
 {
 	write_object(out, OT_VALUE_SYMBOL);
@@ -115,4 +137,5 @@ void ObjectExpression_ValueSymbol::writeObject(std::ostream * out) const
 	write_object(out, _value);
 }
 
+// EOF
 

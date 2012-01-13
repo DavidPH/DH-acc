@@ -21,7 +21,6 @@
 
 #include "SourceTokenC.hpp"
 
-#include "print_debug.hpp"
 #include "SourceStream.hpp"
 
 
@@ -419,33 +418,10 @@ SourceTokenC::TokenType SourceTokenC::getType() const
 	return _type;
 }
 
-
-
 char const * make_string(SourceTokenC::TokenType type)
 {
 	return (type <= SourceTokenC::TT_NONE) ? SourceTokenC::_names[type] : "TT_NONE";
 }
 
-void print_debug(std::ostream * const out, SourceTokenC const & token)
-{
-	*out << "SourceTokenC(";
-		*out << "type=(";
-		print_debug(out, token._type);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "data=(";
-		print_debug(out, token._data);
-		*out << ")";
-	*out << ")";
-}
-void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type)
-{
-	if (type <= SourceTokenC::TT_NONE)
-		*out << SourceTokenC::_names[type];
-	else
-		*out << "TT";
-}
-
+// EOF
 

@@ -44,9 +44,6 @@ public:
                               SourceContext *context,
                               SourcePosition const &position);
 
-protected:
-   virtual void printDebug(std::ostream *out) const;
-
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
@@ -81,16 +78,6 @@ SourceExpression_BranchIOr(SourceExpression *_exprL, SourceExpression *_exprR,
 
    label1   = label + "_1";
    labelEnd = label + "_end";
-}
-
-//
-// SourceExpression_BranchIOr::printDebug
-//
-void SourceExpression_BranchIOr::printDebug(std::ostream * out) const
-{
-   *out << "SourceExpression_BranchIOr(";
-   Super::printDebug(out);
-   *out << ")";
 }
 
 //
@@ -141,8 +128,6 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       make_objects_memcpy_post(objects, dst, src, position);
    }
 }
-
-
 
 // EOF
 

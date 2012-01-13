@@ -35,9 +35,6 @@ class SourceExpression_UnaryNot : public SourceExpression_Unary
 public:
 	SourceExpression_UnaryNot(SourceExpression * expr, SourcePosition const & position);
 
-protected:
-	virtual void printDebug(std::ostream * const out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
@@ -49,18 +46,8 @@ SourceExpression::Pointer SourceExpression::create_unary_not(SourceExpression * 
 	return new SourceExpression_UnaryNot(expr, position);
 }
 
-
-
 SourceExpression_UnaryNot::SourceExpression_UnaryNot(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, NULL, position_)
 {
-
-}
-
-void SourceExpression_UnaryNot::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_UnaryNot(";
-	Super::printDebug(out);
-	*out << ")";
 }
 
 void SourceExpression_UnaryNot::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -82,4 +69,5 @@ void SourceExpression_UnaryNot::virtual_makeObjects(ObjectVector *objects, Varia
 	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
 }
 
+// EOF
 

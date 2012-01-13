@@ -115,9 +115,6 @@ public:
 
 	friend char const * make_string(SourceTokenC::TokenType type);
 
-	friend void print_debug(std::ostream * const out, SourceTokenC const & token);
-	friend void print_debug(std::ostream * const out, SourceTokenC::TokenType const & type);
-
 private:
 	std::string _data;
 	SourcePosition _position;
@@ -128,8 +125,5 @@ private:
 	static char const * _names[TT_NONE+1];
 };
 
-
-
 #endif /* HPP_SourceTokenC_ */
-
 

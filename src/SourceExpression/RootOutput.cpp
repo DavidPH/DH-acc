@@ -36,9 +36,6 @@ class SourceExpression_RootOutput : public SourceExpression
 public:
 	SourceExpression_RootOutput(SourceExpression * expr, SourcePosition const & position);
 
-protected:
-	virtual void printDebug(std::ostream * out) const;
-
 private:
 	void doOut(ObjectVector * objects, VariableType const * type) const;
 
@@ -54,11 +51,8 @@ SourceExpression::Pointer SourceExpression::create_root_output(SourceExpression 
 	return new SourceExpression_RootOutput(expr, position);
 }
 
-
-
 SourceExpression_RootOutput::SourceExpression_RootOutput(SourceExpression * expr, SourcePosition const & position_) : Super(position_), _expr(expr)
 {
-
 }
 
 void SourceExpression_RootOutput::doOut(ObjectVector * objects, VariableType const * type) const
@@ -270,17 +264,6 @@ void SourceExpression_RootOutput::doOut(ObjectVector * objects, VariableType con
 	objects->addToken(OCODE_ACSP_CHARACTER);
 }
 
-void SourceExpression_RootOutput::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_RootOutput(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expr=(";
-		print_debug(out, _expr);
-		*out << ")";
-	*out << ")";
-}
-
 void SourceExpression_RootOutput::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
@@ -299,4 +282,5 @@ void SourceExpression_RootOutput::virtual_makeObjects(ObjectVector *objects, Var
 		objects->addToken(OCODE_ACSP_END_LOG);
 }
 
+// EOF
 

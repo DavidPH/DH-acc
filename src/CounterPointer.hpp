@@ -121,17 +121,7 @@ protected:
 	mutable size_t _referenceCount;
 };
 
-template<typename T> void print_debug(std::ostream * const out, CounterPointer<T> const & in)
-{
-	if (in)
-		print_debug(out, *in);
-	else
-		*out << "NULL";
-}
-
 #include "CounterPointer.inline.hpp"
 
 #endif /* HPP_CounterPointer_ */
-
-
 

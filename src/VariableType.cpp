@@ -21,7 +21,6 @@
 
 #include "VariableType.hpp"
 
-#include "print_debug.hpp"
 #include "SourceException.hpp"
 
 
@@ -420,8 +419,6 @@ int VariableType::sizeCall(SourcePosition const & position) const
 	return 0;
 }
 
-
-
 char const * make_string(VariableType::Type vt)
 {
 	switch (vt)
@@ -460,41 +457,5 @@ VariableType::Type & operator ++ (VariableType::Type & vt)
 	return vt;
 }
 
-void print_debug(std::ostream * out, VariableType const & in)
-{
-	*out << "VariableType(";
-		*out << "vt=(";
-		print_debug(out, in.vt);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "callType->vt=(";
-		print_debug(out, in.callType->vt);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "refType->vt=(";
-		print_debug(out, in.refType->vt);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "names=(";
-		print_debug(out, in.names);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "types=(";
-		print_debug(out, in.types);
-		*out << ")";
-	*out << ")";
-}
-void print_debug(std::ostream * out, VariableType::Type in)
-{
-	*out << make_string(in);
-}
-
+// EOF
 

@@ -48,9 +48,6 @@ public:
 
 	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
 
-protected:
-	virtual void printDebug(std::ostream * const out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
@@ -64,11 +61,8 @@ SourceExpression::Pointer SourceExpression::create_unary_dereference(SourceExpre
 	return new SourceExpression_UnaryDereference(expr, position);
 }
 
-
-
 SourceExpression_UnaryDereference::SourceExpression_UnaryDereference(SourceExpression *_expr, SourcePosition const &_position) : Super(_expr, _position)
 {
-
 }
 
 //
@@ -109,13 +103,6 @@ CounterPointer<ObjectExpression> SourceExpression_UnaryDereference::makeObjectAd
 	return expr->makeObject();
 }
 
-void SourceExpression_UnaryDereference::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_UnaryDereference(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
 void SourceExpression_UnaryDereference::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
@@ -148,4 +135,5 @@ void SourceExpression_UnaryDereference::virtual_makeObjectsAddress(ObjectVector 
 	expr->makeObjects(objects, dst);
 }
 
+// EOF
 

@@ -31,8 +31,6 @@ public:
 	ObjectExpression_UnaryAdd(ObjectExpression * expr, SourcePosition const & position);
 	ObjectExpression_UnaryAdd(std::istream * in);
 
-	virtual void printDebug(std::ostream * out) const;
-
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
 
@@ -48,27 +46,18 @@ ObjectExpression::Pointer ObjectExpression::create_unary_add(ObjectExpression * 
 {
 	return new ObjectExpression_UnaryAdd(expr, position);
 }
+
 ObjectExpression::Pointer ObjectExpression::create_unary_add(std::istream * in)
 {
 	return new ObjectExpression_UnaryAdd(in);
 }
 
-
-
 ObjectExpression_UnaryAdd::ObjectExpression_UnaryAdd(ObjectExpression * expr_, SourcePosition const & position_) : Super(expr_, position_)
 {
-
 }
+
 ObjectExpression_UnaryAdd::ObjectExpression_UnaryAdd(std::istream * in) : Super(in)
 {
-
-}
-
-void ObjectExpression_UnaryAdd::printDebug(std::ostream * out) const
-{
-	*out << "ObjectExpression_UnaryAdd(";
-	Super::printDebug(out);
-	*out << ")";
 }
 
 bigreal ObjectExpression_UnaryAdd::resolveFloat() const
@@ -96,4 +85,5 @@ void ObjectExpression_UnaryAdd::writeObject(std::ostream * out) const
 	Super::writeObject(out);
 }
 
+// EOF
 

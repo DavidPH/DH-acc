@@ -33,8 +33,6 @@ class ObjectExpression_Unary : public ObjectExpression
 public:
 	virtual ExpressionType getType() const;
 
-	virtual void printDebug(std::ostream * out) const;
-
 protected:
 	ObjectExpression_Unary(ObjectExpression * expr, SourcePosition const & position);
 	ObjectExpression_Unary(std::istream * in);
@@ -44,9 +42,5 @@ protected:
 	ObjectExpression::Pointer expr;
 };
 
-
-
 #endif /* HPP_Unary__ObjectExpression_ */
-
-
 

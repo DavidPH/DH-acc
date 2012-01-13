@@ -45,9 +45,6 @@ public:
 
    virtual bool canMakeObject() const;
 
-protected:
-   virtual void printDebug(std::ostream *out) const;
-
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
@@ -76,8 +73,6 @@ create_binary_assign_const(SourceExpression *exprL, SourceExpression *exprR,
    return new SourceExpression_BinaryAssign(exprL, exprR, true, position);
 }
 
-
-
 //
 // SourceExpression_BinaryAssign::SourceExpression_BinaryAssign
 //
@@ -103,16 +98,6 @@ bool SourceExpression_BinaryAssign::canMakeObject() const
 }
 
 //
-// SourceExpression_BinaryAssign::printDebug
-//
-void SourceExpression_BinaryAssign::printDebug(std::ostream *out) const
-{
-   *out << "SourceExpressionDS_BinaryAssign(";
-   Super::printDebug(out);
-   *out << ")";
-}
-
-//
 // SourceExpression_BinaryAssign::virtual_makeObjects
 //
 void SourceExpression_BinaryAssign::
@@ -135,8 +120,6 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
                             " supported.", position, getName());
    }
 }
-
-
 
 // EOF
 

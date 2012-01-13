@@ -80,10 +80,7 @@ void SourceTokenizerDS::doAssert(SourceTokenC::TokenType type)
 	if (_token.getType() != type)
 	{
 		std::ostringstream out;
-		out << "expected ";
-		print_debug(&out, type);
-		out << " got ";
-		print_debug(&out, _token.getType());
+		out << "expected " << make_string(type) << " got " << make_string(_token.getType());
 
 		throw SourceException(out.str(), _token.getPosition(), "SourceTokenizerDS");
 	}
@@ -423,5 +420,5 @@ void SourceTokenizerDS::unget(SourceTokenC const & token)
 	_ungetStack.push(token);
 }
 
-
+// EOF
 

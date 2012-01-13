@@ -35,9 +35,6 @@ class SourceExpression_BranchNot : public SourceExpression_Unary
 public:
 	SourceExpression_BranchNot(SourceExpression * expr, SourcePosition const & position);
 
-protected:
-	virtual void printDebug(std::ostream * const out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
@@ -49,18 +46,8 @@ SourceExpression::Pointer SourceExpression::create_branch_not(SourceExpression *
 	return new SourceExpression_BranchNot(expr, position);
 }
 
-
-
 SourceExpression_BranchNot::SourceExpression_BranchNot(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, VariableType::get_vt_boolsoft(), position_)
 {
-
-}
-
-void SourceExpression_BranchNot::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BranchNot(";
-	Super::printDebug(out);
-	*out << ")";
 }
 
 void SourceExpression_BranchNot::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -73,4 +60,5 @@ void SourceExpression_BranchNot::virtual_makeObjects(ObjectVector *objects, Vari
 	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
 }
 
+// EOF
 

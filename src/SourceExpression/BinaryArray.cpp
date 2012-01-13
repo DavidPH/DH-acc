@@ -50,9 +50,6 @@ public:
 
    virtual VariableType const *getType() const;
 
-protected:
-   virtual void printDebug(std::ostream *out) const;
-
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
@@ -84,8 +81,6 @@ create_binary_array(SourceExpression *exprL, SourceExpression *exprR,
 
    return new SourceExpression_BinaryArray(exprL, exprR, position);
 }
-
-
 
 //
 // SourceExpression_BinaryArray::SourceExpression_BinaryArray
@@ -154,16 +149,6 @@ VariableType const *SourceExpression_BinaryArray::getType() const
 }
 
 //
-// SourceExpression_BinaryArray::printDebug
-//
-void SourceExpression_BinaryArray::printDebug(std::ostream *out) const
-{
-   *out << "SourceExpression_BinaryArray(";
-   Super::printDebug(out);
-   *out << ")";
-}
-
-//
 // SourceExpression_BinaryArray::virtual_makeObjects
 //
 void SourceExpression_BinaryArray::
@@ -200,8 +185,6 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       make_objects_memcpy_post(objects, dst, src, position);
    }
 }
-
-
 
 // EOF
 

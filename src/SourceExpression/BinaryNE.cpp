@@ -35,9 +35,6 @@ class SourceExpression_BinaryNE : public SourceExpression_BinaryCompare
 public:
 	SourceExpression_BinaryNE(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
-protected:
-	virtual void printDebug(std::ostream * out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
@@ -49,18 +46,8 @@ SourceExpression::Pointer SourceExpression::create_binary_ne(SourceExpression * 
 	return new SourceExpression_BinaryNE(exprL, exprR, position);
 }
 
-
-
 SourceExpression_BinaryNE::SourceExpression_BinaryNE(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
-
-}
-
-void SourceExpression_BinaryNE::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BinaryNE(";
-	Super::printDebug(out);
-	*out << ")";
 }
 
 void SourceExpression_BinaryNE::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -91,4 +78,5 @@ void SourceExpression_BinaryNE::virtual_makeObjects(ObjectVector *objects, Varia
 	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
 }
 
+// EOF
 

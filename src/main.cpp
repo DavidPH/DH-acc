@@ -27,7 +27,6 @@
 #include "ObjectVector.hpp"
 #include "option.hpp"
 #include "ost_type.hpp"
-#include "print_debug.hpp"
 #include "SourceBlockC.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
@@ -283,4 +282,5 @@ int main(int argc, char * * argv)
 	return 1;
 }
 
+// EOF
 

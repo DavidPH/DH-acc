@@ -37,8 +37,6 @@ public:
 
 	virtual ExpressionType getType() const;
 
-	virtual void printDebug(std::ostream * out) const;
-
 	virtual bigsint resolveInt() const;
 
 	virtual void writeACSP(std::ostream * out) const;
@@ -56,17 +54,16 @@ ObjectExpression::Pointer ObjectExpression::create_value_int(bigsint value, Sour
 {
 	return new ObjectExpression_ValueInt(value, position);
 }
+
 ObjectExpression::Pointer ObjectExpression::create_value_int(std::istream * in)
 {
 	return new ObjectExpression_ValueInt(in);
 }
 
-
-
 ObjectExpression_ValueInt::ObjectExpression_ValueInt(bigsint value, SourcePosition const & position_) : Super(position_), _value(value)
 {
-
 }
+
 ObjectExpression_ValueInt::ObjectExpression_ValueInt(std::istream * in) : Super(in)
 {
 	read_object(in, &_value);
@@ -75,17 +72,6 @@ ObjectExpression_ValueInt::ObjectExpression_ValueInt(std::istream * in) : Super(
 ObjectExpression::ExpressionType ObjectExpression_ValueInt::getType() const
 {
 	return ET_INT;
-}
-
-void ObjectExpression_ValueInt::printDebug(std::ostream * out) const
-{
-	*out << "ObjectExpression_ValueInt(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "value=(";
-		*out << _value;
-		*out << ")";
-	*out << ")";
 }
 
 bigsint ObjectExpression_ValueInt::resolveInt() const
@@ -108,4 +94,5 @@ void ObjectExpression_ValueInt::writeObject(std::ostream * out) const
 	write_object(out, _value);
 }
 
+// EOF
 

@@ -45,9 +45,6 @@ public:
 
    virtual VariableType const *getType() const;
 
-protected:
-   virtual void printDebug(std::ostream *out) const;
-
 private:
    SourceVariable::Pointer var;
 };
@@ -150,8 +147,6 @@ create_value_variable(SourceVariable *var, SourcePosition const &position)
    return new SourceExpression_ValueVariable(var, position);
 }
 
-
-
 //
 // SourceExpression_ValueVariable::SourceExpression_ValueVariable
 //
@@ -187,22 +182,6 @@ VariableType const *SourceExpression_ValueVariable::getType() const
 {
    return var->getType();
 }
-
-//
-// SourceExpression_ValueVariable::printDebug
-//
-void SourceExpression_ValueVariable::printDebug(std::ostream *out) const
-{
-   *out << "SourceExpression_ValueVariable(";
-   Super::printDebug(out);
-   *out << " ";
-      *out << "var=(";
-      print_debug(out, var);
-      *out << ")";
-   *out << ")";
-}
-
-
 
 // EOF
 

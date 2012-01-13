@@ -653,10 +653,7 @@ _ocode_init_s::_ocode_init_s()
 
 ObjectCodeSet::ObjectCodeSet() : ocode(OCODE_NONE), ocode_imm(OCODE_NONE)
 {
-
 }
-
-
 
 ObjectCode ocode_get_code(SourceTokenC const & token)
 {
@@ -709,28 +706,6 @@ char const * make_string(ObjectCode ocode)
 		return "OCODE";
 }
 
-void print_debug(std::ostream * out, ObjectCode in)
-{
-	if (in <= OCODE_NONE)
-		*out << _ocode_str[in];
-	else
-		*out << "OCODE";
-}
-void print_debug(std::ostream * out, ObjectCodeSet const & in)
-{
-	*out << "ObjectCodeSet(";
-		*out << "ocode=(";
-		print_debug(out, in.ocode);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "ocode_imm=(";
-		print_debug(out, in.ocode_imm);
-		*out << ")";
-	*out << ")";
-}
-
 void read_object(std::istream * in, ObjectCode * out)
 {
 	read_object_raw(in, (char *)out, sizeof(*out));
@@ -754,5 +729,5 @@ void write_object(std::ostream * out, ObjectCodeSet const & in)
 	write_object(out, in.ocode_imm);
 }
 
-
+// EOF
 

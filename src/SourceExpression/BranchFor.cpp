@@ -36,9 +36,6 @@ class SourceExpression_BranchFor : public SourceExpression
 public:
 	SourceExpression_BranchFor(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position);
 
-protected:
-	virtual void printDebug(std::ostream * const out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
@@ -61,8 +58,6 @@ SourceExpression::Pointer SourceExpression::create_branch_for(SourceExpression *
 	return new SourceExpression_BranchFor(exprInit, exprCond, exprIter, exprLoop, context, position);
 }
 
-
-
 SourceExpression_BranchFor::SourceExpression_BranchFor(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position_) : Super(position_), _exprInit(exprInit), _exprCond(exprCond), _exprIter(exprIter), _exprLoop(exprLoop), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position))
 {
 	std::string label(context->makeLabel());
@@ -80,35 +75,6 @@ SourceExpression_BranchFor::SourceExpression_BranchFor(SourceExpression * exprIn
 
 	if (_exprLoop->getType()->vt != VariableType::VT_VOID)
 		_exprLoop = create_value_cast(_exprLoop, VariableType::get_vt_void(), position);
-}
-
-void SourceExpression_BranchFor::printDebug(std::ostream * const out) const
-{
-	*out << "SourceExpression_BranchFor(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "exprInit=(";
-		print_debug(out, _exprInit);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "exprCond=(";
-		print_debug(out, _exprCond);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "exprIter=(";
-		print_debug(out, _exprIter);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "exprLoop=(";
-		print_debug(out, _exprLoop);
-		*out << ")";
-	*out << ")";
 }
 
 void SourceExpression_BranchFor::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -136,4 +102,5 @@ void SourceExpression_BranchFor::virtual_makeObjects(ObjectVector *objects, Vari
 	objects->addLabel(_labelBreak);
 }
 
+// EOF
 

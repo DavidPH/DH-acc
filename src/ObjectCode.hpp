@@ -733,9 +733,6 @@ bool ocode_is_push_noarg(ObjectCode ocode);
 
 char const * make_string(ObjectCode ocode);
 
-void print_debug(std::ostream * out, ObjectCode in);
-void print_debug(std::ostream * out, ObjectCodeSet const & in);
-
 void read_object(std::istream * in, ObjectCode * out);
 void read_object(std::istream * in, ObjectCodeSet * out);
 

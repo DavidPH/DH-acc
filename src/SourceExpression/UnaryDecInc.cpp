@@ -25,7 +25,6 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../print_debug.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -37,6 +36,8 @@
 #define DELTA_U 2
 #define DELTA_MASK 3
 #define DELTA_EXPR 4
+
+
 
 //
 // SourceExpression_UnaryDecInc
@@ -51,9 +52,6 @@ class SourceExpression_UnaryDecInc : public SourceExpression_Unary
 public:
    SourceExpression_UnaryDecInc(SourceExpression *expr, bool inc, bool suf,
                                 SourcePosition const &position);
-
-protected:
-   virtual void printDebug(std::ostream *out) const;
 
 private:
    int doDelta(ObjectVector *objects);
@@ -104,8 +102,6 @@ create_unary_inc_suf(SourceExpression * expr, SourcePosition const & position)
 {
    return new SourceExpression_UnaryDecInc(expr, true, true, position);
 }
-
-
 
 //
 // SourceExpression_UnaryDecInc::SourceExpression_UnaryDecInc
@@ -298,25 +294,6 @@ doSrc(ObjectVector *objects, VariableData *src, int deltaType)
 }
 
 //
-// SourceExpression_UnaryDecInc::printDebug
-//
-void SourceExpression_UnaryDecInc::printDebug(std::ostream *out) const
-{
-   *out << "SourceExpression_UnaryDecInc(";
-   Super::printDebug(out);
-      *out << "inc=(";
-      print_debug(out, inc);
-      *out << ")";
-
-      *out << ", ";
-
-      *out << "suf=(";
-      print_debug(out, suf);
-      *out << ")";
-   *out << ")";
-}
-
-//
 // SourceExpression_UnaryDecInc::virtual_makeObjects
 //
 void SourceExpression_UnaryDecInc::
@@ -393,8 +370,6 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    if (!suf && dst->type != VariableData::MT_VOID)
       doDst(objects, dst, src);
 }
-
-
 
 // EOF
 

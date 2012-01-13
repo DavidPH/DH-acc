@@ -23,7 +23,6 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../print_debug.hpp"
 #include "../SourceContext.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -36,9 +35,6 @@ class SourceExpression_BranchSwitch : public SourceExpression
 
 public:
 	SourceExpression_BranchSwitch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position);
-
-protected:
-	virtual void printDebug(std::ostream * out) const;
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -62,8 +58,6 @@ SourceExpression::Pointer SourceExpression::create_branch_switch(SourceExpressio
 	return new SourceExpression_BranchSwitch(expr, exprCases, context, position);
 }
 
-
-
 SourceExpression_BranchSwitch::SourceExpression_BranchSwitch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position_) : Super(position_), _expr(expr), _exprCases(exprCases), _cases(context->getCases(position)), _caseLabels(_cases.size()), _caseDefault(context->getLabelCaseDefault(position)), _caseBreak(context->getLabelBreak(position)), _needDefault(!context->hasLabelCaseDefault())
 {
 	if (_expr->getType()->vt != VariableType::VT_INT)
@@ -74,53 +68,6 @@ SourceExpression_BranchSwitch::SourceExpression_BranchSwitch(SourceExpression * 
 
 	for (size_t i(0); i < _cases.size(); ++i)
 		_caseLabels[i] = context->getLabelCase(_cases[i], position);
-}
-
-void SourceExpression_BranchSwitch::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BranchSwitch(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expr=(";
-		print_debug(out, _expr);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "exprCases=(";
-		print_debug(out, _exprCases);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "cases=(";
-		print_debug(out, _cases);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "caseLabels=(";
-		print_debug(out, _caseLabels);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "caseDefault=(";
-		print_debug(out, _caseDefault);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "caseBreak=(";
-		print_debug(out, _caseBreak);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "needDefault=(";
-		print_debug(out, _needDefault);
-		*out << ")";
-	*out << ")";
 }
 
 void SourceExpression_BranchSwitch::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -151,4 +98,5 @@ void SourceExpression_BranchSwitch::virtual_makeObjects(ObjectVector *objects, V
 	objects->addLabel(_caseBreak);
 }
 
+// EOF
 

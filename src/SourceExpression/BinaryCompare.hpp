@@ -38,13 +38,7 @@ public:
 protected:
 	SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 	SourceExpression_BinaryCompare(SourceExpression * exprL, SourceExpression * exprR, bool branchChecked, SourcePosition const & position);
-
-	virtual void printDebug(std::ostream * out) const;
 };
 
-
-
 #endif /* HPP_BinaryCompare__SourceExpression_ */
-
-
 

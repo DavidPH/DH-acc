@@ -39,17 +39,6 @@ ObjectExpression::ExpressionType ObjectExpression_Unary::getType() const
 	return expr->getType();
 }
 
-void ObjectExpression_Unary::printDebug(std::ostream * out) const
-{
-	*out << "ObjectExpression_Unary(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expr=(";
-		print_debug(out, *expr);
-		*out << ")";
-	*out << ")";
-}
-
 void ObjectExpression_Unary::writeObject(std::ostream * out) const
 {
 	Super::writeObject(out);
@@ -57,4 +46,5 @@ void ObjectExpression_Unary::writeObject(std::ostream * out) const
 	write_object(out, expr);
 }
 
+// EOF
 

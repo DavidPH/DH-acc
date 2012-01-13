@@ -40,7 +40,13 @@ class ObjectVector;
 class SourceTokenC;
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// ObjectExpression
+//
 class ObjectExpression : public Counter
 {
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression, Counter);
@@ -59,8 +65,6 @@ public:
 
 	virtual ExpressionType getType() const = 0;
 
-	virtual void printDebug(std::ostream * out) const;
-
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
 	virtual ObjectCodeSet resolveOCode() const;
@@ -71,8 +75,6 @@ public:
 
 	friend bool override_object(ObjectExpression::ExpressionType * out, ObjectExpression::ExpressionType const & in);
 	friend bool override_object(ObjectExpression::Pointer * out, ObjectExpression::Pointer const & in);
-
-	friend void print_debug(std::ostream * out, ObjectExpression const & in);
 
 	friend void read_object(std::istream * in, ExpressionType * out);
 	friend void read_object(std::istream * in, Pointer * out);
@@ -249,11 +251,11 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
 
 extern option_data<bool> option_string_fold;
 
-
-
 #endif /* HPP_ObjectExpression_ */
-
 

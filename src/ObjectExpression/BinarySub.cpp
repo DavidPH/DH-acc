@@ -22,7 +22,13 @@
 #include "Binary.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// ObjectExpression_BinarySub
+//
 class ObjectExpression_BinarySub : public ObjectExpression_Binary
 {
 	MAKE_COUNTER_CLASS_BASE(ObjectExpression_BinarySub, ObjectExpression_Binary);
@@ -30,8 +36,6 @@ class ObjectExpression_BinarySub : public ObjectExpression_Binary
 public:
 	ObjectExpression_BinarySub(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 	ObjectExpression_BinarySub(std::istream * in);
-
-	virtual void printDebug(std::ostream * out) const;
 
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
@@ -41,40 +45,53 @@ protected:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// ObjectExpression::create_binary_sub
+//
 ObjectExpression::Pointer ObjectExpression::create_binary_sub(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position)
 {
 	return new ObjectExpression_BinarySub(exprL, exprR, position);
 }
+
+//
+// ObjectExpression::create_binary_sub
+//
 ObjectExpression::Pointer ObjectExpression::create_binary_sub(std::istream * in)
 {
 	return new ObjectExpression_BinarySub(in);
 }
 
-
-
+//
+// ObjectExpression_BinarySub::ObjectExpression_BinarySub
+//
 ObjectExpression_BinarySub::ObjectExpression_BinarySub(ObjectExpression * exprL_, ObjectExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
-
 }
+
+//
+// ObjectExpression_BinarySub::ObjectExpression_BinarySub
+//
 ObjectExpression_BinarySub::ObjectExpression_BinarySub(std::istream * in) : Super(in)
 {
-
 }
 
-void ObjectExpression_BinarySub::printDebug(std::ostream * const out) const
-{
-	*out << "ObjectExpression_BinarySub(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
+//
+// ObjectExpression_BinarySub::resolveFloat
+//
 bigreal ObjectExpression_BinarySub::resolveFloat() const
 {
 	if (getType() == ET_FLOAT) return exprL->resolveFloat() - exprR->resolveFloat();
 
 	return Super::resolveFloat();
 }
+
+//
+// ObjectExpression_BinarySub::resolveInt
+//
 bigsint ObjectExpression_BinarySub::resolveInt() const
 {
 	if (getType() == ET_INT) return exprL->resolveInt() - exprR->resolveInt();
@@ -82,6 +99,9 @@ bigsint ObjectExpression_BinarySub::resolveInt() const
 	return Super::resolveInt();
 }
 
+//
+// ObjectExpression_BinarySub::writeObject
+//
 void ObjectExpression_BinarySub::writeObject(std::ostream * out) const
 {
 	write_object(out, OT_BINARY_SUB);
@@ -89,4 +109,5 @@ void ObjectExpression_BinarySub::writeObject(std::ostream * out) const
 	Super::writeObject(out);
 }
 
+// EOF
 

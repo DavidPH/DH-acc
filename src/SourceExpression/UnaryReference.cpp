@@ -34,9 +34,6 @@ public:
 
 	virtual VariableType const * getType() const;
 
-protected:
-	virtual void printDebug(std::ostream * const out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
@@ -50,23 +47,13 @@ SourceExpression::Pointer SourceExpression::create_unary_reference(SourceExpress
 	return new SourceExpression_UnaryReference(expr, position);
 }
 
-
-
 SourceExpression_UnaryReference::SourceExpression_UnaryReference(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, position_), _type(VariableType::get_pointer(expr->getType()))
 {
-
 }
 
 VariableType const * SourceExpression_UnaryReference::getType() const
 {
 	return _type;
-}
-
-void SourceExpression_UnaryReference::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_UnaryReference(";
-	Super::printDebug(out);
-	*out << ")";
 }
 
 void SourceExpression_UnaryReference::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -76,4 +63,5 @@ void SourceExpression_UnaryReference::virtual_makeObjects(ObjectVector *objects,
 	expr->makeObjectsAddress(objects, dst);
 }
 
+// EOF
 

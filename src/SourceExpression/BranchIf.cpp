@@ -40,9 +40,6 @@ public:
 
 	virtual VariableType const * getType() const;
 
-protected:
-	virtual void printDebug(std::ostream * out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
@@ -61,12 +58,11 @@ SourceExpression::Pointer SourceExpression::create_branch_if(SourceExpression * 
 {
 	return new SourceExpression_BranchIf(exprCondition, exprIf, NULL, context, position);
 }
+
 SourceExpression::Pointer SourceExpression::create_branch_if(SourceExpression * exprCondition, SourceExpression * exprIf, SourceExpression * exprElse, SourceContext * context, SourcePosition const & position)
 {
 	return new SourceExpression_BranchIf(exprCondition, exprIf, exprElse, context, position);
 }
-
-
 
 SourceExpression_BranchIf::SourceExpression_BranchIf(SourceExpression * exprCondition, SourceExpression * exprIf, SourceExpression * exprElse, SourceContext * context, SourcePosition const & position_) : Super(position_), _exprCondition(exprCondition), _exprIf(exprIf), _exprElse(exprElse)
 {
@@ -96,29 +92,6 @@ VariableType const * SourceExpression_BranchIf::getType() const
 	return _exprIf->getType();
 }
 
-void SourceExpression_BranchIf::printDebug(std::ostream * const out) const
-{
-	*out << "SourceExpression_BranchIf(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "exprCondition=(";
-		print_debug(out, _exprCondition);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "exprIf=(";
-		print_debug(out, _exprIf);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "exprElse=(";
-		print_debug(out, _exprElse);
-		*out << ")";
-	*out << ")";
-}
-
 void SourceExpression_BranchIf::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	VariableData::Pointer src = VariableData::create_stack(_exprCondition->getType()->size(position));
@@ -143,4 +116,5 @@ void SourceExpression_BranchIf::virtual_makeObjects(ObjectVector *objects, Varia
 	objects->addLabel(_labelEnd);
 }
 
+// EOF
 

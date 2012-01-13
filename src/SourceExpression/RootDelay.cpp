@@ -36,9 +36,6 @@ class SourceExpression_RootDelay : public SourceExpression
 public:
 	SourceExpression_RootDelay(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
 
-protected:
-	virtual void printDebug(std::ostream * out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
@@ -53,23 +50,10 @@ SourceExpression::Pointer SourceExpression::create_root_delay(SourceExpression *
 	return new SourceExpression_RootDelay(expr, context, position);
 }
 
-
-
 SourceExpression_RootDelay::SourceExpression_RootDelay(SourceExpression * expr, SourceContext * context, SourcePosition const & position_) : Super(position_), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
 {
 	if (_expr->getType()->vt != VariableType::VT_INT)
 		_expr = create_value_cast(_expr, VariableType::get_vt_int(), position);
-}
-
-void SourceExpression_RootDelay::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_RootDelay(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expr=(";
-		print_debug(out, _expr);
-		*out << ")";
-	*out << ")";
 }
 
 void SourceExpression_RootDelay::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -86,4 +70,5 @@ void SourceExpression_RootDelay::virtual_makeObjects(ObjectVector *objects, Vari
 	objects->addToken(OCODE_ADDR_STACK_SUB_IMM, stack);
 }
 
+// EOF
 

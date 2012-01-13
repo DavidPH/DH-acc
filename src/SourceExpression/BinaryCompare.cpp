@@ -28,11 +28,10 @@
 
 SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, false, position_)
 {
-
 }
-SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL_, SourceExpression * exprR_, bool branchChecked, SourcePosition const & position_) : Super(exprL_, exprR_, VariableType::get_vt_boolsoft(), VariableType::get_vt_boolsoft(), position_)
+
+SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(SourceExpression * exprL_, SourceExpression * exprR_, bool, SourcePosition const & position_) : Super(exprL_, exprR_, VariableType::get_vt_boolsoft(), VariableType::get_vt_boolsoft(), position_)
 {
-	(void)branchChecked; // dummy arg
 }
 
 bool SourceExpression_BinaryCompare::canMakeObject() const
@@ -45,11 +44,5 @@ VariableType const * SourceExpression_BinaryCompare::getType() const
 	return VariableType::get_vt_boolhard();
 }
 
-void SourceExpression_BinaryCompare::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BinaryCompare(";
-	Super::printDebug(out);
-	*out << ")";
-}
-
+// EOF
 

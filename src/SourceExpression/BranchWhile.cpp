@@ -36,9 +36,6 @@ class SourceExpression_BranchWhile : public SourceExpression
 public:
 	SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, bool postCondition, SourcePosition const & position);
 
-protected:
-	virtual void printDebug(std::ostream * const out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
@@ -58,12 +55,11 @@ SourceExpression::Pointer SourceExpression::create_branch_do(SourceExpression * 
 {
 	return new SourceExpression_BranchWhile(exprCondition, exprLoop, context, true, position);
 }
+
 SourceExpression::Pointer SourceExpression::create_branch_while(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position)
 {
 	return new SourceExpression_BranchWhile(exprCondition, exprWhile, context, false, position);
 }
-
-
 
 SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, bool postCondition, SourcePosition const & position_) : Super(position_), _exprCondition(exprCondition), _exprWhile(exprWhile), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position)), _labelLoop(context->makeLabel() + "_loop"), _postCondition(postCondition)
 {
@@ -72,23 +68,6 @@ SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * ex
 
 	if (_exprWhile->getType()->vt != VariableType::VT_VOID)
 		_exprWhile = create_value_cast(_exprWhile, VariableType::get_vt_void(), position);
-}
-
-void SourceExpression_BranchWhile::printDebug(std::ostream * const out) const
-{
-	*out << "SourceExpression_BranchWhile(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "exprCondition=(";
-		print_debug(out, _exprCondition);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "exprWhile=(";
-		print_debug(out, _exprWhile);
-		*out << ")";
-	*out << ")";
 }
 
 void SourceExpression_BranchWhile::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -109,4 +88,5 @@ void SourceExpression_BranchWhile::virtual_makeObjects(ObjectVector *objects, Va
 	objects->addLabel(_labelBreak);
 }
 
+// EOF
 

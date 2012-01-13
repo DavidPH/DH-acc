@@ -35,9 +35,6 @@ class SourceExpression_BinaryGE : public SourceExpression_BinaryCompare
 public:
 	SourceExpression_BinaryGE(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
 
-protected:
-	virtual void printDebug(std::ostream * out) const;
-
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
@@ -49,18 +46,8 @@ SourceExpression::Pointer SourceExpression::create_binary_ge(SourceExpression * 
 	return new SourceExpression_BinaryGE(exprL, exprR, position);
 }
 
-
-
 SourceExpression_BinaryGE::SourceExpression_BinaryGE(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
 {
-
-}
-
-void SourceExpression_BinaryGE::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_BinaryGE(";
-	Super::printDebug(out);
-	*out << ")";
 }
 
 void SourceExpression_BinaryGE::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -94,4 +81,5 @@ void SourceExpression_BinaryGE::virtual_makeObjects(ObjectVector *objects, Varia
 	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
 }
 
+// EOF
 

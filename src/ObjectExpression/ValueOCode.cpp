@@ -35,8 +35,6 @@ public:
 
 	virtual ExpressionType getType() const;
 
-	virtual void printDebug(std::ostream * out) const;
-
 	virtual ObjectCodeSet resolveOCode() const;
 
 protected:
@@ -57,11 +55,8 @@ ObjectExpression::Pointer ObjectExpression::create_value_ocode(std::istream * in
 	return new ObjectExpression_ValueOCode(in);
 }
 
-
-
 ObjectExpression_ValueOCode::ObjectExpression_ValueOCode(ObjectCodeSet const & value, SourcePosition const & position_) : Super(position_), _value(value)
 {
-
 }
 ObjectExpression_ValueOCode::ObjectExpression_ValueOCode(std::istream * in) : Super(in)
 {
@@ -71,17 +66,6 @@ ObjectExpression_ValueOCode::ObjectExpression_ValueOCode(std::istream * in) : Su
 ObjectExpression::ExpressionType ObjectExpression_ValueOCode::getType() const
 {
 	return ET_OCODE;
-}
-
-void ObjectExpression_ValueOCode::printDebug(std::ostream * out) const
-{
-	*out << "ObjectExpression_ValueOCode(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "value=(";
-		print_debug(out, _value);
-		*out << ")";
-	*out << ")";
 }
 
 ObjectCodeSet ObjectExpression_ValueOCode::resolveOCode() const
@@ -98,4 +82,5 @@ void ObjectExpression_ValueOCode::writeObject(std::ostream * out) const
 	write_object(out, _value);
 }
 
+// EOF
 

@@ -24,7 +24,6 @@
 #include "SourceVariable.hpp"
 
 #include "ObjectExpression.hpp"
-#include "print_debug.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 #include "VariableData.hpp"
@@ -258,72 +257,6 @@ VariableType const * SourceVariable::getType() const
 {
    return type;
 }
-
-
-
-//
-// print_debug
-//
-void print_debug(std::ostream *out, SourceVariable const &in)
-{
-   *out << "SourceVariable(";
-      *out << "position=(";
-      print_debug(out, in.position);
-      *out << ")";
-
-      *out << ", ";
-
-      *out << "nameObject=(";
-      print_debug(out, in.nameObject);
-      *out << ")";
-
-      *out << ", ";
-
-      *out << "nameSource=(";
-      print_debug(out, in.nameSource);
-      *out << ")";
-
-      *out << ", ";
-
-      *out << "expr=(";
-      print_debug(out, in.expr);
-      *out << ")";
-
-      *out << ", ";
-
-      *out << "type=(";
-      print_debug(out, in.type);
-      *out << ")";
-
-      *out << ", ";
-
-      *out << "sc=(";
-      print_debug(out, in.sc);
-      *out << ")";
-   *out << ")";
-}
-
-//
-// print_debug
-//
-void print_debug(std::ostream *out, SourceVariable::StorageClass in)
-{
-   switch (in)
-   {
-   case SourceVariable::SC_AUTO:                 *out << "SC_AUTO";                 break;
-   case SourceVariable::SC_CONSTANT:             *out << "SC_CONSTANT";             break;
-   case SourceVariable::SC_REGISTER:             *out << "SC_REGISTER";             break;
-   case SourceVariable::SC_REGISTER_GLOBAL:      *out << "SC_REGISTER_GLOBAL";      break;
-   case SourceVariable::SC_REGISTER_MAP:         *out << "SC_REGISTER_MAP";         break;
-   case SourceVariable::SC_REGISTER_WORLD:       *out << "SC_REGISTER_WORLD";       break;
-   case SourceVariable::SC_REGISTERARRAY_GLOBAL: *out << "SC_REGISTERARRAY_GLOBAL"; break;
-   case SourceVariable::SC_REGISTERARRAY_MAP:    *out << "SC_REGISTERARRAY_MAP";    break;
-   case SourceVariable::SC_REGISTERARRAY_WORLD:  *out << "SC_REGISTERARRAY_WORLD";  break;
-   case SourceVariable::SC_STATIC:               *out << "SC_STATIC";               break;
-   }
-}
-
-
 
 // EOF
 

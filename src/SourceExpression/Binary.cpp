@@ -33,14 +33,17 @@ SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL_, Sour
 {
 	doCast();
 }
+
 SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL_, SourceExpression * exprR_, bool arithmetic, SourcePosition const & position_) : Super(position_), exprL(exprL_), exprR(exprR_), _arithmetic(arithmetic)
 {
 	doCast();
 }
+
 SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL_, SourceExpression * exprR_, VariableType const * castL, VariableType const * castR, SourcePosition const & position_) : Super(position_), exprL(exprL_), exprR(exprR_), _arithmetic(2)
 {
 	doCast(castL, castR);
 }
+
 SourceExpression_Binary::SourceExpression_Binary(SourceExpression * exprL_, SourceExpression * exprR_, VariableType const * castL, VariableType const * castR, bool arithmetic, SourcePosition const & position_) : Super(position_), exprL(exprL_), exprR(exprR_), _arithmetic(arithmetic)
 {
 	doCast(castL, castR);
@@ -111,6 +114,7 @@ void SourceExpression_Binary::doCast()
 	if (exprR->getType() != type)
 		exprR = create_value_cast(exprR, type, position);
 }
+
 void SourceExpression_Binary::doCast(VariableType const * castL, VariableType const * castR)
 {
 	if (castL && exprL->getType() != castL)
@@ -123,23 +127,6 @@ void SourceExpression_Binary::doCast(VariableType const * castL, VariableType co
 VariableType const * SourceExpression_Binary::getType() const
 {
 	return get_promoted_type(exprL->getType(), exprR->getType(), position);
-}
-
-void SourceExpression_Binary::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_Binary(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "exprL=(";
-		print_debug(out, exprL);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "exprR=(";
-		print_debug(out, exprR);
-		*out << ")";
-	*out << ")";
 }
 
 void SourceExpression_Binary::recurse_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -158,4 +145,5 @@ void SourceExpression_Binary::recurse_makeObjects(ObjectVector *objects, Variabl
 	objects->setPosition(position);
 }
 
+// EOF
 

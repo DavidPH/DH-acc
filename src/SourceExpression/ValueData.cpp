@@ -23,7 +23,6 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../print_debug.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
@@ -37,9 +36,6 @@ public:
 	SourceExpression_ValueData(VariableType const * type, bool garbage, SourcePosition const & position);
 
 	virtual VariableType const * getType() const;
-
-protected:
-	virtual void printDebug(std::ostream * out) const;
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -55,33 +51,13 @@ SourceExpression::Pointer SourceExpression::create_value_data(VariableType const
 	return new SourceExpression_ValueData(type, garbage, position);
 }
 
-
-
 SourceExpression_ValueData::SourceExpression_ValueData(VariableType const * type, bool garbage, SourcePosition const & position_) : Super(position_), _type(type), _garbage(garbage)
 {
-
 }
 
 VariableType const * SourceExpression_ValueData::getType() const
 {
 	return _type;
-}
-
-void SourceExpression_ValueData::printDebug(std::ostream * const out) const
-{
-	*out << "SourceExpressionDS_ValueData(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "type=(";
-		print_debug(out, _type);
-		*out << ")";
-
-		*out << ", ";
-
-		*out << "garbage=(";
-		*out << _garbage;
-		*out << ")";
-	*out << ")";
 }
 
 void SourceExpression_ValueData::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -108,4 +84,5 @@ void SourceExpression_ValueData::virtual_makeObjects(ObjectVector *objects, Vari
 	make_objects_memcpy_post(objects, dst, src, position);
 }
 
+// EOF
 

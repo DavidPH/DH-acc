@@ -25,7 +25,6 @@
 
 #include "ObjectExpression.hpp"
 #include "ObjectVector.hpp"
-#include "print_debug.hpp"
 #include "SourceException.hpp"
 #include "VariableData.hpp"
 #include "VariableType.hpp"
@@ -259,27 +258,6 @@ makeObjectsCast(ObjectVector *objects, VariableData *dst,
    }
 }
 
-void SourceExpression::printDebug(std::ostream * out) const
-{
-   *out << "SourceExpressionDS(";
-      *out << "evaluations=(";
-      print_debug(out, evaluated);
-      *out << ")";
-
-      *out << ", ";
-
-      *out << "labels=(";
-      print_debug(out, labels);
-      *out << ")";
-
-      *out << ", ";
-
-      *out << "position=(";
-      print_debug(out, position);
-      *out << ")";
-   *out << ")";
-}
-
 //
 // SourceExpression::recurse_makeObjects
 //
@@ -402,18 +380,6 @@ virtual_makeObjectsCast(ObjectVector * objects, VariableData *dst,
       make_objects_memcpy_cast(objects, dst, src, dstType, srcType, position);
    }
 }
-
-
-
-//
-// print_debug<SourceExpression>
-//
-void print_debug(std::ostream *out, SourceExpression const &in)
-{
-   in.printDebug(out);
-}
-
-
 
 // EOF
 

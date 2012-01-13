@@ -41,7 +41,13 @@ class VariableData;
 struct VariableType;
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression
+//
 class SourceExpression : public Counter
 {
    MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression, Counter);
@@ -72,8 +78,6 @@ public:
 
 
    friend class SourceVariable;
-
-   friend void print_debug(std::ostream *out, SourceExpression const &in);
 
    static Pointer create_binary_add(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
    static Pointer create_binary_and(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
@@ -142,8 +146,6 @@ public:
 
 protected:
    SourceExpression(SourcePosition const & position);
-
-   virtual void printDebug(std::ostream *out) const;
 
    void
    recurse_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -247,8 +249,6 @@ private:
                             ObjectExpression *stack,
                             SourcePosition const &position);
 };
-
-
 
 #endif//HPP_SourceExpression_
 

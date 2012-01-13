@@ -29,8 +29,8 @@
 
 SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr_, SourcePosition const & position_) : Super(position_), expr(expr_), _make(false)
 {
-
 }
+
 SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr_, VariableType const * cast, SourcePosition const & position_) : Super(position_), expr(expr_), _make(true)
 {
 	if (cast && expr->getType() != cast)
@@ -40,17 +40,6 @@ SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr_, Variabl
 VariableType const * SourceExpression_Unary::getType() const
 {
 	return expr->getType();
-}
-
-void SourceExpression_Unary::printDebug(std::ostream * out) const
-{
-	*out << "SourceExpression_Unary(";
-	Super::printDebug(out);
-	*out << " ";
-		*out << "expr=(";
-		print_debug(out, expr);
-		*out << ")";
-	*out << ")";
 }
 
 void SourceExpression_Unary::recurse_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -68,4 +57,5 @@ void SourceExpression_Unary::recurse_makeObjects(ObjectVector *objects, Variable
 	objects->setPosition(position);
 }
 
+// EOF
 

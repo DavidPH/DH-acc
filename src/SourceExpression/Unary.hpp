@@ -37,8 +37,6 @@ protected:
 	SourceExpression_Unary(SourceExpression * expr, SourcePosition const & position);
 	SourceExpression_Unary(SourceExpression * expr, VariableType const * cast, SourcePosition const & position);
 
-	virtual void printDebug(std::ostream * out) const;
-
 	void recurse_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	SourceExpression::Pointer expr;
@@ -47,9 +45,5 @@ private:
 	bool _make;
 };
 
-
-
 #endif /* HPP_Binary__SourceExpression_ */
-
-
 
