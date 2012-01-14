@@ -25,7 +25,7 @@
 #define HPP_SourceExpression_
 
 #include "bignum.hpp"
-#include "CounterPointer.hpp"
+#include "Counter.hpp"
 #include "SourcePosition.hpp"
 #include "SourceVariable.hpp"
 

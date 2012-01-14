@@ -22,7 +22,7 @@
 #ifndef HPP_ObjectToken_
 #define HPP_ObjectToken_
 
-#include "CounterPointer.hpp"
+#include "Counter.hpp"
 #include "ObjectCode.hpp"
 #include "SourcePosition.hpp"
 
@@ -32,10 +32,13 @@
 #include <string>
 #include <vector>
 
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
 class ObjectExpression;
 class SourceTokenC;
-
-
 
 class ObjectToken
 {

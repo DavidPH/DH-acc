@@ -23,17 +23,20 @@
 #define HPP_ObjectVector_
 
 #include "bignum.hpp"
-#include "CounterPointer.hpp"
+#include "Counter.hpp"
 #include "ObjectCode.hpp"
 #include "SourcePosition.hpp"
 
 #include <string>
 #include <vector>
 
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
 class ObjectExpression;
 class ObjectToken;
-
-
 
 class ObjectVector
 {
@@ -89,9 +92,5 @@ template<typename T1, typename T2> inline CounterPointer<ObjectExpression> Objec
 	return getValueAdd((ObjectExpression *)getValue(l), (ObjectExpression *)getValue(r));
 }
 
-
-
 #endif /* HPP_ObjectVector_ */
-
-
 

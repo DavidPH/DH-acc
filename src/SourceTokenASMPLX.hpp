@@ -23,17 +23,20 @@
 #define HPP_SourceTokenASMPLX_
 
 #include "bignum.hpp"
-#include "CounterPointer.hpp"
+#include "Counter.hpp"
 #include "SourcePosition.hpp"
 
 #include <string>
 #include <vector>
 
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
 class ObjectExpression;
 class ObjectVector;
 class SourceStream;
-
-
 
 class SourceTokenASMPLX
 {
@@ -71,9 +74,5 @@ private:
 	static bigreal string_to_real(std::string const & s, SourcePosition const & position);
 };
 
-
-
 #endif /* HPP_SourceTokenASMPLX_ */
-
-
 

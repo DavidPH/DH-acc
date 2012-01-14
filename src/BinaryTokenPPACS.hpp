@@ -24,11 +24,16 @@
 
 #include "BinaryTokenACS.hpp"
 #include "bignum.hpp"
-#include "CounterPointer.hpp"
+#include "Counter.hpp"
 #include "SourcePosition.hpp"
 
 #include <ostream>
 #include <vector>
+
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 struct ObjectData_Auto;
 struct ObjectData_Script;
@@ -37,8 +42,6 @@ struct ObjectData_String;
 class ObjectExpression;
 class ObjectToken;
 class ObjectVector;
-
-
 
 class BinaryTokenPPACS
 {
@@ -138,8 +141,5 @@ private:
 	static int _arg_counts[BCODE_NONE];
 };
 
-
-
 #endif /* HPP_BinaryTokenPPACS_ */
-
 

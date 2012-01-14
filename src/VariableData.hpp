@@ -25,13 +25,19 @@
 #define VARIABLEDATA_H__
 
 #include "bignum.hpp"
-#include "CounterPointer.hpp"
+#include "Counter.hpp"
+
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 class ObjectExpression;
 class SourceExpression;
 
-
-
+//
+// VariableData
+//
 class VariableData : public Counter
 {
    MAKE_COUNTER_CLASS_BASE(VariableData, Counter);
@@ -117,8 +123,6 @@ private:
 
    ~VariableData();
 };
-
-
 
 #endif//VARIABLEDATA_H__
 

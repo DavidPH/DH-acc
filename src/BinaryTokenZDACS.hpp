@@ -24,11 +24,16 @@
 
 #include "BinaryTokenACS.hpp"
 #include "bignum.hpp"
-#include "CounterPointer.hpp"
+#include "Counter.hpp"
 #include "SourcePosition.hpp"
 
 #include <ostream>
 #include <vector>
+
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 struct ObjectData_Function;
 struct ObjectData_Register;
@@ -38,8 +43,6 @@ struct ObjectData_String;
 class ObjectExpression;
 class ObjectToken;
 class ObjectVector;
-
-
 
 class BinaryTokenZDACS
 {
@@ -160,8 +163,5 @@ private:
 	static bigsint _temp_counter;
 };
 
-
-
 #endif /* HPP_BinaryTokenZDACS_ */
-
 

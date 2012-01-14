@@ -23,7 +23,7 @@
 #define HPP_ObjectExpression_
 
 #include "bignum.hpp"
-#include "CounterPointer.hpp"
+#include "Counter.hpp"
 #include "ObjectData.hpp"
 #include "option.hpp"
 #include "SourcePosition.hpp"

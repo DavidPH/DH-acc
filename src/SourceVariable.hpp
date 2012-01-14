@@ -24,12 +24,17 @@
 #ifndef HPP_SourceVariable_
 #define HPP_SourceVariable_
 
-#include "CounterPointer.hpp"
+#include "Counter.hpp"
 #include "SourcePosition.hpp"
 
 #include <ostream>
 #include <string>
 #include <vector>
+
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 class ObjectExpression;
 class ObjectVector;
@@ -37,8 +42,6 @@ class SourceExpression;
 class SourceTokenC;
 class VariableData;
 struct VariableType;
-
-
 
 //
 // SourceVariable

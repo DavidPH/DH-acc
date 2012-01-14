@@ -22,7 +22,7 @@
 #ifndef HPP_SourceTokenizerDS_
 #define HPP_SourceTokenizerDS_
 
-#include "CounterPointer.hpp"
+#include "Counter.hpp"
 #include "SourceTokenC.hpp"
 
 #include <map>
@@ -30,10 +30,13 @@
 #include <string>
 #include <vector>
 
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
 class ObjectExpression;
 class SourceStream;
-
-
 
 class SourceTokenizerDS
 {
