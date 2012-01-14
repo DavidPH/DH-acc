@@ -26,21 +26,28 @@
 #include "../SourceTokenizerDS.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::make_expression_single_do
+//
 SRCEXPDS_EXPRSINGLE_DEFN(do)
 {
-	SourceContext contextLoop(context, SourceContext::CT_LOOP);
-	SourceExpression::Pointer exprLoop(make_expression_single(in, blocks, &contextLoop));
+	SourceContext::Reference contextLoop = SourceContext::create(context, SourceContext::CT_LOOP);
+	SourceExpression::Pointer exprLoop(make_expression_single(in, blocks, contextLoop));
 
 	SourceTokenC tokenWhile(in->get(SourceTokenC::TT_IDENTIFIER));
 
 	if (tokenWhile.getData() != "while")
 		throw SourceException("expected 'while' got '" + tokenWhile.getData() + "'", token.getPosition(), "SourceExpressionDS");
 
-	SourceContext contextCondition(&contextLoop, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprCondition(make_expression_single(in, blocks, &contextCondition));
+	SourceContext::Reference contextCondition = SourceContext::create(contextLoop, SourceContext::CT_BLOCK);
+	SourceExpression::Pointer exprCondition(make_expression_single(in, blocks, contextCondition));
 
-	return create_branch_do(exprCondition, exprLoop, &contextCondition, token.getPosition());
+	return create_branch_do(exprCondition, exprLoop, contextCondition, token.getPosition());
 }
 
+// EOF
 

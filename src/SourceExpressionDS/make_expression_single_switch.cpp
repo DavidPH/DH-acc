@@ -26,19 +26,25 @@
 #include "../SourceTokenizerDS.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::make_expression_single_switch
+//
 SRCEXPDS_EXPRSINGLE_DEFN(switch)
 {
-	SourceContext contextSwitch(context, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprSwitch(make_expression_single(in, blocks, &contextSwitch));
+	SourceContext::Reference contextSwitch = SourceContext::create(context, SourceContext::CT_BLOCK);
+	SourceExpression::Pointer exprSwitch(make_expression_single(in, blocks, contextSwitch));
 
 	in->unget(in->get(SourceTokenC::TT_OP_BRACE_O));
 
-	SourceContext contextCases(&contextSwitch, SourceContext::CT_SWITCH);
-	SourceExpression::Pointer exprCases(make_expression(in, blocks, &contextCases));
+	SourceContext::Reference contextCases = SourceContext::create(contextSwitch, SourceContext::CT_SWITCH);
+	SourceExpression::Pointer exprCases(make_expression(in, blocks, contextCases));
 
-	return create_branch_switch(exprSwitch, exprCases, &contextCases, token.getPosition());
+	return create_branch_switch(exprSwitch, exprCases, contextCases, token.getPosition());
 }
 
-
+// EOF
 

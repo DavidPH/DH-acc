@@ -26,21 +26,27 @@
 #include "../SourceTokenizerDS.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::make_expression_single_if
+//
 SRCEXPDS_EXPRSINGLE_DEFN(if)
 {
-	SourceContext contextCondition(context, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprCondition(make_expression_single(in, blocks, &contextCondition));
+	SourceContext::Reference contextCondition = SourceContext::create(context, SourceContext::CT_BLOCK);
+	SourceExpression::Pointer exprCondition(make_expression_single(in, blocks, contextCondition));
 
-	SourceContext contextIf(&contextCondition, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprIf(make_expression_single(in, blocks, &contextIf));
+	SourceContext::Reference contextIf = SourceContext::create(contextCondition, SourceContext::CT_BLOCK);
+	SourceExpression::Pointer exprIf(make_expression_single(in, blocks, contextIf));
 
 	if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER && in->peek().getData() == "else")
 	{
 		in->get();
 
-		SourceContext contextElse(&contextCondition, SourceContext::CT_BLOCK);
-		SourceExpression::Pointer exprElse(make_expression_single(in, blocks, &contextElse));
+		SourceContext::Reference contextElse = SourceContext::create(contextCondition, SourceContext::CT_BLOCK);
+		SourceExpression::Pointer exprElse(make_expression_single(in, blocks, contextElse));
 
 		return create_branch_if(exprCondition, exprIf, exprElse, context, token.getPosition());
 	}
@@ -50,5 +56,5 @@ SRCEXPDS_EXPRSINGLE_DEFN(if)
 	}
 }
 
-
+// EOF
 

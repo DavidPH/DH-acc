@@ -29,7 +29,13 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::make_expression_single
+//
 SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	SourceExpression::Pointer expr;
@@ -126,8 +132,8 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 	{
 		in->unget(token);
 		std::vector<SourceExpression::Pointer> expressions;
-		SourceContext blockContext(context, SourceContext::CT_BLOCK);
-		make_expressions(in, &expressions, blocks, &blockContext);
+		SourceContext::Reference blockContext = SourceContext::create(context, SourceContext::CT_BLOCK);
+		make_expressions(in, &expressions, blocks, blockContext);
 		expr = create_value_block(expressions, token.getPosition());
 		break;
 	}
@@ -211,13 +217,13 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 	{
 		token = in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
-		SourceContext contextCall(context, SourceContext::CT_BLOCK);
+		SourceContext::Reference contextCall = SourceContext::create(context, SourceContext::CT_BLOCK);
 
 		std::vector<SourceExpression::Pointer> args;
 
 		if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
 		{
-			args.push_back(make_expression(in, blocks, &contextCall));
+			args.push_back(make_expression(in, blocks, contextCall));
 
 			if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
 				break;
@@ -226,7 +232,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		}
 		in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-		expr = create_branch_call(expr, args, &contextCall, token.getPosition());
+		expr = create_branch_call(expr, args, contextCall, token.getPosition());
 	}
 		break;
 
@@ -243,12 +249,20 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		return expr;
 	}
 }
+
+//
+// SourceExpressionDS::make_expression_single_break
+//
 SRCEXPDS_EXPRSINGLE_DEFN(break)
 {
 	(void)in; (void)blocks;
 
 	return create_branch_break(context, token.getPosition());
 }
+
+//
+// SourceExpressionDS::make_expression_single_case
+//
 SRCEXPDS_EXPRSINGLE_DEFN(case)
 {
 	context->setAllowLabel(false);
@@ -261,6 +275,10 @@ SRCEXPDS_EXPRSINGLE_DEFN(case)
 	expr->addLabel(context->addLabelCase(value, token.getPosition()));
 	return expr;
 }
+
+//
+// SourceExpressionDS::make_expression_single_const
+//
 SRCEXPDS_EXPRSINGLE_DEFN(const)
 {
 	VariableType const * type(make_expression_type(in, blocks, context));
@@ -274,12 +292,20 @@ SRCEXPDS_EXPRSINGLE_DEFN(const)
 
 	return create_value_variable(var, token.getPosition());
 }
+
+//
+// SourceExpressionDS::make_expression_single_continue
+//
 SRCEXPDS_EXPRSINGLE_DEFN(continue)
 {
 	(void)in; (void)blocks;
 
 	return create_branch_continue(context, token.getPosition());
 }
+
+//
+// SourceExpressionDS::make_expression_single_default
+//
 SRCEXPDS_EXPRSINGLE_DEFN(default)
 {
 	in->get(SourceTokenC::TT_OP_COLON);
@@ -288,10 +314,18 @@ SRCEXPDS_EXPRSINGLE_DEFN(default)
 	expr->addLabel(context->addLabelCaseDefault(token.getPosition()));
 	return expr;
 }
+
+//
+// SourceExpressionDS::make_expression_single_delay
+//
 SRCEXPDS_EXPRSINGLE_DEFN(delay)
 {
 	return create_root_delay(make_expression(in, blocks, context), context, token.getPosition());
 }
+
+//
+// SourceExpressionDS::make_expression_single_library
+//
 SRCEXPDS_EXPRSINGLE_DEFN(library)
 {
 	(void)blocks; (void)context;
@@ -302,14 +336,26 @@ SRCEXPDS_EXPRSINGLE_DEFN(library)
 
 	return create_value_data(VariableType::get_vt_void(), false, token.getPosition());
 }
+
+//
+// SourceExpressionDS::make_expression_single_output
+//
 SRCEXPDS_EXPRSINGLE_DEFN(output)
 {
 	return create_root_output(make_expression(in, blocks, context), token.getPosition());
 }
+
+//
+// SourceExpressionDS::make_expression_single_return
+//
 SRCEXPDS_EXPRSINGLE_DEFN(return)
 {
 	return create_branch_return(make_expression(in, blocks, context), context, token.getPosition());
 }
+
+//
+// SourceExpressionDS::make_expression_single_sizeof
+//
 SRCEXPDS_EXPRSINGLE_DEFN(sizeof)
 {
 	bool hasParentheses(in->peek().getType() == SourceTokenC::TT_OP_PARENTHESIS_O);
@@ -322,6 +368,10 @@ SRCEXPDS_EXPRSINGLE_DEFN(sizeof)
 
 	return create_value_int(size, token.getPosition());
 }
+
+//
+// SourceExpressionDS::make_expression_single_type
+//
 SRCEXPDS_EXPRSINGLE_DEFN(type)
 {
 	in->unget(token);
@@ -329,6 +379,10 @@ SRCEXPDS_EXPRSINGLE_DEFN(type)
 
 	return create_value_data(VariableType::get_vt_void(), false, token.getPosition());
 }
+
+//
+// SourceExpressionDS::make_expression_single_typedef
+//
 SRCEXPDS_EXPRSINGLE_DEFN(typedef)
 {
 	VariableType const * type(make_expression_type(in, blocks, context));
@@ -336,19 +390,28 @@ SRCEXPDS_EXPRSINGLE_DEFN(typedef)
 
 	return create_value_data(VariableType::get_vt_void(), false, token.getPosition());
 }
+
+//
+// SourceExpressionDS::make_expression_single_void
+//
 SRCEXPDS_EXPRSINGLE_DEFN(void)
 {
 	return create_value_cast(make_expression(in, blocks, context), VariableType::get_vt_void(), token.getPosition());
 }
+
+//
+// SourceExpressionDS::make_expression_single_while
+//
 SRCEXPDS_EXPRSINGLE_DEFN(while)
 {
-	SourceContext contextCondition(context, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprCondition(make_expression_single(in, blocks, &contextCondition));
+	SourceContext::Reference contextCondition = SourceContext::create(context, SourceContext::CT_BLOCK);
+	SourceExpression::Pointer exprCondition(make_expression_single(in, blocks, contextCondition));
 
-	SourceContext contextWhile(&contextCondition, SourceContext::CT_LOOP);
-	SourceExpression::Pointer exprWhile(make_expression_single(in, blocks, &contextWhile));
+	SourceContext::Reference contextWhile = SourceContext::create(contextCondition, SourceContext::CT_LOOP);
+	SourceExpression::Pointer exprWhile(make_expression_single(in, blocks, contextWhile));
 
-	return create_branch_while(exprCondition, exprWhile, &contextWhile, token.getPosition());
+	return create_branch_while(exprCondition, exprWhile, contextWhile, token.getPosition());
 }
 
+// EOF
 

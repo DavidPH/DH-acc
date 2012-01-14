@@ -27,17 +27,28 @@
 #include "VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
 
 SourceExpressionDS::expression_single_handler_map SourceExpressionDS::_expression_single_handlers;
 SourceExpressionDS::expression_single_handler_map SourceExpressionDS::_expression_single_extern_handlers;
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::SourceExpressionDS
+//
 SourceExpressionDS::SourceExpressionDS(SourcePosition const & position_) : Super(position_)
 {
-
 }
 
+//
+// SourceExpressionDS::init
+//
 void SourceExpressionDS::init()
 {
 	_expression_single_handlers["__asmfunc"]  = make_expression_single_asmfunc;
@@ -79,6 +90,9 @@ void SourceExpressionDS::init()
 	_expression_single_extern_handlers["__variable"] = make_expression_single_extern_variable;
 }
 
+//
+// SourceExpressionDS::is_expression_type
+//
 bool SourceExpressionDS::is_expression_type(std::string const & data, SourceContext * context)
 {
 	if (data == "array") return true;
@@ -92,6 +106,9 @@ bool SourceExpressionDS::is_expression_type(std::string const & data, SourceCont
 	return context->getVariableTypeNull(data);
 }
 
+//
+// SourceExpressionDS::make_expression
+//
 SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	SourceExpression::Pointer expr(make_expression_single(in, blocks, context));
@@ -243,15 +260,15 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 
 		case SourceTokenC::TT_OP_QUERY:
 		{
-			SourceContext contextIf(context, SourceContext::CT_BLOCK);
-			contextIf.setAllowLabel(false);
-			SourceExpression::Pointer exprIf(make_expression_single(in, blocks, &contextIf));
-			contextIf.setAllowLabel(true);
+			SourceContext::Reference contextIf = SourceContext::create(context, SourceContext::CT_BLOCK);
+			contextIf->setAllowLabel(false);
+			SourceExpression::Pointer exprIf(make_expression_single(in, blocks, contextIf));
+			contextIf->setAllowLabel(true);
 
 			in->get(SourceTokenC::TT_OP_COLON);
 
-			SourceContext contextElse(context, SourceContext::CT_BLOCK);
-			SourceExpression::Pointer exprElse(make_expression_single(in, blocks, &contextElse));
+			SourceContext::Reference contextElse = SourceContext::create(context, SourceContext::CT_BLOCK);
+			SourceExpression::Pointer exprElse(make_expression_single(in, blocks, contextElse));
 
 			expr = create_branch_if(expr, exprIf, exprElse, context, token.getPosition());
 		}
@@ -276,10 +293,17 @@ SourceExpression::Pointer SourceExpressionDS::make_expression(SourceTokenizerDS 
 	}
 }
 
+//
+// SourceExpressionDS::make_expression_arglist
+//
 void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<VariableType const *> * argTypes, VariableType const * * returnType, SourceVariable::StorageClass argClass)
 {
 	make_expression_arglist(in, blocks, context, argTypes, NULL, NULL, NULL, returnType, argClass);
 }
+
+//
+// SourceExpressionDS::make_expression_arglist
+//
 void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<VariableType const *> * argTypes, std::vector<std::string> * argNames, int * argCount, SourceContext * argContext, VariableType const * * returnType, SourceVariable::StorageClass argClass)
 {
 	if (argCount) *argCount = 0;
@@ -320,6 +344,9 @@ void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS * in, std::ve
 	}
 }
 
+//
+// SourceExpressionDS::make_expressions
+//
 SourceExpression::Pointer SourceExpressionDS::make_expressions(SourceTokenizerDS * in)
 {
 	SourcePosition position(in->peek().getPosition());
@@ -335,6 +362,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expressions(SourceTokenizerDS
 
 	return create_value_block(expressions, position);
 }
+
+//
+// SourceExpressionDS::make_expressions
+//
 void SourceExpressionDS::make_expressions(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * expressions, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	bool brackets(in->peek().getType() == SourceTokenC::TT_OP_BRACKET_O);
@@ -353,4 +384,5 @@ void SourceExpressionDS::make_expressions(SourceTokenizerDS * in, std::vector<So
 	in->get(brackets ? SourceTokenC::TT_OP_BRACKET_C : SourceTokenC::TT_OP_BRACE_C);
 }
 
+// EOF
 

@@ -25,31 +25,37 @@
 #include "../SourceTokenizerDS.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::make_expression_single_for
+//
 SRCEXPDS_EXPRSINGLE_DEFN(for)
 {
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
-	SourceContext contextInit(context, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprInit(make_expression(in, blocks, &contextInit));
+	SourceContext::Reference contextInit = SourceContext::create(context, SourceContext::CT_BLOCK);
+	SourceExpression::Pointer exprInit(make_expression(in, blocks, contextInit));
 
 	in->get(SourceTokenC::TT_OP_SEMICOLON);
 
-	SourceContext contextCond(&contextInit, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprCond(make_expression(in, blocks, &contextCond));
+	SourceContext::Reference contextCond = SourceContext::create(contextInit, SourceContext::CT_BLOCK);
+	SourceExpression::Pointer exprCond(make_expression(in, blocks, contextCond));
 
 	in->get(SourceTokenC::TT_OP_SEMICOLON);
 
-	SourceContext contextIter(&contextCond, SourceContext::CT_BLOCK);
-	SourceExpression::Pointer exprIter(make_expression(in, blocks, &contextIter));
+	SourceContext::Reference contextIter = SourceContext::create(contextCond, SourceContext::CT_BLOCK);
+	SourceExpression::Pointer exprIter(make_expression(in, blocks, contextIter));
 
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-	SourceContext contextLoop(&contextCond, SourceContext::CT_LOOP);
-	SourceExpression::Pointer exprLoop(make_expression_single(in, blocks, &contextLoop));
+	SourceContext::Reference contextLoop = SourceContext::create(contextCond, SourceContext::CT_LOOP);
+	SourceExpression::Pointer exprLoop(make_expression_single(in, blocks, contextLoop));
 
-	return create_branch_for(exprInit, exprCond, exprIter, exprLoop, &contextLoop, token.getPosition());
+	return create_branch_for(exprInit, exprCond, exprIter, exprLoop, contextLoop, token.getPosition());
 }
 
-
+// EOF
 

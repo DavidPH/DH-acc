@@ -29,13 +29,21 @@
 #include <string>
 #include <vector>
 
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
 class SourceTokenC;
 struct VariableType;
 
-
-
-class SourceContext
+//
+// SourceContext
+//
+class SourceContext : public Counter
 {
+	MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceContext, Counter);
+
 public:
 	enum ContextType
 	{
@@ -54,9 +62,6 @@ public:
 	};
 
 
-
-	SourceContext(SourceContext * parent, ContextType type);
-	~SourceContext();
 
 	std::string addLabelCase(bigsint value, SourcePosition const & position);
 	std::string addLabelCaseDefault(SourcePosition const & position);
@@ -107,12 +112,16 @@ public:
 
 
 
+	static Reference create(SourceContext *parent, ContextType type);
+
 	static void init();
 
-	static SourceContext *global_context;
+	static Pointer global_context;
 
 private:
+	SourceContext(SourceContext *parent, ContextType type);
 	SourceContext();
+	~SourceContext();
 
 	void addCount(int count, SourceVariable::StorageClass sc);
 	void addLimit(int limit, SourceVariable::StorageClass sc);
@@ -165,8 +174,5 @@ private:
 	unsigned _inheritLocals : 1;
 };
 
-
-
 #endif /* HPP_SourceContext_ */
-
 

@@ -29,7 +29,13 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::make_expression_single_extern_function
+//
 SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
 {
 	// functionName
@@ -62,6 +68,9 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
 	return create_value_variable(functionVariable, token.getPosition());
 }
 
+//
+// SourceExpressionDS::make_expression_single_function
+//
 SRCEXPDS_EXPRSINGLE_DEFN(function)
 {
 	// functionArgClass
@@ -73,7 +82,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 		functionArgClass = SourceVariable::SC_REGISTER;
 
 	// functionContext
-	SourceContext functionContext(context, SourceContext::CT_FUNCTION);
+	SourceContext::Reference functionContext = SourceContext::create(context, SourceContext::CT_FUNCTION);
 
 	// functionName
 	std::string functionName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
@@ -93,7 +102,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 	std::vector<std::string> functionArgNames;
 	int functionArgCount;
 	VariableType const * functionReturn;
-	make_expression_arglist(in, blocks, context, &functionArgTypes, &functionArgNames, &functionArgCount, &functionContext, &functionReturn, functionArgClass);
+	make_expression_arglist(in, blocks, context, &functionArgTypes, &functionArgNames, &functionArgCount, functionContext, &functionReturn, functionArgClass);
 
 	// functionVarType
 	VariableType const * functionVarType(VariableType::get_function(functionReturn, functionArgTypes));
@@ -108,17 +117,18 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 	context->addVariable(functionVariable);
 
 	// functionExpression
-	SourceExpression::Pointer functionExpression(make_expression_single(in, blocks, &functionContext));
+	SourceExpression::Pointer functionExpression(make_expression_single(in, blocks, functionContext));
 	functionExpression->addLabel(functionLabel);
 	blocks->push_back(functionExpression);
-	blocks->push_back(create_branch_return(create_value_data(functionReturn, true, token.getPosition()), &functionContext, token.getPosition()));
+	blocks->push_back(create_branch_return(create_value_data(functionReturn, true, token.getPosition()), functionContext, token.getPosition()));
 
 	// functionVarCount
-	int functionVarCount(functionContext.getLimit(SourceVariable::SC_REGISTER));
+	int functionVarCount(functionContext->getLimit(SourceVariable::SC_REGISTER));
 
 	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size(token.getPosition()), false);
 
 	return create_value_variable(functionVariable, token.getPosition());
 }
 
+// EOF
 

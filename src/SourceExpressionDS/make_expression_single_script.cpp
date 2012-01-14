@@ -31,7 +31,13 @@
 #include <sstream>
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::make_expression_single_extern_script
+//
 SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
 {
 	// scriptName
@@ -59,10 +65,13 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
 	return create_value_variable(scriptVariable, token.getPosition());
 }
 
+//
+// SourceExpressionDS::make_expression_single_script
+//
 SRCEXPDS_EXPRSINGLE_DEFN(script)
 {
 	// scriptContext
-	SourceContext scriptContext(context, SourceContext::CT_SCRIPT);
+	SourceContext::Reference scriptContext = SourceContext::create(context, SourceContext::CT_SCRIPT);
 
 	// scriptName
 	std::string scriptName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
@@ -94,7 +103,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 	std::vector<std::string> scriptArgNames;
 	int scriptArgCount;
 	VariableType const * scriptReturn;
-	make_expression_arglist(in, blocks, context, &scriptArgTypes, &scriptArgNames, &scriptArgCount, &scriptContext, &scriptReturn);
+	make_expression_arglist(in, blocks, context, &scriptArgTypes, &scriptArgNames, &scriptArgCount, scriptContext, &scriptReturn);
 
 	// scriptNumber
 	bigsint scriptNumber;
@@ -146,11 +155,11 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 	SourceExpression::Pointer scriptExpression(create_root_script(scriptVarType, token.getPosition()));
 	scriptExpression->addLabel(scriptLabel);
 	blocks->push_back(scriptExpression);
-	blocks->push_back(make_expression_single(in, blocks, &scriptContext));
-	blocks->push_back(create_branch_return(create_value_data(scriptReturn, true, token.getPosition()), &scriptContext, token.getPosition()));
+	blocks->push_back(make_expression_single(in, blocks, scriptContext));
+	blocks->push_back(create_branch_return(create_value_data(scriptReturn, true, token.getPosition()), scriptContext, token.getPosition()));
 
 	// scriptVarCount
-	int scriptVarCount(scriptContext.getLimit(SourceVariable::SC_REGISTER));
+	int scriptVarCount(scriptContext->getLimit(SourceVariable::SC_REGISTER));
 
 	if (scriptNumber < 0)
 		ObjectExpression::add_script(scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount, scriptVarCount);
@@ -160,4 +169,5 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 	return create_value_variable(scriptVariable, token.getPosition());
 }
 
+// EOF
 

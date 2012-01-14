@@ -31,11 +31,20 @@
 #include <sstream>
 
 
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
 
-SourceContext *SourceContext::global_context = NULL;
+SourceContext::Pointer SourceContext::global_context;
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceContext::SourceContext
+//
 SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(NULL), _returnType(VariableType::get_vt_void()), _type(CT_BLOCK), _inheritLocals(false)
 {
 	getVariableType_typedef("bool",     VariableType::get_vt_boolhard(), SourcePosition::builtin());
@@ -51,6 +60,10 @@ SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countA
 	addVariable(SourceVariable::create_constant("false", VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(0, SourcePosition::builtin()), SourcePosition::builtin()));
 	addVariable(SourceVariable::create_constant("true",  VariableType::get_vt_boolhard(), ObjectExpression::create_value_int(1, SourcePosition::builtin()), SourcePosition::builtin()));
 }
+
+//
+// SourceContext::SourceContext
+//
 SourceContext::SourceContext(SourceContext * parent, ContextType type) : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _label(parent->makeLabelShort()), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(parent), _returnType(NULL), _type(type), _inheritLocals(type == CT_BLOCK || type == CT_LOOP || type == CT_SWITCH)
 {
 	if (_inheritLocals)
@@ -59,11 +72,17 @@ SourceContext::SourceContext(SourceContext * parent, ContextType type) : _allowL
 		_limitRegister = _parent->_limitRegister;
 	}
 }
+
+//
+// SourceContext::~SourceContext
+//
 SourceContext::~SourceContext()
 {
-
 }
 
+//
+// SourceContext::addCount
+//
 void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 {
 	switch (sc)
@@ -90,6 +109,9 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 	}
 }
 
+//
+// SourceContext::addLabelCase
+//
 std::string SourceContext::addLabelCase(bigsint value, SourcePosition const & position)
 {
 	if (_type == CT_SWITCH)
@@ -107,6 +129,10 @@ std::string SourceContext::addLabelCase(bigsint value, SourcePosition const & po
 
 	throw SourceException("addLabelCase", position, "SourceContext");
 }
+
+//
+// SourceContext::addLabelCaseDefault
+//
 std::string SourceContext::addLabelCaseDefault(SourcePosition const & position)
 {
 	if (_type == CT_SWITCH)
@@ -124,11 +150,18 @@ std::string SourceContext::addLabelCaseDefault(SourcePosition const & position)
 
 	throw SourceException("addLabelCaseDefault", position, "SourceContext");
 }
+
+//
+// SourceContext::addLabelGoto
+//
 std::string SourceContext::addLabelGoto(SourceTokenC const & token)
 {
 	return getLabelGoto(token);
 }
 
+//
+// SourceContext::addLimit
+//
 void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 {
 	switch (sc)
@@ -163,6 +196,9 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 	}
 }
 
+//
+// SourceContext::addVariable
+//
 void SourceContext::addVariable(SourceVariable * var)
 {
 	_vars.push_back(var);
@@ -190,6 +226,18 @@ void SourceContext::addVariable(SourceVariable * var)
 	}
 }
 
+//
+// SourceContext::create
+//
+SourceContext::Reference SourceContext::
+create(SourceContext *parent, ContextType type)
+{
+   return Reference(new SourceContext(parent, type));
+}
+
+//
+// SourceContext::getAllowLabel
+//
 bool SourceContext::getAllowLabel() const
 {
 	if (_parent && _inheritLocals)
@@ -198,6 +246,9 @@ bool SourceContext::getAllowLabel() const
 		return _allowLabel;
 }
 
+//
+// SourceContext::getCases
+//
 std::vector<bigsint> SourceContext::getCases(SourcePosition const & position) const
 {
 	if (_type == CT_SWITCH)
@@ -223,6 +274,9 @@ std::vector<bigsint> SourceContext::getCases(SourcePosition const & position) co
 	throw SourceException("getCases", position, "SourceContext");
 }
 
+//
+// SourceContext::getCount
+//
 int SourceContext::getCount(SourceVariable::StorageClass sc) const
 {
 	switch (sc)
@@ -253,6 +307,9 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
 	throw SourceException("getCount", SourcePosition::none(), "SourceContext");
 }
 
+//
+// SourceContext::getLabel
+//
 std::string SourceContext::getLabel() const
 {
 	if (_parent)
@@ -260,6 +317,10 @@ std::string SourceContext::getLabel() const
 	else
 		return ObjectExpression::get_filename() + _label;
 }
+
+//
+// SourceContext::getLabelBreak
+//
 std::string SourceContext::getLabelBreak(SourcePosition const & position) const
 {
 	if (_type == CT_LOOP || _type == CT_SWITCH)
@@ -270,6 +331,10 @@ std::string SourceContext::getLabelBreak(SourcePosition const & position) const
 
 	throw SourceException("getLabelBreak", position, "SourceContext");
 }
+
+//
+// SourceContext::getLabelCase
+//
 std::string SourceContext::getLabelCase(bigsint value, SourcePosition const & position)
 {
 	if (_type == CT_SWITCH)
@@ -287,6 +352,10 @@ std::string SourceContext::getLabelCase(bigsint value, SourcePosition const & po
 
 	throw SourceException("getLabelCase", position, "SourceContext");
 }
+
+//
+// SourceContext::getLabelCaseDefault
+//
 std::string SourceContext::getLabelCaseDefault(SourcePosition const & position) const
 {
 	if (_type == CT_SWITCH)
@@ -297,6 +366,10 @@ std::string SourceContext::getLabelCaseDefault(SourcePosition const & position) 
 
 	throw SourceException("getLabelCaseDefault", position, "SourceContext");
 }
+
+//
+// SourceContext::getLabelContinue
+//
 std::string SourceContext::getLabelContinue(SourcePosition const & position) const
 {
 	if (_type == CT_LOOP)
@@ -307,6 +380,10 @@ std::string SourceContext::getLabelContinue(SourcePosition const & position) con
 
 	throw SourceException("getLabelContinue", position, "SourceContext");
 }
+
+//
+// SourceContext::getLabelGoto
+//
 std::string SourceContext::getLabelGoto(SourceTokenC const & token) const
 {
 	if (_parent && _inheritLocals)
@@ -315,6 +392,9 @@ std::string SourceContext::getLabelGoto(SourceTokenC const & token) const
 	return getLabel() + "_goto" + token.getData();
 }
 
+//
+// SourceContext::getLimit
+//
 int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 {
 	switch (sc)
@@ -339,11 +419,17 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
 	throw SourceException("getCount", SourcePosition::none(), "SourceContext");
 }
 
+//
+// SourceContext::getReturnType
+//
 VariableType const * SourceContext::getReturnType() const
 {
 	return _returnType ? _returnType : _parent->getReturnType();
 }
 
+//
+// SourceContext::getTypeRoot
+//
 SourceContext::ContextType SourceContext::getTypeRoot() const
 {
 	switch (_type)
@@ -362,10 +448,17 @@ SourceContext::ContextType SourceContext::getTypeRoot() const
 	return _type;
 }
 
+//
+// SourceContext::getVariable
+//
 SourceVariable::Pointer SourceContext::getVariable(SourceTokenC const & token) const
 {
 	return getVariable(token.getData(), token.getPosition(), true);
 }
+
+//
+// SourceContext::getVariable
+//
 SourceVariable::Pointer SourceContext::getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const
 {
 	for (size_t i(_vars.size()); i--;)
@@ -399,20 +492,33 @@ SourceVariable::Pointer SourceContext::getVariable(std::string const & name, Sou
 	throw SourceException("no such variable '" + name + "'", position, "SourceContext");
 }
 
+//
+// SourceContext::hasLabelCaseDefault
+//
 bool SourceContext::hasLabelCaseDefault() const
 {
 	return _caseDefault;
 }
 
+//
+// SourceContext::init
+//
 void SourceContext::init()
 {
 	global_context = new SourceContext;
 }
 
+//
+// SourceContext::makeLabel
+//
 std::string SourceContext::makeLabel()
 {
 	return getLabel() + makeLabelShort();
 }
+
+//
+// SourceContext::makeLabelShort
+//
 std::string SourceContext::makeLabelShort()
 {
 	std::ostringstream oss;
@@ -422,6 +528,9 @@ std::string SourceContext::makeLabelShort()
 	return oss.str();
 }
 
+//
+// SourceContext::makeNameObject
+//
 std::string SourceContext::makeNameObject(NameType nameType, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const
 {
 	std::string nameObject;
@@ -471,6 +580,10 @@ std::string SourceContext::makeNameObject(NameType nameType, SourceVariable::Sto
 
 	return nameObject;
 }
+
+//
+// SourceContext::makeNameObject
+//
 std::string SourceContext::makeNameObject(NameType nameType, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const
 {
 	std::string nameObject;
@@ -521,14 +634,21 @@ std::string SourceContext::makeNameObject(NameType nameType, SourceVariable::Sto
 	return nameObject;
 }
 
+//
+// SourceContext::setAllowLabel
+//
 void SourceContext::setAllowLabel(bool allow)
 {
 	_allowLabel = allow;
 }
 
+//
+// SourceContext::setReturnType
+//
 void SourceContext::setReturnType(VariableType const * returnType)
 {
 	_returnType = returnType;
 }
 
+// EOF
 
