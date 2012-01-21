@@ -28,13 +28,20 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BinaryMod
+//
 class SourceExpression_BinaryMod : public SourceExpression_Binary
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryMod, SourceExpression_Binary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryMod,
+                                   SourceExpression_Binary);
 
 public:
-	SourceExpression_BinaryMod(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+   SourceExpression_BinaryMod(SRCEXP_EXPRBIN_ARGS);
 
 	virtual CounterPointer<ObjectExpression> makeObject() const;
 
@@ -43,13 +50,24 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_binary_mod(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
+//
+// SourceExpression::create_binary_mod
+//
+SRCEXP_EXPRBIN_DEFN(mod)
 {
-	return new SourceExpression_BinaryMod(exprL, exprR, position);
+   return new SourceExpression_BinaryMod(exprL, exprR, context, position);
 }
 
-SourceExpression_BinaryMod::SourceExpression_BinaryMod(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, true, position_)
+//
+// SourceExpression_BinaryMod::SourceExpression_BinaryMod
+//
+SourceExpression_BinaryMod::
+SourceExpression_BinaryMod(SRCEXP_EXPRBIN_PARM)
+                           : Super(true, SRCEXP_EXPRBIN_PASS)
 {
 }
 

@@ -51,10 +51,10 @@ SRCEXPDS_EXPRSINGLE_DEFN(for)
 
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-	SourceContext::Reference contextLoop = SourceContext::create(contextCond, SourceContext::CT_LOOP);
-	SourceExpression::Pointer exprLoop(make_expression_single(in, blocks, contextLoop));
+   SourceContext::Reference contextBody = SourceContext::create(contextCond, SourceContext::CT_LOOP);
+   SourceExpression::Pointer exprBody(make_expression_single(in, blocks, contextBody));
 
-	return create_branch_for(exprInit, exprCond, exprIter, exprLoop, contextLoop, token.getPosition());
+   return create_branch_for(exprCond, exprBody, exprIter, exprInit, contextBody, token.getPosition());
 }
 
 // EOF

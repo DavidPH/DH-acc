@@ -29,19 +29,20 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 //
 // SourceExpression_BinaryAssign
 //
 class SourceExpression_BinaryAssign : public SourceExpression_Binary
 {
-   MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryAssign,
-                           SourceExpression_Binary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryAssign,
+                                   SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryAssign(SourceExpression *exprL,
-                                 SourceExpression *exprR, bool allowConst,
-                                 SourcePosition const &position);
+   SourceExpression_BinaryAssign(bool allowConst, SRCEXP_EXPRBIN_ARGS);
 
    virtual bool canMakeObject() const;
 
@@ -52,36 +53,35 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::create_binary_assign
 //
-SourceExpression::Pointer SourceExpression::
-create_binary_assign(SourceExpression *exprL, SourceExpression *exprR,
-                     SourcePosition const &position)
+SRCEXP_EXPRBIN_DEFN(assign)
 {
-   return new SourceExpression_BinaryAssign(exprL, exprR, false, position);
+   return new SourceExpression_BinaryAssign
+              (false, exprL, exprR, context, position);
 }
 
 //
 // SourceExpression::create_binary_assign_const
 //
-SourceExpression::Pointer SourceExpression::
-create_binary_assign_const(SourceExpression *exprL, SourceExpression *exprR,
-                           SourcePosition const &position)
+SRCEXP_EXPRBIN_DEFN(assign_const)
 {
-   return new SourceExpression_BinaryAssign(exprL, exprR, true, position);
+   return new SourceExpression_BinaryAssign
+              (true, exprL, exprR, context, position);
 }
 
 //
 // SourceExpression_BinaryAssign::SourceExpression_BinaryAssign
 //
 SourceExpression_BinaryAssign::
-SourceExpression_BinaryAssign(SourceExpression *_exprL,
-                              SourceExpression *_exprR, bool _allowConst,
-                              SourcePosition const &_position)
-                              : Super(_exprL, _exprR, NULL, _exprL->getType(),
-                                      _position),
+SourceExpression_BinaryAssign(bool _allowConst, SRCEXP_EXPRBIN_PARM)
+                              : Super(NULL, _exprL->getType(),
+                                      SRCEXP_EXPRBIN_PASS),
                                 allowConst(_allowConst)
 {
 }

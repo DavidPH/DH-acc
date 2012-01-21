@@ -30,6 +30,9 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
 
 #define DELTA_F 0
 #define DELTA_I 1
@@ -38,6 +41,9 @@
 #define DELTA_EXPR 4
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 //
 // SourceExpression_UnaryDecInc
@@ -46,12 +52,11 @@
 //
 class SourceExpression_UnaryDecInc : public SourceExpression_Unary
 {
-   MAKE_COUNTER_CLASS_BASE(SourceExpression_UnaryDecInc,
-                           SourceExpression_Unary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_UnaryDecInc,
+                                   SourceExpression_Unary);
 
 public:
-   SourceExpression_UnaryDecInc(SourceExpression *expr, bool inc, bool suf,
-                                SourcePosition const &position);
+   SourceExpression_UnaryDecInc(bool inc, bool suf, SRCEXP_EXPRUNA_ARGS);
 
 private:
    int doDelta(ObjectVector *objects);
@@ -66,50 +71,53 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::create_unary_dec_pre
 //
-SourceExpression::Pointer SourceExpression::
-create_unary_dec_pre(SourceExpression * expr, SourcePosition const & position)
+SRCEXP_EXPRUNA_DEFN(dec_pre)
 {
-   return new SourceExpression_UnaryDecInc(expr, false, false, position);
+   return new SourceExpression_UnaryDecInc(false, false, expr, context,
+                                           position);
 }
 
 //
 // SourceExpression::create_unary_dec_suf
 //
-SourceExpression::Pointer SourceExpression::
-create_unary_dec_suf(SourceExpression * expr, SourcePosition const & position)
+SRCEXP_EXPRUNA_DEFN(dec_suf)
 {
-   return new SourceExpression_UnaryDecInc(expr, false, true, position);
+   return new SourceExpression_UnaryDecInc(false, true, expr, context,
+                                           position);
 }
 
 //
 // SourceExpression::create_unary_inc_pre
 //
-SourceExpression::Pointer SourceExpression::
-create_unary_inc_pre(SourceExpression * expr, SourcePosition const & position)
+SRCEXP_EXPRUNA_DEFN(inc_pre)
 {
-   return new SourceExpression_UnaryDecInc(expr, true, false, position);
+   return new SourceExpression_UnaryDecInc(true, false, expr, context,
+                                           position);
 }
 
 //
 // SourceExpression::create_unary_inc_suf
 //
-SourceExpression::Pointer SourceExpression::
-create_unary_inc_suf(SourceExpression * expr, SourcePosition const & position)
+SRCEXP_EXPRUNA_DEFN(inc_suf)
 {
-   return new SourceExpression_UnaryDecInc(expr, true, true, position);
+   return new SourceExpression_UnaryDecInc(true, true, expr, context,
+                                           position);
 }
 
 //
 // SourceExpression_UnaryDecInc::SourceExpression_UnaryDecInc
 //
 SourceExpression_UnaryDecInc::
-SourceExpression_UnaryDecInc(SourceExpression *_expr, bool _inc, bool _suf,
-                             SourcePosition const &_position)
-                             : Super(_expr, _position), inc(_inc), suf(_suf)
+SourceExpression_UnaryDecInc(bool _inc, bool _suf, SRCEXP_EXPRUNA_PARM)
+                             : Super(SRCEXP_EXPRUNA_PASS),
+                               inc(_inc), suf(_suf)
 {
 }
 

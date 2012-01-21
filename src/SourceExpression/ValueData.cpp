@@ -27,46 +27,81 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_ValueData
+//
 class SourceExpression_ValueData : public SourceExpression
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_ValueData, SourceExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueData,
+                                   SourceExpression);
 
 public:
-	SourceExpression_ValueData(VariableType const * type, bool garbage, SourcePosition const & position);
+   SourceExpression_ValueData(bool garbage, VariableType const *type,
+                              SRCEXP_EXPR_ARGS);
 
 	virtual VariableType const * getType() const;
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	VariableType const * _type;
-	bool _garbage;
+   VariableType const *type;
+   bool garbage;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_value_data(VariableType const * type, bool garbage, SourcePosition const & position)
+//
+// SourceExpression::create_value_data
+//
+SRCEXP_EXPRVAL_DEFN(t, data)
 {
-	return new SourceExpression_ValueData(type, garbage, position);
+   return new SourceExpression_ValueData(false, type, context, position);
 }
 
-SourceExpression_ValueData::SourceExpression_ValueData(VariableType const * type, bool garbage, SourcePosition const & position_) : Super(position_), _type(type), _garbage(garbage)
+//
+// SourceExpression::create_value_data_garbage
+//
+SRCEXP_EXPRVAL_DEFN(t, data_garbage)
+{
+   return new SourceExpression_ValueData(true, type, context, position);
+}
+
+//
+// SourceExpression_ValueData::SourceExpression_ValueData
+//
+SourceExpression_ValueData::
+SourceExpression_ValueData(bool _garbage, VariableType const *_type,
+                           SRCEXP_EXPR_PARM)
+                           : Super(SRCEXP_EXPR_PASS),
+                             type(_type), garbage(_garbage)
 {
 }
 
-VariableType const * SourceExpression_ValueData::getType() const
+//
+// SourceExpression_ValueData::getType
+//
+VariableType const *SourceExpression_ValueData::getType() const
 {
-	return _type;
+   return type;
 }
 
+//
+// SourceExpression_ValueData::virtual_makeObjects
+//
 void SourceExpression_ValueData::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
 
 	if (dst->type == VariableData::MT_VOID) return;
 
-	bigsint srcSize = _type->size(position);
+	bigsint srcSize = type->size(position);
 
 	VariableData::Pointer src = VariableData::create_stack(srcSize);
 
@@ -75,7 +110,7 @@ void SourceExpression_ValueData::virtual_makeObjects(ObjectVector *objects, Vari
 	for (bigsint i = srcSize; i--;)
 	{
 		// FIXME: Should be based on type.
-		if (_garbage)
+		if (garbage)
 			objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0xDEADBEEF));
 		else
 			objects->addTokenPushZero();

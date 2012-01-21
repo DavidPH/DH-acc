@@ -62,7 +62,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
 	SourceVariable::Pointer scriptVariable(SourceVariable::create_constant(scriptName, scriptVarType, scriptNameObject, token.getPosition()));
 	context->addVariable(scriptVariable);
 
-	return create_value_variable(scriptVariable, token.getPosition());
+   return create_value_variable(scriptVariable, context, token.getPosition());
 }
 
 //
@@ -152,11 +152,16 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 	context->addVariable(scriptVariable);
 
 	// scriptExpression
-	SourceExpression::Pointer scriptExpression(create_root_script(scriptVarType, token.getPosition()));
+   SourceExpression::Pointer scriptExpression =
+      create_root_script(scriptVarType, scriptContext, token.getPosition());
 	scriptExpression->addLabel(scriptLabel);
 	blocks->push_back(scriptExpression);
 	blocks->push_back(make_expression_single(in, blocks, scriptContext));
-	blocks->push_back(create_branch_return(create_value_data(scriptReturn, true, token.getPosition()), scriptContext, token.getPosition()));
+   SourceExpression::Pointer scriptExprData =
+      create_value_data_garbage(scriptReturn, scriptContext, token.getPosition());
+   SourceExpression::Pointer scriptExprRetn =
+      create_branch_return(scriptExprData, scriptContext, token.getPosition());
+   blocks->push_back(scriptExprRetn);
 
 	// scriptVarCount
 	int scriptVarCount(scriptContext->getLimit(SourceVariable::SC_REGISTER));
@@ -166,7 +171,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 	else
 		ObjectExpression::add_script(scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount, scriptVarCount, scriptNumber);
 
-	return create_value_variable(scriptVariable, token.getPosition());
+   return create_value_variable(scriptVariable, context, token.getPosition());
 }
 
 // EOF

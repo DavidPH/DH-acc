@@ -29,7 +29,13 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::make_expression_single_asmfunc
+//
 SRCEXPDS_EXPRSINGLE_DEFN(asmfunc)
 {
 	// asmfuncName
@@ -55,7 +61,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(asmfunc)
 	SourceVariable::Pointer asmfuncVariable(SourceVariable::create_constant(asmfuncName, asmfuncVarType, asmfuncObject, token.getPosition()));
 
 	context->addVariable(asmfuncVariable);
-	return create_value_variable(asmfuncVariable, token.getPosition());
+   return create_value_variable(asmfuncVariable, context, token.getPosition());
 }
 
+// EOF
 

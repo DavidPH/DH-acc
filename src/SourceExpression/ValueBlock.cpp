@@ -29,18 +29,21 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 //
 // SourceExpression_ValueBlock
 //
 class SourceExpression_ValueBlock : public SourceExpression
 {
-   MAKE_COUNTER_CLASS_BASE(SourceExpression_ValueBlock, SourceExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueBlock,
+                                   SourceExpression);
 
 public:
-   SourceExpression_ValueBlock(
-      std::vector<SourceExpression::Pointer> const &expressions,
-      SourcePosition const &position);
+   SourceExpression_ValueBlock
+   (std::vector<SourceExpression::Pointer> const &args, SRCEXP_EXPR_ARGS);
 
    virtual VariableType const * getType() const;
 
@@ -59,25 +62,26 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::create_value_block
 //
-SourceExpression::Pointer SourceExpression::
-create_value_block(std::vector<SourceExpression::Pointer> const &expressions,
-                   SourcePosition const & position)
+SRCEXP_EXPRVAL_DEFN(a, block)
 {
-   return new SourceExpression_ValueBlock(expressions, position);
+   return new SourceExpression_ValueBlock(args, context, position);
 }
 
 //
 // SourceExpression_ValueBlock::SourceExpression_ValueBlock
 //
 SourceExpression_ValueBlock::
-SourceExpression_ValueBlock(
-   std::vector<SourceExpression::Pointer> const &_expressions,
-   SourcePosition const &_position)
-   : Super(_position), expressions(_expressions)
+SourceExpression_ValueBlock(std::vector<SourceExpression::Pointer> const &args,
+                            SRCEXP_EXPR_PARM)
+                            : Super(SRCEXP_EXPR_PASS),
+                              expressions(args)
 {
    std::vector<VariableType const *> types(expressions.size());
 

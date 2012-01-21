@@ -26,13 +26,20 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BinaryShift
+//
 class SourceExpression_BinaryShift : public SourceExpression_Binary
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryShift, SourceExpression_Binary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryShift,
+                                   SourceExpression_Binary);
 
 public:
-	SourceExpression_BinaryShift(SourceExpression * exprL, SourceExpression * exprR, bool right, SourcePosition const & position);
+   SourceExpression_BinaryShift(bool right, SRCEXP_EXPRBIN_ARGS);
 
 	virtual bool canMakeObject() const;
 
@@ -43,18 +50,37 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_binary_shiftl(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
+//
+// SourceExpression::create_binary_shiftl
+//
+SRCEXP_EXPRBIN_DEFN(shiftl)
 {
-	return new SourceExpression_BinaryShift(exprL, exprR, false, position);
+   return new SourceExpression_BinaryShift
+              (false, exprL, exprR, context, position);
 }
 
-SourceExpression::Pointer SourceExpression::create_binary_shiftr(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
+//
+// SourceExpression::create_binary_shiftr
+//
+SRCEXP_EXPRBIN_DEFN(shiftr)
 {
-	return new SourceExpression_BinaryShift(exprL, exprR, true, position);
+   return new SourceExpression_BinaryShift
+              (true, exprL, exprR, context, position);
 }
 
-SourceExpression_BinaryShift::SourceExpression_BinaryShift(SourceExpression * exprL_, SourceExpression * exprR_, bool right, SourcePosition const & position_) : Super(exprL_, exprR_, VariableType::get_vt_int(), VariableType::get_vt_int(), false, position_), _right(right)
+//
+// SourceExpression_BinaryShift::SourceExpression_BinaryShift
+//
+SourceExpression_BinaryShift::
+SourceExpression_BinaryShift(bool right, SRCEXP_EXPRBIN_PARM)
+                             : Super(VariableType::get_vt_int(),
+                                     VariableType::get_vt_int(),
+                                     false, SRCEXP_EXPRBIN_PASS),
+                               _right(right)
 {
 }
 

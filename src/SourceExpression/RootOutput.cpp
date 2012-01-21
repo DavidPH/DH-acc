@@ -28,33 +28,56 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_RootOutput
+//
 class SourceExpression_RootOutput : public SourceExpression
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_RootOutput, SourceExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_RootOutput,
+                                   SourceExpression);
 
 public:
-	SourceExpression_RootOutput(SourceExpression * expr, SourcePosition const & position);
+   SourceExpression_RootOutput(SRCEXP_EXPRUNA_ARGS);
 
 private:
 	void doOut(ObjectVector * objects, VariableType const * type) const;
 
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	SourceExpression::Pointer _expr;
+   SourceExpression::Pointer expr;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_root_output(SourceExpression * expr, SourcePosition const & position)
+//
+// SourceExpression::create_root_output
+//
+SourceExpression::Pointer SourceExpression::
+create_root_output(SRCEXP_EXPRUNA_ARGS)
 {
-	return new SourceExpression_RootOutput(expr, position);
+   return new SourceExpression_RootOutput(expr, context, position);
 }
 
-SourceExpression_RootOutput::SourceExpression_RootOutput(SourceExpression * expr, SourcePosition const & position_) : Super(position_), _expr(expr)
+//
+// SourceExpression_RootOutput::SourceExpression_RootOutput
+//
+SourceExpression_RootOutput::
+SourceExpression_RootOutput(SRCEXP_EXPRUNA_PARM)
+                            : Super(SRCEXP_EXPR_PASS),
+                              expr(_expr)
 {
 }
 
+//
+// SourceExpression_RootOutput::doOut
+//
 void SourceExpression_RootOutput::doOut(ObjectVector * objects, VariableType const * type) const
 {
 	switch (type->vt)
@@ -264,17 +287,21 @@ void SourceExpression_RootOutput::doOut(ObjectVector * objects, VariableType con
 	objects->addToken(OCODE_ACSP_CHARACTER);
 }
 
+//
+// SourceExpression_RootOutput::virtual_makeObjects
+//
 void SourceExpression_RootOutput::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
 
-	_expr->makeObjects(objects, VariableData::create_stack(_expr->getType()->size(position)));
+   expr->makeObjects
+         (objects, VariableData::create_stack(expr->getType()->size(position)));
 
 	objects->setPosition(position);
 
 	objects->addToken(OCODE_ACSP_START);
 
-	doOut(objects, _expr->getType());
+   doOut(objects, expr->getType());
 
 	if (target_type == TARGET_Hexen)
 		objects->addToken(OCODE_ACSP_END);

@@ -27,26 +27,44 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BinaryLE
+//
 class SourceExpression_BinaryLE : public SourceExpression_BinaryCompare
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryLE, SourceExpression_BinaryCompare);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryLE,
+                                   SourceExpression_BinaryCompare);
 
 public:
-	SourceExpression_BinaryLE(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+   SourceExpression_BinaryLE(SRCEXP_EXPRBIN_ARGS);
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_binary_le(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
+//
+// SourceExpression::create_binary_le
+//
+SRCEXP_EXPRBIN_DEFN(le)
 {
-	return new SourceExpression_BinaryLE(exprL, exprR, position);
+   return new SourceExpression_BinaryLE(exprL, exprR, context, position);
 }
 
-SourceExpression_BinaryLE::SourceExpression_BinaryLE(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
+//
+// SourceExpression_BinaryLE::SourceExpression_BinaryLE
+//
+SourceExpression_BinaryLE::
+SourceExpression_BinaryLE(SRCEXP_EXPRBIN_PARM)
+                          : Super(SRCEXP_EXPRBIN_PASS)
 {
 }
 

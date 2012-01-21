@@ -25,7 +25,13 @@
 #include "../SourceExpression.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_Unary
+//
 class SourceExpression_Unary : public SourceExpression
 {
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression_Unary, SourceExpression);
@@ -34,15 +40,15 @@ public:
 	virtual VariableType const * getType() const;
 
 protected:
-	SourceExpression_Unary(SourceExpression * expr, SourcePosition const & position);
-	SourceExpression_Unary(SourceExpression * expr, VariableType const * cast, SourcePosition const & position);
+   SourceExpression_Unary(SRCEXP_EXPRUNA_ARGS);
+   SourceExpression_Unary(VariableType const * cast, SRCEXP_EXPRUNA_ARGS);
 
 	void recurse_makeObjects(ObjectVector *objects, VariableData *dst);
 
 	SourceExpression::Pointer expr;
 
 private:
-	bool _make;
+   bool make;
 };
 
 #endif /* HPP_Binary__SourceExpression_ */

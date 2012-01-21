@@ -30,19 +30,20 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 //
 // SourceExpression_BinaryArray
 //
 class SourceExpression_BinaryArray : public SourceExpression_Binary
 {
-   MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryArray,
-                           SourceExpression_Binary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryArray,
+                                   SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryArray(SourceExpression *exprL,
-                                SourceExpression *exprR,
-                                SourcePosition const &position);
+   SourceExpression_BinaryArray(SRCEXP_EXPRBIN_ARGS);
 
    virtual bool canGetData() const;
 
@@ -55,13 +56,14 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::create_binary_array
 //
-SourceExpression::Pointer SourceExpression::
-create_binary_array(SourceExpression *exprL, SourceExpression *exprR,
-                    SourcePosition const &position)
+SRCEXP_EXPRBIN_DEFN(array)
 {
    VariableType const *typeL = exprL->getType();
    VariableType const *typeR = exprR->getType();
@@ -75,21 +77,20 @@ create_binary_array(SourceExpression *exprL, SourceExpression *exprR,
       (typeR->vt == VariableType::VT_ARRAY && exprR->canMakeObjectsAddress())
    )
    {
-      return create_unary_dereference(create_binary_add(exprL, exprR, position),
-                                      position);
+      return create_unary_dereference
+             (create_binary_add(exprL, exprR, context, position), context,
+              position);
    }
 
-   return new SourceExpression_BinaryArray(exprL, exprR, position);
+   return new SourceExpression_BinaryArray(exprL, exprR, context, position);
 }
 
 //
 // SourceExpression_BinaryArray::SourceExpression_BinaryArray
 //
 SourceExpression_BinaryArray::
-SourceExpression_BinaryArray(SourceExpression *_exprL,
-                             SourceExpression *_exprR,
-                             SourcePosition const &_position)
-                             : Super(_exprL, _exprR, _position)
+SourceExpression_BinaryArray(SRCEXP_EXPRBIN_PARM)
+                             : Super(SRCEXP_EXPRBIN_PASS)
 {
    // Can only be done for VT_ARRAY or VT_STRING.
    if (exprL->getType()->vt != VariableType::VT_ARRAY
@@ -99,7 +100,8 @@ SourceExpression_BinaryArray(SourceExpression *_exprL,
                             position, getName());
 
    if (exprR->getType()->vt != VariableType::VT_INT)
-      exprR = create_value_cast(exprR, VariableType::get_vt_int(), position);
+      exprR = create_value_cast
+              (exprR, VariableType::get_vt_int(), context, position);
 }
 
 //
@@ -127,13 +129,14 @@ VariableData::Pointer SourceExpression_BinaryArray::getData() const
    // If the type's size isn't 1, need to multiply the offset.
    if (typeSize != 1)
    {
-      offset = create_binary_mul(offset, create_value_int(typeSize, position),
-                                 position);
+      offset = create_binary_mul(offset, create_value_int
+                                         (typeSize, context, position),
+                                 context, position);
    }
 
    // If there is already an offset, add it.
    if (src->offsetExpr)
-      offset = create_binary_add(src->offsetExpr, offset, position);
+      offset = create_binary_add(src->offsetExpr, offset, context, position);
 
    return VariableData::create_registerarray(type->size(position),
                                              src->sectionRA, src->address,

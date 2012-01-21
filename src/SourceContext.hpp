@@ -150,7 +150,7 @@ private:
 	int _limitAuto;
 	int _limitRegister;
 
-	SourceContext * _parent;
+	SourceContext::Pointer _parent;
 
 	VariableType const * _returnType;
 

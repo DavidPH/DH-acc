@@ -26,28 +26,49 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr_, SourcePosition const & position_) : Super(position_), expr(expr_), _make(false)
+//
+// SourceExpression_Unary::SourceExpression_Unary
+//
+SourceExpression_Unary::
+SourceExpression_Unary(SRCEXP_EXPRUNA_PARM)
+                       : Super(SRCEXP_EXPR_PASS),
+                         expr(_expr), make(false)
 {
 }
 
-SourceExpression_Unary::SourceExpression_Unary(SourceExpression * expr_, VariableType const * cast, SourcePosition const & position_) : Super(position_), expr(expr_), _make(true)
+//
+// SourceExpression_Unary::SourceExpression_Unary
+//
+SourceExpression_Unary::
+SourceExpression_Unary(VariableType const *cast, SRCEXP_EXPRUNA_PARM)
+                       : Super(SRCEXP_EXPR_PASS),
+                         expr(_expr), make(true)
 {
 	if (cast && expr->getType() != cast)
-		this->expr = create_value_cast(expr, cast, position);
+		this->expr = create_value_cast(expr, cast, context, position);
 }
 
+//
+// SourceExpression_Unary::getType
+//
 VariableType const * SourceExpression_Unary::getType() const
 {
 	return expr->getType();
 }
 
+//
+// SourceExpression_Unary::recurse_makeObjects
+//
 void SourceExpression_Unary::recurse_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
 
 	// Special case, child handles expression.
-	if (!_make) return;
+	if (!make) return;
 
 	VariableData::Pointer src = VariableData::create_stack(getType()->size(position));
 

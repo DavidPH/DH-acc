@@ -28,7 +28,13 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::make_expression_single_native
+//
 SRCEXPDS_EXPRSINGLE_DEFN(native)
 {
 	// nativeName
@@ -53,7 +59,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(native)
 	SourceVariable::Pointer nativeVariable(SourceVariable::create_constant(nativeName, nativeVarType, nativeObject, token.getPosition()));
 
 	context->addVariable(nativeVariable);
-	return create_value_variable(nativeVariable, token.getPosition());
+   return create_value_variable(nativeVariable, context, token.getPosition());
 }
 
+// EOF
 

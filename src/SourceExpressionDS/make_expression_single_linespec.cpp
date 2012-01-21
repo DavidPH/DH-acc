@@ -28,7 +28,13 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::make_expression_single_linespec
+//
 SRCEXPDS_EXPRSINGLE_DEFN(linespec)
 {
 	// linespecName
@@ -53,7 +59,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(linespec)
 	SourceVariable::Pointer linespecVariable(SourceVariable::create_constant(linespecName, linespecVarType, linespecObject, token.getPosition()));
 
 	context->addVariable(linespecVariable);
-	return create_value_variable(linespecVariable, token.getPosition());
+   return create_value_variable(linespecVariable, context, token.getPosition());
 }
 
+// EOF
 

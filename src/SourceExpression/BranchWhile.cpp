@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/BranchWhile.cpp
-**
-** Defines the SourceExpression_BranchWhile class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of do-while and while loops.
+//
+//-----------------------------------------------------------------------------
 
 #include "../SourceExpression.hpp"
 
@@ -28,64 +30,103 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BranchWhile
+//
 class SourceExpression_BranchWhile : public SourceExpression
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchWhile, SourceExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BranchWhile, SourceExpression);
 
 public:
-	SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, bool postCondition, SourcePosition const & position);
+   SourceExpression_BranchWhile
+   (bool postCond, SourceExpression * exprCond, SourceExpression *exprBody,
+    SRCEXP_EXPR_ARGS);
 
 private:
-	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	SourceExpression::Pointer _exprCondition;
-	SourceExpression::Pointer _exprWhile;
+   SourceExpression::Pointer exprCond;
+   SourceExpression::Pointer exprBody;
 
-	std::string _labelBreak;
-	std::string _labelContinue;
-	std::string _labelLoop;
-
-	bool _postCondition;
+   bool postCond;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_branch_do(SourceExpression * exprCondition, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position)
+//
+// SourceExpression::create_branch_do
+//
+SRCEXP_EXPRBRA_DEFN(2, do)
 {
-	return new SourceExpression_BranchWhile(exprCondition, exprLoop, context, true, position);
+   return new SourceExpression_BranchWhile(true, exprCond, exprBody, context,
+                                           position);
 }
 
-SourceExpression::Pointer SourceExpression::create_branch_while(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, SourcePosition const & position)
+//
+// SourceExpression::create_branch_while
+//
+SRCEXP_EXPRBRA_DEFN(2, while)
 {
-	return new SourceExpression_BranchWhile(exprCondition, exprWhile, context, false, position);
+   return new SourceExpression_BranchWhile(false, exprCond, exprBody, context,
+                                           position);
 }
 
-SourceExpression_BranchWhile::SourceExpression_BranchWhile(SourceExpression * exprCondition, SourceExpression * exprWhile, SourceContext * context, bool postCondition, SourcePosition const & position_) : Super(position_), _exprCondition(exprCondition), _exprWhile(exprWhile), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position)), _labelLoop(context->makeLabel() + "_loop"), _postCondition(postCondition)
+//
+// SourceExpression_BranchWhile::SourceExpression_BranchWhile
+//
+SourceExpression_BranchWhile::
+SourceExpression_BranchWhile
+(bool _postCond, SourceExpression *_exprCond, SourceExpression *_exprBody,
+ SRCEXP_EXPR_PARM)
+ : Super(SRCEXP_EXPR_PASS),
+   exprCond(_exprCond), exprBody(_exprBody), postCond(_postCond)
 {
-	if (_exprCondition->getType()->vt != VariableType::VT_BOOLSOFT)
-		_exprCondition = create_value_cast(_exprCondition, VariableType::get_vt_boolsoft(), position);
+   {
+      VariableType const *typeCond = exprCond->getType();
+      VariableType const *type     = VariableType::get_vt_boolsoft();
 
-	if (_exprWhile->getType()->vt != VariableType::VT_VOID)
-		_exprWhile = create_value_cast(_exprWhile, VariableType::get_vt_void(), position);
+      if (typeCond != type)
+         exprCond = create_value_cast(exprCond, type, context, position);
+   }
+
+   {
+      VariableType const *typeBody = exprBody->getType();
+      VariableType const *type     = VariableType::get_vt_void();
+
+      if (typeBody != type)
+         exprBody = create_value_cast(exprBody, type, context, position);
+   }
 }
 
 void SourceExpression_BranchWhile::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjects(objects, dst);
+   Super::recurse_makeObjects(objects, dst);
 
-	if (!_postCondition)
-		objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_labelContinue));
+   bigsint               sizeCond = exprCond->getType()->size(position);
+   VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
 
-	objects->addLabel(_labelLoop);
-	_exprWhile->makeObjects(objects, VariableData::create_void(0));
+   std::string labelBody     = label + "_body";
+   std::string labelContinue = context->getLabelContinue(position);
 
-	objects->addLabel(_labelContinue);
-	_exprCondition->makeObjects(objects, VariableData::create_stack(_exprCondition->getType()->size(position)));
-	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(_labelLoop));
+   if (!postCond)
+      objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelContinue));
 
-	objects->addLabel(_labelBreak);
+   objects->addLabel(labelBody);
+   exprBody->makeObjects(objects, VariableData::create_void(0));
+
+   objects->addLabel(labelContinue);
+   exprCond->makeObjects(objects, destCond);
+   objects->setPosition(position);
+   objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelBody));
+
+   objects->addLabel(context->getLabelBreak(position));
 }
 
 // EOF

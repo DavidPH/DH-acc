@@ -30,30 +30,29 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 //
 // SourceExpression_BranchXOr
 //
 class SourceExpression_BranchXOr : public SourceExpression_BinaryCompare
 {
-   MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchXOr,
-                           SourceExpression_BinaryCompare);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BranchXOr,
+                                   SourceExpression_BinaryCompare);
 
 public:
-   SourceExpression_BranchXOr(SourceExpression *exprL, SourceExpression *exprR,
-                              SourceContext *context,
-                              SourcePosition const &position);
+   SourceExpression_BranchXOr(SRCEXP_EXPRBIN_ARGS);
 
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
-
-   std::string labelL0;
-   std::string label0;
-   std::string label1;
-   std::string labelEnd;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::create_branch_xor
@@ -69,17 +68,9 @@ create_branch_xor(SourceExpression *exprL, SourceExpression *exprR,
 // SourceExpression_BranchXOr::SourceExpression_BranchXOr
 //
 SourceExpression_BranchXOr::
-SourceExpression_BranchXOr(SourceExpression *_exprL, SourceExpression *_exprR,
-                           SourceContext *context,
-                           SourcePosition const &_position)
-                           : Super(_exprL, _exprR, true, _position)
+SourceExpression_BranchXOr(SRCEXP_EXPRBIN_PARM)
+                           : Super(true, SRCEXP_EXPRBIN_PASS)
 {
-   std::string label(context->makeLabel());
-
-   labelL0  = label + "_L0";
-   label0   = label + "_0";
-   label1   = label + "_1";
-   labelEnd = label + "_end";
 }
 
 //
@@ -103,6 +94,11 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    }
    else
    {
+      std::string labelL0  = label + "_L0";
+      std::string label0   = label + "_0";
+      std::string label1   = label + "_1";
+      std::string labelEnd = label + "_end";
+
       make_objects_memcpy_prep(objects, dst, src, position);
 
       exprL->makeObjects(objects, tmp);

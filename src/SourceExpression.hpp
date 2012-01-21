@@ -33,17 +33,214 @@
 #include <string>
 #include <vector>
 
-class ObjectExpression;
-class ObjectVector;
-class SourceContext;
-class SourceTokenC;
-class VariableData;
-struct VariableType;
+
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+#define SRCEXP_EXPR_ARGS \
+   SourceContext *context, SourcePosition const &position
+
+#define SRCEXP_EXPR_PARM \
+   SourceContext *_context, SourcePosition const &_position
+
+#define SRCEXP_EXPR_PASS \
+   _context, _position
+
+
+#define SRCEXP_EXPRUNA_ARGS \
+   SourceExpression *expr,  \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRUNA_PARM \
+   SourceExpression *_expr, \
+   SRCEXP_EXPR_PARM
+
+#define SRCEXP_EXPRUNA_PASS \
+   _expr,                   \
+   SRCEXP_EXPR_PASS
+
+#define SRCEXP_EXPRUNA_DECL(NAME)   \
+   static SourceExpression::Pointer \
+   create_unary_##NAME(SRCEXP_EXPRUNA_ARGS)
+
+#define SRCEXP_EXPRUNA_DEFN(NAME)               \
+   SourceExpression::Pointer SourceExpression:: \
+   create_unary_##NAME(SRCEXP_EXPRUNA_ARGS)
+
+
+#define SRCEXP_EXPRBIN_ARGS                          \
+   SourceExpression *exprL, SourceExpression *exprR, \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRBIN_PARM                            \
+   SourceExpression *_exprL, SourceExpression *_exprR, \
+   SRCEXP_EXPR_PARM
+
+#define SRCEXP_EXPRBIN_PASS \
+   _exprL, _exprR,          \
+   SRCEXP_EXPR_PASS
+
+#define SRCEXP_EXPRBIN_DECL(NAME)   \
+   static SourceExpression::Pointer \
+   create_binary_##NAME(SRCEXP_EXPRBIN_ARGS)
+
+#define SRCEXP_EXPRBIN_DEFN(NAME)               \
+   SourceExpression::Pointer SourceExpression:: \
+   create_binary_##NAME(SRCEXP_EXPRBIN_ARGS)
+
+
+#define SRCEXP_EXPRBRA0_ARGS \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRBRA1_ARGS   \
+   SourceExpression *exprCond, \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRBRA2_ARGS                               \
+   SourceExpression *exprCond, SourceExpression *exprBody, \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRBRA3_ARGS                               \
+   SourceExpression *exprCond, SourceExpression *exprBody, \
+   SourceExpression *exprElse,                             \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRBRA4_ARGS                               \
+   SourceExpression *exprCond, SourceExpression *exprBody, \
+   SourceExpression *exprIter, SourceExpression *exprInit, \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRBRAu_ARGS \
+   SourceExpression *expr,   \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRBRAb_ARGS                         \
+   SourceExpression *exprL, SourceExpression *exprR, \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRBRAa_ARGS                                     \
+   SourceExpression *expr, SourceExpression::Vector const &args, \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRBRAs_ARGS \
+   std::string const &value, \
+   SRCEXP_EXPR_ARGS
+
+//
+// SRCEXP_EXPRBRA_DECL
+//
+// Declares a create_branch function.
+//
+// Type is one of the following:
+//   0 - No expressions.
+//   1 - Condition expression.
+//   2 - Condition, body expressions.
+//   3 - Condition, body, else expressions.
+//   4 - Condition, body, iterate, initialize expressions.
+//   u - Single expression.
+//   b - Left, right expressions.
+//   a - Single expression and vector.
+//   s - String argument.
+//
+#define SRCEXP_EXPRBRA_DECL(TYPE,NAME) \
+   static SourceExpression::Pointer    \
+   create_branch_##NAME(SRCEXP_EXPRBRA##TYPE##_ARGS)
+
+//
+// SRCEXP_EXPRBRA_DEFN
+//
+// Begins defining a create_branch function.
+//
+// Type is same as DECL.
+//
+#define SRCEXP_EXPRBRA_DEFN(TYPE,NAME)          \
+   SourceExpression::Pointer SourceExpression:: \
+   create_branch_##NAME(SRCEXP_EXPRBRA##TYPE##_ARGS)
+
+
+#define SRCEXP_EXPRVALa_ARGS             \
+   SourceExpression::Vector const &args, \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRVALc_ARGS \
+   char value,               \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRVALe_ARGS \
+   SourceExpression *expr,   \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRVALes_ARGS                        \
+   SourceExpression *expr, std::string const &value, \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRVALet_ARGS                        \
+   SourceExpression *expr, VariableType const *type, \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRVALi_ARGS \
+   bigsint value,            \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRVALr_ARGS \
+   bigreal value,            \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRVALs_ARGS \
+   std::string const &value, \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRVALt_ARGS \
+   VariableType const *type, \
+   SRCEXP_EXPR_ARGS
+
+#define SRCEXP_EXPRVALv_ARGS \
+   SourceVariable *var,      \
+   SRCEXP_EXPR_ARGS
+
+//
+// SRCEXP_EXPRVAL_DECL
+//
+// Declares a create_value function.
+//
+// Type is one of the following:
+//    a - Vector argument.
+//    c - Char argument.
+//   e  - Expression argument.
+//   es - Expression, string arguments.
+//   et - Expression, type arguments.
+//    i - Integer argument.
+//    r - Real argument.
+//    s - String argument.
+//    t - Type argument.
+//    v - Variable argument.
+//
+#define SRCEXP_EXPRVAL_DECL(TYPE,NAME) \
+   static SourceExpression::Pointer    \
+   create_value_##NAME(SRCEXP_EXPRVAL##TYPE##_ARGS)
+
+//
+// SRCEXP_EXPRVAL_DEFN
+//
+// Begins defining a create_value function.
+//
+// Type is same as DECL.
+//
+#define SRCEXP_EXPRVAL_DEFN(TYPE,NAME)          \
+   SourceExpression::Pointer SourceExpression:: \
+   create_value_##NAME(SRCEXP_EXPRVAL##TYPE##_ARGS)
 
 
 //----------------------------------------------------------------------------|
 // Types                                                                      |
 //
+
+class ObjectExpression;
+class ObjectVector;
+class SourceContext;
+class VariableData;
+struct VariableType;
 
 //
 // SourceExpression
@@ -53,6 +250,9 @@ class SourceExpression : public Counter
    MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression, Counter);
 
 public:
+   typedef std::vector<Pointer> Vector;
+
+
    void addLabel(std::string const &label);
 
    virtual bool canGetData() const;
@@ -79,73 +279,85 @@ public:
 
    friend class SourceVariable;
 
-   static Pointer create_binary_add(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_and(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_array(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_assign(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_assign_const(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_div(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_eq(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_ge(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_gt(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_ior(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_le(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_lt(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_mod(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_mul(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_ne(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_shiftl(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_shiftr(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_sub(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
-   static Pointer create_binary_xor(SourceExpression *exprL, SourceExpression *exprR, SourcePosition const &position);
+   // Unary operators.
+   SRCEXP_EXPRUNA_DECL(dec_pre);
+   SRCEXP_EXPRUNA_DECL(dec_suf);
+   SRCEXP_EXPRUNA_DECL(dereference);
+   SRCEXP_EXPRUNA_DECL(inc_pre);
+   SRCEXP_EXPRUNA_DECL(inc_suf);
+   SRCEXP_EXPRUNA_DECL(not);
+   SRCEXP_EXPRUNA_DECL(reference);
+   SRCEXP_EXPRUNA_DECL(sub);
 
-   static Pointer create_branch_and(SourceExpression *exprL, SourceExpression *exprR, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_break(SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_call(SourceExpression *expr, std::vector<SourceExpression::Pointer> const &args, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_continue(SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_do(SourceExpression *exprCondition, SourceExpression *exprLoop, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_for(SourceExpression *exprInit, SourceExpression *exprCond, SourceExpression *exprIter, SourceExpression *exprLoop, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_goto(std::string const &label, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_goto(SourceExpression *expr, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_if(SourceExpression *exprCondition, SourceExpression *exprIf, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_if(SourceExpression *exprCondition, SourceExpression *exprIf, SourceExpression *exprElse, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_ior(SourceExpression *exprL, SourceExpression *exprR, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_not(SourceExpression *expr, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_return(SourceExpression *expr, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_switch(SourceExpression *expr, SourceExpression *exprCases, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_while(SourceExpression *exprCondition, SourceExpression *exprWhile, SourceContext *context, SourcePosition const &position);
-   static Pointer create_branch_xor(SourceExpression *exprL, SourceExpression *exprR, SourceContext *context, SourcePosition const &position);
+   // Binary operators.
+   SRCEXP_EXPRBIN_DECL(add);
+   SRCEXP_EXPRBIN_DECL(and);
+   SRCEXP_EXPRBIN_DECL(array);
+   SRCEXP_EXPRBIN_DECL(assign);
+   SRCEXP_EXPRBIN_DECL(assign_const);
+   SRCEXP_EXPRBIN_DECL(div);
+   SRCEXP_EXPRBIN_DECL(eq);
+   SRCEXP_EXPRBIN_DECL(ge);
+   SRCEXP_EXPRBIN_DECL(gt);
+   SRCEXP_EXPRBIN_DECL(ior);
+   SRCEXP_EXPRBIN_DECL(le);
+   SRCEXP_EXPRBIN_DECL(lt);
+   SRCEXP_EXPRBIN_DECL(mod);
+   SRCEXP_EXPRBIN_DECL(mul);
+   SRCEXP_EXPRBIN_DECL(ne);
+   SRCEXP_EXPRBIN_DECL(shiftl);
+   SRCEXP_EXPRBIN_DECL(shiftr);
+   SRCEXP_EXPRBIN_DECL(sub);
+   SRCEXP_EXPRBIN_DECL(xor);
 
-   static Pointer create_unary_dec_pre(SourceExpression *expr, SourcePosition const &position);
-   static Pointer create_unary_dec_suf(SourceExpression *expr, SourcePosition const &position);
-   static Pointer create_unary_dereference(SourceExpression *expr, SourcePosition const &position);
-   static Pointer create_unary_inc_pre(SourceExpression *expr, SourcePosition const &position);
-   static Pointer create_unary_inc_suf(SourceExpression *expr, SourcePosition const &position);
-   static Pointer create_unary_not(SourceExpression *expr, SourcePosition const &position);
-   static Pointer create_unary_reference(SourceExpression *expr, SourcePosition const &position);
-   static Pointer create_unary_sub(SourceExpression *expr, SourcePosition const &position);
+   // Branching operators.
+   SRCEXP_EXPRBRA_DECL(b, and);
+   SRCEXP_EXPRBRA_DECL(0, break);
+   SRCEXP_EXPRBRA_DECL(a, call);
+   SRCEXP_EXPRBRA_DECL(0, continue);
+   SRCEXP_EXPRBRA_DECL(2, do);
+   SRCEXP_EXPRBRA_DECL(4, for);
+   SRCEXP_EXPRBRA_DECL(u, goto);
+   SRCEXP_EXPRBRA_DECL(s, goto);
+   SRCEXP_EXPRBRA_DECL(2, if);
+   SRCEXP_EXPRBRA_DECL(3, if);
+   SRCEXP_EXPRBRA_DECL(b, ior);
+   SRCEXP_EXPRBRA_DECL(u, not);
+   SRCEXP_EXPRBRA_DECL(u, return);
+   SRCEXP_EXPRBRA_DECL(2, switch);
+   SRCEXP_EXPRBRA_DECL(2, while);
+   SRCEXP_EXPRBRA_DECL(b, xor);
 
-   static Pointer create_root_delay(SourceExpression *expr, SourceContext *context, SourcePosition const &position);
-   static Pointer create_root_output(SourceExpression *expr, SourcePosition const &position);
-   static Pointer create_root_script(VariableType const *type, SourcePosition const &position);
+   // Values.
+   SRCEXP_EXPRVAL_DECL( a, block);
+   SRCEXP_EXPRVAL_DECL(et, cast);
+   SRCEXP_EXPRVAL_DECL( c, char);
+   SRCEXP_EXPRVAL_DECL( s, char);
+   SRCEXP_EXPRVAL_DECL( t, data);
+   SRCEXP_EXPRVAL_DECL( t, data_garbage);
+   SRCEXP_EXPRVAL_DECL( i, int);
+   SRCEXP_EXPRVAL_DECL( s, int);
+   SRCEXP_EXPRVAL_DECL(es, member);
+   SRCEXP_EXPRVAL_DECL( r, real);
+   SRCEXP_EXPRVAL_DECL( s, real);
+   SRCEXP_EXPRVAL_DECL( s, string);
+   SRCEXP_EXPRVAL_DECL( v, variable);
 
-   static Pointer create_value_block(std::vector<SourceExpression::Pointer> const &expressions, SourcePosition const &position);
-   static Pointer create_value_cast(SourceExpression *expr, VariableType const *type, SourcePosition const &position);
-   static Pointer create_value_char(SourceTokenC const &token);
-   static Pointer create_value_data(VariableType const *type, bool garbage, SourcePosition const &position);
-   static Pointer create_value_int(bigsint value, SourcePosition const &position);
-   static Pointer create_value_int(SourceTokenC const &token);
-   static Pointer create_value_member(SourceExpression *expr, SourceTokenC const &token);
-   static Pointer create_value_real(SourceTokenC const &token);
-   static Pointer create_value_string(SourceTokenC const &token);
-   static Pointer create_value_variable(SourceVariable *var, SourcePosition const &position);
+   // Root expressions.
+   static Pointer create_root_delay
+                  (SourceExpression *expr, SRCEXP_EXPR_ARGS);
+   static Pointer create_root_output
+                  (SourceExpression *expr, SRCEXP_EXPR_ARGS);
+   static Pointer create_root_script
+                  (VariableType const *type, SRCEXP_EXPR_ARGS);
 
    static VariableType const *
    get_promoted_type(VariableType const *type1, VariableType const *type2,
                      SourcePosition const &position);
 
 protected:
-   SourceExpression(SourcePosition const & position);
+   SourceExpression(SRCEXP_EXPR_ARGS);
+   ~SourceExpression();
 
    void
    recurse_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -158,6 +370,8 @@ protected:
                            VariableType const *dstType);
 
    SourcePosition position;
+   std::string label;
+   CounterReference<SourceContext> context;
 
 
 
@@ -188,8 +402,6 @@ protected:
                             SourcePosition const &position);
 
 private:
-   SourceExpression();
-
    void makeObjectsBase(ObjectVector *objects, VariableData *dst);
 
    void recurse_makeObjectsBase(ObjectVector *objects, VariableData *dst);

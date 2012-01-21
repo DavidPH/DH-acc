@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/BranchSwitch.cpp
-**
-** Defines the SourceExpression_BranchSwitch class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of switch blocks.
+//
+//-----------------------------------------------------------------------------
 
 #include "../SourceExpression.hpp"
 
@@ -28,74 +30,117 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BranchSwitch
+//
 class SourceExpression_BranchSwitch : public SourceExpression
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchSwitch, SourceExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BranchSwitch,
+                                   SourceExpression);
 
 public:
-	SourceExpression_BranchSwitch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position);
+   SourceExpression_BranchSwitch
+   (SourceExpression *exprCond, SourceExpression *exprBody,
+    SRCEXP_EXPR_ARGS);
 
 private:
-	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	SourceExpression::Pointer _expr;
-	SourceExpression::Pointer _exprCases;
-
-	std::vector<bigsint> _cases;
-	std::vector<std::string> _caseLabels;
-
-	std::string _caseDefault;
-	std::string _caseBreak;
-
-	bool _needDefault;
+   SourceExpression::Pointer exprCond;
+   SourceExpression::Pointer exprBody;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_branch_switch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position)
+//
+// SourceExpression::create_branch_switch
+//
+SRCEXP_EXPRBRA_DEFN(2, switch)
 {
-	return new SourceExpression_BranchSwitch(expr, exprCases, context, position);
+   return new SourceExpression_BranchSwitch(exprCond, exprBody, context,
+                                            position);
 }
 
-SourceExpression_BranchSwitch::SourceExpression_BranchSwitch(SourceExpression * expr, SourceExpression * exprCases, SourceContext * context, SourcePosition const & position_) : Super(position_), _expr(expr), _exprCases(exprCases), _cases(context->getCases(position)), _caseLabels(_cases.size()), _caseDefault(context->getLabelCaseDefault(position)), _caseBreak(context->getLabelBreak(position)), _needDefault(!context->hasLabelCaseDefault())
+//
+// SourceExpression_BranchSwitch::SourceExpression_BranchSwitch
+//
+SourceExpression_BranchSwitch::
+SourceExpression_BranchSwitch
+(SourceExpression *_exprCond, SourceExpression *_exprBody,
+ SRCEXP_EXPR_PARM)
+ : Super(SRCEXP_EXPR_PASS),
+   exprCond(_exprCond), exprBody(_exprBody)
 {
-	if (_expr->getType()->vt != VariableType::VT_INT)
-		_expr = create_value_cast(_expr, VariableType::get_vt_int(), position);
+   {
+      VariableType const *typeCond = exprCond->getType();
+      VariableType const *type     = VariableType::get_vt_int();
 
-	if (_exprCases->getType()->vt != VariableType::VT_VOID)
-		_exprCases = create_value_cast(_exprCases, VariableType::get_vt_void(), position);
+      if (typeCond != type)
+         exprCond = create_value_cast(exprCond, type, context, position);
+   }
 
-	for (size_t i(0); i < _cases.size(); ++i)
-		_caseLabels[i] = context->getLabelCase(_cases[i], position);
+   {
+      VariableType const *typeBody = exprBody->getType();
+      VariableType const *type     = VariableType::get_vt_void();
+
+      if (typeBody != type)
+         exprBody = create_value_cast(exprBody, type, context, position);
+   }
 }
 
-void SourceExpression_BranchSwitch::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+//
+// SourceExpression_BranchSwitch::virtual_makeObjects
+//
+void SourceExpression_BranchSwitch::
+virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjects(objects, dst);
+   Super::recurse_makeObjects(objects, dst);
 
-	_expr->makeObjects(objects, VariableData::create_stack(_expr->getType()->size(position)));
+   // Build case data.
+   std::vector<bigsint> cases = context->getCases(position);
+   std::string caseDefault = context->getLabelCaseDefault(position);
 
-	objects->setPosition(position);
+   std::vector<ObjectExpression::Pointer> args;
+   args.reserve(cases.size() * 2);
 
-	std::vector<ObjectExpression::Pointer> args;
-	args.reserve(_cases.size() * 2);
+   for (size_t i(0); i < cases.size(); ++i)
+   {
+      bigsint     caseNum = cases[i];
+      std::string caseLab = context->getLabelCase(caseNum, position);
 
-	for (size_t i(0); i < _cases.size(); ++i)
-	{
-		args.push_back(objects->getValue(_cases[i]));
-		args.push_back(objects->getValue(_caseLabels[i]));
-	}
+      args.push_back(objects->getValue(caseNum));
+      args.push_back(objects->getValue(caseLab));
+   }
 
-	objects->addToken(OCODE_BRANCH_TABLE, args);
+   // Generate condition.
+   bigsint               sizeCond = exprCond->getType()->size(position);
+   VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
 
-	objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_caseDefault));
+   exprCond->makeObjects(objects, destCond);
 
-	_exprCases->makeObjects(objects, VariableData::create_void(0));
+   objects->setPosition(position);
 
-	if (_needDefault)
-		objects->addLabel(_caseDefault);
-	objects->addLabel(_caseBreak);
+   // Generate jump table.
+   objects->addToken(OCODE_BRANCH_TABLE, args);
+
+   objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(caseDefault));
+
+   // Generate cases.
+   exprBody->makeObjects(objects, VariableData::create_void(0));
+
+   // Add default target if none specified.
+   if (!context->hasLabelCaseDefault())
+      objects->addLabel(caseDefault);
+
+   // Add break target.
+   objects->addLabel(context->getLabelBreak(position));
 }
 
 // EOF

@@ -26,9 +26,10 @@
 
 #include <map>
 
-class SourceTokenizerDS;
 
-
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
 
 #define SRCEXPDS_EXPRSINGLE_ARGS                            \
 	SourceTokenizerDS * in, SourceTokenC const & token, \
@@ -44,17 +45,23 @@ class SourceTokenizerDS;
 	make_expression_single_##NAME(SRCEXPDS_EXPRSINGLE_ARGS)
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
+class SourceTokenizerDS;
 
 class SourceExpressionDS : public SourceExpression
 {
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpressionDS, SourceExpression);
 
 public:
-	SourceExpressionDS(SourcePosition const & position);
-
 	static void init();
 
 	static SourceExpression::Pointer make_expressions(SourceTokenizerDS * tokenizer);
+
+protected:
+   SourceExpressionDS(SRCEXP_EXPR_ARGS);
 
 private:
 	typedef SourceExpression::Pointer (*expression_single_handler)(SRCEXPDS_EXPRSINGLE_ARGS);

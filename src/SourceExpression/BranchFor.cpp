@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/BranchFor.cpp
-**
-** Defines the SourceExpression_BranchFor class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of for loops.
+//
+//-----------------------------------------------------------------------------
 
 #include "../SourceExpression.hpp"
 
@@ -28,78 +30,116 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BranchFor
+//
 class SourceExpression_BranchFor : public SourceExpression
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchFor, SourceExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BranchFor,
+                                   SourceExpression);
 
 public:
-	SourceExpression_BranchFor(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position);
+   SourceExpression_BranchFor
+   (SourceExpression *exprCond, SourceExpression *exprBody,
+    SourceExpression *exprIter, SourceExpression *exprInit,
+    SRCEXP_EXPR_ARGS);
 
 private:
-	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	SourceExpression::Pointer _exprInit;
-	SourceExpression::Pointer _exprCond;
-	SourceExpression::Pointer _exprIter;
-	SourceExpression::Pointer _exprLoop;
-
-	std::string _labelCond;
-	std::string _labelLoop;
-
-	std::string _labelBreak;
-	std::string _labelContinue;
+   SourceExpression::Pointer exprCond;
+   SourceExpression::Pointer exprBody;
+   SourceExpression::Pointer exprIter;
+   SourceExpression::Pointer exprInit;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_branch_for(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position)
+//
+// SourceExpression::create_branch_for
+//
+SRCEXP_EXPRBRA_DEFN(4, for)
 {
-	return new SourceExpression_BranchFor(exprInit, exprCond, exprIter, exprLoop, context, position);
+   return new SourceExpression_BranchFor
+              (exprCond, exprBody, exprIter, exprInit, context, position);
 }
 
-SourceExpression_BranchFor::SourceExpression_BranchFor(SourceExpression * exprInit, SourceExpression * exprCond, SourceExpression * exprIter, SourceExpression * exprLoop, SourceContext * context, SourcePosition const & position_) : Super(position_), _exprInit(exprInit), _exprCond(exprCond), _exprIter(exprIter), _exprLoop(exprLoop), _labelBreak(context->getLabelBreak(position)), _labelContinue(context->getLabelContinue(position))
+//
+// SourceExpression_BranchFor::SourceExpression_BranchFor
+//
+SourceExpression_BranchFor::
+SourceExpression_BranchFor
+(SourceExpression *_exprCond, SourceExpression *_exprBody,
+ SourceExpression *_exprIter, SourceExpression *_exprInit,
+ SRCEXP_EXPR_PARM)
+ : Super(SRCEXP_EXPR_PASS),
+   exprCond(_exprCond), exprBody(_exprBody),
+   exprIter(_exprIter), exprInit(_exprInit)
 {
-	std::string label(context->makeLabel());
-	_labelCond = label + "_cond";
-	_labelLoop = label + "_loop";
+   {
+      VariableType const *typeCond = exprCond->getType();
+      VariableType const *type     = VariableType::get_vt_boolsoft();
 
-	if (_exprInit->getType()->vt != VariableType::VT_VOID)
-		_exprInit = create_value_cast(_exprInit, VariableType::get_vt_void(), position);
+      if (typeCond != type)
+         exprCond = create_value_cast(exprCond, type, context, position);
+   }
 
-	if (_exprCond->getType()->vt != VariableType::VT_BOOLSOFT)
-		_exprCond = create_value_cast(_exprCond, VariableType::get_vt_boolsoft(), position);
+   {
+      VariableType const *typeBody = exprBody->getType();
+      VariableType const *typeIter = exprIter->getType();
+      VariableType const *typeInit = exprInit->getType();
+      VariableType const *type     = VariableType::get_vt_void();
 
-	if (_exprIter->getType()->vt != VariableType::VT_VOID)
-		_exprIter = create_value_cast(_exprIter, VariableType::get_vt_void(), position);
+      if (typeBody != type)
+         exprBody = create_value_cast(exprBody, type, context, position);
 
-	if (_exprLoop->getType()->vt != VariableType::VT_VOID)
-		_exprLoop = create_value_cast(_exprLoop, VariableType::get_vt_void(), position);
+      if (typeIter != type)
+         exprIter = create_value_cast(exprIter, type, context, position);
+
+      if (typeInit != type)
+         exprInit = create_value_cast(exprInit, type, context, position);
+   }
 }
 
-void SourceExpression_BranchFor::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+
+//
+// SourceExpression_BranchFor::virtual_makeObjects
+//
+void SourceExpression_BranchFor::
+virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	VariableData::Pointer src = VariableData::create_stack(VariableType::get_vt_boolsoft()->size(position));
-	VariableData::Pointer snk = VariableData::create_void(0);
+   Super::recurse_makeObjects(objects, dst);
 
-	Super::recurse_makeObjects(objects, dst);
+   bigsint               sizeCond = exprCond->getType()->size(position);
+   VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
+   VariableData::Pointer sink     = VariableData::create_void(0);
 
-	_exprInit->makeObjects(objects, snk);
-	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_labelCond));
+   std::string labelCond = label + "_cond";
+   std::string labelBody = label + "_body";
 
-	objects->addLabel(_labelLoop);
-	_exprLoop->makeObjects(objects, snk);
+   exprInit->makeObjects(objects, sink);
+   objects->setPosition(position);
+   objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelCond));
 
-	objects->addLabel(_labelContinue);
-	_exprIter->makeObjects(objects, snk);
+   objects->addLabel(labelBody);
+   exprBody->makeObjects(objects, sink);
 
-	objects->addLabel(_labelCond);
-	_exprCond->makeObjects(objects, src);
-	objects->setPosition(position);
-	objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(_labelLoop));
+   objects->addLabel(context->getLabelContinue(position));
+   exprIter->makeObjects(objects, sink);
 
-	objects->addLabel(_labelBreak);
+   objects->addLabel(labelCond);
+   exprCond->makeObjects(objects, destCond);
+   objects->setPosition(position);
+   objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelBody));
+
+   objects->addLabel(context->getLabelBreak(position));
 }
 
 // EOF

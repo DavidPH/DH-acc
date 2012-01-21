@@ -25,27 +25,39 @@
 
 #include "ObjectExpression.hpp"
 #include "ObjectVector.hpp"
+#include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "VariableData.hpp"
 #include "VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::SourceExpression
 //
 SourceExpression::
-SourceExpression(SourcePosition const &_position)
-                 : position(_position), evaluated(false)
+SourceExpression(SourceContext *_context, SourcePosition const &_position)
+                 : position(_position), label(_context->makeLabel()),
+                   context(_context), evaluated(false)
+{
+}
+
+//
+// SourceExpression::~SourceExpression
+//
+SourceExpression::~SourceExpression()
 {
 }
 
 //
 // SourceExpression::addLabel
 //
-void SourceExpression::addLabel(std::string const &label)
+void SourceExpression::addLabel(std::string const &_label)
 {
-   labels.push_back(label);
+   labels.push_back(_label);
 }
 
 //

@@ -30,48 +30,68 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BranchReturn
+//
 class SourceExpression_BranchReturn : public SourceExpression
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchReturn, SourceExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BranchReturn, SourceExpression);
 
 public:
-	SourceExpression_BranchReturn(SourceExpression * expr, SourceContext * context, SourcePosition const & position);
+   SourceExpression_BranchReturn(SRCEXP_EXPRUNA_ARGS);
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	SourceExpression::Pointer _expr;
-	SourceContext::ContextType _type;
+   SourceExpression::Pointer expr;
+   SourceContext::ContextType ct;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_branch_return(SourceExpression * expr, SourceContext * context, SourcePosition const & position)
+//
+// SourceExpression::create_branch_return
+//
+SRCEXP_EXPRBRA_DEFN(u, return)
 {
 	return new SourceExpression_BranchReturn(expr, context, position);
 }
 
-SourceExpression_BranchReturn::SourceExpression_BranchReturn(SourceExpression * expr, SourceContext * context, SourcePosition const & position_) : Super(position_), _expr(expr), _type(context->getTypeRoot())
+//
+// SourceExpression_BranchReturn::SourceExpression_BranchReturn
+//
+SourceExpression_BranchReturn::
+SourceExpression_BranchReturn(SRCEXP_EXPRUNA_PARM)
+                              : Super(SRCEXP_EXPR_PASS),
+                                expr(_expr), ct(context->getTypeRoot())
 {
-	if (_expr->getType() != context->getReturnType())
-		_expr = SourceExpression::create_value_cast(_expr, context->getReturnType(), position);
+   VariableType const *type = context->getReturnType();
+
+   if (expr->getType() != type)
+      expr = create_value_cast(expr, type, context, position);
 }
 
 void SourceExpression_BranchReturn::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
 
-	bigsint srcSize = _expr->getType()->size(position);
+	bigsint srcSize = expr->getType()->size(position);
 	if (srcSize && target_type == TARGET_ZDoom)
 		--srcSize;
 	VariableData::Pointer src = VariableData::create_stack(srcSize);
 
-	_expr->makeObjects(objects, src);
+	expr->makeObjects(objects, src);
 
 	objects->setPosition(position);
 
-	bigsint retnSize(_expr->getType()->size(position));
+	bigsint retnSize(expr->getType()->size(position));
 
 	if (target_type != TARGET_ZDoom)
 	{
@@ -86,7 +106,7 @@ void SourceExpression_BranchReturn::virtual_makeObjects(ObjectVector *objects, V
 			objects->addToken(OCODE_SET_AUTO_VAR32I, objects->getValue(-i));
 	}
 
-	switch (_type)
+	switch (ct)
 	{
 	case SourceContext::CT_BLOCK:
 		objects->addToken(OCODE_ACS_SCRIPT_TERMINATE);

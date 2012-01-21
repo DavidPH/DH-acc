@@ -28,13 +28,20 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_UnaryDereference
+//
 class SourceExpression_UnaryDereference : public SourceExpression_Unary
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_UnaryDereference, SourceExpression_Unary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_UnaryDereference,
+                                   SourceExpression_Unary);
 
 public:
-	SourceExpression_UnaryDereference(SourceExpression * expr, SourcePosition const & position);
+   SourceExpression_UnaryDereference(SRCEXP_EXPRUNA_ARGS);
 
 	virtual bool canGetData() const;
 
@@ -55,13 +62,24 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_unary_dereference(SourceExpression * expr, SourcePosition const & position)
+//
+// SourceExpression::create_unary_dereference
+//
+SRCEXP_EXPRUNA_DEFN(dereference)
 {
-	return new SourceExpression_UnaryDereference(expr, position);
+   return new SourceExpression_UnaryDereference(expr, context, position);
 }
 
-SourceExpression_UnaryDereference::SourceExpression_UnaryDereference(SourceExpression *_expr, SourcePosition const &_position) : Super(_expr, _position)
+//
+// SourceExpression_UnaryDereference::SourceExpression_UnaryDereference
+//
+SourceExpression_UnaryDereference::
+SourceExpression_UnaryDereference(SRCEXP_EXPRUNA_PARM)
+                                  : Super(SRCEXP_EXPRUNA_PASS)
 {
 }
 
@@ -70,17 +88,23 @@ SourceExpression_UnaryDereference::SourceExpression_UnaryDereference(SourceExpre
 //
 bool SourceExpression_UnaryDereference::canGetData() const
 {
-   return getType()->vt != VariableType::VT_STRING;
+   return expr->getType()->vt != VariableType::VT_STRING;
 }
 
+//
+// SourceExpression_UnaryDereference::canMakeObjectAddress
+//
 bool SourceExpression_UnaryDereference::canMakeObjectAddress() const
 {
 	return expr->canMakeObject();
 }
 
+//
+// SourceExpression_UnaryDereference::canMakeObjectsAddress
+//
 bool SourceExpression_UnaryDereference::canMakeObjectsAddress() const
 {
-	return true;
+   return expr->getType()->vt != VariableType::VT_STRING;
 }
 
 //
@@ -93,16 +117,25 @@ VariableData::Pointer SourceExpression_UnaryDereference::getData() const
                      ObjectExpression::create_value_int(0, position), expr);
 }
 
+//
+// SourceExpression_UnaryDereference::getType
+//
 VariableType const * SourceExpression_UnaryDereference::getType() const
 {
 	return expr->getType()->refType;
 }
 
+//
+// SourceExpression_UnaryDereference::makeObjectAddress
+//
 CounterPointer<ObjectExpression> SourceExpression_UnaryDereference::makeObjectAddress() const
 {
 	return expr->makeObject();
 }
 
+//
+// SourceExpression_UnaryDereference::virtual_makeObjects
+//
 void SourceExpression_UnaryDereference::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
@@ -128,6 +161,9 @@ void SourceExpression_UnaryDereference::virtual_makeObjects(ObjectVector *object
 	make_objects_memcpy_post(objects, dst, src, position);
 }
 
+//
+// SourceExpression_UnaryDereference::virtual_makeObjectsAddress
+//
 void SourceExpression_UnaryDereference::virtual_makeObjectsAddress(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjectsAddress(objects, dst);

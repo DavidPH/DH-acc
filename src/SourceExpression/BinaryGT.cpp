@@ -27,26 +27,44 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BinaryGT
+//
 class SourceExpression_BinaryGT : public SourceExpression_BinaryCompare
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryGT, SourceExpression_BinaryCompare);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryGT,
+                                   SourceExpression_BinaryCompare);
 
 public:
-	SourceExpression_BinaryGT(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+   SourceExpression_BinaryGT(SRCEXP_EXPRBIN_ARGS);
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_binary_gt(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
+//
+// SourceExpression::create_binary_gt
+//
+SRCEXP_EXPRBIN_DEFN(gt)
 {
-	return new SourceExpression_BinaryGT(exprL, exprR, position);
+   return new SourceExpression_BinaryGT(exprL, exprR, context, position);
 }
 
-SourceExpression_BinaryGT::SourceExpression_BinaryGT(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
+//
+// SourceExpression_BinaryGT::SourceExpression_BinaryGT
+//
+SourceExpression_BinaryGT::
+SourceExpression_BinaryGT(SRCEXP_EXPRBIN_PARM)
+                          : Super(SRCEXP_EXPRBIN_PASS)
 {
 }
 

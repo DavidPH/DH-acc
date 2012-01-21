@@ -25,59 +25,49 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../SourceContext.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 //
 // SourceExpression_BranchIOr
 //
 class SourceExpression_BranchIOr : public SourceExpression_BinaryCompare
 {
-   MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchIOr,
-                           SourceExpression_BinaryCompare);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BranchIOr,
+                                   SourceExpression_BinaryCompare);
 
 public:
-   SourceExpression_BranchIOr(SourceExpression *exprL, SourceExpression *exprR,
-                              SourceContext *context,
-                              SourcePosition const &position);
+   SourceExpression_BranchIOr(SRCEXP_EXPRBIN_ARGS);
 
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
-
-   std::string label1;
-   std::string labelEnd;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::create_branch_ior
 //
-SourceExpression::Pointer SourceExpression::
-create_branch_ior(SourceExpression *exprL, SourceExpression *exprR,
-                  SourceContext *context, SourcePosition const &position)
+SRCEXP_EXPRBRA_DEFN(b, ior)
 {
-   return new SourceExpression_BranchIOr(exprL, exprR, context, position);
+	return new SourceExpression_BranchIOr(exprL, exprR, context, position);
 }
-
-
 
 //
 // SourceExpression_BranchIOr::SourceExpression_BranchIOr
 //
 SourceExpression_BranchIOr::
-SourceExpression_BranchIOr(SourceExpression *_exprL, SourceExpression *_exprR,
-                           SourceContext *context,
-                           SourcePosition const &_position)
-                           : Super(_exprL, _exprR, true, _position)
+SourceExpression_BranchIOr(SRCEXP_EXPRBIN_PARM)
+                           : Super(true, SRCEXP_EXPRBIN_PASS)
 {
-   std::string label(context->makeLabel());
-
-   label1   = label + "_1";
-   labelEnd = label + "_end";
 }
 
 //
@@ -93,6 +83,9 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    VariableData::Pointer src = VariableData::create_stack(srcSize);
    VariableData::Pointer tmp = VariableData::create_stack(srcSize);
+
+   std::string label1   = label + "_1";
+   std::string labelEnd = label + "_end";
 
    if (dst->type == VariableData::MT_VOID)
    {

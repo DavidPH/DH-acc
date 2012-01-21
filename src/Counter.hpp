@@ -29,6 +29,18 @@
 // Macros                                                                     |
 //
 
+#define MAKE_COMMON_COUNTER_CLASS(CLASS)              \
+public:                                               \
+virtual char const *getName() const {return #CLASS;}  \
+typedef CounterPointer<CLASS> Pointer;                \
+typedef CounterPointer<CLASS const> ConstPointer;     \
+friend class CounterPointer<CLASS>;                   \
+friend class CounterPointer<CLASS const>;             \
+typedef CounterReference<CLASS> Reference;            \
+typedef CounterReference<CLASS const> ConstReference; \
+friend class CounterReference<CLASS>;                 \
+friend class CounterReference<CLASS const>
+
 //
 // MAKE_ABSTRACT_COUNTER_CLASS
 //
@@ -39,7 +51,7 @@ private:                                                 \
 virtual CLASS *cloneRaw() const = 0;                     \
 public:                                                  \
 CounterPointer<CLASS> clone() const {return cloneRaw();} \
-MAKE_NOCLONE_COUNTER_CLASS(CLASS)
+MAKE_COMMON_COUNTER_CLASS(CLASS)
 
 //
 // MAKE_ABSTRACT_COUNTER_CLASS_BASE
@@ -53,17 +65,12 @@ typedef BASE Super
 //
 // For use in definining un-copy-able reference-counted classes.
 //
-#define MAKE_NOCLONE_COUNTER_CLASS(CLASS)             \
-public:                                               \
-virtual char const *getName() const {return #CLASS;}  \
-typedef CounterPointer<CLASS> Pointer;                \
-typedef CounterPointer<CLASS const> ConstPointer;     \
-friend class CounterPointer<CLASS>;                   \
-friend class CounterPointer<CLASS const>;             \
-typedef CounterReference<CLASS> Reference;            \
-typedef CounterReference<CLASS const> ConstReference; \
-friend class CounterReference<CLASS>;                 \
-friend class CounterReference<CLASS const>
+#define MAKE_NOCLONE_COUNTER_CLASS(CLASS)                \
+private:                                                 \
+virtual CLASS *cloneRaw() const {throw Counter();}       \
+public:                                                  \
+CounterPointer<CLASS> clone() const {return cloneRaw();} \
+MAKE_COMMON_COUNTER_CLASS(CLASS)
 
 //
 // MAKE_NOCLONE_COUNTER_CLASS_BASE
@@ -80,7 +87,7 @@ private:                                                   \
 virtual CLASS *cloneRaw() const {return new CLASS(*this);} \
 public:                                                    \
 CounterPointer<CLASS> clone() const {return cloneRaw();}   \
-MAKE_NOCLONE_COUNTER_CLASS(CLASS)
+MAKE_COMMON_COUNTER_CLASS(CLASS)
 
 //
 // MAKE_COUNTER_CLASS_BASE

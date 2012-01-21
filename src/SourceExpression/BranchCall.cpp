@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/BranchCall.cpp
-**
-** Defines the SourceExpression_BranchCall class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of "operator ()".
+//
+//-----------------------------------------------------------------------------
 
 #include "../SourceExpression.hpp"
 
@@ -28,59 +30,88 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BranchCall
+//
 class SourceExpression_BranchCall : public SourceExpression
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchCall, SourceExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BranchCall,
+                                   SourceExpression);
 
 public:
-	SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position);
+   SourceExpression_BranchCall(SourceExpression *expr,
+                               SourceExpression::Vector const &args,
+                               SRCEXP_EXPR_ARGS);
 
-	virtual VariableType const * getType() const;
+   virtual VariableType const *getType() const;
 
 private:
-	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	std::vector<SourceExpression::Pointer> _args;
-	SourceExpression::Pointer _expr;
-	bigsint _stack;
-
-	std::string _labelReturn;
+   SourceExpression::Vector args;
+   SourceExpression::Pointer expr;
+   bigsint stack;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_branch_call(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position)
+//
+// SourceExpression::create_branch_call
+//
+SRCEXP_EXPRBRA_DEFN(a, call)
 {
-	return new SourceExpression_BranchCall(expr, args, context, position);
+   return new SourceExpression_BranchCall(expr, args, context, position);
 }
 
-SourceExpression_BranchCall::SourceExpression_BranchCall(SourceExpression * expr, std::vector<SourceExpression::Pointer> const & args, SourceContext * context, SourcePosition const & position_) : Super(position_), _args(args), _expr(expr), _stack(context->getLimit(SourceVariable::SC_AUTO))
+//
+// SourceExpression_BranchCall::SourceExpression_BranchCall
+//
+SourceExpression_BranchCall::
+SourceExpression_BranchCall
+(SourceExpression *_expr, SourceExpression::Vector const &_args,
+ SRCEXP_EXPR_PARM)
+ : Super(SRCEXP_EXPR_PASS),
+   args(_args), expr(_expr), stack(context->getLimit(SourceVariable::SC_AUTO))
 {
-	_labelReturn = context->makeLabel() + "_retn";
+   VariableType const *type(expr->getType());
 
-	VariableType const * type(_expr->getType());
+   if (args.size() != type->types.size())
+      throw SourceException("incorrect arg count", position, getName());
 
-	if (_args.size() != type->types.size())
-		throw SourceException("incorrect arg count", position, getName());
-
-	for (size_t i(0); i < _args.size(); ++i)
-	{
-		if (_args[i]->getType() != type->types[i])
-			_args[i] = create_value_cast(_args[i], type->types[i], position);
-	}
+   for (size_t i(0); i < args.size(); ++i)
+   {
+      if (args[i]->getType() != type->types[i])
+         args[i] = create_value_cast(args[i], type->types[i], context, position);
+   }
 }
 
+//
+// SourceExpression_BranchCall::getType
+//
 VariableType const * SourceExpression_BranchCall::getType() const
 {
-	return _expr->getType()->callType;
+   return expr->getType()->callType;
 }
 
-void SourceExpression_BranchCall::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+//
+// SourceExpression_BranchCall::virtual_makeObjects
+//
+void SourceExpression_BranchCall::
+virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjects(objects, dst);
+   Super::recurse_makeObjects(objects, dst);
 
-	make_objects_call(objects, dst, _expr, _args, objects->getValue(_stack), _labelReturn, position);
+   std::string labelReturn = label + "_retn";
+
+   make_objects_call(objects, dst, expr, args, objects->getValue(stack),
+                     labelReturn, position);
 }
 
 // EOF

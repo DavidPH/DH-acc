@@ -31,17 +31,21 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 //
 // SourceExpression_ValueMember
 //
 class SourceExpression_ValueMember : public SourceExpression
 {
-   MAKE_COUNTER_CLASS_BASE(SourceExpression_ValueMember, SourceExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueMember,
+                                   SourceExpression);
 
 public:
    SourceExpression_ValueMember(SourceExpression *expr,
-                                SourceTokenC const &token);
+                                std::string const &value, SRCEXP_EXPR_ARGS);
 
    virtual bool canGetData() const;
 
@@ -55,23 +59,26 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::create_value_member
 //
-SourceExpression::Pointer SourceExpression::
-create_value_member(SourceExpression *expr, SourceTokenC const &token)
+SRCEXP_EXPRVAL_DEFN(es, member)
 {
-   return new SourceExpression_ValueMember(expr, token);
+   return new SourceExpression_ValueMember(expr, value, context, position);
 }
 
 //
 // SourceExpression_ValueMember::SourceExpression_ValueMember
 //
 SourceExpression_ValueMember::
-SourceExpression_ValueMember(SourceExpression *_expr, SourceTokenC const &token)
-                             : Super(token.getPosition()), expr(_expr),
-                               name(token.getData())
+SourceExpression_ValueMember(SourceExpression *_expr, std::string const &value,
+                             SRCEXP_EXPR_PARM)
+                             : Super(SRCEXP_EXPR_PASS),
+                               expr(_expr), name(value)
 {
 }
 
@@ -104,10 +111,11 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
    if (src->type == VariableData::MT_REGISTERARRAY)
    {
       SourceExpression::Pointer memberOffsetExpr =
-         create_value_int(memberOffset, position);
+         create_value_int(memberOffset, context, position);
 
       SourceExpression::Pointer offset =
-         create_binary_add(src->offsetExpr, memberOffsetExpr, position);
+         create_binary_add(src->offsetExpr, memberOffsetExpr, context,
+                           position);
 
       return VariableData::create_registerarray(memberSize, src->sectionRA,
                                                 src->address, offset);

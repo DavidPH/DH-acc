@@ -27,26 +27,44 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BinaryEQ
+//
 class SourceExpression_BinaryEQ : public SourceExpression_BinaryCompare
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryEQ, SourceExpression_BinaryCompare);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryEQ,
+                                   SourceExpression_BinaryCompare);
 
 public:
-	SourceExpression_BinaryEQ(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+   SourceExpression_BinaryEQ(SRCEXP_EXPRBIN_ARGS);
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_binary_eq(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
+//
+// SourceExpression::create_binary_eq
+//
+SRCEXP_EXPRBIN_DEFN(eq)
 {
-	return new SourceExpression_BinaryEQ(exprL, exprR, position);
+   return new SourceExpression_BinaryEQ(exprL, exprR, context, position);
 }
 
-SourceExpression_BinaryEQ::SourceExpression_BinaryEQ(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, position_)
+//
+// SourceExpression_BinaryEQ::SourceExpression_BinaryEQ
+//
+SourceExpression_BinaryEQ::
+SourceExpression_BinaryEQ(SRCEXP_EXPRBIN_PARM)
+                          : Super(SRCEXP_EXPRBIN_PASS)
 {
 }
 

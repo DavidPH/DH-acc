@@ -27,29 +27,50 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_UnaryNot
+//
 class SourceExpression_UnaryNot : public SourceExpression_Unary
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_UnaryNot, SourceExpression_Unary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_UnaryNot,
+                                   SourceExpression_Unary);
 
 public:
-	SourceExpression_UnaryNot(SourceExpression * expr, SourcePosition const & position);
+   SourceExpression_UnaryNot(SRCEXP_EXPRUNA_ARGS);
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_unary_not(SourceExpression * expr, SourcePosition const & position)
+//
+// SourceExpression::create_unary_not
+//
+SRCEXP_EXPRUNA_DEFN(not)
 {
-	return new SourceExpression_UnaryNot(expr, position);
+   return new SourceExpression_UnaryNot(expr, context, position);
 }
 
-SourceExpression_UnaryNot::SourceExpression_UnaryNot(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, NULL, position_)
+//
+// SourceExpression_UnaryNot::SourceExpression_UnaryNot
+//
+SourceExpression_UnaryNot::
+SourceExpression_UnaryNot(SRCEXP_EXPRUNA_PARM)
+                          : Super(NULL, SRCEXP_EXPRUNA_PASS)
 {
 }
 
+//
+// SourceExpression_UnaryNot::virtual_makeObjects
+//
 void SourceExpression_UnaryNot::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);

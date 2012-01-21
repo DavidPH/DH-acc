@@ -25,7 +25,13 @@
 #include "../SourceTokenizerDS.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::make_expression_single_symbol
+//
 SRCEXPDS_EXPRSINGLE_DEFN(symbol)
 {
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
@@ -36,7 +42,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(symbol)
 
 	SourceVariable::Pointer var(SourceVariable::create_literal(type, name, token.getPosition()));
 
-	return create_value_variable(var, token.getPosition());
+   return create_value_variable(var, context, token.getPosition());
 }
 
+// EOF
 

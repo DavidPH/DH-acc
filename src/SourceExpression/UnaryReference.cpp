@@ -24,38 +24,64 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_UnaryReference
+//
 class SourceExpression_UnaryReference : public SourceExpression_Unary
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_UnaryReference, SourceExpression_Unary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_UnaryReference,
+                                   SourceExpression_Unary);
 
 public:
-	SourceExpression_UnaryReference(SourceExpression * expr, SourcePosition const & position);
+   SourceExpression_UnaryReference(SRCEXP_EXPRUNA_ARGS);
 
 	virtual VariableType const * getType() const;
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	VariableType const * _type;
+   VariableType const *type;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_unary_reference(SourceExpression * expr, SourcePosition const & position)
+//
+// SourceExpression::create_unary_reference
+//
+SRCEXP_EXPRUNA_DEFN(reference)
 {
-	return new SourceExpression_UnaryReference(expr, position);
+	return new SourceExpression_UnaryReference(expr, context, position);
 }
 
-SourceExpression_UnaryReference::SourceExpression_UnaryReference(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, position_), _type(VariableType::get_pointer(expr->getType()))
+//
+// SourceExpression_UnaryReference::SourceExpression_UnaryReference
+//
+SourceExpression_UnaryReference::
+SourceExpression_UnaryReference(SRCEXP_EXPRUNA_PARM)
+                                : Super(SRCEXP_EXPRUNA_PASS),
+                                  type(VariableType::get_pointer
+                                                     (expr->getType()))
 {
 }
 
+//
+// SourceExpression_UnaryReference::getType
+//
 VariableType const * SourceExpression_UnaryReference::getType() const
 {
-	return _type;
+   return type;
 }
 
+//
+// SourceExpression_UnaryReference::virtual_makeObjects
+//
 void SourceExpression_UnaryReference::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);

@@ -28,13 +28,20 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_UnarySub
+//
 class SourceExpression_UnarySub : public SourceExpression_Unary
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_UnarySub, SourceExpression_Unary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_UnarySub,
+                                   SourceExpression_Unary);
 
 public:
-	SourceExpression_UnarySub(SourceExpression * expr, SourcePosition const & position);
+   SourceExpression_UnarySub(SRCEXP_EXPRUNA_ARGS);
 
 	virtual bool canMakeObject() const;
 
@@ -45,26 +52,46 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_unary_sub(SourceExpression * expr, SourcePosition const & position)
+//
+// SourceExpression::create_unary_sub
+//
+SRCEXP_EXPRUNA_DEFN(sub)
 {
-	return new SourceExpression_UnarySub(expr, position);
+   return new SourceExpression_UnarySub(expr, context, position);
 }
 
-SourceExpression_UnarySub::SourceExpression_UnarySub(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, NULL, position_)
+//
+// SourceExpression_UnarySub::SourceExpression_UnarySub
+//
+SourceExpression_UnarySub::
+SourceExpression_UnarySub(SRCEXP_EXPRUNA_PARM)
+                          : Super(NULL, SRCEXP_EXPRUNA_PASS)
 {
 }
 
+//
+// SourceExpression_UnarySub::canMakeObject
+//
 bool SourceExpression_UnarySub::canMakeObject() const
 {
 	return expr->canMakeObject();
 }
 
+//
+// SourceExpression_UnarySub::makeObject
+//
 CounterPointer<ObjectExpression> SourceExpression_UnarySub::makeObject() const
 {
 	return ObjectExpression::create_unary_sub(expr->makeObject(), position);
 }
 
+//
+// SourceExpression_UnarySub::virtual_makeObjects
+//
 void SourceExpression_UnarySub::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);

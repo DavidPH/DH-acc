@@ -65,7 +65,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
 	context->addVariable(functionVariable);
 
 	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionArgCount, functionReturn->size(token.getPosition()), true);
-	return create_value_variable(functionVariable, token.getPosition());
+   return create_value_variable(functionVariable, context, token.getPosition());
 }
 
 //
@@ -120,14 +120,18 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 	SourceExpression::Pointer functionExpression(make_expression_single(in, blocks, functionContext));
 	functionExpression->addLabel(functionLabel);
 	blocks->push_back(functionExpression);
-	blocks->push_back(create_branch_return(create_value_data(functionReturn, true, token.getPosition()), functionContext, token.getPosition()));
+   SourceExpression::Pointer functionExprData =
+      create_value_data_garbage(functionReturn, functionContext, token.getPosition());
+   SourceExpression::Pointer functionExprRetn =
+      create_branch_return(functionExprData, functionContext, token.getPosition());
+   blocks->push_back(functionExprRetn);
 
 	// functionVarCount
 	int functionVarCount(functionContext->getLimit(SourceVariable::SC_REGISTER));
 
 	ObjectExpression::add_function(functionNameObject, functionLabel, functionArgCount, functionVarCount, functionReturn->size(token.getPosition()), false);
 
-	return create_value_variable(functionVariable, token.getPosition());
+   return create_value_variable(functionVariable, context, token.getPosition());
 }
 
 // EOF

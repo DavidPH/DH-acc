@@ -28,56 +28,94 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BranchGoto
+//
 class SourceExpression_BranchGoto : public SourceExpression
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchGoto, SourceExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BranchGoto,
+                                   SourceExpression);
 
 public:
-	SourceExpression_BranchGoto(std::string const & label, SourcePosition const & position);
-	SourceExpression_BranchGoto(SourceExpression *expr, SourcePosition const &position);
+   SourceExpression_BranchGoto(std::string const &label, SRCEXP_EXPR_ARGS);
+   SourceExpression_BranchGoto(SRCEXP_EXPRUNA_ARGS);
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	SourceExpression::Pointer expr;
-	std::string _label;
+   SourceExpression::Pointer expr;
+   std::string labelGoto;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_branch_break(SourceContext * context, SourcePosition const & position)
+//
+// SourceExpression::create_branch_break
+//
+SRCEXP_EXPRBRA_DEFN(0, break)
 {
-	return new SourceExpression_BranchGoto(context->getLabelBreak(position), position);
+   return new SourceExpression_BranchGoto(context->getLabelBreak(position),
+                                          context, position);
 }
 
-SourceExpression::Pointer SourceExpression::create_branch_continue(SourceContext * context, SourcePosition const & position)
+//
+// SourceExpression::create_branch_continue
+//
+SRCEXP_EXPRBRA_DEFN(0, continue)
 {
-	return new SourceExpression_BranchGoto(context->getLabelContinue(position), position);
+   return new SourceExpression_BranchGoto(context->getLabelContinue(position),
+                                          context, position);
 }
 
-SourceExpression::Pointer SourceExpression::create_branch_goto(std::string const & label, SourceContext *, SourcePosition const & position)
+//
+// SourceExpression::create_branch_goto
+//
+SRCEXP_EXPRBRA_DEFN(s, goto)
 {
-	return new SourceExpression_BranchGoto(label, position);
+   return new SourceExpression_BranchGoto(value, context, position);
 }
 
-SourceExpression::Pointer SourceExpression::create_branch_goto(SourceExpression *expr, SourceContext *, SourcePosition const &position)
+
+//
+// SourceExpression::create_branch_goto
+//
+SRCEXP_EXPRBRA_DEFN(u, goto)
 {
-	return new SourceExpression_BranchGoto(expr, position);
+   return new SourceExpression_BranchGoto(expr, context, position);
 }
 
-
-
-SourceExpression_BranchGoto::SourceExpression_BranchGoto(std::string const & label, SourcePosition const & position_) : Super(position_), _label(label)
+//
+// SourceExpression_BranchGoto::SourceExpression_BranchGoto
+//
+SourceExpression_BranchGoto::
+SourceExpression_BranchGoto(std::string const &_label, SRCEXP_EXPR_PARM)
+                            : Super(SRCEXP_EXPR_PASS),
+                              labelGoto(_label)
 {
 }
 
-SourceExpression_BranchGoto::SourceExpression_BranchGoto(SourceExpression *_expr, SourcePosition const &_position) : Super(_position), expr(_expr)
+//
+// SourceExpression_BranchGoto::SourceExpression_BranchGoto
+//
+SourceExpression_BranchGoto::
+SourceExpression_BranchGoto(SRCEXP_EXPRUNA_PARM)
+                            : Super(SRCEXP_EXPR_PASS), expr(_expr)
 {
-	if (expr->getType()->vt != VariableType::VT_LABEL)
-		expr = create_value_cast(expr, VariableType::get_vt_label(), position);
+   if (expr->getType()->vt != VariableType::VT_LABEL)
+      expr = create_value_cast(expr, VariableType::get_vt_label(), context,
+                               position);
 }
 
+//
+// SourceExpression_BranchGoto::virtual_makeObjects
+//
 void SourceExpression_BranchGoto::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
@@ -98,7 +136,7 @@ void SourceExpression_BranchGoto::virtual_makeObjects(ObjectVector *objects, Var
 		}
 	}
 	else
-		objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(_label));
+		objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelGoto));
 }
 
 // EOF

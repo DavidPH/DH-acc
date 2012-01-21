@@ -30,14 +30,20 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_ValueVariable
+//
 class SourceExpression_ValueVariable : public SourceExpression
 {
-   MAKE_COUNTER_CLASS_BASE(SourceExpression_ValueVariable, SourceExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueVariable,
+                                   SourceExpression);
 
 public:
-   SourceExpression_ValueVariable(SourceVariable *var,
-                                  SourcePosition const &position);
+   SourceExpression_ValueVariable(SourceVariable *var, SRCEXP_EXPR_ARGS);
 
    virtual bool canGetData() const;
 
@@ -50,110 +56,118 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::create_value_char
 //
-SourceExpression::Pointer SourceExpression::
-create_value_char(SourceTokenC const &token)
+SRCEXP_EXPRVAL_DEFN(c, char)
 {
-   if (token.getData().size() != 1)
-   {
-      throw SourceException("invalid length for character literal",
-                            token.getPosition(), "SourceExpression");
-   }
-
-   ObjectExpression::Pointer charVarData
-      = ObjectExpression::create_value_int(token.getData()[0],
-                                           token.getPosition());
+   ObjectExpression::Pointer charVarData =
+      ObjectExpression::create_value_int(value, position);
 
    VariableType const *charVarType = VariableType::get_vt_char();
 
-   SourceVariable::Pointer charVariable
-      = SourceVariable::create_literal(charVarType, charVarData,
-                                       token.getPosition());
+   SourceVariable::Pointer charVariable =
+      SourceVariable::create_literal(charVarType, charVarData, position);
 
-   return create_value_variable(charVariable, token.getPosition());
+   return create_value_variable(charVariable, context, position);
+}
+
+//
+// SourceExpression::create_value_char
+//
+SRCEXP_EXPRVAL_DEFN(s, char)
+{
+   if (value.size() != 1)
+   {
+      throw SourceException("invalid length for character literal", position,
+                            "SourceExpression");
+   }
+
+   return create_value_char(value[0], context, position);
 }
 
 //
 // SourceExpression::create_value_int
 //
-SourceExpression::Pointer SourceExpression::
-create_value_int(bigsint value, SourcePosition const &position)
+SRCEXP_EXPRVAL_DEFN(i, int)
 {
-   ObjectExpression::Pointer intVarData
-      = ObjectExpression::create_value_int(value, position);
+   ObjectExpression::Pointer intVarData =
+      ObjectExpression::create_value_int(value, position);
 
    VariableType const *intVarType = VariableType::get_vt_int();
 
-   SourceVariable::Pointer intVariable
-      = SourceVariable::create_literal(intVarType, intVarData, position);
+   SourceVariable::Pointer intVariable =
+      SourceVariable::create_literal(intVarType, intVarData, position);
 
-   return create_value_variable(intVariable, position);
+   return create_value_variable(intVariable, context, position);
 }
 
 //
 // SourceExpression::create_value_int
 //
-SourceExpression::Pointer SourceExpression::
-create_value_int(SourceTokenC const &token)
+SRCEXP_EXPRVAL_DEFN(s, int)
 {
-   return create_value_int(get_bigsint(token), token.getPosition());
+   return create_value_int(get_bigsint(value, position), context, position);
 }
 
 //
 // SourceExpression::create_value_real
 //
-SourceExpression::Pointer SourceExpression::
-create_value_real(SourceTokenC const &token)
+SRCEXP_EXPRVAL_DEFN(r, real)
 {
-   ObjectExpression::Pointer realVarData
-      = ObjectExpression::create_value_float(get_bigreal(token),
-                                             token.getPosition());
+   ObjectExpression::Pointer realVarData =
+      ObjectExpression::create_value_float(value, position);
 
    VariableType const *realVarType = VariableType::get_vt_real();
 
-   SourceVariable::Pointer realVariable
-      = SourceVariable::create_literal(realVarType, realVarData,
-                                       token.getPosition());
+   SourceVariable::Pointer realVariable =
+      SourceVariable::create_literal(realVarType, realVarData, position);
 
-   return create_value_variable(realVariable, token.getPosition());
+   return create_value_variable(realVariable, context, position);
+}
+
+//
+// SourceExpression::create_value_real
+//
+SRCEXP_EXPRVAL_DEFN(s, real)
+{
+   return create_value_real(get_bigsint(value, position), context, position);
 }
 
 //
 // SourceExpression::create_value_string
 //
-SourceExpression::Pointer SourceExpression::
-create_value_string(SourceTokenC const &token)
+SRCEXP_EXPRVAL_DEFN(s, string)
 {
-   std::string stringVarData = ObjectData_String::add(token.getData());
+   std::string stringVarData = ObjectData_String::add(value);
 
    VariableType const *stringVarType = VariableType::get_vt_string();
 
    SourceVariable::Pointer stringVariable
-      = SourceVariable::create_literal(stringVarType, stringVarData,
-                                       token.getPosition());
+      = SourceVariable::create_literal(stringVarType, stringVarData, position);
 
-   return create_value_variable(stringVariable, token.getPosition());
+   return create_value_variable(stringVariable, context, position);
 }
 
 //
 // SourceExpression::create_value_variable
 //
-SourceExpression::Pointer SourceExpression::
-create_value_variable(SourceVariable *var, SourcePosition const &position)
+SRCEXP_EXPRVAL_DEFN(v, variable)
 {
-   return new SourceExpression_ValueVariable(var, position);
+   return new SourceExpression_ValueVariable(var, context, position);
 }
 
 //
 // SourceExpression_ValueVariable::SourceExpression_ValueVariable
 //
 SourceExpression_ValueVariable::
-SourceExpression_ValueVariable(SourceVariable *_var,
-                               SourcePosition const &_position)
-                               : Super(_position), var(_var)
+SourceExpression_ValueVariable(SourceVariable *_var, SRCEXP_EXPR_PARM)
+                               : Super(SRCEXP_EXPR_PASS),
+                                 var(_var)
 {
    if (!_var->getType()->complete)
       throw SourceException("incomplete type", position, getName());

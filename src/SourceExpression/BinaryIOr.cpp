@@ -28,13 +28,20 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BinaryIOr
+//
 class SourceExpression_BinaryIOr : public SourceExpression_Binary
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BinaryIOr, SourceExpression_Binary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryIOr,
+                                   SourceExpression_Binary);
 
 public:
-	SourceExpression_BinaryIOr(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position);
+   SourceExpression_BinaryIOr(SRCEXP_EXPRBIN_ARGS);
 
 	virtual CounterPointer<ObjectExpression> makeObject() const;
 
@@ -43,13 +50,24 @@ private:
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_binary_ior(SourceExpression * exprL, SourceExpression * exprR, SourcePosition const & position)
+//
+// SourceExpression::create_binary_ior
+//
+SRCEXP_EXPRBIN_DEFN(ior)
 {
-	return new SourceExpression_BinaryIOr(exprL, exprR, position);
+   return new SourceExpression_BinaryIOr(exprL, exprR, context, position);
 }
 
-SourceExpression_BinaryIOr::SourceExpression_BinaryIOr(SourceExpression * exprL_, SourceExpression * exprR_, SourcePosition const & position_) : Super(exprL_, exprR_, false, position_)
+//
+// SourceExpression_BinaryIOr::SourceExpression_BinaryIOr
+//
+SourceExpression_BinaryIOr::
+SourceExpression_BinaryIOr(SRCEXP_EXPRBIN_PARM)
+                           : Super(false, SRCEXP_EXPRBIN_PASS)
 {
 }
 

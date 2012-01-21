@@ -27,26 +27,45 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// SourceExpression_BranchNot
+//
 class SourceExpression_BranchNot : public SourceExpression_Unary
 {
-	MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchNot, SourceExpression_Unary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BranchNot,
+                                   SourceExpression_Unary);
 
 public:
-	SourceExpression_BranchNot(SourceExpression * expr, SourcePosition const & position);
+   SourceExpression_BranchNot(SRCEXP_EXPRUNA_ARGS);
 
 private:
 	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-SourceExpression::Pointer SourceExpression::create_branch_not(SourceExpression * expr, SourceContext *, SourcePosition const & position)
+//
+// SourceExpression::create_branch_not
+//
+SRCEXP_EXPRBRA_DEFN(u, not)
 {
-	return new SourceExpression_BranchNot(expr, position);
+   return new SourceExpression_BranchNot(expr, context, position);
 }
 
-SourceExpression_BranchNot::SourceExpression_BranchNot(SourceExpression * expr_, SourcePosition const & position_) : Super(expr_, VariableType::get_vt_boolsoft(), position_)
+//
+// SourceExpression_BranchNot::SourceExpression_BranchNot
+//
+SourceExpression_BranchNot::
+SourceExpression_BranchNot(SRCEXP_EXPRUNA_PARM)
+                           : Super(VariableType::get_vt_boolsoft(),
+                                   SRCEXP_EXPRUNA_PASS)
 {
 }
 

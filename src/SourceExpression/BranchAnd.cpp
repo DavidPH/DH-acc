@@ -25,40 +25,38 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../SourceContext.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 //
 // SourceExpression_BranchAnd
 //
 class SourceExpression_BranchAnd : public SourceExpression_BinaryCompare
 {
-   MAKE_COUNTER_CLASS_BASE(SourceExpression_BranchAnd,
-                           SourceExpression_BinaryCompare);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BranchAnd,
+                                   SourceExpression_BinaryCompare);
 
 public:
-   SourceExpression_BranchAnd(SourceExpression *exprL, SourceExpression *exprR,
-                              SourceContext *context,
-                              SourcePosition const &position);
+   SourceExpression_BranchAnd(SRCEXP_EXPRBIN_ARGS);
 
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
-
-   std::string label0;
-   std::string labelEnd;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::create_branch_and
 //
-SourceExpression::Pointer SourceExpression::
-create_branch_and(SourceExpression *exprL, SourceExpression *exprR,
-                  SourceContext *context, SourcePosition const &position)
+SRCEXP_EXPRBRA_DEFN(b, and)
 {
    return new SourceExpression_BranchAnd(exprL, exprR, context, position);
 }
@@ -67,15 +65,9 @@ create_branch_and(SourceExpression *exprL, SourceExpression *exprR,
 // SourceExpression_BranchAnd::SourceExpression_BranchAnd
 //
 SourceExpression_BranchAnd::
-SourceExpression_BranchAnd(SourceExpression *_exprL, SourceExpression *_exprR,
-                           SourceContext *context,
-                           SourcePosition const &_position)
-                           : Super(_exprL, _exprR, true, _position)
+SourceExpression_BranchAnd(SRCEXP_EXPRBIN_PARM)
+                           : Super(true, SRCEXP_EXPRBIN_PASS)
 {
-   std::string label(context->makeLabel());
-
-   label0   = label + "_0";
-   labelEnd = label + "_end";
 }
 
 //
@@ -91,6 +83,9 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    VariableData::Pointer src = VariableData::create_stack(srcSize);
    VariableData::Pointer tmp = VariableData::create_stack(srcSize);
+
+   std::string label0   = label + "_0";
+   std::string labelEnd = label + "_end";
 
    if (dst->type == VariableData::MT_VOID)
    {
