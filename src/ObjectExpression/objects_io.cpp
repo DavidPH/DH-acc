@@ -143,9 +143,17 @@ void read_object(std::istream * in, ObjectExpression::Pointer * out)
 		*out = ObjectExpression::create_binary_xor(in);
 		break;
 
+   case ObjectExpression::OT_CAST:
+      *out = ObjectExpression::create_cast(in);
+      break;
+
 	case ObjectExpression::OT_UNARY_ADD:
 		*out = ObjectExpression::create_unary_add(in);
 		break;
+
+   case ObjectExpression::OT_UNARY_LOGNOT:
+      *out = ObjectExpression::create_unary_lognot(in);
+      break;
 
 	case ObjectExpression::OT_UNARY_SUB:
 		*out = ObjectExpression::create_unary_sub(in);

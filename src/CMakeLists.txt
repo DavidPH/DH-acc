@@ -27,11 +27,13 @@ add_executable(DH-acc
 	ObjectExpression/BinaryMul.cpp
 	ObjectExpression/BinarySub.cpp
 	ObjectExpression/BinaryXOr.cpp
+   ObjectExpression/Cast.cpp
 	ObjectExpression/do_deferred_allocation.cpp
 	ObjectExpression/iter.cpp
 	ObjectExpression/objects_io.cpp
 	ObjectExpression/Unary.cpp
 	ObjectExpression/UnaryAdd.cpp
+   ObjectExpression/UnaryLogNot.cpp
 	ObjectExpression/UnarySub.cpp
 	ObjectExpression/ValueFloat.cpp
 	ObjectExpression/ValueInt.cpp

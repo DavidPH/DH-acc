@@ -127,7 +127,11 @@ public:
 	static Pointer create_binary_sub(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_xor(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 
+   static Pointer create_cast_float_to_int(ObjectExpression *expr, SourcePosition const &position);
+   static Pointer create_cast_int_to_float(ObjectExpression *expr, SourcePosition const &position);
+
 	static Pointer create_unary_add(ObjectExpression * expr, SourcePosition const & position);
+   static Pointer create_unary_lognot(ObjectExpression *expr, SourcePosition const &position);
 	static Pointer create_unary_sub(ObjectExpression * expr, SourcePosition const & position);
 
 	static Pointer create_value_ocode(ObjectCodeSet const & ocode, SourcePosition const & position);
@@ -181,7 +185,10 @@ protected:
 		OT_BINARY_SUB,
 		OT_BINARY_XOR,
 
+      OT_CAST,
+
 		OT_UNARY_ADD,
+      OT_UNARY_LOGNOT,
 		OT_UNARY_SUB,
 
 		OT_VALUE_FLOAT,
@@ -214,7 +221,10 @@ protected:
 	static Pointer create_binary_sub(std::istream * in);
 	static Pointer create_binary_xor(std::istream * in);
 
+   static Pointer create_cast(std::istream *in);
+
 	static Pointer create_unary_add(std::istream * in);
+   static Pointer create_unary_lognot(std::istream *in);
 	static Pointer create_unary_sub(std::istream * in);
 
 	static Pointer create_value_float(std::istream * in);
