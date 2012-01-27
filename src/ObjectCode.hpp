@@ -24,10 +24,13 @@
 
 #include <ostream>
 
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
 class SourcePosition;
 class SourceTokenC;
-
-
 
 enum ObjectCode
 {
@@ -613,22 +616,44 @@ enum ObjectCode
    // =========================================================================
    // ACS                                                                     |
 
-   OCODE_ACS_LINESPEC1,
-   OCODE_ACS_LINESPEC1_IMM,
-   OCODE_ACS_LINESPEC2,
-   OCODE_ACS_LINESPEC2_IMM,
-   OCODE_ACS_LINESPEC3,
-   OCODE_ACS_LINESPEC3_IMM,
-   OCODE_ACS_LINESPEC4,
-   OCODE_ACS_LINESPEC4_IMM,
-   OCODE_ACS_LINESPEC5,
-   OCODE_ACS_LINESPEC5_IMM,
+   OCODE_ACS_GAME_SKILL,
+   OCODE_ACS_GAME_TIMER,
+   OCODE_ACS_GAME_TYPE,
+   OCODE_ACS_LINE_BLOCK_SET,
+   OCODE_ACS_LINE_SIDE,
+   OCODE_ACS_LINE_SPEC_CLEAR,
+   OCODE_ACS_LINE_SPEC_EXEC1,
+   OCODE_ACS_LINE_SPEC_EXEC1_IMM,
+   OCODE_ACS_LINE_SPEC_EXEC2,
+   OCODE_ACS_LINE_SPEC_EXEC2_IMM,
+   OCODE_ACS_LINE_SPEC_EXEC3,
+   OCODE_ACS_LINE_SPEC_EXEC3_IMM,
+   OCODE_ACS_LINE_SPEC_EXEC4,
+   OCODE_ACS_LINE_SPEC_EXEC4_IMM,
+   OCODE_ACS_LINE_SPEC_EXEC5,
+   OCODE_ACS_LINE_SPEC_EXEC5_IMM,
+   OCODE_ACS_LINE_SPEC_SET,
+   OCODE_ACS_PLAYER_COUNT,
    OCODE_ACS_SCRIPT_RESTART,
    OCODE_ACS_SCRIPT_SUSPEND,
    OCODE_ACS_SCRIPT_TERMINATE,
-   OCODE_ACS_THINGCOUNT,
-   OCODE_ACS_THINGCOUNT_IMM,
-   OCODE_ACS_TIMER,
+   OCODE_ACS_SOUND_AMBIENT,
+   OCODE_ACS_SOUND_SECTOR,
+   OCODE_ACS_SOUND_SEQUENCE,
+   OCODE_ACS_SOUND_THING,
+   OCODE_ACS_TEXTURE_SET_CEILING,
+   OCODE_ACS_TEXTURE_SET_CEILING_IMM,
+   OCODE_ACS_TEXTURE_SET_FLOOR,
+   OCODE_ACS_TEXTURE_SET_FLOOR_IMM,
+   OCODE_ACS_TEXTURE_SET_LINE,
+   OCODE_ACS_THING_COUNT,
+   OCODE_ACS_THING_COUNT_IMM,
+   OCODE_ACS_WAIT_POLYOBJECT,
+   OCODE_ACS_WAIT_POLYOBJECT_IMM,
+   OCODE_ACS_WAIT_SCRIPT,
+   OCODE_ACS_WAIT_SCRIPT_IMM,
+   OCODE_ACS_WAIT_SECTOR,
+   OCODE_ACS_WAIT_SECTOR_IMM,
 
 
    // =========================================================================
@@ -723,6 +748,9 @@ struct ObjectCodeSet
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 ObjectCode ocode_get_code(SourceTokenC const & token);
 ObjectCode ocode_get_code(std::string const & data, SourcePosition const & position);
@@ -739,9 +767,5 @@ void read_object(std::istream * in, ObjectCodeSet * out);
 void write_object(std::ostream * out, ObjectCode const & in);
 void write_object(std::ostream * out, ObjectCodeSet const & in);
 
-
-
 #endif /* HPP_ObjectCode_ */
-
-
 

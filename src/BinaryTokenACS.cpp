@@ -26,25 +26,43 @@
 #include "SourceException.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
 
 int BinaryTokenACS::_arg_counts[BCODE_NONE];
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// BinaryTokenACS::BinaryTokenACS
+//
 BinaryTokenACS::BinaryTokenACS(BinaryCode code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args) : _args(args), _code(code), _labels(labels), _position(position)
 {
-
 }
 
+//
+// BinaryTokenACS::addLabel
+//
 void BinaryTokenACS::addLabel(std::string const & label)
 {
 	_labels.push_back(label);
 }
 
+//
+// BinaryTokenACS::init
+//
 void BinaryTokenACS::init()
 {
 	init(_arg_counts);
 }
+
+//
+// BinaryTokenACS::init
+//
 void BinaryTokenACS::init(int * argCounts)
 {
 	#define DO_INIT(NAME,ARGC)\
@@ -133,23 +151,45 @@ void BinaryTokenACS::init(int * argCounts)
 	DO_INIT(MISC_RANDOM,     0);
 	DO_INIT(MISC_RANDOM_IMM, 2);
 
-	// ACS
-	DO_INIT(LINESPEC1,        1);
-	DO_INIT(LINESPEC1_IMM,    2);
-	DO_INIT(LINESPEC2,        1);
-	DO_INIT(LINESPEC2_IMM,    3);
-	DO_INIT(LINESPEC3,        1);
-	DO_INIT(LINESPEC3_IMM,    4);
-	DO_INIT(LINESPEC4,        1);
-	DO_INIT(LINESPEC4_IMM,    5);
-	DO_INIT(LINESPEC5,        1);
-	DO_INIT(LINESPEC5_IMM,    6);
-	DO_INIT(SCRIPT_RESTART,   0);
-	DO_INIT(SCRIPT_SUSPEND,   0);
-	DO_INIT(SCRIPT_TERMINATE, 0);
-	DO_INIT(THINGCOUNT,       0);
-	DO_INIT(THINGCOUNT_IMM,   2);
-	DO_INIT(TIMER,            0);
+   // ACS
+   DO_INIT(GAME_SKILL,              0);
+   DO_INIT(GAME_TIMER,              0);
+   DO_INIT(GAME_TYPE,               0);
+   DO_INIT(LINE_BLOCK_SET,          0);
+   DO_INIT(LINE_SIDE,               0);
+   DO_INIT(LINE_SPEC_CLEAR,         0);
+   DO_INIT(LINE_SPEC_EXEC1,         1);
+   DO_INIT(LINE_SPEC_EXEC1_IMM,     2);
+   DO_INIT(LINE_SPEC_EXEC2,         1);
+   DO_INIT(LINE_SPEC_EXEC2_IMM,     3);
+   DO_INIT(LINE_SPEC_EXEC3,         1);
+   DO_INIT(LINE_SPEC_EXEC3_IMM,     4);
+   DO_INIT(LINE_SPEC_EXEC4,         1);
+   DO_INIT(LINE_SPEC_EXEC4_IMM,     5);
+   DO_INIT(LINE_SPEC_EXEC5,         1);
+   DO_INIT(LINE_SPEC_EXEC5_IMM,     6);
+   DO_INIT(LINE_SPEC_SET,           0);
+   DO_INIT(PLAYER_COUNT,            0);
+   DO_INIT(SCRIPT_RESTART,          0);
+   DO_INIT(SCRIPT_SUSPEND,          0);
+   DO_INIT(SCRIPT_TERMINATE,        0);
+   DO_INIT(SOUND_AMBIENT,           0);
+   DO_INIT(SOUND_SECTOR,            0);
+   DO_INIT(SOUND_SEQUENCE,          0);
+   DO_INIT(SOUND_THING,             0);
+   DO_INIT(TEXTURE_SET_CEILING,     0);
+   DO_INIT(TEXTURE_SET_CEILING_IMM, 2);
+   DO_INIT(TEXTURE_SET_FLOOR,       0);
+   DO_INIT(TEXTURE_SET_FLOOR_IMM,   2);
+   DO_INIT(TEXTURE_SET_LINE,        0);
+   DO_INIT(THING_COUNT,             0);
+   DO_INIT(THING_COUNT_IMM,         2);
+   DO_INIT(WAIT_POLYOBJECT,         0);
+   DO_INIT(WAIT_POLYOBJECT_IMM,     1);
+   DO_INIT(WAIT_SCRIPT,             0);
+   DO_INIT(WAIT_SCRIPT_IMM,         1);
+   DO_INIT(WAIT_SECTOR,             0);
+   DO_INIT(WAIT_SECTOR_IMM,         1);
 
 	// ACS Common Extensions
 
@@ -166,20 +206,33 @@ void BinaryTokenACS::init(int * argCounts)
 	#undef DO_INIT
 }
 
+//
+// BinaryTokenACS::label_begin
+//
 BinaryTokenACS::label_iterator BinaryTokenACS::label_begin() const
 {
 	return _labels.begin();
 }
+
+//
+// BinaryTokenACS::label_end
+//
 BinaryTokenACS::label_iterator BinaryTokenACS::label_end() const
 {
 	return _labels.end();
 }
 
+//
+// BinaryTokenACS::size
+//
 size_t BinaryTokenACS::size() const
 {
 	return _arg_counts[_code]*4 + 4;
 }
 
+//
+// BinaryTokenACS::writeACS0
+//
 void BinaryTokenACS::writeACS0(std::ostream * const out) const
 {
 	write_ACS0_32(out, _code);
@@ -193,6 +246,9 @@ void BinaryTokenACS::writeACS0(std::ostream * const out) const
 	}
 }
 
+//
+// BinaryTokenACS::write_all
+//
 void BinaryTokenACS::write_all(std::ostream * out, std::vector<BinaryTokenACS> const & instructions)
 {
 	output_prep(instructions);
@@ -208,4 +264,5 @@ void BinaryTokenACS::write_all(std::ostream * out, std::vector<BinaryTokenACS> c
 	}
 }
 
+// EOF
 

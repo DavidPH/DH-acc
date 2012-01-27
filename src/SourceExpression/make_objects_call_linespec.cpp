@@ -28,7 +28,13 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpression::make_objects_call_linespec
+//
 void SourceExpression::make_objects_call_linespec(ObjectVector *objects, VariableData *dst, VariableType const *type, ObjectExpression *data, std::vector<SourceExpression::Pointer> const &args, SourcePosition const &position)
 {
 	if (type->sizeCall(position) > 5)
@@ -58,12 +64,12 @@ void SourceExpression::make_objects_call_linespec(ObjectVector *objects, Variabl
 	{
 		switch (type->sizeCall(position))
 		{
-		case 0: ocode = OCODE_ACS_LINESPEC1; objects->addTokenPushZero(); break;
-		case 1: ocode = OCODE_ACS_LINESPEC1; break;
-		case 2: ocode = OCODE_ACS_LINESPEC2; break;
-		case 3: ocode = OCODE_ACS_LINESPEC3; break;
-		case 4: ocode = OCODE_ACS_LINESPEC4; break;
-		case 5: ocode = OCODE_ACS_LINESPEC5; break;
+      case 0: ocode = OCODE_ACS_LINE_SPEC_EXEC1; objects->addTokenPushZero(); break;
+      case 1: ocode = OCODE_ACS_LINE_SPEC_EXEC1; break;
+      case 2: ocode = OCODE_ACS_LINE_SPEC_EXEC2; break;
+      case 3: ocode = OCODE_ACS_LINE_SPEC_EXEC3; break;
+      case 4: ocode = OCODE_ACS_LINE_SPEC_EXEC4; break;
+      case 5: ocode = OCODE_ACS_LINE_SPEC_EXEC5; break;
 		default: throw SourceException("unexpected arg count to call linespec", position, "SourceExpression");
 		}
 	}
@@ -80,4 +86,5 @@ void SourceExpression::make_objects_call_linespec(ObjectVector *objects, Variabl
 	make_objects_memcpy_post(objects, dst, src, position);
 }
 
+// EOF
 

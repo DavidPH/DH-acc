@@ -29,12 +29,23 @@
 #include <string>
 
 
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
 
 static std::map<std::string, ObjectCode> _ocode_map;
 static char const * _ocode_str[OCODE_NONE+1];
 
 static struct _ocode_init_s {_ocode_init_s();} _ocode_init;
 
+
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
+
+//
+// _ocode_init_s::_ocode_init_s
+//
 _ocode_init_s::_ocode_init_s()
 {
 	#define DO_INIT(NAME)\
@@ -551,24 +562,46 @@ _ocode_init_s::_ocode_init_s()
 	DO_INIT(MISC_STRLEN);
 
 
-	// ACS
+   // ACS
 
-	DO_INIT(ACS_LINESPEC1);
-	DO_INIT(ACS_LINESPEC1_IMM);
-	DO_INIT(ACS_LINESPEC2);
-	DO_INIT(ACS_LINESPEC2_IMM);
-	DO_INIT(ACS_LINESPEC3);
-	DO_INIT(ACS_LINESPEC3_IMM);
-	DO_INIT(ACS_LINESPEC4);
-	DO_INIT(ACS_LINESPEC4_IMM);
-	DO_INIT(ACS_LINESPEC5);
-	DO_INIT(ACS_LINESPEC5_IMM);
-	DO_INIT(ACS_SCRIPT_RESTART);
-	DO_INIT(ACS_SCRIPT_SUSPEND);
-	DO_INIT(ACS_SCRIPT_TERMINATE);
-	DO_INIT(ACS_THINGCOUNT);
-	DO_INIT(ACS_THINGCOUNT_IMM);
-	DO_INIT(ACS_TIMER);
+   DO_INIT(ACS_GAME_SKILL);
+   DO_INIT(ACS_GAME_TIMER);
+   DO_INIT(ACS_GAME_TYPE);
+   DO_INIT(ACS_LINE_BLOCK_SET);
+   DO_INIT(ACS_LINE_SIDE);
+   DO_INIT(ACS_LINE_SPEC_CLEAR);
+   DO_INIT(ACS_LINE_SPEC_EXEC1);
+   DO_INIT(ACS_LINE_SPEC_EXEC1_IMM);
+   DO_INIT(ACS_LINE_SPEC_EXEC2);
+   DO_INIT(ACS_LINE_SPEC_EXEC2_IMM);
+   DO_INIT(ACS_LINE_SPEC_EXEC3);
+   DO_INIT(ACS_LINE_SPEC_EXEC3_IMM);
+   DO_INIT(ACS_LINE_SPEC_EXEC4);
+   DO_INIT(ACS_LINE_SPEC_EXEC4_IMM);
+   DO_INIT(ACS_LINE_SPEC_EXEC5);
+   DO_INIT(ACS_LINE_SPEC_EXEC5_IMM);
+   DO_INIT(ACS_LINE_SPEC_SET);
+   DO_INIT(ACS_PLAYER_COUNT);
+   DO_INIT(ACS_SCRIPT_RESTART);
+   DO_INIT(ACS_SCRIPT_SUSPEND);
+   DO_INIT(ACS_SCRIPT_TERMINATE);
+   DO_INIT(ACS_SOUND_AMBIENT);
+   DO_INIT(ACS_SOUND_SECTOR);
+   DO_INIT(ACS_SOUND_SEQUENCE);
+   DO_INIT(ACS_SOUND_THING);
+   DO_INIT(ACS_TEXTURE_SET_CEILING);
+   DO_INIT(ACS_TEXTURE_SET_CEILING_IMM);
+   DO_INIT(ACS_TEXTURE_SET_FLOOR);
+   DO_INIT(ACS_TEXTURE_SET_FLOOR_IMM);
+   DO_INIT(ACS_TEXTURE_SET_LINE);
+   DO_INIT(ACS_THING_COUNT);
+   DO_INIT(ACS_THING_COUNT_IMM);
+   DO_INIT(ACS_WAIT_POLYOBJECT);
+   DO_INIT(ACS_WAIT_POLYOBJECT_IMM);
+   DO_INIT(ACS_WAIT_SCRIPT);
+   DO_INIT(ACS_WAIT_SCRIPT_IMM);
+   DO_INIT(ACS_WAIT_SECTOR);
+   DO_INIT(ACS_WAIT_SECTOR_IMM);
 
 
 	// ACS Common Extensions
@@ -649,16 +682,24 @@ _ocode_init_s::_ocode_init_s()
 	#undef DO_INIT
 }
 
-
-
+//
+// ObjectCodeSet::ObjectCodeSet
+//
 ObjectCodeSet::ObjectCodeSet() : ocode(OCODE_NONE), ocode_imm(OCODE_NONE)
 {
 }
 
+//
+// ocode_get_code
+//
 ObjectCode ocode_get_code(SourceTokenC const & token)
 {
 	return ocode_get_code(token.getData(), token.getPosition());
 }
+
+//
+// ocode_get_code
+//
 ObjectCode ocode_get_code(std::string const & data, SourcePosition const & position)
 {
 	std::map<std::string, ObjectCode>::iterator codeIt(_ocode_map.find(data));
@@ -669,6 +710,9 @@ ObjectCode ocode_get_code(std::string const & data, SourcePosition const & posit
 	return codeIt->second;
 }
 
+//
+// ocode_is_push_noarg
+//
 bool ocode_is_push_noarg(ObjectCode ocode)
 {
 	switch (ocode)
@@ -698,6 +742,9 @@ bool ocode_is_push_noarg(ObjectCode ocode)
 	}
 }
 
+//
+// make_string<ObjectCode>
+//
 char const * make_string(ObjectCode ocode)
 {
 	if (ocode <= OCODE_NONE)
@@ -706,6 +753,9 @@ char const * make_string(ObjectCode ocode)
 		return "OCODE";
 }
 
+//
+// read_object<ObjectCode>
+//
 void read_object(std::istream * in, ObjectCode * out)
 {
 	read_object_raw(in, (char *)out, sizeof(*out));
@@ -713,16 +763,27 @@ void read_object(std::istream * in, ObjectCode * out)
 	if (*out > OCODE_NONE)
 		*out = OCODE_NONE;
 }
+
+//
+// read_object<ObjectCodeSet>
+//
 void read_object(std::istream * in, ObjectCodeSet * out)
 {
 	read_object(in, &out->ocode);
 	read_object(in, &out->ocode_imm);
 }
 
+//
+// write_object<ObjectCode>
+//
 void write_object(std::ostream * out, ObjectCode const & in)
 {
 	write_object_raw(out, (char const *)&in, sizeof(in));
 }
+
+//
+// write_object<ObjectCodeSet>
+//
 void write_object(std::ostream * out, ObjectCodeSet const & in)
 {
 	write_object(out, in.ocode);

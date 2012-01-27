@@ -25,6 +25,9 @@
 #include "../BinaryToken/make_tokens.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
 
 #define BINTOKACS_TOKENS_MAP_ARITHMETIC() \
    CASE_REMAP(ADD32F, ADD);               \
@@ -232,23 +235,45 @@
    CASE_REMAP_PRE(MISC, RANDOM32U_IMM, RANDOM_IMM)  /* WARNING */
 
 
-#define BINTOKACS_TOKENS_MAP_ACS() \
-   CASE_MAP_ACS(LINESPEC1);        \
-   CASE_MAP_ACS(LINESPEC1_IMM);    \
-   CASE_MAP_ACS(LINESPEC2);        \
-   CASE_MAP_ACS(LINESPEC2_IMM);    \
-   CASE_MAP_ACS(LINESPEC3);        \
-   CASE_MAP_ACS(LINESPEC3_IMM);    \
-   CASE_MAP_ACS(LINESPEC4);        \
-   CASE_MAP_ACS(LINESPEC4_IMM);    \
-   CASE_MAP_ACS(LINESPEC5);        \
-   CASE_MAP_ACS(LINESPEC5_IMM);    \
-   CASE_MAP_ACS(SCRIPT_RESTART);   \
-   CASE_MAP_ACS(SCRIPT_SUSPEND);   \
-   CASE_MAP_ACS(SCRIPT_TERMINATE); \
-   CASE_MAP_ACS(THINGCOUNT);       \
-   CASE_MAP_ACS(THINGCOUNT_IMM);   \
-   CASE_MAP_ACS(TIMER)
+#define BINTOKACS_TOKENS_MAP_ACS()        \
+   CASE_MAP_ACS(GAME_SKILL);              \
+   CASE_MAP_ACS(GAME_TIMER);              \
+   CASE_MAP_ACS(GAME_TYPE);               \
+   CASE_MAP_ACS(LINE_BLOCK_SET);          \
+   CASE_MAP_ACS(LINE_SIDE);               \
+   CASE_MAP_ACS(LINE_SPEC_CLEAR);         \
+   CASE_MAP_ACS(LINE_SPEC_EXEC1);         \
+   CASE_MAP_ACS(LINE_SPEC_EXEC1_IMM);     \
+   CASE_MAP_ACS(LINE_SPEC_EXEC2);         \
+   CASE_MAP_ACS(LINE_SPEC_EXEC2_IMM);     \
+   CASE_MAP_ACS(LINE_SPEC_EXEC3);         \
+   CASE_MAP_ACS(LINE_SPEC_EXEC3_IMM);     \
+   CASE_MAP_ACS(LINE_SPEC_EXEC4);         \
+   CASE_MAP_ACS(LINE_SPEC_EXEC4_IMM);     \
+   CASE_MAP_ACS(LINE_SPEC_EXEC5);         \
+   CASE_MAP_ACS(LINE_SPEC_EXEC5_IMM);     \
+   CASE_MAP_ACS(LINE_SPEC_SET);           \
+   CASE_MAP_ACS(PLAYER_COUNT);            \
+   CASE_MAP_ACS(SCRIPT_RESTART);          \
+   CASE_MAP_ACS(SCRIPT_SUSPEND);          \
+   CASE_MAP_ACS(SCRIPT_TERMINATE);        \
+   CASE_MAP_ACS(SOUND_AMBIENT);           \
+   CASE_MAP_ACS(SOUND_SECTOR);            \
+   CASE_MAP_ACS(SOUND_SEQUENCE);          \
+   CASE_MAP_ACS(SOUND_THING);             \
+   CASE_MAP_ACS(TEXTURE_SET_CEILING);     \
+   CASE_MAP_ACS(TEXTURE_SET_CEILING_IMM); \
+   CASE_MAP_ACS(TEXTURE_SET_FLOOR);       \
+   CASE_MAP_ACS(TEXTURE_SET_FLOOR_IMM);   \
+   CASE_MAP_ACS(TEXTURE_SET_LINE);        \
+   CASE_MAP_ACS(THING_COUNT);             \
+   CASE_MAP_ACS(THING_COUNT_IMM);         \
+   CASE_MAP_ACS(WAIT_POLYOBJECT);         \
+   CASE_MAP_ACS(WAIT_POLYOBJECT_IMM);     \
+   CASE_MAP_ACS(WAIT_SCRIPT);             \
+   CASE_MAP_ACS(WAIT_SCRIPT_IMM);         \
+   CASE_MAP_ACS(WAIT_SECTOR);             \
+   CASE_MAP_ACS(WAIT_SECTOR_IMM)
 
 #define BINTOKACS_TOKENS_MAP_ACS_ALL() \
    BINTOKACS_TOKENS_MAP_ACS()
@@ -338,8 +363,6 @@
 #define BINTOKACS_TOKENS_TRAN_ALL_ALL() \
    BINTOKACS_TOKENS_TRAN_CONVERT_ALL(); \
    BINTOKACS_TOKENS_TRAN_STACK_ALL()
-
-
 
 #endif//HPP_make_tokens__BinaryTokenACS_
 

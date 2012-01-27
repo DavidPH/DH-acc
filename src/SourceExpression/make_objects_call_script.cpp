@@ -28,7 +28,13 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpression::make_objects_call_script
+//
 void SourceExpression::make_objects_call_script(ObjectVector *objects, VariableData *dst, VariableType const *type, SourceExpression *data, std::vector<SourceExpression::Pointer> const &args, ObjectExpression *stack, SourcePosition const &position)
 {
 	if (args.size() != type->types.size())
@@ -58,11 +64,11 @@ void SourceExpression::make_objects_call_script(ObjectVector *objects, VariableD
 	{
 		switch (type->sizeCall(position))
 		{
-		case  0: ocode = OCODE_ACS_LINESPEC1; break;
-		case  1: ocode = OCODE_ACS_LINESPEC2; break;
-		case  2: ocode = OCODE_ACS_LINESPEC3; break;
-		case  3: ocode = OCODE_ACS_LINESPEC4; break;
-		default: ocode = OCODE_ACS_LINESPEC4; break;
+      case  0: ocode = OCODE_ACS_LINE_SPEC_EXEC1; break;
+      case  1: ocode = OCODE_ACS_LINE_SPEC_EXEC2; break;
+      case  2: ocode = OCODE_ACS_LINE_SPEC_EXEC3; break;
+      case  3: ocode = OCODE_ACS_LINE_SPEC_EXEC4; break;
+      default: ocode = OCODE_ACS_LINE_SPEC_EXEC4; break;
 		}
 	}
 	else
@@ -111,4 +117,5 @@ void SourceExpression::make_objects_call_script(ObjectVector *objects, VariableD
 	make_objects_memcpy_post(objects, dst, VariableData::create_stack(type->callType->size(position)), position);
 }
 
+// EOF
 
