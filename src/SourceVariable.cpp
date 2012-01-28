@@ -146,22 +146,22 @@ get_StorageClass(SourceTokenC const &token)
    if (token.getData() == "register")
       return SC_REGISTER;
 
-   if (token.getData() == "register_global")
+   if (token.getData() == "__register_global")
       return SC_REGISTER_GLOBAL;
 
-   if (token.getData() == "register_map")
+   if (token.getData() == "__register_map")
       return SC_REGISTER_MAP;
 
-   if (token.getData() == "register_world")
+   if (token.getData() == "__register_world")
       return SC_REGISTER_WORLD;
 
-   if (token.getData() == "registerarray_global")
+   if (token.getData() == "__registerarray_global")
       return SC_REGISTERARRAY_GLOBAL;
 
-   if (token.getData() == "registerarray_map")
+   if (token.getData() == "__registerarray_map")
       return SC_REGISTERARRAY_MAP;
 
-   if (token.getData() == "registerarray_world")
+   if (token.getData() == "__registerarray_world")
       return SC_REGISTERARRAY_WORLD;
 
    if (token.getData() == "static")

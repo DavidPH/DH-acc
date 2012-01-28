@@ -364,32 +364,32 @@ storage-class register
 storage-class register-global
   Allocates storage in global-scope registers. This is the storage class of ACS
   non-array variables defined as global.
-    "register_global"
+    "__register_global"
 
 storage-class register-map
   Allocates storage in map-scope registers. This is the storage class of ACS
   non-array variables defined outside any script or function.
-    "register_map"
+    "__register_map"
 
 storage-class register-world
   Allocates storage in world-scope registers. This is the storage class of ACS
   non-array variables defined as world.
-    "register_world"
+    "__register_world"
 
 storage-class registerarray-global
   Allocates storage in global-scope registerarrays. This is the storage class of
   ACS array variables defined as global.
-    "registerarray_global"
+    "__registerarray_global"
 
 storage-class registerarray-map
   Allocates storage in map-scope registerarrays. This is the storage class of
   ACS array variables defined outside any script or function.
-    "registerarray_map"
+    "__registerarray_map"
 
 storage-class registerarray-world
   Allocates storage in world-scope registerarrays. This is the storage class of
   ACS array variables defined as world.
-    "registerarray_world"
+    "__registerarray_world"
 
 storage-class static
   Allocates storage in addressable space.
@@ -454,7 +454,7 @@ type pointer
 
 type real
   A real type that may be fixed-point or floating-point, based on the target.
-    "real"
+    "__real"
 
 type script
   A pointer type used for scripts.
@@ -470,7 +470,7 @@ type string
   Consequently, its semantics are highly dependent on the target and cannot be
   relied upon portably. If the target does not require special handling, it may
   be equivalent to char * or variant.
-    "string"
+    "__string"
 
 type struct
     "struct" identifier [ "{" [ type identifier ";" ]... "}" ]
