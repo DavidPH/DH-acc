@@ -293,7 +293,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(case)
 //
 // SourceExpressionDS::make_expression_single_const
 //
-SRCEXPDS_EXPRSINGLE_DEFN(const)
+SRCEXPDS_EXPRSINGLE_DEFN(constexpr)
 {
 	VariableType const * type(make_expression_type(in, blocks, context));
 	std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());

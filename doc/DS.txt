@@ -68,10 +68,8 @@ operator ~
     "~" expression_single
 
 operator type
-  Yields the expression converted to type. In the second form, type must be a
-  single identifier.
+  Yields the expression converted to type.
     "(" type ")" expression_single
-    type expression_single
 
 operator * (unary)
   Yields the value pointed-to by expression.
@@ -219,9 +217,9 @@ operator case
   possible to resolve case statically.
     "case" expression(case) ":" expression
 
-operator const
+operator constexpr
   Defines a named and typed constant. Yields the constant.
-    "const" type name "=" expression
+    "constexpr" type name "=" expression
 
 operator continue
   Branches to the end of the current iteration of the current loop. Yields void.

@@ -55,7 +55,7 @@ void SourceExpressionDS::init()
 	_expression_single_handlers["__asmfunc"]  = make_expression_single_asmfunc;
 	_expression_single_handlers[  "break"]    = make_expression_single_break;
 	_expression_single_handlers[  "case"]     = make_expression_single_case;
-	_expression_single_handlers[  "const"]    = make_expression_single_const;
+	_expression_single_handlers[  "constexpr"]= make_expression_single_constexpr;
 	_expression_single_handlers[  "continue"] = make_expression_single_continue;
 	_expression_single_handlers[  "default"]  = make_expression_single_default;
 	_expression_single_handlers["__delay"]    = make_expression_single_delay;

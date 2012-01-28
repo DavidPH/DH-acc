@@ -34,7 +34,7 @@ void __variable register_map struct __heap_block * __heap_index;
 
 // Heap starts after automatic variable stack and static variable section of
 // addressable space.
-void const int __heap_start = 8192 + (24*1024);
+void constexpr int __heap_start = 8192 + (24*1024);
 
 struct __heap_block
 {
