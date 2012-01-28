@@ -446,7 +446,7 @@ type line special
 
 type native
   A pointer type used for native/builtin functions.
-    "native" arglist_return
+    "__native" arglist_return
 
 type pointer
   A pointer type used for addressable memory.

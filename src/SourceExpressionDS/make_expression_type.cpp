@@ -44,6 +44,7 @@ is_expression_type(std::string const &data, SourceContext *context)
    if (data ==   "enum")     return true;
    if (data == "__function") return true;
    if (data == "__linespec") return true;
+   if (data == "__native")   return true;
    if (data == "__script")   return true;
    if (data ==   "struct")   return true;
    if (data == "__typeof")   return true;
@@ -149,6 +150,12 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
       make_expression_arglist(in, blocks, context, &types, &retn);
 
       type = VariableType::get_linespec(retn, types);
+   }
+   else if (token.getData() == "__native")
+   {
+      make_expression_arglist(in, blocks, context, &types, &retn);
+
+      type = VariableType::get_native(retn, types);
    }
    else if (token.getData() == "__script")
 	{
