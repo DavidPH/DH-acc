@@ -29,10 +29,10 @@
 
 ObjectData_Script::ScriptFlag odata_get_ScriptFlag(SourceTokenC const & token)
 {
-	if (token.getData() == "net")
+	if (token.getData() == "__net")
 		return ObjectData_Script::SF_NET;
 
-	if (token.getData() == "clientside")
+	if (token.getData() == "__clientside")
 		return ObjectData_Script::SF_CLIENTSIDE;
 
 	throw SourceException("invalid script-flag", token.getPosition(), "ObjectData");
@@ -40,31 +40,31 @@ ObjectData_Script::ScriptFlag odata_get_ScriptFlag(SourceTokenC const & token)
 
 ObjectData_Script::ScriptType odata_get_ScriptType(SourceTokenC const & token)
 {
-	if (token.getData() == "closed")
+	if (token.getData() == "__closed")
 		return ObjectData_Script::ST_CLOSED;
 
-	if (token.getData() == "open")
+	if (token.getData() == "__open")
 		return ObjectData_Script::ST_OPEN;
 
-	if (token.getData() == "respawn")
+	if (token.getData() == "__respawn")
 		return ObjectData_Script::ST_RESPAWN;
 
-	if (token.getData() == "death")
+	if (token.getData() == "__death")
 		return ObjectData_Script::ST_DEATH;
 
-	if (token.getData() == "enter")
+	if (token.getData() == "__enter")
 		return ObjectData_Script::ST_ENTER;
 
-	if (token.getData() == "lightning")
+	if (token.getData() == "__lightning")
 		return ObjectData_Script::ST_LIGHTNING;
 
-	if (token.getData() == "unloading")
+	if (token.getData() == "__unloading")
 		return ObjectData_Script::ST_UNLOADING;
 
-	if (token.getData() == "disconnect")
+	if (token.getData() == "__disconnect")
 		return ObjectData_Script::ST_DISCONNECT;
 
-	if (token.getData() == "return")
+	if (token.getData() == "__return")
 		return ObjectData_Script::ST_RETURN;
 
 	throw SourceException("invalid script-type", token.getPosition(), "ObjectData");
