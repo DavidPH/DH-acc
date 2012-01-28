@@ -92,22 +92,6 @@ void SourceExpressionDS::init()
 }
 
 //
-// SourceExpressionDS::is_expression_type
-//
-bool SourceExpressionDS::is_expression_type(std::string const & data, SourceContext * context)
-{
-	if (data == "array") return true;
-	if (data == "block") return true;
-	if (data == "enum") return true;
-	if (data == "script") return true;
-	if (data == "struct") return true;
-	if (data == "typeof") return true;
-	if (data == "union") return true;
-
-	return context->getVariableTypeNull(data);
-}
-
-//
 // SourceExpressionDS::make_expression
 //
 SourceExpression::Pointer SourceExpressionDS::

@@ -28,7 +28,33 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// SourceExpressionDS::is_expression_type
+//
+bool SourceExpressionDS::
+is_expression_type(std::string const &data, SourceContext *context)
+{
+   if (data == "__array")    return true;
+   if (data == "__asmfunc")  return true;
+   if (data == "__block")    return true;
+   if (data ==   "enum")     return true;
+   if (data == "__function") return true;
+   if (data == "__linespec") return true;
+   if (data == "__script")   return true;
+   if (data ==   "struct")   return true;
+   if (data == "__typeof")   return true;
+   if (data ==   "union")    return true;
+
+   return context->getVariableTypeNull(data);
+}
+
+//
+// SourceExpressionDS::make_expression_type
+//
 VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
 	SourceTokenC token(in->get(SourceTokenC::TT_IDENTIFIER));
@@ -39,7 +65,7 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 	VariableType const * type;
 	std::vector<VariableType const *> types;
 
-	if (token.getData() == "array")
+   if (token.getData() == "__array")
 	{
 		VariableType const * refType(make_expression_type(in, blocks, context));
 		in->get(SourceTokenC::TT_OP_BRACKET_O);
@@ -47,7 +73,13 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 		in->get(SourceTokenC::TT_OP_BRACKET_C);
 		type = VariableType::get_array(refType, count);
 	}
-	else if (token.getData() == "block")
+   else if (token.getData() == "__asmfunc")
+   {
+      make_expression_arglist(in, blocks, context, &types, &retn);
+
+      type = VariableType::get_asmfunc(retn, types);
+   }
+   else if (token.getData() == "__block")
 	{
 		in->get(SourceTokenC::TT_OP_BRACE_O);
 
@@ -106,7 +138,19 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 			type = context->getVariableType_enum(name, false, token.getPosition());
 		}
 	}
-	else if (token.getData() == "script")
+   else if (token.getData() == "__function")
+   {
+      make_expression_arglist(in, blocks, context, &types, &retn);
+
+      type = VariableType::get_function(retn, types);
+   }
+   else if (token.getData() == "__linespec")
+   {
+      make_expression_arglist(in, blocks, context, &types, &retn);
+
+      type = VariableType::get_linespec(retn, types);
+   }
+   else if (token.getData() == "__script")
 	{
 		make_expression_arglist(in, blocks, context, &types, &retn);
 
@@ -159,7 +203,7 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 				type = context->getVariableType_struct(name, token.getPosition());
 		}
 	}
-	else if (token.getData() == "typeof")
+   else if (token.getData() == "decltype")
 	{
 		type = make_expression_single(in, blocks, context)->getType();
 	}
@@ -197,4 +241,5 @@ VariableType const * SourceExpressionDS::make_expression_type(SourceTokenizerDS 
 	}
 }
 
+// EOF
 

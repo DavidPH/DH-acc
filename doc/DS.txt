@@ -394,3 +394,90 @@ storage-class registerarray-world
 storage-class static
   Allocates storage in addressable space.
     "static"
+
+
+
+These are the types in DS. As of the time of this writing, there is no
+distinction between explicit type-cast and implicit type-cast. Consequently,
+almost all types can be converted to any other type as needed without any
+warning.
+
+type array
+    "__array" type "[" expression "]"
+
+type assembly function
+  A pointer type used for assembly functions. Can only be used at compile-time.
+    "__asmfunc" arglist_return
+
+type block
+    "__block" "{" [ type ]... "}"
+
+type char
+    "char"
+
+type const
+    type "const"
+
+type enum
+    "enum" identifier
+    "enum" [ identifier ]
+      "{" [ identifier [ "=" expression ] [ ","
+            identifier [ "=" expression ] ]... ] "}"
+
+type function
+  A pointer type used for functions.
+    "__function" arglist_return
+
+type hard bool
+  A boolean type that is guaranteed to always be 0 (false) or 1 (true).
+    "bool"
+
+type int
+  An integer type.
+    "int"
+
+type label
+  A pointer type used for labeled expressions.
+    "__label"
+
+type line special
+  A pointer type used for line specials.
+    "__linespec" arglist_return
+
+type native
+  A pointer type used for native/builtin functions.
+    "native" arglist_return
+
+type pointer
+  A pointer type used for addressable memory.
+    type "*"
+
+type real
+  A real type that may be fixed-point or floating-point, based on the target.
+    "real"
+
+type script
+  A pointer type used for scripts.
+    "__script" arglist_return
+
+type soft bool
+  A boolean type that has indeterminate representation. Proper casting, however,
+  will always yield 0 (false) or 1 (true).
+    "__softbool"
+
+type string
+  A pointer type used when the target needs special handling of strings.
+  Consequently, its semantics are highly dependent on the target and cannot be
+  relied upon portably. If the target does not require special handling, it may
+  be equivalent to char * or variant.
+    "string"
+
+type struct
+    "struct" identifier [ "{" [ type identifier ";" ]... "}" ]
+
+type union
+    "union" identifier [ "{" [ type identifier ";" ]... "}" ]
+
+type void
+    "void"
+

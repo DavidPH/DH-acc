@@ -48,7 +48,7 @@ SourceContext::Pointer SourceContext::global_context;
 SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countAuto(0), _countRegister(0), _labelCount(0), _limitAuto(0), _limitRegister(0), _parent(NULL), _returnType(VariableType::get_vt_void()), _type(CT_BLOCK), _inheritLocals(false)
 {
 	getVariableType_typedef("bool",     VariableType::get_vt_boolhard(), SourcePosition::builtin());
-	getVariableType_typedef("softbool", VariableType::get_vt_boolsoft(), SourcePosition::builtin());
+   getVariableType_typedef("__softbool", VariableType::get_vt_boolsoft(), SourcePosition::builtin());
 	getVariableType_typedef("char",     VariableType::get_vt_char(),     SourcePosition::builtin());
 	getVariableType_typedef("int",      VariableType::get_vt_int(),      SourcePosition::builtin());
 	getVariableType_typedef("__label",  VariableType::get_vt_label(),    SourcePosition::builtin());
