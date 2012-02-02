@@ -27,22 +27,17 @@
 #include "SourceExpression.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
 
 static ObjectExpression::Pointer address0 =
    ObjectExpression::create_value_int(0, SourcePosition::none());
 
 
-
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
 //
-// VariableData::VariableData
-//
-VariableData::
-VariableData(VariableData const &data)
-             : Super(data), type(data.type), size(data.size),
-               sectionR(data.sectionR), address(data.address),
-               offsetExpr(data.offsetExpr), offsetTemp(data.offsetTemp)
-{
-}
 
 //
 // VariableData::VariableData
@@ -51,6 +46,19 @@ VariableData::
 VariableData(MemoryType _type, bigsint _size, ObjectExpression *_address,
              SourceExpression *offset)
              : type(_type), size(_size), address(_address), offsetExpr(offset)
+{
+   if (!address)
+      address = address0;
+}
+
+//
+// VariableData::VariableData
+//
+VariableData::
+VariableData(MemoryType _type, bigsint _size, SectionL section,
+             ObjectExpression *_address, SourceExpression *offset)
+             : type(_type), size(_size), sectionL(section), address(_address),
+               offsetExpr(offset)
 {
    if (!address)
       address = address0;
@@ -102,9 +110,9 @@ create_auto(bigsint size, ObjectExpression *address)
 // VariableData::create_literal
 //
 VariableData::Pointer VariableData::
-create_literal(bigsint size, ObjectExpression *value)
+create_literal(bigsint size, SectionL section, ObjectExpression *value)
 {
-   return new VariableData(MT_LITERAL, size, value, NULL);
+   return new VariableData(MT_LITERAL, size, section, value, NULL);
 }
 
 //

@@ -40,7 +40,7 @@ class SourceExpression;
 //
 class VariableData : public Counter
 {
-   MAKE_COUNTER_CLASS_BASE(VariableData, Counter);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(VariableData, Counter);
 
 public:
    enum MemoryType
@@ -55,6 +55,12 @@ public:
       MT_VOID,
 
       MT_NONE
+   };
+
+   enum SectionL // Literal
+   {
+      SL_INT,
+      SL_STRING
    };
 
    enum SectionR // Register
@@ -79,6 +85,7 @@ public:
 
    union
    {
+      SectionL  sectionL;
       SectionR  sectionR;
       SectionRA sectionRA;
    };
@@ -91,7 +98,8 @@ public:
 
    static Pointer create_auto(bigsint size, ObjectExpression *address);
 
-   static Pointer create_literal(bigsint size, ObjectExpression *value);
+   static Pointer create_literal(bigsint size, SectionL section,
+                                 ObjectExpression *value);
 
    static Pointer create_pointer(bigsint size, ObjectExpression *address,
                                  SourceExpression *offset);
@@ -110,10 +118,11 @@ public:
    static Pointer create_void(bigsint size);
 
 private:
-   VariableData(VariableData const &data);
-
    VariableData(MemoryType type, bigsint size, ObjectExpression *address,
                 SourceExpression *offset);
+
+   VariableData(MemoryType type, bigsint size, SectionL section,
+                ObjectExpression *address, SourceExpression *offset);
 
    VariableData(MemoryType type, bigsint size, SectionR section,
                 ObjectExpression *address, SourceExpression *offset);

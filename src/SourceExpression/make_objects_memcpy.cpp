@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../ost_type.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 
@@ -134,6 +135,14 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
 
    case VariableData::MT_LITERAL:
       objects->addToken(OCODE_GET_LITERAL32I, src->address);
+
+      // ZDoom requires tagging strings.
+      if (src->sectionL == VariableData::SL_STRING &&
+          target_type == TARGET_ZDoom)
+      {
+         objects->addToken(OCODE_ACSE_STRING_TAG);
+      }
+
       break;
 
    case VariableData::MT_NONE:

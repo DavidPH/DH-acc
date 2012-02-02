@@ -198,8 +198,18 @@ makeObjects(ObjectVector *objects, VariableData *dst)
    {
       recurse_makeObjects(objects, dst);
 
+      VariableData::SectionL section;
+
+      VariableType const *type = getType();
+
+      if (type->vt == VariableType::VT_STRING)
+         section = VariableData::SL_STRING;
+      else
+         section = VariableData::SL_INT;
+
       VariableData::Pointer src =
-         VariableData::create_literal(getType()->size(position), makeObject());
+         VariableData::create_literal(type->size(position), section,
+                                      makeObject());
 
       make_objects_memcpy_prep(objects, dst, src, position);
       make_objects_memcpy_post(objects, dst, src, position);
@@ -222,7 +232,8 @@ makeObjectsAddress(ObjectVector *objects, VariableData *dst)
 
       // This should properly determine the size of a pointer.
       VariableData::Pointer src =
-         VariableData::create_literal(1, makeObjectAddress());
+         VariableData::create_literal(1, VariableData::SL_INT,
+                                      makeObjectAddress());
 
       make_objects_memcpy_prep(objects, dst, src, position);
       make_objects_memcpy_post(objects, dst, src, position);

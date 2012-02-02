@@ -197,7 +197,16 @@ VariableData::Pointer SourceVariable::getData() const
       return VariableData::create_auto(size, address);
 
    case SC_CONSTANT:
-      return VariableData::create_literal(size, address);
+      switch (type->vt)
+      {
+      case VariableType::VT_STRING:
+         return VariableData::create_literal
+                (size, VariableData::SL_STRING, address);
+
+      default:
+         return VariableData::create_literal
+                (size, VariableData::SL_INT, address);
+      }
 
    case SC_REGISTER:
       return VariableData::create_register
