@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/make_objects_call_function.cpp
-**
-** Defines the SourceExpression::make_objects_call_function function.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of calling functions.
+//
+//-----------------------------------------------------------------------------
 
 #include "../SourceExpression.hpp"
 
@@ -29,133 +31,180 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-void SourceExpression::make_objects_call_function(ObjectVector *objects, VariableData *dst, VariableType const *type, ObjectExpression *data, std::vector<SourceExpression::Pointer> const &args, ObjectExpression *stack, std::string const &labelReturn, SourcePosition const &position)
+//
+// SourceExpression::make_objects_call_function
+//
+void SourceExpression::
+make_objects_call_function
+(ObjectVector *objects, VariableData *dst, VariableType const *type,
+ ObjectExpression *data, std::vector<SourceExpression::Pointer> const &args,
+ ObjectExpression *stack, std::string const &labelReturn,
+ SourcePosition const &position)
 {
-	if (args.size() != type->types.size())
-		throw SourceException("incorrect arg count to call function", position, "SourceExpression");
+   if (args.size() != type->types.size())
+      throw SourceException("incorrect arg count to call function", position,
+                            __func__);
 
-	VariableData::Pointer src = VariableData::create_stack(type->callType->size(position));
+   VariableData::Pointer src =
+      VariableData::create_stack(type->callType->size(position));
 
-	make_objects_memcpy_prep(objects, dst, src, position);
+   make_objects_memcpy_prep(objects, dst, src, position);
 
-	for (size_t i(0); i < args.size(); ++i)
-	{
-		if (args[i]->getType() != type->types[i])
-			throw SourceException("incorrect arg type to call function", args[i]->position, "SourceExpression");
+   // Evaluate the arguments.
+   for (size_t i = 0; i < args.size(); ++i)
+   {
+      SourceExpression::Pointer arg = args[i];
 
-		args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->size(position)));
-	}
+      VariableType const *argType = arg->getType();
 
-	objects->setPosition(position);
+      if (argType != type->types[i])
+         throw SourceException("incorrect arg type to call function",
+                               arg->position, __func__);
 
-	// Determine which OCODE to use.
-	ObjectCode ocode;
-	if (target_type != TARGET_ZDoom)
-		ocode = OCODE_BRANCH_GOTO_IMM;
-	else if (type->callType->vt == VariableType::VT_VOID)
-		ocode = OCODE_ACSE_CALLFUNCVOID_IMM;
-	else
-		ocode = OCODE_ACSE_CALLFUNC_IMM;
+      VariableData::Pointer argDst =
+         VariableData::create_stack(argType->size(position));
 
-	// Determine how many bytes of the return to handle.
-	bigsint retnSize(type->callType->size(position));
-	// ZDoom handles one of the return bytes for us.
-	if (target_type == TARGET_ZDoom && retnSize >= 1)
-		--retnSize;
+      args[i]->makeObjects(objects, argDst);
+   }
 
-	ObjectExpression::Pointer ostack(objects->getValueAdd(stack, retnSize));
+   objects->setPosition(position);
 
-	// Advance the stack-pointer.
-	objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
+   // Determine which OCODE to use.
+   ObjectCode ocode;
+   if (target_type != TARGET_ZDoom)
+      ocode = OCODE_BRANCH_GOTO_IMM;
+   else if (type->callType->vt == VariableType::VT_VOID)
+      ocode = OCODE_ACSE_FUNC_CALLVOID_IMM;
+   else
+      ocode = OCODE_ACSE_FUNC_CALL_IMM;
 
-	// For not ZDoom...
-	if (target_type != TARGET_ZDoom)
-	{
-		// ... Determine how many bytes of the call to handle.
-		bigsint callSize(type->sizeCall(position));
+   // Determine how many bytes of the return to handle.
+   bigsint retnSize = type->callType->size(position);
+   // ZDoom handles one of the return bytes for us.
+   if (target_type == TARGET_ZDoom && retnSize >= 1)
+      --retnSize;
 
-		// ... Place args in auto vars.
-		// FIXME: Should be based on type.
-		for (bigsint i(callSize); i--;)
-			objects->addToken(OCODE_SET_AUTO_VAR32I, objects->getValue(i));
+   // Calculate total stack offset.
+   ObjectExpression::Pointer ostack = objects->getValueAdd(stack, retnSize);
 
-		// ... Push return address.
-		objects->addToken(OCODE_GET_LITERAL32I, ObjectExpression::create_value_symbol(labelReturn, position));
-	}
+   // Advance the stack-pointer.
+   objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
 
-	// The actual call. Data being the jump target.
-	objects->addToken(ocode, data);
-	objects->addLabel(labelReturn);
+   // For not ZDoom...
+   if (target_type != TARGET_ZDoom)
+   {
+      // ... Determine how many bytes of the call to handle.
+      bigsint callSize = type->sizeCall(position);
 
-	// For any return bytes we're handling, push them onto the stack.
-	// FIXME: Should be based on type.
-	for (bigsint i(-retnSize); i; ++i)
-		objects->addToken(OCODE_GET_AUTO_VAR32I, objects->getValue(i));
+      // ... Place args in auto vars.
+      // FIXME: Should be based on type.
+      for (bigsint i = callSize; i--;)
+         objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
 
-	// Reset the stack-pointer.
-	objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
+      // ... Push return address.
+      ObjectExpression::Pointer retnExpr =
+         ObjectExpression::create_value_symbol(labelReturn, position);
 
-	make_objects_memcpy_post(objects, dst, src, position);
+      objects->addToken(OCODE_GET_LITERAL32I, retnExpr);
+   }
+
+   // The actual call. Data being the jump target.
+   objects->addToken(ocode, data);
+   objects->addLabel(labelReturn);
+
+   // For any return bytes we're handling, push them onto the stack.
+   // FIXME: Should be based on type.
+   for (bigsint i(-retnSize); i; ++i)
+      objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));
+
+   // Reset the stack-pointer.
+   objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
+
+   make_objects_memcpy_post(objects, dst, src, position);
 }
 
-void SourceExpression::make_objects_call_function(ObjectVector *objects, VariableData *dst, VariableType const *type, SourceExpression *data, std::vector<SourceExpression::Pointer> const &args, ObjectExpression *stack, std::string const &labelReturn, SourcePosition const &position)
+//
+// SourceExpression::make_objects_call_function
+//
+void SourceExpression::
+make_objects_call_function
+(ObjectVector *objects, VariableData *dst, VariableType const *type,
+ SourceExpression *data, std::vector<SourceExpression::Pointer> const &args,
+ ObjectExpression *stack, std::string const &labelReturn,
+ SourcePosition const &position)
 {
-	if (args.size() != type->types.size())
-		throw SourceException("incorrect arg count to call function", position, "SourceExpression");
+   if (args.size() != type->types.size())
+      throw SourceException("incorrect arg count to call function", position,
+                            __func__);
 
-	VariableData::Pointer src = VariableData::create_stack(type->callType->size(position));
+   VariableData::Pointer src =
+      VariableData::create_stack(type->callType->size(position));
 
-	make_objects_memcpy_prep(objects, dst, src, position);
+   make_objects_memcpy_prep(objects, dst, src, position);
 
-	// Must push return address before target address.
-	objects->addToken(OCODE_GET_LITERAL32I, ObjectExpression::create_value_symbol(labelReturn, position));
+   // Must push return address before target address.
+   ObjectExpression::Pointer retnExpr =
+      ObjectExpression::create_value_symbol(labelReturn, position);
+   objects->addToken(OCODE_GET_LITERAL32I, retnExpr);
 
-	// Determine jump target.
-	data->makeObjects(objects, VariableData::create_stack(type->size(position)));
+   // Determine jump target.
+   data->makeObjects(objects, VariableData::create_stack(type->size(position)));
 
-	for (size_t i(0); i < args.size(); ++i)
-	{
-		if (args[i]->getType() != type->types[i])
-			throw SourceException("incorrect arg type to call function", args[i]->position, "SourceExpression");
+   for (size_t i(0); i < args.size(); ++i)
+   {
+      SourceExpression::Pointer arg = args[i];
 
-		args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->size(position)));
-	}
+      VariableType const *argType = arg->getType();
 
-	objects->setPosition(position);
+      if (argType != type->types[i])
+         throw SourceException("incorrect arg type to call function",
+                               arg->position, __func__);
 
-	// Determine which OCODE to use.
-	ObjectCode ocode(OCODE_BRANCH_GOTO);
+      VariableData::Pointer argDst =
+         VariableData::create_stack(argType->size(position));
 
-	// Determine how many bytes of the return to handle.
-	bigsint retnSize(type->callType->size(position));
+      args[i]->makeObjects(objects, argDst);
+   }
 
-	ObjectExpression::Pointer ostack(objects->getValueAdd(stack, retnSize));
+   objects->setPosition(position);
 
-	// Advance the stack-pointer.
-	objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
+   // Determine which OCODE to use.
+   ObjectCode ocode = OCODE_BRANCH_GOTO;
 
-	// Determine how many bytes of the call to handle.
-	bigsint callSize(type->sizeCall(position));
+   // Determine how many bytes of the return to handle.
+   bigsint retnSize(type->callType->size(position));
 
-	// Place args in auto vars.
-	// FIXME: Should be based on type.
-	for (bigsint i(callSize); i--;)
-		objects->addToken(OCODE_SET_AUTO_VAR32I, objects->getValue(i));
+   ObjectExpression::Pointer ostack = objects->getValueAdd(stack, retnSize);
 
-	// The actual call.
-	objects->addToken(ocode);
-	objects->addLabel(labelReturn);
+   // Advance the stack-pointer.
+   objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
 
-	// For any return bytes we're handling, push them onto the stack.
-	// FIXME: Should be based on type.
-	for (bigsint i(-retnSize); i; ++i)
-		objects->addToken(OCODE_GET_AUTO_VAR32I, objects->getValue(i));
+   // Determine how many bytes of the call to handle.
+   bigsint callSize = type->sizeCall(position);
 
-	// Reset the stack-pointer.
-	objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
+   // Place args in auto vars.
+   // FIXME: Should be based on type.
+   for (bigsint i(callSize); i--;)
+      objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
 
-	make_objects_memcpy_post(objects, dst, src, position);
+   // The actual call.
+   objects->addToken(ocode);
+   objects->addLabel(labelReturn);
+
+   // For any return bytes we're handling, push them onto the stack.
+   // FIXME: Should be based on type.
+   for (bigsint i(-retnSize); i; ++i)
+      objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));
+
+   // Reset the stack-pointer.
+   objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
+
+   make_objects_memcpy_post(objects, dst, src, position);
 }
 
+// EOF
 

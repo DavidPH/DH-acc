@@ -340,7 +340,7 @@ virtual_makeObjectsAddress(ObjectVector *objects, VariableData *dst)
    switch (src->type)
    {
    case VariableData::MT_AUTO:
-      objects->addToken(OCODE_ADDR_STACK_VAR, src->address);
+      objects->addToken(OCODE_ADDR_AUTO, src->address);
       break;
 
    case VariableData::MT_POINTER:

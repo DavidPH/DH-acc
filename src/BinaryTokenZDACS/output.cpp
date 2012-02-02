@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* BinaryTokenZDACS/output.cpp
-**
-** Defines the BinaryTokenZDACS::output_* functions.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// ZDoom formats (ACSE, ACSe) output.
+//
+//-----------------------------------------------------------------------------
 
 #include "../BinaryTokenZDACS.hpp"
 
@@ -26,73 +28,91 @@
 #include <sstream>
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-template<typename T> void BinaryTokenZDACS::output_ACSE(std::ostream * out, std::vector<T> const & instructions)
+//
+// BinaryTokenZDACS::output_ACSE
+//
+template<typename T>
+void BinaryTokenZDACS::
+output_ACSE(std::ostream *out, std::vector<T> const &instructions)
 {
-	std::ostringstream chunkout;
+   typename std::vector<T>::const_iterator iter;
 
-	// Header
-	*out << 'A' << 'C' << 'S' << 'E';
-	BinaryTokenACS::write_ACS0_32(out, ObjectExpression::get_address_count());
+   std::ostringstream chunkout;
 
-	// Instructions
-	for (typename std::vector<T>::const_iterator instr(instructions.begin()); instr != instructions.end(); ++instr)
-		instr->writeACS0(out);
+   // Header
+   *out << 'A' << 'C' << 'S' << 'E';
+   BinaryTokenACS::write_ACS0_32(out, ObjectExpression::get_address_count());
 
-	// AIMP - Map Array Imports
-	_temp_counter = 0;
-	ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_AIMP_counter, &chunkout);
+   // Instructions
+   for (iter = instructions.begin(); iter != instructions.end(); ++iter)
+      iter->writeACS0(out);
 
-	if (_temp_counter)
-		BinaryTokenACS::write_ACS0_32(&chunkout, _temp_counter);
+   // AIMP - Map Array Imports
+   temp_counter = 0;
+   ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_AIMP_counter, &chunkout);
 
-	ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_AIMP, &chunkout);
-	write_ACSE_chunk(out, &chunkout, "AIMP");
+   if (temp_counter)
+      BinaryTokenACS::write_ACS0_32(&chunkout, temp_counter);
 
-	// ARAY - Map Array Declarations
-	ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_ARAY, &chunkout);
-	write_ACSE_chunk(out, &chunkout, "ARAY");
+   ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_AIMP, &chunkout);
+   write_ACSE_chunk(out, &chunkout, "AIMP");
 
-	// FNAM - Function Names
-	ObjectExpression::iter_function(write_ACSE_function_FNAM, NULL);
-	write_ACSE_stringtable(&chunkout, false);
-	write_ACSE_chunk(out, &chunkout, "FNAM");
+   // AINI - Map Array Initialization
+   // TODO
 
-	// FUNC - Functions
-	ObjectExpression::iter_function(write_ACSE_function_FUNC, &chunkout);
-	write_ACSE_chunk(out, &chunkout, "FUNC");
+   // ARAY - Map Array Declarations
+   ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_ARAY, &chunkout);
+   write_ACSE_chunk(out, &chunkout, "ARAY");
 
-	// LOAD - Load Libraries
-	ObjectExpression::iter_library(write_ACSE_library, &chunkout);
-	write_ACSE_chunk(out, &chunkout, "LOAD");
+   // FNAM - Function Names
+   ObjectExpression::iter_function(write_ACSE_function_FNAM, NULL);
+   write_ACSE_stringtable(&chunkout, false);
+   write_ACSE_chunk(out, &chunkout, "FNAM");
 
-	// MEXP - Map Register Exports
-	ObjectExpression::iter_register_map(write_ACSE_register_MEXP, NULL);
-	ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_MEXP, NULL);
-	write_ACSE_stringtable(&chunkout, false);
-	write_ACSE_chunk(out, &chunkout, "MEXP");
+   // FUNC - Functions
+   ObjectExpression::iter_function(write_ACSE_function_FUNC, &chunkout);
+   write_ACSE_chunk(out, &chunkout, "FUNC");
 
-	// MIMP - Map Register Imports
-	ObjectExpression::iter_register_map(write_ACSE_register_MIMP, &chunkout);
-	write_ACSE_chunk(out, &chunkout, "MIMP");
+   // LOAD - Load Libraries
+   ObjectExpression::iter_library(write_ACSE_library, &chunkout);
+   write_ACSE_chunk(out, &chunkout, "LOAD");
 
-	// SPTR - Script Pointers
-	ObjectExpression::iter_script(write_ACSE_script, &chunkout);
-	write_ACSE_chunk(out, &chunkout, "SPTR");
+   // MEXP - Map Register Exports
+   ObjectExpression::iter_register_map(write_ACSE_register_MEXP, NULL);
+   ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_MEXP, NULL);
+   write_ACSE_stringtable(&chunkout, false);
+   write_ACSE_chunk(out, &chunkout, "MEXP");
 
-	// SFLG - Script Flags
-	ObjectExpression::iter_script(write_ACSE_script_flags, &chunkout);
-	write_ACSE_chunk(out, &chunkout, "SFLG");
+   // MIMP - Map Register Imports
+   ObjectExpression::iter_register_map(write_ACSE_register_MIMP, &chunkout);
+   write_ACSE_chunk(out, &chunkout, "MIMP");
 
-	// STRL - String Literals
-	ObjectData_String::iterate(write_ACSE_string_STRL, NULL);
-	write_ACSE_stringtable(&chunkout, true);
-	write_ACSE_chunk(out, &chunkout, "STRL");
+   // MINI - Map Register Initialization
+   // TODO
 
-	// SVCT - Script Variable Counts
-	ObjectExpression::iter_script(write_ACSE_script_vars, &chunkout);
-	write_ACSE_chunk(out, &chunkout, "SVCT");
+   // SPTR - Script Pointers
+   ObjectExpression::iter_script(write_ACSE_script, &chunkout);
+   write_ACSE_chunk(out, &chunkout, "SPTR");
+
+   // SFLG - Script Flags
+   ObjectExpression::iter_script(write_ACSE_script_flags, &chunkout);
+   write_ACSE_chunk(out, &chunkout, "SFLG");
+
+   // STRL - String Literals
+   ObjectData_String::iterate(write_ACSE_string_STRL, NULL);
+   write_ACSE_stringtable(&chunkout, true);
+   write_ACSE_chunk(out, &chunkout, "STRL");
+
+   // SVCT - Script Variable Counts
+   ObjectExpression::iter_script(write_ACSE_script_vars, &chunkout);
+   write_ACSE_chunk(out, &chunkout, "SVCT");
 }
-template void BinaryTokenZDACS::output_ACSE<BinaryTokenZDACS>(std::ostream * out, std::vector<BinaryTokenZDACS> const & instructions);
 
+template void BinaryTokenZDACS::output_ACSE<BinaryTokenZDACS>(std::ostream *out, std::vector<BinaryTokenZDACS> const & instructions);
+
+// EOF
 

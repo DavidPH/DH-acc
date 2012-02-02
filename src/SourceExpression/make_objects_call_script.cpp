@@ -1,28 +1,31 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/make_objects_call_script.cpp
-**
-** Defines the SourceExpression::make_objects_call_script function.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of calling scripts.
+//
+//-----------------------------------------------------------------------------
 
 #include "../SourceExpression.hpp"
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../ost_type.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -35,86 +38,102 @@
 //
 // SourceExpression::make_objects_call_script
 //
-void SourceExpression::make_objects_call_script(ObjectVector *objects, VariableData *dst, VariableType const *type, SourceExpression *data, std::vector<SourceExpression::Pointer> const &args, ObjectExpression *stack, SourcePosition const &position)
+void SourceExpression::
+make_objects_call_script
+(ObjectVector *objects, VariableData *dst, VariableType const *type,
+ SourceExpression *data, std::vector<SourceExpression::Pointer> const &args,
+ ObjectExpression *stack, SourcePosition const &position)
 {
-	if (args.size() != type->types.size())
-		throw SourceException("incorrect arg count to call script", position, "SourceExpression");
+   if (args.size() != type->types.size())
+      throw SourceException("incorrect arg count to call script", position,
+                            __func__);
 
-	VariableData::Pointer src = VariableData::create_stack(type->callType->size(position));
+   VariableData::Pointer src =
+      VariableData::create_stack(type->callType->size(position));
 
-	make_objects_memcpy_prep(objects, dst, src, position);
+   make_objects_memcpy_prep(objects, dst, src, position);
 
-	data->makeObjects(objects, VariableData::create_stack(type->size(position)));
+   data->makeObjects(objects, VariableData::create_stack(type->size(position)));
 
-	for (size_t i(0); i < args.size(); ++i)
-	{
-		if (args[i]->getType() != type->types[i])
-			throw SourceException("incorrect arg type to call script", args[i]->position, "SourceExpression");
+   // Evaluate the arguments.
+   for (size_t i = 0; i < args.size(); ++i)
+   {
+      SourceExpression::Pointer arg = args[i];
 
-		args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->size(position)));
-	}
+      VariableType const *argType = arg->getType();
 
-	objects->setPosition(position);
+      if (argType != type->types[i])
+         throw SourceException("incorrect arg type to call script",
+                               arg->position, __func__);
 
-	ObjectCode ocode;
-	ObjectExpression::Pointer ospec(objects->getValue(84));
-	ObjectExpression::Pointer oretn;
+      VariableData::Pointer argDst =
+         VariableData::create_stack(argType->size(position));
 
-	if (type->callType->vt == VariableType::VT_VOID)
-	{
-		switch (type->sizeCall(position))
-		{
-      case  0: ocode = OCODE_ACS_LINE_SPEC_EXEC1; break;
-      case  1: ocode = OCODE_ACS_LINE_SPEC_EXEC2; break;
-      case  2: ocode = OCODE_ACS_LINE_SPEC_EXEC3; break;
-      case  3: ocode = OCODE_ACS_LINE_SPEC_EXEC4; break;
-      default: ocode = OCODE_ACS_LINE_SPEC_EXEC4; break;
-		}
-	}
-	else
-	{
-		ocode = OCODE_ACSE_LINESPEC5RESULT;
+      args[i]->makeObjects(objects, argDst);
+   }
 
-		// Dummy args.
-		for (size_t i(type->sizeCall(position)); i < 3; ++i)
-			objects->addTokenPushZero();
-	}
+   objects->setPosition(position);
 
-	// Extended return data?
-	if (type->callType->size(position) > 1)
-		oretn = objects->getValue(type->callType->size(position) - 1);
+   // Determine which OCODE to use.
+   ObjectCode ocode;
 
-	// Stack for call.
-	objects->addToken(OCODE_ADDR_STACK_ADD_IMM, stack);
+   if (type->callType->vt == VariableType::VT_VOID)
+   {
+      switch (type->sizeCall(position))
+      {
+      case  0: ocode = OCODE_ACS_SPECIAL_EXEC1; break;
+      case  1: ocode = OCODE_ACS_SPECIAL_EXEC2; break;
+      case  2: ocode = OCODE_ACS_SPECIAL_EXEC3; break;
+      case  3: ocode = OCODE_ACS_SPECIAL_EXEC4; break;
+      default: ocode = OCODE_ACS_SPECIAL_EXEC4; break;
+      }
+   }
+   else
+   {
+      ocode = OCODE_ACSE_SPECIAL_EXEC5_RETN1;
 
-	// Stack for extended return data.
-	if (oretn) objects->addToken(OCODE_ADDR_STACK_ADD_IMM, oretn);
+      // Dummy args.
+      for (size_t i(type->sizeCall(position)); i < 3; ++i)
+         objects->addTokenPushZero();
+   }
 
-	// Extended call data.
-	// FIXME: Should be based on type.
-	if (type->sizeCall(position) > 3) for (int i(type->sizeCall(position) - 3); i--;)
-		objects->addToken(OCODE_SET_AUTO_VAR32I, objects->getValue(i));
+   // Determine which line special to use.
+   ObjectExpression::Pointer ospec = objects->getValue(84);
 
-	// Dummy arg.
-	if (ocode == OCODE_ACSE_LINESPEC5RESULT) objects->addTokenPushZero();
+   // Determine how many bytes of the return to handle.
+   bigsint retnSize = type->callType->size(position);
+   // ZDoom handles one of the return bytes for us.
+   if (target_type == TARGET_ZDoom && retnSize >= 1)
+      --retnSize;
 
-	// Call.
-	objects->addToken(ocode, ospec);
+   // Calculate total stack offset.
+   ObjectExpression::Pointer ostack = objects->getValueAdd(stack, retnSize);
 
-	// Extended return data.
-	if (oretn)
-	{
-		// FIXME: Should be based on type.
-		for (int i(-type->callType->size(position)); ++i;)
-			objects->addToken(OCODE_GET_AUTO_VAR32I, objects->getValue(i));
+   // Advance the stack-pointer.
+   objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
 
-		objects->addToken(OCODE_ADDR_STACK_SUB_IMM, oretn);
-	}
+   // Extended call data.
+   bigsint callSize = type->sizeCall(position);
 
-	// Stack for call.
-	objects->addToken(OCODE_ADDR_STACK_SUB_IMM, stack);
+   // FIXME: Should be based on type.
+   if (callSize > 3) for (bigsint i = callSize - 3; i--;)
+      objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
 
-	make_objects_memcpy_post(objects, dst, VariableData::create_stack(type->callType->size(position)), position);
+   // Dummy arg.
+   if (ocode == OCODE_ACSE_SPECIAL_EXEC5_RETN1) objects->addTokenPushZero();
+
+   // The actual call.
+   objects->addToken(ocode, ospec);
+
+   // For any return bytes we're handling, push them onto the stack.
+   // FIXME: Should be based on type.
+   for (bigsint i(-retnSize); i; ++i)
+      objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));
+
+   // Reset the stack-pointer.
+   objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
+
+   make_objects_memcpy_post(objects, dst, src, position);
 }
 
 // EOF

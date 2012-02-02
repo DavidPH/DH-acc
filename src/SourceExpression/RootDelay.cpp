@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    ObjectExpression::Pointer stackObj(objects->getValue(stack));
    objects->addToken(OCODE_ADDR_STACK_ADD_IMM, stackObj);
-   objects->addToken(OCODE_MISC_DELAY32);
+   objects->addToken(OCODE_ACS_WAIT_TICS);
    objects->addToken(OCODE_ADDR_STACK_SUB_IMM, stackObj);
 }
 

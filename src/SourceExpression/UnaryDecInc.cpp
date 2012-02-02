@@ -187,25 +187,28 @@ void SourceExpression_UnaryDecInc::
 doSrc(ObjectVector *objects, VariableData *src, int deltaType)
 {
    ObjectCode ocode = OCODE_NONE;
+   bool       typed = false;
 
    switch (src->type)
    {
    case VariableData::MT_AUTO:
       if (deltaType & DELTA_EXPR)
-         ocode = inc ? OCODE_SETOP_ADD_AUTO_VAR32F
-                     : OCODE_SETOP_SUB_AUTO_VAR32F;
+         ocode = inc ? OCODE_SETOP_ADD_AUTO32F
+                     : OCODE_SETOP_SUB_AUTO32F;
       else
-         ocode = inc ? OCODE_SETOP_INC_AUTO_VAR32F
-                     : OCODE_SETOP_DEC_AUTO_VAR32F;
+         ocode = inc ? OCODE_SETOP_INC_AUTO32F
+                     : OCODE_SETOP_DEC_AUTO32F;
+      typed = true;
       break;
 
    case VariableData::MT_POINTER:
       if (deltaType & DELTA_EXPR)
-         ocode = inc ? OCODE_SETOP_ADD_POINTER_VAR32F
-                     : OCODE_SETOP_SUB_POINTER_VAR32F;
+         ocode = inc ? OCODE_SETOP_ADD_POINTER32F
+                     : OCODE_SETOP_SUB_POINTER32F;
       else
-         ocode = inc ? OCODE_SETOP_INC_POINTER_VAR32F
-                     : OCODE_SETOP_DEC_POINTER_VAR32F;
+         ocode = inc ? OCODE_SETOP_INC_POINTER32F
+                     : OCODE_SETOP_DEC_POINTER32F;
+      typed = true;
       break;
 
    case VariableData::MT_REGISTER:
@@ -213,38 +216,39 @@ doSrc(ObjectVector *objects, VariableData *src, int deltaType)
       {
       case VariableData::SR_LOCAL:
          if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_SETOP_ADD_REGISTER_VAR32F
-                        : OCODE_SETOP_SUB_REGISTER_VAR32F;
+            ocode = inc ? OCODE_SETOP_ADD_REGISTER32F
+                        : OCODE_SETOP_SUB_REGISTER32F;
          else
-            ocode = inc ? OCODE_SETOP_INC_REGISTER_VAR32F
-                        : OCODE_SETOP_DEC_REGISTER_VAR32F;
+            ocode = inc ? OCODE_SETOP_INC_REGISTER32F
+                        : OCODE_SETOP_DEC_REGISTER32F;
+         typed = true;
          break;
 
       case VariableData::SR_MAP:
          if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_SETOP_ADD_MAPREGISTER_VAR32F
-                        : OCODE_SETOP_SUB_MAPREGISTER_VAR32F;
+            ocode = inc ? OCODE_ACS_SETOP_ADD_MAPREGISTER
+                        : OCODE_ACS_SETOP_SUB_MAPREGISTER;
          else
-            ocode = inc ? OCODE_SETOP_INC_MAPREGISTER_VAR32F
-                        : OCODE_SETOP_DEC_MAPREGISTER_VAR32F;
+            ocode = inc ? OCODE_ACS_SETOP_INC_MAPREGISTER
+                        : OCODE_ACS_SETOP_DEC_MAPREGISTER;
          break;
 
       case VariableData::SR_WORLD:
          if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_SETOP_ADD_WORLDREGISTER_VAR32F
-                        : OCODE_SETOP_SUB_WORLDREGISTER_VAR32F;
+            ocode = inc ? OCODE_ACS_SETOP_ADD_WORLDREGISTER
+                        : OCODE_ACS_SETOP_SUB_WORLDREGISTER;
          else
-            ocode = inc ? OCODE_SETOP_INC_WORLDREGISTER_VAR32F
-                        : OCODE_SETOP_DEC_WORLDREGISTER_VAR32F;
+            ocode = inc ? OCODE_ACS_SETOP_INC_WORLDREGISTER
+                        : OCODE_ACS_SETOP_DEC_WORLDREGISTER;
          break;
 
       case VariableData::SR_GLOBAL:
          if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_SETOP_ADD_GLOBALREGISTER_VAR32F
-                        : OCODE_SETOP_SUB_GLOBALREGISTER_VAR32F;
+            ocode = inc ? OCODE_ACSE_SETOP_ADD_GLOBALREGISTER
+                        : OCODE_ACSE_SETOP_SUB_GLOBALREGISTER;
          else
-            ocode = inc ? OCODE_SETOP_INC_GLOBALREGISTER_VAR32F
-                        : OCODE_SETOP_DEC_GLOBALREGISTER_VAR32F;
+            ocode = inc ? OCODE_ACSE_SETOP_INC_GLOBALREGISTER
+                        : OCODE_ACSE_SETOP_DEC_GLOBALREGISTER;
          break;
       }
       break;
@@ -254,40 +258,41 @@ doSrc(ObjectVector *objects, VariableData *src, int deltaType)
       {
       case VariableData::SRA_MAP:
          if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_SETOP_ADD_MAPARRAY_VAR32F
-                        : OCODE_SETOP_SUB_MAPARRAY_VAR32F;
+            ocode = inc ? OCODE_ACSE_SETOP_ADD_MAPARRAY
+                        : OCODE_ACSE_SETOP_SUB_MAPARRAY;
          else
-            ocode = inc ? OCODE_SETOP_INC_MAPARRAY_VAR32F
-                        : OCODE_SETOP_DEC_MAPARRAY_VAR32F;
+            ocode = inc ? OCODE_ACSE_SETOP_INC_MAPARRAY
+                        : OCODE_ACSE_SETOP_DEC_MAPARRAY;
          break;
 
       case VariableData::SRA_WORLD:
          if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_SETOP_ADD_WORLDARRAY_VAR32F
-                        : OCODE_SETOP_SUB_WORLDARRAY_VAR32F;
+            ocode = inc ? OCODE_ACSE_SETOP_ADD_WORLDARRAY
+                        : OCODE_ACSE_SETOP_SUB_WORLDARRAY;
          else
-            ocode = inc ? OCODE_SETOP_INC_WORLDARRAY_VAR32F
-                        : OCODE_SETOP_DEC_WORLDARRAY_VAR32F;
+            ocode = inc ? OCODE_ACSE_SETOP_INC_WORLDARRAY
+                        : OCODE_ACSE_SETOP_DEC_WORLDARRAY;
          break;
 
       case VariableData::SRA_GLOBAL:
          if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_SETOP_ADD_GLOBALARRAY_VAR32F
-                        : OCODE_SETOP_SUB_GLOBALARRAY_VAR32F;
+            ocode = inc ? OCODE_ACSE_SETOP_ADD_GLOBALARRAY
+                        : OCODE_ACSE_SETOP_SUB_GLOBALARRAY;
          else
-            ocode = inc ? OCODE_SETOP_INC_GLOBALARRAY_VAR32F
-                        : OCODE_SETOP_DEC_GLOBALARRAY_VAR32F;
+            ocode = inc ? OCODE_ACSE_SETOP_INC_GLOBALARRAY
+                        : OCODE_ACSE_SETOP_DEC_GLOBALARRAY;
          break;
       }
       break;
 
    case VariableData::MT_STATIC:
       if (deltaType & DELTA_EXPR)
-         ocode = inc ? OCODE_SETOP_ADD_STATIC_VAR32F
-                     : OCODE_SETOP_SUB_STATIC_VAR32F;
+         ocode = inc ? OCODE_SETOP_ADD_STATIC32F
+                     : OCODE_SETOP_SUB_STATIC32F;
       else
-         ocode = inc ? OCODE_SETOP_INC_STATIC_VAR32F
-                     : OCODE_SETOP_DEC_STATIC_VAR32F;
+         ocode = inc ? OCODE_SETOP_INC_STATIC32F
+                     : OCODE_SETOP_DEC_STATIC32F;
+      typed = true;
       break;
 
    case VariableData::MT_LITERAL:
@@ -297,7 +302,8 @@ doSrc(ObjectVector *objects, VariableData *src, int deltaType)
       throw SourceException("invalid MT", position, getName());
    }
 
-   ocode = static_cast<ObjectCode>(ocode + (deltaType & DELTA_MASK));
+   if (typed)
+      ocode = static_cast<ObjectCode>(ocode + (deltaType & DELTA_MASK));
    objects->addToken(ocode, src->address);
 }
 
@@ -340,10 +346,10 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
          // If we couldn't do delta because prefix, we do it now.
          if (src->type != VariableData::MT_REGISTERARRAY && !suf)
          {
-            objects->addToken(OCODE_SET_TEMP_VAR);
-            objects->addToken(OCODE_GET_TEMP_VAR);
+            objects->addToken(OCODE_SET_TEMP);
+            objects->addToken(OCODE_GET_TEMP);
             deltaType = doDelta(objects);
-            objects->addToken(OCODE_GET_TEMP_VAR);
+            objects->addToken(OCODE_GET_TEMP);
          }
          else
          {
@@ -357,7 +363,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       // If stashing the offset on the stack, and pushing the result to the
       // stack, need to keep the offset in front of the result.
       if (offset && dst->type == VariableData::MT_STACK)
-         objects->addToken(OCODE_SET_TEMP_VAR);
+         objects->addToken(OCODE_SET_TEMP);
 
       doDst(objects, dst, src);
 
@@ -367,7 +373,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
             deltaType = doDelta(objects);
 
       if (offset && dst->type == VariableData::MT_STACK)
-         objects->addToken(OCODE_GET_TEMP_VAR);
+         objects->addToken(OCODE_GET_TEMP);
    }
 
    if (!deltaType)

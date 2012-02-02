@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* BinaryTokenPPACS/make_tokens.cpp
-**
-** Defines the BinaryTokenPPACS::make_tokens functions.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Object to PPACS translation.
+//
+//-----------------------------------------------------------------------------
 
 #include "../BinaryTokenPPACS.hpp"
 
@@ -29,192 +31,209 @@
 #include "../BinaryTokenACS/make_tokens.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
 
 #define TOKEN_CLASS BinaryTokenPPACS
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-void BinaryTokenPPACS::make_tokens(ObjectToken const & object, std::vector<BinaryTokenPPACS> * instructions)
+//
+// BinaryTokenPPACS::make_tokens
+//
+void BinaryTokenPPACS::
+make_tokens(ObjectToken const &object,
+            std::vector<BinaryTokenPPACS> *instructions)
 {
-	static ObjectExpression::Pointer const fracbits(ObjectExpression::create_value_int(16, SourcePosition::builtin()));
+   static ObjectExpression::Pointer const fracbits =
+      ObjectExpression::create_value_int(16, SourcePosition::builtin());
 
-	static ObjectExpression::Pointer const indexTemp(ObjectExpression::create_value_int(1, SourcePosition::builtin()));
+   static ObjectExpression::Pointer const indexTemp =
+      ObjectExpression::create_value_int(1, SourcePosition::builtin());
 
-	static std::vector<std::string> const nolabels;
+   static std::vector<std::string> const nolabels;
 
-	std::vector<ObjectExpression::Pointer> args;
+   std::vector<ObjectExpression::Pointer> args;
 
-	SourcePosition const & position(object.getPosition());
+   SourcePosition const &position = object.getPosition();
 
-	std::vector<std::string> const * labels(&object.getLabels());
+   std::vector<std::string> const *labels = &object.getLabels();
 
-	switch (object.getCode())
-	{
-	// Direct Mappings
+   switch (object.getCode())
+   {
+   // Direct Mappings
 
 
-	BINTOKACS_TOKENS_MAP_ALL_ALL();
+   BINTOKACS_TOKENS_MAP_ALL_ALL();
 
-	// Arithmetic
-	CASE_REMAP(DIV32F, DIV_FIXED);
-	CASE_REMAP(MUL32F, MUL_FIXED);
+   // Arithmetic
+   CASE_REMAP(DIV32F, DIV_FIXED);
+   CASE_REMAP(MUL32F, MUL_FIXED);
 
-	// Bitwise
+   // Bitwise
 
-	// Branching
-	CASE_REMAP_PRE(BRANCH, GOTO,     GOTO);
+   // Branching
+   CASE_REMAP_PRE(BRANCH, GOTO,     GOTO);
 
-	// Comparison
+   // Comparison
 
-	// Logical
+   // Logical
 
-	// Stack-ops.
+   // Stack-ops.
 
-	// Variable Address
-	CASE_REMAP_PRE(ADDR, STACK_ADD, STACK_ADD);
-	CASE_REMAP_PRE(ADDR, STACK_SUB, STACK_SUB);
-	CASE_REMAP_PRE(ADDR, STACK_VAR, STACK_VAR);
+   // Variable Address
+   CASE_REMAP_PRE(ADDR, AUTO, AUTO);
+   CASE_REMAP_PRE(ADDR, STACK_ADD, STACK_ADD);
+   CASE_REMAP_PRE(ADDR, STACK_SUB, STACK_SUB);
 
-	// Variable Get
-	CASE_REMAP_PRE(GET, AUTO_VAR32F, AUTO_VAR);
-	CASE_REMAP_PRE(GET, AUTO_VAR32I, AUTO_VAR);
+   // Variable Get
+   CASE_REMAP_PRE(GET, AUTO32F, AUTO);
+   CASE_REMAP_PRE(GET, AUTO32I, AUTO);
 
-	CASE_REMAP_PRE(GET, MOBJ_VAR32F, MOBJ_VAR);
-	CASE_REMAP_PRE(GET, MOBJ_VAR32I, MOBJ_VAR);
+   CASE_REMAP_PRE(GET, POINTER32F, POINTER);
+   CASE_REMAP_PRE(GET, POINTER32I, POINTER);
 
-	CASE_REMAP_PRE(GET, POINTER_VAR32F, POINTER_VAR);
-	CASE_REMAP_PRE(GET, POINTER_VAR32I, POINTER_VAR);
+   CASE_REMAP_PRE(GET, STATIC32F, STATIC);
+   CASE_REMAP_PRE(GET, STATIC32I, STATIC);
 
-	CASE_REMAP_PRE(GET, STATIC_VAR32F, STATIC_VAR);
-	CASE_REMAP_PRE(GET, STATIC_VAR32I, STATIC_VAR);
+   // Variable Set
+   CASE_REMAP_PRE(SET, AUTO32F, AUTO);
+   CASE_REMAP_PRE(SET, AUTO32I, AUTO);
 
-	// Variable Set
-	CASE_REMAP_PRE(SET, AUTO_VAR32F, AUTO_VAR);
-	CASE_REMAP_PRE(SET, AUTO_VAR32I, AUTO_VAR);
+   CASE_REMAP_PRE(SET, POINTER32F, POINTER);
+   CASE_REMAP_PRE(SET, POINTER32I, POINTER);
 
-	CASE_REMAP_PRE(SET, MOBJ_VAR32F, MOBJ_VAR);
-	CASE_REMAP_PRE(SET, MOBJ_VAR32I, MOBJ_VAR);
+   CASE_REMAP_PRE(SET, STATIC32F, STATIC);
+   CASE_REMAP_PRE(SET, STATIC32I, STATIC);
 
-	CASE_REMAP_PRE(SET, POINTER_VAR32F, POINTER_VAR);
-	CASE_REMAP_PRE(SET, POINTER_VAR32I, POINTER_VAR);
+   // Variable Set Op
+   CASE_REMAP_PRE(SETOP_ADD, AUTO32F,    AUTO);
+   CASE_REMAP_PRE(SETOP_ADD, AUTO32I,    AUTO);
+   CASE_REMAP_PRE(SETOP_ADD, AUTO32U,    AUTO);
+   CASE_REMAP_PRE(SETOP_ADD, POINTER32F, POINTER);
+   CASE_REMAP_PRE(SETOP_ADD, POINTER32I, POINTER);
+   CASE_REMAP_PRE(SETOP_ADD, POINTER32U, POINTER);
+   CASE_REMAP_PRE(SETOP_ADD, STATIC32F,  STATIC);
+   CASE_REMAP_PRE(SETOP_ADD, STATIC32I,  STATIC);
+   CASE_REMAP_PRE(SETOP_ADD, STATIC32U,  STATIC);
 
-	CASE_REMAP_PRE(SET, STATIC_VAR32F, STATIC_VAR);
-	CASE_REMAP_PRE(SET, STATIC_VAR32I, STATIC_VAR);
+   CASE_REMAP_PRE(SETOP_SUB, AUTO32F,    AUTO);
+   CASE_REMAP_PRE(SETOP_SUB, AUTO32I,    AUTO);
+   CASE_REMAP_PRE(SETOP_SUB, AUTO32U,    AUTO);
+   CASE_REMAP_PRE(SETOP_SUB, POINTER32F, POINTER);
+   CASE_REMAP_PRE(SETOP_SUB, POINTER32I, POINTER);
+   CASE_REMAP_PRE(SETOP_SUB, POINTER32U, POINTER);
+   CASE_REMAP_PRE(SETOP_SUB, STATIC32F,  STATIC);
+   CASE_REMAP_PRE(SETOP_SUB, STATIC32I,  STATIC);
+   CASE_REMAP_PRE(SETOP_SUB, STATIC32U,  STATIC);
 
-	// Variable Set Op
-	CASE_REMAP_PRE(SETOP_ADD, AUTO_VAR32F,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_ADD, AUTO_VAR32I,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_ADD, AUTO_VAR32U,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_ADD, POINTER_VAR32F, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_ADD, POINTER_VAR32I, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_ADD, POINTER_VAR32U, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_ADD, STATIC_VAR32F,  STATIC_VAR);
-	CASE_REMAP_PRE(SETOP_ADD, STATIC_VAR32I,  STATIC_VAR);
-	CASE_REMAP_PRE(SETOP_ADD, STATIC_VAR32U,  STATIC_VAR);
+   CASE_REMAP_PRE(SETOP_MUL, AUTO32I,    AUTO);
+   CASE_REMAP_PRE(SETOP_MUL, AUTO32U,    AUTO);
+   CASE_REMAP_PRE(SETOP_MUL, POINTER32I, POINTER);
+   CASE_REMAP_PRE(SETOP_MUL, POINTER32U, POINTER);
+   CASE_REMAP_PRE(SETOP_MUL, STATIC32I,  STATIC);
+   CASE_REMAP_PRE(SETOP_MUL, STATIC32U,  STATIC);
 
-	CASE_REMAP_PRE(SETOP_SUB, AUTO_VAR32F,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_SUB, AUTO_VAR32I,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_SUB, AUTO_VAR32U,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_SUB, POINTER_VAR32F, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_SUB, POINTER_VAR32I, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_SUB, POINTER_VAR32U, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_SUB, STATIC_VAR32F,  STATIC_VAR);
-	CASE_REMAP_PRE(SETOP_SUB, STATIC_VAR32I,  STATIC_VAR);
-	CASE_REMAP_PRE(SETOP_SUB, STATIC_VAR32U,  STATIC_VAR);
+   CASE_REMAP_PRE(SETOP_DIV, AUTO32I,    AUTO);
+   CASE_REMAP_PRE(SETOP_DIV, AUTO32U,    AUTO);    /* WARNING */
+   CASE_REMAP_PRE(SETOP_DIV, POINTER32I, POINTER);
+   CASE_REMAP_PRE(SETOP_DIV, POINTER32U, POINTER); /* WARNING */
+   CASE_REMAP_PRE(SETOP_DIV, STATIC32I,  STATIC);
+   CASE_REMAP_PRE(SETOP_DIV, STATIC32U,  STATIC);  /* WARNING */
 
-	CASE_REMAP_PRE(SETOP_MUL, AUTO_VAR32I,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_MUL, AUTO_VAR32U,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_MUL, POINTER_VAR32I, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_MUL, POINTER_VAR32U, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_MUL, STATIC_VAR32I,  STATIC_VAR);
-	CASE_REMAP_PRE(SETOP_MUL, STATIC_VAR32U,  STATIC_VAR);
+   CASE_REMAP_PRE(SETOP_MOD, AUTO32F,    AUTO);
+   CASE_REMAP_PRE(SETOP_MOD, AUTO32I,    AUTO);
+   CASE_REMAP_PRE(SETOP_MOD, AUTO32U,    AUTO);    /* WARNING */
+   CASE_REMAP_PRE(SETOP_MOD, POINTER32F, POINTER);
+   CASE_REMAP_PRE(SETOP_MOD, POINTER32I, POINTER);
+   CASE_REMAP_PRE(SETOP_MOD, POINTER32U, POINTER); /* WARNING */
+   CASE_REMAP_PRE(SETOP_MOD, STATIC32F,  STATIC);
+   CASE_REMAP_PRE(SETOP_MOD, STATIC32I,  STATIC);
+   CASE_REMAP_PRE(SETOP_MOD, STATIC32U,  STATIC);  /* WARNING */
 
-	CASE_REMAP_PRE(SETOP_DIV, AUTO_VAR32I,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_DIV, AUTO_VAR32U,    AUTO_VAR);    /* WARNING */
-	CASE_REMAP_PRE(SETOP_DIV, POINTER_VAR32I, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_DIV, POINTER_VAR32U, POINTER_VAR); /* WARNING */
-	CASE_REMAP_PRE(SETOP_DIV, STATIC_VAR32I,  STATIC_VAR);
-	CASE_REMAP_PRE(SETOP_DIV, STATIC_VAR32U,  STATIC_VAR);  /* WARNING */
+   CASE_REMAP_PRE(SETOP_INC, AUTO32I,    AUTO);
+   CASE_REMAP_PRE(SETOP_INC, AUTO32U,    AUTO);
+   CASE_REMAP_PRE(SETOP_INC, POINTER32I, POINTER);
+   CASE_REMAP_PRE(SETOP_INC, POINTER32U, POINTER);
+   CASE_REMAP_PRE(SETOP_INC, STATIC32I,  STATIC);
+   CASE_REMAP_PRE(SETOP_INC, STATIC32U,  STATIC);
 
-	CASE_REMAP_PRE(SETOP_MOD, AUTO_VAR32F,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_MOD, AUTO_VAR32I,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_MOD, AUTO_VAR32U,    AUTO_VAR);    /* WARNING */
-	CASE_REMAP_PRE(SETOP_MOD, POINTER_VAR32F, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_MOD, POINTER_VAR32I, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_MOD, POINTER_VAR32U, POINTER_VAR); /* WARNING */
-	CASE_REMAP_PRE(SETOP_MOD, STATIC_VAR32F,  STATIC_VAR);
-	CASE_REMAP_PRE(SETOP_MOD, STATIC_VAR32I,  STATIC_VAR);
-	CASE_REMAP_PRE(SETOP_MOD, STATIC_VAR32U,  STATIC_VAR);  /* WARNING */
+   CASE_REMAP_PRE(SETOP_DEC, AUTO32I,    AUTO);
+   CASE_REMAP_PRE(SETOP_DEC, AUTO32U,    AUTO);
+   CASE_REMAP_PRE(SETOP_DEC, POINTER32I, POINTER);
+   CASE_REMAP_PRE(SETOP_DEC, POINTER32U, POINTER);
+   CASE_REMAP_PRE(SETOP_DEC, STATIC32I,  STATIC);
+   CASE_REMAP_PRE(SETOP_DEC, STATIC32U,  STATIC);
 
-	CASE_REMAP_PRE(SETOP_INC, AUTO_VAR32I,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_INC, AUTO_VAR32U,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_INC, POINTER_VAR32I, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_INC, POINTER_VAR32U, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_INC, STATIC_VAR32I,  STATIC_VAR);
-	CASE_REMAP_PRE(SETOP_INC, STATIC_VAR32U,  STATIC_VAR);
+   // Miscellaneous
 
-	CASE_REMAP_PRE(SETOP_DEC, AUTO_VAR32I,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_DEC, AUTO_VAR32U,    AUTO_VAR);
-	CASE_REMAP_PRE(SETOP_DEC, POINTER_VAR32I, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_DEC, POINTER_VAR32U, POINTER_VAR);
-	CASE_REMAP_PRE(SETOP_DEC, STATIC_VAR32I,  STATIC_VAR);
-	CASE_REMAP_PRE(SETOP_DEC, STATIC_VAR32U,  STATIC_VAR);
+   // ACS
 
-	// Miscellaneous
+   // ACS Common Extensions
 
-	// ACS
+   // ACS Extensions
+   CASE_MAP_ACSE(MID_GET);
+   CASE_MAP_ACSE(MID_SET);
 
-	// ACS Common Extensions
-
-	// ACS Extensions
-
-	// ACS Printing
-	CASE_MAP_ACSP(END_ERROR);
-	CASE_MAP_ACSP(END_LOG);
-	CASE_REMAP_ACSP(NUM_DEC32F, FIXED);
+   // ACS Printing
+   CASE_MAP_ACSP(END_ERROR);
+   CASE_MAP_ACSP(END_LOG);
+   CASE_REMAP_ACSP(NUM_DEC32F, FIXED);
 
 
 
-	// Translations
+   // Translations
 
 
-	BINTOKACS_TOKENS_TRAN_ALL_ALL();
+   BINTOKACS_TOKENS_TRAN_ALL_ALL();
 
-	// Variable Address
+   // Variable Address
 
-	case OCODE_ADDR_STACK_ADD_IMM:
-		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-		PUSH_TOKEN(BCODE_ADDR_STACK_ADD);
-		break;
+   case OCODE_ADDR_STACK_ADD_IMM:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+      PUSH_TOKEN(BCODE_ADDR_STACK_ADD);
+      break;
 
-	case OCODE_ADDR_STACK_SUB_IMM:
-		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-		PUSH_TOKEN(BCODE_ADDR_STACK_SUB);
-		break;
+   case OCODE_ADDR_STACK_SUB_IMM:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+      PUSH_TOKEN(BCODE_ADDR_STACK_SUB);
+      break;
 
-	// Variable Get
+   // Variable Get
 
-	case OCODE_GET_TEMP_VAR:
-		args.push_back(indexTemp);
-		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		break;
+   case OCODE_GET_TEMP:
+      args.push_back(indexTemp);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      break;
 
-	// Variable Set
+   // Variable Set
 
-	case OCODE_SET_TEMP_VAR:
-		args.push_back(indexTemp);
-		PUSH_TOKEN(BCODE_SET_WORLDREGISTER_VAR);
-		break;
+   case OCODE_SET_TEMP:
+      args.push_back(indexTemp);
+      PUSH_TOKEN(BCODE_SET_WORLDREGISTER);
+      break;
 
-	case OCODE_NONE:
-	default:
-		throw SourceException("unknown OCODE: " + (std::string)make_string(object.getCode()), position, "BinaryTokenPPACS");
-	}
+   case OCODE_NONE:
+   default:
+      throw SourceException("unknown OCODE: " + std::string(make_string(object.getCode())),
+                            position, __func__);
+   }
 }
-void BinaryTokenPPACS::make_tokens(ObjectVector const & objects, std::vector<BinaryTokenPPACS> * instructions)
+
+//
+// BinaryTokenPPACS::make_tokens
+//
+void BinaryTokenPPACS::
+make_tokens(ObjectVector const &objects,
+            std::vector<BinaryTokenPPACS> *instructions)
 {
-	for (bigsint index(0); index < objects.size(); ++index)
-		make_tokens(objects[index], instructions);
+   for (bigsint index(0); index < objects.size(); ++index)
+      make_tokens(objects[index], instructions);
 }
 
+// EOF
 

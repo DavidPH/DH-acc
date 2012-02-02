@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* BinaryTokenZDACS/make_tokens.cpp
-**
-** Defines the BinaryTokenZDACS::make_tokens functions.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Object to ZDACS translation.
+//
+//-----------------------------------------------------------------------------
 
 #include "../BinaryTokenZDACS.hpp"
 
@@ -29,260 +31,436 @@
 #include "../BinaryTokenACS/make_tokens.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
 
 #define TOKEN_CLASS BinaryTokenZDACS
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-void BinaryTokenZDACS::make_tokens(ObjectToken const & object, std::vector<BinaryTokenZDACS> * instructions)
+//
+// BinaryTokenZDACS::make_tokens
+//
+void BinaryTokenZDACS::
+make_tokens(ObjectToken const &object,
+            std::vector<BinaryTokenZDACS> *instructions)
 {
-	static ObjectExpression::Pointer const fracbits(ObjectExpression::create_value_int(16, SourcePosition::builtin()));
+   static ObjectExpression::Pointer const fracbits =
+      ObjectExpression::create_value_int(16, SourcePosition::builtin());
 
-	static ObjectExpression::Pointer const indexAddr(ObjectExpression::create_value_int(0, SourcePosition::builtin()));
-	static ObjectExpression::Pointer const indexStack(ObjectExpression::create_value_int(0, SourcePosition::builtin()));
-	static ObjectExpression::Pointer const indexTemp(ObjectExpression::create_value_int(1, SourcePosition::builtin()));
+   static ObjectExpression::Pointer const indexAddr =
+      ObjectExpression::create_value_int(0, SourcePosition::builtin());
 
-	static std::vector<std::string> const nolabels;
+   static ObjectExpression::Pointer const indexStack =
+      ObjectExpression::create_value_int(0, SourcePosition::builtin());
 
-	std::vector<ObjectExpression::Pointer> args;
+   static ObjectExpression::Pointer const indexTemp =
+      ObjectExpression::create_value_int(1, SourcePosition::builtin());
 
-	SourcePosition const & position(object.getPosition());
+   static std::vector<std::string> const nolabels;
 
-	std::vector<std::string> const * labels(&object.getLabels());
+   std::vector<ObjectExpression::Pointer> args;
 
-	switch (object.getCode())
-	{
-	// Direct Mappings
+   SourcePosition const &position = object.getPosition();
 
+   std::vector<std::string> const *labels = &object.getLabels();
 
-	BINTOKACS_TOKENS_MAP_ALL_ALL();
-
-	// Arithmetic
-	CASE_REMAP(DIV32F, DIV_FIXED);
-	CASE_REMAP(MUL32F, MUL_FIXED);
-
-	// Bitwise
-	CASE_REMAP_PRE(BITWISE, NOT32, NOT);
-
-	// Branching
-
-	// Comparison
-
-	// Logical
-
-	// Stack-ops.
-	CASE_REMAP_PRE(STACK, DUP32,  DUP);
-	CASE_REMAP_PRE(STACK, SWAP32, SWAP);
-
-	// Variable Address
-
-	// Variable Get
-	CASE_REMAP_PRE(GET, GLOBALARRAY_VAR32F, GLOBALARRAY_VAR);
-	CASE_REMAP_PRE(GET, GLOBALARRAY_VAR32I, GLOBALARRAY_VAR);
-
-	CASE_REMAP_PRE(GET, GLOBALREGISTER_VAR32F, GLOBALREGISTER_VAR);
-	CASE_REMAP_PRE(GET, GLOBALREGISTER_VAR32I, GLOBALREGISTER_VAR);
-
-	CASE_REMAP_PRE(GET, MAPARRAY_VAR32F, MAPARRAY_VAR);
-	CASE_REMAP_PRE(GET, MAPARRAY_VAR32I, MAPARRAY_VAR);
-
-	CASE_REMAP_PRE(GET, TID_VAR32F, TID_VAR);
-	CASE_REMAP_PRE(GET, TID_VAR32I, TID_VAR);
-
-	CASE_REMAP_PRE(GET, WORLDARRAY_VAR32F, WORLDARRAY_VAR);
-	CASE_REMAP_PRE(GET, WORLDARRAY_VAR32I, WORLDARRAY_VAR);
-
-	// Variable Set
-	CASE_REMAP_PRE(SET, GLOBALARRAY_VAR32F, GLOBALARRAY_VAR);
-	CASE_REMAP_PRE(SET, GLOBALARRAY_VAR32I, GLOBALARRAY_VAR);
-
-	CASE_REMAP_PRE(SET, GLOBALREGISTER_VAR32F, GLOBALREGISTER_VAR);
-	CASE_REMAP_PRE(SET, GLOBALREGISTER_VAR32I, GLOBALREGISTER_VAR);
-
-	CASE_REMAP_PRE(SET, MAPARRAY_VAR32F, MAPARRAY_VAR);
-	CASE_REMAP_PRE(SET, MAPARRAY_VAR32I, MAPARRAY_VAR);
-
-	CASE_REMAP_PRE(SET, TID_VAR32F, TID_VAR);
-	CASE_REMAP_PRE(SET, TID_VAR32I, TID_VAR);
-
-	CASE_REMAP_PRE(SET, WORLDARRAY_VAR32F, WORLDARRAY_VAR);
-	CASE_REMAP_PRE(SET, WORLDARRAY_VAR32I, WORLDARRAY_VAR);
-
-	// Variable Set Op
-
-	// Miscellaneous
-	CASE_REMAP_PRE(MISC, NATIVE, NATIVE);
-
-	CASE_REMAP_PRE(MISC, STRLEN, STRLEN);
-
-	// ACS
-
-	// ACS Common Extensions
-
-	// ACS Extensions
-	CASE_MAP_ACSE(CALLFUNC_IMM);
-	CASE_MAP_ACSE(CALLFUNCVOID_IMM);
-	CASE_MAP_ACSE(GET_ACTIVATOR_TID);
-	CASE_MAP_ACSE(GET_AMMO_CAPACITY);
-	CASE_MAP_ACSE(GET_TID_ANGLE);
-	CASE_MAP_ACSE(GET_TID_PITCH);
-	CASE_MAP_ACSE(GET_TID_X);
-	CASE_MAP_ACSE(GET_TID_Y);
-	CASE_MAP_ACSE(GET_TID_Z);
-	CASE_MAP_ACSE(INVENTORY_CHECK);
-	CASE_MAP_ACSE(INVENTORY_CHECK_IMM);
-	CASE_MAP_ACSE(INVENTORY_GIVE);
-	CASE_MAP_ACSE(INVENTORY_GIVE_IMM);
-	CASE_MAP_ACSE(INVENTORY_TAKE);
-	CASE_MAP_ACSE(INVENTORY_TAKE_IMM);
-	CASE_MAP_ACSE(LINESPEC5RESULT);
-	CASE_MAP_ACSE(RETNFUNC);
-	CASE_MAP_ACSE(RETNFUNCVOID);
-	CASE_MAP_ACSE(SCRIPT_SETRETURN);
-	CASE_MAP_ACSE(SET_AMMO_CAPACITY);
-	CASE_MAP_ACSE(SET_TID_ANGLE);
-	CASE_MAP_ACSE(SET_TID_PITCH);
-	CASE_MAP_ACSE(SET_TID_POSITION);
-	CASE_MAP_ACSE(SPAWN);
-	CASE_MAP_ACSE(SPAWN_IMM);
-	CASE_MAP_ACSE(SPAWN_PROJECTILE);
-
-	// ACS Printing
-	CASE_MAP_ACSP(END_LOG);
-	CASE_REMAP_ACSP(NUM_DEC32F, FIXED);
-	CASE_REMAP_ACSP(NUM_HEX32I, NUM_HEX); // WARNING
-	CASE_REMAP_ACSP(NUM_HEX32U, NUM_HEX);
+   switch (object.getCode())
+   {
+   // Direct Mappings
 
 
+   BINTOKACS_TOKENS_MAP_ALL_ALL();
 
-	// Translations
+   // Arithmetic
+   CASE_REMAP(DIV32F, DIV_FIXED);
+   CASE_REMAP(MUL32F, MUL_FIXED);
+
+   // Bitwise
+   CASE_REMAP_PRE(BITWISE, NOT32, NOT);
+
+   // Branching
+
+   // Comparison
+
+   // Logical
+
+   // Stack-ops.
+   CASE_REMAP_PRE(STACK, DUP32,  DUP);
+   CASE_REMAP_PRE(STACK, SWAP32, SWAP);
+
+   // Trigonometry
+   CASE_REMAP_PRE(TRIG, COS32F, COS);
+   CASE_REMAP_PRE(TRIG, SIN32F, SIN);
+
+   // Variable Address
+
+   // Variable Get
+
+   // Variable Set
+
+   // Variable Set Op
+
+   // Miscellaneous
+   CASE_REMAP_PRE(MISC, NATIVE, NATIVE);
+
+   // ACS
+
+   // ACS Common Extensions
+
+   // ACS Extensions
+   CASE_MAP_ACSE(FUNC_CALL_IMM);
+   CASE_MAP_ACSE(FUNC_CALLVOID_IMM);
+   CASE_MAP_ACSE(FUNC_RETN);
+   CASE_MAP_ACSE(FUNC_RETNVOID);
+   CASE_MAP_ACSE(GAME_EXEC);
+   CASE_MAP_ACSE(GAME_EXEC_IMM);
+   CASE_MAP_ACSE(GAME_GET_CVAR);
+   CASE_MAP_ACSE(GAME_GET_INVASIONSTATE);
+   CASE_MAP_ACSE(GAME_GET_INVASIONWAVE);
+   CASE_MAP_ACSE(GAME_GET_LEVELINFO);
+   CASE_MAP_ACSE(GAME_GET_TEAMINFO_PLAYERCOUNT_BLUE);
+   CASE_MAP_ACSE(GAME_GET_TEAMINFO_PLAYERCOUNT_RED);
+   CASE_MAP_ACSE(GAME_GET_TEAMINFO_SCORE_BLUE);
+   CASE_MAP_ACSE(GAME_GET_TEAMINFO_SCORE_RED);
+   CASE_MAP_ACSE(GAME_GET_THINGCOUNT_STR);
+   CASE_MAP_ACSE(GAME_GET_TYPE_ONEFLAGCTF);
+   CASE_MAP_ACSE(GAME_GET_TYPE_SINGLEPLAYER);
+   CASE_MAP_ACSE(GAME_REPLACETEXTURES);
+   CASE_MAP_ACSE(GAME_SET_AIRCONTROL);
+   CASE_MAP_ACSE(GAME_SET_AIRCONTROL_IMM);
+   CASE_MAP_ACSE(GAME_SET_GRAVITY);
+   CASE_MAP_ACSE(GAME_SET_GRAVITY_IMM);
+   CASE_MAP_ACSE(GAME_SET_LEVEL);
+   CASE_MAP_ACSE(GAME_SET_MUSIC);
+   CASE_MAP_ACSE(GAME_SET_MUSIC_IMM);
+   CASE_MAP_ACSE(GAME_SET_MUSICLOCAL);
+   CASE_MAP_ACSE(GAME_SET_MUSICLOCAL_IMM);
+   CASE_MAP_ACSE(GAME_SET_MUSICST);
+   CASE_MAP_ACSE(GAME_SET_SKY);
+   CASE_MAP_ACSE(GET_GLOBALARRAY);
+   CASE_MAP_ACSE(GET_GLOBALREGISTER);
+   CASE_MAP_ACSE(GET_MAPARRAY);
+   CASE_MAP_ACSE(GET_WORLDARRAY);
+   CASE_MAP_ACSE(LINE_GET_OFFSETY);
+   CASE_MAP_ACSE(LTAG_SET_BLOCKMONSTER);
+   CASE_MAP_ACSE(MISC_PLAYMOVIE);
+   CASE_MAP_ACSE(MTAG_ADD_INVENTORY);
+   CASE_MAP_ACSE(MTAG_CHK_TEXTURE_CEILING);
+   CASE_MAP_ACSE(MTAG_CHK_TEXTURE_FLOOR);
+   CASE_MAP_ACSE(MTAG_CLR_INVENTORY);
+   CASE_MAP_ACSE(MTAG_DAMAGE);
+   CASE_MAP_ACSE(MTAG_GET);
+   CASE_MAP_ACSE(MTAG_GET_ANGLE);
+   CASE_MAP_ACSE(MTAG_GET_CEILINGZ);
+   CASE_MAP_ACSE(MTAG_GET_CLASSIFICATION);
+   CASE_MAP_ACSE(MTAG_GET_FLOORZ);
+   CASE_MAP_ACSE(MTAG_GET_INVENTORY);
+   CASE_MAP_ACSE(MTAG_GET_LIGHTLEVEL);
+   CASE_MAP_ACSE(MTAG_GET_PITCH);
+   CASE_MAP_ACSE(MTAG_GET_X);
+   CASE_MAP_ACSE(MTAG_GET_Y);
+   CASE_MAP_ACSE(MTAG_GET_Z);
+   CASE_MAP_ACSE(MTAG_MORPH);
+   CASE_MAP_ACSE(MTAG_SET);
+   CASE_MAP_ACSE(MTAG_SET_ANGLE);
+   CASE_MAP_ACSE(MTAG_SET_CAMERATEXTURE);
+   CASE_MAP_ACSE(MTAG_SET_MARINESPRITE);
+   CASE_MAP_ACSE(MTAG_SET_MARINEWEAPON);
+   CASE_MAP_ACSE(MTAG_SET_PITCH);
+   CASE_MAP_ACSE(MTAG_SET_SPECIAL);
+   CASE_MAP_ACSE(MTAG_SET_STATE);
+   CASE_MAP_ACSE(MTAG_SET_XYZ);
+   CASE_MAP_ACSE(MTAG_SUB_INVENTORY);
+   CASE_MAP_ACSE(MTAG_UNMORPH);
+   CASE_MAP_ACSE(MTAG_USEINVENTORY);
+   CASE_MAP_ACSE(PLAYER_GET_CAMERA);
+   CASE_MAP_ACSE(PLAYER_GET_CLASS);
+   CASE_MAP_ACSE(PLAYER_GET_INFO);
+   CASE_MAP_ACSE(PLAYER_GET_INGAME);
+   CASE_MAP_ACSE(PLAYER_GET_INPUT);
+   CASE_MAP_ACSE(PLAYER_GET_ISBOT);
+   CASE_MAP_ACSE(SCREEN_FADE_RANGE);
+   CASE_MAP_ACSE(SCREEN_FADE_START);
+   CASE_MAP_ACSE(SCREEN_FADE_STOP);
+   CASE_MAP_ACSE(SCREEN_GET_HEIGHT);
+   CASE_MAP_ACSE(SCREEN_GET_WIDTH);
+   CASE_MAP_ACSE(SCREEN_SET_HUDSIZE);
+   CASE_MAP_ACSE(SCRIPT_SETRETURN);
+   CASE_MAP_ACSE(SET_GLOBALARRAY);
+   CASE_MAP_ACSE(SET_GLOBALREGISTER);
+   CASE_MAP_ACSE(SET_MAPARRAY);
+   CASE_MAP_ACSE(SET_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_ADD_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_ADD_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_ADD_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_ADD_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_AND_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_AND_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_AND_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_AND_MAPREGISTER);
+   CASE_MAP_ACSE(SETOP_AND_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_AND_WORLDREGISTER);
+   CASE_MAP_ACSE(SETOP_DEC_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_DEC_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_DEC_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_DEC_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_DIV_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_DIV_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_DIV_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_DIV_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_INC_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_INC_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_INC_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_INC_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_IOR_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_IOR_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_IOR_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_IOR_MAPREGISTER);
+   CASE_MAP_ACSE(SETOP_IOR_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_IOR_WORLDREGISTER);
+   CASE_MAP_ACSE(SETOP_LSH_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_LSH_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_LSH_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_LSH_MAPREGISTER);
+   CASE_MAP_ACSE(SETOP_LSH_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_LSH_WORLDREGISTER);
+   CASE_MAP_ACSE(SETOP_MOD_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_MOD_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_MOD_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_MOD_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_MUL_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_MUL_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_MUL_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_MUL_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_RSH_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_RSH_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_RSH_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_RSH_MAPREGISTER);
+   CASE_MAP_ACSE(SETOP_RSH_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_RSH_WORLDREGISTER);
+   CASE_MAP_ACSE(SETOP_SUB_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_SUB_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_SUB_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_SUB_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_XOR_GLOBALARRAY);
+   CASE_MAP_ACSE(SETOP_XOR_GLOBALREGISTER);
+   CASE_MAP_ACSE(SETOP_XOR_MAPARRAY);
+   CASE_MAP_ACSE(SETOP_XOR_MAPREGISTER);
+   CASE_MAP_ACSE(SETOP_XOR_WORLDARRAY);
+   CASE_MAP_ACSE(SETOP_XOR_WORLDREGISTER);
+   CASE_MAP_ACSE(SOUND_AMBIENTLOCAL);
+   CASE_MAP_ACSE(SOUND_THING);
+   CASE_MAP_ACSE(SPAWN_POINT);
+   CASE_MAP_ACSE(SPAWN_POINT_IMM);
+   CASE_MAP_ACSE(SPAWN_PROJECTILE_SID);
+   CASE_MAP_ACSE(SPAWN_PROJECTILE_STR);
+   CASE_MAP_ACSE(SPAWN_SPOT_ANGLE);
+   CASE_MAP_ACSE(SPAWN_SPOT_ANGLE_IMM);
+   CASE_MAP_ACSE(SPAWN_SPOT);
+   CASE_MAP_ACSE(SPECIAL_EXEC5_RETN1);
+   CASE_MAP_ACSE(STAG_DAMAGE);
+   CASE_MAP_ACSE(STAG_GET_LIGHTLEVEL);
+   CASE_MAP_ACSE(STAG_GET_THINGCOUNT_SID);
+   CASE_MAP_ACSE(STAG_GET_THINGCOUNT_STR);
+   CASE_MAP_ACSE(STAG_GET_Z_CEILING);
+   CASE_MAP_ACSE(STAG_GET_Z_FLOOR);
+   CASE_MAP_ACSE(STAG_SET_TRIGGER_CEILING);
+   CASE_MAP_ACSE(STAG_SET_TRIGGER_FLOOR);
+   CASE_MAP_ACSE(STRING_COPY_GLOBALRANGE);
+   CASE_MAP_ACSE(STRING_COPY_MAPRANGE);
+   CASE_MAP_ACSE(STRING_COPY_WORLDRANGE);
+   CASE_MAP_ACSE(STRING_GET_LENGTH);
+   CASE_MAP_ACSE(STRING_TAG);
+   CASE_MAP_ACSE(THING_ADD_INVENTORY);
+   CASE_MAP_ACSE(THING_ADD_INVENTORY_IMM);
+   CASE_MAP_ACSE(THING_CHK_WEAPON);
+   CASE_MAP_ACSE(THING_CLR_INVENTORY);
+   CASE_MAP_ACSE(THING_GET_AMMOCAP);
+   CASE_MAP_ACSE(THING_GET_ARMOR);
+   CASE_MAP_ACSE(THING_GET_FRAGS);
+   CASE_MAP_ACSE(THING_GET_HEALTH);
+   CASE_MAP_ACSE(THING_GET_INVENTORY);
+   CASE_MAP_ACSE(THING_GET_INVENTORY_IMM);
+   CASE_MAP_ACSE(THING_GET_MTAG);
+   CASE_MAP_ACSE(THING_GET_PLAYERNUMBER);
+   CASE_MAP_ACSE(THING_GET_SIGIL);
+   CASE_MAP_ACSE(THING_GET_TEAM);
+   CASE_MAP_ACSE(THING_SET_AMMOCAP);
+   CASE_MAP_ACSE(THING_SET_MUGSHOT);
+   CASE_MAP_ACSE(THING_SET_WEAPON);
+   CASE_MAP_ACSE(THING_SUB_INVENTORY);
+   CASE_MAP_ACSE(THING_SUB_INVENTORY_IMM);
+   CASE_MAP_ACSE(THING_USEINVENTORY);
+   CASE_MAP_ACSE(TRANSLATION_END);
+   CASE_MAP_ACSE(TRANSLATION_PALETTE);
+   CASE_MAP_ACSE(TRANSLATION_RGB);
+   CASE_MAP_ACSE(TRANSLATION_START);
+   CASE_MAP_ACSE(TRIG_VECTORANGLE);
+
+   // ACS Printing
+   CASE_MAP_ACSP(END_HUD);
+   CASE_MAP_ACSP(END_HUD_BOLD);
+   CASE_MAP_ACSP(END_LOG);
+   CASE_MAP_ACSP(END_OPT);
+   CASE_MAP_ACSP(END_STRING);
+   CASE_MAP_ACSP(KEYBIND);
+   CASE_REMAP_ACSP(NUM_BIN32I, NUM_BIN); // WARNING
+   CASE_REMAP_ACSP(NUM_BIN32U, NUM_BIN);
+   CASE_REMAP_ACSP(NUM_DEC32F, FIXED);
+   CASE_REMAP_ACSP(NUM_HEX32I, NUM_HEX); // WARNING
+   CASE_REMAP_ACSP(NUM_HEX32U, NUM_HEX);
+   CASE_MAP_ACSP(PLAYER_NAME);
+   CASE_MAP_ACSP(SET_FONT);
+   CASE_MAP_ACSP(SET_FONT_IMM);
+   CASE_MAP_ACSP(START_OPT);
+   CASE_MAP_ACSP(STRING_GLOBALARRAY);
+   CASE_MAP_ACSP(STRING_GLOBALRANGE);
+   CASE_MAP_ACSP(STRING_LOCALIZED);
+   CASE_MAP_ACSP(STRING_MAPARRAY);
+   CASE_MAP_ACSP(STRING_MAPRANGE);
+   CASE_MAP_ACSP(STRING_WORLDARRAY);
+   CASE_MAP_ACSP(STRING_WORLDRANGE);
 
 
-	BINTOKACS_TOKENS_TRAN_ALL();
 
-	// Branching
+   // Translations
 
-	case OCODE_BRANCH_TABLE:
-		args = object.getArgs();
-		if (args.size() % 2)
-			throw SourceException("uneven OCODE_BRANCH_TABLE", position, "BinaryTokenZDACS");
-		PUSH_TOKEN(BCODE_BRANCH_TABLE);
-		break;
 
-	// Variable Address
+   BINTOKACS_TOKENS_TRAN_ALL();
 
-	case OCODE_ADDR_STACK_ADD_IMM:
-		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-	case OCODE_ADDR_STACK_ADD:
-		args.push_back(indexStack);
-		PUSH_TOKEN(BCODE_SETOP_ADD_WORLDREGISTER_VAR);
-		break;
+   // Branching
 
-	case OCODE_ADDR_STACK_SUB_IMM:
-		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-	case OCODE_ADDR_STACK_SUB:
-		args.push_back(indexStack);
-		PUSH_TOKEN(BCODE_SETOP_SUB_WORLDREGISTER_VAR);
-		break;
+   case OCODE_BRANCH_TABLE:
+      args = object.getArgs();
+      if (args.size() % 2)
+         throw SourceException("uneven OCODE_BRANCH_TABLE", position, __func__);
+      PUSH_TOKEN(BCODE__BRANCH_TABLE);
+      break;
 
-	case OCODE_ADDR_STACK_VAR:
-		args.push_back(indexStack);
-		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		if (object.getArg(0)->resolveInt())
-		{
-			PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-			PUSH_TOKEN(BCODE_ADD);
-		}
-		break;
+   // Variable Address
 
-	// Variable Get
+   case OCODE_ADDR_AUTO:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      if (object.getArg(0)->resolveInt())
+      {
+         PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+         PUSH_TOKEN(BCODE_ADD);
+      }
+      break;
 
-	case OCODE_GET_AUTO_VAR32F:
-	case OCODE_GET_AUTO_VAR32I:
-		args.push_back(indexStack);
-		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		if (object.getArg(0)->resolveInt())
-		{
-			PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-			PUSH_TOKEN(BCODE_ADD);
-		}
-		args.push_back(indexAddr);
-		PUSH_TOKEN(BCODE_GET_GLOBALARRAY_VAR);
-		break;
+   case OCODE_ADDR_STACK_ADD_IMM:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+   case OCODE_ADDR_STACK_ADD:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_SETOP_ADD_WORLDREGISTER);
+      break;
 
-	case OCODE_GET_POINTER_VAR32F:
-	case OCODE_GET_POINTER_VAR32I:
-		if (object.getArg(0)->resolveInt())
-		{
-			PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-			PUSH_TOKEN(BCODE_ADD);
-		}
-		args.push_back(indexAddr);
-		PUSH_TOKEN(BCODE_GET_GLOBALARRAY_VAR);
-		break;
+   case OCODE_ADDR_STACK_SUB_IMM:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+   case OCODE_ADDR_STACK_SUB:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_SETOP_SUB_WORLDREGISTER);
+      break;
 
-	case OCODE_GET_STATIC_VAR32F:
-	case OCODE_GET_STATIC_VAR32I:
-		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-		args.push_back(indexAddr);
-		PUSH_TOKEN(BCODE_GET_GLOBALARRAY_VAR);
-		break;
+   // Variable Get
 
-	case OCODE_GET_TEMP_VAR:
-		args.push_back(indexTemp);
-		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		break;
+   case OCODE_GET_AUTO32F:
+   case OCODE_GET_AUTO32I:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      if (object.getArg(0)->resolveInt())
+      {
+         PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+         PUSH_TOKEN(BCODE_ADD);
+      }
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_GET_GLOBALARRAY);
+      break;
 
-	// Variable Set
+   case OCODE_GET_POINTER32F:
+   case OCODE_GET_POINTER32I:
+      if (object.getArg(0)->resolveInt())
+      {
+         PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+         PUSH_TOKEN(BCODE_ADD);
+      }
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_GET_GLOBALARRAY);
+      break;
 
-	case OCODE_SET_AUTO_VAR32F:
-	case OCODE_SET_AUTO_VAR32I:
-		args.push_back(indexStack);
-		PUSH_TOKEN(BCODE_GET_WORLDREGISTER_VAR);
-		if (object.getArg(0)->resolveInt())
-		{
-			PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-			PUSH_TOKEN(BCODE_ADD);
-		}
-		PUSH_TOKEN(BCODE_STACK_SWAP);
-		args.push_back(indexAddr);
-		PUSH_TOKEN(BCODE_SET_GLOBALARRAY_VAR);
-		break;
+   case OCODE_GET_STATIC32F:
+   case OCODE_GET_STATIC32I:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_GET_GLOBALARRAY);
+      break;
 
-	case OCODE_SET_POINTER_VAR32F:
-	case OCODE_SET_POINTER_VAR32I:
-		if (object.getArg(0)->resolveInt())
-		{
-			PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-			PUSH_TOKEN(BCODE_ADD);
-		}
-		PUSH_TOKEN(BCODE_STACK_SWAP);
-		args.push_back(indexAddr);
-		PUSH_TOKEN(BCODE_SET_GLOBALARRAY_VAR);
-		break;
+   case OCODE_GET_TEMP:
+      args.push_back(indexTemp);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      break;
 
-	case OCODE_SET_STATIC_VAR32F:
-	case OCODE_SET_STATIC_VAR32I:
-		PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-		PUSH_TOKEN(BCODE_STACK_SWAP);
-		args.push_back(indexAddr);
-		PUSH_TOKEN(BCODE_SET_GLOBALARRAY_VAR);
-		break;
+   // Variable Set
 
-	case OCODE_SET_TEMP_VAR:
-		args.push_back(indexTemp);
-		PUSH_TOKEN(BCODE_SET_WORLDREGISTER_VAR);
-		break;
+   case OCODE_SET_AUTO32F:
+   case OCODE_SET_AUTO32I:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      if (object.getArg(0)->resolveInt())
+      {
+         PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+         PUSH_TOKEN(BCODE_ADD);
+      }
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SET_GLOBALARRAY);
+      break;
 
-	case OCODE_NONE:
-	default:
-		throw SourceException("unknown OCODE: " + (std::string)make_string(object.getCode()), position, "BinaryTokenZDACS");
-	}
+   case OCODE_SET_POINTER32F:
+   case OCODE_SET_POINTER32I:
+      if (object.getArg(0)->resolveInt())
+      {
+         PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+         PUSH_TOKEN(BCODE_ADD);
+      }
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SET_GLOBALARRAY);
+      break;
+
+   case OCODE_SET_STATIC32F:
+   case OCODE_SET_STATIC32I:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SET_GLOBALARRAY);
+      break;
+
+   case OCODE_SET_TEMP:
+      args.push_back(indexTemp);
+      PUSH_TOKEN(BCODE_SET_WORLDREGISTER);
+      break;
+
+   case OCODE_NONE:
+   default:
+      throw SourceException("unknown OCODE: " + (std::string)make_string(object.getCode()), position, "BinaryTokenZDACS");
+   }
 }
+
+//
+// BinaryTokenZDACS::make_tokens
+//
 void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<BinaryTokenZDACS> * instructions)
 {
-	for (bigsint index(0); index < objects.size(); ++index)
-		make_tokens(objects[index], instructions);
+   for (bigsint index(0); index < objects.size(); ++index)
+      make_tokens(objects[index], instructions);
 }
 
+// EOF
 

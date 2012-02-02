@@ -29,6 +29,9 @@
 #include "../VariableData.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::make_objects_memcpy_prep
@@ -125,7 +128,7 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
    {
    case VariableData::MT_AUTO:
       for (bigsint i = 0; i < src->size; ++i)
-         objects->addToken(OCODE_GET_AUTO_VAR32I,
+         objects->addToken(OCODE_GET_AUTO32I,
                            objects->getValueAdd(src->address, i));
       break;
 
@@ -148,15 +151,15 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
       }
 
       if (src->size == 1)
-         objects->addToken(OCODE_GET_POINTER_VAR32I, src->address);
+         objects->addToken(OCODE_GET_POINTER32I, src->address);
       else
       {
-         objects->addToken(OCODE_SET_TEMP_VAR);
+         objects->addToken(OCODE_SET_TEMP);
 
          for (bigsint i = 0; i < src->size; ++i)
          {
-            objects->addToken(OCODE_GET_TEMP_VAR);
-            objects->addToken(OCODE_GET_POINTER_VAR32I,
+            objects->addToken(OCODE_GET_TEMP);
+            objects->addToken(OCODE_GET_POINTER32I,
                               objects->getValueAdd(src->address, i));
          }
       }
@@ -168,22 +171,22 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
          switch (src->sectionR)
          {
          case VariableData::SR_LOCAL:
-            objects->addToken(OCODE_GET_REGISTER_VAR32I,
+            objects->addToken(OCODE_GET_REGISTER32I,
                               objects->getValueAdd(src->address, i));
             break;
 
          case VariableData::SR_MAP:
-            objects->addToken(OCODE_GET_MAPREGISTER_VAR32I,
+            objects->addToken(OCODE_ACS_GET_MAPREGISTER,
                               objects->getValueAdd(src->address, i));
             break;
 
          case VariableData::SR_WORLD:
-            objects->addToken(OCODE_GET_WORLDREGISTER_VAR32I,
+            objects->addToken(OCODE_ACS_GET_WORLDREGISTER,
                               objects->getValueAdd(src->address, i));
             break;
 
          case VariableData::SR_GLOBAL:
-            objects->addToken(OCODE_GET_GLOBALREGISTER_VAR32I,
+            objects->addToken(OCODE_ACSE_GET_GLOBALREGISTER,
                               objects->getValueAdd(src->address, i));
             break;
          }
@@ -201,25 +204,25 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
          switch (src->sectionRA)
          {
          case VariableData::SRA_MAP:
-            objects->addToken(OCODE_GET_MAPARRAY_VAR32I, src->address);
+            objects->addToken(OCODE_ACSE_GET_MAPARRAY, src->address);
             break;
 
          case VariableData::SRA_WORLD:
-            objects->addToken(OCODE_GET_WORLDARRAY_VAR32I, src->address);
+            objects->addToken(OCODE_ACSE_GET_WORLDARRAY, src->address);
             break;
 
          case VariableData::SRA_GLOBAL:
-            objects->addToken(OCODE_GET_GLOBALARRAY_VAR32I, src->address);
+            objects->addToken(OCODE_ACSE_GET_GLOBALARRAY, src->address);
             break;
          }
       }
       else
       {
-         objects->addToken(OCODE_SET_TEMP_VAR);
+         objects->addToken(OCODE_SET_TEMP);
 
          for (bigsint i = 0; i < src->size; ++i)
          {
-            objects->addToken(OCODE_GET_TEMP_VAR);
+            objects->addToken(OCODE_GET_TEMP);
 
             if (i != 0)
             {
@@ -230,15 +233,15 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
             switch (src->sectionRA)
             {
             case VariableData::SRA_MAP:
-               objects->addToken(OCODE_GET_MAPARRAY_VAR32I, src->address);
+               objects->addToken(OCODE_ACSE_GET_MAPARRAY, src->address);
                break;
 
             case VariableData::SRA_WORLD:
-               objects->addToken(OCODE_GET_WORLDARRAY_VAR32I, src->address);
+               objects->addToken(OCODE_ACSE_GET_WORLDARRAY, src->address);
                break;
 
             case VariableData::SRA_GLOBAL:
-               objects->addToken(OCODE_GET_GLOBALARRAY_VAR32I, src->address);
+               objects->addToken(OCODE_ACSE_GET_GLOBALARRAY, src->address);
                break;
             }
          }
@@ -251,7 +254,7 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
 
    case VariableData::MT_STATIC:
       for (bigsint i = 0; i < src->size; ++i)
-         objects->addToken(OCODE_GET_STATIC_VAR32I,
+         objects->addToken(OCODE_GET_STATIC32I,
                            objects->getValueAdd(src->address, i));
       break;
 
@@ -264,7 +267,7 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
    {
    case VariableData::MT_AUTO:
       for (bigsint i = dst->size; i--;)
-         objects->addToken(OCODE_SET_AUTO_VAR32I,
+         objects->addToken(OCODE_SET_AUTO32I,
                            objects->getValueAdd(dst->address, i));
       break;
 
@@ -289,16 +292,16 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
 
       if (dst->size == 1)
       {
-         objects->addToken(OCODE_SET_POINTER_VAR32I, dst->address);
+         objects->addToken(OCODE_SET_POINTER32I, dst->address);
       }
       else
       {
-         objects->addToken(OCODE_SET_TEMP_VAR);
+         objects->addToken(OCODE_SET_TEMP);
 
          for (bigsint i = dst->size; i--;)
          {
-            objects->addToken(OCODE_GET_TEMP_VAR);
-            objects->addToken(OCODE_SET_POINTER_VAR32I,
+            objects->addToken(OCODE_GET_TEMP);
+            objects->addToken(OCODE_SET_POINTER32I,
                               objects->getValueAdd(dst->address, i));
          }
       }
@@ -310,22 +313,22 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
          switch (dst->sectionR)
          {
          case VariableData::SR_LOCAL:
-            objects->addToken(OCODE_SET_REGISTER_VAR32I,
+            objects->addToken(OCODE_SET_REGISTER32I,
                               objects->getValueAdd(dst->address, i));
             break;
 
          case VariableData::SR_MAP:
-            objects->addToken(OCODE_SET_MAPREGISTER_VAR32I,
+            objects->addToken(OCODE_ACS_SET_MAPREGISTER,
                               objects->getValueAdd(dst->address, i));
             break;
 
          case VariableData::SR_WORLD:
-            objects->addToken(OCODE_SET_WORLDREGISTER_VAR32I,
+            objects->addToken(OCODE_ACS_SET_WORLDREGISTER,
                               objects->getValueAdd(dst->address, i));
             break;
 
          case VariableData::SR_GLOBAL:
-            objects->addToken(OCODE_SET_GLOBALREGISTER_VAR32I,
+            objects->addToken(OCODE_ACSE_SET_GLOBALREGISTER,
                               objects->getValueAdd(dst->address, i));
             break;
          }
@@ -347,15 +350,15 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
          switch (src->sectionRA)
          {
          case VariableData::SRA_MAP:
-            objects->addToken(OCODE_SET_MAPARRAY_VAR32I, src->address);
+            objects->addToken(OCODE_ACSE_SET_MAPARRAY, src->address);
             break;
 
          case VariableData::SRA_WORLD:
-            objects->addToken(OCODE_SET_WORLDARRAY_VAR32I, src->address);
+            objects->addToken(OCODE_ACSE_SET_WORLDARRAY, src->address);
             break;
 
          case VariableData::SRA_GLOBAL:
-            objects->addToken(OCODE_SET_GLOBALARRAY_VAR32I, src->address);
+            objects->addToken(OCODE_ACSE_SET_GLOBALARRAY, src->address);
             break;
          }
       }
@@ -363,11 +366,11 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
       {
          dst->offsetExpr->makeObjects(objects, dst->offsetTemp);
 
-         objects->addToken(OCODE_SET_TEMP_VAR);
+         objects->addToken(OCODE_SET_TEMP);
 
          for (bigsint i = dst->size; i--;)
          {
-            objects->addToken(OCODE_GET_TEMP_VAR);
+            objects->addToken(OCODE_GET_TEMP);
 
             if (i)
             {
@@ -380,15 +383,15 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
             switch (src->sectionRA)
             {
             case VariableData::SRA_MAP:
-               objects->addToken(OCODE_SET_MAPARRAY_VAR32I, src->address);
+               objects->addToken(OCODE_ACSE_SET_MAPARRAY, src->address);
                break;
 
             case VariableData::SRA_WORLD:
-               objects->addToken(OCODE_SET_WORLDARRAY_VAR32I, src->address);
+               objects->addToken(OCODE_ACSE_SET_WORLDARRAY, src->address);
                break;
 
             case VariableData::SRA_GLOBAL:
-               objects->addToken(OCODE_SET_GLOBALARRAY_VAR32I, src->address);
+               objects->addToken(OCODE_ACSE_SET_GLOBALARRAY, src->address);
                break;
             }
          }
@@ -401,7 +404,7 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
 
    case VariableData::MT_STATIC:
       for (bigsint i = dst->size; i--;)
-         objects->addToken(OCODE_SET_STATIC_VAR32I,
+         objects->addToken(OCODE_SET_STATIC32I,
                            objects->getValueAdd(dst->address, i));
       break;
 
@@ -428,8 +431,6 @@ make_objects_memcpy_void(ObjectVector *objects, VariableData *src,
    for (bigsint i = src->size; i--;)
       objects->addToken(OCODE_STACK_DROP32);
 }
-
-
 
 // EOF
 

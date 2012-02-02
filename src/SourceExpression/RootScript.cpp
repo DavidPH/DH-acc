@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -86,8 +86,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    if (sizeCall > 3) for (bigsint i(sizeCall - 3); i--;)
    {
       // FIXME: Should be based on type.
-      objects->addToken(OCODE_GET_AUTO_VAR32I, objects->getValue(i));
-      objects->addToken(OCODE_SET_REGISTER_VAR32I, objects->getValue(i+3));
+      objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));
+      objects->addToken(OCODE_SET_REGISTER32I, objects->getValue(i+3));
    }
 }
 
