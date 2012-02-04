@@ -83,7 +83,8 @@ SourceExpression_BranchSwitch
       VariableType const *type     = VariableType::get_vt_int();
 
       if (typeCond != type)
-         exprCond = create_value_cast(exprCond, type, context, position);
+         exprCond = create_value_cast_implicit
+                    (exprCond, type, context, position);
    }
 
    {
@@ -91,7 +92,8 @@ SourceExpression_BranchSwitch
       VariableType const *type     = VariableType::get_vt_void();
 
       if (typeBody != type)
-         exprBody = create_value_cast(exprBody, type, context, position);
+         exprBody = create_value_cast_implicit
+                    (exprBody, type, context, position);
    }
 }
 

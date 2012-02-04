@@ -34,7 +34,7 @@ __extfunc memchr(void const * mem, int data, int size) -> void *
 
 	for (__variable register char const * it = (char const *)mem; it != stop; ++it)
 		if (*it == data)
-			return it;
+			return (void *)it;
 
 	return NULL;
 };

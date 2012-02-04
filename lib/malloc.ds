@@ -95,7 +95,7 @@ __extfunc malloc(int size) -> void *
 		// Used block.
 		if (__heap_index->used)
 		{
-			void __heap_index = (char *)(__heap_index + 1) + __heap_index->size;
+			void __heap_index = (struct __heap_block *)((char *)(__heap_index + 1) + __heap_index->size);
 			continue;
 		};
 
@@ -109,7 +109,7 @@ __extfunc malloc(int size) -> void *
 			}
 			else
 			{
-				void __heap_index = (char *)(__heap_index + 1) + __heap_index->size;
+				void __heap_index = (struct __heap_block *)((char *)(__heap_index + 1) + __heap_index->size);
 				continue;
 			};
 		};
@@ -120,7 +120,7 @@ __extfunc malloc(int size) -> void *
 
 		void __variable register void * p = (void *)(__heap_index + 1);
 
-		void __heap_index = (char *)p + size;
+		void __heap_index = (struct __heap_block *)((char *)p + size);
 
 		void __heap_index->used = 0;
 		void __heap_index->size = 0;

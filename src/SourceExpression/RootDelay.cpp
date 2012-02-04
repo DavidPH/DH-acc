@@ -78,7 +78,7 @@ SourceExpression_RootDelay(SRCEXP_EXPRUNA_PARM)
    VariableType const *type = VariableType::get_vt_int();
 
    if (expr->getType() != type)
-      expr = create_value_cast(expr, type, context, position);
+      expr = create_value_cast_implicit(expr, type, context, position);
 }
 
 //

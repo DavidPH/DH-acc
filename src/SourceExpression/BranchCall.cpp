@@ -88,7 +88,8 @@ SourceExpression_BranchCall
    for (size_t i(0); i < args.size(); ++i)
    {
       if (args[i]->getType() != type->types[i])
-         args[i] = create_value_cast(args[i], type->types[i], context, position);
+         args[i] = create_value_cast_implicit
+                   (args[i], type->types[i], context, position);
    }
 }
 

@@ -104,13 +104,13 @@ void SourceExpression_Binary::doCast()
       if (typeL->vt == VariableType::VT_ARRAY)
       {
          typeL = VariableType::get_pointer(typeL->refType);
-         exprL = create_value_cast(exprL, typeL, context, position);
+         exprL = create_value_cast_implicit(exprL, typeL, context, position);
       }
 
       if (typeR->vt == VariableType::VT_ARRAY)
       {
          typeR = VariableType::get_pointer(typeR->refType);
-         exprR = create_value_cast(exprR, typeR, context, position);
+         exprR = create_value_cast_implicit(exprR, typeR, context, position);
       }
 
       if (typeL->vt == typeR->vt && typeL != typeR)
@@ -121,7 +121,7 @@ void SourceExpression_Binary::doCast()
          if (type->refType->size(position) != 1)
          {
             if (typeL->vt != VariableType::VT_INT)
-               exprL = create_value_cast
+               exprL = create_value_cast_implicit
                        (exprL, VariableType::get_vt_int(), context, position);
 
             exprL = create_binary_mul
@@ -130,7 +130,7 @@ void SourceExpression_Binary::doCast()
                      context, position);
          }
 
-         exprL = create_value_cast(exprL, type, context, position);
+         exprL = create_value_cast_implicit(exprL, type, context, position);
       }
 
       if (typeR->vt != VariableType::VT_POINTER)
@@ -138,7 +138,7 @@ void SourceExpression_Binary::doCast()
          if (type->refType->size(position) != 1)
          {
             if (typeR->vt != VariableType::VT_INT)
-               exprR = create_value_cast
+               exprR = create_value_cast_implicit
                        (exprR, VariableType::get_vt_int(), context, position);
 
             exprR = create_binary_mul
@@ -147,17 +147,17 @@ void SourceExpression_Binary::doCast()
                      context, position);
          }
 
-         exprR = create_value_cast(exprR, type, context, position);
+         exprR = create_value_cast_implicit(exprR, type, context, position);
       }
 
       return;
    }
 
    if (exprL->getType() != type)
-      exprL = create_value_cast(exprL, type, context, position);
+      exprL = create_value_cast_implicit(exprL, type, context, position);
 
    if (exprR->getType() != type)
-      exprR = create_value_cast(exprR, type, context, position);
+      exprR = create_value_cast_implicit(exprR, type, context, position);
 }
 
 //
@@ -167,10 +167,10 @@ void SourceExpression_Binary::
 doCast(VariableType const *castL, VariableType const *castR)
 {
    if (castL && exprL->getType() != castL)
-      exprL = create_value_cast(exprL, castL, context, position);
+      exprL = create_value_cast_implicit(exprL, castL, context, position);
 
    if (castR && exprR->getType() != castR)
-      exprR = create_value_cast(exprR, castR, context, position);
+      exprR = create_value_cast_implicit(exprR, castR, context, position);
 }
 
 //

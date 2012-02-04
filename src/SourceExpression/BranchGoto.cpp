@@ -109,8 +109,8 @@ SourceExpression_BranchGoto(SRCEXP_EXPRUNA_PARM)
                             : Super(SRCEXP_EXPR_PASS), expr(_expr)
 {
    if (expr->getType()->vt != VariableType::VT_LABEL)
-      expr = create_value_cast(expr, VariableType::get_vt_label(), context,
-                               position);
+      expr = create_value_cast_implicit
+             (expr, VariableType::get_vt_label(), context, position);
 }
 
 //

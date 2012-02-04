@@ -100,7 +100,7 @@ SourceExpression_BinaryArray(SRCEXP_EXPRBIN_PARM)
                             position, getName());
 
    if (exprR->getType()->vt != VariableType::VT_INT)
-      exprR = create_value_cast
+      exprR = create_value_cast_implicit
               (exprR, VariableType::get_vt_int(), context, position);
 }
 

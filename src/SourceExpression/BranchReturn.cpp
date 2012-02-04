@@ -78,7 +78,7 @@ SourceExpression_BranchReturn(SRCEXP_EXPRUNA_PARM)
    VariableType const *type = context->getReturnType();
 
    if (expr->getType() != type)
-      expr = create_value_cast(expr, type, context, position);
+      expr = create_value_cast_implicit(expr, type, context, position);
 }
 
 //

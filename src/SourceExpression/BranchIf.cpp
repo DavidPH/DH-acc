@@ -99,7 +99,8 @@ SourceExpression_BranchIf
       VariableType const *type     = VariableType::get_vt_boolsoft();
 
       if (typeCond != type)
-         exprCond = create_value_cast(exprCond, type, context, position);
+         exprCond = create_value_cast_implicit
+                    (exprCond, type, context, position);
    }
 
    if (exprElse)
@@ -110,10 +111,12 @@ SourceExpression_BranchIf
          get_promoted_type(typeBody, typeElse, position);
 
       if (typeBody != type)
-         exprBody = create_value_cast(exprBody, type, context, position);
+         exprBody = create_value_cast_implicit
+                    (exprBody, type, context, position);
 
       if (typeElse != type)
-         exprElse = create_value_cast(exprElse, type, context, position);
+         exprElse = create_value_cast_implicit
+                    (exprElse, type, context, position);
    }
    else
    {
@@ -121,7 +124,8 @@ SourceExpression_BranchIf
       VariableType const *type     = VariableType::get_vt_void();
 
       if (typeBody != type)
-         exprBody = create_value_cast(exprBody, type, context, position);
+         exprBody = create_value_cast_implicit
+                    (exprBody, type, context, position);
    }
 }
 

@@ -173,7 +173,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		{
 			VariableType const * type(make_expression_type(in, blocks, context));
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-         expr = create_value_cast(make_expression_single(in, blocks, context), type, PASS_A);
+         expr = create_value_cast_explicit(make_expression_single(in, blocks, context), type, PASS_A);
 		}
 		else
 		{
@@ -410,9 +410,9 @@ SRCEXPDS_EXPRSINGLE_DEFN(typedef)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(void)
 {
-   return create_value_cast(make_expression(in, blocks, context),
-                            VariableType::get_vt_void(), context,
-                            token.getPosition());
+   return create_value_cast_explicit(make_expression(in, blocks, context),
+                                     VariableType::get_vt_void(), context,
+                                     token.getPosition());
 }
 
 //

@@ -49,7 +49,8 @@ SourceExpression_Unary(VariableType const *cast, SRCEXP_EXPRUNA_PARM)
                          expr(_expr), make(true)
 {
 	if (cast && expr->getType() != cast)
-		this->expr = create_value_cast(expr, cast, context, position);
+		this->expr = create_value_cast_implicit
+                       (expr, cast, context, position);
 }
 
 //

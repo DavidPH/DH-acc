@@ -43,7 +43,7 @@ class SourceExpression_ValueCast : public SourceExpression
 
 public:
    SourceExpression_ValueCast(SourceExpression *expr, VariableType const *type,
-                              SRCEXP_EXPR_ARGS);
+                              bool implicit, SRCEXP_EXPR_ARGS);
 
    virtual bool canMakeObject() const;
 
@@ -64,11 +64,19 @@ private:
 //
 
 //
-// SourceExpression::create_value_cast
+// SourceExpression::create_value_cast_explicit
 //
-SRCEXP_EXPRVAL_DEFN(et, cast)
+SRCEXP_EXPRVAL_DEFN(et, cast_explicit)
 {
-   return new SourceExpression_ValueCast(expr, type, context, position);
+   return new SourceExpression_ValueCast(expr, type, false, context, position);
+}
+
+//
+// SourceExpression::create_value_cast_implicit
+//
+SRCEXP_EXPRVAL_DEFN(et, cast_implicit)
+{
+   return new SourceExpression_ValueCast(expr, type, true, context, position);
 }
 
 //
@@ -76,10 +84,102 @@ SRCEXP_EXPRVAL_DEFN(et, cast)
 //
 SourceExpression_ValueCast::
 SourceExpression_ValueCast(SourceExpression *_expr, VariableType const *_type,
-                           SRCEXP_EXPR_PARM)
+                           bool implicit, SRCEXP_EXPR_PARM)
                            : Super(SRCEXP_EXPR_PASS),
                              expr(_expr), type(_type)
 {
+   #define BAD_CAST()                                           \
+   if (true)                                                    \
+   {                                                            \
+      exceptString  = "invalid implicit cast (";                \
+      exceptString += make_string(exprType->vt);                \
+      exceptString += " to ";                                   \
+      exceptString += make_string(type->vt);                    \
+      exceptString += ")";                                      \
+      throw SourceException(exceptString, position, getName()); \
+   }                                                            \
+   else (void)0
+
+   // Explicit casts bypass all tests. (For now.)
+   if (!implicit) return;
+
+   std::string exceptString;
+
+   VariableType const *exprType = expr->getType();
+
+   // Can cast a type to itself safely, of course.
+   if (exprType == type) return;
+
+   // Can cast T const to/from T safely.
+   if (exprType->constType == type || type->constType == exprType)
+      return;
+
+   // Implicit cast between fundamentally different types.
+   if (exprType->vt != type->vt)
+   {
+      // Any cast to/from VT_ASMFUNC must be explicit.
+      if (exprType->vt == VariableType::VT_ASMFUNC ||
+          type->vt     == VariableType::VT_ASMFUNC)
+         BAD_CAST();
+
+      // Any cast to/from VT_FUNCTION must be explicit.
+      if (exprType->vt == VariableType::VT_FUNCTION ||
+          type->vt     == VariableType::VT_FUNCTION)
+         BAD_CAST();
+
+      // Any cast to/from VT_LABEL must be explicit.
+      if (exprType->vt == VariableType::VT_LABEL ||
+          type->vt     == VariableType::VT_LABEL)
+         BAD_CAST();
+
+      // Any cast to/from VT_LINESPEC must be explicit.
+      if (exprType->vt == VariableType::VT_LINESPEC ||
+          type->vt     == VariableType::VT_LINESPEC)
+         BAD_CAST();
+
+      // Any cast to/from VT_NATIVE must be explicit.
+      if (exprType->vt == VariableType::VT_NATIVE ||
+          type->vt     == VariableType::VT_NATIVE)
+         BAD_CAST();
+
+      // Any cast to/from VT_SCRIPT must be explicit.
+      if (exprType->vt == VariableType::VT_SCRIPT ||
+          type->vt     == VariableType::VT_SCRIPT)
+         BAD_CAST();
+
+      // Any cast to/from VT_STRING must be explicit.
+      if (exprType->vt == VariableType::VT_STRING ||
+          type->vt     == VariableType::VT_STRING)
+         BAD_CAST();
+
+      return;
+   }
+
+   // Implicit pointer casts.
+   // This is more restrictive than C's rules.
+   if (exprType->vt == VariableType::VT_POINTER)
+   {
+      // Can cast if the refType is the same.
+      if (exprType->refType == type->refType)
+         return;
+
+      // Casts that discard const must be explicit.
+      if (!exprType->refType->constType && type->refType->constType)
+         BAD_CAST();
+
+      // Cast to/from void* is acceptable.
+      if (exprType->refType->vt == VariableType::VT_VOID ||
+          type->refType->vt     == VariableType::VT_VOID)
+         return;
+
+      // Cast to T const * from T * is safe.
+      if (exprType->refType->constType == type->refType)
+         return;
+
+      BAD_CAST();
+   }
+
+   #undef BAD_CAST
 }
 
 //
