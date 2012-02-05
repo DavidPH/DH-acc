@@ -73,8 +73,20 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 	// scriptContext
 	SourceContext::Reference scriptContext = SourceContext::create(context, SourceContext::CT_SCRIPT);
 
-	// scriptName
-	std::string scriptName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+   // scriptName
+   SourceTokenC scriptNameToken = in->get(SourceTokenC::TT_IDENTIFIER);
+   std::string scriptName(scriptNameToken.getData());
+
+   // __func__
+   {
+      std::string funcVarData = ObjectData_String::add(scriptName);
+
+      SourceVariable::Pointer funcVar = SourceVariable::
+         create_constant("__func__", VariableType::get_vt_string()->constType,
+                         funcVarData, scriptNameToken.getPosition());
+
+      scriptContext->addVariable(funcVar);
+   }
 
 	// scriptType
 	ObjectData_Script::ScriptType scriptType;

@@ -84,8 +84,20 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 	// functionContext
 	SourceContext::Reference functionContext = SourceContext::create(context, SourceContext::CT_FUNCTION);
 
-	// functionName
-	std::string functionName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+   // functionName
+   SourceTokenC functionNameToken = in->get(SourceTokenC::TT_IDENTIFIER);
+   std::string functionName(functionNameToken.getData());
+
+   // __func__
+   {
+      std::string funcVarData = ObjectData_String::add(functionName);
+
+      SourceVariable::Pointer funcVar = SourceVariable::
+         create_constant("__func__", VariableType::get_vt_string()->constType,
+                         funcVarData, functionNameToken.getPosition());
+
+      functionContext->addVariable(funcVar);
+   }
 
 	// functionLabel
 	std::string functionLabel;
