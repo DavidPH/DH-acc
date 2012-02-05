@@ -301,7 +301,10 @@ operator output
 operator printf
   Prints a formatted string. Expressions are implicitly cast to the necessary
   type. The identifier indicates the type of printing operation and defaults to
-  __printf_print. Yield depends on operation.
+  __printf_print. Some operations require additional expressions which must come
+  after conversion expressions. Additionally, hud operations have a differing
+  number of arguments based on the msgtype. Consequently, that field must be a
+  compile-time constant. Yield depends on operation.
   Supported conversion specifiers:
    %S (__string)
    %f (__real)
@@ -310,6 +313,8 @@ operator printf
   Supported operations:
    __printf_bold -> void
    __printf_error -> void
+   __printf_hud (int, int, int, __real, __real, __real, ...) -> void
+   __printf_hud_bold (int, int, int, __real, __real, __real, ...) -> void
    __printf_log -> void
    __printf_print -> void
    __printf_string -> __string
