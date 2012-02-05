@@ -47,6 +47,14 @@ ObjectExpression_Binary::ObjectExpression_Binary(std::istream * in) : Super(in)
 }
 
 //
+// ObjectExpression_Binary::canResolve
+//
+bool ObjectExpression_Binary::canResolve() const
+{
+   return exprL->canResolve() && exprR->canResolve();
+}
+
+//
 // ObjectExpression_Binary::getType
 //
 ObjectExpression::ExpressionType ObjectExpression_Binary::getType() const

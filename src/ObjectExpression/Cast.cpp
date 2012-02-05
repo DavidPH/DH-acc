@@ -62,6 +62,14 @@ public:
    }
 
    //
+   // ::canResolve
+   //
+   virtual bool canResolve() const
+   {
+      return expr->canResolve();
+   }
+
+   //
    // ::getType
    //
    virtual ExpressionType getType() const

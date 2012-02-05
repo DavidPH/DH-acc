@@ -24,21 +24,44 @@
 #include "../SourceException.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// ObjectExpression_Unary::ObjectExpression_Unary
+//
 ObjectExpression_Unary::ObjectExpression_Unary(ObjectExpression * expr_, SourcePosition const & position_) : Super(position_), expr(expr_)
 {
-
 }
+
+//
+// ObjectExpression_Unary::ObjectExpression_Unary
+//
 ObjectExpression_Unary::ObjectExpression_Unary(std::istream * in) : Super(in)
 {
 	read_object(in, &expr);
 }
 
+//
+// ObjectExpression_Unary::canResolve
+//
+bool ObjectExpression_Unary::canResolve() const
+{
+   return expr->canResolve();
+}
+
+//
+// ObjectExpression_Unary::getType
+//
 ObjectExpression::ExpressionType ObjectExpression_Unary::getType() const
 {
 	return expr->getType();
 }
 
+//
+// ObjectExpression_Unary::writeObject
+//
 void ObjectExpression_Unary::writeObject(std::ostream * out) const
 {
 	Super::writeObject(out);

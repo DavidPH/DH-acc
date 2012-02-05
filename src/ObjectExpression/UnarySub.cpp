@@ -37,10 +37,11 @@ public:
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
 
-	virtual void writeACSP(std::ostream * out) const;
-
 protected:
 	virtual void writeObject(std::ostream * out) const;
+
+private:
+   virtual void writeACSPLong(std::ostream *out) const;
 };
 
 
@@ -76,7 +77,10 @@ bigsint ObjectExpression_UnarySub::resolveInt() const
 	return Super::resolveInt();
 }
 
-void ObjectExpression_UnarySub::writeACSP(std::ostream * out) const
+//
+// ObjectExpression_UnarySub::writeACSPLong
+//
+void ObjectExpression_UnarySub::writeACSPLong(std::ostream *out) const
 {
 	BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_NEGATE);
 

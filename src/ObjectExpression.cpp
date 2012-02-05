@@ -21,6 +21,8 @@
 
 #include "ObjectExpression.hpp"
 
+#include "ACSP.hpp"
+#include "BinaryTokenACS.hpp"
 #include "ObjectCode.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
@@ -240,15 +242,35 @@ std::string const & ObjectExpression::get_filename()
 	return _filename;
 }
 
-ObjectExpression::Pointer ObjectExpression::get_symbol(std::string const & symbol, SourcePosition const & position)
+//
+// ObjectExpression::get_symbol
+//
+ObjectExpression::Pointer ObjectExpression::
+get_symbol(std::string const &symbol, SourcePosition const &position)
 {
-	std::map<std::string, ObjectExpression::Pointer>::iterator valueIt(_symbol_table.find(symbol));
+   ObjectExpression::Pointer value = get_symbol_null(symbol);
 
-	if (valueIt == _symbol_table.end())
-		throw SourceException("unknown symbol '" + symbol + "'", position, "ObjectExpression");
+   if (!value)
+      throw SourceException("unknown symbol '" + symbol + "'", position, "ObjectExpression");
 
-	return valueIt->second;
+   return value;
 }
+
+//
+// ObjectExpression::get_symbol_null
+//
+ObjectExpression::Pointer ObjectExpression::
+get_symbol_null(std::string const &symbol)
+{
+   std::map<std::string, ObjectExpression::Pointer>::iterator valueIt =
+      _symbol_table.find(symbol);
+
+   return valueIt == _symbol_table.end() ? NULL : valueIt->second;
+}
+
+//
+// ObjectExpression::get_symbol_type
+//
 ObjectExpression::ExpressionType ObjectExpression::get_symbol_type(std::string const & symbol, SourcePosition const & position)
 {
 	std::map<std::string, ExpressionType>::iterator typeIt(_symbol_type_table.find(symbol));
@@ -277,11 +299,6 @@ ObjectCodeSet ObjectExpression::resolveOCode() const
 	throw SourceException("cannot resolve ocode", position, getName());
 }
 
-void ObjectExpression::writeACSP(std::ostream *) const
-{
-	throw SourceException("cannot write ACS+", position, getName());
-}
-
 void ObjectExpression::set_address_count(bigsint addressCount)
 {
 	_address_count = addressCount;
@@ -298,6 +315,28 @@ void ObjectExpression::set_library(std::string const & library)
 		_library_original = library;
 
 	_library_table.insert(library);
+}
+
+//
+// ObjectExpression::writeACSP
+//
+void ObjectExpression::writeACSP(std::ostream *out) const
+{
+   if (canResolve())
+   {
+      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LITERAL);
+      BinaryTokenACS::write_ACS0_32(out, *this);
+   }
+   else
+      writeACSPLong(out);
+}
+
+//
+// ObjectExpression::writeACSPLong
+//
+void ObjectExpression::writeACSPLong(std::ostream *) const
+{
+   throw SourceException("cannot write ACS+", position, getName());
 }
 
 void ObjectExpression::writeObject(std::ostream * out) const

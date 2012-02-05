@@ -34,10 +34,11 @@ public:
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
 
-	virtual void writeACSP(std::ostream * out) const;
-
 protected:
 	virtual void writeObject(std::ostream * out) const;
+
+private:
+   virtual void writeACSPLong(std::ostream *out) const;
 };
 
 
@@ -73,7 +74,10 @@ bigsint ObjectExpression_UnaryAdd::resolveInt() const
 	return Super::resolveInt();
 }
 
-void ObjectExpression_UnaryAdd::writeACSP(std::ostream * out) const
+//
+// ObjectExpression_UnaryAdd::writeACSPLong
+//
+void ObjectExpression_UnaryAdd::writeACSPLong(std::ostream *out) const
 {
 	expr->writeACSP(out);
 }

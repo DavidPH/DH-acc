@@ -37,6 +37,8 @@ class ObjectExpression_Binary : public ObjectExpression
 	MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression_Binary, ObjectExpression);
 
 public:
+   bool canResolve() const;
+
 	virtual ExpressionType getType() const;
 
 protected:

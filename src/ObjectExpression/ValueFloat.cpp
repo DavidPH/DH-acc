@@ -35,16 +35,18 @@ public:
 	ObjectExpression_ValueFloat(bigreal value, SourcePosition const & position);
 	ObjectExpression_ValueFloat(std::istream * in);
 
+   virtual bool canResolve() const;
+
 	virtual ExpressionType getType() const;
 
 	virtual bigreal resolveFloat() const;
-
-	virtual void writeACSP(std::ostream * out) const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
 
 private:
+   virtual void writeACSPLong(std::ostream *out) const;
+
 	bigreal _value;
 };
 
@@ -69,6 +71,14 @@ ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(std::istream * in) : Su
 	read_object(in, &_value);
 }
 
+//
+// ObjectExpression_ValueFloat::canResolve
+//
+bool ObjectExpression_ValueFloat::canResolve() const
+{
+   return true;
+}
+
 ObjectExpression::ExpressionType ObjectExpression_ValueFloat::getType() const
 {
 	return ET_FLOAT;
@@ -79,7 +89,10 @@ bigreal ObjectExpression_ValueFloat::resolveFloat() const
 	return _value;
 }
 
-void ObjectExpression_ValueFloat::writeACSP(std::ostream * out) const
+//
+// ObjectExpression_ValueFloat::writeACSPLong
+//
+void ObjectExpression_ValueFloat::writeACSPLong(std::ostream *out) const
 {
 	BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LITERAL);
 	BinaryTokenACS::write_ACS0_32(out, *this);

@@ -60,6 +60,7 @@ public:
 	};
 
 
+   virtual bool canResolve() const = 0;
 
 	SourcePosition const & getPosition() const;
 
@@ -69,8 +70,7 @@ public:
 	virtual bigsint resolveInt() const;
 	virtual ObjectCodeSet resolveOCode() const;
 
-	virtual void writeACSP(std::ostream * out) const;
-
+   void writeACSP(std::ostream *out) const;
 
 
 	friend bool override_object(ObjectExpression::ExpressionType * out, ObjectExpression::ExpressionType const & in);
@@ -146,6 +146,7 @@ public:
 	static std::string const & get_filename();
 
 	static ObjectExpression::Pointer get_symbol(std::string const & symbol, SourcePosition const & position);
+   static ObjectExpression::Pointer get_symbol_null(std::string const &symbol);
 	static ExpressionType get_symbol_type(std::string const & symbol, SourcePosition const & position);
 
 	static void iter_auto(void (*iter)(std::ostream *, ObjectData_Auto const &), std::ostream * out);
@@ -233,6 +234,9 @@ protected:
 	static Pointer create_value_symbol(std::istream * in);
 
 private:
+   virtual void writeACSPLong(std::ostream *out) const;
+
+
 	static bigsint _address_count;
 
 	static std::string _filename;

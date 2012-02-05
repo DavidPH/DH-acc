@@ -42,17 +42,19 @@ public:
 	ObjectExpression_ValueSymbol(std::string const & value, SourcePosition const & position);
 	ObjectExpression_ValueSymbol(std::istream * in);
 
+   virtual bool canResolve() const;
+
 	virtual ExpressionType getType() const;
 
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
 
-	virtual void writeACSP(std::ostream * out) const;
-
 protected:
 	virtual void writeObject(std::ostream * out) const;
 
 private:
+   virtual void writeACSPLong(std::ostream *out) const;
+
 	std::string _value;
 };
 
@@ -93,6 +95,16 @@ ObjectExpression_ValueSymbol::ObjectExpression_ValueSymbol(std::istream * in) : 
 }
 
 //
+// ObjectExpression_ValueSymbol::canResolve
+//
+bool ObjectExpression_ValueSymbol::canResolve() const
+{
+   ObjectExpression::Pointer symbol = ObjectExpression::get_symbol_null(_value);
+
+   return symbol && symbol->canResolve();
+}
+
+//
 // ObjectExpression_ValueSymbol::getType
 //
 ObjectExpression::ExpressionType ObjectExpression_ValueSymbol::getType() const
@@ -117,9 +129,9 @@ bigsint ObjectExpression_ValueSymbol::resolveInt() const
 }
 
 //
-// ObjectExpression_ValueSymbol::writeACSP
+// ObjectExpression_ValueSymbol::writeACSPLong
 //
-void ObjectExpression_ValueSymbol::writeACSP(std::ostream * out) const
+void ObjectExpression_ValueSymbol::writeACSPLong(std::ostream *out) const
 {
 	BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_SYMBOL);
 	BinaryTokenPPACS::write_ACSP_string(out, _value);

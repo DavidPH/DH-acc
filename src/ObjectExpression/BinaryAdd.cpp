@@ -40,10 +40,11 @@ public:
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
 
-	virtual void writeACSP(std::ostream * out) const;
-
 protected:
 	virtual void writeObject(std::ostream * out) const;
+
+private:
+   virtual void writeACSPLong(std::ostream *out) const;
 };
 
 
@@ -99,9 +100,9 @@ bigsint ObjectExpression_BinaryAdd::resolveInt() const
 }
 
 //
-// ObjectExpression_BinaryAdd::writeACSP
+// ObjectExpression_BinaryAdd::writeACSPLong
 //
-void ObjectExpression_BinaryAdd::writeACSP(std::ostream * out) const
+void ObjectExpression_BinaryAdd::writeACSPLong(std::ostream *out) const
 {
 	BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_ADD);
 

@@ -33,6 +33,8 @@ public:
 	ObjectExpression_ValueOCode(ObjectCodeSet const & value, SourcePosition const & position);
 	ObjectExpression_ValueOCode(std::istream * in);
 
+   virtual bool canResolve() const;
+
 	virtual ExpressionType getType() const;
 
 	virtual ObjectCodeSet resolveOCode() const;
@@ -61,6 +63,14 @@ ObjectExpression_ValueOCode::ObjectExpression_ValueOCode(ObjectCodeSet const & v
 ObjectExpression_ValueOCode::ObjectExpression_ValueOCode(std::istream * in) : Super(in)
 {
 	read_object(in, &_value);
+}
+
+//
+// ObjectExpression_ValueOCode::canResolve
+//
+bool ObjectExpression_ValueOCode::canResolve() const
+{
+   return true;
 }
 
 ObjectExpression::ExpressionType ObjectExpression_ValueOCode::getType() const

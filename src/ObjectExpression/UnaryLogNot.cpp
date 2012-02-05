@@ -73,7 +73,7 @@ public:
       return !expr->resolveInt();
    }
 
-   virtual void writeACSP(std::ostream *out) const
+   virtual void writeACSPLong(std::ostream *out) const
    {
       BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LNOT);
       expr->writeACSP(out);

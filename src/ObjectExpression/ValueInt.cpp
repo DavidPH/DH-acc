@@ -35,16 +35,18 @@ public:
 	ObjectExpression_ValueInt(bigsint value, SourcePosition const & position);
 	ObjectExpression_ValueInt(std::istream * in);
 
+   virtual bool canResolve() const;
+
 	virtual ExpressionType getType() const;
 
 	virtual bigsint resolveInt() const;
-
-	virtual void writeACSP(std::ostream * out) const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
 
 private:
+   virtual void writeACSPLong(std::ostream *out) const;
+
 	bigsint _value;
 };
 
@@ -69,6 +71,14 @@ ObjectExpression_ValueInt::ObjectExpression_ValueInt(std::istream * in) : Super(
 	read_object(in, &_value);
 }
 
+//
+// ObjectExpression_ValueInt::canResolve
+//
+bool ObjectExpression_ValueInt::canResolve() const
+{
+   return true;
+}
+
 ObjectExpression::ExpressionType ObjectExpression_ValueInt::getType() const
 {
 	return ET_INT;
@@ -79,7 +89,10 @@ bigsint ObjectExpression_ValueInt::resolveInt() const
 	return _value;
 }
 
-void ObjectExpression_ValueInt::writeACSP(std::ostream * out) const
+//
+// ObjectExpression_ValueInt::writeACSPLong
+//
+void ObjectExpression_ValueInt::writeACSPLong(std::ostream *out) const
 {
 	BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LITERAL);
 	BinaryTokenACS::write_ACS0_32(out, _value);
