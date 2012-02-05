@@ -129,7 +129,6 @@ public:
    template<typename T>
    static void output_ACSP(std::ostream *out, std::vector<T> const &instructions);
 
-   static void write_ACSP_auto(std::ostream *out, ObjectData_Auto const &a);
    static void write_ACSP_label(std::ostream *out, std::string const &label);
    static void write_ACSP_script(std::ostream *out, ObjectData_Script const &s);
    static void write_ACSP_static(std::ostream *out, ObjectData_Static const &s);

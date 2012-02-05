@@ -27,20 +27,13 @@
 #include <sstream>
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-void BinaryTokenPPACS::write_ACSP_auto(std::ostream * out, ObjectData_Auto const & a)
-{
-	std::ostringstream token;
-
-	write_ACSP_string(&token, a.name);
-	BinaryTokenACS::write_ACS0_32(&token, ACSP_EXPR_LITERAL);
-	BinaryTokenACS::write_ACS0_32(&token, a.number);
-
-	BinaryTokenACS::write_ACS0_32(out, ACSP_TOKEN_SYMBOL);
-	BinaryTokenACS::write_ACS0_32(out, token.str().size());
-	*out << token.str();
-}
-
+//
+// BinaryTokenPPACS::write_ACSP_label
+//
 void BinaryTokenPPACS::write_ACSP_label(std::ostream * out, std::string const & label)
 {
 	std::ostringstream token;
@@ -52,6 +45,9 @@ void BinaryTokenPPACS::write_ACSP_label(std::ostream * out, std::string const & 
 	*out << token.str();
 }
 
+//
+// BinaryTokenPPACS::write_ACSP_script
+//
 void BinaryTokenPPACS::write_ACSP_script(std::ostream * out, ObjectData_Script const & s)
 {
 	std::ostringstream token;
@@ -70,6 +66,9 @@ void BinaryTokenPPACS::write_ACSP_script(std::ostream * out, ObjectData_Script c
 	*out << token.str();
 }
 
+//
+// BinaryTokenPPACS::write_ACSP_static
+//
 void BinaryTokenPPACS::write_ACSP_static(std::ostream * out, ObjectData_Static const & s)
 {
 	std::ostringstream token;
@@ -93,6 +92,9 @@ void BinaryTokenPPACS::write_ACSP_static(std::ostream * out, ObjectData_Static c
 	*out << token.str();
 }
 
+//
+// BinaryTokenPPACS::write_ACSP_string
+//
 void BinaryTokenPPACS::write_ACSP_string(std::ostream * out, ObjectData_String const & s)
 {
 	std::ostringstream token;
@@ -104,6 +106,10 @@ void BinaryTokenPPACS::write_ACSP_string(std::ostream * out, ObjectData_String c
 	BinaryTokenACS::write_ACS0_32(out, token.str().size());
 	*out << token.str();
 }
+
+//
+// BinaryTokenPPACS::write_ACSP_string
+//
 void BinaryTokenPPACS::write_ACSP_string(std::ostream * out, std::string const & s)
 {
 	size_t length = (s.size() + 4) & ~3;
@@ -112,4 +118,5 @@ void BinaryTokenPPACS::write_ACSP_string(std::ostream * out, std::string const &
 	while (length-- > s.size()) *out << '\0';
 }
 
+// EOF
 
