@@ -74,6 +74,7 @@ void SourceExpressionDS::init()
 	_expression_single_handlers["__linespec"] = make_expression_single_linespec;
 	_expression_single_handlers["__native"]   = make_expression_single_native;
 	_expression_single_handlers["__output"]   = make_expression_single_output;
+	_expression_single_handlers["__printf"]   = make_expression_single_printf;
 	_expression_single_handlers[  "return"]   = make_expression_single_return;
 	_expression_single_handlers["__script"]   = make_expression_single_script;
 	_expression_single_handlers[  "sizeof"]   = make_expression_single_sizeof;

@@ -349,6 +349,10 @@ public:
                   (SourceExpression *expr, SRCEXP_EXPR_ARGS);
    static Pointer create_root_output
                   (SourceExpression *expr, SRCEXP_EXPR_ARGS);
+   static Pointer create_root_printf
+                  (std::string const &printfType, std::string const &format,
+                   SourceExpression::Vector const &expressions,
+                   SRCEXP_EXPR_ARGS);
    static Pointer create_root_script
                   (VariableType const *type, SRCEXP_EXPR_ARGS);
 

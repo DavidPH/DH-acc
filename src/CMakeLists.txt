@@ -89,6 +89,7 @@ add_executable(DH-acc
 	SourceExpression/make_objects_memcpy.cpp
 	SourceExpression/RootDelay.cpp
 	SourceExpression/RootOutput.cpp
+   SourceExpression/RootPrintf.cpp
 	SourceExpression/RootScript.cpp
 	SourceExpression/Unary.cpp
 	SourceExpression/UnaryDecInc.cpp
@@ -115,6 +116,7 @@ add_executable(DH-acc
 	SourceExpressionDS/make_expression_single_if.cpp
 	SourceExpressionDS/make_expression_single_linespec.cpp
 	SourceExpressionDS/make_expression_single_native.cpp
+   SourceExpressionDS/make_expression_single_printf.cpp
 	SourceExpressionDS/make_expression_single_script.cpp
 	SourceExpressionDS/make_expression_single_switch.cpp
 	SourceExpressionDS/make_expression_single_symbol.cpp

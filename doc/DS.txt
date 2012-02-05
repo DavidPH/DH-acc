@@ -298,6 +298,23 @@ operator output
   Prints expression for debugging. Yields void.
     "__output" expression
 
+operator printf
+  Prints a formatted string. Expressions are implicitly cast to the necessary
+  type. The identifier indicates the type of printing operation and defaults to
+  __printf_print. Yield depends on operation.
+  Supported conversion specifiers:
+   %S (__string)
+   %f (__real)
+   %i (int)
+   %p (void const *)
+  Supported operations:
+   __printf_bold -> void
+   __printf_error -> void
+   __printf_log -> void
+   __printf_print -> void
+   __printf_string -> __string
+    "__printf" [ "<" identifier ">" ] "(" string [ "," expression ]... ")"
+
 operator return
   Returns a value. Yields void.
     "return" expression.
