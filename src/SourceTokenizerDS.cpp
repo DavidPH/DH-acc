@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceTokenizerDS.cpp
-**
-** Defines the SourceTokenizerDS methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// DS preprocessing.
+//
+//-----------------------------------------------------------------------------
 
 #include "SourceTokenizerDS.hpp"
 
@@ -27,6 +29,159 @@
 #include "SourceStream.hpp"
 
 #include <sstream>
+
+
+//----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+//
+// make_expression
+//
+static ObjectExpression::Pointer
+make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
+                std::vector<SourceTokenC> const &operators, size_t begin,
+                size_t end)
+{
+   #define EXPRL make_expression(expressions, operators, begin, iter)
+   #define EXPRR make_expression(expressions, operators, iter+1, end)
+
+   #define CARGS operators[iter].getPosition()
+
+   // Terminating case. Only one expression, so just return it.
+   if (begin == end) return expressions[begin];
+
+   size_t iter;
+
+   // ?:
+
+   // ||
+   for (iter = end; iter-- > begin;)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_PIPE2:
+         return ObjectExpression::create_branch_ior(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // ^^
+   for (iter = end; iter-- > begin;)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_CARET2:
+         return ObjectExpression::create_branch_xor(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // &&
+   for (iter = end; iter-- > begin;)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_AND2:
+         return ObjectExpression::create_branch_and(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // |
+   for (iter = end; iter-- > begin;)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_PIPE:
+         return ObjectExpression::create_binary_ior(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // ^
+   for (iter = end; iter-- > begin;)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_CARET:
+         return ObjectExpression::create_binary_xor(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // &
+   for (iter = end; iter-- > begin;)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_AND:
+         return ObjectExpression::create_binary_and(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // == !=
+
+   // >= > <= <
+
+   // >> <<
+
+   // - +
+   for (iter = end; iter-- > begin;)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_MINUS:
+         return ObjectExpression::create_binary_sub(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_PLUS:
+         return ObjectExpression::create_binary_add(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // * % /
+   for (iter = end; iter-- > begin;)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_ASTERISK:
+         return ObjectExpression::create_binary_mul(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_PERCENT:
+         return ObjectExpression::create_binary_mod(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_SLASH:
+         return ObjectExpression::create_binary_div(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   throw SourceException("unexpected operator", operators[begin].getPosition(),
+                         __func__);
+
+   #undef CARGS
+
+   #undef EXPRR
+   #undef EXPRL
+}
 
 
 //----------------------------------------------------------------------------|
@@ -251,67 +406,57 @@ bool SourceTokenizerDS::getIf()
 //
 ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
 {
-	ObjectExpression::Pointer expr(getIfSingle());
+   std::vector<ObjectExpression::Pointer> expressions;
+   std::vector<SourceTokenC> operators;
 
-	for (prep(); _token.getType() != SourceTokenC::TT_OP_HASH; prep())
-	{
-		SourcePosition position(_token.getPosition());
+   expressions.push_back(getIfSingle());
 
-		switch (_token.getType())
-		{
-		case SourceTokenC::TT_OP_AND:
-			expr = ObjectExpression::create_binary_and(expr, getIfSingle(), position);
-			break;
-
+   for (prep(); _token.getType() != SourceTokenC::TT_OP_HASH; prep())
+   {
+      switch (_token.getType())
+      {
+      case SourceTokenC::TT_OP_AND:
       case SourceTokenC::TT_OP_AND2:
-         expr = ObjectExpression::create_branch_and(expr, getIfSingle(), position);
-         break;
-
-		case SourceTokenC::TT_OP_ASTERISK:
-			expr = ObjectExpression::create_binary_mul(expr, getIfSingle(), position);
-			break;
-
-		case SourceTokenC::TT_OP_CARET:
-			expr = ObjectExpression::create_binary_xor(expr, getIfSingle(), position);
-			break;
-
+      case SourceTokenC::TT_OP_ASTERISK:
+      case SourceTokenC::TT_OP_CARET:
       case SourceTokenC::TT_OP_CARET2:
-         expr = ObjectExpression::create_branch_xor(expr, getIfSingle(), position);
-         break;
-
-		case SourceTokenC::TT_OP_MINUS:
-			expr = ObjectExpression::create_binary_sub(expr, getIfSingle(), position);
-			break;
-
-		case SourceTokenC::TT_OP_PARENTHESIS_C:
-			return expr;
-
-		case SourceTokenC::TT_OP_PERCENT:
-			expr = ObjectExpression::create_binary_mod(expr, getIfSingle(), position);
-			break;
-
-		case SourceTokenC::TT_OP_PIPE:
-			expr = ObjectExpression::create_binary_ior(expr, getIfSingle(), position);
-			break;
-
+      case SourceTokenC::TT_OP_CMP_EQ:
+      case SourceTokenC::TT_OP_CMP_GE:
+      case SourceTokenC::TT_OP_CMP_GT:
+      case SourceTokenC::TT_OP_CMP_GT2:
+      case SourceTokenC::TT_OP_CMP_LE:
+      case SourceTokenC::TT_OP_CMP_LT:
+      case SourceTokenC::TT_OP_CMP_LT2:
+      case SourceTokenC::TT_OP_CMP_NE:
+      case SourceTokenC::TT_OP_MINUS:
+      case SourceTokenC::TT_OP_PERCENT:
+      case SourceTokenC::TT_OP_PIPE:
       case SourceTokenC::TT_OP_PIPE2:
-         expr = ObjectExpression::create_branch_ior(expr, getIfSingle(), position);
+      case SourceTokenC::TT_OP_PLUS:
+      case SourceTokenC::TT_OP_SLASH:
+      case_expr:
+         operators.push_back(_token);
+         expressions.push_back(getIfSingle());
          break;
 
-		case SourceTokenC::TT_OP_PLUS:
-			expr = ObjectExpression::create_binary_add(expr, getIfSingle(), position);
-			break;
+      case SourceTokenC::TT_OP_COLON:
+      case SourceTokenC::TT_OP_PARENTHESIS_C:
+         goto done;
 
-		case SourceTokenC::TT_OP_SLASH:
-			expr = ObjectExpression::create_binary_div(expr, getIfSingle(), position);
-			break;
+      case SourceTokenC::TT_OP_QUERY:
+         operators.push_back(_token);
+         expressions.push_back(getIfMultiple());
+         prep(SourceTokenC::TT_OP_COLON);
+         goto case_expr;
 
-		default:
-			throw SourceException("unexpected token type", position, "SourceTokenizerDS::getIfMultiple");
-		}
-	}
+      default:
+         throw SourceException("unexpected token type", _token.getPosition(),
+                               __func__);
+      }
+   }
 
-	return expr;
+done:
+   return make_expression(expressions, operators, 0, operators.size());
 }
 
 ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
