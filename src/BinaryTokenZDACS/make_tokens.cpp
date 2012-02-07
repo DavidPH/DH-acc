@@ -35,6 +35,14 @@
 // Macros                                                                     |
 //
 
+#define PUSH_TOKEN_ADD_ARG0()                 \
+   if (object.getArg(0)->resolveInt())        \
+   {                                          \
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1); \
+      PUSH_TOKEN(BCODE_ADD);                  \
+   }                                          \
+   else (void)0
+
 #define TOKEN_CLASS BinaryTokenZDACS
 
 
@@ -347,11 +355,7 @@ make_tokens(ObjectToken const &object,
    case OCODE_ADDR_AUTO:
       args.push_back(indexStack);
       PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      if (object.getArg(0)->resolveInt())
-      {
-         PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-         PUSH_TOKEN(BCODE_ADD);
-      }
+      PUSH_TOKEN_ADD_ARG0();
       break;
 
    case OCODE_ADDR_STACK_ADD_IMM:
@@ -374,22 +378,14 @@ make_tokens(ObjectToken const &object,
    case OCODE_GET_AUTO32I:
       args.push_back(indexStack);
       PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      if (object.getArg(0)->resolveInt())
-      {
-         PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-         PUSH_TOKEN(BCODE_ADD);
-      }
+      PUSH_TOKEN_ADD_ARG0();
       args.push_back(indexAddr);
       PUSH_TOKEN(BCODE_GET_GLOBALARRAY);
       break;
 
    case OCODE_GET_POINTER32F:
    case OCODE_GET_POINTER32I:
-      if (object.getArg(0)->resolveInt())
-      {
-         PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-         PUSH_TOKEN(BCODE_ADD);
-      }
+      PUSH_TOKEN_ADD_ARG0();
       args.push_back(indexAddr);
       PUSH_TOKEN(BCODE_GET_GLOBALARRAY);
       break;
@@ -412,11 +408,7 @@ make_tokens(ObjectToken const &object,
    case OCODE_SET_AUTO32I:
       args.push_back(indexStack);
       PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      if (object.getArg(0)->resolveInt())
-      {
-         PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-         PUSH_TOKEN(BCODE_ADD);
-      }
+      PUSH_TOKEN_ADD_ARG0();
       PUSH_TOKEN(BCODE_STACK_SWAP);
       args.push_back(indexAddr);
       PUSH_TOKEN(BCODE_SET_GLOBALARRAY);
@@ -424,11 +416,7 @@ make_tokens(ObjectToken const &object,
 
    case OCODE_SET_POINTER32F:
    case OCODE_SET_POINTER32I:
-      if (object.getArg(0)->resolveInt())
-      {
-         PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-         PUSH_TOKEN(BCODE_ADD);
-      }
+      PUSH_TOKEN_ADD_ARG0();
       PUSH_TOKEN(BCODE_STACK_SWAP);
       args.push_back(indexAddr);
       PUSH_TOKEN(BCODE_SET_GLOBALARRAY);
@@ -447,9 +435,59 @@ make_tokens(ObjectToken const &object,
       PUSH_TOKEN(BCODE_SET_WORLDREGISTER);
       break;
 
+   // Variable Set Op
+
+   case OCODE_SETOP_DEC_AUTO32I:
+   case OCODE_SETOP_DEC_AUTO32U:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      PUSH_TOKEN_ADD_ARG0();
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_DEC_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_DEC_POINTER32I:
+   case OCODE_SETOP_DEC_POINTER32U:
+      PUSH_TOKEN_ADD_ARG0();
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_DEC_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_DEC_STATIC32I:
+   case OCODE_SETOP_DEC_STATIC32U:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_DEC_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_INC_AUTO32I:
+   case OCODE_SETOP_INC_AUTO32U:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      PUSH_TOKEN_ADD_ARG0();
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_INC_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_INC_POINTER32I:
+   case OCODE_SETOP_INC_POINTER32U:
+      PUSH_TOKEN_ADD_ARG0();
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_INC_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_INC_STATIC32I:
+   case OCODE_SETOP_INC_STATIC32U:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_INC_GLOBALARRAY);
+      break;
+
    case OCODE_NONE:
    default:
-      throw SourceException("unknown OCODE: " + (std::string)make_string(object.getCode()), position, "BinaryTokenZDACS");
+      throw SourceException(std::string("unknown OCODE: ") +
+                            make_string(object.getCode()),
+                            position, __func__);
    }
 }
 
