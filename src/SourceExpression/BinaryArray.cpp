@@ -99,9 +99,9 @@ SourceExpression_BinaryArray(SRCEXP_EXPRBIN_PARM)
                             + (std::string)make_string(exprL->getType()->vt),
                             position, getName());
 
-   if (exprR->getType()->vt != VariableType::VT_INT)
+   if (exprR->getType()->vt != VariableType::VT_UINT)
       exprR = create_value_cast_implicit
-              (exprR, VariableType::get_vt_int(), context, position);
+              (exprR, VariableType::get_vt_uint(), context, position);
 }
 
 //
@@ -129,7 +129,7 @@ VariableData::Pointer SourceExpression_BinaryArray::getData() const
    // If the type's size isn't 1, need to multiply the offset.
    if (typeSize != 1)
    {
-      offset = create_binary_mul(offset, create_value_int
+      offset = create_binary_mul(offset, create_value_uint
                                          (typeSize, context, position),
                                  context, position);
    }

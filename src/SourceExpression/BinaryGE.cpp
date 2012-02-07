@@ -68,6 +68,9 @@ SourceExpression_BinaryGE(SRCEXP_EXPRBIN_PARM)
 {
 }
 
+//
+// SourceExpression_BinaryGE::virtual_makeObjects
+//
 void SourceExpression_BinaryGE::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
@@ -85,6 +88,7 @@ void SourceExpression_BinaryGE::virtual_makeObjects(ObjectVector *objects, Varia
 	case VariableType::VT_POINTER:
 	case VariableType::VT_SCRIPT:
 	case VariableType::VT_STRING:
+   case VariableType::VT_UINT:
 		objects->addToken(OCODE_CMP_GE32U);
 		break;
 

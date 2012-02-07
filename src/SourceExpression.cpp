@@ -127,6 +127,9 @@ get_promoted_type(VariableType const *type1, VariableType const* type2,
    if (type1->vt == VariableType::VT_INT) return type1;
    if (type2->vt == VariableType::VT_INT) return type2;
 
+   if (type1->vt == VariableType::VT_UINT) return type1;
+   if (type2->vt == VariableType::VT_UINT) return type2;
+
    if (type1->vt == VariableType::VT_CHAR) return type1;
    if (type2->vt == VariableType::VT_CHAR) return type2;
 

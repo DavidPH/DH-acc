@@ -76,6 +76,9 @@ CounterPointer<ObjectExpression> SourceExpression_BinarySub::makeObject() const
 	return ObjectExpression::create_binary_sub(exprL->makeObject(), exprR->makeObject(), position);
 }
 
+//
+// SourceExpression_BinarySub::virtual_makeObjects
+//
 void SourceExpression_BinarySub::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
@@ -88,6 +91,7 @@ void SourceExpression_BinarySub::virtual_makeObjects(ObjectVector *objects, Vari
 		break;
 
 	case VariableType::VT_POINTER:
+   case VariableType::VT_UINT:
 		objects->addToken(OCODE_SUB32U);
 		break;
 

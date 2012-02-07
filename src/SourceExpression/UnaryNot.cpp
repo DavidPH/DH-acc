@@ -80,6 +80,7 @@ void SourceExpression_UnaryNot::virtual_makeObjects(ObjectVector *objects, Varia
 	case VariableType::VT_CHAR:
 	case VariableType::VT_INT:
 	case VariableType::VT_POINTER:
+   case VariableType::VT_UINT:
 		objects->addToken(OCODE_BITWISE_NOT32);
 		break;
 

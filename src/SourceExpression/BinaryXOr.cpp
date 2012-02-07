@@ -76,6 +76,9 @@ CounterPointer<ObjectExpression> SourceExpression_BinaryXOr::makeObject() const
 	return ObjectExpression::create_binary_xor(exprL->makeObject(), exprR->makeObject(), position);
 }
 
+//
+// SourceExpression_BinaryXOr::virtual_makeObjects
+//
 void SourceExpression_BinaryXOr::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
@@ -85,6 +88,7 @@ void SourceExpression_BinaryXOr::virtual_makeObjects(ObjectVector *objects, Vari
 	case VariableType::VT_CHAR:
 	case VariableType::VT_INT:
 	case VariableType::VT_POINTER:
+   case VariableType::VT_UINT:
 		objects->addToken(OCODE_BITWISE_XOR32);
 		break;
 

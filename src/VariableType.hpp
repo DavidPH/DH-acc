@@ -43,6 +43,7 @@ struct VariableType
 		VT_LABEL,
 		VT_REAL,
 		VT_STRING,
+      VT_UINT,
 
 		VT_VOID,
 
@@ -103,7 +104,6 @@ struct VariableType
 	static VariableType const * get_pointer(VariableType const * refType);
 	static VariableType const * get_script(VariableType const * callType, std::vector<VariableType const *> const & types);
 
-	static VariableType const * get_vt(Type vt);
 	static VariableType const * get_vt_boolhard();
 	static VariableType const * get_vt_boolsoft();
 	static VariableType const * get_vt_char();
@@ -111,6 +111,7 @@ struct VariableType
 	static VariableType const * get_vt_label();
 	static VariableType const * get_vt_real();
 	static VariableType const * get_vt_string();
+	static VariableType const * get_vt_uint();
 	static VariableType const * get_vt_void();
 
 private:
@@ -135,6 +136,7 @@ private:
 	static VariableType vt_label;
 	static VariableType vt_real;
 	static VariableType vt_string;
+	static VariableType vt_uint;
 	static VariableType vt_void;
 
 	static VariableType vtc_boolhard;
@@ -144,6 +146,7 @@ private:
 	static VariableType vtc_label;
 	static VariableType vtc_real;
 	static VariableType vtc_string;
+	static VariableType vtc_uint;
 	static VariableType vtc_void;
 };
 

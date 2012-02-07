@@ -207,6 +207,11 @@ private:
                objects->addToken(OCODE_ACSP_NUM_HEX32U);
                continue;
 
+            case 'u':
+               makeExpr(objects, VariableType::get_vt_uint());
+               objects->addToken(OCODE_ACSP_NUM_DEC32U);
+               continue;
+
             default:
                throw SourceException("unrecognized printf format char",
                                      position, __func__);

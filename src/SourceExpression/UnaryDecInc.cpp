@@ -148,6 +148,7 @@ doDelta(ObjectVector *objects)
          deltaType |= DELTA_EXPR;
       }
    }
+   case VariableType::VT_UINT:
       deltaType |= DELTA_U;
       break;
 

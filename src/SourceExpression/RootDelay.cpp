@@ -75,7 +75,7 @@ SourceExpression_RootDelay(SRCEXP_EXPRUNA_PARM)
                              expr(_expr),
                              stack(context->getLimit(SourceVariable::SC_AUTO))
 {
-   VariableType const *type = VariableType::get_vt_int();
+   VariableType const *type = VariableType::get_vt_uint();
 
    if (expr->getType() != type)
       expr = create_value_cast_implicit(expr, type, context, position);

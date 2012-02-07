@@ -219,6 +219,7 @@ bool SourceExpression_ValueCast::canMakeObject() const
    case VariableType::VT_REAL:
    case VariableType::VT_SCRIPT:
    case VariableType::VT_STRING:
+   case VariableType::VT_UINT:
       break;
    }
 
@@ -245,6 +246,7 @@ bool SourceExpression_ValueCast::canMakeObject() const
    case VariableType::VT_REAL:
    case VariableType::VT_SCRIPT:
    case VariableType::VT_STRING:
+   case VariableType::VT_UINT:
       break;
    }
 
@@ -289,6 +291,7 @@ ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
    case VariableType::VT_POINTER:
    case VariableType::VT_SCRIPT:
    case VariableType::VT_STRING:
+   case VariableType::VT_UINT:
       switch (exprType->vt)
       {
       case VariableType::VT_ARRAY:
@@ -315,6 +318,7 @@ ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
       case VariableType::VT_POINTER:
       case VariableType::VT_SCRIPT:
       case VariableType::VT_STRING:
+      case VariableType::VT_UINT:
          break;
 
       case VariableType::VT_REAL:
@@ -345,6 +349,7 @@ ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
       case VariableType::VT_POINTER:
       case VariableType::VT_SCRIPT:
       case VariableType::VT_STRING:
+      case VariableType::VT_UINT:
          obj = ObjectExpression::create_unary_lognot(obj, position);
          obj = ObjectExpression::create_unary_lognot(obj, position);
          break;
@@ -391,6 +396,7 @@ ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
       case VariableType::VT_POINTER:
       case VariableType::VT_SCRIPT:
       case VariableType::VT_STRING:
+      case VariableType::VT_UINT:
          obj = ObjectExpression::create_cast_float_to_int(obj, position);
          break;
       }

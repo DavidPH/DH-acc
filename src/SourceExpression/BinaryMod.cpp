@@ -76,6 +76,9 @@ CounterPointer<ObjectExpression> SourceExpression_BinaryMod::makeObject() const
 	return ObjectExpression::create_binary_mod(exprL->makeObject(), exprR->makeObject(), position);
 }
 
+//
+// SourceExpression_BinaryMod::virtual_makeObjects
+//
 void SourceExpression_BinaryMod::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
@@ -88,6 +91,7 @@ void SourceExpression_BinaryMod::virtual_makeObjects(ObjectVector *objects, Vari
 		break;
 
 	case VariableType::VT_POINTER:
+   case VariableType::VT_UINT:
 		objects->addToken(OCODE_MOD32U);
 		break;
 

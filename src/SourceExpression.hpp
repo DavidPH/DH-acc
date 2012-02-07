@@ -342,6 +342,7 @@ public:
    SRCEXP_EXPRVAL_DECL( r, real);
    SRCEXP_EXPRVAL_DECL( s, real);
    SRCEXP_EXPRVAL_DECL( s, string);
+   SRCEXP_EXPRVAL_DECL( i, uint);
    SRCEXP_EXPRVAL_DECL( v, variable);
 
    // Root expressions.

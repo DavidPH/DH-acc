@@ -87,6 +87,7 @@ void SourceExpression::make_objects_memcpy_cast(ObjectVector *objects, VariableD
 	case VariableType::VT_POINTER:
 	case VariableType::VT_SCRIPT:
 	case VariableType::VT_STRING:
+   case VariableType::VT_UINT:
 		switch (dstType->vt)
 		{
 		case VariableType::VT_ARRAY:
@@ -113,6 +114,7 @@ void SourceExpression::make_objects_memcpy_cast(ObjectVector *objects, VariableD
 		case VariableType::VT_POINTER:
 		case VariableType::VT_SCRIPT:
 		case VariableType::VT_STRING:
+      case VariableType::VT_UINT:
 			break;
 
 		case VariableType::VT_REAL:
@@ -143,6 +145,7 @@ void SourceExpression::make_objects_memcpy_cast(ObjectVector *objects, VariableD
 		case VariableType::VT_POINTER:
 		case VariableType::VT_SCRIPT:
 		case VariableType::VT_STRING:
+      case VariableType::VT_UINT:
 			objects->addToken(OCODE_LOGICAL_NOT32I);
 			objects->addToken(OCODE_LOGICAL_NOT32I);
 			break;
@@ -188,6 +191,7 @@ void SourceExpression::make_objects_memcpy_cast(ObjectVector *objects, VariableD
 		case VariableType::VT_POINTER:
 		case VariableType::VT_SCRIPT:
 		case VariableType::VT_STRING:
+      case VariableType::VT_UINT:
 			objects->addToken(OCODE_CONVERT_32F_32I);
 			break;
 		}

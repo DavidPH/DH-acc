@@ -35,6 +35,8 @@ std::vector<VariableType *> VariableType::type_pointer;
 std::vector<VariableType *> VariableType::type_script;
 
 #define VT_INIT(NAME,VT,VTR)                                        \
+VariableType const *VariableType::get_vt_##NAME()                   \
+{return &vt_##NAME;}                                                \
 VariableType VariableType::vt_##NAME  = { VT_##VT, true, &vtc_void, \
 &vtc_##NAME, &vtc_##VTR, std::vector<std::string>(),                \
 std::vector<VariableType const *>() };                              \
@@ -50,6 +52,7 @@ VT_INIT(label,    LABEL,    void);
 VT_INIT(real,     REAL,     void);
 VT_INIT(string,   STRING,   char);
 VT_INIT(void,     VOID,     void);
+VT_INIT(uint,     UINT,     void);
 
 #undef VT_INIT
 
@@ -118,6 +121,7 @@ VariableType const * VariableType::doConst()
 	case VT_REAL:
 	case VT_SCRIPT:
 	case VT_STRING:
+	case VT_UINT:
 	case VT_VOID:
 		break;
 	}
@@ -202,55 +206,6 @@ VariableType const * VariableType::get_script(VariableType const * callType, std
 	return get_function_like(VT_SCRIPT, &type_script, callType, types);
 }
 
-VariableType const * VariableType::get_vt(Type vt)
-{
-	switch (vt)
-	{
-	case VT_BOOLHARD: return &vt_boolhard;
-	case VT_BOOLSOFT: return &vt_boolsoft;
-	case VT_CHAR:     return &vt_char;
-	case VT_INT:      return &vt_int;
-	case VT_LABEL:    return &vt_label;
-	case VT_REAL:     return &vt_real;
-	case VT_STRING:   return &vt_string;
-	case VT_VOID:     return &vt_void;
-
-	default: throw "VariableType::get_vt";
-	}
-}
-VariableType const * VariableType::get_vt_boolhard()
-{
-	return &vt_boolhard;
-}
-VariableType const * VariableType::get_vt_boolsoft()
-{
-	return &vt_boolsoft;
-}
-VariableType const * VariableType::get_vt_char()
-{
-	return &vt_char;
-}
-VariableType const * VariableType::get_vt_int()
-{
-	return &vt_int;
-}
-VariableType const * VariableType::get_vt_label()
-{
-	return &vt_label;
-}
-VariableType const * VariableType::get_vt_real()
-{
-	return &vt_real;
-}
-VariableType const * VariableType::get_vt_string()
-{
-	return &vt_string;
-}
-VariableType const * VariableType::get_vt_void()
-{
-	return &vt_void;
-}
-
 int VariableType::getOffset(std::string const & name, SourcePosition const & position) const
 {
 	if (!complete)
@@ -317,6 +272,7 @@ bool VariableType::isVoid(SourcePosition const & position) const
 	case VT_REAL:
 	case VT_SCRIPT:
 	case VT_STRING:
+	case VT_UINT:
 		return false;
 	}
 
@@ -359,6 +315,7 @@ int VariableType::size(SourcePosition const & position) const
 	case VT_REAL:
 	case VT_SCRIPT:
 	case VT_STRING:
+	case VT_UINT:
 		return 1;
 
 	case VT_UNION:
@@ -397,6 +354,7 @@ int VariableType::sizeCall(SourcePosition const & position) const
 	case VT_REAL:
 	case VT_STRING:
 	case VT_STRUCT:
+	case VT_UINT:
 	case VT_UNION:
 	case VT_VOID:
 		return 0;
@@ -440,6 +398,7 @@ char const * make_string(VariableType::Type vt)
 	case VariableType::VT_SCRIPT:   return "VT_SCRIPT";
 	case VariableType::VT_STRING:   return "VT_STRING";
 	case VariableType::VT_STRUCT:   return "VT_STRUCT";
+   case VariableType::VT_UINT:     return "VT_UINT";
 	case VariableType::VT_UNION:    return "VT_UNION";
 	case VariableType::VT_VOID:     return "VT_VOID";
 	}

@@ -68,6 +68,9 @@ SourceExpression_BinaryNE(SRCEXP_EXPRBIN_PARM)
 {
 }
 
+//
+// SourceExpression_BinaryNE::virtual_makeObjects
+//
 void SourceExpression_BinaryNE::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
@@ -82,6 +85,7 @@ void SourceExpression_BinaryNE::virtual_makeObjects(ObjectVector *objects, Varia
 	case VariableType::VT_POINTER:
 	case VariableType::VT_SCRIPT:
 	case VariableType::VT_STRING:
+   case VariableType::VT_UINT:
 		objects->addToken(OCODE_CMP_NE32I);
 		break;
 

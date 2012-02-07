@@ -77,6 +77,9 @@ CounterPointer<ObjectExpression> SourceExpression_BinaryMul::makeObject() const
 	return ObjectExpression::create_binary_mul(exprL->makeObject(), exprR->makeObject(), position);
 }
 
+//
+// SourceExpression_BinaryMul::virtual_makeObjects
+//
 void SourceExpression_BinaryMul::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
 	Super::recurse_makeObjects(objects, dst);
@@ -89,6 +92,7 @@ void SourceExpression_BinaryMul::virtual_makeObjects(ObjectVector *objects, Vari
 		break;
 
 	case VariableType::VT_POINTER:
+   case VariableType::VT_UINT:
 		objects->addToken(OCODE_MUL32U);
 		break;
 

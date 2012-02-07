@@ -154,6 +154,22 @@ SRCEXP_EXPRVAL_DEFN(s, string)
 }
 
 //
+// SourceExpression::create_value_uint
+//
+SRCEXP_EXPRVAL_DEFN(i, uint)
+{
+   ObjectExpression::Pointer uintVarData =
+      ObjectExpression::create_value_int(value, position);
+
+   VariableType const *uintVarType = VariableType::get_vt_uint();
+
+   SourceVariable::Pointer uintVariable =
+      SourceVariable::create_literal(uintVarType, uintVarData, position);
+
+   return create_value_variable(uintVariable, context, position);
+}
+
+//
 // SourceExpression::create_value_variable
 //
 SRCEXP_EXPRVAL_DEFN(v, variable)

@@ -253,6 +253,12 @@ void SourceExpression_RootOutput::doOut(ObjectVector * objects, VariableType con
 
 		break;
 
+   case VariableType::VT_UINT:
+      objects->addToken(OCODE_ACSP_NUM_DEC32U);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('U'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      break;
+
 	case VariableType::VT_UNION:
 		objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('U'));
 		objects->addToken(OCODE_ACSP_CHARACTER);

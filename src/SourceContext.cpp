@@ -54,6 +54,7 @@ SourceContext::SourceContext() : _allowLabel(true), _caseDefault(false), _countA
 	getVariableType_typedef("__label",  VariableType::get_vt_label(),    SourcePosition::builtin());
    getVariableType_typedef("__real",     VariableType::get_vt_real(),     SourcePosition::builtin());
    getVariableType_typedef("__string",   VariableType::get_vt_string(),   SourcePosition::builtin());
+   getVariableType_typedef(  "unsigned", VariableType::get_vt_uint(),     SourcePosition::builtin());
 	getVariableType_typedef("void",     VariableType::get_vt_void(),     SourcePosition::builtin());
 
 
