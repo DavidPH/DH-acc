@@ -127,6 +127,10 @@ public:
 	static Pointer create_binary_sub(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 	static Pointer create_binary_xor(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
 
+   static Pointer create_branch_and(ObjectExpression *exprL, ObjectExpression *exprR, SourcePosition const &position);
+   static Pointer create_branch_ior(ObjectExpression *exprL, ObjectExpression *exprR, SourcePosition const &position);
+   static Pointer create_branch_xor(ObjectExpression *exprL, ObjectExpression *exprR, SourcePosition const &position);
+
    static Pointer create_cast_float_to_int(ObjectExpression *expr, SourcePosition const &position);
    static Pointer create_cast_int_to_float(ObjectExpression *expr, SourcePosition const &position);
 
@@ -186,6 +190,10 @@ protected:
 		OT_BINARY_SUB,
 		OT_BINARY_XOR,
 
+      OT_BRANCH_AND,
+      OT_BRANCH_IOR,
+      OT_BRANCH_XOR,
+
       OT_CAST,
 
 		OT_UNARY_ADD,
@@ -221,6 +229,10 @@ protected:
 	static Pointer create_binary_mul(std::istream * in);
 	static Pointer create_binary_sub(std::istream * in);
 	static Pointer create_binary_xor(std::istream * in);
+
+   static Pointer create_branch_and(std::istream *in);
+   static Pointer create_branch_ior(std::istream *in);
+   static Pointer create_branch_xor(std::istream *in);
 
    static Pointer create_cast(std::istream *in);
 

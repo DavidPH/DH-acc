@@ -29,6 +29,9 @@
 #include <sstream>
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 SourceTokenizerDS::SourceTokenizerDS(SourceStream * const in) : _canCommand(true), _canExpand(true), _canSkip(true)
 {
@@ -69,9 +72,13 @@ void SourceTokenizerDS::addDefine(std::string const & name, SourcePosition const
 
 	_defines[name] = tokens;
 }
+
+//
+// SourceTokenizerDS::addSkip
+//
 void SourceTokenizerDS::addSkip(bool skip)
 {
-	_skipStack.push(skip);
+   skipStack.push_back(skip);
 	_unskipStack.push(!skip);
 }
 
@@ -129,31 +136,44 @@ void SourceTokenizerDS::doCommand_define()
 
 	addDefine(name, position, tokens);
 }
+
+//
+// SourceTokenizerDS::doCommand_else
+//
 void SourceTokenizerDS::doCommand_else()
 {
-	if (_skipStack.empty())
+   if (skipStack.empty())
 		throw SourceException("unmatched #else", _token.getPosition(), "SourceTokenizerDS");
 
-	_skipStack.top() = _unskipStack.top();
+   skipStack.back() = _unskipStack.top();
 	_unskipStack.top() = true; // If it wasn't, it is now.
 }
+
+//
+// SourceTokenizerDS::doCommand_elif
+//
 void SourceTokenizerDS::doCommand_elif()
 {
-	if (_skipStack.empty())
+   if (skipStack.empty())
 		throw SourceException("unmatched #elif", _token.getPosition(), "SourceTokenizerDS");
 
 	bool ifResult(getIf());
 
-	_skipStack.top() = _unskipStack.top() || !ifResult;
+   skipStack.back() = _unskipStack.top() || !ifResult;
 	_unskipStack.top() = _unskipStack.top() || ifResult;
 }
+
+//
+// SourceTokenizerDS::doCommand_endif
+//
 void SourceTokenizerDS::doCommand_endif()
 {
-	if (_skipStack.empty())
+   if (skipStack.empty())
 		throw SourceException("unmatched #endif", _token.getPosition(), "SourceTokenizerDS");
 
 	remSkip();
 }
+
 void SourceTokenizerDS::doCommand_error()
 {
 	prep(SourceTokenC::TT_STRING);
@@ -225,6 +245,10 @@ bool SourceTokenizerDS::getIf()
 
 	return !!expr->resolveInt();
 }
+
+//
+// SourceTokenizerDS::getIfMultiple
+//
 ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
 {
 	ObjectExpression::Pointer expr(getIfSingle());
@@ -239,6 +263,10 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
 			expr = ObjectExpression::create_binary_and(expr, getIfSingle(), position);
 			break;
 
+      case SourceTokenC::TT_OP_AND2:
+         expr = ObjectExpression::create_branch_and(expr, getIfSingle(), position);
+         break;
+
 		case SourceTokenC::TT_OP_ASTERISK:
 			expr = ObjectExpression::create_binary_mul(expr, getIfSingle(), position);
 			break;
@@ -246,6 +274,10 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
 		case SourceTokenC::TT_OP_CARET:
 			expr = ObjectExpression::create_binary_xor(expr, getIfSingle(), position);
 			break;
+
+      case SourceTokenC::TT_OP_CARET2:
+         expr = ObjectExpression::create_branch_xor(expr, getIfSingle(), position);
+         break;
 
 		case SourceTokenC::TT_OP_MINUS:
 			expr = ObjectExpression::create_binary_sub(expr, getIfSingle(), position);
@@ -262,6 +294,10 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
 			expr = ObjectExpression::create_binary_ior(expr, getIfSingle(), position);
 			break;
 
+      case SourceTokenC::TT_OP_PIPE2:
+         expr = ObjectExpression::create_branch_ior(expr, getIfSingle(), position);
+         break;
+
 		case SourceTokenC::TT_OP_PLUS:
 			expr = ObjectExpression::create_binary_add(expr, getIfSingle(), position);
 			break;
@@ -277,6 +313,7 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
 
 	return expr;
 }
+
 ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
 {
 	prep();
@@ -338,9 +375,17 @@ bool SourceTokenizerDS::hasDefine(std::string const & name)
 	return _defines.find(name) != _defines.end();
 }
 
+//
+// SourceTokenizerDS::isSkip
+//
 bool SourceTokenizerDS::isSkip()
 {
-	return !_skipStack.empty() && _skipStack.top();
+   std::vector<bool>::iterator it;
+
+   for (it = skipStack.begin(); it != skipStack.end(); ++it)
+      if (*it) return true;
+
+   return false;
 }
 
 SourceTokenC const & SourceTokenizerDS::peek()
@@ -409,9 +454,13 @@ void SourceTokenizerDS::remDefine()
 {
 	_defines.erase(_token.getData());
 }
+
+//
+// SourceTokenizerDS::remSkip
+//
 void SourceTokenizerDS::remSkip()
 {
-	_skipStack.pop();
+   skipStack.pop_back();
 	_unskipStack.pop();
 }
 

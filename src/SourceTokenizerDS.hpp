@@ -92,7 +92,7 @@ private:
 	std::map<std::string, std::vector<SourceTokenC> > _defines;
 
 	std::stack<SourceStream *> _in;
-	std::stack<bool> _skipStack;
+   std::vector<bool> skipStack;
 	std::stack<SourceTokenC> _ungetStack;
 	std::stack<bool> _unskipStack;
 
