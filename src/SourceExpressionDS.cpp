@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpressionDS.cpp
-**
-** Defines the SourceExpressionDS methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// DS handling/parsing.
+//
+//-----------------------------------------------------------------------------
 
 #include "SourceExpressionDS.hpp"
 
@@ -33,6 +35,282 @@
 
 SourceExpressionDS::expression_single_handler_map SourceExpressionDS::_expression_single_handlers;
 SourceExpressionDS::expression_single_handler_map SourceExpressionDS::_expression_single_extern_handlers;
+
+
+//----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+//
+// make_expression
+//
+// Recursively splits a vector of expressions.
+//
+// start and stop are indexes into operators.
+//
+static SourceExpression::Pointer
+make_expression(SourceExpression::Vector const &expressions,
+                std::vector<SourceTokenC> const &operators, size_t start,
+                size_t stop, SourceContext *context)
+{
+   #define EXPRL make_expression(expressions, operators, start, iter, context)
+   #define EXPRR make_expression(expressions, operators, iter+1, stop, context)
+
+   #define CARGS context, operators[iter].getPosition()
+
+   // Terminating case. Only one expression, so just return it.
+   if (start == stop) return expressions[start];
+
+   // Some temporaries.
+   SourceExpression::Pointer expr, exprl, exprr;
+
+   size_t iter;
+
+   // &= &&= *= ^= ^^= >>= <<= = -= |= ||= += /=
+   for (iter = stop; iter-- > start;)
+   {
+      #define DO_CASE(FUNC)                                   \
+         exprl = EXPRL;                                       \
+         exprr = SourceExpression::FUNC(exprl, EXPRR, CARGS); \
+         return SourceExpression::create_binary_assign(exprl, exprr, CARGS)
+
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_AND_EQUALS:
+         DO_CASE(create_binary_and);
+
+      case SourceTokenC::TT_OP_AND2_EQUALS:
+         DO_CASE(create_branch_and);
+
+      case SourceTokenC::TT_OP_ASTERISK_EQUALS:
+         DO_CASE(create_binary_mul);
+
+      case SourceTokenC::TT_OP_CARET_EQUALS:
+         DO_CASE(create_binary_xor);
+
+      case SourceTokenC::TT_OP_CARET2_EQUALS:
+         DO_CASE(create_branch_xor);
+
+      case SourceTokenC::TT_OP_CMP_GT2_EQUALS:
+         DO_CASE(create_binary_shiftr);
+
+      case SourceTokenC::TT_OP_CMP_LT2_EQUALS:
+         DO_CASE(create_binary_shiftl);
+
+      case SourceTokenC::TT_OP_EQUALS:
+         return SourceExpression::create_binary_assign(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_MINUS_EQUALS:
+         DO_CASE(create_binary_sub);
+
+      case SourceTokenC::TT_OP_PERCENT_EQUALS:
+         DO_CASE(create_binary_mod);
+
+      case SourceTokenC::TT_OP_PIPE_EQUALS:
+         DO_CASE(create_binary_ior);
+
+      case SourceTokenC::TT_OP_PIPE2_EQUALS:
+         DO_CASE(create_branch_ior);
+
+      case SourceTokenC::TT_OP_PLUS_EQUALS:
+         DO_CASE(create_binary_add);
+
+      case SourceTokenC::TT_OP_SLASH_EQUALS:
+         DO_CASE(create_binary_div);
+
+      default:
+         break;
+      }
+
+      #undef DO_CASE
+   }
+
+   // ?:
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_QUERY:
+      {
+         exprl = EXPRL; expr = expressions[++iter]; exprr = EXPRR;
+         return SourceExpression::create_branch_if(exprl, expr, exprr, CARGS);
+      }
+
+      default:
+         break;
+      }
+   }
+
+   // ||
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_PIPE2:
+         return SourceExpression::create_branch_ior(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // ^^
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_CARET2:
+         return SourceExpression::create_branch_xor(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // &&
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_AND2:
+         return SourceExpression::create_branch_and(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // |
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_PIPE:
+         return SourceExpression::create_binary_ior(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // ^
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_CARET:
+         return SourceExpression::create_binary_xor(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // &
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_AND:
+         return SourceExpression::create_binary_and(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // == !=
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_CMP_EQ:
+         return SourceExpression::create_binary_eq(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_CMP_NE:
+         return SourceExpression::create_binary_ne(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // >= > <= <
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_CMP_GE:
+         return SourceExpression::create_binary_ge(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_CMP_GT:
+         return SourceExpression::create_binary_gt(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_CMP_LE:
+         return SourceExpression::create_binary_le(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_CMP_LT:
+         return SourceExpression::create_binary_lt(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // >> <<
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_CMP_GT2:
+         return SourceExpression::create_binary_shiftr(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_CMP_LT2:
+         return SourceExpression::create_binary_shiftl(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // - +
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_MINUS:
+         return SourceExpression::create_binary_sub(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_PLUS:
+         return SourceExpression::create_binary_add(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   // * % /
+   for (iter = start; iter < stop; ++iter)
+   {
+      switch (operators[iter].getType())
+      {
+      case SourceTokenC::TT_OP_ASTERISK:
+         return SourceExpression::create_binary_mul(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_PERCENT:
+         return SourceExpression::create_binary_mod(EXPRL, EXPRR, CARGS);
+
+      case SourceTokenC::TT_OP_SLASH:
+         return SourceExpression::create_binary_div(EXPRL, EXPRR, CARGS);
+
+      default:
+         break;
+      }
+   }
+
+   throw SourceException("unexpected operator", operators[start].getPosition(),
+                         __func__);
+}
 
 
 //----------------------------------------------------------------------------|
@@ -99,202 +377,78 @@ SourceExpression::Pointer SourceExpressionDS::
 make_expression(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
                 SourceContext *context)
 {
-   #define EXPR_S make_expression_single(in, blocks, context)
-   #define EXPR_L make_expression(in, blocks, context)
-   #define PASS_A context, position
+   SourceExpression::Vector expressions;
+   std::vector<SourceTokenC> operators;
 
-   SourceExpression::Pointer expr(make_expression_single(in, blocks, context));
+   SourceTokenC token;
 
-   while (true)
+   bool looping = true;
+
+   expressions.push_back(make_expression_single(in, blocks, context));
+
+   while (looping) switch ((token = in->get()).getType())
    {
-      SourceTokenC token(in->get());
+   case SourceTokenC::TT_OP_AND:
+   case SourceTokenC::TT_OP_AND_EQUALS:
+   case SourceTokenC::TT_OP_AND2:
+   case SourceTokenC::TT_OP_AND2_EQUALS:
+   case SourceTokenC::TT_OP_ASTERISK:
+   case SourceTokenC::TT_OP_ASTERISK_EQUALS:
+   case SourceTokenC::TT_OP_CARET:
+   case SourceTokenC::TT_OP_CARET_EQUALS:
+   case SourceTokenC::TT_OP_CARET2:
+   case SourceTokenC::TT_OP_CARET2_EQUALS:
+   case SourceTokenC::TT_OP_CMP_EQ:
+   case SourceTokenC::TT_OP_CMP_GE:
+   case SourceTokenC::TT_OP_CMP_GT:
+   case SourceTokenC::TT_OP_CMP_GT2:
+   case SourceTokenC::TT_OP_CMP_GT2_EQUALS:
+   case SourceTokenC::TT_OP_CMP_LE:
+   case SourceTokenC::TT_OP_CMP_LT:
+   case SourceTokenC::TT_OP_CMP_LT2:
+   case SourceTokenC::TT_OP_CMP_LT2_EQUALS:
+   case SourceTokenC::TT_OP_CMP_NE:
+   case SourceTokenC::TT_OP_EQUALS:
+   case SourceTokenC::TT_OP_MINUS:
+   case SourceTokenC::TT_OP_MINUS_EQUALS:
+   case SourceTokenC::TT_OP_PERCENT:
+   case SourceTokenC::TT_OP_PERCENT_EQUALS:
+   case SourceTokenC::TT_OP_PIPE:
+   case SourceTokenC::TT_OP_PIPE_EQUALS:
+   case SourceTokenC::TT_OP_PIPE2:
+   case SourceTokenC::TT_OP_PIPE2_EQUALS:
+   case SourceTokenC::TT_OP_PLUS:
+   case SourceTokenC::TT_OP_PLUS_EQUALS:
+   case SourceTokenC::TT_OP_SLASH:
+   case SourceTokenC::TT_OP_SLASH_EQUALS:
+   case_expr:
+      operators.push_back(token);
+      expressions.push_back(make_expression_single(in, blocks, context));
+      break;
 
-      SourcePosition const &position = token.getPosition();
+   case SourceTokenC::TT_OP_BRACKET_C:
+   case SourceTokenC::TT_OP_COLON:
+   case SourceTokenC::TT_OP_COMMA:
+   case SourceTokenC::TT_OP_PARENTHESIS_C:
+   case SourceTokenC::TT_OP_SEMICOLON:
+      in->unget(token);
+      looping = false;
+      break;
 
-      switch (token.getType())
-      {
-      case SourceTokenC::TT_OP_AND:
-         expr = create_binary_and(expr, EXPR_S, context, position);
-         break;
+   case SourceTokenC::TT_OP_QUERY:
+      operators.push_back(token);
+      expressions.push_back(make_expression(in, blocks, context));
+      token = in->get(SourceTokenC::TT_OP_COLON);
+      goto case_expr;
 
-      case SourceTokenC::TT_OP_AND_EQUALS:
-         expr = create_binary_assign(expr, create_binary_and(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_AND2:
-         expr = create_branch_and(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_AND2_EQUALS:
-         expr = create_binary_assign(expr, create_branch_and(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_ASTERISK:
-         expr = create_binary_mul(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_ASTERISK_EQUALS:
-         expr = create_binary_assign(expr, create_binary_mul(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_BRACKET_C:
-         in->unget(token);
-         return expr;
-
-      case SourceTokenC::TT_OP_CARET:
-         expr = create_binary_xor(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CARET_EQUALS:
-         expr = create_binary_assign(expr, create_binary_xor(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CARET2:
-         expr = create_branch_xor(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CARET2_EQUALS:
-         expr = create_binary_assign(expr, create_branch_xor(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CMP_EQ:
-         expr = create_binary_eq(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CMP_GE:
-         expr = create_binary_ge(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CMP_GT:
-         expr = create_binary_gt(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CMP_GT2:
-         expr = create_binary_shiftr(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CMP_GT2_EQUALS:
-         expr = create_binary_assign(expr, create_binary_shiftr(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CMP_LE:
-         expr = create_binary_le(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CMP_LT:
-         expr = create_binary_lt(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CMP_LT2:
-         expr = create_binary_shiftl(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CMP_LT2_EQUALS:
-         expr = create_binary_assign(expr, create_binary_shiftl(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_CMP_NE:
-         expr = create_binary_ne(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_COLON:
-         in->unget(token);
-         return expr;
-
-      case SourceTokenC::TT_OP_COMMA:
-         in->unget(token);
-         return expr;
-
-      case SourceTokenC::TT_OP_EQUALS:
-         return create_binary_assign(expr, EXPR_L, PASS_A);
-
-      case SourceTokenC::TT_OP_MINUS:
-         expr = create_binary_sub(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_MINUS_EQUALS:
-         expr = create_binary_assign(expr, create_binary_sub(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_PARENTHESIS_C:
-         in->unget(token);
-         return expr;
-
-      case SourceTokenC::TT_OP_PERCENT:
-         expr = create_binary_mod(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_PERCENT_EQUALS:
-         expr = create_binary_assign(expr, create_binary_mod(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_PIPE:
-         expr = create_binary_ior(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_PIPE_EQUALS:
-         expr = create_binary_assign(expr, create_binary_ior(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_PIPE2:
-         expr = create_branch_ior(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_PIPE2_EQUALS:
-         expr = create_binary_assign(expr, create_branch_ior(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_PLUS:
-         expr = create_binary_add(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_PLUS_EQUALS:
-         expr = create_binary_assign(expr, create_binary_add(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_QUERY:
-      {
-         SourceContext::Reference contextBody =
-            SourceContext::create(context, SourceContext::CT_BLOCK);
-
-         contextBody->setAllowLabel(false);
-         SourceExpression::Pointer exprBody =
-            make_expression_single(in, blocks, contextBody);
-         contextBody->setAllowLabel(true);
-
-         in->get(SourceTokenC::TT_OP_COLON);
-
-         SourceContext::Reference contextElse =
-            SourceContext::create(context, SourceContext::CT_BLOCK);
-         SourceExpression::Pointer exprElse =
-            make_expression_single(in, blocks, contextElse);
-
-         expr = create_branch_if(expr, exprBody, exprElse, PASS_A);
-      }
-         break;
-
-      case SourceTokenC::TT_OP_SEMICOLON:
-         in->unget(token);
-         return expr;
-
-      case SourceTokenC::TT_OP_SLASH:
-         expr = create_binary_div(expr, EXPR_S, PASS_A);
-         break;
-
-      case SourceTokenC::TT_OP_SLASH_EQUALS:
-         expr = create_binary_assign(expr, create_binary_div(expr, EXPR_L, PASS_A), PASS_A);
-         break;
-
-      default:
-         in->unget(token);
-         throw SourceException("unexpected token type", position,
-                               "SourceExpressionDS::make_expression");
-      }
+   default:
+      in->unget(token);
+      throw SourceException(std::string("unexpected token type '") +
+                            make_string(token.getType()) + "'",
+                            token.getPosition(), __func__);
    }
 
-   #undef PASS_A
-   #undef EXPR_L
-   #undef EXPR_S
+   return ::make_expression(expressions, operators, 0, operators.size(), context);
 }
 
 //
