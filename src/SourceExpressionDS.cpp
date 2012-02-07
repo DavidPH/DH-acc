@@ -67,7 +67,7 @@ make_expression(SourceExpression::Vector const &expressions,
    size_t iter;
 
    // &= &&= *= ^= ^^= >>= <<= = -= |= ||= += /=
-   for (iter = stop; iter-- > start;)
+   for (iter = start; iter < stop; ++iter)
    {
       #define DO_CASE(FUNC)                                   \
          exprl = EXPRL;                                       \
@@ -126,7 +126,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // ?:
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
@@ -142,7 +142,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // ||
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
@@ -155,7 +155,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // ^^
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
@@ -168,7 +168,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // &&
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
@@ -181,7 +181,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // |
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
@@ -194,7 +194,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // ^
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
@@ -207,7 +207,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // &
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
@@ -220,7 +220,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // == !=
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
@@ -236,7 +236,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // >= > <= <
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
@@ -258,7 +258,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // >> <<
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
@@ -274,7 +274,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // - +
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
@@ -290,7 +290,7 @@ make_expression(SourceExpression::Vector const &expressions,
    }
 
    // * % /
-   for (iter = start; iter < stop; ++iter)
+   for (iter = stop; iter-- > start;)
    {
       switch (operators[iter].getType())
       {
