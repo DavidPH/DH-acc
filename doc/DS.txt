@@ -152,8 +152,7 @@ operator ?:
   If else-branch is present, it must have the same type as if-branch. Otherwise,
   if-branch must have type void. Creates a new context for if-branch and
   else-branch based on current context.
-    expression "?" expression_single(if-branch)
-    ":" expression_single(else-branch)
+    expression "?" expression_single ":" expression_single
 
 operator =
   Assigns the result of the right expression to the address of the left
@@ -234,11 +233,17 @@ operator delay
   or ticks). Yields void.
     "__delay" expression
 
+operator do
+  Performs iteration. Yields void. Creates new contexts for condition and body
+  based on current context.
+    "do" expression_single "while" "(" expression ")"
+
 operator enum
   Defines an enumeration. Yields void.
-    "enum" [ identifier ] [ "{"
-    [ identifier [ "=" expression ] [ "," identifier [ "=" expression ] ]... ]
-    "}" ]
+    "enum" identifier
+    "enum" [ identifier ]
+      "{" [ identifier [ "=" expression ] [ ","
+            identifier [ "=" expression ] ]... ] "}"
 
 operator extern
   Performs forward-declaration. Yields the thing declared.
@@ -250,9 +255,7 @@ operator for
   Performs iteration. Yields void. Creates a new context for initializer based
   on current context, a new context for condition based on initializer context,
   and a new context for remaining expressions based on condition context.
-    "for"
-    "(" expression(initializer) ";" expression(condition) ";" expression ")"
-    expression_single
+    "for" "(" expression ";" expression ";" expression ")" expression_single
 
 operator function
   Defines a function. Yields a pointer to the function. Creates a new context
@@ -273,12 +276,11 @@ operator goto_dyn
 
 operator if
   Performs a conditional branch. Yields the result of if-branch or else-branch.
-  If else-branch is present, it must have the same type as if-branch. Otherwise,
-  if-branch must have type void. Creates a new context for condition based on
+  Yields a value of the promoted type of the two expressions or void if there is
+  no such promotion possible. Creates a new context for condition based on
   current context, and new contexts for remaining expressions based on condition
   context.
-    "if" expression_single(condition) expression_single(if-branch)
-      [ "else" expression_single(else-branch) ]
+    "if" "(" expression ")" expression_single [ "else" expression_single ]
 
 operator library
   Sets the current ACSE library. Yields void.
@@ -337,7 +339,7 @@ operator switch
   Performs a jump into a jump table. Yields void. Creates a new context for
   expression based on current context and a new context for block based on
   expression context.
-    "switch" expression_single "{" [ expression ";" ] "}"
+    "switch" "(" expression ")" "{" [ expression ";" ]... "}"
 
 operator struct
   Defines a struct. Yields void.
@@ -370,7 +372,7 @@ operator while
   Performs iteration. Yields void. Creates a new context for condition based on
   current context and a new context for remaining expression based on condition
   context.
-    "while" expression_single(condition) expression_single
+    "while" "(" expression ")" expression_single
 
 
 
