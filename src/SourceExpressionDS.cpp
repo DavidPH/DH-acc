@@ -437,7 +437,9 @@ make_expression(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
 
    case SourceTokenC::TT_OP_QUERY:
       operators.push_back(token);
+      context->setAllowLabel(false);
       expressions.push_back(make_expression(in, blocks, context));
+      context->setAllowLabel(true);
       token = in->get(SourceTokenC::TT_OP_COLON);
       goto case_expr;
 
