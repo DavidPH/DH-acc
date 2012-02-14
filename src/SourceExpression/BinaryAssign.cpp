@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -115,10 +115,12 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    }
    else
    {
-      // Unfortunate potential for double evaluation.
-      // TODO: Something more clever.
-      exprR->makeObjects(objects, exprL->getData());
-      exprL->makeObjects(objects, dst);
+      VariableData::Pointer dup = exprL->getData();
+      VariableData::Pointer src = VariableData::create_stack(dup->size);
+
+      make_objects_memcpy_prep(objects, dst, dup, src, position);
+      exprR->makeObjects(objects, src);
+      make_objects_memcpy_post(objects, dst, dup, src, position);
    }
 }
 
