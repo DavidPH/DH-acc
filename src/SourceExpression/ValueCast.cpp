@@ -192,9 +192,16 @@ SourceExpression_ValueCast(SourceExpression *_expr, VariableType const *_type,
 //
 bool SourceExpression_ValueCast::canMakeObject() const
 {
-   if (!expr->canMakeObject()) return false;
-
    VariableType const *exprType = expr->getType();
+
+   // Special case for casting an array to a pointer.
+   if (exprType->vt == VariableType::VT_ARRAY &&
+      type->vt == VariableType::VT_POINTER)
+   {
+      return expr->canMakeObjectAddress();
+   }
+
+   if (!expr->canMakeObject()) return false;
 
    switch (type->vt)
    {
@@ -266,9 +273,16 @@ VariableType const *SourceExpression_ValueCast::getType() const
 //
 ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
 {
-   ObjectExpression::Pointer obj = expr->makeObject();
-
    VariableType const *exprType = expr->getType();
+
+   // Special case for casting an array to a pointer.
+   if (exprType->vt == VariableType::VT_ARRAY &&
+      type->vt == VariableType::VT_POINTER)
+   {
+      return expr->makeObjectAddress();
+   }
+
+   ObjectExpression::Pointer obj = expr->makeObject();
 
    switch (type->vt)
    {
