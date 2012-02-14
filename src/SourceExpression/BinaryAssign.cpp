@@ -115,9 +115,10 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    }
    else
    {
-      // TODO
-      throw SourceException("Using the result of assignment not currently"
-                            " supported.", position, getName());
+      // Unfortunate potential for double evaluation.
+      // TODO: Something more clever.
+      exprR->makeObjects(objects, exprL->getData());
+      exprL->makeObjects(objects, dst);
    }
 }
 
