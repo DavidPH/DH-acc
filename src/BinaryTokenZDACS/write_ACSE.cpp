@@ -89,7 +89,12 @@ write_ACSE_function_FUNC(std::ostream *out, ObjectData_Function const &f)
 void BinaryTokenZDACS::
 write_ACSE_function_FNAM(std::ostream *, ObjectData_Function const &f)
 {
-   strings_temp.push_back(f.name);
+   size_t index = static_cast<size_t>(f.number);
+
+   if (strings_temp.size() <= index)
+      strings_temp.resize(index+1);
+
+   strings_temp[index] = f.name;
 }
 
 //
@@ -227,8 +232,14 @@ void BinaryTokenZDACS::
 write_ACSE_script_SNAM(std::ostream *, ObjectData_Script const &s)
 {
    // ACSE named scripts must be negative.
-   if (s.number < 0)
-      strings_temp.push_back(s.name);
+   if (s.number >= 0) return;
+
+   size_t index = static_cast<size_t>(-s.number - 1);
+
+   if (strings_temp.size() <= index)
+      strings_temp.resize(index+1);
+
+   strings_temp[index] = s.name;
 }
 
 //
