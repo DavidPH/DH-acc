@@ -99,8 +99,13 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    write_ACSE_chunk(out, &chunkout, "SPTR");
 
    // SFLG - Script Flags
-   ObjectExpression::iter_script(write_ACSE_script_flags, &chunkout);
+   ObjectExpression::iter_script(write_ACSE_script_SFLG, &chunkout);
    write_ACSE_chunk(out, &chunkout, "SFLG");
+
+   // SNAM - Script Names
+   ObjectExpression::iter_script(write_ACSE_script_SNAM, &chunkout);
+   write_ACSE_stringtable(&chunkout, false);
+   write_ACSE_chunk(out, &chunkout, "SNAM");
 
    // STRL - String Literals
    ObjectData_String::iterate(write_ACSE_string_STRL, NULL);
@@ -108,7 +113,7 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    write_ACSE_chunk(out, &chunkout, "STRL");
 
    // SVCT - Script Variable Counts
-   ObjectExpression::iter_script(write_ACSE_script_vars, &chunkout);
+   ObjectExpression::iter_script(write_ACSE_script_SVCT, &chunkout);
    write_ACSE_chunk(out, &chunkout, "SVCT");
 }
 

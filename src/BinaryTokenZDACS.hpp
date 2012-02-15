@@ -331,8 +331,9 @@ public:
    static void write_ACSE_registerarray_AIMP_counter(std::ostream *out, ObjectData_RegisterArray const &r);
    static void write_ACSE_registerarray_MEXP(std::ostream *out, ObjectData_RegisterArray const &r);
    static void write_ACSE_script(std::ostream *out, ObjectData_Script const &s);
-   static void write_ACSE_script_flags(std::ostream *out, ObjectData_Script const &s);
-   static void write_ACSE_script_vars(std::ostream *out, ObjectData_Script const &s);
+   static void write_ACSE_script_SFLG(std::ostream *out, ObjectData_Script const &s);
+   static void write_ACSE_script_SNAM(std::ostream *out, ObjectData_Script const &s);
+   static void write_ACSE_script_SVCT(std::ostream *out, ObjectData_Script const &s);
    static void write_ACSE_string_STRL(std::ostream *out, ObjectData_String const &s);
    static void write_ACSE_stringtable(std::ostream *out, bool junk);
 

@@ -209,10 +209,10 @@ write_ACSE_script(std::ostream *out, ObjectData_Script const &s)
 }
 
 //
-// BinaryTokenZDACS::write_ACSE_script_flags
+// BinaryTokenZDACS::write_ACSE_script_SFLG
 //
 void BinaryTokenZDACS::
-write_ACSE_script_flags(std::ostream *out, ObjectData_Script const &s)
+write_ACSE_script_SFLG(std::ostream *out, ObjectData_Script const &s)
 {
    if (!s.flags) return;
 
@@ -221,10 +221,21 @@ write_ACSE_script_flags(std::ostream *out, ObjectData_Script const &s)
 }
 
 //
-// BinaryTokenZDACS::write_ACSE_script_vars
+// BinaryTokenZDACS::write_ACSE_script_SNAM
 //
 void BinaryTokenZDACS::
-write_ACSE_script_vars(std::ostream *out, ObjectData_Script const &s)
+write_ACSE_script_SNAM(std::ostream *, ObjectData_Script const &s)
+{
+   // ACSE named scripts must be negative.
+   if (s.number < 0)
+      strings_temp.push_back(s.name);
+}
+
+//
+// BinaryTokenZDACS::write_ACSE_script_SVCT
+//
+void BinaryTokenZDACS::
+write_ACSE_script_SVCT(std::ostream *out, ObjectData_Script const &s)
 {
    if (s.varCount <= 10) return;
    if (s.varCount <= 20 && target_type == TARGET_ZDoom) return;
