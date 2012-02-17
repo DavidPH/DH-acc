@@ -1,96 +1,131 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* ost_type.cpp
-**
-** Defines functions, variables, and enums for dealing with output, source, and
-** target types.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Output/Source/Target Type.
+//
+//-----------------------------------------------------------------------------
 
 #include "ost_type.hpp"
 
 #include "option.hpp"
 
+#include <cstring>
 
 
-OutputType output_type(OUTPUT_UNKNOWN);
-SourceType source_type(SOURCE_UNKNOWN);
-TargetType target_type(TARGET_UNKNOWN);
+//----------------------------------------------------------------------------|
+// Static Prototypes                                                          |
+//
 
-option_auto<OutputType> option_output_type("output", "input", "Output type.", &output_type);
-option_auto<SourceType> option_source_type("source", "output", "Format of source file(s).", &source_type);
-option_auto<TargetType> option_target_type("target", "output", "Target game.", &target_type);
+static int output_handler
+(char const *opt, int optf, int argc, char const *const *argv);
+
+static int source_handler
+(char const *opt, int optf, int argc, char const *const *argv);
+
+static int target_handler
+(char const *opt, int optf, int argc, char const *const *argv);
 
 
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
 
-template<> OutputType option_auto<OutputType>::parse(std::string const & name, std::string const & arg)
+static option::option_call option_output
+('\0', "output-type", "output", "Output type.", NULL, output_handler);
+
+static option::option_call option_source
+('\0', "source-type", "input", "Source file type.", NULL, source_handler);
+
+static option::option_call option_target
+('\0', "target-type", "output", "Target engine.", NULL, target_handler);
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+OutputType output_type = OUTPUT_UNKNOWN;
+SourceType source_type = SOURCE_UNKNOWN;
+TargetType target_type = TARGET_UNKNOWN;
+
+
+//----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+//
+// output_handler
+//
+static int output_handler
+(char const *opt, int optf, int argc, char const *const *argv)
 {
-	if (arg == "ACS0")
-		return OUTPUT_ACS0;
-	else if (arg == "ACSE")
-		return OUTPUT_ACSE;
-	else if (arg == "ACS+")
-		return OUTPUT_ACSP;
-	else if (arg == "object")
-		return OUTPUT_object;
-	else
-		throw exception(name, arg, "unknown type");
-}
-template<> SourceType option_auto<SourceType>::parse(std::string const & name, std::string const & arg)
-{
-	if (arg == "ASMPLX")
-		return SOURCE_ASMPLX;
-	else if (arg == "DS")
-		return SOURCE_DS;
-	else if (arg == "object")
-		return SOURCE_object;
-	else
-		throw exception(name, arg, "unknown type");
-}
-template<> TargetType option_auto<TargetType>::parse(std::string const & name, std::string const & arg)
-{
-	if (arg == "Eternity")
-		return TARGET_Eternity;
-	else if (arg == "Hexen")
-		return TARGET_Hexen;
-	else if (arg == "HexPP")
-		return TARGET_HexPP;
-	else if (arg == "ZDoom")
-		return TARGET_ZDoom;
-	else
-		throw exception(name, arg, "unknown type");
-}
+   if (!argc) option::exception::error(opt, optf, "requires argument");
 
-template<> bool option_auto<OutputType>::handler_default(std::string const & name, std::string const & arg, bool, OutputType * data)
-{
-	*data = parse(name, arg);
+   if (!strcmp(argv[0], "ACS0"))
+      output_type = OUTPUT_ACS0;
+   else if (!strcmp(argv[0], "ACSE"))
+      output_type = OUTPUT_ACSE;
+   else if (!strcmp(argv[0], "ACS+"))
+      output_type = OUTPUT_ACSP;
+   else if (!strcmp(argv[0], "object"))
+      output_type = OUTPUT_object;
+   else
+      option::exception::error(opt, optf, "unrecognized type");
 
-	return true;
-}
-template<> bool option_auto<SourceType>::handler_default(std::string const & name, std::string const & arg, bool, SourceType * data)
-{
-	*data = parse(name, arg);
-
-	return true;
-}
-template<> bool option_auto<TargetType>::handler_default(std::string const & name, std::string const & arg, bool, TargetType * data)
-{
-	*data = parse(name, arg);
-
-	return true;
+   return 1;
 }
 
+static int source_handler
+(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if (!argc) option::exception::error(opt, optf, "requires argument");
+
+   if (!strcmp(argv[0], "ASMPLX"))
+      source_type = SOURCE_ASMPLX;
+   else if (!strcmp(argv[0], "DS"))
+      source_type = SOURCE_DS;
+   else if (!strcmp(argv[0], "object"))
+      source_type = SOURCE_object;
+   else
+      option::exception::error(opt, optf, "unrecognized type");
+
+   return 1;
+}
+
+static int target_handler
+(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if (!argc) option::exception::error(opt, optf, "requires argument");
+
+   if (!strcmp(argv[0], "Eternity"))
+      target_type = TARGET_Eternity;
+   else if (!strcmp(argv[0], "Hexen"))
+      target_type = TARGET_Hexen;
+   else if (!strcmp(argv[0], "HexPP"))
+      target_type = TARGET_HexPP;
+   else if (!strcmp(argv[0], "ZDoom"))
+      target_type = TARGET_ZDoom;
+   else
+      option::exception::error(opt, optf, "unrecognized type");
+
+   return 1;
+}
+
+// EOF
 

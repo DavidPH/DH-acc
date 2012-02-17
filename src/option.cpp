@@ -1,330 +1,1045 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* option.cpp
-**
-** Defines the option-handling functions.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Option Handling
+//
+//-----------------------------------------------------------------------------
 
 #include "option.hpp"
 
-#include <map>
-#include <set>
+#include <cstdarg>
+#include <cstdlib>
+#include <cstring>
+#include <string>
+#include <vector>
 
 
 
-std::string const option::no_arg("\0\0\0NO\0\0_\0\0ARG\0\0\0", 16);
+option *option::arg_handler = head();
 
-std::string option::program;
-std::string option::usage;
-std::string option::version;
+char const *option::help_program = NULL;
+char const *option::help_version = NULL;
+char const *option::help_usage   = NULL;
+char const *option::help_desc_s  = NULL;
+char const *option::help_desc_l  = NULL;
 
-typedef std::map<std::string, option *> _option_map_type;
-static inline _option_map_type & _option_map()
+size_t       option::option_args::arg_alloc = 8;
+size_t       option::option_args::arg_count = 0;
+char const **option::option_args::arg_vector = new char const*[8];
+
+//=============================================================================
+// option                                                                     |
+//
+
+//
+// option::option
+//
+option::option() : descL(NULL), descS(NULL), group(NULL), nameL(NULL),
+                   nameS('\0'), next(this), prev(this)
 {
-	static _option_map_type * option_map(new _option_map_type);
-
-	return *option_map;
-}
-typedef std::set<option *, bool (*)(option *, option *)> _option_set_type;
-static inline _option_set_type & _option_set()
-{
-	static _option_set_type * option_set(new _option_set_type(option::less));
-
-	return *option_set;
-}
-
-
-
-option::exception::exception(std::string const & name_, std::string const & description_) : _what("(--" + name_ + "): " + description_)
-{
-
-}
-option::exception::exception(std::string const & name_, std::string const & arg, std::string const & description_) : _what("(--" + name_ + "=" + arg + "): " + description_)
-{
-
-}
-option::exception::~exception() throw()
-{
-
 }
 
-char const * option::exception::what() const throw()
+//
+// option::option
+//
+option::option(char _nameS, char const *_nameL, char const *_group,
+               char const *_descS, char const *_descL)
+               : descL(_descL ? _descL : _descS), descS(_descS), group(_group),
+                 nameL(_nameL), nameS(_nameS)
 {
-	return _what.c_str();
+   option *start = find_group_start(group);
+   option *end = find_group_end(group, start);
+
+   option *opt;
+
+   for (opt = start; opt != end; opt = opt->next)
+   {
+      if (optstrcmp(opt->nameL, nameL) > 0)
+         break;
+   }
+
+   next = opt;
+   prev = opt->prev;
+
+   next->prev = this;
+   prev->next = this;
 }
 
-
-
-option::option(std::string const & name_, std::string const & group_, std::string const & description_) : description(description_), group(group_), name(name_)
-{
-	_option_map()[name] = this;
-	_option_set().insert(this);
-}
+//
+// option::~option
+//
 option::~option()
 {
-	_option_map().erase(name);
-	_option_set().erase(this);
+   prev->next = next;
+   next->prev = prev;
 }
 
-void option::assert_arg(std::string const & name, std::string const & arg)
+//
+// option::count_args
+//
+int option::count_args(int argc, char const *const *argv)
 {
-	if (arg == no_arg)
-		throw exception(name, "missing argument");
+   int argi;
+   char const *arg;
+
+   for (argi = 0; argi < argc; ++argi)
+   {
+      arg = argv[argi];
+      if (arg[0] == '-' && arg[1] != '\0')
+         break;
+   }
+
+   return argi;
 }
 
-bool option::less(option * l, option * r)
+//
+// option::find
+//
+option *option::find(char nameS)
 {
-	if (l->group < r->group) return true;
-	if (l->group > r->group) return false;
+   option *end = head();
+   option *opt = end;
 
-	return l->name < r->name;
+   while ((opt = opt->next) != end)
+   {
+      if (opt->nameS && opt->nameS == nameS)
+         return opt;
+   }
+
+   exception::error(&nameS, OPTF_SHORT, "no such option");
+   return NULL;
 }
 
-void option::print_help(std::ostream * out)
+//
+// option::find
+//
+option *option::find(char const *nameL)
 {
-	print_help(out, 80);
+   option *end = head();
+   option *opt = end;
+
+   // shorthand longopts
+   size_t  slen = strlen(nameL);
+   option *sopt = NULL;
+   int     scnt = 0;
+
+   while ((opt = opt->next) != end)
+   {
+      if (!opt->nameL) continue;
+
+      if (strcmp(opt->nameL, nameL) == 0)
+         return opt;
+
+      if (memcmp(opt->nameL, nameL, slen) == 0)
+      {
+         sopt = opt;
+         scnt++;
+      }
+   }
+
+   if (sopt)
+   {
+      if (scnt > 1)
+         exception::error(nameL, 0, "ambiguous shorthand (%i matches)", scnt);
+
+      return sopt;
+   }
+
+   exception::error(nameL, 0, "no such option");
+   return NULL;
 }
-void option::print_help(std::ostream * out, int width)
+
+//
+// option::find_group_end
+//
+option *option::find_group_end(char const *group, option *start)
 {
-	if (!program.empty())
-	{
-		if (version.empty())
-			*out << program << std::endl;
-		else
-			*out << program << " " << version << std::endl;
+   option *end = head();
+   option *opt;
 
-		if (!usage.empty())
-			*out << "usage: " << program << " " << usage << std::endl;
-	}
+   for (opt = start; opt != end; opt = opt->next)
+   {
+      if (optstrcmp(opt->group, group) > 0)
+         break;
+   }
 
-	typedef _option_set_type::const_iterator optIt_t;
-
-	_option_set_type const & optSet(_option_set());
-	optIt_t optBegin(optSet.begin());
-	optIt_t optEnd(optSet.end());
-
-	std::string group;
-	int padlen(0);
-
-	for (optIt_t optIt(optBegin); optIt != optEnd; ++optIt)
-	{
-		option * opt(*optIt);
-
-		if (opt->group != group)
-		{
-			if (!group.empty()) *out << std::endl;
-
-			*out << (group = opt->group) << ':' << std::endl;
-
-			padlen = 0;
-			for (optIt_t grpIt(optIt); grpIt != optEnd; ++grpIt)
-			{
-				option * grp(*grpIt);
-
-				if (grp->group != group) break;
-
-				int len((int)grp->name.size());
-
-				if (len > padlen) padlen = len;
-			}
-
-			// Normal prefix+suffix length.
-			padlen += 6;
-		}
-
-		opt->printHelp(out, width, padlen);
-	}
+   return opt;
 }
 
-void option::printHelp(std::ostream * out, int width, int padlen)
+//
+// option::find_group_start
+//
+option *option::find_group_start(char const *group)
 {
-	*out << "  --" << name;
-	int len(4 + (int)name.size());
-	while (len++ < padlen) *out << ' '; --len;
+   option *end = head();
+   option *opt = end;
 
-	for (std::string::iterator it(description.begin()); it != description.end(); ++it)
-	{
-		if (++len > width)
-		{
-			*out << std::endl;
-			len = 0;
-			while (len++ < padlen) *out << ' ';
-		}
+   if (!group)
+      return opt->next;
 
-		*out << *it;
-	}
-	*out << std::endl;
+   while ((opt = opt->next) != end)
+   {
+      if (optstrcmp(opt->group, group) >= 0)
+         break;
+   }
+
+   return opt;
 }
 
-void option::process(int argc, char const * const * argv)
+//
+// option::head
+//
+option *option::head()
 {
-	std::vector<std::string> args;
-	args.reserve(argc);
-
-	for (int i(0); i < argc; ++i)
-		args.push_back(argv[i]);
-
-	process(args);
+   static option *opt = new option_args;
+   return opt;
 }
-bool option::process(std::string const & name, std::string const & arg)
+
+//
+// option::optstrcmp
+//
+int option::optstrcmp(char const *s1, char const *s2)
 {
-	char const * name_c(name.c_str());
+   if (s1 == s2) return 0;
 
-	if (name_c[0] != '-' || name_c[1] != '-')
-	{
-		args_handler(name, name, true, &args_vector);
-		return false;
-	}
+   if (!s1) return -1;
+   if (!s2) return +1;
 
-	bool arg_used(true);
-	char const * arg_c(arg.c_str());
-
-	name_c += 2;
-
-	if (arg_c[0] == '-' && arg_c[1] == '-')
-		arg_c = NULL;
-
-	bool barg(true);
-
-	if (name_c[0] == 'n' && name_c[1] == 'o' && name_c[2] == '-')
-	{
-		barg = false;
-		name_c += 3;
-	}
-
-	arg_used = arg_used && arg_c;
-	std::string arg_s(arg_c ? (std::string)arg_c : no_arg);
-
-	std::string name_s(name_c);
-
-	_option_map_type::iterator optIt(_option_map().find(name_s));
-
-	if (optIt != _option_map().end())
-	{
-		return optIt->second->handle(name_s, arg_c, barg) && arg_used;
-	}
-
-	throw exception(name_c, "unknown name");
+   return strcmp(s1, s2);
 }
-void option::process(std::vector<std::string> const & args)
+
+//
+// option::print_help
+//
+void option::print_help(FILE *out, unsigned width)
 {
-	for (std::vector<std::string>::size_type argi(0), argn(1), argc(args.size()); argi < argc; ++argi)
-	{
-		argn = argi + 1;
+   // TODO: Determine terminal width.
+   if (!width)
+      width = 80;
 
-		argi += process(args[argi], (argn < argc) ? args[argn] : no_arg);
-	}
+   if (help_program)
+   {
+      fputs(help_program, out);
+
+      if (help_version)
+      {
+         fputc(' ', out);
+         fputs(help_version, out);
+      }
+
+      fputc('\n', out);
+
+      if (help_usage)
+      {
+         fputs("usage: ", out);
+         fputs(help_program, out);
+         fputc(' ', out);
+         write_wrapped(out, width, help_usage, 7, help_program);
+      }
+
+      fputc('\n', out);
+   }
+
+   if (help_desc_s)
+   {
+      write_wrapped(out, width, help_desc_s, 0);
+      fputc('\n', out);
+   }
+
+   option *end = head();
+   option *opt = end;
+
+   char const *group = NULL;
+
+   size_t grouplen = 0;
+
+   while ((opt = opt->next) != end)
+   {
+      size_t baselen;
+
+      char const *desc = opt->descS;
+
+      if (!desc) continue;
+
+      // This gets us past the starting NULL groups and makes checking faster
+      // for folded string literals.
+      if (opt->group != group && (!opt->group || !group ||
+                                  strcmp(opt->group, group) != 0))
+      {
+         group = opt->group;
+
+         if (group)
+         {
+            fputc( '\n', out);
+            fputs(group, out);
+            fputs(":\n", out);
+         }
+
+         grouplen = 0;
+      }
+
+      if (!grouplen)
+      {
+         option *it = opt->prev;
+
+         while ((it = it->next) != end &&
+                (it->group == group ||
+                 (it->group && group && strcmp(it->group, group) == 0)))
+         {
+            if (!it->nameL) continue;
+
+            size_t len = strlen(it->nameL);
+
+            if (len > grouplen) grouplen = len;
+         }
+
+         // If not, no long names were encountered.
+         if (grouplen) grouplen += 3;
+         grouplen += 7;
+      }
+
+      // Print the short name or pad if none.
+      if (opt->nameS)
+      {
+         fputs("  -", out);
+         fputc(opt->nameS, out);
+         fputc(opt->nameL ? ',' : ' ', out);
+      }
+      else
+         fputs("     ", out);
+
+      baselen = 5;
+
+      // Print the long name, if any.
+      if (opt->nameL)
+      {
+         fputs(" --", out);
+         fputs(opt->nameL, out);
+
+         baselen += 3 + strlen(opt->nameL);
+      }
+
+      // Pad to the same adding as the rest of the group.
+      while (baselen < grouplen)
+      {
+         fputc(' ', out);
+         baselen++;
+      }
+
+      // It could happen. No need to deadlock over it.
+      if (baselen > width)
+      {
+         fputc('\n', out);
+         continue;
+      }
+
+      write_wrapped(out, width, desc, baselen);
+   }
 }
 
-
-
-template<> float option_auto<float>::parse(std::string const & name, std::string const & arg)
+//
+// option::print_vers
+//
+void option::print_version(FILE *out)
 {
-	assert_arg(name, arg);
+   if (help_program)
+   {
+      fputs(help_program, out);
 
-	float f(0);
+      if (help_version)
+      {
+         fputc(' ', out);
+         fputs(help_version, out);
+      }
 
-	char const * s(arg.c_str());
-
-	for (; *s && *s != '.'; ++s)
-	{
-		if (!isdigit(*s))
-			throw exception(name, arg, "invalid float");
-
-		f *= 10;
-		f += *s - '0';
-	}
-
-	if (*s == '.')
-	{
-		while (*++s);
-
-		float fFrac(0);
-
-		while (*--s != '.')
-		{
-			if (!isdigit(*s))
-				throw exception(name, arg, "invalid float");
-
-			fFrac += *s - '0';
-			fFrac /= 10;
-		}
-	}
-
-	return f;
+      fputc('\n', out);
+   }
 }
 
-template<> int option_auto<int>::parse(std::string const & name, std::string const & arg)
+//
+// option::process_option_arg
+//
+int option::process_option_arg(int argc, char const *const *argv, int optf)
 {
-	assert_arg(name, arg);
+   int optc = count_args(argc, argv);
 
-	int i(0);
-
-	for (char const * s(arg.c_str()); *s; ++s)
-	{
-		if (!isdigit(*s))
-			throw exception(name, arg, "invalid int");
-
-		i *= 10;
-		i += *s - '0';
-	}
-
-	return i;
+   return arg_handler->handle("", optf, optc, argv);
 }
 
-template<> bool option_auto<bool>::handler_default(std::string const &, std::string const &, bool barg, bool * data)
+//
+// option::process_option_long
+//
+int option::process_option_long(int argc, char const *const *argv, int optf)
 {
-	*data = barg;
+   int used;
+   int optc = count_args(argc-1, argv+1) + 1;
+   char const *arg0;
+   char const *opts = argv[0]+2;
+   option *opt;
 
-	return false;
+   if (opts[0] == 'n' && opts[1] == 'o' && opts[2] == '-')
+   {
+      opts += 3;
+      optf |= OPTF_FALSE;
+   }
+
+   if (optc == argc-1)
+      optf |= OPTF_FINAL;
+
+   arg0 = strchr(opts, '=');
+
+   if (arg0)
+   {
+      optc++;
+      char const **optv = new char const *[optc];
+      optv[0] = arg0+1;
+      for (int i = 1; i < optc; ++i)
+         optv[i] = argv[i];
+
+      size_t optsLen = arg0 - opts;
+      char *optsTemp = new char[optsLen+1];
+      memcpy(optsTemp, opts, optsLen);
+      optsTemp[optsLen] = '\0';
+
+      try
+      {
+         opt = find(optsTemp);
+         used = opt->handle(optsTemp, optf, optc, optv);
+      }
+      catch (...)
+      {
+         delete[] optv;
+         delete[] optsTemp;
+         throw;
+      }
+
+      delete[] optv;
+      delete[] optsTemp;
+
+      // An argument was explicitly attached to this option. If it went unused,
+      // that's an error.
+      if (!used)
+         exception::error(optsTemp, optf, "extraneous argument");
+   }
+   else
+   {
+      opt = find(opts);
+      used = opt->handle(opts, optf, optc, argv+1) + 1;
+   }
+
+   return used;
 }
-template<> bool option_auto<float>::handler_default(std::string const & name, std::string const & arg, bool, float * data)
+
+//
+// option::process_option_short
+//
+int option::process_option_short(int argc, char const *const *argv, int optf)
 {
-	*data = parse(name, arg);
+   int used = 1;
+   int optc = count_args(argc-1, argv+1) + 1;
+   char const *opts;
+   char const **optv;
+   option *opt;
 
-	return true;
+   optv = new char const *[optc];
+   for (int i = 1; i < optc; ++i)
+      optv[i] = argv[i];
+
+   optf |= OPTF_SHORT;
+
+   if (optc == argc)
+      optf |= OPTF_FINAL;
+
+   try
+   {
+      for (opts = argv[0]+1; *opts; ++opts)
+      {
+         opt = find(*opts);
+
+         if (opts[1])
+         {
+            optv[0] = opts+1;
+            used = opt->handle(opts, optf, optc, optv);
+
+            // used includes the opts in argv, so can return as-is.
+            if (used)
+               break;
+         }
+         else
+         {
+            // Add 1 so that the count includes the opts in argv.
+            used = opt->handle(opts, optf, optc-1, argv+1) + 1;
+         }
+      }
+   }
+   catch (...)
+   {
+      delete[] optv;
+      throw;
+   }
+
+   delete[] optv;
+
+   return used;
 }
-template<> bool option_auto<int>::handler_default(std::string const & name, std::string const & arg, bool, int * data)
+
+//
+// option::process_options
+//
+void option::process_options(int argc, char const *const *argv, int optf)
 {
-	*data = parse(name, arg);
+   char const *argvName;
+   int used;
 
-	return true;
+   while (argc)
+   {
+      argvName = argv[0];
+
+      if (argvName[0] == '-')
+      {
+         // -*
+         if (argvName[1] == '-')
+         {
+            // --*
+            if (argvName[2] == '\0')
+            {
+               // --
+               argc--; argv++;
+               break;
+            }
+            else
+            {
+               // --*
+               used = process_option_long(argc, argv, optf);
+            }
+         }
+         else if (argvName[1] == '\0')
+         {
+            // -
+            used = process_option_arg(argc, argv, optf);
+         }
+         else
+         {
+            // -*
+            used = process_option_short(argc, argv, optf);
+         }
+      }
+      else
+      {
+         // *
+         used = process_option_arg(argc, argv, optf);
+      }
+
+      argc -= used;
+      argv += used;
+   }
+
+   // If argc is still nonzero, we encountered an explicit end of options.
+   // Process all remaining args as freestanding.
+   while (argc)
+   {
+      used = arg_handler->handle("", optf|OPTF_FINAL, argc, argv);
+
+      argc -= used;
+      argv += used;
+   }
 }
-template<> bool option_auto<std::string>::handler_default(std::string const & name, std::string const & arg, bool, std::string * data)
+
+//
+// option::wordlen
+//
+size_t option::wordlen(char const *str)
 {
-	assert_arg(name, arg);
+   size_t len = 0;
 
-	*data = arg;
+   while (*str && !isspace(*str++))
+      len++;
 
-	return true;
+   return len ? len : 1;
 }
-template<> bool option_auto<std::vector<std::string> >::handler_default(std::string const & name, std::string const & arg, bool, std::vector<std::string> * data)
+
+//
+// option::write_wrapped
+//
+void option::write_wrapped(FILE *out, size_t width, char const *str,
+                           size_t baselen, char const *prefix)
 {
-	assert_arg(name, arg);
+   char const *pre;
+   size_t linelen = baselen;
 
-	data->push_back(arg);
+   if (prefix)
+      linelen += strlen(prefix)+1;
 
-	return true;
+   while (*str)
+   {
+      // Linewrapping.
+      if (*str == '\n' || linelen+wordlen(str) > width)
+      {
+         fputc('\n', out);
+
+         // Only write line start stuff for the last linefeed.
+         if (*str == '\n' && str[1] == '\n')
+         {
+            str++;
+            continue;
+         }
+
+         for (linelen = 0; linelen < baselen; ++linelen)
+            fputc(' ', out);
+
+         if (prefix)
+         {
+            // Only reprint prefix for an explicit line break.
+            if (*str == '\n')
+               for (pre = prefix; *pre; ++pre, ++linelen)
+                  fputc(*pre, out);
+            else
+               for (pre = prefix; *pre; ++pre, ++linelen)
+                  fputc(' ', out);
+
+            fputc(' ', out);
+            linelen++;
+         }
+
+         if (*str == '\n') str++;
+
+         // Skip any leading spaces.
+         while (*str == ' ') str++;
+      }
+
+      fputc(*str++, out);
+      linelen++;
+   }
+
+   fputc('\n', out);
 }
 
+//=============================================================================
+// option::exception                                                          |
+//
+
+//
+// exception::exception
+//
+option::exception::exception() : whatmsg(NULL), whatlen(0)
+{
+}
+
+//
+// exception::exception
+//
+option::exception::exception(exception const &e)
+{
+   whatlen = e.whatlen;
+   whatmsg = new char[whatlen];
+   memcpy(whatmsg, e.whatmsg, whatlen);
+}
+
+//
+// exception::exception
+//
+option::exception::exception(char const *msg)
+{
+   whatlen = strlen(msg)+1;
+   whatmsg = new char[whatlen];
+   memcpy(whatmsg, msg, whatlen);
+}
+
+//
+// exception::exception
+//
+option::exception::exception(char const *msg, size_t len)
+{
+   whatlen = len+1;
+   whatmsg = new char[whatlen];
+   memcpy(whatmsg, msg, whatlen);
+}
+
+//
+// exception::~exception
+//
+option::exception::~exception() throw()
+{
+   delete[] whatmsg;
+}
+
+//
+// exception::error
+//
+void option::exception
+::error(char const *opt, int optf, char const *format, ...)
+{
+   char msg[1024];
+
+   int len;
+
+   if (optf & OPTF_SHORT)
+      len = snprintf(msg, 1024, "'-%c': ", *opt);
+   else
+      len = snprintf(msg, 1024, "'--%s': ", opt);
+
+   if (len > 1024) len = 1024;
+
+   va_list args;
+   va_start(args, format);
+   len += vsnprintf(msg+len, 1024-len, format, args);
+   va_end(args);
+
+   if (len > 1024) len = 1024;
+
+   throw option::exception(msg, len);
+}
+
+//=============================================================================
+// option::option_args                                                        |
+//
+
+//
+// option_args::option_args
+//
+// Only defined in order to make private.
+//
+option::option_args::option_args()
+{
+}
+
+//
+// option_args::handle
+//
+// This default handler just appends all of its args to the arg_vector.
+//
+int option::option_args
+::handle(char const *, int optf, int argc, char const *const *argv)
+{
+   int argi;
+   size_t new_count = arg_count + argc;
+
+   if (new_count > arg_alloc)
+   {
+      size_t new_alloc = new_count;
+      if (!(optf & OPTF_FINAL))
+         new_alloc *= 2;
+
+      char const **new_vector = new char const*[new_alloc];
+      memcpy(new_vector, arg_vector, sizeof(char const *) * arg_count);
+      delete[] arg_vector;
+
+      arg_alloc  = new_alloc;
+      arg_vector = new_vector;
+   }
+
+   for (argi = 0; argi < argc; ++argi)
+   {
+      if (optf & OPTF_KEEPA)
+      {
+         arg_vector[arg_count] = argv[argi];
+      }
+      else
+      {
+         size_t len = strlen(argv[argi])+1;
+         arg_vector[arg_count] = static_cast<char *>(memcpy(new char[len],
+                                                            argv[argi], len));
+      }
+
+      arg_count++;
+   }
+
+   return argc;
+}
+
+//=============================================================================
+// option::option_call                                                        |
+//
+
+//
+// option_call::option_call
+//
+option::option_call
+::option_call(char _nameS, char const *_nameL, char const *_group,
+              char const *_descS, char const *_descL, handler _h)
+              : option(_nameS, _nameL, _group, _descS, _descL), h(_h)
+{
+}
+
+//
+// option_call::handle
+//
+int option::option_call::handle(char const *opt, int optf, int argc,
+                                char const *const *argv)
+{
+   return h(opt, optf, argc, argv);
+}
+
+//=============================================================================
+// option::option_copy                                                        |
+//
+
+//
+// option_copy::option_copy
+//
+option::option_copy
+::option_copy(char _nameS, char const *_nameL, option *_copy)
+              : option(_nameS, _nameL, _copy->group, _copy->nameL, NULL),
+                copy(_copy)
+{
+}
+
+int option::option_copy
+::handle(char const *opt, int optf, int argc, char const *const *argv)
+{
+   return copy->handle(opt, optf, argc, argv);
+}
+
+//=============================================================================
+// option::option_cstr                                                        |
+//
+
+//
+// option_cstr::option_cstr
+//
+option::option_cstr
+::option_cstr(char _nameS, char const *_nameL, char const *_group,
+              char const *_descS, char const *_descL)
+              : option(_nameS, _nameL, _group, _descS, _descL), data(NULL)
+{
+}
+
+//
+// option_cstr::option_cstr
+//
+option::option_cstr
+::option_cstr(char _nameS, char const *_nameL, char const *_group,
+              char const *_descS, char const *_descL, char const *value)
+              : option(_nameS, _nameL, _group, _descS, _descL), data(value)
+{
+}
+
+//
+// option_cstr::handle
+//
+int option::option_cstr
+::handle(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if (optf & OPTF_FALSE)
+   {
+      data = NULL;
+      return 0;
+   }
+
+   if (!argc) exception::error(opt, optf, "requires argument");
+
+   if (optf & OPTF_KEEPA)
+   {
+      data = argv[0];
+   }
+   else
+   {
+      size_t len = strlen(argv[0])+1;
+      data = static_cast<char *>(memcpy(new char[len], argv[0], len));
+   }
+
+   return 1;
+}
+
+//=============================================================================
+// option::option_data                                                        |
+//
+
+//
+// option_data::option_data
+//
+template<typename T>
+option::option_data<T>
+::option_data(char _nameS, char const *_nameL, char const *_group,
+              char const *_descS, char const *_descL)
+              : option_dptr<T>(_nameS, _nameL, _group, _descS, _descL, &data),
+                data(0)
+{
+}
+template<>
+option::option_data<std::string>
+::option_data(char _nameS, char const *_nameL, char const *_group,
+              char const *_descS, char const *_descL)
+              : option_dptr(_nameS, _nameL, _group, _descS, _descL, &data),
+                data()
+{
+}
+template<>
+option::option_data<std::vector<std::string> >
+::option_data(char _nameS, char const *_nameL, char const *_group,
+              char const *_descS, char const *_descL)
+              : option_dptr(_nameS, _nameL, _group, _descS, _descL, &data),
+                data()
+{
+}
+
+//
+// option_data::option_data
+//
+template<typename T>
+option::option_data<T>
+::option_data(char _nameS, char const *_nameL, char const *_group,
+              char const *_descS, char const *_descL, T const &value)
+              : option_dptr<T>(_nameS, _nameL, _group, _descS, _descL, &data),
+                data(value)
+{
+}
+template<>
+option::option_data<char const *>
+::option_data(char _nameS, char const *_nameL, char const *_group,
+              char const *_descS, char const *_descL, char const *const &value)
+              : option_dptr(_nameS, _nameL, _group, _descS, _descL, &data),
+                data()
+{
+   size_t len = strlen(value)+1;
+   data = static_cast<char *>(memcpy(new char[len], value, len));
+}
+
+//
+// option_data::~option_data
+//
+template<typename T>
+option::option_data<T>::~option_data()
+{
+}
+template<>
+option::option_data<char const *>::~option_data()
+{
+   delete[] data;
+}
+
+template class option::option_data<bool>;
+template class option::option_data<int>;
+template class option::option_data<char const *>;
+template class option::option_data<std::string>;
+template class option::option_data<std::vector<std::string> >;
+
+//=============================================================================
+// option::option_dptr                                                        |
+//
+
+//
+// option_dptr::option_dptr
+//
+template<typename T>
+option::option_dptr<T>
+::option_dptr(char _nameS, char const *_nameL, char const *_group,
+              char const *_descS, char const *_descL, T *_dptr)
+              : option(_nameS, _nameL, _group, _descS, _descL), dptr(_dptr)
+{
+}
+
+//
+// option_dptr::handle <bool>
+//
+template<>
+int option::option_dptr<bool>
+::handle(char const *, int optf, int, char const *const *)
+{
+   *dptr = !(optf & OPTF_FALSE);
+   return 0;
+}
+
+//
+// option_dptr::handle <int>
+//
+template<>
+int option::option_dptr<int>
+::handle(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if (optf & OPTF_FALSE)
+   {
+      *dptr = 0;
+      return 0;
+   }
+
+   if (!argc) exception::error(opt, optf, "requires argument");
+
+   *dptr = atoi(argv[0]);
+   return 1;
+}
+
+//
+// option_dptr::handle <char const *>
+//
+template<>
+int option::option_dptr<char const *>
+::handle(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if (optf & OPTF_FALSE)
+   {
+      *dptr = NULL;
+      return 0;
+   }
+
+   if (!argc) exception::error(opt, optf, "requires argument");
+
+   size_t len = strlen(argv[0])+1;
+   *dptr = static_cast<char *>(memcpy(new char[len], argv[0], len));
+   return 1;
+}
+
+//
+// option_dptr::handle <std::string>
+//
+template<>
+int option::option_dptr<std::string>
+::handle(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if (optf & OPTF_FALSE)
+   {
+      dptr->clear();
+      return 0;
+   }
+
+   if (!argc) exception::error(opt, optf, "requires argument");
+
+   *dptr = argv[0];
+   return 1;
+}
+
+//
+// option_dptr::handle <std::vector<std::string>>
+//
+template<>
+int option::option_dptr<std::vector<std::string> >
+::handle(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if (optf & OPTF_FALSE)
+   {
+      dptr->clear();
+      return 0;
+   }
+
+   if (!argc) exception::error(opt, optf, "requires argument");
+
+   dptr->push_back(argv[0]);
+   return 1;
+}
+
+template class option::option_dptr<bool>;
+template class option::option_dptr<int>;
+template class option::option_dptr<char const *>;
+template class option::option_dptr<std::string>;
+template class option::option_dptr<std::vector<std::string> >;
 
 
-// Must be after template specializations.
-std::vector<std::string> option::args_vector;
-option_auto<std::vector<std::string> >::handler_t option::args_handler(option_auto<std::vector<std::string> >::handler_default);
 
+// EOF
 

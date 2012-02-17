@@ -51,7 +51,8 @@
 // Static Variables                                                           |
 //
 
-static option_data<std::string> option_out("out", "output", "Output File.");
+static option::option_data<std::string> option_out
+('\0', "out", "output", "Output File.", NULL);
 
 
 //----------------------------------------------------------------------------|
@@ -196,25 +197,24 @@ static inline void _init(int argc, char const *const *argv)
    SourceContext::init();
    SourceExpressionDS::init();
 
-   option::program = argv[0];
+   option::help_program = argv[0];
 
    if (argc == 1)
    {
-      option::print_help(&std::cerr);
+      option::print_help(stderr);
       throw 0;
    }
 
-   option::process(argc-1, argv+1);
-
-   if (option_out.data.empty() && !option::args_vector.empty())
+   option::process_options(argc-1, argv+1, option::OPTF_KEEPA);
    {
-      option_out.data = option::args_vector.back();
-      option::args_vector.pop_back();
+   if (option_out.data.empty() && option::option_args::arg_count)
+      option_out.data =
+         option::option_args::arg_vector[--option::option_args::arg_count];
    }
 
-   if (option::args_vector.empty())
+   if (!option::option_args::arg_count)
    {
-      option::print_help(&std::cerr);
+      option::print_help(stderr);
       throw 1;
    }
 }
@@ -231,10 +231,10 @@ static inline int _main()
       target_type = TARGET_Hexen;
 
    // Read source file(s).
-   for (std::vector<std::string>::iterator arg(option::args_vector.begin());
-        arg != option::args_vector.end();
-        ++arg)
-      read_source(*arg, source_type, &objects);
+   for (char const **iter = option::option_args::arg_vector,
+                   **end  = option::option_args::arg_count+iter;
+        iter != end; ++iter)
+      read_source(*iter, source_type, &objects);
 
    // If doing object output, don't process object data.
    if (output_type == OUTPUT_object)
@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
    catch (option::exception const &e)
    {
       std::cerr << "(option::exception): " << e.what() << std::endl;
-      option::print_help(&std::cerr);
+      option::print_help(stderr);
    }
    catch (std::exception const &e)
    {

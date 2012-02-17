@@ -1,36 +1,51 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceStream.cpp
-**
-** SourceStream methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Low-level processing of source code.
+//
+//-----------------------------------------------------------------------------
 
 #include "SourceStream.hpp"
 
 #include "option.hpp"
 
 #include <fstream>
+#include <vector>
 
 
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
 
-option_data<std::vector<std::string> > option_include_dir("include-dir", "input", "Specifies a directory to search for includes in.", std::vector<std::string>(1));
-option_data<int> option_tab_columns("tab-columns", "input", "How many columns a tab counts for in error reporting.", 1);
+static option::option_data<std::vector<std::string> > option_include_dir
+('i', "include-dir", "input",
+ "Specifies a directory to search for includes in.", NULL,
+ std::vector<std::string>(1));
+
+static option::option_data<int> option_tab_columns
+('\0', "tab-columns", "input",
+ "How many columns a tab counts for in error reporting.", NULL, 1);
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 SourceStream::SourceStream(std::string const & filename, SourceType const type) :
 _oldC(-2), _curC(-2), _newC(-2),

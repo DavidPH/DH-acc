@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* ObjectVector.cpp
-**
-** Defines the ObjectVector methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// ObjectToken vector.
+//
+//-----------------------------------------------------------------------------
 
 #include "ObjectVector.hpp"
 
@@ -27,12 +29,24 @@
 #include "option.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
 
-option_data<bool> option_opt_nop("opt-nop", "optimization", "Strips NOP instructions.", false);
-option_data<bool> option_opt_pushdrop("opt-pushdrop", "optimization", "Strips PUSH/DROP pairs. On by default.", true);
-option_data<bool> option_opt_pushpushswap("opt-pushpushswap", "optimization", "Removes the SWAP from PUSH/PUSH/SWAP sets. On by default.", true);
+static option::option_data<bool> option_opt_nop
+('\0', "opt-nop", "optimization",
+ "Strips NOP instructions.", NULL, false);
+static option::option_data<bool> option_opt_pushdrop
+('\0', "opt-pushdrop", "optimization",
+ "Strips PUSH/DROP pairs. On by default.", NULL, true);
+static option::option_data<bool> option_opt_pushpushswap
+('\0', "opt-pushpushswap", "optimization",
+ "Removes the SWAP from PUSH/PUSH/SWAP sets. On by default.", NULL, true);
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 void ObjectVector::addLabel(std::string const & label)
 {

@@ -1,33 +1,45 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* ObjectExpression.cpp
-**
-** Defines the ObjectExpression methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Base class for object-level expression handling.
+//
+//-----------------------------------------------------------------------------
 
 #include "ObjectExpression.hpp"
 
 #include "ACSP.hpp"
 #include "BinaryTokenACS.hpp"
 #include "ObjectCode.hpp"
+#include "option.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 
 #include <sstream>
+
+
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
+
+static option::option_dptr<bool> option_string_fold_handle
+('\0', "string-fold", "optimization", "Removes duplicate strings.", NULL,
+ &option_string_fold);
 
 
 //----------------------------------------------------------------------------|
@@ -60,7 +72,7 @@ std::map<std::string, ObjectData_Static> ObjectExpression::_static_table;
 std::map<std::string, ObjectExpression::Pointer>        ObjectExpression::_symbol_table;
 std::map<std::string, ObjectExpression::ExpressionType> ObjectExpression::_symbol_type_table;
 
-option_data<bool> option_string_fold("string-fold", "optimization", "Removes duplicate strings.", false);
+bool option_string_fold = false;
 
 
 //----------------------------------------------------------------------------|
