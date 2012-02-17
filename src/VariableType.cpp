@@ -353,6 +353,8 @@ bigsint VariableType::getSize(SourcePosition const &position) const
       return size;
    }
    }
+
+   throw SourceException("invalid type", position, __func__);
 }
 
 //

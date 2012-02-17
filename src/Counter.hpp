@@ -67,7 +67,7 @@ typedef BASE Super
 //
 #define MAKE_NOCLONE_COUNTER_CLASS(CLASS)                \
 private:                                                 \
-virtual CLASS *cloneRaw() const {throw Counter();}       \
+virtual CLASS *cloneRaw() const {throw 1;}               \
 public:                                                  \
 CounterPointer<CLASS> clone() const {return cloneRaw();} \
 MAKE_COMMON_COUNTER_CLASS(CLASS)

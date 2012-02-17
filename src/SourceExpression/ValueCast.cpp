@@ -119,37 +119,51 @@ SourceExpression_ValueCast::SourceExpression_ValueCast
       // Any cast to/from BT_ASMFUNC must be explicit.
       if (exprBT == VariableType::BT_ASMFUNC ||
           thisBT == VariableType::BT_ASMFUNC)
+      {
          BAD_CAST();
+      }
 
       // Any cast to/from BT_FUNCTION must be explicit.
       if (exprBT == VariableType::BT_FUNCTION ||
           thisBT == VariableType::BT_FUNCTION)
+      {
          BAD_CAST();
+      }
 
       // Any cast to/from BT_LABEL must be explicit.
       if (exprBT == VariableType::BT_LABEL ||
           thisBT == VariableType::BT_LABEL)
+      {
          BAD_CAST();
+      }
 
       // Any cast to/from BT_LINESPEC must be explicit.
       if (exprBT == VariableType::BT_LINESPEC ||
           thisBT == VariableType::BT_LINESPEC)
+      {
          BAD_CAST();
+      }
 
       // Any cast to/from BT_NATIVE must be explicit.
       if (exprBT == VariableType::BT_NATIVE ||
           thisBT == VariableType::BT_NATIVE)
+      {
          BAD_CAST();
+      }
 
       // Any cast to/from BT_SCRIPT must be explicit.
       if (exprBT == VariableType::BT_SCRIPT ||
           thisBT == VariableType::BT_SCRIPT)
+      {
          BAD_CAST();
+      }
 
       // Any cast to/from BT_STRING must be explicit.
       if (exprBT == VariableType::BT_STRING ||
           thisBT == VariableType::BT_STRING)
+      {
          BAD_CAST();
+      }
 
       return;
    }
@@ -170,7 +184,9 @@ SourceExpression_ValueCast::SourceExpression_ValueCast
 
       // Casts that discard qualifiers must be explicit.
       if (!thisRetn->getQualifier(exprRetn->getQualifiers()))
+      {
          BAD_CAST();
+      }
 
       // Cast to/from void* is acceptable.
       if (exprRetnBT == VariableType::BT_VOID ||
