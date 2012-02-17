@@ -42,7 +42,7 @@ class SourceExpression_BinaryCompare : public SourceExpression_Binary
 public:
    virtual bool canMakeObject() const;
 
-   virtual VariableType const *getType() const;
+   virtual CounterReference<VariableType> getType() const;
 
 protected:
    SourceExpression_BinaryCompare(SRCEXP_EXPRBIN_ARGS);

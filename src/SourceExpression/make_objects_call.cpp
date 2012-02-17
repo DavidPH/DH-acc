@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,22 +29,23 @@
 #include "../VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceExpression::make_objects_call
 //
-void SourceExpression::
-make_objects_call(ObjectVector *objects, VariableData *dst,
-                  SourceExpression *expr,
-                  std::vector<SourceExpression::Pointer> const & args,
-                  ObjectExpression *stack, std::string const &labelReturn,
-                  SourcePosition const &position)
+void SourceExpression::make_objects_call
+(ObjectVector *objects, VariableData *dst, SourceExpression *expr,
+ Vector const &args, ObjectExpression *stack, std::string const &labelReturn,
+ SourcePosition const &position)
 {
-   VariableType const *type = expr->getType();
+   VariableType::Reference type = expr->getType();
 
-   switch (type->vt)
+   switch (type->getBasicType())
    {
-   case VariableType::VT_ASMFUNC:
+   case VariableType::BT_ASMFUNC:
       if (expr->canMakeObject())
       {
          make_objects_call_asmfunc(objects, dst, type, expr->makeObject(),
@@ -52,12 +53,11 @@ make_objects_call(ObjectVector *objects, VariableData *dst,
       }
       else
       {
-         throw SourceException("non-constant asmfuncs not supported",
-                               position, "SourceExpression");
+         throw SourceException("non-constant asmfunc", position, __func__);
       }
       break;
 
-   case VariableType::VT_FUNCTION:
+   case VariableType::BT_FUNCTION:
       if (expr->canMakeObject())
       {
          make_objects_call_function(objects, dst, type, expr->makeObject(),
@@ -70,7 +70,7 @@ make_objects_call(ObjectVector *objects, VariableData *dst,
       }
       break;
 
-   case VariableType::VT_LINESPEC:
+   case VariableType::BT_LINESPEC:
       if (expr->canMakeObject())
       {
          make_objects_call_linespec(objects, dst, type, expr->makeObject(),
@@ -78,12 +78,11 @@ make_objects_call(ObjectVector *objects, VariableData *dst,
       }
       else
       {
-         throw SourceException("non-constant linespecs not yet supported",
-                               position, "SourceExpression");
+         throw SourceException("non-constant linespec", position, __func__);
       }
       break;
 
-   case VariableType::VT_NATIVE:
+   case VariableType::BT_NATIVE:
       if (expr->canMakeObject())
       {
          make_objects_call_native(objects, dst, type, expr->makeObject(), args,
@@ -91,19 +90,17 @@ make_objects_call(ObjectVector *objects, VariableData *dst,
       }
       else
       {
-         throw SourceException("non-constant natives not yet supported",
-                               position, "SourceExpression");
+         throw SourceException("non-constant native", position, __func__);
       }
       break;
 
-   case VariableType::VT_SCRIPT:
+   case VariableType::BT_SCRIPT:
       make_objects_call_script(objects, dst, type, expr, args, stack,
                                position);
       break;
 
    default:
-      throw SourceException("attempt to call uncallable", position,
-                            "SourceExpression");
+      throw SourceException("attempt to call uncallable", position, __func__);
    }
 }
 

@@ -30,49 +30,41 @@
 #include "VariableType.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 //
 // SourceVariable::SourceVariable
 //
-SourceVariable::
-SourceVariable(SourceVariable const &var)
-               : Super(var), position(var.position), nameObject(var.nameObject),
-                 nameSource(var.nameSource), expr(var.expr), type(var.type),
-                 sc(var.sc)
+SourceVariable::SourceVariable
+(std::string const &_nameSource, VariableType *_type, ObjectExpression *_expr,
+ SourcePosition const &_position)
+ : position(_position), nameSource(_nameSource), expr(_expr), type(_type),
+   sc(SC_CONSTANT)
 {
 }
 
 //
 // SourceVariable::SourceVariable
 //
-SourceVariable::
-SourceVariable(std::string const &_nameSource, VariableType const *_type,
-               ObjectExpression *_expr, SourcePosition const &_position)
-               : position(_position), nameSource(_nameSource), expr(_expr),
-                 type(_type), sc(SC_CONSTANT)
-{
-}
-
-//
-// SourceVariable::SourceVariable
-//
-SourceVariable::
-SourceVariable(std::string const &_nameSource, VariableType const *_type,
-               std::string const &_nameObject, SourcePosition const &_position)
-               : position(_position), nameObject(_nameObject),
-                 nameSource(_nameSource), type(_type), sc(SC_CONSTANT)
+SourceVariable::SourceVariable
+(std::string const &_nameSource, VariableType *_type,
+ std::string const &_nameObject, SourcePosition const &_position)
+ : position(_position), nameObject(_nameObject), nameSource(_nameSource),
+   type(_type), sc(SC_CONSTANT)
 {
 }
 
 //
 // ourceVariable::SourceVariable
 //
-SourceVariable::
-SourceVariable(std::string const &_nameSource, VariableType const *_type,
-               std::string const &_nameObject, StorageClass _sc,
-               SourcePosition const &_position)
-               : position(_position), nameObject(_nameObject),
-                 nameSource(_nameSource), type(_type), sc(_sc)
+SourceVariable::SourceVariable
+(std::string const &_nameSource, VariableType *_type,
+ std::string const &_nameObject, StorageClass _sc,
+ SourcePosition const &_position)
+ : position(_position), nameObject(_nameObject), nameSource(_nameSource),
+   type(_type), sc(_sc)
 {
 }
 
@@ -86,9 +78,9 @@ SourceVariable::~SourceVariable()
 //
 // SourceVariable::create_constant
 //
-SourceVariable::Pointer SourceVariable::
-create_constant(std::string const &nameSource, VariableType const *type,
-                ObjectExpression *expr, SourcePosition const &position)
+SourceVariable::Pointer SourceVariable::create_constant
+(std::string const &nameSource, VariableType *type, ObjectExpression *expr,
+ SourcePosition const &position)
 {
    return new SourceVariable(nameSource, type, expr, position);
 }
@@ -96,9 +88,9 @@ create_constant(std::string const &nameSource, VariableType const *type,
 //
 // SourceVariable::create_constant
 //
-SourceVariable::Pointer SourceVariable::
-create_constant(std::string const &nameSource, VariableType const *type,
-                std::string const &nameObject, SourcePosition const &position)
+SourceVariable::Pointer SourceVariable::create_constant
+(std::string const &nameSource, VariableType *type,
+ std::string const &nameObject, SourcePosition const &position)
 {
    return new SourceVariable(nameSource, type, nameObject, position);
 }
@@ -106,9 +98,8 @@ create_constant(std::string const &nameSource, VariableType const *type,
 //
 // SourceVariable::create_literal
 //
-SourceVariable::Pointer SourceVariable::
-create_literal(VariableType const *type, ObjectExpression *expr,
-               SourcePosition const &position)
+SourceVariable::Pointer SourceVariable::create_literal
+(VariableType *type, ObjectExpression *expr, SourcePosition const &position)
 {
    return new SourceVariable("", type, expr, position);
 }
@@ -116,9 +107,9 @@ create_literal(VariableType const *type, ObjectExpression *expr,
 //
 // SourceVariable::create_literal
 //
-SourceVariable::Pointer SourceVariable::
-create_literal(VariableType const *type, std::string const &nameObject,
-               SourcePosition const &position)
+SourceVariable::Pointer SourceVariable::create_literal
+(VariableType *type, std::string const &nameObject,
+ SourcePosition const &position)
 {
    return new SourceVariable("", type, nameObject, position);
 }
@@ -126,10 +117,9 @@ create_literal(VariableType const *type, std::string const &nameObject,
 //
 // SourceVariable::create_variable
 //
-SourceVariable::Pointer SourceVariable::
-create_variable(std::string const &nameSource, VariableType const *type,
-                std::string const &nameObject, StorageClass sc,
-                SourcePosition const &position)
+SourceVariable::Pointer SourceVariable::create_variable
+(std::string const &nameSource, VariableType *type,
+ std::string const &nameObject, StorageClass sc, SourcePosition const &position)
 {
    return new SourceVariable(nameSource, type, nameObject, sc, position);
 }
@@ -184,7 +174,7 @@ SourceVariable::StorageClass SourceVariable::getClass() const
 VariableData::Pointer SourceVariable::getData() const
 {
    ObjectExpression::Pointer address;
-   bigsint                   size = type->size(position);
+   bigsint                   size = type->getSize(position);
 
    if (expr)
       address = expr;
@@ -197,9 +187,9 @@ VariableData::Pointer SourceVariable::getData() const
       return VariableData::create_auto(size, address);
 
    case SC_CONSTANT:
-      switch (type->vt)
+      switch (type->getBasicType())
       {
-      case VariableType::VT_STRING:
+      case VariableType::BT_STRING:
          return VariableData::create_literal
                 (size, VariableData::SL_STRING, address);
 
@@ -262,7 +252,7 @@ std::string const & SourceVariable::getNameSource() const
 //
 // SourceVariable::getType
 //
-VariableType const * SourceVariable::getType() const
+VariableType::Reference SourceVariable::getType() const
 {
    return type;
 }

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ public:
 
    virtual VariableData::Pointer getData() const;
 
-   virtual VariableType const *getType() const;
+   virtual VariableType::Reference getType() const;
 
 private:
    SourceExpression::Pointer expr;
@@ -97,16 +97,16 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
 {
    VariableData::Pointer data;
 
-   VariableData::Pointer src     = expr->getData();
-   VariableType const   *srcType = expr->getType();
+   VariableData::Pointer   src     = expr->getData();
+   VariableType::Reference srcType = expr->getType();
 
    if (!src->address)
       throw SourceException("cannot getData", position, getName());
 
    // Member data.
-   bigsint             memberOffset = srcType->getOffset(name, position);
-   VariableType const *memberType   = srcType->getType(name, position);
-   bigsint             memberSize   = memberType->size(position);
+   bigsint                 memberOffset = srcType->getOffset(name, position);
+   VariableType::Reference memberType   = srcType->getType(name, position);
+   bigsint                 memberSize   = memberType->getSize(position);
 
    if (src->type == VariableData::MT_REGISTERARRAY)
    {
@@ -152,7 +152,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
 //
 // SourceExpression_ValueMember::getType
 //
-VariableType const *SourceExpression_ValueMember::getType() const
+VariableType::Reference SourceExpression_ValueMember::getType() const
 {
    return expr->getType()->getType(name, position);
 }

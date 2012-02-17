@@ -45,9 +45,8 @@ SourceExpression_BinaryCompare(SRCEXP_EXPRBIN_PARM)
 //
 SourceExpression_BinaryCompare::
 SourceExpression_BinaryCompare(bool, SRCEXP_EXPRBIN_PARM)
-                               : Super(VariableType::get_vt_boolsoft(),
-                                       VariableType::get_vt_boolsoft(),
-                                       SRCEXP_EXPRBIN_PASS)
+ : Super(VariableType::get_bt_boolsoft(), VariableType::get_bt_boolsoft(),
+         SRCEXP_EXPRBIN_PASS)
 {
 }
 
@@ -62,9 +61,9 @@ bool SourceExpression_BinaryCompare::canMakeObject() const
 //
 // SourceExpression_BinaryCompare::getType
 //
-VariableType const * SourceExpression_BinaryCompare::getType() const
+VariableType::Reference SourceExpression_BinaryCompare::getType() const
 {
-   return VariableType::get_vt_boolhard();
+   return VariableType::get_bt_boolhard();
 }
 
 // EOF

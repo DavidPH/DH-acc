@@ -290,6 +290,22 @@ public:
    }
 
    //
+   // ::raw
+   //
+   T *raw() const
+   {
+      return p;
+   }
+
+   //
+   // ::ref
+   //
+   CounterReference<T> ref() const
+   {
+      return CounterReference<T>(p);
+   }
+
+   //
    // ::refCount
    //
    unsigned refCount() const

@@ -42,12 +42,13 @@ class SourceExpression_ValueCast : public SourceExpression
                                    SourceExpression);
 
 public:
-   SourceExpression_ValueCast(SourceExpression *expr, VariableType const *type,
-                              bool implicit, SRCEXP_EXPR_ARGS);
+   SourceExpression_ValueCast
+   (SourceExpression *expr, VariableType *type, bool implicit,
+    SRCEXP_EXPR_ARGS);
 
    virtual bool canMakeObject() const;
 
-   virtual VariableType const *getType() const;
+   virtual VariableType::Reference getType() const;
 
    virtual ObjectExpression::Pointer makeObject() const;
 
@@ -55,7 +56,7 @@ private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
    SourceExpression::Pointer expr;
-   VariableType const *type;
+   VariableType::Reference type;
 };
 
 
@@ -82,19 +83,17 @@ SRCEXP_EXPRVAL_DEFN(et, cast_implicit)
 //
 // SourceExpression_ValueCast::SourceExpression_ValueCast
 //
-SourceExpression_ValueCast::
-SourceExpression_ValueCast(SourceExpression *_expr, VariableType const *_type,
-                           bool implicit, SRCEXP_EXPR_PARM)
-                           : Super(SRCEXP_EXPR_PASS),
-                             expr(_expr), type(_type)
+SourceExpression_ValueCast::SourceExpression_ValueCast
+(SourceExpression *_expr, VariableType *_type, bool implicit, SRCEXP_EXPR_PARM)
+ : Super(SRCEXP_EXPR_PASS), expr(_expr), type(_type->getUnqualified())
 {
    #define BAD_CAST()                                           \
    if (true)                                                    \
    {                                                            \
       exceptString  = "invalid implicit cast (";                \
-      exceptString += make_string(exprType->vt);                \
+      exceptString += make_string(exprBT);                      \
       exceptString += " to ";                                   \
-      exceptString += make_string(type->vt);                    \
+      exceptString += make_string(thisBT);                      \
       exceptString += ")";                                      \
       throw SourceException(exceptString, position, getName()); \
    }                                                            \
@@ -105,51 +104,51 @@ SourceExpression_ValueCast(SourceExpression *_expr, VariableType const *_type,
 
    std::string exceptString;
 
-   VariableType const *exprType = expr->getType();
+   VariableType::Reference exprType = expr->getType()->getUnqualified();
+   VariableType           *thisType = type;
 
    // Can cast a type to itself safely, of course.
    if (exprType == type) return;
 
-   // Can cast T const to/from T safely.
-   if (exprType->constType == type || type->constType == exprType)
-      return;
+   VariableType::BasicType exprBT = exprType->getBasicType();
+   VariableType::BasicType thisBT = thisType->getBasicType();
 
    // Implicit cast between fundamentally different types.
-   if (exprType->vt != type->vt)
+   if (exprBT != thisBT)
    {
-      // Any cast to/from VT_ASMFUNC must be explicit.
-      if (exprType->vt == VariableType::VT_ASMFUNC ||
-          type->vt     == VariableType::VT_ASMFUNC)
+      // Any cast to/from BT_ASMFUNC must be explicit.
+      if (exprBT == VariableType::BT_ASMFUNC ||
+          thisBT == VariableType::BT_ASMFUNC)
          BAD_CAST();
 
-      // Any cast to/from VT_FUNCTION must be explicit.
-      if (exprType->vt == VariableType::VT_FUNCTION ||
-          type->vt     == VariableType::VT_FUNCTION)
+      // Any cast to/from BT_FUNCTION must be explicit.
+      if (exprBT == VariableType::BT_FUNCTION ||
+          thisBT == VariableType::BT_FUNCTION)
          BAD_CAST();
 
-      // Any cast to/from VT_LABEL must be explicit.
-      if (exprType->vt == VariableType::VT_LABEL ||
-          type->vt     == VariableType::VT_LABEL)
+      // Any cast to/from BT_LABEL must be explicit.
+      if (exprBT == VariableType::BT_LABEL ||
+          thisBT == VariableType::BT_LABEL)
          BAD_CAST();
 
-      // Any cast to/from VT_LINESPEC must be explicit.
-      if (exprType->vt == VariableType::VT_LINESPEC ||
-          type->vt     == VariableType::VT_LINESPEC)
+      // Any cast to/from BT_LINESPEC must be explicit.
+      if (exprBT == VariableType::BT_LINESPEC ||
+          thisBT == VariableType::BT_LINESPEC)
          BAD_CAST();
 
-      // Any cast to/from VT_NATIVE must be explicit.
-      if (exprType->vt == VariableType::VT_NATIVE ||
-          type->vt     == VariableType::VT_NATIVE)
+      // Any cast to/from BT_NATIVE must be explicit.
+      if (exprBT == VariableType::BT_NATIVE ||
+          thisBT == VariableType::BT_NATIVE)
          BAD_CAST();
 
-      // Any cast to/from VT_SCRIPT must be explicit.
-      if (exprType->vt == VariableType::VT_SCRIPT ||
-          type->vt     == VariableType::VT_SCRIPT)
+      // Any cast to/from BT_SCRIPT must be explicit.
+      if (exprBT == VariableType::BT_SCRIPT ||
+          thisBT == VariableType::BT_SCRIPT)
          BAD_CAST();
 
-      // Any cast to/from VT_STRING must be explicit.
-      if (exprType->vt == VariableType::VT_STRING ||
-          type->vt     == VariableType::VT_STRING)
+      // Any cast to/from BT_STRING must be explicit.
+      if (exprBT == VariableType::BT_STRING ||
+          thisBT == VariableType::BT_STRING)
          BAD_CAST();
 
       return;
@@ -157,25 +156,35 @@ SourceExpression_ValueCast(SourceExpression *_expr, VariableType const *_type,
 
    // Implicit pointer casts.
    // This is more restrictive than C's rules.
-   if (exprType->vt == VariableType::VT_POINTER)
+   if (exprBT == VariableType::BT_POINTER)
    {
-      // Can cast if the refType is the same.
-      if (exprType->refType == type->refType)
+      VariableType::Reference exprRetn = exprType->getReturn();
+      VariableType::Reference thisRetn = thisType->getReturn();
+
+      VariableType::BasicType exprRetnBT = exprRetn->getBasicType();
+      VariableType::BasicType thisRetnBT = thisRetn->getBasicType();
+
+      // Can cast if the reference type is exactly the same.
+      if (exprRetn == thisRetn)
          return;
 
-      // Casts that discard const must be explicit.
-      if (!exprType->refType->constType && type->refType->constType)
+      // Casts that discard qualifiers must be explicit.
+      if (!thisRetn->getQualifier(exprRetn->getQualifiers()))
          BAD_CAST();
 
       // Cast to/from void* is acceptable.
-      if (exprType->refType->vt == VariableType::VT_VOID ||
-          type->refType->vt     == VariableType::VT_VOID)
+      if (exprRetnBT == VariableType::BT_VOID ||
+          thisRetnBT == VariableType::BT_VOID)
          return;
 
-      // Cast to T const * from T * is safe.
-      if (exprType->refType->constType == type->refType)
+      // Any difference here is either added qualifiers, which is safe, or...
+      if (exprRetn->getUnqualified() == thisRetn->getUnqualified())
          return;
 
+      // ... different types, which (unlike C) is not allowed implicitly. This
+      // also means that qualifiers can only be added to the first-referred
+      // type. This correctly prevents implicit (T const **)T **. However, it
+      // incorrectly prevents implicit (T const *const *)T * const*.
       BAD_CAST();
    }
 
@@ -192,68 +201,72 @@ SourceExpression_ValueCast(SourceExpression *_expr, VariableType const *_type,
 //
 bool SourceExpression_ValueCast::canMakeObject() const
 {
-   VariableType const *exprType = expr->getType();
+   VariableType::Reference exprType = expr->getType()->getUnqualified();
+   VariableType           *thisType = type;
+
+   VariableType::BasicType exprBT = exprType->getBasicType();
+   VariableType::BasicType thisBT = thisType->getBasicType();
 
    // Special case for casting an array to a pointer.
-   if (exprType->vt == VariableType::VT_ARRAY &&
-      type->vt == VariableType::VT_POINTER)
+   if (exprBT == VariableType::BT_ARRAY &&
+       thisBT == VariableType::BT_POINTER)
    {
       return expr->canMakeObjectAddress();
    }
 
    if (!expr->canMakeObject()) return false;
 
-   switch (type->vt)
+   switch (type->getBasicType())
    {
-   case VariableType::VT_ARRAY:
-   case VariableType::VT_ASMFUNC:
-   case VariableType::VT_BLOCK:
-   case VariableType::VT_STRUCT:
-   case VariableType::VT_UNION:
-   case VariableType::VT_VOID:
+   case VariableType::BT_ARRAY:
+   case VariableType::BT_ASMFUNC:
+   case VariableType::BT_BLOCK:
+   case VariableType::BT_STRUCT:
+   case VariableType::BT_UNION:
+   case VariableType::BT_VOID:
       return false;
 
-   case VariableType::VT_BOOLHARD:
-   case VariableType::VT_BOOLSOFT:
-   case VariableType::VT_CHAR:
-   case VariableType::VT_ENUM:
-   case VariableType::VT_FUNCTION:
-   case VariableType::VT_INT:
-   case VariableType::VT_LABEL:
-   case VariableType::VT_LINESPEC:
-   case VariableType::VT_NATIVE:
-   case VariableType::VT_POINTER:
-   case VariableType::VT_REAL:
-   case VariableType::VT_SCRIPT:
-   case VariableType::VT_STRING:
-   case VariableType::VT_UINT:
+   case VariableType::BT_BOOLHARD:
+   case VariableType::BT_BOOLSOFT:
+   case VariableType::BT_CHAR:
+   case VariableType::BT_ENUM:
+   case VariableType::BT_FUNCTION:
+   case VariableType::BT_INT:
+   case VariableType::BT_LABEL:
+   case VariableType::BT_LINESPEC:
+   case VariableType::BT_NATIVE:
+   case VariableType::BT_POINTER:
+   case VariableType::BT_REAL:
+   case VariableType::BT_SCRIPT:
+   case VariableType::BT_STRING:
+   case VariableType::BT_UINT:
       break;
    }
 
-   switch (exprType->vt)
+   switch (exprType->getBasicType())
    {
-   case VariableType::VT_ARRAY:
-   case VariableType::VT_ASMFUNC:
-   case VariableType::VT_BLOCK:
-   case VariableType::VT_STRUCT:
-   case VariableType::VT_UNION:
-   case VariableType::VT_VOID:
+   case VariableType::BT_ARRAY:
+   case VariableType::BT_ASMFUNC:
+   case VariableType::BT_BLOCK:
+   case VariableType::BT_STRUCT:
+   case VariableType::BT_UNION:
+   case VariableType::BT_VOID:
       return false;
 
-   case VariableType::VT_BOOLHARD:
-   case VariableType::VT_BOOLSOFT:
-   case VariableType::VT_CHAR:
-   case VariableType::VT_ENUM:
-   case VariableType::VT_FUNCTION:
-   case VariableType::VT_INT:
-   case VariableType::VT_LABEL:
-   case VariableType::VT_LINESPEC:
-   case VariableType::VT_NATIVE:
-   case VariableType::VT_POINTER:
-   case VariableType::VT_REAL:
-   case VariableType::VT_SCRIPT:
-   case VariableType::VT_STRING:
-   case VariableType::VT_UINT:
+   case VariableType::BT_BOOLHARD:
+   case VariableType::BT_BOOLSOFT:
+   case VariableType::BT_CHAR:
+   case VariableType::BT_ENUM:
+   case VariableType::BT_FUNCTION:
+   case VariableType::BT_INT:
+   case VariableType::BT_LABEL:
+   case VariableType::BT_LINESPEC:
+   case VariableType::BT_NATIVE:
+   case VariableType::BT_POINTER:
+   case VariableType::BT_REAL:
+   case VariableType::BT_SCRIPT:
+   case VariableType::BT_STRING:
+   case VariableType::BT_UINT:
       break;
    }
 
@@ -263,7 +276,7 @@ bool SourceExpression_ValueCast::canMakeObject() const
 //
 // SourceExpression_ValueCast::getType
 //
-VariableType const *SourceExpression_ValueCast::getType() const
+VariableType::Reference SourceExpression_ValueCast::getType() const
 {
    return type;
 }
@@ -273,105 +286,109 @@ VariableType const *SourceExpression_ValueCast::getType() const
 //
 ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
 {
-   VariableType const *exprType = expr->getType();
+   VariableType::Reference exprType = expr->getType()->getUnqualified();
+   VariableType           *thisType = type;
+
+   VariableType::BasicType exprBT = exprType->getBasicType();
+   VariableType::BasicType thisBT = thisType->getBasicType();
 
    // Special case for casting an array to a pointer.
-   if (exprType->vt == VariableType::VT_ARRAY &&
-      type->vt == VariableType::VT_POINTER)
+   if (exprBT == VariableType::BT_ARRAY &&
+       thisBT == VariableType::BT_POINTER)
    {
       return expr->makeObjectAddress();
    }
 
    ObjectExpression::Pointer obj = expr->makeObject();
 
-   switch (type->vt)
+   switch (thisBT)
    {
-   case VariableType::VT_ARRAY:
-   case VariableType::VT_ASMFUNC:
-   case VariableType::VT_BLOCK:
-   case VariableType::VT_STRUCT:
-   case VariableType::VT_UNION:
-   case VariableType::VT_VOID:
-      throw SourceException("invalid VT from", position, getName());
+   case VariableType::BT_ARRAY:
+   case VariableType::BT_ASMFUNC:
+   case VariableType::BT_BLOCK:
+   case VariableType::BT_STRUCT:
+   case VariableType::BT_UNION:
+   case VariableType::BT_VOID:
+      throw SourceException("invalid BT from", position, getName());
 
-   case VariableType::VT_BOOLHARD:
-   case VariableType::VT_CHAR:
-   case VariableType::VT_ENUM:
-   case VariableType::VT_FUNCTION:
-   case VariableType::VT_INT:
-   case VariableType::VT_LABEL:
-   case VariableType::VT_LINESPEC:
-   case VariableType::VT_NATIVE:
-   case VariableType::VT_POINTER:
-   case VariableType::VT_SCRIPT:
-   case VariableType::VT_STRING:
-   case VariableType::VT_UINT:
-      switch (exprType->vt)
+   case VariableType::BT_BOOLHARD:
+   case VariableType::BT_CHAR:
+   case VariableType::BT_ENUM:
+   case VariableType::BT_FUNCTION:
+   case VariableType::BT_INT:
+   case VariableType::BT_LABEL:
+   case VariableType::BT_LINESPEC:
+   case VariableType::BT_NATIVE:
+   case VariableType::BT_POINTER:
+   case VariableType::BT_SCRIPT:
+   case VariableType::BT_STRING:
+   case VariableType::BT_UINT:
+      switch (exprBT)
       {
-      case VariableType::VT_ARRAY:
-      case VariableType::VT_ASMFUNC:
-      case VariableType::VT_BLOCK:
-      case VariableType::VT_STRUCT:
-      case VariableType::VT_UNION:
-      case VariableType::VT_VOID:
-         throw SourceException("invalid VT to", position, getName());
+      case VariableType::BT_ARRAY:
+      case VariableType::BT_ASMFUNC:
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_VOID:
+         throw SourceException("invalid BT to", position, getName());
 
-      case VariableType::VT_BOOLHARD:
+      case VariableType::BT_BOOLHARD:
          obj = ObjectExpression::create_unary_lognot(obj, position);
          obj = ObjectExpression::create_unary_lognot(obj, position);
          break;
 
-      case VariableType::VT_BOOLSOFT:
-      case VariableType::VT_CHAR:
-      case VariableType::VT_ENUM:
-      case VariableType::VT_FUNCTION:
-      case VariableType::VT_INT:
-      case VariableType::VT_LABEL:
-      case VariableType::VT_LINESPEC:
-      case VariableType::VT_NATIVE:
-      case VariableType::VT_POINTER:
-      case VariableType::VT_SCRIPT:
-      case VariableType::VT_STRING:
-      case VariableType::VT_UINT:
+      case VariableType::BT_BOOLSOFT:
+      case VariableType::BT_CHAR:
+      case VariableType::BT_ENUM:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_INT:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_POINTER:
+      case VariableType::BT_SCRIPT:
+      case VariableType::BT_STRING:
+      case VariableType::BT_UINT:
          break;
 
-      case VariableType::VT_REAL:
+      case VariableType::BT_REAL:
          obj = ObjectExpression::create_cast_int_to_float(obj, position);
          break;
       }
       break;
 
-   case VariableType::VT_BOOLSOFT:
-      switch (exprType->vt)
+   case VariableType::BT_BOOLSOFT:
+      switch (exprBT)
       {
-      case VariableType::VT_ARRAY:
-      case VariableType::VT_ASMFUNC:
-      case VariableType::VT_BLOCK:
-      case VariableType::VT_STRUCT:
-      case VariableType::VT_UNION:
-      case VariableType::VT_VOID:
-         throw SourceException("invalid VT to", position, getName());
+      case VariableType::BT_ARRAY:
+      case VariableType::BT_ASMFUNC:
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_VOID:
+         throw SourceException("invalid BT to", position, getName());
 
-      case VariableType::VT_BOOLHARD:
-      case VariableType::VT_CHAR:
-      case VariableType::VT_ENUM:
-      case VariableType::VT_FUNCTION:
-      case VariableType::VT_INT:
-      case VariableType::VT_LABEL:
-      case VariableType::VT_LINESPEC:
-      case VariableType::VT_NATIVE:
-      case VariableType::VT_POINTER:
-      case VariableType::VT_SCRIPT:
-      case VariableType::VT_STRING:
-      case VariableType::VT_UINT:
+      case VariableType::BT_BOOLHARD:
+      case VariableType::BT_CHAR:
+      case VariableType::BT_ENUM:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_INT:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_POINTER:
+      case VariableType::BT_SCRIPT:
+      case VariableType::BT_STRING:
+      case VariableType::BT_UINT:
          obj = ObjectExpression::create_unary_lognot(obj, position);
          obj = ObjectExpression::create_unary_lognot(obj, position);
          break;
 
-      case VariableType::VT_BOOLSOFT:
+      case VariableType::BT_BOOLSOFT:
          break;
 
-      case VariableType::VT_REAL:
+      case VariableType::BT_REAL:
          obj = ObjectExpression::create_unary_lognot(obj, position);
          obj = ObjectExpression::create_unary_lognot(obj, position);
          obj = ObjectExpression::create_cast_int_to_float(obj, position);
@@ -379,38 +396,38 @@ ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
       }
       break;
 
-   case VariableType::VT_REAL:
-      switch (exprType->vt)
+   case VariableType::BT_REAL:
+      switch (exprBT)
       {
-      case VariableType::VT_ARRAY:
-      case VariableType::VT_ASMFUNC:
-      case VariableType::VT_BLOCK:
-      case VariableType::VT_STRUCT:
-      case VariableType::VT_UNION:
-      case VariableType::VT_VOID:
-         throw SourceException("invalid VT to", position, getName());
+      case VariableType::BT_ARRAY:
+      case VariableType::BT_ASMFUNC:
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_VOID:
+         throw SourceException("invalid BT to", position, getName());
 
-      case VariableType::VT_BOOLHARD:
+      case VariableType::BT_BOOLHARD:
          obj = ObjectExpression::create_cast_float_to_int(obj, position);
          obj = ObjectExpression::create_unary_lognot(obj, position);
          obj = ObjectExpression::create_unary_lognot(obj, position);
          break;
 
-      case VariableType::VT_BOOLSOFT:
-      case VariableType::VT_REAL:
+      case VariableType::BT_BOOLSOFT:
+      case VariableType::BT_REAL:
          break;
 
-      case VariableType::VT_CHAR:
-      case VariableType::VT_ENUM:
-      case VariableType::VT_FUNCTION:
-      case VariableType::VT_INT:
-      case VariableType::VT_LABEL:
-      case VariableType::VT_LINESPEC:
-      case VariableType::VT_NATIVE:
-      case VariableType::VT_POINTER:
-      case VariableType::VT_SCRIPT:
-      case VariableType::VT_STRING:
-      case VariableType::VT_UINT:
+      case VariableType::BT_CHAR:
+      case VariableType::BT_ENUM:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_INT:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_POINTER:
+      case VariableType::BT_SCRIPT:
+      case VariableType::BT_STRING:
+      case VariableType::BT_UINT:
          obj = ObjectExpression::create_cast_float_to_int(obj, position);
          break;
       }
@@ -429,8 +446,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    Super::recurse_makeObjects(objects, dst);
 
    // Special case for casting an array to a pointer.
-   if (expr->getType()->vt == VariableType::VT_ARRAY &&
-      type->vt == VariableType::VT_POINTER)
+   if (expr->getType()->getBasicType() == VariableType::BT_ARRAY &&
+      type->getBasicType() == VariableType::BT_POINTER)
    {
       expr->makeObjectsAddress(objects, dst);
    }

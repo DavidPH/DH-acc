@@ -69,16 +69,13 @@ create_root_delay(SRCEXP_EXPRUNA_ARGS)
 //
 // SourceExpression_RootDelay::SourceExpression_RootDelay
 //
-SourceExpression_RootDelay::
-SourceExpression_RootDelay(SRCEXP_EXPRUNA_PARM)
-                           : Super(SRCEXP_EXPR_PASS),
-                             expr(_expr),
-                             stack(context->getLimit(SourceVariable::SC_AUTO))
+SourceExpression_RootDelay::SourceExpression_RootDelay(SRCEXP_EXPRUNA_PARM)
+ : Super(SRCEXP_EXPR_PASS), expr(_expr),
+   stack(context->getLimit(SourceVariable::SC_AUTO))
 {
-   VariableType const *type = VariableType::get_vt_uint();
+   VariableType::Reference type = VariableType::get_bt_uint();
 
-   if (expr->getType() != type)
-      expr = create_value_cast_implicit(expr, type, context, position);
+   expr = create_value_cast_implicit(expr, type, context, position);
 }
 
 //
@@ -90,7 +87,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    Super::recurse_makeObjects(objects, dst);
 
    expr->makeObjects
-         (objects, VariableData::create_stack(expr->getType()->size(position)));
+   (objects, VariableData::create_stack(expr->getType()->getSize(position)));
 
    objects->setPosition(position);
 

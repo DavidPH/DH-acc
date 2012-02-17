@@ -42,23 +42,20 @@ class SourceExpression_ValueBlock : public SourceExpression
                                    SourceExpression);
 
 public:
-   SourceExpression_ValueBlock
-   (std::vector<SourceExpression::Pointer> const &args, SRCEXP_EXPR_ARGS);
+   SourceExpression_ValueBlock(Vector const &args, SRCEXP_EXPR_ARGS);
 
-   virtual VariableType const * getType() const;
+   virtual VariableType::Reference getType() const;
 
 private:
    void makeVoid(ObjectVector *objects) const;
 
-   virtual void
-   virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-   virtual void
-   virtual_makeObjectsCast(ObjectVector *objects, VariableData *dst,
-                           VariableType const *dstType);
+   virtual void virtual_makeObjectsCast
+   (ObjectVector *objects, VariableData *dst, VariableType *dstType);
 
-   std::vector<SourceExpression::Pointer> expressions;
-   VariableType const *type;
+   Vector expressions;
+   VariableType::Pointer type;
 };
 
 
@@ -77,26 +74,24 @@ SRCEXP_EXPRVAL_DEFN(a, block)
 //
 // SourceExpression_ValueBlock::SourceExpression_ValueBlock
 //
-SourceExpression_ValueBlock::
-SourceExpression_ValueBlock(std::vector<SourceExpression::Pointer> const &args,
-                            SRCEXP_EXPR_PARM)
-                            : Super(SRCEXP_EXPR_PASS),
-                              expressions(args)
+SourceExpression_ValueBlock::SourceExpression_ValueBlock
+(Vector const &args, SRCEXP_EXPR_PARM)
+ : Super(SRCEXP_EXPR_PASS), expressions(args)
 {
-   std::vector<VariableType const *> types(expressions.size());
+   VariableType::Vector types(expressions.size());
 
-   for (size_t i(0); i < expressions.size(); ++i)
+   for (size_t i = 0; i < expressions.size(); ++i)
       types[i] = expressions[i]->getType();
 
-   type = VariableType::get_block(types);
+   type = VariableType::get_bt_block(types);
 }
 
 //
 // SourceExpression_ValueBlock::getType
 //
-VariableType const * SourceExpression_ValueBlock::getType() const
+VariableType::Reference SourceExpression_ValueBlock::getType() const
 {
-   return type;
+   return type.ref();
 }
 
 //
@@ -106,12 +101,12 @@ void SourceExpression_ValueBlock::makeVoid(ObjectVector *objects) const
 {
    VariableData::Pointer dstPart;
    bigsint               dstPartSize;
-   VariableType const   *dstPartType;
+   VariableType::Pointer dstPartType;
 
-   for (size_t i(0); i < expressions.size(); ++i)
+   for (size_t i = 0; i < expressions.size(); ++i)
    {
       dstPartType = expressions[i]->getType();
-      dstPartSize = dstPartType->size(position);
+      dstPartSize = dstPartType->getSize(position);
       dstPart = VariableData::create_void(dstPartSize);
       expressions[i]->makeObjects(objects, dstPart);
    }
@@ -131,19 +126,19 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       return;
    }
 
-   bigsint               tmpSize = type->size(position);
+   bigsint               tmpSize = type->getSize(position);
    VariableData::Pointer tmp     = VariableData::create_stack(tmpSize);
 
    VariableData::Pointer dstPart;
    bigsint               dstPartSize;
-   VariableType const   *dstPartType;
+   VariableType::Pointer dstPartType;
 
    make_objects_memcpy_prep(objects, dst, tmp, position);
 
-   for (size_t i(0); i < expressions.size(); ++i)
+   for (size_t i = 0; i < expressions.size(); ++i)
    {
       dstPartType = expressions[i]->getType();
-      dstPartSize = dstPartType->size(position);
+      dstPartSize = dstPartType->getSize(position);
       dstPart = VariableData::create_stack(dstPartSize);
       expressions[i]->makeObjects(objects, dstPart);
    }
@@ -154,38 +149,57 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 //
 // SourceExpression_ValueBlock::virtual_makeObjectsCast
 //
-void SourceExpression_ValueBlock::
-virtual_makeObjectsCast(ObjectVector *objects, VariableData *dst,
-                        VariableType const *dstType)
+void SourceExpression_ValueBlock::virtual_makeObjectsCast
+(ObjectVector *objects, VariableData *dst, VariableType *dstType)
 {
    Super::recurse_makeObjectsCast(objects, dst, dstType);
 
    if (dst->type == VariableData::MT_VOID
-    || dstType->vt == VariableType::VT_VOID)
+    || dstType->getBasicType() == VariableType::BT_VOID)
    {
       makeVoid(objects);
       return;
    }
 
-   if (expressions.size() != dstType->types.size())
-      throw SourceException("incorrect number of expressions to cast",
-                            position, getName());
-
-   bigsint               tmpSize = type->size(position);
+   bigsint               tmpSize = type->getSize(position);
    VariableData::Pointer tmp     = VariableData::create_stack(tmpSize);
-
-   VariableData::Pointer dstPart;
-   bigsint               dstPartSize;
-   VariableType const   *dstPartType;
 
    make_objects_memcpy_prep(objects, dst, tmp, position);
 
-   for (size_t i(0); i < expressions.size(); ++i)
+   if (dstType->getBasicType() == VariableType::BT_ARRAY)
    {
-      dstPartType = expressions[i]->getType();
-      dstPartSize = dstPartType->size(position);
-      dstPart = VariableData::create_stack(dstPartSize);
-      expressions[i]->makeObjectsCast(objects, dstPart, dstType->types[i]);
+      if (static_cast<bigsint>(expressions.size()) != dstType->getWidth())
+         throw SourceException("incorrect number of expressions to cast",
+                               position, getName());
+
+      VariableType::Reference dstPartType = dstType->getReturn();
+      bigsint                 dstPartSize = dstPartType->getSize(position);
+      VariableData::Pointer   dstPart = VariableData::create_stack(dstPartSize);
+
+      for (size_t i = 0; i < expressions.size(); ++i)
+      {
+         expressions[i]->makeObjectsCast(objects, dstPart, dstPartType);
+      }
+   }
+   else
+   {
+      VariableType::Vector const &dstTypes = dstType->getTypes();
+
+      if (expressions.size() != dstTypes.size())
+         throw SourceException("incorrect number of expressions to cast",
+                               position, getName());
+
+      VariableData::Pointer dstPart;
+      bigsint               dstPartSize;
+      VariableType::Pointer dstPartType;
+
+      for (size_t i = 0; i < expressions.size(); ++i)
+      {
+         dstPartType = dstTypes[i];
+         dstPartSize = dstPartType->getSize(position);
+         dstPart = VariableData::create_stack(dstPartSize);
+         expressions[i]->makeObjectsCast(objects, dstPart, dstPartType);
+      }
    }
 
    make_objects_memcpy_post(objects, dst, tmp, position);

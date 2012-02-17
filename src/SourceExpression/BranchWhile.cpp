@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -89,21 +89,15 @@ SourceExpression_BranchWhile
    exprCond(_exprCond), exprBody(_exprBody), postCond(_postCond)
 {
    {
-      VariableType const *typeCond = exprCond->getType();
-      VariableType const *type     = VariableType::get_vt_boolsoft();
+      VariableType::Reference type = VariableType::get_bt_boolsoft();
 
-      if (typeCond != type)
-         exprCond = create_value_cast_implicit
-                    (exprCond, type, context, position);
+      exprCond = create_value_cast_implicit(exprCond, type, context, position);
    }
 
    {
-      VariableType const *typeBody = exprBody->getType();
-      VariableType const *type     = VariableType::get_vt_void();
+      VariableType::Reference type = VariableType::get_bt_void();
 
-      if (typeBody != type)
-         exprBody = create_value_cast_implicit
-                    (exprBody, type, context, position);
+      exprBody = create_value_cast_implicit(exprBody, type, context, position);
    }
 }
 
@@ -111,7 +105,7 @@ void SourceExpression_BranchWhile::virtual_makeObjects(ObjectVector *objects, Va
 {
    Super::recurse_makeObjects(objects, dst);
 
-   bigsint               sizeCond = exprCond->getType()->size(position);
+   bigsint               sizeCond = exprCond->getType()->getSize(position);
    VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
 
    std::string labelBody     = label + "_body";

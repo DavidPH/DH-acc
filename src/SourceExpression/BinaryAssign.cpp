@@ -105,9 +105,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   if (!allowConst && !exprL->getType()->constType)
-      throw SourceException("attempt to assign const type", position,
-                            getName());
+   if (!allowConst && exprL->getType()->getQualifier(VariableType::QUAL_CONST))
+      throw SourceException("assignment to const", position, getName());
 
    if (dst->type == VariableData::MT_VOID)
    {

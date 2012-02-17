@@ -72,8 +72,20 @@ private:
 	static bool is_expression_type(std::string const & data, SourceContext * context);
 
 	static SourceExpression::Pointer make_expression(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
-	static void make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<VariableType const *> * argTypes, VariableType const * * returnType, SourceVariable::StorageClass argClass = SourceVariable::SC_REGISTER);
-	static void make_expression_arglist(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context, std::vector<VariableType const *> * argTypes, std::vector<std::string> * argNames, int * argCount, SourceContext * argContext, VariableType const * * returnType, SourceVariable::StorageClass argClass = SourceVariable::SC_REGISTER);
+
+   static void make_expression_arglist
+   (SourceTokenizerDS *in, Vector *blocks, SourceContext *context,
+    std::vector<CounterPointer<VariableType> > *argTypes,
+    CounterPointer<VariableType> *returnType,
+    SourceVariable::StorageClass argClass = SourceVariable::SC_REGISTER);
+
+   static void make_expression_arglist
+   (SourceTokenizerDS *in, Vector *blocks, SourceContext *context,
+    std::vector<CounterPointer<VariableType> > *argTypes,
+    std::vector<std::string> *argNames, int *argCount,
+    SourceContext *argContext, CounterPointer<VariableType> *returnType,
+    SourceVariable::StorageClass argClass = SourceVariable::SC_REGISTER);
+
 	static void make_expressions(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * expressions, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
 
 	static SourceExpression::Pointer make_expression_single(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
@@ -111,7 +123,8 @@ private:
 	SRCEXPDS_EXPRSINGLE_DECL(void);
 	SRCEXPDS_EXPRSINGLE_DECL(while);
 
-	static VariableType const * make_expression_type(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context);
+   static CounterReference<VariableType> make_expression_type
+   (SourceTokenizerDS * in, Vector *blocks, SourceContext *context);
 
 	static expression_single_handler_map _expression_single_handlers;
 	static expression_single_handler_map _expression_single_extern_handlers;

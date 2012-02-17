@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -81,8 +81,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   VariableType const *srcType = VariableType::get_vt_boolhard();
-   bigsint             srcSize = srcType->size(position);
+   VariableType::Reference srcType = VariableType::get_bt_boolhard();
+   bigsint                 srcSize = srcType->getSize(position);
 
    VariableData::Pointer src = VariableData::create_stack(srcSize);
    VariableData::Pointer tmp = VariableData::create_stack(srcSize);

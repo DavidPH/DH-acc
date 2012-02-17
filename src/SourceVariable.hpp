@@ -41,14 +41,14 @@ class ObjectVector;
 class SourceExpression;
 class SourceTokenC;
 class VariableData;
-struct VariableType;
+class VariableType;
 
 //
 // SourceVariable
 //
 class SourceVariable : Counter
 {
-   MAKE_COUNTER_CLASS_BASE(SourceVariable, Counter);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceVariable, Counter);
 
 public:
    enum StorageClass
@@ -69,51 +69,50 @@ public:
 
    StorageClass getClass() const;
 
-   std::string const & getNameObject() const;
-   std::string const & getNameSource() const;
+   std::string const &getNameObject() const;
+   std::string const &getNameSource() const;
 
    CounterPointer<VariableData> getData() const;
 
-   VariableType const * getType() const;
+   CounterReference<VariableType> getType() const;
 
 
 
-   static Pointer
-   create_constant(std::string const &nameSource, VariableType const *type,
-                   ObjectExpression *expr, SourcePosition const &position);
+   static Pointer create_constant
+   (std::string const &nameSource, VariableType *type, ObjectExpression *expr,
+    SourcePosition const &position);
 
-   static Pointer
-   create_constant(std::string const &nameSource, VariableType const *type,
-                   std::string const &nameObject, SourcePosition const &position);
+   static Pointer create_constant
+   (std::string const &nameSource, VariableType *type,
+    std::string const &nameObject, SourcePosition const &position);
 
-   static Pointer
-   create_literal(VariableType const *type, ObjectExpression *expr,
-                  SourcePosition const &position);
+   static Pointer create_literal
+   (VariableType *type, ObjectExpression *expr, SourcePosition const &position);
 
-   static Pointer
-   create_literal(VariableType const *type, std::string const &nameObject,
-                  SourcePosition const &position);
+   static Pointer create_literal
+   (VariableType *type, std::string const &nameObject,
+    SourcePosition const &position);
 
-   static Pointer
-   create_variable(std::string const &nameSource, VariableType const *type,
-                   std::string const &nameObject, StorageClass sc,
-                   SourcePosition const &position);
+   static Pointer create_variable
+   (std::string const &nameSource, VariableType *type,
+    std::string const &nameObject, StorageClass sc,
+    SourcePosition const &position);
 
    static StorageClass get_StorageClass(SourceTokenC const &token);
 
 private:
-   SourceVariable(SourceVariable const &var);
+   SourceVariable
+   (std::string const &nameSource, VariableType *type, ObjectExpression *expr,
+    SourcePosition const &position);
 
-   SourceVariable(std::string const &nameSource, VariableType const *type,
-                  ObjectExpression *expr, SourcePosition const &position);
+   SourceVariable
+   (std::string const &nameSource, VariableType *type,
+    std::string const &nameObject, SourcePosition const &position);
 
-   SourceVariable(std::string const &nameSource, VariableType const *type,
-                  std::string const &nameObject,
-                  SourcePosition const &position);
-
-   SourceVariable(std::string const &nameSource, VariableType const *type,
-                  std::string const &nameObject, StorageClass sc,
-                  SourcePosition const &position);
+   SourceVariable
+   (std::string const &nameSource, VariableType *type,
+    std::string const &nameObject, StorageClass sc,
+    SourcePosition const &position);
 
    ~SourceVariable();
 
@@ -121,7 +120,7 @@ private:
    std::string nameObject;
    std::string nameSource;
    CounterPointer<ObjectExpression> expr;
-   VariableType const *type;
+   CounterReference<VariableType> type;
    StorageClass sc;
 };
 

@@ -175,8 +175,8 @@
    SourceExpression *expr, std::string const &value, \
    SRCEXP_EXPR_ARGS
 
-#define SRCEXP_EXPRVALet_ARGS                        \
-   SourceExpression *expr, VariableType const *type, \
+#define SRCEXP_EXPRVALet_ARGS                  \
+   SourceExpression *expr, VariableType *type, \
    SRCEXP_EXPR_ARGS
 
 #define SRCEXP_EXPRVALi_ARGS \
@@ -192,7 +192,7 @@
    SRCEXP_EXPR_ARGS
 
 #define SRCEXP_EXPRVALt_ARGS \
-   VariableType const *type, \
+   VariableType *type,       \
    SRCEXP_EXPR_ARGS
 
 #define SRCEXP_EXPRVALv_ARGS \
@@ -240,7 +240,7 @@ class ObjectExpression;
 class ObjectVector;
 class SourceContext;
 class VariableData;
-struct VariableType;
+class VariableType;
 
 //
 // SourceExpression
@@ -264,7 +264,7 @@ public:
 
    virtual CounterPointer<VariableData> getData() const;
 
-   virtual VariableType const *getType() const;
+   virtual CounterReference<VariableType> getType() const;
 
    virtual CounterPointer<ObjectExpression> makeObject() const;
    virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
@@ -273,8 +273,8 @@ public:
 
    void makeObjectsAddress(ObjectVector *objects, VariableData *dst);
 
-   void makeObjectsCast(ObjectVector *objects, VariableData *dst,
-                        VariableType const *dstType);
+   void makeObjectsCast
+   (ObjectVector *objects, VariableData *dst, VariableType *dstType);
 
 
    friend class SourceVariable;
@@ -346,34 +346,26 @@ public:
    SRCEXP_EXPRVAL_DECL( v, variable);
 
    // Root expressions.
-   static Pointer create_root_delay
-                  (SourceExpression *expr, SRCEXP_EXPR_ARGS);
-   static Pointer create_root_output
-                  (SourceExpression *expr, SRCEXP_EXPR_ARGS);
+   static Pointer create_root_delay(SourceExpression *expr, SRCEXP_EXPR_ARGS);
+   static Pointer create_root_output(SourceExpression *expr, SRCEXP_EXPR_ARGS);
    static Pointer create_root_printf
-                  (std::string const &printfType, std::string const &format,
-                   SourceExpression::Vector const &expressions,
-                   SRCEXP_EXPR_ARGS);
-   static Pointer create_root_script
-                  (VariableType const *type, SRCEXP_EXPR_ARGS);
+   (std::string const &printfType, std::string const &format,
+    Vector const &expressions, SRCEXP_EXPR_ARGS);
+   static Pointer create_root_script (VariableType *type, SRCEXP_EXPR_ARGS);
 
-   static VariableType const *
-   get_promoted_type(VariableType const *type1, VariableType const *type2,
-                     SourcePosition const &position);
+   static CounterReference<VariableType> get_promoted_type
+   (VariableType *type1, VariableType *type2, SourcePosition const &position);
 
 protected:
    SourceExpression(SRCEXP_EXPR_ARGS);
    ~SourceExpression();
 
-   void
-   recurse_makeObjects(ObjectVector *objects, VariableData *dst);
+   void recurse_makeObjects(ObjectVector *objects, VariableData *dst);
 
-   void
-   recurse_makeObjectsAddress(ObjectVector *objects, VariableData *dst);
+   void recurse_makeObjectsAddress(ObjectVector *objects, VariableData *dst);
 
-   void
-   recurse_makeObjectsCast(ObjectVector *objects, VariableData *dst,
-                           VariableType const *dstType);
+   void recurse_makeObjectsCast
+   (ObjectVector *objects, VariableData *dst, VariableType *dstType);
 
    SourcePosition position;
    std::string label;
@@ -388,12 +380,10 @@ protected:
                      ObjectExpression *stack, std::string const &labelReturn,
                      SourcePosition const &position);
 
-   static void
-   make_objects_memcpy_cast(ObjectVector *objects,
-                            VariableData *dst, VariableData *src,
-                            VariableType const *dstType,
-                            VariableType const *srcType,
-                            SourcePosition const &position);
+   static void make_objects_memcpy_cast
+   (ObjectVector *objects, VariableData *dst, VariableData *src,
+    VariableType *dstType, VariableType *srcType,
+    SourcePosition const &position);
 
    static void
    make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
@@ -420,60 +410,45 @@ private:
 
    void recurse_makeObjectsBase(ObjectVector *objects, VariableData *dst);
 
-   virtual void
-   virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-   virtual void
-   virtual_makeObjectsAddress(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjectsAddress
+   (ObjectVector *objects, VariableData *dst);
 
-   virtual void
-   virtual_makeObjectsCast(ObjectVector *objects, VariableData *dst,
-                          VariableType const *dstType);
+   virtual void virtual_makeObjectsCast
+   (ObjectVector *objects, VariableData *dst, VariableType *dstType);
 
    std::vector<std::string> labels;
    bool evaluated;
 
 
 
-   static void
-   make_objects_call_asmfunc(ObjectVector *objects, VariableData *dst,
-                             VariableType const *type, ObjectExpression *data,
-                             std::vector<SourceExpression::Pointer> const &args,
-                             SourcePosition const &position);
+   static void make_objects_call_asmfunc
+   (ObjectVector *objects, VariableData *dst, VariableType *type,
+    ObjectExpression *data, Vector const &args, SourcePosition const &position);
 
-   static void
-   make_objects_call_function(ObjectVector *objects, VariableData *dst,
-                              VariableType const *type, ObjectExpression *data,
-                              std::vector<SourceExpression::Pointer> const &args,
-                              ObjectExpression *stack,
-                              std::string const &labelReturn,
-                              SourcePosition const &position);
-   static void
-   make_objects_call_function(ObjectVector *objects, VariableData *dst,
-                              VariableType const *type, SourceExpression *data,
-                              std::vector<SourceExpression::Pointer> const &args,
-                              ObjectExpression *stack,
-                              std::string const &labelReturn,
-                              SourcePosition const &position);
+   static void make_objects_call_function
+   (ObjectVector *objects, VariableData *dst, VariableType *type,
+    ObjectExpression *data, Vector const &args, ObjectExpression *stack,
+    std::string const &labelReturn, SourcePosition const &position);
 
-   static void
-   make_objects_call_linespec(ObjectVector *objects, VariableData *dst,
-                              VariableType const *type, ObjectExpression *data,
-                              std::vector<SourceExpression::Pointer> const &args,
-                              SourcePosition const &position);
+   static void  make_objects_call_function
+   (ObjectVector *objects, VariableData *dst, VariableType *type,
+    SourceExpression *data, Vector const &args, ObjectExpression *stack,
+    std::string const &labelReturn, SourcePosition const &position);
 
-   static void
-   make_objects_call_native(ObjectVector *objects, VariableData *dst,
-                            VariableType const *type, ObjectExpression *data,
-                            std::vector<SourceExpression::Pointer> const &args,
-                            SourcePosition const &position);
+   static void make_objects_call_linespec
+   (ObjectVector *objects, VariableData *dst, VariableType *type,
+    ObjectExpression *data, Vector const &args, SourcePosition const &position);
 
-   static void
-   make_objects_call_script(ObjectVector *objects, VariableData *dst,
-                            VariableType const *type, SourceExpression *data,
-                            std::vector<SourceExpression::Pointer> const &args,
-                            ObjectExpression *stack,
-                            SourcePosition const &position);
+   static void make_objects_call_native
+   (ObjectVector *objects, VariableData *dst, VariableType *type,
+    ObjectExpression *data, Vector const &args, SourcePosition const &position);
+
+   static void make_objects_call_script
+   (ObjectVector *objects, VariableData *dst, VariableType *type,
+    SourceExpression *data, Vector const &args, ObjectExpression *stack,
+    SourcePosition const &position);
 };
 
 #endif//HPP_SourceExpression_

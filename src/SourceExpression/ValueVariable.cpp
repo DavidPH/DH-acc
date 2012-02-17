@@ -49,7 +49,7 @@ public:
 
    virtual VariableData::Pointer getData() const;
 
-   virtual VariableType const *getType() const;
+   virtual VariableType::Reference getType() const;
 
 private:
    SourceVariable::Pointer var;
@@ -68,7 +68,7 @@ SRCEXP_EXPRVAL_DEFN(c, char)
    ObjectExpression::Pointer charVarData =
       ObjectExpression::create_value_int(value, position);
 
-   VariableType const *charVarType = VariableType::get_vt_char();
+   VariableType::Reference charVarType = VariableType::get_bt_char();
 
    SourceVariable::Pointer charVariable =
       SourceVariable::create_literal(charVarType, charVarData, position);
@@ -98,7 +98,7 @@ SRCEXP_EXPRVAL_DEFN(i, int)
    ObjectExpression::Pointer intVarData =
       ObjectExpression::create_value_int(value, position);
 
-   VariableType const *intVarType = VariableType::get_vt_int();
+   VariableType::Reference intVarType = VariableType::get_bt_int();
 
    SourceVariable::Pointer intVariable =
       SourceVariable::create_literal(intVarType, intVarData, position);
@@ -122,7 +122,7 @@ SRCEXP_EXPRVAL_DEFN(r, real)
    ObjectExpression::Pointer realVarData =
       ObjectExpression::create_value_float(value, position);
 
-   VariableType const *realVarType = VariableType::get_vt_real();
+   VariableType::Reference realVarType = VariableType::get_bt_real();
 
    SourceVariable::Pointer realVariable =
       SourceVariable::create_literal(realVarType, realVarData, position);
@@ -145,7 +145,7 @@ SRCEXP_EXPRVAL_DEFN(s, string)
 {
    std::string stringVarData = ObjectData_String::add(value);
 
-   VariableType const *stringVarType = VariableType::get_vt_string();
+   VariableType::Reference stringVarType = VariableType::get_bt_string();
 
    SourceVariable::Pointer stringVariable
       = SourceVariable::create_literal(stringVarType, stringVarData, position);
@@ -161,7 +161,7 @@ SRCEXP_EXPRVAL_DEFN(i, uint)
    ObjectExpression::Pointer uintVarData =
       ObjectExpression::create_value_int(value, position);
 
-   VariableType const *uintVarType = VariableType::get_vt_uint();
+   VariableType::Reference uintVarType = VariableType::get_bt_uint();
 
    SourceVariable::Pointer uintVariable =
       SourceVariable::create_literal(uintVarType, uintVarData, position);
@@ -185,7 +185,7 @@ SourceExpression_ValueVariable(SourceVariable *_var, SRCEXP_EXPR_PARM)
                                : Super(SRCEXP_EXPR_PASS),
                                  var(_var)
 {
-   if (!_var->getType()->complete)
+   if (!_var->getType()->getComplete())
       throw SourceException("incomplete type", position, getName());
 }
 
@@ -208,7 +208,7 @@ VariableData::Pointer SourceExpression_ValueVariable::getData() const
 //
 // SourceExpression_ValueVariable::getType
 //
-VariableType const *SourceExpression_ValueVariable::getType() const
+VariableType::Reference SourceExpression_ValueVariable::getType() const
 {
    return var->getType();
 }

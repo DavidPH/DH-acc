@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceContext.hpp
-**
-** Defines the SourceContext class.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Source-level context handling.
+//
+//-----------------------------------------------------------------------------
 
 #ifndef HPP_SourceContext_
 #define HPP_SourceContext_
@@ -34,145 +36,163 @@
 // Types                                                                      |
 //
 
-class SourceTokenC;
-struct VariableType;
+class VariableType;
 
 //
 // SourceContext
 //
 class SourceContext : public Counter
 {
-	MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceContext, Counter);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceContext, Counter);
 
 public:
-	enum ContextType
-	{
-		CT_BLOCK,
-		CT_FUNCTION,
-		CT_LOOP,
-		CT_SCRIPT,
-		CT_SWITCH
-	};
+   enum ContextType
+   {
+      CT_BLOCK,
+      CT_FUNCTION,
+      CT_LOOP,
+      CT_SCRIPT,
+      CT_SWITCH
+   };
 
-	enum NameType
-	{
-		NT_LOCAL,    // __variable
-		NT_EXTERN,   // extern __variable
-		NT_EXTLOCAL, // __extvar
-	};
-
-
-
-	std::string addLabelCase(bigsint value, SourcePosition const & position);
-	std::string addLabelCaseDefault(SourcePosition const & position);
-	std::string addLabelGoto(SourceTokenC const & token);
-
-	void addVariable(SourceVariable * var);
-
-	bool getAllowLabel() const;
-
-	std::vector<bigsint> getCases(SourcePosition const & position) const;
-
-	std::string getLabel() const;
-	std::string getLabelBreak(SourcePosition const & position) const;
-	std::string getLabelCase(bigsint value, SourcePosition const & position);
-	std::string getLabelCaseDefault(SourcePosition const & position) const;
-	std::string getLabelContinue(SourcePosition const & position) const;
-	std::string getLabelGoto(SourceTokenC const & token) const;
-
-	int getLimit(SourceVariable::StorageClass sc) const;
-
-	VariableType const * getReturnType() const;
-
-	ContextType getType() const;
-	ContextType getTypeRoot() const;
-
-	CounterPointer<SourceVariable> getVariable(SourceTokenC const & token) const;
-
-	VariableType const * getVariableType(SourceTokenC const & token);
-	VariableType const * getVariableType_enum(std::string const & name, bool block, SourcePosition const & position);
-	VariableType const * getVariableType_struct(std::string const & name, SourcePosition const & position);
-	VariableType const * getVariableType_struct(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position);
-	VariableType const * getVariableType_typedef(SourceTokenC const & token, VariableType const * type);
-	VariableType const * getVariableType_typedef(std::string const & name, VariableType const * type, SourcePosition const & position);
-	VariableType const * getVariableType_union(std::string const & name, SourcePosition const & position);
-	VariableType const * getVariableType_union(std::string const & name, std::vector<std::string> const & names, std::vector<VariableType const *> const & types, SourcePosition const & position);
-	VariableType const * getVariableTypeNull(std::string const & name);
-
-	bool hasLabelCaseDefault() const;
-
-	std::string makeLabel();
-
-	std::string makeNameObject(NameType nameType, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, SourcePosition const & position) const;
-	std::string makeNameObject(NameType nameType, SourceVariable::StorageClass sc, VariableType const * type, std::string const & nameSource, bigsint address, SourcePosition const & position) const;
-
-	void setAllowLabel(bool allow);
-
-	void setReturnType(VariableType const * returnType);
+   enum NameType
+   {
+      NT_LOCAL,    // __variable
+      NT_EXTERN,   // extern __variable
+      NT_EXTLOCAL, // __extvar
+   };
 
 
+   std::string addLabelCase(bigsint value, SourcePosition const & position);
+   std::string addLabelCaseDefault(SourcePosition const & position);
+   std::string addLabelGoto(std::string const &name, SourcePosition const &position);
 
-	static Reference create(SourceContext *parent, ContextType type);
+   void addVariable(SourceVariable * var);
 
-	static void init();
+   bool getAllowLabel() const;
 
-	static Pointer global_context;
+   std::vector<bigsint> getCases(SourcePosition const & position) const;
+
+   std::string getLabel() const;
+   std::string getLabelBreak(SourcePosition const & position) const;
+   std::string getLabelCase(bigsint value, SourcePosition const & position);
+   std::string getLabelCaseDefault(SourcePosition const & position) const;
+   std::string getLabelContinue(SourcePosition const & position) const;
+   std::string getLabelGoto(std::string const &name, SourcePosition const &position) const;
+
+   int getLimit(SourceVariable::StorageClass sc) const;
+
+   CounterReference<VariableType> getReturnType() const;
+
+   ContextType getType() const;
+   ContextType getTypeRoot() const;
+
+   CounterPointer<SourceVariable> getVariable(std::string const &name, SourcePosition const &position) const;
+
+   // Named type.
+   CounterReference<VariableType> getVariableType
+   (std::string const &name, SourcePosition const &position);
+
+   // enum
+   CounterReference<VariableType> getVariableType_enum
+   (std::string const &name, bool block, SourcePosition const &position);
+
+   // struct
+   CounterReference<VariableType> getVariableType_struct
+   (std::string const &name, SourcePosition const &position);
+
+   // struct {...}
+   CounterReference<VariableType> getVariableType_struct
+   (std::string const &name, std::vector<std::string> const &names,
+    std::vector<CounterPointer<VariableType> > const &types,
+    SourcePosition const &position);
+
+   // typedef
+   CounterReference<VariableType> getVariableType_typedef
+   (std::string const &name, VariableType *type, SourcePosition const &position);
+
+   // union
+   CounterReference<VariableType> getVariableType_union
+   (std::string const &name, SourcePosition const & position);
+
+   // union {...}
+   CounterReference<VariableType> getVariableType_union
+   (std::string const &name, std::vector<std::string> const &names,
+    std::vector<CounterPointer<VariableType> > const &types,
+    SourcePosition const & position);
+
+   CounterPointer<VariableType> getVariableTypeNull(std::string const &name);
+
+   bool hasLabelCaseDefault() const;
+
+   std::string makeLabel();
+
+   std::string makeNameObject(NameType nameType, SourceVariable::StorageClass sc, VariableType *type, std::string const & nameSource, SourcePosition const & position) const;
+   std::string makeNameObject(NameType nameType, SourceVariable::StorageClass sc, VariableType *type, std::string const & nameSource, bigsint address, SourcePosition const & position) const;
+
+   void setAllowLabel(bool allow);
+
+   void setReturnType(VariableType *type);
+
+
+   static Reference create(SourceContext *parent, ContextType type);
+
+   static void init();
+
+   static Pointer global_context;
 
 private:
-	SourceContext(SourceContext *parent, ContextType type);
-	SourceContext();
-	~SourceContext();
+   SourceContext(SourceContext *parent, ContextType type);
+   SourceContext();
+   ~SourceContext();
 
-	void addCount(int count, SourceVariable::StorageClass sc);
-	void addLimit(int limit, SourceVariable::StorageClass sc);
+   void addCount(int count, SourceVariable::StorageClass sc);
+   void addLimit(int limit, SourceVariable::StorageClass sc);
 
-	int getCount(SourceVariable::StorageClass sc) const;
+   int getCount(SourceVariable::StorageClass sc) const;
 
-	CounterPointer<SourceVariable> getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
+   CounterPointer<SourceVariable> getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
 
-	VariableType * getVariableType_enum(std::string const & name);
-	VariableType * getVariableType_struct(std::string const & name);
-	VariableType * getVariableType_union(std::string const & name);
+   CounterPointer<VariableType> getVariableType_enum(std::string const & name);
+   CounterPointer<VariableType> getVariableType_struct(std::string const & name);
+   CounterPointer<VariableType> getVariableType_union(std::string const & name);
 
-	std::string makeLabelShort();
+   std::string makeLabelShort();
 
-	bool _allowLabel;
+   std::map<bigsint, bool> cases;
 
-	std::map<bigsint, bool> _cases;
-	bool _caseDefault;
+   std::vector<std::string> enumNames;
+   std::vector<CounterReference<VariableType> > enumTypes;
 
-	int _countAuto;
-	int _countRegister;
+   std::vector<std::string> structNames;
+   std::vector<CounterReference<VariableType> > structTypes;
 
-	std::string _label;
-	int _labelCount;
+   std::vector<std::string> typedefNames;
+   std::vector<CounterReference<VariableType> > typedefTypes;
 
-	int _limitAuto;
-	int _limitRegister;
+   std::vector<std::string> unionNames;
+   std::vector<CounterReference<VariableType> > unionTypes;
 
-	SourceContext::Pointer _parent;
+   std::vector<std::string> varNames;
+   std::vector<CounterPointer<SourceVariable> > varVars;
 
-	VariableType const * _returnType;
+   std::string label;
 
-	ContextType _type;
+   SourceContext::Pointer parent;
+   CounterPointer<VariableType> typeReturn;
 
-	std::vector<VariableType const *> _types;
-	std::vector<std::string> _typenames;
+   bigsint countAuto;
+   bigsint countRegister;
+   bigsint labelCount;
+   bigsint limitAuto;
+   bigsint limitRegister;
 
-	std::vector<VariableType *> _enums;
-	std::vector<std::string> _enumnames;
+   ContextType typeContext;
 
-	std::vector<VariableType *> _structs;
-	std::vector<std::string> _structnames;
-
-	std::vector<VariableType *> _unions;
-	std::vector<std::string> _unionnames;
-
-	std::vector<CounterPointer<SourceVariable> > _vars;
-	std::vector<std::string> _varnames;
-
-	unsigned _inheritLocals : 1;
+   bool allowLabel    : 1;
+   bool caseDefault   : 1;
+   bool inheritLocals : 1;
 };
 
-#endif /* HPP_SourceContext_ */
+#endif//HPP_SourceContext_
 

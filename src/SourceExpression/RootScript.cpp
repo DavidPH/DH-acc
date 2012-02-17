@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceException.hpp"
 #include "../VariableType.hpp"
 
 
@@ -41,12 +42,12 @@ class SourceExpression_RootScript : public SourceExpression
                                    SourceExpression);
 
 public:
-   SourceExpression_RootScript(VariableType const *type, SRCEXP_EXPR_ARGS);
+   SourceExpression_RootScript(VariableType *type, SRCEXP_EXPR_ARGS);
 
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-   VariableType const *type;
+   VariableType::Reference type;
 };
 
 
@@ -58,7 +59,7 @@ private:
 // SourceExpression::create_root_output
 //
 SourceExpression::Pointer SourceExpression::
-create_root_script(VariableType const * type, SRCEXP_EXPR_ARGS)
+create_root_script(VariableType *type, SRCEXP_EXPR_ARGS)
 {
    return new SourceExpression_RootScript(type, context, position);
 }
@@ -67,7 +68,7 @@ create_root_script(VariableType const * type, SRCEXP_EXPR_ARGS)
 // SourceExpression_RootScript::SourceExpression_RootScript
 //
 SourceExpression_RootScript::
-SourceExpression_RootScript(VariableType const *_type, SRCEXP_EXPR_PARM)
+SourceExpression_RootScript(VariableType *_type, SRCEXP_EXPR_PARM)
                             : Super(SRCEXP_EXPR_PASS),
                               type(_type)
 {
@@ -81,9 +82,18 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   bigsint sizeCall = type->sizeCall(position);
+   bigsint callSize = 0;
+   VariableType::Vector const &callTypes = type->getTypes();
 
-   if (sizeCall > 3) for (bigsint i(sizeCall - 3); i--;)
+   for (size_t i = 0; i < callTypes.size(); ++i)
+   {
+      if (!callTypes[i])
+         throw SourceException("variadic script", position, getName());
+
+      callSize += callTypes[i]->getSize(position);
+   }
+
+   if (callSize > 3) for (bigsint i = callSize - 3; i--;)
    {
       // FIXME: Should be based on type.
       objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));

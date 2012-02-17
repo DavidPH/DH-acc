@@ -66,29 +66,17 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		}
 	}
 
-   #if 0
-	{	// Check for type.
-		VariableType const * type(context->getVariableTypeNull(token.getData()));
-
-		if (type)
-		{
-			expr = create_value_cast(make_expression_single(in, blocks, context), type, token.getPosition());
-			break;
-		}
-	}
-   #endif
-
 		// Check for label.
 		if (in->peek().getType() == SourceTokenC::TT_OP_COLON && context->getAllowLabel())
 		{
 			in->get(SourceTokenC::TT_OP_COLON);
 			expr = make_expression(in, blocks, context);
-			expr->addLabel(context->getLabelGoto(token));
+         expr->addLabel(context->getLabelGoto(token.getData(), token.getPosition()));
 			break;
 		}
 
 		// Must be a variable.
-      expr = create_value_variable(context->getVariable(token), PASS_A);
+      expr = create_value_variable(context->getVariable(token.getData(), token.getPosition()), PASS_A);
 		break;
 
 	case SourceTokenC::TT_INTEGER:
@@ -123,10 +111,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 		}
 		else
 		{
-			label = context->getLabelGoto(labelToken);
+			label = context->getLabelGoto(labelToken.getData(), labelToken.getPosition());
 		}
 
-      expr = create_value_variable(SourceVariable::create_literal(VariableType::get_vt_label(), label, labelToken.getPosition()), PASS_A);
+      expr = create_value_variable(SourceVariable::create_literal(VariableType::get_bt_label(), label, labelToken.getPosition()), PASS_A);
 	}
 		break;
 
@@ -168,12 +156,13 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 	case SourceTokenC::TT_OP_PARENTHESIS_C:
 	case SourceTokenC::TT_OP_SEMICOLON:
 		in->unget(token);
-      return create_value_data(VariableType::get_vt_void(), PASS_A);
+      return create_value_data(VariableType::get_bt_void(), PASS_A);
 
 	case SourceTokenC::TT_OP_PARENTHESIS_O:
 		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER && is_expression_type(in->peek().getData(), context))
 		{
-			VariableType const * type(make_expression_type(in, blocks, context));
+         VariableType::Reference type =
+            make_expression_type(in, blocks, context);
 			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
          expr = create_value_cast_explicit(make_expression_single(in, blocks, context), type, PASS_A);
 		}
@@ -297,14 +286,16 @@ SRCEXPDS_EXPRSINGLE_DEFN(case)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(constexpr)
 {
-	VariableType const * type(make_expression_type(in, blocks, context));
-	std::string name(in->get(SourceTokenC::TT_IDENTIFIER).getData());
-	in->get(SourceTokenC::TT_OP_EQUALS);
-	SourceExpression::Pointer data(make_expression(in, blocks, context));
+   VariableType::Reference type = make_expression_type(in, blocks, context);
+   std::string name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+   in->get(SourceTokenC::TT_OP_EQUALS);
+   SourceExpression::Pointer data = make_expression(in, blocks, context);
 
-	SourceVariable::Pointer var(SourceVariable::create_constant(name, type, data->makeObject(), token.getPosition()));
+   SourceVariable::Pointer var =
+      SourceVariable::create_constant
+      (name, type, data->makeObject(), token.getPosition());
 
-	context->addVariable(var);
+   context->addVariable(var);
 
    return create_value_variable(var, context, token.getPosition());
 }
@@ -350,7 +341,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(library)
 	ObjectExpression::set_library(in->get(SourceTokenC::TT_STRING).getData());
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-   return create_value_data(VariableType::get_vt_void(), context, token.getPosition());
+   return create_value_data
+          (VariableType::get_bt_void(), context, token.getPosition());
 }
 
 //
@@ -378,7 +370,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(sizeof)
 
 	if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
-	bigsint size(make_expression_type(in, blocks, context)->size(token.getPosition()));
+   bigsint size =
+      make_expression_type(in, blocks, context)->getSize(token.getPosition());
 
 	if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
@@ -393,7 +386,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(type)
 	in->unget(token);
 	make_expression_type(in, blocks, context);
 
-   return create_value_data(VariableType::get_vt_void(), context, token.getPosition());
+   return create_value_data
+          (VariableType::get_bt_void(), context, token.getPosition());
 }
 
 //
@@ -401,10 +395,12 @@ SRCEXPDS_EXPRSINGLE_DEFN(type)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(typedef)
 {
-	VariableType const * type(make_expression_type(in, blocks, context));
-	context->getVariableType_typedef(in->get(SourceTokenC::TT_IDENTIFIER), type);
+   VariableType::Reference type = make_expression_type(in, blocks, context);
+   SourceTokenC name = in->get(SourceTokenC::TT_IDENTIFIER);
+   context->getVariableType_typedef(name.getData(), type, name.getPosition());
 
-   return create_value_data(VariableType::get_vt_void(), context, token.getPosition());
+   return create_value_data
+          (VariableType::get_bt_void(), context, token.getPosition());
 }
 
 //
@@ -412,9 +408,9 @@ SRCEXPDS_EXPRSINGLE_DEFN(typedef)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(void)
 {
-   return create_value_cast_explicit(make_expression(in, blocks, context),
-                                     VariableType::get_vt_void(), context,
-                                     token.getPosition());
+   return create_value_cast_explicit
+          (make_expression(in, blocks, context), VariableType::get_bt_void(),
+		 context, token.getPosition());
 }
 
 //

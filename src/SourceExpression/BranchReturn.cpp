@@ -75,7 +75,7 @@ SourceExpression_BranchReturn(SRCEXP_EXPRUNA_PARM)
                               : Super(SRCEXP_EXPR_PASS),
                                 expr(_expr), ct(context->getTypeRoot())
 {
-   VariableType const *type = context->getReturnType();
+   VariableType::Reference type = context->getReturnType();
 
    if (expr->getType() != type)
       expr = create_value_cast_implicit(expr, type, context, position);
@@ -89,7 +89,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   bigsint srcSize = expr->getType()->size(position);
+   bigsint srcSize = expr->getType()->getSize(position);
    if (srcSize && target_type == TARGET_ZDoom)
       --srcSize;
    VariableData::Pointer src = VariableData::create_stack(srcSize);
@@ -98,7 +98,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    objects->setPosition(position);
 
-   bigsint retnSize(expr->getType()->size(position));
+   bigsint retnSize(expr->getType()->getSize(position));
 
    if (target_type != TARGET_ZDoom)
    {

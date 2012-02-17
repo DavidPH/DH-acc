@@ -60,7 +60,7 @@ SourceExpression_Binary(bool _arithmetic, SRCEXP_EXPRBIN_PARM)
 // SourceExpression_Binary::SourceExpression_Binary
 //
 SourceExpression_Binary::
-SourceExpression_Binary(VariableType const *castL, VariableType const *castR,
+SourceExpression_Binary(VariableType *castL, VariableType *castR,
                         SRCEXP_EXPRBIN_PARM)
                         : Super(SRCEXP_EXPR_PASS),
                           exprL(_exprL), exprR(_exprR), arithmetic(2)
@@ -72,7 +72,7 @@ SourceExpression_Binary(VariableType const *castL, VariableType const *castR,
 // SourceExpression_Binary::SourceExpression_Binary
 //
 SourceExpression_Binary::
-SourceExpression_Binary(VariableType const *castL, VariableType const *castR,
+SourceExpression_Binary(VariableType *castL, VariableType *castR,
                         bool _arithmetic, SRCEXP_EXPRBIN_PARM)
                         : Super(SRCEXP_EXPR_PASS),
                           exprL(_exprL), exprR(_exprR), arithmetic(_arithmetic)
@@ -93,90 +93,86 @@ bool SourceExpression_Binary::canMakeObject() const
 //
 void SourceExpression_Binary::doCast()
 {
-   VariableType const * type(getType());
+   #define PARM context, position
+
+   VariableType::Reference type = getType();
 
    // Pointer arithmetic.
-   if (type->vt == VariableType::VT_POINTER && arithmetic == 1)
+   if (type->getBasicType() == VariableType::BT_POINTER && arithmetic == 1)
    {
-      VariableType const * typeL(exprL->getType());
-      VariableType const * typeR(exprR->getType());
+      VariableType::Reference typeRet = type->getReturn();
+      bigsint sizeRet = typeRet->getSize(position);
 
-      if (typeL->vt == VariableType::VT_ARRAY)
+      SourceExpression::Pointer exprOff = create_value_uint(sizeRet, PARM);
+      VariableType::Reference typeOff = VariableType::get_bt_uint();
+
+      VariableType::Reference typeL = exprL->getType();
+      VariableType::Reference typeR = exprR->getType();
+
+      if (typeL->getBasicType() == VariableType::BT_ARRAY)
       {
-         typeL = VariableType::get_pointer(typeL->refType);
-         exprL = create_value_cast_implicit(exprL, typeL, context, position);
+         typeL = typeL->getReturn()->getPointer();
+         exprL = create_value_cast_implicit(exprL, typeL, PARM);
       }
 
-      if (typeR->vt == VariableType::VT_ARRAY)
+      if (typeR->getBasicType() == VariableType::BT_ARRAY)
       {
-         typeR = VariableType::get_pointer(typeR->refType);
-         exprR = create_value_cast_implicit(exprR, typeR, context, position);
+         typeR = typeR->getReturn()->getPointer();
+         exprR = create_value_cast_implicit(exprR, typeR, PARM);
       }
 
-      if (typeL->vt == typeR->vt && typeL != typeR)
+      if (typeL->getBasicType() == typeR->getBasicType() &&
+          typeL->getUnqualified() != typeR->getUnqualified())
          throw SourceException("VT_POINTER mismatch", position, getName());
 
-      if (typeL->vt != VariableType::VT_POINTER)
+      if (typeL->getBasicType() != VariableType::BT_POINTER)
       {
-         if (type->refType->size(position) != 1)
+         if (sizeRet != 1)
          {
-            if (typeL->vt != VariableType::VT_INT)
-               exprL = create_value_cast_implicit
-                       (exprL, VariableType::get_vt_int(), context, position);
-
-            exprL = create_binary_mul
-                    (exprL, create_value_int
-                            (type->refType->size(position), context, position),
-                     context, position);
+            exprL = create_value_cast_implicit(exprL, typeOff, PARM);
+            exprL = create_binary_mul(exprL, exprOff, PARM);
          }
 
-         exprL = create_value_cast_implicit(exprL, type, context, position);
+         exprL = create_value_cast_implicit(exprL, type, PARM);
       }
 
-      if (typeR->vt != VariableType::VT_POINTER)
+      if (typeR->getBasicType() != VariableType::BT_POINTER)
       {
-         if (type->refType->size(position) != 1)
+         if (sizeRet != 1)
          {
-            if (typeR->vt != VariableType::VT_INT)
-               exprR = create_value_cast_implicit
-                       (exprR, VariableType::get_vt_int(), context, position);
-
-            exprR = create_binary_mul
-                    (exprR, create_value_int
-                            (type->refType->size(position), context, position),
-                     context, position);
+            exprR = create_value_cast_implicit(exprR, typeOff, PARM);
+            exprR = create_binary_mul(exprR, exprOff, PARM);
          }
 
-         exprR = create_value_cast_implicit(exprR, type, context, position);
+         exprR = create_value_cast_implicit(exprR, type, PARM);
       }
 
       return;
    }
 
-   if (exprL->getType() != type)
-      exprL = create_value_cast_implicit(exprL, type, context, position);
+   exprL = create_value_cast_implicit(exprL, type, PARM);
+   exprR = create_value_cast_implicit(exprR, type, PARM);
 
-   if (exprR->getType() != type)
-      exprR = create_value_cast_implicit(exprR, type, context, position);
+   #undef PARM
 }
 
 //
 // SourceExpression_Binary::doCast
 //
 void SourceExpression_Binary::
-doCast(VariableType const *castL, VariableType const *castR)
+doCast(VariableType *castL, VariableType *castR)
 {
-   if (castL && exprL->getType() != castL)
+   if (castL)
       exprL = create_value_cast_implicit(exprL, castL, context, position);
 
-   if (castR && exprR->getType() != castR)
+   if (castR)
       exprR = create_value_cast_implicit(exprR, castR, context, position);
 }
 
 //
 // SourceExpression_Binary::getType
 //
-VariableType const * SourceExpression_Binary::getType() const
+VariableType::Reference SourceExpression_Binary::getType() const
 {
    return get_promoted_type(exprL->getType(), exprR->getType(), position);
 }
@@ -193,7 +189,7 @@ recurse_makeObjects(ObjectVector *objects, VariableData *dst)
    if (arithmetic == 2) return;
 
    VariableData::Pointer src =
-      VariableData::create_stack(getType()->size(position));
+      VariableData::create_stack(getType()->getSize(position));
 
    make_objects_memcpy_prep(objects, dst, src, position);
    exprL->makeObjects(objects, src);

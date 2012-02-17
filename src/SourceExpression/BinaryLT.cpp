@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/BinaryLT.cpp
-**
-** Defines the SourceExpression_BinaryLT class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of "operator <".
+//
+//-----------------------------------------------------------------------------
 
 #include "BinaryCompare.hpp"
 
@@ -43,7 +45,7 @@ public:
    SourceExpression_BinaryLT(SRCEXP_EXPRBIN_ARGS);
 
 private:
-	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
 
@@ -71,36 +73,38 @@ SourceExpression_BinaryLT(SRCEXP_EXPRBIN_PARM)
 //
 // SourceExpression_BinaryLT::virtual_makeObjects
 //
-void SourceExpression_BinaryLT::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+void SourceExpression_BinaryLT::virtual_makeObjects
+(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjects(objects, dst);
+   Super::recurse_makeObjects(objects, dst);
 
-	switch (exprL->getType()->vt)
-	{
-	case VariableType::VT_CHAR:
-	case VariableType::VT_INT:
-		objects->addToken(OCODE_CMP_LT32I);
-		break;
+   switch (exprL->getType()->getBasicType())
+   {
+   case VariableType::BT_CHAR:
+   case VariableType::BT_INT:
+      objects->addToken(OCODE_CMP_LT32I);
+      break;
 
-	case VariableType::VT_FUNCTION:
-	case VariableType::VT_LINESPEC:
-	case VariableType::VT_NATIVE:
-	case VariableType::VT_POINTER:
-	case VariableType::VT_SCRIPT:
-	case VariableType::VT_STRING:
-   case VariableType::VT_UINT:
-		objects->addToken(OCODE_CMP_LT32U);
-		break;
+   case VariableType::BT_FUNCTION:
+   case VariableType::BT_LINESPEC:
+   case VariableType::BT_NATIVE:
+   case VariableType::BT_POINTER:
+   case VariableType::BT_SCRIPT:
+   case VariableType::BT_STRING:
+   case VariableType::BT_UINT:
+      objects->addToken(OCODE_CMP_LT32U);
+      break;
 
-	case VariableType::VT_REAL:
-		objects->addToken(OCODE_CMP_LT32F);
-		break;
+   case VariableType::BT_REAL:
+      objects->addToken(OCODE_CMP_LT32F);
+      break;
 
-	default:
-		throw SourceException("invalid VT", position, getName());
-	}
+   default:
+      throw SourceException("invalid BT", position, getName());
+   }
 
-	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
+   make_objects_memcpy_post
+   (objects, dst, VariableData::create_stack(getType()->getSize(position)), position);
 }
 
 // EOF

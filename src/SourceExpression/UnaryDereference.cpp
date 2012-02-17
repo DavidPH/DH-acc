@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/UnaryDereference.cpp
-**
-** Defines the SourceExpression_UnaryDereference class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of "operator *".
+//
+//-----------------------------------------------------------------------------
 
 #include "Unary.hpp"
 
@@ -43,22 +45,23 @@ class SourceExpression_UnaryDereference : public SourceExpression_Unary
 public:
    SourceExpression_UnaryDereference(SRCEXP_EXPRUNA_ARGS);
 
-	virtual bool canGetData() const;
+   virtual bool canGetData() const;
 
-	virtual bool canMakeObjectAddress() const;
+   virtual bool canMakeObjectAddress() const;
 
-	virtual bool canMakeObjectsAddress() const;
+   virtual bool canMakeObjectsAddress() const;
 
-	virtual VariableData::Pointer getData() const;
+   virtual VariableData::Pointer getData() const;
 
-	virtual VariableType const * getType() const;
+   virtual VariableType::Reference getType() const;
 
-	virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
+   virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
 
 private:
-	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-	virtual void virtual_makeObjectsAddress(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjectsAddress
+   (ObjectVector *objects, VariableData *dst);
 };
 
 
@@ -88,7 +91,7 @@ SourceExpression_UnaryDereference(SRCEXP_EXPRUNA_PARM)
 //
 bool SourceExpression_UnaryDereference::canGetData() const
 {
-   return expr->getType()->vt != VariableType::VT_STRING;
+   return expr->getType()->getBasicType() != VariableType::BT_STRING;
 }
 
 //
@@ -96,7 +99,7 @@ bool SourceExpression_UnaryDereference::canGetData() const
 //
 bool SourceExpression_UnaryDereference::canMakeObjectAddress() const
 {
-	return expr->canMakeObject();
+   return canMakeObjectsAddress() && expr->canMakeObject();
 }
 
 //
@@ -104,7 +107,7 @@ bool SourceExpression_UnaryDereference::canMakeObjectAddress() const
 //
 bool SourceExpression_UnaryDereference::canMakeObjectsAddress() const
 {
-   return expr->getType()->vt != VariableType::VT_STRING;
+   return expr->getType()->getBasicType() != VariableType::BT_STRING;
 }
 
 //
@@ -113,62 +116,68 @@ bool SourceExpression_UnaryDereference::canMakeObjectsAddress() const
 VariableData::Pointer SourceExpression_UnaryDereference::getData() const
 {
    return VariableData::
-      create_pointer(getType()->size(position),
+      create_pointer(getType()->getSize(position),
                      ObjectExpression::create_value_int(0, position), expr);
 }
 
 //
 // SourceExpression_UnaryDereference::getType
 //
-VariableType const * SourceExpression_UnaryDereference::getType() const
+VariableType::Reference SourceExpression_UnaryDereference::getType() const
 {
-	return expr->getType()->refType;
+   return expr->getType()->getReturn();
 }
 
 //
 // SourceExpression_UnaryDereference::makeObjectAddress
 //
-CounterPointer<ObjectExpression> SourceExpression_UnaryDereference::makeObjectAddress() const
+ObjectExpression::Pointer SourceExpression_UnaryDereference::makeObjectAddress
+() const
 {
-	return expr->makeObject();
+   return expr->makeObject();
 }
 
 //
 // SourceExpression_UnaryDereference::virtual_makeObjects
 //
-void SourceExpression_UnaryDereference::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+void SourceExpression_UnaryDereference::virtual_makeObjects
+(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjects(objects, dst);
+   Super::recurse_makeObjects(objects, dst);
 
-	if (expr->getType()->vt == VariableType::VT_STRING)
-	{
-		VariableData::Pointer tmp = VariableData::create_stack(getType()->size(position));
+   if (expr->getType()->getBasicType() == VariableType::BT_STRING)
+   {
+      VariableData::Pointer src =
+         VariableData::create_stack(getType()->getSize(position));
+      VariableData::Pointer tmp =
+         VariableData::create_stack(expr->getType()->getSize(position));
 
-		make_objects_memcpy_prep(objects, dst, tmp, position);
+      make_objects_memcpy_prep(objects, dst, src, position);
 
-		expr->makeObjects(objects, VariableData::create_stack(expr->getType()->size(position)));
-		objects->addTokenPushZero();
-		objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2), objects->getValue(15));
+      expr->makeObjects(objects, tmp);
+      objects->addTokenPushZero();
+      objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2), objects->getValue(15));
 
-		make_objects_memcpy_post(objects, dst, tmp, position);
+      make_objects_memcpy_post(objects, dst, src, position);
 
-		return;
-	}
+      return;
+   }
 
-	VariableData::Pointer src = getData();
+   VariableData::Pointer src = getData();
 
-	make_objects_memcpy_prep(objects, dst, src, position);
-	make_objects_memcpy_post(objects, dst, src, position);
+   make_objects_memcpy_prep(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, position);
 }
 
 //
 // SourceExpression_UnaryDereference::virtual_makeObjectsAddress
 //
-void SourceExpression_UnaryDereference::virtual_makeObjectsAddress(ObjectVector *objects, VariableData *dst)
+void SourceExpression_UnaryDereference::virtual_makeObjectsAddress
+(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjectsAddress(objects, dst);
+   Super::recurse_makeObjectsAddress(objects, dst);
 
-	expr->makeObjects(objects, dst);
+   expr->makeObjects(objects, dst);
 }
 
 // EOF

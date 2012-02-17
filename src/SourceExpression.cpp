@@ -106,43 +106,46 @@ bool SourceExpression::canMakeObjectsAddress() const
 //
 // SourceExpression::get_promoted_type
 //
-VariableType const *SourceExpression::
-get_promoted_type(VariableType const *type1, VariableType const* type2,
+VariableType::Reference SourceExpression::
+get_promoted_type(VariableType *type1, VariableType *type2,
                   SourcePosition const &)
 {
-   if (type1 == type2) return type1;
+   if (type1 == type2) return static_cast<VariableType::Reference>(type1);
 
-   if (type1->vt == VariableType::VT_VOID) return type1;
-   if (type2->vt == VariableType::VT_VOID) return type2;
+   VariableType::BasicType bt1 = type1->getBasicType();
+   VariableType::BasicType bt2 = type2->getBasicType();
 
-   if (type1->vt == VariableType::VT_POINTER) return type1;
-   if (type2->vt == VariableType::VT_POINTER) return type2;
+   if (bt1 == VariableType::BT_VOID) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_VOID) return type2->getUnqualified();
 
-   if (type1->vt == VariableType::VT_ARRAY) return VariableType::get_pointer(type1->refType);
-   if (type2->vt == VariableType::VT_ARRAY) return VariableType::get_pointer(type2->refType);
+   if (bt1 == VariableType::BT_POINTER) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_POINTER) return type2->getUnqualified();
 
-   if (type1->vt == VariableType::VT_REAL) return type1;
-   if (type2->vt == VariableType::VT_REAL) return type2;
+   if (bt1 == VariableType::BT_ARRAY) return type1->getReturn()->getPointer();
+   if (bt2 == VariableType::BT_ARRAY) return type2->getReturn()->getPointer();
 
-   if (type1->vt == VariableType::VT_INT) return type1;
-   if (type2->vt == VariableType::VT_INT) return type2;
+   if (bt1 == VariableType::BT_REAL) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_REAL) return type2->getUnqualified();
 
-   if (type1->vt == VariableType::VT_UINT) return type1;
-   if (type2->vt == VariableType::VT_UINT) return type2;
+   if (bt1 == VariableType::BT_INT) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_INT) return type2->getUnqualified();
 
-   if (type1->vt == VariableType::VT_CHAR) return type1;
-   if (type2->vt == VariableType::VT_CHAR) return type2;
+   if (bt1 == VariableType::BT_UINT) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_UINT) return type2->getUnqualified();
 
-   if (type1->vt == VariableType::VT_STRING) return type1;
-   if (type2->vt == VariableType::VT_STRING) return type2;
+   if (bt1 == VariableType::BT_CHAR) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_CHAR) return type2->getUnqualified();
 
-   if (type1->vt == VariableType::VT_BOOLHARD) return type1;
-   if (type2->vt == VariableType::VT_BOOLHARD) return type2;
+   if (bt1 == VariableType::BT_STRING) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_STRING) return type2->getUnqualified();
 
-   if (type1->vt == VariableType::VT_BOOLSOFT) return type1;
-   if (type2->vt == VariableType::VT_BOOLSOFT) return type2;
+   if (bt1 == VariableType::BT_BOOLHARD) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_BOOLHARD) return type2->getUnqualified();
 
-   return VariableType::get_vt_void();
+   if (bt1 == VariableType::BT_BOOLSOFT) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_BOOLSOFT) return type2->getUnqualified();
+
+   return VariableType::get_bt_void();
 }
 
 //
@@ -156,9 +159,9 @@ VariableData::Pointer SourceExpression::getData() const
 //
 // SourceExpression::getType
 //
-VariableType const *SourceExpression::getType() const
+VariableType::Reference SourceExpression::getType() const
 {
-   return VariableType::get_vt_void();
+   return VariableType::get_bt_void();
 }
 
 //
@@ -203,15 +206,15 @@ makeObjects(ObjectVector *objects, VariableData *dst)
 
       VariableData::SectionL section;
 
-      VariableType const *type = getType();
+      VariableType::Reference type = getType();
 
-      if (type->vt == VariableType::VT_STRING)
+      if (type->getBasicType() == VariableType::BT_STRING)
          section = VariableData::SL_STRING;
       else
          section = VariableData::SL_INT;
 
       VariableData::Pointer src =
-         VariableData::create_literal(type->size(position), section,
+         VariableData::create_literal(type->getSize(position), section,
                                       makeObject());
 
       make_objects_memcpy_prep(objects, dst, src, position);
@@ -262,12 +265,11 @@ makeObjectsBase(ObjectVector *objects, VariableData *)
 //
 // SourceExpression::makeObjectsCast
 //
-void SourceExpression::
-makeObjectsCast(ObjectVector *objects, VariableData *dst,
-                VariableType const *type)
+void SourceExpression::makeObjectsCast
+(ObjectVector *objects, VariableData *dst, VariableType *type)
 {
    // If casting to void, just use a void destination for better codegen.
-   if (type->vt == VariableType::VT_VOID && !dst->offsetTemp)
+   if (type->getBasicType() == VariableType::BT_VOID && !dst->offsetTemp)
    {
       makeObjects(objects, VariableData::create_void(dst->size));
 
@@ -314,9 +316,8 @@ recurse_makeObjectsBase(ObjectVector *objects, VariableData *)
 //
 // SourceExpression::recurse_makeObjectsCast
 //
-void SourceExpression::
-recurse_makeObjectsCast(ObjectVector *objects, VariableData *dst,
-                        VariableType const *)
+void SourceExpression::recurse_makeObjectsCast
+(ObjectVector *objects, VariableData *dst, VariableType *)
 {
    recurse_makeObjectsBase(objects, dst);
 }
@@ -346,8 +347,7 @@ virtual_makeObjectsAddress(ObjectVector *objects, VariableData *dst)
    VariableData::Pointer src = getData();
    VariableData::Pointer tmp =
       VariableData::create_stack(
-         VariableType::get_pointer(
-            VariableType::get_vt_char())->size(position));
+         VariableType::get_bt_char()->getPointer()->getSize(position));
 
    make_objects_memcpy_prep(objects, dst, tmp, position);
 
@@ -383,11 +383,10 @@ virtual_makeObjectsAddress(ObjectVector *objects, VariableData *dst)
 //
 // SourceExpression::virtual_makeObjectsCast
 //
-void SourceExpression::
-virtual_makeObjectsCast(ObjectVector * objects, VariableData *dst,
-                        VariableType const *dstType)
+void SourceExpression::virtual_makeObjectsCast
+(ObjectVector * objects, VariableData *dst, VariableType *dstType)
 {
-   VariableType const *srcType = getType();
+   VariableType::Reference srcType = getType();
 
    if (canGetData())
    {
@@ -399,7 +398,7 @@ virtual_makeObjectsCast(ObjectVector * objects, VariableData *dst,
    else
    {
       VariableData::Pointer src =
-         VariableData::create_stack(srcType->size(position));
+         VariableData::create_stack(srcType->getSize(position));
 
       make_objects_memcpy_prep(objects, dst, src, position);
       virtual_makeObjects(objects, src);

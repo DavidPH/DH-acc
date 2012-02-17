@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -79,21 +79,15 @@ SourceExpression_BranchSwitch
    exprCond(_exprCond), exprBody(_exprBody)
 {
    {
-      VariableType const *typeCond = exprCond->getType();
-      VariableType const *type     = VariableType::get_vt_int();
+      VariableType::Reference type = VariableType::get_bt_int();
 
-      if (typeCond != type)
-         exprCond = create_value_cast_implicit
-                    (exprCond, type, context, position);
+      exprCond = create_value_cast_implicit(exprCond, type, context, position);
    }
 
    {
-      VariableType const *typeBody = exprBody->getType();
-      VariableType const *type     = VariableType::get_vt_void();
+      VariableType::Reference type = VariableType::get_bt_void();
 
-      if (typeBody != type)
-         exprBody = create_value_cast_implicit
-                    (exprBody, type, context, position);
+      exprBody = create_value_cast_implicit(exprBody, type, context, position);
    }
 }
 
@@ -122,7 +116,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    }
 
    // Generate condition.
-   bigsint               sizeCond = exprCond->getType()->size(position);
+   bigsint               sizeCond = exprCond->getType()->getSize(position);
    VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
 
    exprCond->makeObjects(objects, destCond);

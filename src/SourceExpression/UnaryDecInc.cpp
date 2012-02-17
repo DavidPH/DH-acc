@@ -130,35 +130,35 @@ doDelta(ObjectVector *objects)
    ObjectExpression::Pointer deltaExpr;
    int deltaType = 0; // OCODE offset. Order is always F I U.
 
-   VariableType const *type = getType();
+   VariableType::Reference type = getType();
 
-   switch (type->vt)
+   switch (type->getBasicType())
    {
-   case VariableType::VT_CHAR:
-   case VariableType::VT_INT:
+   case VariableType::BT_CHAR:
+   case VariableType::BT_INT:
       deltaType |= DELTA_I;
       break;
 
-   case VariableType::VT_POINTER:
+   case VariableType::BT_POINTER:
    {
-      bigsint i = type->refType->size(position);
+      bigsint i = type->getReturn()->getSize(position);
       if (i != 1)
       {
          deltaExpr = objects->getValue(i);
          deltaType |= DELTA_EXPR;
       }
    }
-   case VariableType::VT_UINT:
+   case VariableType::BT_UINT:
       deltaType |= DELTA_U;
       break;
 
-   case VariableType::VT_REAL:
+   case VariableType::BT_REAL:
       deltaExpr = objects->getValue(1.0);
       deltaType |= DELTA_F|DELTA_EXPR;
       break;
 
    default:
-      throw SourceException("invalid VT", position, getName());
+      throw SourceException("invalid BT", position, getName());
    }
 
    if (deltaExpr)
@@ -337,8 +337,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    if (offset)
    {
-      src->offsetTemp = VariableData::create_stack(
-                                  src->offsetExpr->getType()->size(position) );
+      src->offsetTemp =
+         VariableData::create_stack(src->offsetExpr->getType()->getSize(position));
 
       src->offsetExpr->makeObjects(objects, src->offsetTemp);
 

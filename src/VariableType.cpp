@@ -1,419 +1,684 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* VariableType.cpp
-**
-** Defines the VariableType methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Source-level type handling.
+//
+//-----------------------------------------------------------------------------
 
 #include "VariableType.hpp"
 
 #include "SourceException.hpp"
 
+#include <algorithm>
 
 
-std::vector<VariableType *> VariableType::type_array;
-std::vector<VariableType *> VariableType::type_asmfunc;
-std::vector<VariableType *> VariableType::type_block;
-std::vector<VariableType *> VariableType::type_function;
-std::vector<VariableType *> VariableType::type_linespec;
-std::vector<VariableType *> VariableType::type_native;
-std::vector<VariableType *> VariableType::type_pointer;
-std::vector<VariableType *> VariableType::type_script;
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
 
-#define VT_INIT(NAME,VT,VTR)                                        \
-VariableType const *VariableType::get_vt_##NAME()                   \
-{return &vt_##NAME;}                                                \
-VariableType VariableType::vt_##NAME  = { VT_##VT, true, &vtc_void, \
-&vtc_##NAME, &vtc_##VTR, std::vector<std::string>(),                \
-std::vector<VariableType const *>() };                              \
-VariableType VariableType::vtc_##NAME = { VT_##VT, true, &vtc_void, \
-NULL,        &vtc_##VTR, std::vector<std::string>(),                \
-std::vector<VariableType const *>() }
-
-VT_INIT(boolhard, BOOLHARD, void);
-VT_INIT(boolsoft, BOOLSOFT, void);
-VT_INIT(char,     CHAR,     void);
-VT_INIT(int,      INT,      void);
-VT_INIT(label,    LABEL,    void);
-VT_INIT(real,     REAL,     void);
-VT_INIT(string,   STRING,   char);
-VT_INIT(void,     VOID,     void);
-VT_INIT(uint,     UINT,     void);
-
-#undef VT_INIT
-
-
-
-template<typename T> static bool operator == (std::vector<T> const & l, std::vector<T> const & r)
+static std::string basic_names[] =
 {
-	if (l.size() != r.size()) return false;
+   "BT_BOOLHARD",
+   "BT_BOOLSOFT",
+   "BT_CHAR",
+   "BT_INT",
+   "BT_LABEL",
+   "BT_REAL",
+   "BT_STRING",
+   "BT_UINT",
 
-	for (size_t i(l.size()); i--;)
-		if (l[i] != r[i]) return false;
+   "BT_VOID",
 
-	return true;
+   "BT_ARRAY",
+   "BT_POINTER",
+
+   "BT_ENUM",
+   "BT_STRUCT",
+   "BT_UNION",
+
+   "BT_ASMFUNC",
+   "BT_BLOCK",
+   "BT_FUNCTION",
+   "BT_LINESPEC",
+   "BT_NATIVE",
+   "BT_SCRIPT"
+};
+
+
+//----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+template<typename T>
+static bool operator != (std::vector<T> const &l, std::vector<T> const &r)
+{
+   if (l.size() != r.size()) return true;
+
+   return std::mismatch(l.begin(), l.end(), r.begin()).first != l.end();
 }
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-VariableType * VariableType::create(Type vt, VariableType const * callType, VariableType const * refType)
+//===================================================================
+// Construction/Destruction.
+//
+
+//
+// VariableType::VariableType
+//
+// Only used to create the basic BT_VOID type.
+//
+VariableType::VariableType()
+ : next(this), prev(this), specnext(this), specprev(this),
+   typePtr(NULL), typeRet(this),
+   basic(BT_VOID), quals(0), store(ST_ADDR), width(0),
+   complete(true)
 {
-	static std::vector<VariableType const *> types;
-
-	return create(vt, callType, refType, types);
-}
-VariableType * VariableType::create(Type vt, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types)
-{
-	VariableType * type(new VariableType);
-
-	type->vt        = vt;
-	type->complete  = true;
-	type->callType  = callType;
-	type->constType = NULL;
-	type->refType   = refType;
-	type->names     = std::vector<std::string>(types.size(), "");
-	type->types     = types;
-
-	type->constType = (new VariableType(*type))->doConst();
-
-	return type;
 }
 
-VariableType const * VariableType::doConst()
+//
+// VariableType::VariableType
+//
+VariableType::VariableType(BasicType _basic)
+ : next(this), prev(this), specnext(this), specprev(this),
+   typePtr(NULL), typeRet(get_bt_void()),
+   basic(_basic), quals(0), store(ST_ADDR), width(0),
+   complete(true)
 {
-	switch (vt)
-	{
-	case VT_ARRAY:
-	case VT_BLOCK:
-	case VT_STRUCT:
-	case VT_UNION:
-		for (size_t i(0); i < types.size(); ++i)
-			if (types[i]->constType)
-				types[i] = types[i]->constType;
+   switch (basic)
+   {
+   // Primitive types.
+   case BT_BOOLHARD:
+   case BT_BOOLSOFT:
+   case BT_CHAR:
+   case BT_INT:
+   case BT_LABEL:
+   case BT_REAL:
+   case BT_UINT:
+      break;
 
-		break;
+   case BT_STRING:
+      typeRet = get_bt_char()->addQualifier(QUAL_CONST);
+      break;
 
-	case VT_ASMFUNC:
-	case VT_BOOLHARD:
-	case VT_BOOLSOFT:
-	case VT_CHAR:
-	case VT_ENUM:
-	case VT_FUNCTION:
-	case VT_INT:
-	case VT_LABEL:
-	case VT_LINESPEC:
-	case VT_NATIVE:
-	case VT_POINTER:
-	case VT_REAL:
-	case VT_SCRIPT:
-	case VT_STRING:
-	case VT_UINT:
-	case VT_VOID:
-		break;
-	}
+   case BT_VOID:
+      break;
 
-	return this;
+   // Reference types.
+   case BT_ARRAY:
+   case BT_POINTER:
+      break;
+
+   // Named types.
+   case BT_ENUM:
+   case BT_STRUCT:
+   case BT_UNION:
+      complete = false;
+      break;
+
+   // Anonymous types.
+   case BT_ASMFUNC:
+   case BT_BLOCK:
+   case BT_FUNCTION:
+   case BT_LINESPEC:
+   case BT_NATIVE:
+   case BT_SCRIPT:
+      break;
+   }
 }
 
-VariableType const * VariableType::get_array(VariableType const * refType, bigsint count)
+//
+// VariableType::~VariableType
+//
+VariableType::~VariableType()
 {
-	for (std::vector<VariableType *>::iterator it(type_array.begin()); it != type_array.end(); ++it)
-		if ((*it)->refType == refType && (bigsint)(*it)->types.size() == count)
-			return *it;
+   next->prev = prev;
+   prev->next = next;
 
-	VariableType * type(create(VT_ARRAY, &vt_void, refType, std::vector<VariableType const *>(count, refType)));
+   specnext->specprev = specprev;
+   specprev->specnext = specnext;
 
-	type_array.push_back(type);
+   switch (basic)
+   {
+   // Primitive types.
+   case BT_BOOLHARD:
+   case BT_BOOLSOFT:
+   case BT_CHAR:
+   case BT_INT:
+   case BT_LABEL:
+   case BT_REAL:
+   case BT_STRING:
+   case BT_UINT:
+      break;
 
-	return type;
+   case BT_VOID:
+      break;
+
+   // Reference types.
+   case BT_ARRAY:
+      typeRet->typeArr.erase(this);
+      break;
+
+   case BT_POINTER:
+      typeRet->typePtr = NULL;
+      break;
+
+   // Named types.
+   case BT_ENUM:
+   case BT_STRUCT:
+   case BT_UNION:
+      break;
+
+   // Anonymous types.
+   case BT_ASMFUNC:
+   case BT_BLOCK:
+   case BT_FUNCTION:
+   case BT_LINESPEC:
+   case BT_NATIVE:
+   case BT_SCRIPT:
+      break;
+   }
 }
 
-VariableType const * VariableType::get_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types)
+//===================================================================
+// Type creation.
+//
+
+//
+// VariableType::getArray
+//
+VariableType::Reference VariableType::getArray(bigsint _width)
 {
-	return get_function_like(VT_ASMFUNC, &type_asmfunc, callType, types);
+   for (RawSet::iterator iter = typeArr.begin(); iter != typeArr.end(); ++iter)
+   {
+      if ((*iter)->width == _width)
+         return static_cast<Reference>(*iter);
+   }
+
+   Reference type(new VariableType(BT_ARRAY));
+
+   type->typeRet = Reference(this);
+   type->width = _width;
+   typeArr.insert(type);
+
+   return type;
 }
 
-VariableType const * VariableType::get_block(std::vector<VariableType const *> const & types)
+//
+// VariableType::getPointer
+//
+VariableType::Reference VariableType::getPointer()
 {
-	for (std::vector<VariableType *>::iterator it(type_block.begin()); it != type_block.end(); ++it)
-		if ((*it)->types == types)
-			return *it;
+   if (typePtr)
+      return static_cast<Reference>(typePtr);
 
-	VariableType * type(create(VT_BLOCK, &vt_void, &vt_void, types));
+   typePtr = new VariableType(BT_POINTER);
 
-	type_block.push_back(type);
+   typePtr->typeRet = Reference(this);
 
-	return type;
+   return static_cast<Reference>(typePtr);
 }
 
-VariableType const * VariableType::get_function(VariableType const * callType, std::vector<VariableType const *> const & types)
+//
+// VariableType::setQualifier
+//
+VariableType::Reference VariableType::setQualifier(unsigned _quals)
 {
-	return get_function_like(VT_FUNCTION, &type_function, callType, types);
+   if (quals == _quals)
+      return static_cast<Reference>(this);
+
+   for (VariableType *iter = next; iter != this; iter = iter->next)
+   {
+      if (iter->quals == _quals && iter->store == store)
+         return Reference(iter);
+   }
+
+   VariableType::Reference type = copy_and_link(this);
+
+   type->quals = _quals;
+   if (basic == BT_STRUCT || basic == BT_UNION || basic == BT_BLOCK)
+   {
+      for (Vector::iterator iter = type->types.begin();
+           iter != type->types.end(); ++iter)
+         *iter = (*iter)->setQualifier(_quals);
+   }
+   type->typeUnq = getUnqualified();
+
+   return type;
 }
 
-VariableType const * VariableType::get_function_like(Type vt, std::vector<VariableType *> * type_vector, VariableType const * callType, std::vector<VariableType const *> const & types)
+//
+// VariableType::setStorage
+//
+VariableType::Reference VariableType::setStorage(unsigned _store)
 {
-	for (std::vector<VariableType *>::iterator it(type_vector->begin()); it != type_vector->end(); ++it)
-		if ((*it)->callType == callType && (*it)->types == types)
-			return *it;
+   if (store == _store)
+      return static_cast<Reference>(this);
 
-	VariableType * type(create(vt, callType, &vt_void, types));
+   for (VariableType *iter = next; iter != this; iter = iter->next)
+   {
+      if (iter->quals == quals && iter->store == _store)
+         return Reference(iter);
+   }
 
-	type_vector->push_back(type);
+   VariableType::Reference type = copy_and_link(this);
 
-	return type;
+   type->store = _store;
+   if (basic == BT_STRUCT || basic == BT_UNION || basic == BT_BLOCK)
+   {
+      for (Vector::iterator iter = type->types.begin();
+           iter != type->types.end(); ++iter)
+         *iter = (*iter)->setStorage(_store);
+   }
+   type->typeUnq = getUnqualified();
+
+   return type;
 }
 
-VariableType const * VariableType::get_linespec(VariableType const * callType, std::vector<VariableType const *> const & types)
+//===================================================================
+// Type information.
+//
+
+//
+// VariableType::getSize
+//
+bigsint VariableType::getSize(SourcePosition const &position) const
 {
-	return get_function_like(VT_LINESPEC, &type_linespec, callType, types);
+   if (!complete)
+      throw SourceException("incomplete type", position, __func__);
+
+   switch (basic)
+   {
+   case BT_ARRAY:
+      return typeRet->getSize(position) * width;
+
+   case BT_ASMFUNC:
+   case BT_VOID:
+      return 0;
+
+   case BT_BLOCK:
+   case BT_STRUCT:
+   {
+      bigsint size = 0;
+      for (Vector::const_iterator iter = types.begin(); iter != types.end();
+           ++iter)
+         size += (*iter)->getSize(position);
+      return size;
+   }
+
+   case BT_BOOLHARD:
+   case BT_BOOLSOFT:
+   case BT_CHAR:
+   case BT_ENUM:
+   case BT_FUNCTION:
+   case BT_INT:
+   case BT_LABEL:
+   case BT_LINESPEC:
+   case BT_NATIVE:
+   case BT_POINTER:
+   case BT_REAL:
+   case BT_SCRIPT:
+   case BT_STRING:
+   case BT_UINT:
+      return 1;
+
+   case BT_UNION:
+   {
+      bigsint size = 0;
+      for (Vector::const_iterator iter = types.begin(); iter != types.end();
+           ++iter)
+	 {
+         bigsint sizeNext = (*iter)->getSize(position);
+         if (sizeNext > size) size = sizeNext;
+	 }
+      return size;
+   }
+   }
 }
 
-VariableType const * VariableType::get_native(VariableType const * callType, std::vector<VariableType const *> const & types)
+//
+// VariableType::getSizeCall
+//
+bigsint VariableType::getSizeCall(SourcePosition const &position) const
 {
-	return get_function_like(VT_NATIVE, &type_native, callType, types);
+   bigsint size = 0;
+
+   for (Vector::const_iterator iter = types.begin();
+        iter != types.end() && *iter; ++iter)
+   {
+      if (!*iter) return -1;
+      size += (*iter)->getSize(position);
+   }
+
+   return size;
 }
 
-VariableType const * VariableType::get_pointer(VariableType const * refType)
+//===================================================================
+// Type alteration.
+//
+
+//
+// VariableType::makeComplete
+//
+void VariableType::makeComplete()
 {
-	for (std::vector<VariableType *>::iterator it(type_pointer.begin()); it != type_pointer.end(); ++it)
-		if ((*it)->refType == refType)
-			return *it;
-
-	VariableType * type(create(VT_POINTER, &vt_void, refType));
-
-	type_pointer.push_back(type);
-
-	return type;
+   if (complete) return;
+   complete = true;
+   next->makeComplete();
 }
 
-VariableType const * VariableType::get_script(VariableType const * callType, std::vector<VariableType const *> const & types)
+//
+// VariableType::makeComplete
+//
+void VariableType::makeComplete(VecStr const &_names, Vector const &_types)
 {
-	return get_function_like(VT_SCRIPT, &type_script, callType, types);
+   if (complete) return;
+   names = _names;
+   types = _types;
+   complete = true;
+   next->makeComplete(_names, _types);
 }
 
-int VariableType::getOffset(std::string const & name, SourcePosition const & position) const
+//===================================================================
+// Member information.
+//
+
+//
+// VariableType::getOffset
+//
+bigsint VariableType::getOffset
+(std::string const &name, SourcePosition const &position)
 {
-	if (!complete)
-		throw SourceException("incomplete type", position, "VariableType::getOffset");
+   if (!complete)
+      throw SourceException("incomplete type", position, __func__);
 
-	int offset(0);
+   bigsint offset = 0;
+   for (size_t i = 0; i < names.size(); ++i)
+   {
+      if (names[i] == name) return offset;
+      offset += types[i]->getSize(position);
+   }
 
-	if (vt == VT_UNION)
-		return offset;
-
-	for (size_t i(0); i < names.size(); ++i)
-		if (name == names[i])
-			return offset;
-		else
-			offset += types[i]->size(position);
-
-	throw SourceException("invalid member-variable-type '" + name + "'", position, "VariableType::getOffset");
+   throw SourceException("no such member '" + name + "'", position, __func__);
 }
 
-VariableType const * VariableType::getType(std::string const & name, SourcePosition const & position) const
+//
+// VariableType::getType
+//
+VariableType::Reference VariableType::getType
+(std::string const &name, SourcePosition const &position)
 {
-	if (!complete)
-		throw SourceException("incomplete type", position, "VariableType::getType");
+   if (!complete)
+      throw SourceException("incomplete type", position, __func__);
 
-	for (size_t i(0); i < names.size(); ++i)
-		if (name == names[i])
-			return types[i];
+   for (size_t i = 0; i < names.size(); ++i)
+      if (names[i] == name) return Reference(types[i]);
 
-	throw SourceException("invalid member-variable-type '" + name + "'", position, "VariableType::getType");
+   throw SourceException("no such member '" + name + "'", position, __func__);
 }
 
-bool VariableType::isVoid(SourcePosition const & position) const
+//===================================================================
+// Basic types
+//
+
+//
+// VariableType::get_bt_boolhard
+//
+VariableType::Reference VariableType::get_bt_boolhard()
 {
-	if (!complete)
-		throw SourceException("incomplete type", position, "VariableType::isVoid");
-
-	switch (vt)
-	{
-	case VT_ARRAY:
-	case VT_BLOCK:
-	case VT_STRUCT:
-	case VT_UNION:
-	{
-		for (size_t i(0); i < types.size(); ++i)
-			if (!types[i]->isVoid(position)) return false;
-
-		return true;
-	}
-
-	case VT_VOID:
-		return true;
-
-	case VT_ASMFUNC:
-	case VT_BOOLHARD:
-	case VT_BOOLSOFT:
-	case VT_CHAR:
-	case VT_ENUM:
-	case VT_FUNCTION:
-	case VT_INT:
-	case VT_LABEL:
-	case VT_LINESPEC:
-	case VT_NATIVE:
-	case VT_POINTER:
-	case VT_REAL:
-	case VT_SCRIPT:
-	case VT_STRING:
-	case VT_UINT:
-		return false;
-	}
-
-	return 0;
+   static Reference type(new VariableType(BT_BOOLHARD)); return type;
 }
 
-int VariableType::size(SourcePosition const & position) const
+//
+// VariableType::get_bt_boolsoft
+//
+VariableType::Reference VariableType::get_bt_boolsoft()
 {
-	if (!complete)
-		throw SourceException("incomplete type", position, "VariableType::size");
-
-	switch (vt)
-	{
-	case VT_ARRAY:
-	case VT_BLOCK:
-	case VT_STRUCT:
-	{
-		int s(0);
-
-		for (size_t i(0); i < types.size(); ++i)
-			s += types[i]->size(position);
-
-		return s;
-	}
-
-	case VT_ASMFUNC:
-	case VT_VOID:
-		return 0;
-
-	case VT_BOOLHARD:
-	case VT_BOOLSOFT:
-	case VT_CHAR:
-	case VT_ENUM:
-	case VT_FUNCTION:
-	case VT_INT:
-	case VT_LABEL:
-	case VT_LINESPEC:
-	case VT_NATIVE:
-	case VT_POINTER:
-	case VT_REAL:
-	case VT_SCRIPT:
-	case VT_STRING:
-	case VT_UINT:
-		return 1;
-
-	case VT_UNION:
-	{
-		int s(0);
-
-		for (size_t i(0); i < types.size(); ++i)
-		{
-			if (types[i]->size(position) > s)
-				s = types[i]->size(position);
-		}
-
-		return s;
-	}
-	}
-
-	return 0;
+   static Reference type(new VariableType(BT_BOOLSOFT)); return type;
 }
 
-int VariableType::sizeCall(SourcePosition const & position) const
+//
+// VariableType::get_bt_char
+//
+VariableType::Reference VariableType::get_bt_char()
 {
-	if (!complete)
-		throw SourceException("incomplete type", position, "VariableType::sizeCall");
-
-	switch (vt)
-	{
-	case VT_ARRAY:
-	case VT_BLOCK:
-	case VT_BOOLHARD:
-	case VT_BOOLSOFT:
-	case VT_CHAR:
-	case VT_ENUM:
-	case VT_INT:
-	case VT_LABEL:
-	case VT_POINTER:
-	case VT_REAL:
-	case VT_STRING:
-	case VT_STRUCT:
-	case VT_UINT:
-	case VT_UNION:
-	case VT_VOID:
-		return 0;
-
-	case VT_ASMFUNC:
-	case VT_FUNCTION:
-	case VT_LINESPEC:
-	case VT_NATIVE:
-	case VT_SCRIPT:
-	{
-		int s(0);
-
-		for (std::vector<VariableType const *>::const_iterator it(types.begin()); it != types.end(); ++it)
-			s += (*it)->size(position);
-
-		return s;
-	}
-	}
-
-	return 0;
+   static Reference type(new VariableType(BT_CHAR)); return type;
 }
 
-char const * make_string(VariableType::Type vt)
+//
+// VariableType::get_bt_int
+//
+VariableType::Reference VariableType::get_bt_int()
 {
-	switch (vt)
-	{
-	case VariableType::VT_ARRAY:    return "VT_ARRAY";
-	case VariableType::VT_ASMFUNC:  return "VT_ASMFUNC";
-	case VariableType::VT_BLOCK:    return "VT_BLOCK";
-	case VariableType::VT_BOOLHARD: return "VT_BOOLHARD";
-	case VariableType::VT_BOOLSOFT: return "VT_BOOLSOFT";
-	case VariableType::VT_CHAR:     return "VT_CHAR";
-	case VariableType::VT_ENUM:     return "VT_ENUM";
-	case VariableType::VT_FUNCTION: return "VT_FUNCTION";
-	case VariableType::VT_INT:      return "VT_INT";
-	case VariableType::VT_LABEL:    return "VT_LABEL";
-	case VariableType::VT_LINESPEC: return "VT_LINESPEC";
-	case VariableType::VT_NATIVE:   return "VT_NATIVE";
-	case VariableType::VT_POINTER:  return "VT_POINTER";
-	case VariableType::VT_REAL:     return "VT_REAL";
-	case VariableType::VT_SCRIPT:   return "VT_SCRIPT";
-	case VariableType::VT_STRING:   return "VT_STRING";
-	case VariableType::VT_STRUCT:   return "VT_STRUCT";
-   case VariableType::VT_UINT:     return "VT_UINT";
-	case VariableType::VT_UNION:    return "VT_UNION";
-	case VariableType::VT_VOID:     return "VT_VOID";
-	}
-
-	return "VT_";
+   static Reference type(new VariableType(BT_INT)); return type;
 }
 
-VariableType::Type & operator ++ (VariableType::Type & vt)
+//
+// VariableType::get_bt_label
+//
+VariableType::Reference VariableType::get_bt_label()
 {
-	if (vt < VariableType::VT_UNION)
-		vt = (VariableType::Type)((int)vt + 1);
-	else
-		vt = VariableType::VT_BOOLHARD;
+   static Reference type(new VariableType(BT_LABEL)); return type;
+}
 
-	return vt;
+//
+// VariableType::get_bt_real
+//
+VariableType::Reference VariableType::get_bt_real()
+{
+   static Reference type(new VariableType(BT_REAL)); return type;
+}
+
+//
+// VariableType::get_bt_string
+//
+VariableType::Reference VariableType::get_bt_string()
+{
+   static Reference type(new VariableType(BT_STRING)); return type;
+}
+
+//
+// VariableType::get_bt_uint
+//
+VariableType::Reference VariableType::get_bt_uint()
+{
+   static Reference type(new VariableType(BT_UINT)); return type;
+}
+
+//
+// VariableType::get_bt_void
+//
+VariableType::Reference VariableType::get_bt_void()
+{
+   static Reference type(new VariableType); return type;
+}
+
+//===================================================================
+// Named types
+//
+
+//
+// VariableType::get_bt_enum
+//
+VariableType::Reference VariableType::get_bt_enum()
+{
+   return Reference(new VariableType(BT_ENUM));
+}
+
+//
+// VariableType::get_bt_struct
+//
+VariableType::Reference VariableType::get_bt_struct()
+{
+   return Reference(new VariableType(BT_STRUCT));
+}
+
+//
+// VariableType::get_bt_union
+//
+VariableType::Reference VariableType::get_bt_union()
+{
+   return Reference(new VariableType(BT_UNION));
+}
+
+//===================================================================
+// Anonymous types
+//
+
+//
+// VariableType::get_bt_anonymous
+//
+VariableType::Reference VariableType::get_bt_anonymous
+(Vector types, VariableType *typeRet, VariableType *head, BasicType basic)
+{
+   // Parameters and return are unqualified.
+   if (basic != BT_BLOCK)
+      for (Vector::iterator iter = types.begin(); iter != types.end(); ++iter)
+         *iter = (*iter)->getUnqualified();
+
+   typeRet = typeRet->getUnqualified();
+
+   // Look for a matching type.
+   for (VariableType *iter = head->specnext; iter != head; iter = iter->specnext)
+   {
+      if (iter->typeRet == typeRet && iter->types == types)
+         return static_cast<Reference>(iter);
+   }
+
+   // No matching type exists, create a new one.
+   Reference type(new VariableType(basic));
+
+   type->types = types;
+   type->typeRet = static_cast<Reference>(typeRet);
+   type->specprev = head;
+   type->specnext = head->specnext;
+   head->specnext->specprev = type;
+   head->specnext = type;
+
+   return type;
+}
+
+//
+// VariableType::get_bt_asmfunc
+//
+VariableType::Reference VariableType::get_bt_asmfunc
+(Vector const &types, VariableType *typeRet)
+{
+   static Reference type(new VariableType(BT_ASMFUNC));
+
+   if (types.empty() && typeRet->basic == BT_VOID) return type;
+
+   return get_bt_anonymous(types, typeRet, type, BT_ASMFUNC);
+}
+
+//
+// VariableType::get_bt_block
+//
+VariableType::Reference VariableType::get_bt_block(Vector const &types)
+{
+   static Reference type(new VariableType(BT_BLOCK));
+
+   if (types.empty()) return type;
+
+   return get_bt_anonymous(types, get_bt_void(), type, BT_BLOCK);
+}
+
+//
+// VariableType::get_bt_function
+//
+VariableType::Reference VariableType::get_bt_function
+(Vector const &types, VariableType *typeRet)
+{
+   static Reference type(new VariableType(BT_FUNCTION));
+
+   if (types.empty() && typeRet->basic == BT_VOID) return type;
+
+   return get_bt_anonymous(types, typeRet, type, BT_FUNCTION);
+}
+
+//
+// VariableType::get_bt_linespec
+//
+VariableType::Reference VariableType::get_bt_linespec
+(Vector const &types, VariableType *typeRet)
+{
+   static Reference type(new VariableType(BT_LINESPEC));
+
+   if (types.empty() && typeRet->basic == BT_VOID) return type;
+
+   return get_bt_anonymous(types, typeRet, type, BT_LINESPEC);
+}
+
+//
+// VariableType::get_bt_native
+//
+VariableType::Reference VariableType::get_bt_native
+(Vector const &types, VariableType *typeRet)
+{
+   static Reference type(new VariableType(BT_NATIVE));
+
+   if (types.empty() && typeRet->basic == BT_VOID) return type;
+
+   return get_bt_anonymous(types, typeRet, type, BT_NATIVE);
+}
+
+//
+// VariableType::get_bt_script
+//
+VariableType::Reference VariableType::get_bt_script
+(Vector const &types, VariableType *typeRet)
+{
+   static Reference type(new VariableType(BT_SCRIPT));
+
+   if (types.empty() && typeRet->basic == BT_VOID) return type;
+
+   return get_bt_anonymous(types, typeRet, type, BT_SCRIPT);
+}
+
+//===================================================================
+// Miscellaneous.
+//
+
+//
+// VariableType::copy_and_link
+//
+VariableType::Reference VariableType::copy_and_link(VariableType *base)
+{
+   Reference type(new VariableType(*base));
+
+   type->next = base->next;
+   type->prev = base;
+   base->next->prev = type;
+   base->next = type;
+
+   return type;
+}
+
+//
+// make_string<VariableType::BasicType>
+//
+std::string const &make_string(VariableType::BasicType basic)
+{
+   return basic_names[basic];
 }
 
 // EOF

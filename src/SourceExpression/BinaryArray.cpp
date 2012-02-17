@@ -49,7 +49,7 @@ public:
 
    virtual VariableData::Pointer getData() const;
 
-   virtual VariableType const *getType() const;
+   virtual VariableType::Reference getType() const;
 
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -65,16 +65,17 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(array)
 {
-   VariableType const *typeL = exprL->getType();
-   VariableType const *typeR = exprR->getType();
+   VariableType::Reference typeL = exprL->getType();
+   VariableType::Reference typeR = exprR->getType();
+
+   VariableType::BasicType btL = typeL->getBasicType();
+   VariableType::BasicType btR = typeR->getBasicType();
 
    // This allows C semantics for array access. Specifically that x[y] be the
    // same as *(x+y).
-   if (
-      typeL->vt == VariableType::VT_POINTER ||
-      typeR->vt == VariableType::VT_POINTER ||
-      (typeL->vt == VariableType::VT_ARRAY && exprL->canMakeObjectsAddress()) ||
-      (typeR->vt == VariableType::VT_ARRAY && exprR->canMakeObjectsAddress())
+   if (btL == VariableType::BT_POINTER || btR == VariableType::BT_POINTER ||
+      (btL == VariableType::BT_ARRAY && exprL->canMakeObjectsAddress()) ||
+      (btR == VariableType::BT_ARRAY && exprR->canMakeObjectsAddress())
    )
    {
       return create_unary_dereference
@@ -92,16 +93,15 @@ SourceExpression_BinaryArray::
 SourceExpression_BinaryArray(SRCEXP_EXPRBIN_PARM)
                              : Super(SRCEXP_EXPRBIN_PASS)
 {
-   // Can only be done for VT_ARRAY or VT_STRING.
-   if (exprL->getType()->vt != VariableType::VT_ARRAY
-    && exprL->getType()->vt != VariableType::VT_STRING)
-      throw SourceException("expected VT_ARRAY or VT_STRING for exprL got "
-                            + (std::string)make_string(exprL->getType()->vt),
-                            position, getName());
+   VariableType::BasicType btL = exprL->getType()->getBasicType();
 
-   if (exprR->getType()->vt != VariableType::VT_UINT)
-      exprR = create_value_cast_implicit
-              (exprR, VariableType::get_vt_uint(), context, position);
+   // Can only be done for VT_ARRAY or VT_STRING.
+   if (btL != VariableType::BT_ARRAY && btL != VariableType::BT_STRING)
+      throw SourceException("expected VT_ARRAY or VT_STRING for exprL got "
+                            + make_string(btL), position, getName());
+
+   exprR = create_value_cast_implicit
+           (exprR, VariableType::get_bt_uint(), context, position);
 }
 
 //
@@ -117,9 +117,11 @@ bool SourceExpression_BinaryArray::canGetData() const
 //
 VariableData::Pointer SourceExpression_BinaryArray::getData() const
 {
+   #define PARM context, position
+
    VariableData::Pointer src = exprL->getData();
-   VariableType const *type = getType();
-   bigsint typeSize = type->size(position);
+   VariableType::Reference type = getType();
+   bigsint typeSize = type->getSize(position);
 
    if (src->type != VariableData::MT_REGISTERARRAY)
       throw SourceException("cannot getData", position, getName());
@@ -129,26 +131,26 @@ VariableData::Pointer SourceExpression_BinaryArray::getData() const
    // If the type's size isn't 1, need to multiply the offset.
    if (typeSize != 1)
    {
-      offset = create_binary_mul(offset, create_value_uint
-                                         (typeSize, context, position),
-                                 context, position);
+      offset = create_binary_mul
+               (offset, create_value_uint(typeSize, PARM), PARM);
    }
 
    // If there is already an offset, add it.
    if (src->offsetExpr)
-      offset = create_binary_add(src->offsetExpr, offset, context, position);
+      offset = create_binary_add(src->offsetExpr, offset, PARM);
 
-   return VariableData::create_registerarray(type->size(position),
-                                             src->sectionRA, src->address,
-                                             offset);
+   return VariableData::create_registerarray
+          (typeSize, src->sectionRA, src->address, offset);
+
+   #undef PARM
 }
 
 //
 // SourceExpression_BinaryArray::getType
 //
-VariableType const *SourceExpression_BinaryArray::getType() const
+VariableType::Reference SourceExpression_BinaryArray::getType() const
 {
-   return exprL->getType()->refType;
+   return exprL->getType()->getReturn();
 }
 
 //
@@ -159,11 +161,11 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   if (exprL->getType()->vt == VariableType::VT_STRING)
+   if (exprL->getType()->getBasicType() == VariableType::BT_STRING)
    {
-      bigsint typeSize = getType()->size(position);
-      bigsint sizeL = exprL->getType()->size(position);
-      bigsint sizeR = exprR->getType()->size(position);
+      bigsint typeSize = getType()->getSize(position);
+      bigsint sizeL = exprL->getType()->getSize(position);
+      bigsint sizeR = exprR->getType()->getSize(position);
 
       VariableData::Pointer src = VariableData::create_stack(typeSize);
 

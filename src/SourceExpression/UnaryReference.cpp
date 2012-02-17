@@ -40,7 +40,13 @@ class SourceExpression_UnaryReference : public SourceExpression_Unary
                                    SourceExpression_Unary);
 
 public:
-   SourceExpression_UnaryReference(SRCEXP_EXPRUNA_ARGS);
+   //
+   // ::ourceExpression_UnaryReference
+   //
+   SourceExpression_UnaryReference(SRCEXP_EXPRUNA_PARM)
+    : Super(SRCEXP_EXPRUNA_PASS), type(expr->getType()->getPointer())
+   {
+   }
 
    //
    // ::canMakeObject
@@ -50,7 +56,13 @@ public:
       return expr->canMakeObjectAddress();
    }
 
-   virtual VariableType const *getType() const;
+   //
+   // ::getType
+   //
+   virtual VariableType::Reference getType() const
+   {
+      return type;
+   }
 
    //
    // ::makeObject
@@ -61,9 +73,17 @@ public:
    }
 
 private:
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   //
+   // ::virtual_makeObjects
+   //
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+   {
+      Super::recurse_makeObjects(objects, dst);
 
-   VariableType const *type;
+      expr->makeObjectsAddress(objects, dst);
+   }
+
+   VariableType::Reference type;
 };
 
 
@@ -76,37 +96,7 @@ private:
 //
 SRCEXP_EXPRUNA_DEFN(reference)
 {
-	return new SourceExpression_UnaryReference(expr, context, position);
-}
-
-//
-// SourceExpression_UnaryReference::SourceExpression_UnaryReference
-//
-SourceExpression_UnaryReference::
-SourceExpression_UnaryReference
-(SRCEXP_EXPRUNA_PARM)
- : Super(SRCEXP_EXPRUNA_PASS),
-   type(VariableType::get_pointer(expr->getType()))
-{
-}
-
-//
-// SourceExpression_UnaryReference::getType
-//
-VariableType const * SourceExpression_UnaryReference::getType() const
-{
-   return type;
-}
-
-//
-// SourceExpression_UnaryReference::virtual_makeObjects
-//
-void SourceExpression_UnaryReference::
-virtual_makeObjects(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   expr->makeObjectsAddress(objects, dst);
+   return new SourceExpression_UnaryReference(expr, context, position);
 }
 
 // EOF

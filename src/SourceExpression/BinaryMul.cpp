@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/BinaryMul.cpp
-**
-** Defines the SourceExpression_BinaryMul class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of "operator *".
+//
+//-----------------------------------------------------------------------------
 
 #include "Binary.hpp"
 
@@ -44,10 +46,10 @@ class SourceExpression_BinaryMul : public SourceExpression_Binary
 public:
    SourceExpression_BinaryMul(SRCEXP_EXPRBIN_ARGS);
 
-	virtual CounterPointer<ObjectExpression> makeObject() const;
+   virtual CounterPointer<ObjectExpression> makeObject() const;
 
 private:
-	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
 
@@ -74,37 +76,39 @@ SourceExpression_BinaryMul(SRCEXP_EXPRBIN_PARM)
 
 CounterPointer<ObjectExpression> SourceExpression_BinaryMul::makeObject() const
 {
-	return ObjectExpression::create_binary_mul(exprL->makeObject(), exprR->makeObject(), position);
+   return ObjectExpression::create_binary_mul
+          (exprL->makeObject(), exprR->makeObject(), position);
 }
 
 //
 // SourceExpression_BinaryMul::virtual_makeObjects
 //
-void SourceExpression_BinaryMul::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+void SourceExpression_BinaryMul::virtual_makeObjects
+(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjects(objects, dst);
+   Super::recurse_makeObjects(objects, dst);
 
-	switch (getType()->vt)
-	{
-	case VariableType::VT_CHAR:
-	case VariableType::VT_INT:
-		objects->addToken(OCODE_MUL32I);
-		break;
+   switch (getType()->getBasicType())
+   {
+   case VariableType::BT_CHAR:
+   case VariableType::BT_INT:
+      objects->addToken(OCODE_MUL32I);
+      break;
 
-	case VariableType::VT_POINTER:
-   case VariableType::VT_UINT:
-		objects->addToken(OCODE_MUL32U);
-		break;
+   case VariableType::BT_UINT:
+      objects->addToken(OCODE_MUL32U);
+      break;
 
-	case VariableType::VT_REAL:
-		objects->addToken(OCODE_MUL32F);
-		break;
+   case VariableType::BT_REAL:
+      objects->addToken(OCODE_MUL32F);
+      break;
 
-	default:
-		throw SourceException("invalid VT", position, getName());
-	}
+   default:
+      throw SourceException("invalid BT", position, getName());
+   }
 
-	make_objects_memcpy_post(objects, dst, VariableData::create_stack(getType()->size(position)), position);
+   make_objects_memcpy_post
+   (objects, dst, VariableData::create_stack(getType()->getSize(position)), position);
 }
 
 // EOF

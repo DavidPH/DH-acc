@@ -23,6 +23,8 @@
 
 #include "../SourceExpression.hpp"
 
+#include "make_objects_call.hpp"
+
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../ost_type.hpp"
@@ -38,52 +40,23 @@
 //
 // SourceExpression::make_objects_call_function
 //
-void SourceExpression::
-make_objects_call_function
-(ObjectVector *objects, VariableData *dst, VariableType const *type,
- ObjectExpression *data, std::vector<SourceExpression::Pointer> const &args,
- ObjectExpression *stack, std::string const &labelReturn,
- SourcePosition const &position)
+void SourceExpression::make_objects_call_function
+(ObjectVector *objects, VariableData *dst, VariableType *type,
+ ObjectExpression *data, Vector const &args, ObjectExpression *stack,
+ std::string const &labelReturn, SourcePosition const &position)
 {
-   if (args.size() != type->types.size())
-      throw SourceException("incorrect arg count to call function", position,
-                            __func__);
-
-   VariableData::Pointer src =
-      VariableData::create_stack(type->callType->size(position));
-
-   make_objects_memcpy_prep(objects, dst, src, position);
-
-   // Evaluate the arguments.
-   for (size_t i = 0; i < args.size(); ++i)
-   {
-      SourceExpression::Pointer arg = args[i];
-
-      VariableType const *argType = arg->getType();
-
-      if (argType != type->types[i])
-         throw SourceException("incorrect arg type to call function",
-                               arg->position, __func__);
-
-      VariableData::Pointer argDst =
-         VariableData::create_stack(argType->size(position));
-
-      args[i]->makeObjects(objects, argDst);
-   }
-
-   objects->setPosition(position);
+   FUNCTION_PREAMBLE
+   FUNCTION_ARGS
 
    // Determine which OCODE to use.
    ObjectCode ocode;
    if (target_type != TARGET_ZDoom)
       ocode = OCODE_BRANCH_GOTO_IMM;
-   else if (type->callType->vt == VariableType::VT_VOID)
+   else if (retnType->getBasicType() == VariableType::BT_VOID)
       ocode = OCODE_ACSE_FUNC_CALLVOID_IMM;
    else
       ocode = OCODE_ACSE_FUNC_CALL_IMM;
 
-   // Determine how many bytes of the return to handle.
-   bigsint retnSize = type->callType->size(position);
    // ZDoom handles one of the return bytes for us.
    if (target_type == TARGET_ZDoom && retnSize >= 1)
       --retnSize;
@@ -97,9 +70,6 @@ make_objects_call_function
    // For not ZDoom...
    if (target_type != TARGET_ZDoom)
    {
-      // ... Determine how many bytes of the call to handle.
-      bigsint callSize = type->sizeCall(position);
-
       // ... Place args in auto vars.
       // FIXME: Should be based on type.
       for (bigsint i = callSize; i--;)
@@ -130,61 +100,28 @@ make_objects_call_function
 //
 // SourceExpression::make_objects_call_function
 //
-void SourceExpression::
-make_objects_call_function
-(ObjectVector *objects, VariableData *dst, VariableType const *type,
- SourceExpression *data, std::vector<SourceExpression::Pointer> const &args,
- ObjectExpression *stack, std::string const &labelReturn,
- SourcePosition const &position)
+void SourceExpression::make_objects_call_function
+(ObjectVector *objects, VariableData *dst, VariableType *type,
+ SourceExpression *data, Vector const &args,  ObjectExpression *stack,
+ std::string const &labelReturn, SourcePosition const &position)
 {
-   if (args.size() != type->types.size())
-      throw SourceException("incorrect arg count to call function", position,
-                            __func__);
-
-   VariableData::Pointer src =
-      VariableData::create_stack(type->callType->size(position));
-
-   make_objects_memcpy_prep(objects, dst, src, position);
+   FUNCTION_PREAMBLE
 
    // Must push return address before target address.
-   ObjectExpression::Pointer retnExpr =
-      ObjectExpression::create_value_symbol(labelReturn, position);
-   objects->addToken(OCODE_GET_LITERAL32I, retnExpr);
+   objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(labelReturn));
 
    // Determine jump target.
-   data->makeObjects(objects, VariableData::create_stack(type->size(position)));
+   data->makeObjects(objects, VariableData::create_stack(type->getSize(position)));
 
-   for (size_t i(0); i < args.size(); ++i)
-   {
-      SourceExpression::Pointer arg = args[i];
-
-      VariableType const *argType = arg->getType();
-
-      if (argType != type->types[i])
-         throw SourceException("incorrect arg type to call function",
-                               arg->position, __func__);
-
-      VariableData::Pointer argDst =
-         VariableData::create_stack(argType->size(position));
-
-      args[i]->makeObjects(objects, argDst);
-   }
-
-   objects->setPosition(position);
+   FUNCTION_ARGS
 
    // Determine which OCODE to use.
    ObjectCode ocode = OCODE_BRANCH_GOTO;
-
-   // Determine how many bytes of the return to handle.
-   bigsint retnSize(type->callType->size(position));
 
    ObjectExpression::Pointer ostack = objects->getValueAdd(stack, retnSize);
 
    // Advance the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
-
-   // Determine how many bytes of the call to handle.
-   bigsint callSize = type->sizeCall(position);
 
    // Place args in auto vars.
    // FIXME: Should be based on type.

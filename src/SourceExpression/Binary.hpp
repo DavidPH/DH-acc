@@ -41,17 +41,17 @@ class SourceExpression_Binary : public SourceExpression
 public:
    virtual bool canMakeObject() const;
 
-   virtual VariableType const *getType() const;
+   virtual CounterReference<VariableType> getType() const;
 
 protected:
    SourceExpression_Binary(SRCEXP_EXPRBIN_ARGS);
 
    SourceExpression_Binary(bool arithmetic, SRCEXP_EXPRBIN_ARGS);
 
-   SourceExpression_Binary(VariableType const *castL, VariableType const *castR,
+   SourceExpression_Binary(VariableType *castL, VariableType *castR,
                            SRCEXP_EXPRBIN_ARGS);
 
-   SourceExpression_Binary(VariableType const *castL, VariableType const *castR,
+   SourceExpression_Binary(VariableType *castL, VariableType *castR,
                            bool arithmetic, SRCEXP_EXPRBIN_ARGS);
 
    void recurse_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -61,7 +61,7 @@ protected:
 
 private:
    void doCast();
-   void doCast(VariableType const *castL, VariableType const *castR);
+   void doCast(VariableType *castL, VariableType *castR);
 
    int arithmetic;
 };

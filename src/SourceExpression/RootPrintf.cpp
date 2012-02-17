@@ -88,7 +88,7 @@ public:
    //
    // ::getType
    //
-   virtual VariableType const *getType() const
+   virtual VariableType::Reference getType() const
    {
       switch (printfType)
       {
@@ -98,10 +98,10 @@ public:
       case PT_HUD_BOLD:
       case PT_LOG:
       case PT_PRINT:
-         return VariableType::get_vt_void();
+         return VariableType::get_bt_void();
 
       case PT_STRING:
-         return VariableType::get_vt_string();
+         return VariableType::get_bt_string();
       }
 
       throw SourceException("unrecognized printfType", position, __func__);
@@ -121,10 +121,10 @@ private:
    //
    // Evaluates the next expression onto the stack.
    //
-   void makeExpr(ObjectVector *objects, VariableType const *type)
+   void makeExpr(ObjectVector *objects, VariableType *type)
    {
       VariableData::Pointer tmp =
-         VariableData::create_stack(type->size(position));
+         VariableData::create_stack(type->getSize(position));
 
       create_value_cast_implicit(nextExpr(type), type, context, position)
          ->makeObjects(objects, tmp);
@@ -137,10 +137,10 @@ private:
    //
    void makeString(ObjectVector *objects, std::string const &string)
    {
-      VariableType const *type = VariableType::get_vt_string();
+      VariableType::Reference type = VariableType::get_bt_string();
 
       VariableData::Pointer tmp =
-         VariableData::create_stack(type->size(position));
+         VariableData::create_stack(type->getSize(position));
 
       create_value_string(string, context, position)
          ->makeObjects(objects, tmp);
@@ -149,7 +149,7 @@ private:
    //
    // ::nextExpr
    //
-   SourceExpression::Pointer nextExpr(VariableType const *type)
+   SourceExpression::Pointer nextExpr(VariableType *type)
    {
       if (!*expr) throw SourceException("insufficient arguments for printf",
                                         position, __func__);
@@ -165,7 +165,7 @@ private:
       Super::recurse_makeObjects(objects, dst);
 
       VariableData::Pointer src =
-         VariableData::create_stack(getType()->size(position));
+         VariableData::create_stack(getType()->getSize(position));
 
       std::string string;
 
@@ -188,27 +188,29 @@ private:
             switch (*c)
             {
             case 'S':
-               makeExpr(objects, VariableType::get_vt_string());
+               makeExpr(objects, VariableType::get_bt_string());
                objects->addToken(OCODE_ACSP_STRING);
                continue;
 
             case 'f':
-               makeExpr(objects, VariableType::get_vt_real());
+               makeExpr(objects, VariableType::get_bt_real());
                objects->addToken(OCODE_ACSP_NUM_DEC32F);
                continue;
 
             case 'i':
-               makeExpr(objects, VariableType::get_vt_int());
+               makeExpr(objects, VariableType::get_bt_int());
                objects->addToken(OCODE_ACSP_NUM_DEC32I);
                continue;
 
             case 'p':
-               makeExpr(objects, VariableType::get_pointer(VariableType::get_vt_void()->constType));
+               makeExpr(objects, VariableType::get_bt_void()
+                                 ->addQualifier(VariableType::QUAL_CONST)
+                                 ->getPointer());
                objects->addToken(OCODE_ACSP_NUM_HEX32U);
                continue;
 
             case 'u':
-               makeExpr(objects, VariableType::get_vt_uint());
+               makeExpr(objects, VariableType::get_bt_uint());
                objects->addToken(OCODE_ACSP_NUM_DEC32U);
                continue;
 
@@ -243,15 +245,15 @@ private:
          objects->addToken(OCODE_ACSP_START_OPT);
 
          ObjectExpression::Pointer msgtypeObj =
-            nextExpr(VariableType::get_vt_int())->makeObject();
+            nextExpr(VariableType::get_bt_int())->makeObject();
          bigsint msgtype = msgtypeObj->resolveInt();
 
          objects->addToken(OCODE_GET_LITERAL32I, msgtypeObj);
-         makeExpr(objects, VariableType::get_vt_int());
-         makeExpr(objects, VariableType::get_vt_int());
-         makeExpr(objects, VariableType::get_vt_real());
-         makeExpr(objects, VariableType::get_vt_real());
-         makeExpr(objects, VariableType::get_vt_real());
+         makeExpr(objects, VariableType::get_bt_int());
+         makeExpr(objects, VariableType::get_bt_int());
+         makeExpr(objects, VariableType::get_bt_real());
+         makeExpr(objects, VariableType::get_bt_real());
+         makeExpr(objects, VariableType::get_bt_real());
 
          objects->addToken(OCODE_ACSP_END_OPT);
 
@@ -261,17 +263,17 @@ private:
             break;
 
          case 1:
-            makeExpr(objects, VariableType::get_vt_real());
+            makeExpr(objects, VariableType::get_bt_real());
             break;
 
          case 2:
-            makeExpr(objects, VariableType::get_vt_real());
-            makeExpr(objects, VariableType::get_vt_real());
+            makeExpr(objects, VariableType::get_bt_real());
+            makeExpr(objects, VariableType::get_bt_real());
             break;
 
          case 3:
-            makeExpr(objects, VariableType::get_vt_real());
-            makeExpr(objects, VariableType::get_vt_real());
+            makeExpr(objects, VariableType::get_bt_real());
+            makeExpr(objects, VariableType::get_bt_real());
             break;
 
          default:

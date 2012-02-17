@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceExpression/BranchGoto.cpp
-**
-** Defines the SourceExpression_BranchGoto class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// SourceExpression handling of "operator goto" and "operator goto_dyn".
+//
+//-----------------------------------------------------------------------------
 
 #include "../SourceExpression.hpp"
 
@@ -45,7 +47,7 @@ public:
    SourceExpression_BranchGoto(SRCEXP_EXPRUNA_ARGS);
 
 private:
-	virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
    SourceExpression::Pointer expr;
    std::string labelGoto;
@@ -108,9 +110,8 @@ SourceExpression_BranchGoto::
 SourceExpression_BranchGoto(SRCEXP_EXPRUNA_PARM)
                             : Super(SRCEXP_EXPR_PASS), expr(_expr)
 {
-   if (expr->getType()->vt != VariableType::VT_LABEL)
-      expr = create_value_cast_implicit
-             (expr, VariableType::get_vt_label(), context, position);
+   expr = create_value_cast_implicit
+          (expr, VariableType::get_bt_label(), context, position);
 }
 
 //
@@ -118,25 +119,26 @@ SourceExpression_BranchGoto(SRCEXP_EXPRUNA_PARM)
 //
 void SourceExpression_BranchGoto::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
-	Super::recurse_makeObjects(objects, dst);
+   Super::recurse_makeObjects(objects, dst);
 
-	if (expr)
-	{
-		if (expr->canMakeObject())
-		{
-			objects->addToken(OCODE_BRANCH_GOTO_IMM, expr->makeObject());
-		}
-		else
-		{
-			VariableData::Pointer src = VariableData::create_stack(expr->getType()->size(position));
+   if (expr)
+   {
+      if (expr->canMakeObject())
+      {
+         objects->addToken(OCODE_BRANCH_GOTO_IMM, expr->makeObject());
+      }
+      else
+      {
+         VariableData::Pointer src =
+            VariableData::create_stack(expr->getType()->getSize(position));
 
-			expr->makeObjects(objects, src);
-			objects->setPosition(position);
-			objects->addToken(OCODE_BRANCH_GOTO);
-		}
-	}
-	else
-		objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelGoto));
+         expr->makeObjects(objects, src);
+         objects->setPosition(position);
+         objects->addToken(OCODE_BRANCH_GOTO);
+      }
+   }
+   else
+      objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelGoto));
 }
 
 // EOF

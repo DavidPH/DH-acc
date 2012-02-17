@@ -23,6 +23,8 @@
 
 #include "../SourceExpression.hpp"
 
+#include "make_objects_call.hpp"
+
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../ost_type.hpp"
@@ -38,70 +40,46 @@
 //
 // SourceExpression::make_objects_call_script
 //
-void SourceExpression::
-make_objects_call_script
-(ObjectVector *objects, VariableData *dst, VariableType const *type,
- SourceExpression *data, std::vector<SourceExpression::Pointer> const &args,
- ObjectExpression *stack, SourcePosition const &position)
+void SourceExpression::make_objects_call_script
+(ObjectVector *objects, VariableData *dst, VariableType *type,
+ SourceExpression *data, Vector const &args, ObjectExpression *stack,
+ SourcePosition const &position)
 {
-   if (args.size() != type->types.size())
-      throw SourceException("incorrect arg count to call script", position,
-                            __func__);
+   FUNCTION_PREAMBLE
 
-   VariableData::Pointer src =
-      VariableData::create_stack(type->callType->size(position));
+   data->makeObjects(objects, VariableData::create_stack(type->getSize(position)));
 
-   make_objects_memcpy_prep(objects, dst, src, position);
-
-   data->makeObjects(objects, VariableData::create_stack(type->size(position)));
-
-   // Evaluate the arguments.
-   for (size_t i = 0; i < args.size(); ++i)
-   {
-      SourceExpression::Pointer arg = args[i];
-
-      VariableType const *argType = arg->getType();
-
-      if (argType != type->types[i])
-         throw SourceException("incorrect arg type to call script",
-                               arg->position, __func__);
-
-      VariableData::Pointer argDst =
-         VariableData::create_stack(argType->size(position));
-
-      args[i]->makeObjects(objects, argDst);
-   }
-
-   objects->setPosition(position);
+   FUNCTION_ARGS
 
    // Determine which OCODE to use.
    ObjectCode ocode;
 
-   if (type->callType->vt == VariableType::VT_VOID)
+   if (retnSize == 0)
    {
-      switch (type->sizeCall(position))
+      switch (callSize)
       {
       case  0: ocode = OCODE_ACS_SPECIAL_EXEC1; break;
       case  1: ocode = OCODE_ACS_SPECIAL_EXEC2; break;
       case  2: ocode = OCODE_ACS_SPECIAL_EXEC3; break;
-      case  3: ocode = OCODE_ACS_SPECIAL_EXEC4; break;
       default: ocode = OCODE_ACS_SPECIAL_EXEC4; break;
       }
    }
-   else
+   else if (retnSize == 1)
    {
-      ocode = OCODE_ACSE_SPECIAL_EXEC5_RETN1;
-
-      // Dummy args.
-      for (size_t i(type->sizeCall(position)); i < 3; ++i)
-         objects->addTokenPushZero();
+      switch (callSize)
+      {
+      case 0: objects->addTokenPushZero();
+      case 1: objects->addTokenPushZero();
+      case 2: objects->addTokenPushZero();
+      default: ocode = OCODE_ACSE_SPECIAL_EXEC5_RETN1; break;
+      }
    }
+   else
+      throw SourceException("bad return-size", position, __func__);
 
    // Determine which line special to use.
    ObjectExpression::Pointer ospec = objects->getValue(84);
 
-   // Determine how many bytes of the return to handle.
-   bigsint retnSize = type->callType->size(position);
    // ZDoom handles one of the return bytes for us.
    if (target_type == TARGET_ZDoom && retnSize >= 1)
       --retnSize;
@@ -111,9 +89,6 @@ make_objects_call_script
 
    // Advance the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
-
-   // Extended call data.
-   bigsint callSize = type->sizeCall(position);
 
    // FIXME: Should be based on type.
    if (callSize > 3) for (bigsint i = callSize - 3; i--;)

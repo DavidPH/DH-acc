@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,7 +51,7 @@ public:
    (SourceExpression *exprCond, SourceExpression *exprBody,
     SourceExpression *exprElse, SRCEXP_EXPR_ARGS);
 
-   virtual VariableType const *getType() const;
+   virtual VariableType::Reference getType() const;
 
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -95,44 +95,31 @@ SourceExpression_BranchIf
    exprCond(_exprCond), exprBody(_exprBody), exprElse(_exprElse)
 {
    {
-      VariableType const *typeCond = exprCond->getType();
-      VariableType const *type     = VariableType::get_vt_boolsoft();
+      VariableType::Reference type = VariableType::get_bt_boolsoft();
 
-      if (typeCond != type)
-         exprCond = create_value_cast_implicit
-                    (exprCond, type, context, position);
+      exprCond = create_value_cast_implicit(exprCond, type, context, position);
    }
 
    if (exprElse)
    {
-      VariableType const *typeBody = exprBody->getType();
-      VariableType const *typeElse = exprElse->getType();
-      VariableType const *type     =
-         get_promoted_type(typeBody, typeElse, position);
+      VariableType::Reference type =
+         get_promoted_type(exprBody->getType(), exprElse->getType(), position);
 
-      if (typeBody != type)
-         exprBody = create_value_cast_implicit
-                    (exprBody, type, context, position);
-
-      if (typeElse != type)
-         exprElse = create_value_cast_implicit
-                    (exprElse, type, context, position);
+      exprBody = create_value_cast_implicit(exprBody, type, context, position);
+      exprElse = create_value_cast_implicit(exprElse, type, context, position);
    }
    else
    {
-      VariableType const *typeBody = exprBody->getType();
-      VariableType const *type     = VariableType::get_vt_void();
+      VariableType::Reference type = VariableType::get_bt_void();
 
-      if (typeBody != type)
-         exprBody = create_value_cast_implicit
-                    (exprBody, type, context, position);
+      exprBody = create_value_cast_implicit(exprBody, type, context, position);
    }
 }
 
 //
 // SourceExpression_BranchIf::getType
 //
-VariableType const *SourceExpression_BranchIf::getType() const
+VariableType::Reference SourceExpression_BranchIf::getType() const
 {
    return exprBody->getType();
 }
@@ -145,7 +132,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   bigsint               sizeCond = exprCond->getType()->size(position);
+   bigsint               sizeCond = exprCond->getType()->getSize(position);
    VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
 
    std::string labelBody = label + "_body";

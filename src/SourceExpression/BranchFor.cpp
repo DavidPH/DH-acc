@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -84,31 +84,17 @@ SourceExpression_BranchFor
    exprIter(_exprIter), exprInit(_exprInit)
 {
    {
-      VariableType const *typeCond = exprCond->getType();
-      VariableType const *type     = VariableType::get_vt_boolsoft();
+      VariableType::Reference type = VariableType::get_bt_boolsoft();
 
-      if (typeCond != type)
-         exprCond = create_value_cast_implicit
-                    (exprCond, type, context, position);
+      exprCond = create_value_cast_implicit(exprCond, type, context, position);
    }
 
    {
-      VariableType const *typeBody = exprBody->getType();
-      VariableType const *typeIter = exprIter->getType();
-      VariableType const *typeInit = exprInit->getType();
-      VariableType const *type     = VariableType::get_vt_void();
+      VariableType::Reference type = VariableType::get_bt_void();
 
-      if (typeBody != type)
-         exprBody = create_value_cast_implicit
-                    (exprBody, type, context, position);
-
-      if (typeIter != type)
-         exprIter = create_value_cast_implicit
-                    (exprIter, type, context, position);
-
-      if (typeInit != type)
-         exprInit = create_value_cast_implicit
-                    (exprInit, type, context, position);
+      exprBody = create_value_cast_implicit(exprBody, type, context, position);
+      exprIter = create_value_cast_implicit(exprIter, type, context, position);
+      exprInit = create_value_cast_implicit(exprInit, type, context, position);
    }
 }
 
@@ -121,7 +107,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   bigsint               sizeCond = exprCond->getType()->size(position);
+   bigsint               sizeCond = exprCond->getType()->getSize(position);
    VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
    VariableData::Pointer sink     = VariableData::create_void(0);
 

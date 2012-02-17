@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ public:
                                SourceExpression::Vector const &args,
                                SRCEXP_EXPR_ARGS);
 
-   virtual VariableType const *getType() const;
+   virtual VariableType::Reference getType() const;
 
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
@@ -80,25 +80,28 @@ SourceExpression_BranchCall
  : Super(SRCEXP_EXPR_PASS),
    args(_args), expr(_expr), stack(context->getLimit(SourceVariable::SC_AUTO))
 {
-   VariableType const *type(expr->getType());
+   VariableType::Reference type = expr->getType();
+   VariableType::Vector const &types = type->getTypes();
 
-   if (args.size() != type->types.size())
-      throw SourceException("incorrect arg count", position, getName());
-
-   for (size_t i(0); i < args.size(); ++i)
+   for (size_t i = 0; i < types.size(); ++i)
    {
-      if (args[i]->getType() != type->types[i])
-         args[i] = create_value_cast_implicit
-                   (args[i], type->types[i], context, position);
+      if (!types[i])
+         throw SourceException("variadic call", position, getName());
+
+      if (i >= args.size())
+         throw SourceException("incorrect arg count", position, getName());
+
+      args[i] = create_value_cast_implicit
+                (args[i], types[i], context, position);
    }
 }
 
 //
 // SourceExpression_BranchCall::getType
 //
-VariableType const * SourceExpression_BranchCall::getType() const
+VariableType::Reference SourceExpression_BranchCall::getType() const
 {
-   return expr->getType()->callType;
+   return expr->getType()->getReturn();
 }
 
 //

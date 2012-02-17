@@ -1,154 +1,221 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* VariableType.hpp
-**
-** Defines the VariableType struct.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Source-level type handling.
+//
+//-----------------------------------------------------------------------------
 
 #ifndef HPP_VariableType_
 #define HPP_VariableType_
 
-#include <ostream>
+#include "bignum.hpp"
+#include "Counter.hpp"
+
+#include <set>
 #include <string>
 #include <vector>
 
-#include "bignum.hpp"
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
 class SourcePosition;
 
-
-
-struct VariableType
+//
+// VariableType
+//
+// Stores information about source-level types.
+//
+class VariableType : Counter
 {
-	enum Type
-	{
-		VT_BOOLHARD,
-		VT_BOOLSOFT,
-		VT_CHAR,
-		VT_INT,
-		VT_LABEL,
-		VT_REAL,
-		VT_STRING,
-      VT_UINT,
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(VariableType, Counter);
 
-		VT_VOID,
+public:
+   typedef std::vector<std::string> VecStr;
+   typedef std::vector<Pointer> Vector;
 
-		VT_ARRAY,
-		VT_ASMFUNC,
-		VT_BLOCK,
-		VT_ENUM,
-		VT_FUNCTION,
-		VT_LINESPEC,
-		VT_NATIVE,
-		VT_POINTER,
-		VT_SCRIPT,
-		VT_STRUCT,
-		VT_UNION
-	};
+   //
+   // BasicType
+   //
+   enum BasicType
+   {
+      // Primitive types.
+      BT_BOOLHARD,
+      BT_BOOLSOFT,
+      BT_CHAR,
+      BT_INT,
+      BT_LABEL,
+      BT_REAL,
+      BT_STRING,
+      BT_UINT,
 
-	VariableType const * doConst();
+      BT_VOID,
 
-	int getOffset(std::string const & name, SourcePosition const & position) const;
+      // Reference types.
+      BT_ARRAY,
+      BT_POINTER,
 
-	VariableType const * getType(std::string const & name, SourcePosition const & position) const;
+      // Named types.
+      BT_ENUM,
+      BT_STRUCT,
+      BT_UNION,
 
-	bool isVoid(SourcePosition const & position) const;
+      // Anonymous types.
+      BT_ASMFUNC,
+      BT_BLOCK,
+      BT_FUNCTION,
+      BT_LINESPEC,
+      BT_NATIVE,
+      BT_SCRIPT
+   };
 
-	int size(SourcePosition const & position) const;
-	int sizeCall(SourcePosition const & position) const;
+   //
+   // Qualifier
+   //
+   enum Qualifier
+   {
+      QUAL_CONST    = 1,
+      QUAL_VOLATILE = 2,
+      QUAL_RESTRICT = 4
+   };
 
-	Type vt;
+   //
+   // StoreType
+   //
+   // This is loosely related to SourceVariable::StorageClass.
+   // The low bits are used to store the array number for ARRAY types.
+   //
+   enum StoreType
+   {
+      ST_ADDR           = 0x8000,
+      ST_REGISTER       = 0x9000,
+      ST_MAPREGISTER    = 0xA000,
+      ST_WORLDREGISTER  = 0xB000,
+      ST_GLOBALREGISTER = 0xC000,
+      ST_MAPARRAY       = 0xD000,
+      ST_WORLDARRAY     = 0xE000,
+      ST_GLOBALARRAY    = 0xF000,
 
-	// Type fully defined?
-	bool complete;
-
-	// Type returned when called.
-	VariableType const * callType;
-
-	// Type's constant version.
-	VariableType const * constType;
-
-	// Type returned when dereferenced.
-	VariableType const * refType;
-
-	// VT_STRUCT members or VT_FUNCTION args.
-	std::vector<std::string>          names;
-	std::vector<VariableType const *> types;
+      ST_MASK_AREA = 0x0FFF,
+      ST_MASK_TYPE = 0xF000
+   };
 
 
+   // Type creation.
+   Reference addQualifier(unsigned _quals) {return setQualifier(quals|_quals);}
+   Reference getArray(bigsint width);
+   Reference getPointer();
+   Reference getReturn() const {return typeRet;}
+   Reference getUnqualified() {return Reference(typeUnq ? typeUnq.raw() : this);}
+   Reference setQualifier(unsigned quals);
+   Reference setStorage(unsigned store);
 
-	friend char const * make_string(Type vt);
+   // Type information.
+   BasicType getBasicType() const {return basic;}
+   bool getComplete() const {return complete;}
+   bool getQualifier(unsigned _quals) const {return (quals&_quals) == _quals;}
+   unsigned getQualifiers() const {return quals;}
+   bigsint getSize(SourcePosition const &position) const;
+   bigsint getSizeCall(SourcePosition const &position) const;
+   StoreType getStoreType() const {return StoreType(store & ST_MASK_TYPE);}
+   unsigned getStoreArea() const {return store & ST_MASK_AREA;}
+   Vector const &getTypes() const {return types;}
+   bigsint getWidth() const {return width;}
 
-	friend Type & operator ++ (Type & vt);
+   // Type alteration.
+   // Completes a BT_ENUM.
+   void makeComplete();
+   // Completes a BT_STRUCT or BT_UNION.
+   void makeComplete(VecStr const &names, Vector const &types);
 
-	static VariableType const * get_array(VariableType const * refType, bigsint count);
-	static VariableType const * get_asmfunc(VariableType const * callType, std::vector<VariableType const *> const & types);
-	static VariableType const * get_block(std::vector<VariableType const *> const & types);
-	static VariableType const * get_function(VariableType const * callType, std::vector<VariableType const *> const & types);
-	static VariableType const * get_linespec(VariableType const * callType, std::vector<VariableType const *> const & types);
-	static VariableType const * get_native(VariableType const * callType, std::vector<VariableType const *> const & types);
-	static VariableType const * get_pointer(VariableType const * refType);
-	static VariableType const * get_script(VariableType const * callType, std::vector<VariableType const *> const & types);
+   // Member information.
+   bigsint getOffset(std::string const &name, SourcePosition const &position);
+   Reference getType(std::string const &name, SourcePosition const &position);
 
-	static VariableType const * get_vt_boolhard();
-	static VariableType const * get_vt_boolsoft();
-	static VariableType const * get_vt_char();
-	static VariableType const * get_vt_int();
-	static VariableType const * get_vt_label();
-	static VariableType const * get_vt_real();
-	static VariableType const * get_vt_string();
-	static VariableType const * get_vt_uint();
-	static VariableType const * get_vt_void();
+
+   // Basic types.
+   static Reference get_bt_boolhard();
+   static Reference get_bt_boolsoft();
+   static Reference get_bt_char();
+   static Reference get_bt_int();
+   static Reference get_bt_label();
+   static Reference get_bt_real();
+   static Reference get_bt_string();
+   static Reference get_bt_uint();
+   static Reference get_bt_void();
+
+   // Named types.
+   static Reference get_bt_enum();
+   static Reference get_bt_struct();
+   static Reference get_bt_union();
+
+   // Anonymous types.
+   static Reference get_bt_asmfunc(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_block(Vector const &types);
+   static Reference get_bt_function(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_linespec(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_native(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_script(Vector const &types, VariableType *typeRet);
 
 private:
-	static VariableType * create(Type vt, VariableType const * callType, VariableType const * refType);
-	static VariableType * create(Type vt, VariableType const * callType, VariableType const * refType, std::vector<VariableType const *> const & types);
+   typedef std::set<VariableType *> RawSet;
 
-	static VariableType const * get_function_like(Type vt, std::vector<VariableType *> * type_vector, VariableType const * callType, std::vector<VariableType const *> const & types);
 
-	static std::vector<VariableType *> type_array;
-	static std::vector<VariableType *> type_asmfunc;
-	static std::vector<VariableType *> type_block;
-	static std::vector<VariableType *> type_function;
-	static std::vector<VariableType *> type_linespec;
-	static std::vector<VariableType *> type_native;
-	static std::vector<VariableType *> type_pointer;
-	static std::vector<VariableType *> type_script;
+   explicit VariableType();
+   explicit VariableType(BasicType basic);
+   ~VariableType();
 
-	static VariableType vt_boolhard;
-	static VariableType vt_boolsoft;
-	static VariableType vt_char;
-	static VariableType vt_int;
-	static VariableType vt_label;
-	static VariableType vt_real;
-	static VariableType vt_string;
-	static VariableType vt_uint;
-	static VariableType vt_void;
+   VecStr names;
+   Vector types;
 
-	static VariableType vtc_boolhard;
-	static VariableType vtc_boolsoft;
-	static VariableType vtc_char;
-	static VariableType vtc_int;
-	static VariableType vtc_label;
-	static VariableType vtc_real;
-	static VariableType vtc_string;
-	static VariableType vtc_uint;
-	static VariableType vtc_void;
+   VariableType *next;
+   VariableType *prev;
+
+   VariableType *specnext;
+   VariableType *specprev;
+
+   RawSet        typeArr;
+   VariableType *typePtr;
+   Reference     typeRet;
+   Pointer       typeUnq;
+
+   BasicType basic;
+   unsigned  quals;
+   unsigned  store;
+   bigsint   width;
+
+   bool complete : 1;
+
+
+   static Reference copy_and_link(VariableType *base);
+
+   static Reference get_bt_anonymous
+   (Vector types, VariableType *typeRet, VariableType *head, BasicType basic);
 };
 
-#endif /* HPP_VariableType_ */
+
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
+
+std::string const &make_string(VariableType::BasicType basic);
+
+#endif//HPP_VariableType_
 
