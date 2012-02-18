@@ -175,6 +175,7 @@ public:
 
 private:
    explicit VariableType();
+   explicit VariableType(VariableType &type);
    explicit VariableType(BasicType basic);
    ~VariableType();
 
@@ -199,8 +200,6 @@ private:
 
    bool complete : 1;
 
-
-   static Reference copy_and_link(VariableType *base);
 
    static Reference get_bt_anonymous
    (Vector types, VariableType *typeRet, VariableType *head, BasicType basic);

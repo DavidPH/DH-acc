@@ -98,6 +98,19 @@ VariableType::VariableType()
 //
 // VariableType::VariableType
 //
+VariableType::VariableType(VariableType &type)
+ : next(type.next), prev(&type), specnext(this), specprev(this),
+   typeArr(NULL), typePtr(NULL), typeRet(type.typeRet),
+   basic(type.basic), quals(type.quals), store(type.store), width(type.width),
+   complete(type.complete)
+{
+   type.next->prev = this;
+   type.next = this;
+}
+
+//
+// VariableType::VariableType
+//
 VariableType::VariableType(BasicType _basic)
  : next(this), prev(this), specnext(this), specprev(this),
    typeArr(NULL), typePtr(NULL), typeRet(get_bt_void()),
@@ -270,7 +283,7 @@ VariableType::Reference VariableType::setQualifier(unsigned _quals)
          return Reference(iter);
    }
 
-   VariableType::Reference type = copy_and_link(this);
+   VariableType::Reference type(new VariableType(*this));
 
    type->quals = _quals;
    if (basic == BT_STRUCT || basic == BT_UNION || basic == BT_BLOCK)
@@ -298,7 +311,7 @@ VariableType::Reference VariableType::setStorage(unsigned _store)
          return Reference(iter);
    }
 
-   VariableType::Reference type = copy_and_link(this);
+   VariableType::Reference type(new VariableType(*this));
 
    type->store = _store;
    if (basic == BT_STRUCT || basic == BT_UNION || basic == BT_BLOCK)
@@ -577,7 +590,7 @@ VariableType::Reference VariableType::get_bt_anonymous
 
    typeRet = typeRet->getUnqualified();
 
-   // Look for a matching type.
+   // Look for a matching type. (Equality to head is handled by caller.)
    for (VariableType *iter = head->specnext; iter != head; iter = iter->specnext)
    {
       if (iter->typeRet == typeRet && iter->types == types)
@@ -677,21 +690,6 @@ VariableType::Reference VariableType::get_bt_script
 //===================================================================
 // Miscellaneous.
 //
-
-//
-// VariableType::copy_and_link
-//
-VariableType::Reference VariableType::copy_and_link(VariableType *base)
-{
-   Reference type(new VariableType(*base));
-
-   type->next = base->next;
-   type->prev = base;
-   base->next->prev = type;
-   base->next = type;
-
-   return type;
-}
 
 //
 // make_string<VariableType::BasicType>
