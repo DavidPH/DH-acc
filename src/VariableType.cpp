@@ -89,7 +89,7 @@ static bool operator != (std::vector<T> const &l, std::vector<T> const &r)
 //
 VariableType::VariableType()
  : next(this), prev(this), specnext(this), specprev(this),
-   typePtr(NULL), typeRet(this),
+   typeArr(NULL), typePtr(NULL), typeRet(this),
    basic(BT_VOID), quals(0), store(ST_ADDR), width(0),
    complete(true)
 {
@@ -100,7 +100,7 @@ VariableType::VariableType()
 //
 VariableType::VariableType(BasicType _basic)
  : next(this), prev(this), specnext(this), specprev(this),
-   typePtr(NULL), typeRet(get_bt_void()),
+   typeArr(NULL), typePtr(NULL), typeRet(get_bt_void()),
    basic(_basic), quals(0), store(ST_ADDR), width(0),
    complete(true)
 {
@@ -175,7 +175,8 @@ VariableType::~VariableType()
 
    // Reference types.
    case BT_ARRAY:
-      typeRet->typeArr.erase(this);
+      if (typeRet->typeArr == this)
+         typeRet->typeArr = specnext == this ? NULL : specnext;
       break;
 
    case BT_POINTER:
@@ -208,17 +209,34 @@ VariableType::~VariableType()
 //
 VariableType::Reference VariableType::getArray(bigsint _width)
 {
-   for (RawSet::iterator iter = typeArr.begin(); iter != typeArr.end(); ++iter)
+   if (!typeArr)
    {
-      if ((*iter)->width == _width)
-         return static_cast<Reference>(*iter);
+      typeArr = new VariableType(BT_ARRAY);
+
+      typeArr->typeRet = static_cast<Reference>(this);
+      typeArr->width = _width;
+
+      return static_cast<Reference>(typeArr);
+   }
+
+   for (VariableType *iter = typeArr->specnext; ; iter = iter->specnext)
+   {
+      if (iter->width == _width)
+         return static_cast<Reference>(iter);
+
+      if (iter == typeArr) break;
    }
 
    Reference type(new VariableType(BT_ARRAY));
 
    type->typeRet = Reference(this);
    type->width = _width;
-   typeArr.insert(type);
+
+   // Link into speclist.
+   type->specprev = typeArr;
+   type->specnext = typeArr->specnext;
+   typeArr->specnext->specprev = type;
+   typeArr->specnext = type;
 
    return type;
 }

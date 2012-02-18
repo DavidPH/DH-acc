@@ -27,7 +27,6 @@
 #include "bignum.hpp"
 #include "Counter.hpp"
 
-#include <set>
 #include <string>
 #include <vector>
 
@@ -175,9 +174,6 @@ public:
    static Reference get_bt_script(Vector const &types, VariableType *typeRet);
 
 private:
-   typedef std::set<VariableType *> RawSet;
-
-
    explicit VariableType();
    explicit VariableType(BasicType basic);
    ~VariableType();
@@ -191,7 +187,7 @@ private:
    VariableType *specnext;
    VariableType *specprev;
 
-   RawSet        typeArr;
+   VariableType *typeArr;
    VariableType *typePtr;
    Reference     typeRet;
    Pointer       typeUnq;
