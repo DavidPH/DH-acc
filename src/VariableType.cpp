@@ -99,8 +99,10 @@ VariableType::VariableType()
 // VariableType::VariableType
 //
 VariableType::VariableType(VariableType &type)
- : next(type.next), prev(&type), specnext(this), specprev(this),
+ : names(type.names), types(type.types),
+   next(type.next), prev(&type), specnext(this), specprev(this),
    typeArr(NULL), typePtr(NULL), typeRet(type.typeRet),
+   typeUnq(type.getUnqualified()),
    basic(type.basic), quals(type.quals), store(type.store), width(type.width),
    complete(type.complete)
 {
@@ -292,7 +294,6 @@ VariableType::Reference VariableType::setQualifier(unsigned _quals)
            iter != type->types.end(); ++iter)
          *iter = (*iter)->setQualifier(_quals);
    }
-   type->typeUnq = getUnqualified();
 
    return type;
 }
@@ -320,7 +321,6 @@ VariableType::Reference VariableType::setStorage(unsigned _store)
            iter != type->types.end(); ++iter)
          *iter = (*iter)->setStorage(_store);
    }
-   type->typeUnq = getUnqualified();
 
    return type;
 }
