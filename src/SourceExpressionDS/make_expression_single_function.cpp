@@ -24,11 +24,30 @@
 #include "../SourceExpressionDS.hpp"
 
 #include "../ObjectExpression.hpp"
+#include "../option.hpp"
 #include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
 #include "../VariableType.hpp"
+
+
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
+
+extern bool option_string_func;
+static option::option_dptr<bool> option_string_func_handle
+('\0', "string-func", "features",
+ "Enables __func__ constants for functions and scripts. On by default.", NULL,
+ &option_string_func);
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+bool option_string_func = true;
 
 
 //----------------------------------------------------------------------------|
@@ -106,6 +125,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
    std::string functionName = functionNameToken.getData();
 
    // __func__
+   if (option_string_func)
    {
       std::string funcVarData = ObjectData_String::add(functionName);
 

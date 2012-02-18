@@ -34,6 +34,13 @@
 
 
 //----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+extern bool option_string_func;
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -86,6 +93,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    std::string scriptName = scriptNameToken.getData();
 
    // __func__
+   if (option_string_func)
    {
       std::string funcVarData = ObjectData_String::add(scriptName);
 
