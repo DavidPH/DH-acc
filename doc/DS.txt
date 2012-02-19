@@ -75,6 +75,11 @@ operator * (unary)
   Yields the value pointed-to by expression.
     "*" expression_single
 
+operator @
+  Yields the "storage area" of expression. This is most useful for
+  registerarray variables as it returns the array number.
+    "@" expression_single
+
 operator & (unary)
   Yields a pointer to expression.
     "&" expression_single

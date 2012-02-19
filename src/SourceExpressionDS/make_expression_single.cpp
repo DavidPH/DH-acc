@@ -28,6 +28,7 @@
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -121,6 +122,11 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 	case SourceTokenC::TT_OP_ASTERISK:
       expr = create_unary_dereference(make_expression_single(in, blocks, context), PASS_A);
 		break;
+
+   case SourceTokenC::TT_OP_AT:
+      expr = make_expression_single(in, blocks, context);
+      expr = create_value_variable(SourceVariable::create_literal(VariableType::get_bt_uint(), expr->getData()->address, token.getPosition()), PASS_A);
+      break;
 
 	case SourceTokenC::TT_OP_BRACE_O:
 	{
