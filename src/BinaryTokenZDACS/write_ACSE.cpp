@@ -152,7 +152,7 @@ void BinaryTokenZDACS::
 write_ACSE_registerarray_ARAY(std::ostream *out,
                               ObjectData_RegisterArray const &r)
 {
-   if (!r.externDef) return;
+   if (r.externDef) return;
 
    BinaryTokenACS::write_ACS0_32(out, r.number);
    BinaryTokenACS::write_ACS0_32(out, r.size);
