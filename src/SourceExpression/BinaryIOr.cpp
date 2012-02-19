@@ -43,12 +43,36 @@ class SourceExpression_BinaryIOr : public SourceExpression_Binary
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryIOr(SRCEXP_EXPRBIN_ARGS);
+   SourceExpression_BinaryIOr(bool assign, SRCEXP_EXPRBIN_ARGS);
 
-   virtual CounterPointer<ObjectExpression> makeObject() const;
+   virtual ObjectExpression::Pointer makeObject() const;
 
 private:
+   //
+   // ::doAssign
+   //
+   void doAssign(ObjectVector *objects, VariableData *dst)
+   {
+      ASSIGN_BITWISE_VARS
+
+      ASSIGN_GET_OCODE_BITWISE(IOR)
+
+      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+   }
+
+   //
+   // ::doEvaluate
+   //
+   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   {
+      EVALUATE_BITWISE_VARS(BITWISE_IOR)
+
+      doEvaluateBase(objects, dst, src, ocode);
+   }
+
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+
+   bool assign;
 };
 
 
@@ -61,7 +85,8 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(ior)
 {
-   return new SourceExpression_BinaryIOr(exprL, exprR, context, position);
+   return new SourceExpression_BinaryIOr
+              (false, exprL, exprR, context, position);
 }
 
 //
@@ -69,19 +94,21 @@ SRCEXP_EXPRBIN_DEFN(ior)
 //
 SRCEXP_EXPRBIN_DEFN(ior_eq)
 {
-   return create_binary_assign
-          (exprL, create_binary_ior
-                  (exprL, exprR, context, position),
-           context, position);
+   return new SourceExpression_BinaryIOr
+              (true, exprL, exprR, context, position);
 }
 
 //
 // SourceExpression_BinaryIOr::SourceExpression_BinaryIOr
 //
-SourceExpression_BinaryIOr::
-SourceExpression_BinaryIOr(SRCEXP_EXPRBIN_PARM)
-                           : Super(false, SRCEXP_EXPRBIN_PASS)
+SourceExpression_BinaryIOr::SourceExpression_BinaryIOr
+(bool _assign, SRCEXP_EXPRBIN_PARM)
+ : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
 {
+   CONSTRUCTOR_TYPE_VARS
+   CONSTRUCTOR_ARRAY_DECAY
+
+   CONSTRAINT_INTEGER("|")
 }
 
 //
@@ -101,20 +128,10 @@ void SourceExpression_BinaryIOr::virtual_makeObjects
 {
    Super::recurse_makeObjects(objects, dst);
 
-   switch (getType()->getBasicType())
-   {
-   case VariableType::BT_CHAR:
-   case VariableType::BT_INT:
-   case VariableType::BT_UINT:
-      objects->addToken(OCODE_BITWISE_IOR32);
-      break;
-
-   default:
-      throw SourceException("invalid BT", position, getName());
-   }
-
-   make_objects_memcpy_post
-   (objects, dst, VariableData::create_stack(getType()->getSize(position)), position);
+   if (assign)
+      doAssign(objects, dst);
+   else
+      doEvaluate(objects, dst);
 }
 
 // EOF

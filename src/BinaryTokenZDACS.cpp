@@ -88,6 +88,13 @@ void BinaryTokenZDACS::init()
    DO_INIT(TRIG_COS, 0);
    DO_INIT(TRIG_SIN, 0);
 
+   // Variable Set Op
+   DO_INIT(SETOP_AND_REGISTER, 1);
+   DO_INIT(SETOP_IOR_REGISTER, 1);
+   DO_INIT(SETOP_LSH_REGISTER, 1);
+   DO_INIT(SETOP_RSH_REGISTER, 1);
+   DO_INIT(SETOP_XOR_REGISTER, 1);
+
    // Miscellaneous
    DO_INIT(MISC_NATIVE, 2);
 

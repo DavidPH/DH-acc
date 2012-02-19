@@ -108,7 +108,106 @@ ObjectCode ocodeOp  = OCODE_NONE;                 \
 ObjectCode ocodeGet = OCODE_NONE;                 \
 int ocodeOpType;                                  \
 int ocodeGetType;                                 \
-bool ocodeTyped = false;
+bool ocodeTyped = false;                          \
+ocodeOpType = getOcodeType(typeL->getBasicType(), &ocodeGetType);
+
+//
+// ASSIGN_BITWISE_VARS
+//
+#define ASSIGN_BITWISE_VARS                       \
+VariableType::Reference typeL = exprL->getType(); \
+VariableData::Pointer   src   = exprL->getData(); \
+ObjectCode ocodeOp  = OCODE_NONE;                 \
+ObjectCode ocodeGet = OCODE_NONE;                 \
+int ocodeOpType = 0;                              \
+int ocodeGetType;                                 \
+bool ocodeTyped = false;                          \
+getOcodeType(typeL->getBasicType(), &ocodeGetType);
+
+//
+// ASSIGN_GET_OCODE_GET_REGISTER
+//
+#define ASSIGN_GET_OCODE_GET_REGISTER        \
+switch (src->sectionR)                       \
+{                                            \
+case VariableData::SR_LOCAL:                 \
+   ocodeGet = OCODE_GET_REGISTER32F;         \
+   ocodeTyped = true;                        \
+   break;                                    \
+                                             \
+case VariableData::SR_MAP:                   \
+   ocodeGet = OCODE_ACS_GET_MAPREGISTER;     \
+   break;                                    \
+                                             \
+case VariableData::SR_WORLD:                 \
+   ocodeGet = OCODE_ACS_GET_WORLDREGISTER;   \
+   break;                                    \
+                                             \
+case VariableData::SR_GLOBAL:                \
+   ocodeGet = OCODE_ACSE_GET_GLOBALREGISTER; \
+   break;                                    \
+}
+
+//
+// ASSIGN_GET_OCODE_GET_ARRAY
+//
+#define ASSIGN_GET_OCODE_GET_ARRAY        \
+switch (src->sectionRA)                   \
+{                                         \
+case VariableData::SRA_MAP:               \
+   ocodeGet = OCODE_ACSE_GET_MAPARRAY;    \
+   break;                                 \
+                                          \
+case VariableData::SRA_WORLD:             \
+   ocodeGet = OCODE_ACSE_GET_WORLDARRAY;  \
+   break;                                 \
+                                          \
+case VariableData::SRA_GLOBAL:            \
+   ocodeGet = OCODE_ACSE_GET_GLOBALARRAY; \
+   break;                                 \
+}
+
+//
+// ASSIGN_GET_OCODE_GET
+//
+#define ASSIGN_GET_OCODE_GET                                    \
+switch (src->type)                                              \
+{                                                               \
+case VariableData::MT_AUTO:                                     \
+   ocodeGet = OCODE_GET_AUTO32F;                                \
+   ocodeTyped = true;                                           \
+   break;                                                       \
+                                                                \
+case VariableData::MT_POINTER:                                  \
+   ocodeGet = OCODE_GET_POINTER32F;                             \
+   ocodeTyped = true;                                           \
+   break;                                                       \
+                                                                \
+case VariableData::MT_REGISTER:                                 \
+   ASSIGN_GET_OCODE_GET_REGISTER                                \
+   break;                                                       \
+                                                                \
+case VariableData::MT_REGISTERARRAY:                            \
+   ASSIGN_GET_OCODE_GET_ARRAY                                   \
+   break;                                                       \
+                                                                \
+case VariableData::MT_STATIC:                                   \
+   ocodeGet = OCODE_GET_STATIC32F;                              \
+   ocodeTyped = true;                                           \
+   break;                                                       \
+                                                                \
+case VariableData::MT_LITERAL:                                  \
+case VariableData::MT_STACK:                                    \
+case VariableData::MT_VOID:                                     \
+case VariableData::MT_NONE:                                     \
+   throw SourceException("invalid MT", position, getName());    \
+}                                                               \
+                                                                \
+if (ocodeTyped)                                                 \
+{                                                               \
+   ocodeOp  = static_cast<ObjectCode>(ocodeOp  + ocodeOpType);  \
+   ocodeGet = static_cast<ObjectCode>(ocodeGet + ocodeGetType); \
+}
 
 //
 // ASSIGN_GET_OCODE_ARITHMETIC_REGISTER
@@ -118,23 +217,19 @@ switch (src->sectionR)                                  \
 {                                                       \
 case VariableData::SR_LOCAL:                            \
    ocodeOp  = OCODE_SETOP_##OPER##_REGISTER32F;         \
-   ocodeGet = OCODE_GET_REGISTER32F;                    \
    ocodeTyped = true;                                   \
    break;                                               \
                                                         \
 case VariableData::SR_MAP:                              \
    ocodeOp  = OCODE_ACS_SETOP_##OPER##_MAPREGISTER;     \
-   ocodeGet = OCODE_ACS_GET_MAPREGISTER;                \
    break;                                               \
                                                         \
 case VariableData::SR_WORLD:                            \
    ocodeOp  = OCODE_ACS_SETOP_##OPER##_WORLDREGISTER;   \
-   ocodeGet = OCODE_ACS_GET_WORLDREGISTER;              \
    break;                                               \
                                                         \
 case VariableData::SR_GLOBAL:                           \
    ocodeOp  = OCODE_ACSE_SETOP_##OPER##_GLOBALREGISTER; \
-   ocodeGet = OCODE_ACSE_GET_GLOBALREGISTER;            \
    break;                                               \
 }
 
@@ -146,17 +241,14 @@ switch (src->sectionRA)                              \
 {                                                    \
 case VariableData::SRA_MAP:                          \
    ocodeOp  = OCODE_ACSE_SETOP_##OPER##_MAPARRAY;    \
-   ocodeGet = OCODE_ACSE_GET_MAPARRAY;               \
    break;                                            \
                                                      \
 case VariableData::SRA_WORLD:                        \
    ocodeOp  = OCODE_ACSE_SETOP_##OPER##_WORLDARRAY;  \
-   ocodeGet = OCODE_ACSE_GET_WORLDARRAY;             \
    break;                                            \
                                                      \
 case VariableData::SRA_GLOBAL:                       \
    ocodeOp  = OCODE_ACSE_SETOP_##OPER##_GLOBALARRAY; \
-   ocodeGet = OCODE_ACSE_GET_GLOBALARRAY;            \
    break;                                            \
 }
 
@@ -170,13 +262,11 @@ switch (src->type)                                                \
 {                                                                 \
 case VariableData::MT_AUTO:                                       \
    ocodeOp  = OCODE_SETOP_##OPER##_AUTO32F;                       \
-   ocodeGet = OCODE_GET_AUTO32F;                                  \
    ocodeTyped = true;                                             \
    break;                                                         \
                                                                   \
 case VariableData::MT_POINTER:                                    \
    ocodeOp  = OCODE_SETOP_##OPER##_POINTER32F;                    \
-   ocodeGet = OCODE_GET_POINTER32F;                               \
    ocodeTyped = true;                                             \
    break;                                                         \
                                                                   \
@@ -190,7 +280,6 @@ case VariableData::MT_REGISTERARRAY:                              \
                                                                   \
 case VariableData::MT_STATIC:                                     \
    ocodeOp  = OCODE_SETOP_##OPER##_STATIC32F;                     \
-   ocodeGet = OCODE_GET_STATIC32F;                                \
    ocodeTyped = true;                                             \
    break;                                                         \
                                                                   \
@@ -201,11 +290,84 @@ case VariableData::MT_NONE:                                       \
    throw SourceException("invalid MT", position, getName());      \
 }                                                                 \
                                                                   \
-if (ocodeTyped)                                                   \
-{                                                                 \
-   ocodeOp  = static_cast<ObjectCode>(ocodeOp  + ocodeOpType);    \
-   ocodeGet = static_cast<ObjectCode>(ocodeGet + ocodeGetType);   \
+ASSIGN_GET_OCODE_GET
+
+//
+// ASSIGN_GET_OCODE_BITWISE_REGISTER
+//
+#define ASSIGN_GET_OCODE_BITWISE_REGISTER(OPER)         \
+switch (src->sectionR)                                  \
+{                                                       \
+case VariableData::SR_LOCAL:                            \
+   ocodeOp  = OCODE_SETOP_##OPER##_REGISTER32;          \
+   break;                                               \
+                                                        \
+case VariableData::SR_MAP:                              \
+   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_MAPREGISTER;    \
+   break;                                               \
+                                                        \
+case VariableData::SR_WORLD:                            \
+   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_WORLDREGISTER;  \
+   break;                                               \
+                                                        \
+case VariableData::SR_GLOBAL:                           \
+   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_GLOBALREGISTER; \
+   break;                                               \
 }
+
+//
+// ASSIGN_GET_OCODE_BITWISE_ARRAY
+//
+#define ASSIGN_GET_OCODE_BITWISE_ARRAY(OPER)         \
+switch (src->sectionRA)                              \
+{                                                    \
+case VariableData::SRA_MAP:                          \
+   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_MAPARRAY;    \
+   break;                                            \
+                                                     \
+case VariableData::SRA_WORLD:                        \
+   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_WORLDARRAY;  \
+   break;                                            \
+                                                     \
+case VariableData::SRA_GLOBAL:                       \
+   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_GLOBALARRAY; \
+   break;                                            \
+}
+
+//
+// ASSIGN_GET_OCODE_BITWISE
+//
+#define ASSIGN_GET_OCODE_BITWISE(OPER)                       \
+switch (src->type)                                           \
+{                                                            \
+case VariableData::MT_AUTO:                                  \
+   ocodeOp  = OCODE_SETOP_##OPER##_AUTO32;                   \
+   break;                                                    \
+                                                             \
+case VariableData::MT_POINTER:                               \
+   ocodeOp  = OCODE_SETOP_##OPER##_POINTER32;                \
+   break;                                                    \
+                                                             \
+case VariableData::MT_REGISTER:                              \
+   ASSIGN_GET_OCODE_BITWISE_REGISTER(OPER)                   \
+   break;                                                    \
+                                                             \
+case VariableData::MT_REGISTERARRAY:                         \
+   ASSIGN_GET_OCODE_BITWISE_ARRAY(OPER)                      \
+   break;                                                    \
+                                                             \
+case VariableData::MT_STATIC:                                \
+   ocodeOp  = OCODE_SETOP_##OPER##_STATIC32;                 \
+   break;                                                    \
+                                                             \
+case VariableData::MT_LITERAL:                               \
+case VariableData::MT_STACK:                                 \
+case VariableData::MT_VOID:                                  \
+case VariableData::MT_NONE:                                  \
+   throw SourceException("invalid MT", position, getName()); \
+}                                                            \
+                                                             \
+ASSIGN_GET_OCODE_GET
 
 //
 // EVALUATE_ARITHMETIC_VARS
@@ -218,6 +380,17 @@ bigsint                 size = type->getSize(position);    \
 ObjectCode ocode = OCODE_##OPER##32F;                      \
 ocode = static_cast<ObjectCode>(ocode + getOcodeType(bt)); \
                                                            \
+VariableData::Pointer src = VariableData::create_stack(size);
+
+//
+// EVALUATE_BITWISE_VARS
+//
+#define EVALUATE_BITWISE_VARS(OPER)                     \
+VariableType::Reference type = getType();               \
+bigsint                 size = type->getSize(position); \
+                                                        \
+ObjectCode ocode = OCODE_##OPER##32;                    \
+                                                        \
 VariableData::Pointer src = VariableData::create_stack(size);
 
 

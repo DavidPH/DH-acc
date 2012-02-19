@@ -43,12 +43,36 @@ class SourceExpression_BinaryXOr : public SourceExpression_Binary
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryXOr(SRCEXP_EXPRBIN_ARGS);
+   SourceExpression_BinaryXOr(bool assign, SRCEXP_EXPRBIN_ARGS);
 
-   virtual CounterPointer<ObjectExpression> makeObject() const;
+   virtual ObjectExpression::Pointer makeObject() const;
 
 private:
+   //
+   // ::doAssign
+   //
+   void doAssign(ObjectVector *objects, VariableData *dst)
+   {
+      ASSIGN_BITWISE_VARS
+
+      ASSIGN_GET_OCODE_BITWISE(XOR)
+
+      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+   }
+
+   //
+   // ::doEvaluate
+   //
+   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   {
+      EVALUATE_BITWISE_VARS(BITWISE_XOR)
+
+      doEvaluateBase(objects, dst, src, ocode);
+   }
+
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+
+   bool assign;
 };
 
 
@@ -61,7 +85,8 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(xor)
 {
-   return new SourceExpression_BinaryXOr(exprL, exprR, context, position);
+   return new SourceExpression_BinaryXOr
+              (false, exprL, exprR, context, position);
 }
 
 //
@@ -69,19 +94,21 @@ SRCEXP_EXPRBIN_DEFN(xor)
 //
 SRCEXP_EXPRBIN_DEFN(xor_eq)
 {
-   return create_binary_assign
-          (exprL, create_binary_xor
-                  (exprL, exprR, context, position),
-           context, position);
+   return new SourceExpression_BinaryXOr
+              (true, exprL, exprR, context, position);
 }
 
 //
 // SourceExpression_BinaryXOr::SourceExpression_BinaryXOr
 //
-SourceExpression_BinaryXOr::
-SourceExpression_BinaryXOr(SRCEXP_EXPRBIN_PARM)
-                           : Super(false, SRCEXP_EXPRBIN_PASS)
+SourceExpression_BinaryXOr::SourceExpression_BinaryXOr
+(bool _assign, SRCEXP_EXPRBIN_PARM)
+ : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
 {
+   CONSTRUCTOR_TYPE_VARS
+   CONSTRUCTOR_ARRAY_DECAY
+
+   CONSTRAINT_INTEGER("^")
 }
 
 //
@@ -100,20 +127,10 @@ void SourceExpression_BinaryXOr::virtual_makeObjects(ObjectVector *objects, Vari
 {
    Super::recurse_makeObjects(objects, dst);
 
-   switch (getType()->getBasicType())
-   {
-   case VariableType::BT_CHAR:
-   case VariableType::BT_INT:
-   case VariableType::BT_UINT:
-      objects->addToken(OCODE_BITWISE_XOR32);
-      break;
-
-   default:
-      throw SourceException("invalid BT", position, getName());
-   }
-
-   make_objects_memcpy_post
-   (objects, dst, VariableData::create_stack(getType()->getSize(position)), position);
+   if (assign)
+      doAssign(objects, dst);
+   else
+      doEvaluate(objects, dst);
 }
 
 // EOF

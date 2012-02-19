@@ -54,12 +54,12 @@
    CASE_REMAP(MOD32U, MOD)  /* WARNING */
 
 
-#define BINTOKACS_TOKENS_MAP_BITWISE()        \
-   CASE_REMAP_PRE(BITWISE, AND32,    AND);    \
-   CASE_REMAP_PRE(BITWISE, IOR32,    IOR);    \
-   CASE_REMAP_PRE(BITWISE, SHIFTL32, SHIFTL); \
-   CASE_REMAP_PRE(BITWISE, SHIFTR32, SHIFTR); \
-   CASE_REMAP_PRE(BITWISE, XOR32,    XOR)
+#define BINTOKACS_TOKENS_MAP_BITWISE()  \
+   CASE_REMAP_PRE(BITWISE, AND32, AND); \
+   CASE_REMAP_PRE(BITWISE, IOR32, IOR); \
+   CASE_REMAP_PRE(BITWISE, LSH32, LSH); \
+   CASE_REMAP_PRE(BITWISE, RSH32, RSH); \
+   CASE_REMAP_PRE(BITWISE, XOR32, XOR)
 
 #define BINTOKACS_TOKENS_MAP_BITWISE_ALL() \
    BINTOKACS_TOKENS_MAP_BITWISE()
@@ -294,13 +294,13 @@
    case OCODE_CONVERT_32F_32I:          \
       args.push_back(fracbits);         \
       PUSH_TOKEN(BCODE_GET_LITERAL);    \
-      PUSH_TOKEN(BCODE_BITWISE_SHIFTR); \
+      PUSH_TOKEN(BCODE_BITWISE_RSH);    \
       break;                            \
                                         \
    case OCODE_CONVERT_32I_32F:          \
       args.push_back(fracbits);         \
       PUSH_TOKEN(BCODE_GET_LITERAL);    \
-      PUSH_TOKEN(BCODE_BITWISE_SHIFTL); \
+      PUSH_TOKEN(BCODE_BITWISE_LSH);    \
       break
 
 #define BINTOKACS_TOKENS_TRAN_CONVERT_ALL() \

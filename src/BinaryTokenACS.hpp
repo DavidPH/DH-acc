@@ -127,8 +127,8 @@ public:
       BCODE_BITWISE_IOR                  =  73, \
       BCODE_BITWISE_XOR                  =  74, \
       BCODE_LOGICAL_NOT                  =  75, \
-      BCODE_BITWISE_SHIFTL               =  76, \
-      BCODE_BITWISE_SHIFTR               =  77, \
+      BCODE_BITWISE_LSH                  =  76, \
+      BCODE_BITWISE_RSH                  =  77, \
       BCODE_MISC_NEGATE                  =  78, \
       BCODE_BRANCH_ZERO                  =  79, \
       BCODE_LINE_GET_SIDE                =  80, \

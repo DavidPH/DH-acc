@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator &" and "operator &=".
+// SourceExpression handling of "operator <<" and "operator <<=".
 //
 //-----------------------------------------------------------------------------
 
@@ -35,17 +35,33 @@
 //
 
 //
-// SourceExpression_BinaryAnd
+// SourceExpression_BinaryLSh
 //
-class SourceExpression_BinaryAnd : public SourceExpression_Binary
+class SourceExpression_BinaryLSh : public SourceExpression_Binary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryAnd,
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryLSh,
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryAnd(bool assign, SRCEXP_EXPRBIN_ARGS);
+   //
+   // ::SourceExpression_BinaryLSh
+   //
+   SourceExpression_BinaryLSh(bool _assign, SRCEXP_EXPRBIN_PARM)
+    : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
+   {
+      CONSTRUCTOR_TYPE_VARS
+      CONSTRUCTOR_ARRAY_DECAY
 
-   virtual ObjectExpression::Pointer makeObject() const;
+      CONSTRAINT_INTEGER("<<")
+   }
+
+   //
+   // ::canMakeObject
+   //
+   virtual bool canMakeObject() const
+   {
+      return false;
+   }
 
 private:
    //
@@ -55,7 +71,7 @@ private:
    {
       ASSIGN_BITWISE_VARS
 
-      ASSIGN_GET_OCODE_BITWISE(AND)
+      ASSIGN_GET_OCODE_BITWISE(LSH)
 
       doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
    }
@@ -65,12 +81,23 @@ private:
    //
    void doEvaluate(ObjectVector *objects, VariableData *dst)
    {
-      EVALUATE_BITWISE_VARS(BITWISE_AND)
+      EVALUATE_BITWISE_VARS(BITWISE_LSH)
 
       doEvaluateBase(objects, dst, src, ocode);
    }
 
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   //
+   // ::virtual_makeObjects
+   //
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+   {
+      Super::recurse_makeObjects(objects, dst);
+
+      if (assign)
+         doAssign(objects, dst);
+      else
+         doEvaluate(objects, dst);
+   }
 
    bool assign;
 };
@@ -81,57 +108,21 @@ private:
 //
 
 //
-// SourceExpression::create_binary_and
+// SourceExpression::create_binary_lsh
 //
-SRCEXP_EXPRBIN_DEFN(and)
+SRCEXP_EXPRBIN_DEFN(lsh)
 {
-   return new SourceExpression_BinaryAnd
+   return new SourceExpression_BinaryLSh
               (false, exprL, exprR, context, position);
 }
 
 //
-// SourceExpression::create_binary_and_eq
+// SourceExpression::create_binary_lsh_eq
 //
-SRCEXP_EXPRBIN_DEFN(and_eq)
+SRCEXP_EXPRBIN_DEFN(lsh_eq)
 {
-   return new SourceExpression_BinaryAnd
+   return new SourceExpression_BinaryLSh
               (true, exprL, exprR, context, position);
-}
-
-//
-// SourceExpression_BinaryAnd::SourceExpression_BinaryAnd
-//
-SourceExpression_BinaryAnd::SourceExpression_BinaryAnd
-(bool _assign, SRCEXP_EXPRBIN_PARM)
- : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
-{
-   CONSTRUCTOR_TYPE_VARS
-   CONSTRUCTOR_ARRAY_DECAY
-
-   CONSTRAINT_INTEGER("&")
-}
-
-//
-// SourceExpression_BinaryAnd::makeObject
-//
-ObjectExpression::Pointer SourceExpression_BinaryAnd::makeObject() const
-{
-   return ObjectExpression::create_binary_and
-          (exprL->makeObject(), exprR->makeObject(), position);
-}
-
-//
-// SourceExpression_BinaryAnd::virtual_makeObjects
-//
-void SourceExpression_BinaryAnd::virtual_makeObjects
-(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   if (assign)
-      doAssign(objects, dst);
-   else
-      doEvaluate(objects, dst);
 }
 
 // EOF

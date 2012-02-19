@@ -84,11 +84,11 @@ void BinaryTokenACS::init(int *argCounts)
    DO_INIT(SUB, 0);
 
    // Bitwise
-   DO_INIT(BITWISE_AND,    0);
-   DO_INIT(BITWISE_IOR,    0);
-   DO_INIT(BITWISE_SHIFTL, 0);
-   DO_INIT(BITWISE_SHIFTR, 0);
-   DO_INIT(BITWISE_XOR,    0);
+   DO_INIT(BITWISE_AND, 0);
+   DO_INIT(BITWISE_IOR, 0);
+   DO_INIT(BITWISE_LSH, 0);
+   DO_INIT(BITWISE_RSH, 0);
+   DO_INIT(BITWISE_XOR, 0);
 
    // Branching
    DO_INIT(BRANCH_CASE,     2);
