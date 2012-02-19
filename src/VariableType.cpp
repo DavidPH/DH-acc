@@ -692,6 +692,45 @@ VariableType::Reference VariableType::get_bt_script
 //
 
 //
+// VariableType::is_bt_arithmetic
+//
+bool VariableType::is_bt_arithmetic(BasicType type)
+{
+   switch (type)
+   {
+   case BT_BOOLHARD:
+   case BT_BOOLSOFT:
+   case BT_CHAR:
+   case BT_INT:
+   case BT_REAL:
+   case BT_UINT:
+      return true;
+
+   default:
+      return false;
+   }
+}
+
+//
+// VariableType::is_bt_integer
+//
+bool VariableType::is_bt_integer(BasicType type)
+{
+   switch (type)
+   {
+   case BT_BOOLHARD:
+   case BT_BOOLSOFT:
+   case BT_CHAR:
+   case BT_INT:
+   case BT_UINT:
+      return true;
+
+   default:
+      return false;
+   }
+}
+
+//
 // make_string<VariableType::BasicType>
 //
 std::string const &make_string(VariableType::BasicType basic)

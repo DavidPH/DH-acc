@@ -69,60 +69,53 @@ make_expression(SourceExpression::Vector const &expressions,
    // &= &&= *= ^= ^^= >>= <<= = -= |= ||= += /=
    for (iter = start; iter < stop; ++iter)
    {
-      #define DO_CASE(FUNC)                                   \
-         exprl = EXPRL;                                       \
-         exprr = SourceExpression::FUNC(exprl, EXPRR, CARGS); \
-         return SourceExpression::create_binary_assign(exprl, exprr, CARGS)
-
       switch (operators[iter].getType())
       {
       case SourceTokenC::TT_OP_AND_EQUALS:
-         DO_CASE(create_binary_and);
+         return SourceExpression::create_binary_and_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_AND2_EQUALS:
-         DO_CASE(create_branch_and);
+         return SourceExpression::create_branch_and_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_ASTERISK_EQUALS:
-         DO_CASE(create_binary_mul);
+         return SourceExpression::create_binary_mul_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_CARET_EQUALS:
-         DO_CASE(create_binary_xor);
+         return SourceExpression::create_binary_xor_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_CARET2_EQUALS:
-         DO_CASE(create_branch_xor);
+         return SourceExpression::create_branch_xor_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_CMP_GT2_EQUALS:
-         DO_CASE(create_binary_shiftr);
+         return SourceExpression::create_binary_rsh_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_CMP_LT2_EQUALS:
-         DO_CASE(create_binary_shiftl);
+         return SourceExpression::create_binary_lsh_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_EQUALS:
          return SourceExpression::create_binary_assign(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_MINUS_EQUALS:
-         DO_CASE(create_binary_sub);
+         return SourceExpression::create_binary_sub_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_PERCENT_EQUALS:
-         DO_CASE(create_binary_mod);
+         return SourceExpression::create_binary_mod_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_PIPE_EQUALS:
-         DO_CASE(create_binary_ior);
+         return SourceExpression::create_binary_ior_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_PIPE2_EQUALS:
-         DO_CASE(create_branch_ior);
+         return SourceExpression::create_branch_ior_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_PLUS_EQUALS:
-         DO_CASE(create_binary_add);
+         return SourceExpression::create_binary_add_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_SLASH_EQUALS:
-         DO_CASE(create_binary_div);
+         return SourceExpression::create_binary_div_eq(EXPRL, EXPRR, CARGS);
 
       default:
          break;
       }
-
-      #undef DO_CASE
    }
 
    // ?:
@@ -263,10 +256,10 @@ make_expression(SourceExpression::Vector const &expressions,
       switch (operators[iter].getType())
       {
       case SourceTokenC::TT_OP_CMP_GT2:
-         return SourceExpression::create_binary_shiftr(EXPRL, EXPRR, CARGS);
+         return SourceExpression::create_binary_rsh(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_CMP_LT2:
-         return SourceExpression::create_binary_shiftl(EXPRL, EXPRR, CARGS);
+         return SourceExpression::create_binary_lsh(EXPRL, EXPRR, CARGS);
 
       default:
          break;

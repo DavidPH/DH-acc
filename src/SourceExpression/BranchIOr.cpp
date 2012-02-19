@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator ||".
+// SourceExpression handling of "operator ||" and "operator ||=".
 //
 //-----------------------------------------------------------------------------
 
@@ -59,6 +59,17 @@ private:
 SRCEXP_EXPRBRA_DEFN(b, ior)
 {
 	return new SourceExpression_BranchIOr(exprL, exprR, context, position);
+}
+
+//
+// SourceExpression::create_branch_ior_eq
+//
+SRCEXP_EXPRBRA_DEFN(b, ior_eq)
+{
+   return create_binary_assign
+          (exprL, create_branch_ior
+                  (exprL, exprR, context, position),
+           context, position);
 }
 
 //

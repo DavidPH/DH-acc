@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator %".
+// SourceExpression handling of "operator %" and "operator %=".
 //
 //-----------------------------------------------------------------------------
 
@@ -43,12 +43,38 @@ class SourceExpression_BinaryMod : public SourceExpression_Binary
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryMod(SRCEXP_EXPRBIN_ARGS);
+   SourceExpression_BinaryMod(bool assign, SRCEXP_EXPRBIN_ARGS);
 
    virtual CounterPointer<ObjectExpression> makeObject() const;
 
 private:
+   //
+   // ::doAssign
+   //
+   void doAssign(ObjectVector *objects, VariableData *dst)
+   {
+      ASSIGN_ARITHMETIC_VARS
+
+      ASSIGN_GET_OCODE_ARITHMETIC(MOD)
+
+      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+   }
+
+   //
+   // ::doEvaluate
+   //
+   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   {
+      EVALUATE_ARITHMETIC_VARS(MOD)
+
+      // TODO: X % PO2
+
+      doEvaluateBase(objects, dst, src, ocode);
+   }
+
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+
+   bool assign;
 };
 
 
@@ -61,19 +87,36 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(mod)
 {
-   return new SourceExpression_BinaryMod(exprL, exprR, context, position);
+   return new SourceExpression_BinaryMod
+              (false, exprL, exprR, context, position);
+}
+
+//
+// SourceExpression::create_binary_mod_eq
+//
+SRCEXP_EXPRBIN_DEFN(mod_eq)
+{
+   return new SourceExpression_BinaryMod
+              (true, exprL, exprR, context, position);
 }
 
 //
 // SourceExpression_BinaryMod::SourceExpression_BinaryMod
 //
-SourceExpression_BinaryMod::
-SourceExpression_BinaryMod(SRCEXP_EXPRBIN_PARM)
-                           : Super(true, SRCEXP_EXPRBIN_PASS)
+SourceExpression_BinaryMod::SourceExpression_BinaryMod
+(bool _assign, SRCEXP_EXPRBIN_PARM)
+ : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
 {
+   CONSTRUCTOR_TYPE_VARS
+   CONSTRUCTOR_ARRAY_DECAY
+
+   CONSTRAINT_ARITHMETIC("%")
 }
 
-CounterPointer<ObjectExpression> SourceExpression_BinaryMod::makeObject() const
+//
+// SourceExpression_BinaryMod::makeObject
+//
+ObjectExpression::Pointer SourceExpression_BinaryMod::makeObject() const
 {
    return ObjectExpression::create_binary_mod
           (exprL->makeObject(), exprR->makeObject(), position);
@@ -87,27 +130,10 @@ void SourceExpression_BinaryMod::virtual_makeObjects
 {
    Super::recurse_makeObjects(objects, dst);
 
-   switch (getType()->getBasicType())
-   {
-   case VariableType::BT_CHAR:
-   case VariableType::BT_INT:
-      objects->addToken(OCODE_MOD32I);
-      break;
-
-   case VariableType::BT_UINT:
-      objects->addToken(OCODE_MOD32U);
-      break;
-
-   case VariableType::BT_REAL:
-      objects->addToken(OCODE_MOD32F);
-      break;
-
-   default:
-      throw SourceException("invalid BT", position, getName());
-   }
-
-   make_objects_memcpy_post
-   (objects, dst, VariableData::create_stack(getType()->getSize(position)), position);
+   if (assign)
+      doAssign(objects, dst);
+   else
+      doEvaluate(objects, dst);
 }
 
 // EOF

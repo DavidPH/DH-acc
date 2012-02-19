@@ -89,19 +89,16 @@ SRCEXP_EXPRBIN_DEFN(array)
 //
 // SourceExpression_BinaryArray::SourceExpression_BinaryArray
 //
-SourceExpression_BinaryArray::
-SourceExpression_BinaryArray(SRCEXP_EXPRBIN_PARM)
-                             : Super(SRCEXP_EXPRBIN_PASS)
+SourceExpression_BinaryArray::SourceExpression_BinaryArray
+(SRCEXP_EXPRBIN_PARM)
+ : Super(NULL, VariableType::get_bt_uint(), SRCEXP_EXPRBIN_PASS)
 {
    VariableType::BasicType btL = exprL->getType()->getBasicType();
 
-   // Can only be done for VT_ARRAY or VT_STRING.
+   // Can only be done for BT_ARRAY or BT_STRING.
    if (btL != VariableType::BT_ARRAY && btL != VariableType::BT_STRING)
-      throw SourceException("expected VT_ARRAY or VT_STRING for exprL got "
+      throw SourceException("expected BT_ARRAY or BT_STRING for exprL got "
                             + make_string(btL), position, getName());
-
-   exprR = create_value_cast_implicit
-           (exprR, VariableType::get_bt_uint(), context, position);
 }
 
 //

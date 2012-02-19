@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator -".
+// SourceExpression handling of "operator -" and "operator -=".
 //
 //-----------------------------------------------------------------------------
 
@@ -43,12 +43,38 @@ class SourceExpression_BinarySub : public SourceExpression_Binary
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinarySub(SRCEXP_EXPRBIN_ARGS);
+   SourceExpression_BinarySub(bool assign, SRCEXP_EXPRBIN_ARGS);
 
    virtual CounterPointer<ObjectExpression> makeObject() const;
 
 private:
+   //
+   // ::doAssign
+   //
+   void doAssign(ObjectVector *objects, VariableData *dst)
+   {
+      ASSIGN_ARITHMETIC_VARS
+
+      ASSIGN_GET_OCODE_ARITHMETIC(SUB)
+
+      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+   }
+
+   //
+   // ::doEvaluate
+   //
+   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   {
+      EVALUATE_ARITHMETIC_VARS(SUB)
+
+      // TODO: X - 0
+
+      doEvaluateBase(objects, dst, src, ocode);
+   }
+
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+
+   bool assign;
 };
 
 
@@ -59,21 +85,85 @@ private:
 //
 // SourceExpression::create_binary_sub
 //
-SRCEXP_EXPRBIN_DEFN(sub)
+SourceExpression::Pointer SourceExpression::create_binary_sub
+(SRCEXP_EXPRBIN_PARM)
 {
-   return new SourceExpression_BinarySub(exprL, exprR, context, position);
+   SourceExpression::Pointer exprL = _exprL;
+   SourceExpression::Pointer exprR = _exprR;
+
+   SourceContext *&context = _context;
+   SourcePosition const &position = _position;
+
+   CONSTRUCTOR_TYPE_VARS
+   CONSTRUCTOR_ARRAY_DECAY
+
+   SourceExpression::Pointer expr =
+      new SourceExpression_BinarySub(false, exprL, exprR, context, position);
+
+   // Slight hack for pointer arithmetic.
+   if (btL == VariableType::BT_POINTER && btR == VariableType::BT_POINTER)
+   {
+      expr = create_value_cast_implicit
+             (expr, VariableType::get_bt_int(), context, position);
+
+      bigsint retnSize = typeL->getReturn()->getSize(position);
+      SourceExpression::Pointer retnExpr =
+         create_value_int(retnSize, context, position);
+
+      if (retnSize != 1)
+         expr = create_binary_div(expr, retnExpr, context, position);
+   }
+
+   return expr;
+}
+
+//
+// SourceExpression::create_binary_sub_eq
+//
+SRCEXP_EXPRBIN_DEFN(sub_eq)
+{
+   return new SourceExpression_BinarySub
+              (true, exprL, exprR, context, position);
 }
 
 //
 // SourceExpression_BinarySub::SourceExpression_BinarySub
 //
-SourceExpression_BinarySub::
-SourceExpression_BinarySub(SRCEXP_EXPRBIN_PARM)
-                           : Super(true, SRCEXP_EXPRBIN_PASS)
+SourceExpression_BinarySub::SourceExpression_BinarySub
+(bool _assign, SRCEXP_EXPRBIN_PARM)
+ : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
 {
+   CONSTRUCTOR_TYPE_VARS
+   CONSTRUCTOR_ARRAY_DECAY
+
+   // Type constraints.
+   if (btL == VariableType::BT_POINTER || btR == VariableType::BT_POINTER)
+   {
+      // Pointer constraints.
+      if (btR != VariableType::BT_POINTER && !VariableType::is_bt_integer(btR))
+         throw SourceException("pointer - non-integer", position, getName());
+
+      if (btL != VariableType::BT_POINTER)
+         throw SourceException("non-pointer - pointer", position, getName());
+   }
+   else
+   {
+      CONSTRAINT_ARITHMETIC("-")
+   }
+
+   if (assign && !VariableType::is_bt_arithmetic(btR))
+      throw SourceException("X -= non-arithmetic", position, getName());
+
+   CONSTRUCTOR_POINTER_PREAMBLE
+
+   if (btL == VariableType::BT_POINTER && btR != VariableType::BT_POINTER)
+      exprR = create_binary_mul(exprR, exprSize, context, position);
 }
 
-CounterPointer<ObjectExpression> SourceExpression_BinarySub::makeObject() const
+//
+// SourceExpression_BinarySub::makeObject
+//
+ObjectExpression::Pointer SourceExpression_BinarySub::makeObject() const
 {
    return ObjectExpression::create_binary_sub
           (exprL->makeObject(), exprR->makeObject(), position);
@@ -87,28 +177,10 @@ void SourceExpression_BinarySub::virtual_makeObjects
 {
    Super::recurse_makeObjects(objects, dst);
 
-   switch (getType()->getBasicType())
-   {
-   case VariableType::BT_CHAR:
-   case VariableType::BT_INT:
-      objects->addToken(OCODE_SUB32I);
-      break;
-
-   case VariableType::BT_POINTER:
-   case VariableType::BT_UINT:
-      objects->addToken(OCODE_SUB32U);
-      break;
-
-   case VariableType::BT_REAL:
-      objects->addToken(OCODE_SUB32F);
-      break;
-
-   default:
-      throw SourceException("invalid BT", position, getName());
-   }
-
-   make_objects_memcpy_post
-   (objects, dst, VariableData::create_stack(getType()->getSize(position)), position);
+   if (assign)
+      doAssign(objects, dst);
+   else
+      doEvaluate(objects, dst);
 }
 
 // EOF

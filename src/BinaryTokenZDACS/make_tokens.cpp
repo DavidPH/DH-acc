@@ -53,9 +53,8 @@
 //
 // BinaryTokenZDACS::make_tokens
 //
-void BinaryTokenZDACS::
-make_tokens(ObjectToken const &object,
-            std::vector<BinaryTokenZDACS> *instructions)
+void BinaryTokenZDACS::make_tokens
+(ObjectToken const &object, std::vector<BinaryTokenZDACS> *instructions)
 {
    static ObjectExpression::Pointer const fracbits =
       ObjectExpression::create_value_int(16, SourcePosition::builtin());
@@ -437,6 +436,34 @@ make_tokens(ObjectToken const &object,
 
    // Variable Set Op
 
+      // ADD
+   case OCODE_SETOP_ADD_AUTO32I:
+   case OCODE_SETOP_ADD_AUTO32U:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      PUSH_TOKEN_ADD_ARG0();
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_ADD_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_ADD_POINTER32I:
+   case OCODE_SETOP_ADD_POINTER32U:
+      PUSH_TOKEN_ADD_ARG0();
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_ADD_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_ADD_STATIC32I:
+   case OCODE_SETOP_ADD_STATIC32U:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_ADD_GLOBALARRAY);
+      break;
+
+      // DEC
    case OCODE_SETOP_DEC_AUTO32I:
    case OCODE_SETOP_DEC_AUTO32U:
       args.push_back(indexStack);
@@ -460,6 +487,7 @@ make_tokens(ObjectToken const &object,
       PUSH_TOKEN(BCODE_SETOP_DEC_GLOBALARRAY);
       break;
 
+      // INC
    case OCODE_SETOP_INC_AUTO32I:
    case OCODE_SETOP_INC_AUTO32U:
       args.push_back(indexStack);
@@ -494,7 +522,8 @@ make_tokens(ObjectToken const &object,
 //
 // BinaryTokenZDACS::make_tokens
 //
-void BinaryTokenZDACS::make_tokens(ObjectVector const & objects, std::vector<BinaryTokenZDACS> * instructions)
+void BinaryTokenZDACS::make_tokens
+(ObjectVector const &objects, std::vector<BinaryTokenZDACS> *instructions)
 {
    for (bigsint index(0); index < objects.size(); ++index)
       make_tokens(objects[index], instructions);

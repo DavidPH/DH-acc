@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator |".
+// SourceExpression handling of "operator |" and "operator |=".
 //
 //-----------------------------------------------------------------------------
 
@@ -65,6 +65,17 @@ SRCEXP_EXPRBIN_DEFN(ior)
 }
 
 //
+// SourceExpression::create_binary_ior_eq
+//
+SRCEXP_EXPRBIN_DEFN(ior_eq)
+{
+   return create_binary_assign
+          (exprL, create_binary_ior
+                  (exprL, exprR, context, position),
+           context, position);
+}
+
+//
 // SourceExpression_BinaryIOr::SourceExpression_BinaryIOr
 //
 SourceExpression_BinaryIOr::
@@ -73,7 +84,10 @@ SourceExpression_BinaryIOr(SRCEXP_EXPRBIN_PARM)
 {
 }
 
-CounterPointer<ObjectExpression> SourceExpression_BinaryIOr::makeObject() const
+//
+// SourceExpression_BinaryIOr::makeObject
+//
+ObjectExpression::Pointer SourceExpression_BinaryIOr::makeObject() const
 {
    return ObjectExpression::create_binary_ior
           (exprL->makeObject(), exprR->makeObject(), position);

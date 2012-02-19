@@ -173,6 +173,12 @@ public:
    static Reference get_bt_native(Vector const &types, VariableType *typeRet);
    static Reference get_bt_script(Vector const &types, VariableType *typeRet);
 
+   // Returns true if the given type is an arithmetic type.
+   static bool is_bt_arithmetic(BasicType type);
+
+   // Returns true if the given type is an integer type.
+   static bool is_bt_integer(BasicType type);
+
 private:
    explicit VariableType();
    explicit VariableType(VariableType &type);

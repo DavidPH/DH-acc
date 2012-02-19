@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator /".
+// SourceExpression handling of "operator /" and "operator "/=".
 //
 //-----------------------------------------------------------------------------
 
@@ -43,12 +43,39 @@ class SourceExpression_BinaryDiv : public SourceExpression_Binary
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryDiv(SRCEXP_EXPRBIN_ARGS);
+   SourceExpression_BinaryDiv(bool assign, SRCEXP_EXPRBIN_ARGS);
 
    virtual CounterPointer<ObjectExpression> makeObject() const;
 
 private:
+   //
+   // ::doAssign
+   //
+   void doAssign(ObjectVector *objects, VariableData *dst)
+   {
+      ASSIGN_ARITHMETIC_VARS
+
+      ASSIGN_GET_OCODE_ARITHMETIC(DIV)
+
+      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+   }
+
+   //
+   // ::doEvaluate
+   //
+   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   {
+      EVALUATE_ARITHMETIC_VARS(DIV)
+
+      // TODO: X / 1
+      // TODO: X / PO2
+
+      doEvaluateBase(objects, dst, src, ocode);
+   }
+
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+
+   bool assign;
 };
 
 
@@ -61,22 +88,36 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(div)
 {
-   return new SourceExpression_BinaryDiv(exprL, exprR, context, position);
+   return new SourceExpression_BinaryDiv
+              (false, exprL, exprR, context, position);
+}
+
+//
+// SourceExpression::create_binary_div_eq
+//
+SRCEXP_EXPRBIN_DEFN(div_eq)
+{
+   return new SourceExpression_BinaryDiv
+              (true, exprL, exprR, context, position);
 }
 
 //
 // SourceExpression_BinaryDiv::SourceExpression_BinaryDiv
 //
-SourceExpression_BinaryDiv::
-SourceExpression_BinaryDiv(SRCEXP_EXPRBIN_PARM)
-                           : Super(true, SRCEXP_EXPRBIN_PASS)
+SourceExpression_BinaryDiv::SourceExpression_BinaryDiv
+(bool _assign, SRCEXP_EXPRBIN_PARM)
+ : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
 {
+   CONSTRUCTOR_TYPE_VARS
+   CONSTRUCTOR_ARRAY_DECAY
+
+   CONSTRAINT_ARITHMETIC("/")
 }
 
 //
 // SourceExpression_BinaryDiv::makeObject
 //
-CounterPointer<ObjectExpression> SourceExpression_BinaryDiv::makeObject() const
+ObjectExpression::Pointer SourceExpression_BinaryDiv::makeObject() const
 {
    return ObjectExpression::create_binary_div
           (exprL->makeObject(), exprR->makeObject(), position);
@@ -90,27 +131,10 @@ void SourceExpression_BinaryDiv::virtual_makeObjects
 {
    Super::recurse_makeObjects(objects, dst);
 
-   switch (getType()->getBasicType())
-   {
-   case VariableType::BT_CHAR:
-   case VariableType::BT_INT:
-      objects->addToken(OCODE_DIV32I);
-      break;
-
-   case VariableType::BT_UINT:
-      objects->addToken(OCODE_DIV32U);
-      break;
-
-   case VariableType::BT_REAL:
-      objects->addToken(OCODE_DIV32F);
-      break;
-
-   default:
-      throw SourceException("invalid BT", position, getName());
-   }
-
-   make_objects_memcpy_post
-   (objects, dst, VariableData::create_stack(getType()->getSize(position)), position);
+   if (assign)
+      doAssign(objects, dst);
+   else
+      doEvaluate(objects, dst);
 }
 
 // EOF

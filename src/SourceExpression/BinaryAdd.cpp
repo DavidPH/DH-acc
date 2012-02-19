@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator +".
+// SourceExpression handling of "operator +" and "operator +=".
 //
 //-----------------------------------------------------------------------------
 
@@ -43,12 +43,38 @@ class SourceExpression_BinaryAdd : public SourceExpression_Binary
                                      SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryAdd(SRCEXP_EXPRBIN_ARGS);
+   SourceExpression_BinaryAdd(bool assign, SRCEXP_EXPRBIN_ARGS);
 
    virtual CounterPointer<ObjectExpression> makeObject() const;
 
 private:
+   //
+   // ::doAssign
+   //
+   void doAssign(ObjectVector *objects, VariableData *dst)
+   {
+      ASSIGN_ARITHMETIC_VARS
+
+      ASSIGN_GET_OCODE_ARITHMETIC(ADD)
+
+      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+   }
+
+   //
+   // ::doEvaluate
+   //
+   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   {
+      EVALUATE_ARITHMETIC_VARS(ADD)
+
+      // TODO: X + 0
+
+      doEvaluateBase(objects, dst, src, ocode);
+   }
+
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+
+   bool assign;
 };
 
 
@@ -61,22 +87,63 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(add)
 {
-   return new SourceExpression_BinaryAdd(exprL, exprR, context, position);
+   return new SourceExpression_BinaryAdd
+              (false, exprL, exprR, context, position);
+}
+
+//
+// SourceExpression::create_binary_add_eq
+//
+SRCEXP_EXPRBIN_DEFN(add_eq)
+{
+   return new SourceExpression_BinaryAdd
+              (true, exprL, exprR, context, position);
 }
 
 //
 // SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
 //
-SourceExpression_BinaryAdd::
-SourceExpression_BinaryAdd(SRCEXP_EXPRBIN_PARM)
-                           : Super(true, SRCEXP_EXPRBIN_PASS)
+SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
+(bool _assign, SRCEXP_EXPRBIN_PARM)
+ : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
 {
+   CONSTRUCTOR_TYPE_VARS
+   CONSTRUCTOR_ARRAY_DECAY
+
+   // Type constraints.
+   if (btL == VariableType::BT_POINTER || btR == VariableType::BT_POINTER)
+   {
+      // Pointer constraints.
+      if (btL == VariableType::BT_POINTER && btR == VariableType::BT_POINTER)
+         throw SourceException("pointer + pointer", position, getName());
+
+      if (btL == VariableType::BT_POINTER && !VariableType::is_bt_integer(btR))
+         throw SourceException("pointer + non-integer", position, getName());
+
+      if (!VariableType::is_bt_integer(btL) && btR == VariableType::BT_POINTER)
+         throw SourceException("non-integer + pointer", position, getName());
+   }
+   else
+   {
+      CONSTRAINT_ARITHMETIC("+")
+   }
+
+   if (assign && !VariableType::is_bt_arithmetic(btR))
+      throw SourceException("X -= non-arithmetic", position, getName());
+
+   CONSTRUCTOR_POINTER_PREAMBLE
+
+   if (btL == VariableType::BT_POINTER)
+      exprR = create_binary_mul(exprR, exprSize, context, position);
+
+   if (btR == VariableType::BT_POINTER)
+      exprL = create_binary_mul(exprL, exprSize, context, position);
 }
 
 //
 // SourceExpression_BinaryAdd::makeObject
 //
-CounterPointer<ObjectExpression> SourceExpression_BinaryAdd::makeObject() const
+ObjectExpression::Pointer SourceExpression_BinaryAdd::makeObject() const
 {
    return ObjectExpression::create_binary_add
           (exprL->makeObject(), exprR->makeObject(), position);
@@ -90,28 +157,10 @@ void SourceExpression_BinaryAdd::virtual_makeObjects
 {
    Super::recurse_makeObjects(objects, dst);
 
-   switch (getType()->getBasicType())
-   {
-   case VariableType::BT_CHAR:
-   case VariableType::BT_INT:
-      objects->addToken(OCODE_ADD32I);
-      break;
-
-   case VariableType::BT_POINTER:
-   case VariableType::BT_UINT:
-      objects->addToken(OCODE_ADD32U);
-      break;
-
-   case VariableType::BT_REAL:
-      objects->addToken(OCODE_ADD32F);
-      break;
-
-   default:
-      throw SourceException("invalid BT", position, getName());
-   }
-
-   make_objects_memcpy_post
-   (objects, dst, VariableData::create_stack(getType()->getSize(position)), position);
+   if (assign)
+      doAssign(objects, dst);
+   else
+      doEvaluate(objects, dst);
 }
 
 // EOF

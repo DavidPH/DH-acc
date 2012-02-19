@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator ^".
+// SourceExpression handling of "operator ^" and "operator ^=".
 //
 //-----------------------------------------------------------------------------
 
@@ -62,6 +62,17 @@ private:
 SRCEXP_EXPRBIN_DEFN(xor)
 {
    return new SourceExpression_BinaryXOr(exprL, exprR, context, position);
+}
+
+//
+// SourceExpression::create_binary_xor_eq
+//
+SRCEXP_EXPRBIN_DEFN(xor_eq)
+{
+   return create_binary_assign
+          (exprL, create_binary_xor
+                  (exprL, exprR, context, position),
+           context, position);
 }
 
 //

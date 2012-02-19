@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator ^^".
+// SourceExpression handling of "operator ^^" and "operator ^^=".
 //
 //-----------------------------------------------------------------------------
 
@@ -57,11 +57,20 @@ private:
 //
 // SourceExpression::create_branch_xor
 //
-SourceExpression::Pointer SourceExpression::
-create_branch_xor(SourceExpression *exprL, SourceExpression *exprR,
-                  SourceContext *context, SourcePosition const &position)
+SRCEXP_EXPRBRA_DEFN(b, xor)
 {
    return new SourceExpression_BranchXOr(exprL, exprR, context, position);
+}
+
+//
+// SourceExpression::create_branch_xor_eq
+//
+SRCEXP_EXPRBRA_DEFN(b, xor_eq)
+{
+   return create_binary_assign
+          (exprL, create_branch_xor
+                  (exprL, exprR, context, position),
+           context, position);
 }
 
 //

@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator &".
+// SourceExpression handling of "operator &" and "operator &=".
 //
 //-----------------------------------------------------------------------------
 
@@ -43,12 +43,14 @@ class SourceExpression_BinaryAnd : public SourceExpression_Binary
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryAnd(SRCEXP_EXPRBIN_ARGS);
+   SourceExpression_BinaryAnd(bool assign, SRCEXP_EXPRBIN_ARGS);
 
    virtual CounterPointer<ObjectExpression> makeObject() const;
 
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+
+   bool assign;
 };
 
 
@@ -57,23 +59,40 @@ private:
 //
 
 //
-// SourceExpression::create_binary_add
+// SourceExpression::create_binary_and
 //
 SRCEXP_EXPRBIN_DEFN(and)
 {
-   return new SourceExpression_BinaryAnd(exprL, exprR, context, position);
+   return new SourceExpression_BinaryAnd
+              (false, exprL, exprR, context, position);
+}
+
+//
+// SourceExpression::create_binary_and_eq
+//
+SRCEXP_EXPRBIN_DEFN(and_eq)
+{
+   return create_binary_assign
+          (exprL, create_binary_and
+                  (exprL, exprR, context, position),
+           context, position);
+   //return new SourceExpression_BinaryAnd
+   //           (true, exprL, exprR, context, position);
 }
 
 //
 // SourceExpression_BinaryAnd::SourceExpression_BinaryAnd
 //
-SourceExpression_BinaryAnd::
-SourceExpression_BinaryAnd(SRCEXP_EXPRBIN_PARM)
-                           : Super(false, SRCEXP_EXPRBIN_PASS)
+SourceExpression_BinaryAnd::SourceExpression_BinaryAnd
+(bool _assign, SRCEXP_EXPRBIN_PARM)
+ : Super(false, SRCEXP_EXPRBIN_PASS), assign(_assign)
 {
 }
 
-CounterPointer<ObjectExpression> SourceExpression_BinaryAnd::makeObject() const
+//
+// SourceExpression_BinaryAnd::makeObject
+//
+ObjectExpression::Pointer SourceExpression_BinaryAnd::makeObject() const
 {
    return ObjectExpression::create_binary_and
           (exprL->makeObject(), exprR->makeObject(), position);

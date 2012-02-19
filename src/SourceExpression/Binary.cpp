@@ -89,71 +89,93 @@ bool SourceExpression_Binary::canMakeObject() const
 }
 
 //
+// SourceExpression_Binary::doAssignBase
+//
+void SourceExpression_Binary::doAssignBase
+(ObjectVector *objects, VariableData *dst, VariableData *src,
+ ObjectCode ocodeOp, ObjectCode ocodeGet)
+{
+   VariableType::Reference typeL = exprL->getType();
+
+   VariableData::Pointer tmp = VariableData::create_stack(src->size);
+
+   if (dst->type != VariableData::MT_VOID)
+      make_objects_memcpy_prep(objects, dst, tmp, position);
+
+   // MT_REGISTERARRAY addressing.
+   if (src->type == VariableData::MT_REGISTERARRAY)
+   {
+      src->offsetTemp = VariableData::create_stack
+                        (src->offsetExpr->getType()->getSize(position));
+      src->offsetExpr->makeObjects(objects, src->offsetTemp);
+
+      // Extra address for get.
+      if (dst->type != VariableData::MT_VOID)
+         objects->addToken(OCODE_STACK_DUP32);
+   }
+
+   create_value_cast_implicit(exprR, typeL, context, position)
+   ->makeObjects(objects, tmp);
+
+   // MT_POINTER addressing.
+   if (src->type == VariableData::MT_POINTER)
+   {
+      src->offsetTemp = VariableData::create_stack
+                        (src->offsetExpr->getType()->getSize(position));
+      src->offsetExpr->makeObjects(objects, src->offsetTemp);
+
+      // Extra address for get.
+      if (dst->type != VariableData::MT_VOID)
+      {
+         objects->addToken(OCODE_SET_TEMP);
+         objects->addToken(OCODE_GET_TEMP);
+      }
+   }
+
+   objects->addToken(ocodeOp, src->address);
+
+   if (dst->type != VariableData::MT_VOID)
+   {
+      // MT_POINTER addressing.
+      if (src->type == VariableData::MT_POINTER)
+         objects->addToken(OCODE_GET_TEMP);
+
+      objects->addToken(ocodeGet, src->address);
+
+      make_objects_memcpy_post(objects, dst, tmp, position);
+   }
+}
+
+//
+// SourceExpression_Binary::doEvaluateBase
+//
+void SourceExpression_Binary::doEvaluateBase
+(ObjectVector *objects, VariableData *dst, VariableData *src, ObjectCode ocode)
+{
+   VariableType::Reference type = getType();
+
+   make_objects_memcpy_prep(objects, dst, src, position);
+
+   create_value_cast_implicit(exprL, type, context, position)
+   ->makeObjects(objects, src);
+
+   create_value_cast_implicit(exprR, type, context, position)
+   ->makeObjects(objects, src);
+
+   objects->addToken(ocode);
+
+   make_objects_memcpy_post(objects, dst, src, position);
+}
+
+//
 // SourceExpression_Binary::doCast
 //
 void SourceExpression_Binary::doCast()
 {
-   #define PARM context, position
-
    VariableType::Reference type = getType();
 
-   // Pointer arithmetic.
-   if (type->getBasicType() == VariableType::BT_POINTER && arithmetic == 1)
-   {
-      VariableType::Reference typeRet = type->getReturn();
-      bigsint sizeRet = typeRet->getSize(position);
-
-      SourceExpression::Pointer exprOff = create_value_uint(sizeRet, PARM);
-      VariableType::Reference typeOff = VariableType::get_bt_uint();
-
-      VariableType::Reference typeL = exprL->getType();
-      VariableType::Reference typeR = exprR->getType();
-
-      if (typeL->getBasicType() == VariableType::BT_ARRAY)
-      {
-         typeL = typeL->getReturn()->getPointer();
-         exprL = create_value_cast_implicit(exprL, typeL, PARM);
-      }
-
-      if (typeR->getBasicType() == VariableType::BT_ARRAY)
-      {
-         typeR = typeR->getReturn()->getPointer();
-         exprR = create_value_cast_implicit(exprR, typeR, PARM);
-      }
-
-      if (typeL->getBasicType() == typeR->getBasicType() &&
-          typeL->getUnqualified() != typeR->getUnqualified())
-         throw SourceException("VT_POINTER mismatch", position, getName());
-
-      if (typeL->getBasicType() != VariableType::BT_POINTER)
-      {
-         if (sizeRet != 1)
-         {
-            exprL = create_value_cast_implicit(exprL, typeOff, PARM);
-            exprL = create_binary_mul(exprL, exprOff, PARM);
-         }
-
-         exprL = create_value_cast_implicit(exprL, type, PARM);
-      }
-
-      if (typeR->getBasicType() != VariableType::BT_POINTER)
-      {
-         if (sizeRet != 1)
-         {
-            exprR = create_value_cast_implicit(exprR, typeOff, PARM);
-            exprR = create_binary_mul(exprR, exprOff, PARM);
-         }
-
-         exprR = create_value_cast_implicit(exprR, type, PARM);
-      }
-
-      return;
-   }
-
-   exprL = create_value_cast_implicit(exprL, type, PARM);
-   exprR = create_value_cast_implicit(exprR, type, PARM);
-
-   #undef PARM
+   exprL = create_value_cast_implicit(exprL, type, context, position);
+   exprR = create_value_cast_implicit(exprR, type, context, position);
 }
 
 //
@@ -167,6 +189,39 @@ doCast(VariableType *castL, VariableType *castR)
 
    if (castR)
       exprR = create_value_cast_implicit(exprR, castR, context, position);
+}
+
+//
+// SourceExpression_Binary::getOcodeType
+//
+int SourceExpression_Binary::getOcodeType
+(VariableType::BasicType bt, int *ocodeGetType)
+{
+   int ocodeOpType;
+   switch (bt)
+   {
+   case VariableType::BT_CHAR:
+   case VariableType::BT_INT:
+      ocodeOpType = 1;
+      if (ocodeGetType) *ocodeGetType = 1;
+      break;
+
+   case VariableType::BT_POINTER:
+   case VariableType::BT_UINT:
+      ocodeOpType = 2;
+      if (ocodeGetType) *ocodeGetType = 1;
+      break;
+
+   case VariableType::BT_REAL:
+      ocodeOpType = 0;
+      if (ocodeGetType) *ocodeGetType = 0;
+      break;
+
+   default:
+      throw SourceException("invalid BT", position, getName());
+   }
+
+   return ocodeOpType;
 }
 
 //

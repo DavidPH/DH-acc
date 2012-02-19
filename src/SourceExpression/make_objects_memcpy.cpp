@@ -244,6 +244,14 @@ static void make_objects_memcpy_post_part
             break;
          }
 
+         if (get)
+         {
+            if (data->offsetExpr)
+               data->offsetExpr->makeObjects(objects, data->offsetTemp);
+            else
+               objects->addTokenPushZero();
+         }
+
          if (get) switch (data->sectionRA)
          {
          case VariableData::SRA_MAP:
@@ -480,7 +488,7 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dup,
    make_objects_memcpy_post_part(objects, dst, !!dup, true, position);
 
    // Move the stack into dup.
-   make_objects_memcpy_post_part(objects, dup, false, true, position);
+   make_objects_memcpy_post_part(objects, dup, false, true,  position);
 }
 
 //

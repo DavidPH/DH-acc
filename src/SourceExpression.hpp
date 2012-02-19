@@ -291,27 +291,38 @@ public:
 
    // Binary operators.
    SRCEXP_EXPRBIN_DECL(add);
+   SRCEXP_EXPRBIN_DECL(add_eq);
    SRCEXP_EXPRBIN_DECL(and);
+   SRCEXP_EXPRBIN_DECL(and_eq);
    SRCEXP_EXPRBIN_DECL(array);
    SRCEXP_EXPRBIN_DECL(assign);
    SRCEXP_EXPRBIN_DECL(assign_const);
    SRCEXP_EXPRBIN_DECL(div);
+   SRCEXP_EXPRBIN_DECL(div_eq);
    SRCEXP_EXPRBIN_DECL(eq);
    SRCEXP_EXPRBIN_DECL(ge);
    SRCEXP_EXPRBIN_DECL(gt);
    SRCEXP_EXPRBIN_DECL(ior);
+   SRCEXP_EXPRBIN_DECL(ior_eq);
    SRCEXP_EXPRBIN_DECL(le);
+   SRCEXP_EXPRBIN_DECL(lsh);
+   SRCEXP_EXPRBIN_DECL(lsh_eq);
    SRCEXP_EXPRBIN_DECL(lt);
    SRCEXP_EXPRBIN_DECL(mod);
+   SRCEXP_EXPRBIN_DECL(mod_eq);
    SRCEXP_EXPRBIN_DECL(mul);
+   SRCEXP_EXPRBIN_DECL(mul_eq);
    SRCEXP_EXPRBIN_DECL(ne);
-   SRCEXP_EXPRBIN_DECL(shiftl);
-   SRCEXP_EXPRBIN_DECL(shiftr);
+   SRCEXP_EXPRBIN_DECL(rsh);
+   SRCEXP_EXPRBIN_DECL(rsh_eq);
    SRCEXP_EXPRBIN_DECL(sub);
+   SRCEXP_EXPRBIN_DECL(sub_eq);
    SRCEXP_EXPRBIN_DECL(xor);
+   SRCEXP_EXPRBIN_DECL(xor_eq);
 
    // Branching operators.
    SRCEXP_EXPRBRA_DECL(b, and);
+   SRCEXP_EXPRBRA_DECL(b, and_eq);
    SRCEXP_EXPRBRA_DECL(0, break);
    SRCEXP_EXPRBRA_DECL(a, call);
    SRCEXP_EXPRBRA_DECL(0, continue);
@@ -322,11 +333,13 @@ public:
    SRCEXP_EXPRBRA_DECL(2, if);
    SRCEXP_EXPRBRA_DECL(3, if);
    SRCEXP_EXPRBRA_DECL(b, ior);
+   SRCEXP_EXPRBRA_DECL(b, ior_eq);
    SRCEXP_EXPRBRA_DECL(u, not);
    SRCEXP_EXPRBRA_DECL(u, return);
    SRCEXP_EXPRBRA_DECL(2, switch);
    SRCEXP_EXPRBRA_DECL(2, while);
    SRCEXP_EXPRBRA_DECL(b, xor);
+   SRCEXP_EXPRBRA_DECL(b, xor_eq);
 
    // Values.
    SRCEXP_EXPRVAL_DECL( a, block);

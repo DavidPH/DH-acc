@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator &&".
+// SourceExpression handling of "operator &&" and "operator &&=".
 //
 //-----------------------------------------------------------------------------
 
@@ -59,6 +59,17 @@ private:
 SRCEXP_EXPRBRA_DEFN(b, and)
 {
    return new SourceExpression_BranchAnd(exprL, exprR, context, position);
+}
+
+//
+// SourceExpression::create_branch_and_eq
+//
+SRCEXP_EXPRBRA_DEFN(b, and_eq)
+{
+   return create_binary_assign
+          (exprL, create_branch_and
+                  (exprL, exprR, context, position),
+           context, position);
 }
 
 //

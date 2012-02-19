@@ -17,7 +17,8 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of "operator <<" and "operator >>".
+// SourceExpression handling of "operator <<" and "operator >>" and
+// "operator <<=" and operator ">>=".
 //
 //-----------------------------------------------------------------------------
 
@@ -57,21 +58,43 @@ private:
 //
 
 //
-// SourceExpression::create_binary_shiftl
+// SourceExpression::create_binary_lsh
 //
-SRCEXP_EXPRBIN_DEFN(shiftl)
+SRCEXP_EXPRBIN_DEFN(lsh)
 {
    return new SourceExpression_BinaryShift
               (false, exprL, exprR, context, position);
 }
 
 //
-// SourceExpression::create_binary_shiftr
+// SourceExpression::create_binary_lsh_eq
 //
-SRCEXP_EXPRBIN_DEFN(shiftr)
+SRCEXP_EXPRBIN_DEFN(lsh_eq)
+{
+   return create_binary_assign
+          (exprL, create_binary_lsh
+                  (exprL, exprR, context, position),
+           context, position);
+}
+
+//
+// SourceExpression::create_binary_rsh
+//
+SRCEXP_EXPRBIN_DEFN(rsh)
 {
    return new SourceExpression_BinaryShift
               (true, exprL, exprR, context, position);
+}
+
+//
+// SourceExpression::create_binary_rsh_eq
+//
+SRCEXP_EXPRBIN_DEFN(rsh_eq)
+{
+   return create_binary_assign
+          (exprL, create_binary_rsh
+                  (exprL, exprR, context, position),
+           context, position);
 }
 
 //
