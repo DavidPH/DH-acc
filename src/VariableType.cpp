@@ -93,6 +93,7 @@ VariableType::VariableType()
    basic(BT_VOID), quals(0), store(ST_ADDR), width(0),
    complete(true)
 {
+   --refCount;
 }
 
 //
