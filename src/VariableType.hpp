@@ -103,17 +103,14 @@ public:
    //
    enum StoreType
    {
-      ST_ADDR           = 0x8000,
-      ST_REGISTER       = 0x9000,
-      ST_MAPREGISTER    = 0xA000,
-      ST_WORLDREGISTER  = 0xB000,
-      ST_GLOBALREGISTER = 0xC000,
-      ST_MAPARRAY       = 0xD000,
-      ST_WORLDARRAY     = 0xE000,
-      ST_GLOBALARRAY    = 0xF000,
-
-      ST_MASK_AREA = 0x0FFF,
-      ST_MASK_TYPE = 0xF000
+      ST_ADDR,
+      ST_REGISTER,
+      ST_MAPREGISTER,
+      ST_WORLDREGISTER,
+      ST_GLOBALREGISTER,
+      ST_MAPARRAY,
+      ST_WORLDARRAY,
+      ST_GLOBALARRAY
    };
 
 
@@ -124,7 +121,8 @@ public:
    Reference getReturn() const {return typeRet;}
    Reference getUnqualified() {return Reference(typeUnq ? typeUnq.raw() : this);}
    Reference setQualifier(unsigned quals);
-   Reference setStorage(unsigned store);
+   Reference setStorage(StoreType store);
+   Reference setStorage(StoreType store, std::string const &storeArea);
 
    // Type information.
    BasicType getBasicType() const {return basic;}
@@ -132,9 +130,8 @@ public:
    bool getQualifier(unsigned _quals) const {return (quals&_quals) == _quals;}
    unsigned getQualifiers() const {return quals;}
    bigsint getSize(SourcePosition const &position) const;
-   bigsint getSizeCall(SourcePosition const &position) const;
-   StoreType getStoreType() const {return StoreType(store & ST_MASK_TYPE);}
-   unsigned getStoreArea() const {return store & ST_MASK_AREA;}
+   StoreType getStoreType() const {return store;}
+   std::string const &getStoreArea() const {return storeArea;}
    Vector const &getTypes() const {return types;}
    bigsint getWidth() const {return width;}
 
@@ -185,6 +182,8 @@ private:
    explicit VariableType(BasicType basic);
    ~VariableType();
 
+   void setReturn(VariableType *type);
+
    VecStr names;
    Vector types;
 
@@ -199,9 +198,11 @@ private:
    Reference     typeRet;
    Pointer       typeUnq;
 
+   std::string storeArea;
+
    BasicType basic;
    unsigned  quals;
-   unsigned  store;
+   StoreType store;
    bigsint   width;
 
    bool complete : 1;

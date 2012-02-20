@@ -104,6 +104,7 @@ VariableType::VariableType(VariableType &type)
    next(type.next), prev(&type), specnext(this), specprev(this),
    typeArr(NULL), typePtr(NULL), typeRet(type.typeRet),
    typeUnq(type.getUnqualified()),
+   storeArea(type.storeArea),
    basic(type.basic), quals(type.quals), store(type.store), width(type.width),
    complete(type.complete)
 {
@@ -282,13 +283,16 @@ VariableType::Reference VariableType::setQualifier(unsigned _quals)
 
    for (VariableType *iter = next; iter != this; iter = iter->next)
    {
-      if (iter->quals == _quals && iter->store == store)
+      if (iter->quals == _quals &&
+          iter->store == store && iter->storeArea == iter->storeArea)
          return Reference(iter);
    }
 
    VariableType::Reference type(new VariableType(*this));
 
    type->quals = _quals;
+   if (basic == BT_ARRAY)
+      type->setReturn(type->typeRet->setQualifier(_quals));
    if (basic == BT_STRUCT || basic == BT_UNION || basic == BT_BLOCK)
    {
       for (Vector::iterator iter = type->types.begin();
@@ -300,27 +304,52 @@ VariableType::Reference VariableType::setQualifier(unsigned _quals)
 }
 
 //
+// VariableType::setReturn
+//
+void VariableType::setReturn(VariableType *type)
+{
+   if (basic == BT_ARRAY && typeRet->typeArr == this)
+      typeRet->typeArr = specnext == this ? NULL : specnext;
+
+   typeRet = static_cast<Reference>(type);
+}
+
+//
 // VariableType::setStorage
 //
-VariableType::Reference VariableType::setStorage(unsigned _store)
+VariableType::Reference VariableType::setStorage(StoreType _store)
 {
-   if (store == _store)
+   static std::string _storeArea;
+   return setStorage(_store, _storeArea);
+}
+
+//
+// VariableType::setStorage
+//
+VariableType::Reference VariableType::setStorage
+(StoreType _store, std::string const &_storeArea)
+{
+   if (store == _store && storeArea == _storeArea)
       return static_cast<Reference>(this);
 
    for (VariableType *iter = next; iter != this; iter = iter->next)
    {
-      if (iter->quals == quals && iter->store == _store)
+      if (iter->quals == quals &&
+          iter->store == _store && iter->storeArea == _storeArea)
          return Reference(iter);
    }
 
    VariableType::Reference type(new VariableType(*this));
 
-   type->store = _store;
+   type->store     = _store;
+   type->storeArea = _storeArea;
+   if (basic == BT_ARRAY)
+      type->setReturn(type->typeRet->setStorage(_store, _storeArea));
    if (basic == BT_STRUCT || basic == BT_UNION || basic == BT_BLOCK)
    {
       for (Vector::iterator iter = type->types.begin();
            iter != type->types.end(); ++iter)
-         *iter = (*iter)->setStorage(_store);
+         *iter = (*iter)->setStorage(_store, _storeArea);
    }
 
    return type;
@@ -387,23 +416,6 @@ bigsint VariableType::getSize(SourcePosition const &position) const
    }
 
    throw SourceException("invalid type", position, __func__);
-}
-
-//
-// VariableType::getSizeCall
-//
-bigsint VariableType::getSizeCall(SourcePosition const &position) const
-{
-   bigsint size = 0;
-
-   for (Vector::const_iterator iter = types.begin();
-        iter != types.end() && *iter; ++iter)
-   {
-      if (!*iter) return -1;
-      size += (*iter)->getSize(position);
-   }
-
-   return size;
 }
 
 //===================================================================

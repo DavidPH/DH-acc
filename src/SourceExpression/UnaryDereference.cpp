@@ -51,7 +51,70 @@ public:
 
    virtual bool canMakeObjectsAddress() const;
 
-   virtual VariableData::Pointer getData() const;
+   //
+   // ::getData
+   //
+   virtual VariableData::Pointer getData() const
+   {
+      VariableType::Reference type = getType();
+      bigsint                 size = type->getSize(position);
+      std::string const      &area = type->getStoreArea();
+
+      ObjectExpression::Pointer address;
+      VariableData::SectionR sectionR;
+      VariableData::SectionRA sectionRA;
+
+      switch (type->getStoreType())
+      {
+      case VariableType::ST_ADDR:
+         // FIXME: This causes bad codegen.
+         //if (expr->canMakeObject())
+         //{
+         //   address = expr->makeObject();
+         //   return VariableData::create_static(size, address);
+         //}
+         //else
+         {
+            address = ObjectExpression::create_value_int(0, position);
+            return VariableData::create_pointer(size, address, expr);
+         }
+
+      case VariableType::ST_REGISTER:
+         sectionR = VariableData::SR_LOCAL;
+      case_register:
+         address = expr->makeObject();
+         return VariableData::create_register(size, sectionR, address);
+
+      case VariableType::ST_MAPREGISTER:
+         sectionR = VariableData::SR_MAP;
+         goto case_register;
+
+      case VariableType::ST_WORLDREGISTER:
+         sectionR = VariableData::SR_WORLD;
+         goto case_register;
+
+      case VariableType::ST_GLOBALREGISTER:
+         sectionR = VariableData::SR_GLOBAL;
+         goto case_register;
+
+      case VariableType::ST_MAPARRAY:
+         sectionRA = VariableData::SRA_MAP;
+      case_array:
+         address = ObjectExpression::create_value_symbol(area, position);
+         return VariableData::create_registerarray
+                (size, sectionRA, address, expr);
+
+      case VariableType::ST_WORLDARRAY:
+         sectionRA = VariableData::SRA_WORLD;
+         goto case_array;
+
+      case VariableType::ST_GLOBALARRAY:
+         sectionRA = VariableData::SRA_GLOBAL;
+         goto case_array;
+      }
+
+      return Super::getData();
+   }
 
    virtual VariableType::Reference getType() const;
 
@@ -108,16 +171,6 @@ bool SourceExpression_UnaryDereference::canMakeObjectAddress() const
 bool SourceExpression_UnaryDereference::canMakeObjectsAddress() const
 {
    return expr->getType()->getBasicType() != VariableType::BT_STRING;
-}
-
-//
-// SourceExpression_UnaryDereference::getData
-//
-VariableData::Pointer SourceExpression_UnaryDereference::getData() const
-{
-   return VariableData::
-      create_pointer(getType()->getSize(position),
-                     ObjectExpression::create_value_int(0, position), expr);
 }
 
 //

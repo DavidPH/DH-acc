@@ -66,6 +66,41 @@ SourceVariable::SourceVariable
  : position(_position), nameObject(_nameObject), nameSource(_nameSource),
    type(_type), sc(_sc)
 {
+   switch (sc)
+   {
+   case SC_AUTO:
+   case SC_CONSTANT:
+   case SC_STATIC:
+      break;
+
+   case SC_REGISTER:
+      type = type->setStorage(VariableType::ST_REGISTER);
+      break;
+
+   case SC_REGISTER_GLOBAL:
+      type = type->setStorage(VariableType::ST_GLOBALREGISTER);
+      break;
+
+   case SC_REGISTER_MAP:
+      type = type->setStorage(VariableType::ST_MAPREGISTER);
+      break;
+
+   case SC_REGISTER_WORLD:
+      type = type->setStorage(VariableType::ST_WORLDREGISTER);
+      break;
+
+   case SC_REGISTERARRAY_GLOBAL:
+      type = type->setStorage(VariableType::ST_GLOBALARRAY, nameObject);
+      break;
+
+   case SC_REGISTERARRAY_MAP:
+      type = type->setStorage(VariableType::ST_MAPARRAY, nameObject);
+      break;
+
+   case SC_REGISTERARRAY_WORLD:
+      type = type->setStorage(VariableType::ST_WORLDARRAY, nameObject);
+      break;
+   }
 }
 
 //

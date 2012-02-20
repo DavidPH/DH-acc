@@ -24,6 +24,9 @@
 #include "Unary.hpp"
 
 #include "../ObjectExpression.hpp"
+#include "../ObjectVector.hpp"
+#include "../SourceException.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -53,7 +56,27 @@ public:
    //
    virtual bool canMakeObject() const
    {
-      return expr->canMakeObjectAddress();
+      VariableData::Pointer data = expr->getData();
+
+      switch (data->type)
+      {
+      case VariableData::MT_AUTO:
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         return false;
+
+      case VariableData::MT_POINTER:
+      case VariableData::MT_REGISTERARRAY:
+         return !data->offsetExpr || data->offsetExpr->canMakeObject();
+
+      case VariableData::MT_REGISTER:
+      case VariableData::MT_STATIC:
+         return true;
+      }
+
+      return false;
    }
 
    //
@@ -69,7 +92,36 @@ public:
    //
    virtual ObjectExpression::Pointer makeObject() const
    {
-      return expr->makeObjectAddress();
+      VariableData::Pointer data = expr->getData();
+
+      switch (data->type)
+      {
+      case VariableData::MT_AUTO:
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         break;
+
+      case VariableData::MT_POINTER:
+         if (!data->offsetExpr)
+            return data->address;
+
+         return ObjectExpression::create_binary_add
+                (data->address, data->offsetExpr->makeObject(), position);
+
+      case VariableData::MT_REGISTER:
+      case VariableData::MT_STATIC:
+         return data->address;
+
+      case VariableData::MT_REGISTERARRAY:
+         if (!data->offsetExpr)
+            return ObjectExpression::create_value_int(0, position);
+
+         return data->offsetExpr->makeObject();
+      }
+
+      return Super::makeObject();
    }
 
 private:
@@ -80,7 +132,33 @@ private:
    {
       Super::recurse_makeObjects(objects, dst);
 
-      expr->makeObjectsAddress(objects, dst);
+      VariableData::Pointer data = expr->getData();
+
+      switch (data->type)
+      {
+      case VariableData::MT_AUTO:
+         objects->addToken(OCODE_ADDR_AUTO, data->address);
+         break;
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         throw SourceException("invalid MT", position, getName());
+
+      case VariableData::MT_POINTER:
+      case VariableData::MT_REGISTERARRAY:
+         if (data->offsetExpr)
+            data->offsetExpr->makeObjects(objects, dst);
+         else
+            objects->addTokenPushZero();
+         break;
+
+      case VariableData::MT_REGISTER:
+      case VariableData::MT_STATIC:
+         objects->addToken(OCODE_GET_LITERAL32I, data->address);
+         break;
+      }
    }
 
    VariableType::Reference type;

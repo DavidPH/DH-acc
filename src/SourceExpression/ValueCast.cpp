@@ -312,7 +312,7 @@ ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
    if (exprBT == VariableType::BT_ARRAY &&
        thisBT == VariableType::BT_POINTER)
    {
-      return expr->makeObjectAddress();
+      return create_unary_reference(expr, context, position)->makeObject();
    }
 
    ObjectExpression::Pointer obj = expr->makeObject();
@@ -465,7 +465,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    if (expr->getType()->getBasicType() == VariableType::BT_ARRAY &&
       type->getBasicType() == VariableType::BT_POINTER)
    {
-      expr->makeObjectsAddress(objects, dst);
+      return create_unary_reference(expr, context, position)
+      ->makeObjectsCast(objects, dst, type);
    }
    else
       expr->makeObjectsCast(objects, dst, type);

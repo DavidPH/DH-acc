@@ -47,7 +47,7 @@ void SourceExpression::make_objects_memcpy_cast
                          "->"      + make_string(dstType->getBasicType()))
 
    // If no cast, this just becomes a memcpy.
-   if (dstType == srcType)
+   if (dstType->getUnqualified() == srcType->getUnqualified())
    {
       make_objects_memcpy_post(objects, dst, src, position);
 

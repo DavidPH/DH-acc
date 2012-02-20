@@ -311,6 +311,14 @@ ObjectCodeSet ObjectExpression::resolveOCode() const
 	throw SourceException("cannot resolve ocode", position, getName());
 }
 
+//
+// ObjectExpression::resolveSymbol
+//
+std::string ObjectExpression::resolveSymbol() const
+{
+     throw SourceException("cannot resolve symbol", position, getName());
+}
+
 void ObjectExpression::set_address_count(bigsint addressCount)
 {
 	_address_count = addressCount;

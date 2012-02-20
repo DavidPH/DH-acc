@@ -31,6 +31,76 @@
 
 
 //----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
+typedef SourceExpression::Pointer (*expr_make_t)
+(SourceTokenizerDS *, SourceExpression::Vector * blocks,
+ SourceContext * context);
+
+
+//----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+//
+// do_qualifier
+//
+static void do_qualifier
+(VariableType::Pointer *type, VariableType::Qualifier qual,
+ SourceTokenizerDS *in)
+{
+   SourceTokenC tokenQual = in->get(SourceTokenC::TT_IDENTIFIER);
+
+   if ((*type)->getQualifier(qual))
+      throw SourceException
+            ("redundant qualifier", tokenQual.getPosition(), __func__);
+
+   *type = (*type)->setQualifier(qual);
+}
+
+//
+// do_storage
+//
+static void do_storage
+(VariableType::Pointer *type, VariableType::StoreType store,
+ SourceTokenizerDS *in)
+{
+   SourceTokenC tokenStore = in->get(SourceTokenC::TT_IDENTIFIER);
+
+   if ((*type)->getStoreType() != VariableType::ST_ADDR)
+      throw SourceException
+            ("redundant storage", tokenStore.getPosition(), __func__);
+
+   *type = (*type)->setStorage(store);
+}
+
+//
+// do_storage
+//
+static void do_storage
+(VariableType::Pointer *type, VariableType::StoreType store,
+ SourceTokenizerDS *in, SourceExpression::Vector *blocks,
+ SourceContext *context, expr_make_t maker)
+{
+   SourceTokenC tokenStore = in->get(SourceTokenC::TT_IDENTIFIER);
+
+   if ((*type)->getStoreType() != VariableType::ST_ADDR)
+      throw SourceException
+            ("redundant storage", tokenStore.getPosition(), __func__);
+
+   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+
+   std::string storeArea =
+      maker(in, blocks, context)->makeObject()->resolveSymbol();
+
+   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+   *type = (*type)->setStorage(store, storeArea);
+}
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -235,19 +305,39 @@ VariableType::Reference SourceExpressionDS::make_expression_type
    {
    case SourceTokenC::TT_IDENTIFIER:
       if (in->peek().getData() == "const")
-      {
-         SourceTokenC tokenConst = in->get(SourceTokenC::TT_IDENTIFIER);
+         do_qualifier(&type, VariableType::QUAL_CONST, in);
 
-         if (type->getQualifier(VariableType::QUAL_CONST))
-            throw SourceException
-                  ("const on const", tokenConst.getPosition(), __func__);
+      else if (in->peek().getData() == "volatile")
+         do_qualifier(&type, VariableType::QUAL_VOLATILE, in);
 
-         type = type->setQualifier(VariableType::QUAL_CONST);
+      else if (in->peek().getData() == "restrict")
+         do_qualifier(&type, VariableType::QUAL_RESTRICT, in);
 
-         break;
-      }
+      else if (in->peek().getData() == "register")
+         do_storage(&type, VariableType::ST_REGISTER, in);
+
+      else if (in->peek().getData() == "__mapregister")
+         do_storage(&type, VariableType::ST_MAPREGISTER, in);
+
+      else if (in->peek().getData() == "__worldregister")
+         do_storage(&type, VariableType::ST_WORLDREGISTER, in);
+
+      else if (in->peek().getData() == "__globalregister")
+         do_storage(&type, VariableType::ST_GLOBALREGISTER, in);
+
+      else if (in->peek().getData() == "__maparray")
+         do_storage(&type, VariableType::ST_MAPARRAY, in, blocks, context, make_expression);
+
+      else if (in->peek().getData() == "__worldarray")
+         do_storage(&type, VariableType::ST_WORLDARRAY, in, blocks, context, make_expression);
+
+      else if (in->peek().getData() == "__globalarray")
+         do_storage(&type, VariableType::ST_GLOBALARRAY, in, blocks, context, make_expression);
+
       else
          return type.ref();
+
+      break;
 
    case SourceTokenC::TT_OP_ASTERISK:
       in->get(SourceTokenC::TT_OP_ASTERISK);

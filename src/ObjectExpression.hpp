@@ -70,6 +70,7 @@ public:
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
 	virtual ObjectCodeSet resolveOCode() const;
+   virtual std::string resolveSymbol() const;
 
    void writeACSP(std::ostream *out) const;
 

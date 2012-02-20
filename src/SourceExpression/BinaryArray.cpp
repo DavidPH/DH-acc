@@ -45,10 +45,6 @@ class SourceExpression_BinaryArray : public SourceExpression_Binary
 public:
    SourceExpression_BinaryArray(SRCEXP_EXPRBIN_ARGS);
 
-   virtual bool canGetData() const;
-
-   virtual VariableData::Pointer getData() const;
-
    virtual VariableType::Reference getType() const;
 
 private:
@@ -74,9 +70,7 @@ SRCEXP_EXPRBIN_DEFN(array)
    // This allows C semantics for array access. Specifically that x[y] be the
    // same as *(x+y).
    if (btL == VariableType::BT_POINTER || btR == VariableType::BT_POINTER ||
-      (btL == VariableType::BT_ARRAY && exprL->canMakeObjectsAddress()) ||
-      (btR == VariableType::BT_ARRAY && exprR->canMakeObjectsAddress())
-   )
+       btL == VariableType::BT_ARRAY   || btR == VariableType::BT_ARRAY)
    {
       return create_unary_dereference
              (create_binary_add(exprL, exprR, context, position), context,
@@ -95,51 +89,10 @@ SourceExpression_BinaryArray::SourceExpression_BinaryArray
 {
    VariableType::BasicType btL = exprL->getType()->getBasicType();
 
-   // Can only be done for BT_ARRAY or BT_STRING.
-   if (btL != VariableType::BT_ARRAY && btL != VariableType::BT_STRING)
-      throw SourceException("expected BT_ARRAY or BT_STRING for exprL got "
+   // Can only be done for BT_STRING.
+   if (btL != VariableType::BT_STRING)
+      throw SourceException("expected BT_STRING for exprL got "
                             + make_string(btL), position, getName());
-}
-
-//
-// SourceExpression_BinaryArray::canGetData
-//
-bool SourceExpression_BinaryArray::canGetData() const
-{
-   return true;
-}
-
-//
-// SourceExpression_BinaryArray::getData
-//
-VariableData::Pointer SourceExpression_BinaryArray::getData() const
-{
-   #define PARM context, position
-
-   VariableData::Pointer src = exprL->getData();
-   VariableType::Reference type = getType();
-   bigsint typeSize = type->getSize(position);
-
-   if (src->type != VariableData::MT_REGISTERARRAY)
-      throw SourceException("cannot getData", position, getName());
-
-   SourceExpression::Pointer offset = exprR;
-
-   // If the type's size isn't 1, need to multiply the offset.
-   if (typeSize != 1)
-   {
-      offset = create_binary_mul
-               (offset, create_value_uint(typeSize, PARM), PARM);
-   }
-
-   // If there is already an offset, add it.
-   if (src->offsetExpr)
-      offset = create_binary_add(src->offsetExpr, offset, PARM);
-
-   return VariableData::create_registerarray
-          (typeSize, src->sectionRA, src->address, offset);
-
-   #undef PARM
 }
 
 //
@@ -181,10 +134,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    }
    else
    {
-      VariableData::Pointer src = getData();
-
-      make_objects_memcpy_prep(objects, dst, src, position);
-      make_objects_memcpy_post(objects, dst, src, position);
+      throw SourceException("invalid BT", position, getName());
    }
 }
 

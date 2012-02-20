@@ -48,6 +48,7 @@ public:
 
 	virtual bigreal resolveFloat() const;
 	virtual bigsint resolveInt() const;
+   virtual std::string resolveSymbol() const;
 
 protected:
 	virtual void writeObject(std::ostream * out) const;
@@ -126,6 +127,14 @@ bigreal ObjectExpression_ValueSymbol::resolveFloat() const
 bigsint ObjectExpression_ValueSymbol::resolveInt() const
 {
 	return ObjectExpression::get_symbol(_value, position)->resolveInt();
+}
+
+//
+// ObjectExpression_ValueSymbol::resolveSymbol
+//
+std::string ObjectExpression_ValueSymbol::resolveSymbol() const
+{
+   return _value;
 }
 
 //

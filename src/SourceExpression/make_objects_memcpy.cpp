@@ -269,7 +269,10 @@ static void make_objects_memcpy_post_part
       }
       else
       {
-         data->offsetExpr->makeObjects(objects, data->offsetTemp);
+         if (data->offsetExpr)
+            data->offsetExpr->makeObjects(objects, data->offsetTemp);
+         else
+            objects->addTokenPushZero();
 
          objects->addToken(OCODE_SET_TEMP);
 
