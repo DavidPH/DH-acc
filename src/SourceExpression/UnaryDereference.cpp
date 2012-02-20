@@ -67,13 +67,12 @@ public:
       switch (type->getStoreType())
       {
       case VariableType::ST_ADDR:
-         // FIXME: This causes bad codegen.
-         //if (expr->canMakeObject())
-         //{
-         //   address = expr->makeObject();
-         //   return VariableData::create_static(size, address);
-         //}
-         //else
+         if (expr->canMakeObject())
+         {
+            address = expr->makeObject();
+            return VariableData::create_static(size, address);
+         }
+         else
          {
             address = ObjectExpression::create_value_int(0, position);
             return VariableData::create_pointer(size, address, expr);

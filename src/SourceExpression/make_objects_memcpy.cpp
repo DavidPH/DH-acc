@@ -355,7 +355,7 @@ static void make_objects_memcpy_post_part
                            objects->getValueAdd(data->address, i));
 
       if (get) for (i = 0; i < data->size; ++i)
-         objects->addToken(OCODE_SET_STATIC32I,
+         objects->addToken(OCODE_GET_STATIC32I,
                            objects->getValueAdd(data->address, i));
       break;
 
