@@ -258,20 +258,14 @@ public:
    virtual bool canGetData() const;
 
    virtual bool canMakeObject() const;
-   virtual bool canMakeObjectAddress() const;
-
-   virtual bool canMakeObjectsAddress() const;
 
    virtual CounterPointer<VariableData> getData() const;
 
    virtual CounterReference<VariableType> getType() const;
 
    virtual CounterPointer<ObjectExpression> makeObject() const;
-   virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
 
    void makeObjects(ObjectVector *objects, VariableData *dst);
-
-   void makeObjectsAddress(ObjectVector *objects, VariableData *dst);
 
    void makeObjectsCast
    (ObjectVector *objects, VariableData *dst, VariableType *dstType);
@@ -375,8 +369,6 @@ protected:
 
    void recurse_makeObjects(ObjectVector *objects, VariableData *dst);
 
-   void recurse_makeObjectsAddress(ObjectVector *objects, VariableData *dst);
-
    void recurse_makeObjectsCast
    (ObjectVector *objects, VariableData *dst, VariableType *dstType);
 
@@ -424,9 +416,6 @@ private:
    void recurse_makeObjectsBase(ObjectVector *objects, VariableData *dst);
 
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
-
-   virtual void virtual_makeObjectsAddress
-   (ObjectVector *objects, VariableData *dst);
 
    virtual void virtual_makeObjectsCast
    (ObjectVector *objects, VariableData *dst, VariableType *dstType);

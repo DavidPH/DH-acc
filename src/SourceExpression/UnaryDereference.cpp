@@ -47,10 +47,6 @@ public:
 
    virtual bool canGetData() const;
 
-   virtual bool canMakeObjectAddress() const;
-
-   virtual bool canMakeObjectsAddress() const;
-
    //
    // ::getData
    //
@@ -117,13 +113,8 @@ public:
 
    virtual VariableType::Reference getType() const;
 
-   virtual CounterPointer<ObjectExpression> makeObjectAddress() const;
-
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
-
-   virtual void virtual_makeObjectsAddress
-   (ObjectVector *objects, VariableData *dst);
 };
 
 
@@ -157,36 +148,11 @@ bool SourceExpression_UnaryDereference::canGetData() const
 }
 
 //
-// SourceExpression_UnaryDereference::canMakeObjectAddress
-//
-bool SourceExpression_UnaryDereference::canMakeObjectAddress() const
-{
-   return canMakeObjectsAddress() && expr->canMakeObject();
-}
-
-//
-// SourceExpression_UnaryDereference::canMakeObjectsAddress
-//
-bool SourceExpression_UnaryDereference::canMakeObjectsAddress() const
-{
-   return expr->getType()->getBasicType() != VariableType::BT_STRING;
-}
-
-//
 // SourceExpression_UnaryDereference::getType
 //
 VariableType::Reference SourceExpression_UnaryDereference::getType() const
 {
    return expr->getType()->getReturn();
-}
-
-//
-// SourceExpression_UnaryDereference::makeObjectAddress
-//
-ObjectExpression::Pointer SourceExpression_UnaryDereference::makeObjectAddress
-() const
-{
-   return expr->makeObject();
 }
 
 //
@@ -219,17 +185,6 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
 
    make_objects_memcpy_prep(objects, dst, src, position);
    make_objects_memcpy_post(objects, dst, src, position);
-}
-
-//
-// SourceExpression_UnaryDereference::virtual_makeObjectsAddress
-//
-void SourceExpression_UnaryDereference::virtual_makeObjectsAddress
-(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjectsAddress(objects, dst);
-
-   expr->makeObjects(objects, dst);
 }
 
 // EOF

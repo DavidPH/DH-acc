@@ -227,7 +227,8 @@ bool SourceExpression_ValueCast::canMakeObject() const
    if (exprBT == VariableType::BT_ARRAY &&
        thisBT == VariableType::BT_POINTER)
    {
-      return expr->canMakeObjectAddress();
+      // Not the most efficient solution, no.
+      return create_unary_reference(expr, context, position)->canMakeObject();
    }
 
    if (!expr->canMakeObject()) return false;

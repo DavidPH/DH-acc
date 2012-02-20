@@ -77,33 +77,6 @@ bool SourceExpression::canMakeObject() const
 }
 
 //
-// SourceExpression::canMakeObjectAddress
-//
-bool SourceExpression::canMakeObjectAddress() const
-{
-   return canGetData() && getData()->type == VariableData::MT_STATIC;
-}
-
-//
-// SourceExpression::canMakeObjectsAddress
-//
-bool SourceExpression::canMakeObjectsAddress() const
-{
-   if (!canGetData()) return false;
-
-   switch (getData()->type)
-   {
-   case VariableData::MT_AUTO:
-   case VariableData::MT_POINTER:
-   case VariableData::MT_STATIC:
-      return true;
-
-   default:
-      return false;
-   }
-}
-
-//
 // SourceExpression::get_promoted_type
 //
 VariableType::Reference SourceExpression::
@@ -179,20 +152,6 @@ CounterPointer<ObjectExpression> SourceExpression::makeObject() const
 }
 
 //
-// SourceExpression::makeObjectAddress
-//
-CounterPointer<ObjectExpression> SourceExpression::makeObjectAddress() const
-{
-   VariableData::Pointer src = getData();
-
-   if (src->type != VariableData::MT_STATIC)
-      throw SourceException("makeObjectAddress on invalid expression",
-                            position, getName());
-
-   return src->address;
-}
-
-//
 // SourceExpression::makeObjects
 //
 void SourceExpression::
@@ -222,30 +181,6 @@ makeObjects(ObjectVector *objects, VariableData *dst)
    }
    else
       virtual_makeObjects(objects, dst);
-}
-
-//
-// SourceExpression::makeObjectsAddress
-//
-void SourceExpression::
-makeObjectsAddress(ObjectVector *objects, VariableData *dst)
-{
-   makeObjectsBase(objects, dst);
-
-   if (canMakeObjectAddress())
-   {
-      recurse_makeObjectsAddress(objects, dst);
-
-      // This should properly determine the size of a pointer.
-      VariableData::Pointer src =
-         VariableData::create_literal(1, VariableData::SL_INT,
-                                      makeObjectAddress());
-
-      make_objects_memcpy_prep(objects, dst, src, position);
-      make_objects_memcpy_post(objects, dst, src, position);
-   }
-   else
-      virtual_makeObjectsAddress(objects, dst);
 }
 
 //
@@ -296,15 +231,6 @@ recurse_makeObjects(ObjectVector *objects, VariableData *dst)
 }
 
 //
-// SourceExpression::recurse_makeObjectsAddress
-//
-void SourceExpression::
-recurse_makeObjectsAddress(ObjectVector *objects, VariableData *dst)
-{
-   recurse_makeObjectsBase(objects, dst);
-}
-
-//
 // SourceExpression::recurse_makeObjectsBase
 //
 void SourceExpression::
@@ -334,50 +260,6 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    make_objects_memcpy_prep(objects, dst, src, position);
    make_objects_memcpy_post(objects, dst, src, position);
-}
-
-//
-// SourceExpression::virtual_makeObjectsAddress
-//
-void SourceExpression::
-virtual_makeObjectsAddress(ObjectVector *objects, VariableData *dst)
-{
-   recurse_makeObjectsAddress(objects, dst);
-
-   VariableData::Pointer src = getData();
-   VariableData::Pointer tmp =
-      VariableData::create_stack(
-         VariableType::get_bt_char()->getPointer()->getSize(position));
-
-   make_objects_memcpy_prep(objects, dst, tmp, position);
-
-   switch (src->type)
-   {
-   case VariableData::MT_AUTO:
-      objects->addToken(OCODE_ADDR_AUTO, src->address);
-      break;
-
-   case VariableData::MT_POINTER:
-      src->offsetExpr->makeObjects(objects, tmp);
-
-      if (src->address->resolveInt())
-      {
-         objects->setPosition(position);
-         objects->addToken(OCODE_GET_LITERAL32I, src->address);
-         objects->addToken(OCODE_ADD32U);
-      }
-      break;
-
-   case VariableData::MT_STATIC:
-      objects->addToken(OCODE_GET_LITERAL32I, src->address);
-      break;
-
-   default:
-      throw SourceException("makeObjectsAddress on invalid expression",
-                            position, getName());
-   }
-
-   make_objects_memcpy_post(objects, dst, tmp, position);
 }
 
 //
