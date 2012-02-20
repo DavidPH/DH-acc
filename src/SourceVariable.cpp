@@ -171,26 +171,26 @@ get_StorageClass(SourceTokenC const &token)
    if (token.getData() == "register")
       return SC_REGISTER;
 
-   if (token.getData() == "__register_global")
-      return SC_REGISTER_GLOBAL;
-
-   if (token.getData() == "__register_map")
-      return SC_REGISTER_MAP;
-
-   if (token.getData() == "__register_world")
-      return SC_REGISTER_WORLD;
-
-   if (token.getData() == "__registerarray_global")
-      return SC_REGISTERARRAY_GLOBAL;
-
-   if (token.getData() == "__registerarray_map")
-      return SC_REGISTERARRAY_MAP;
-
-   if (token.getData() == "__registerarray_world")
-      return SC_REGISTERARRAY_WORLD;
-
    if (token.getData() == "static")
       return SC_STATIC;
+
+   if (token.getData() == "__mapregister")
+      return SC_REGISTER_MAP;
+
+   if (token.getData() == "__worldregister")
+      return SC_REGISTER_WORLD;
+
+   if (token.getData() == "__globalregister")
+      return SC_REGISTER_GLOBAL;
+
+   if (token.getData() == "__maparray")
+      return SC_REGISTERARRAY_MAP;
+
+   if (token.getData() == "__worldarray")
+      return SC_REGISTERARRAY_WORLD;
+
+   if (token.getData() == "__globalarray")
+      return SC_REGISTERARRAY_GLOBAL;
 
    throw SourceException("invalid storage-class '" + token.getData() + "'", token.getPosition(), "SourceVariable");
 }

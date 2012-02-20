@@ -30,7 +30,7 @@ __library("malloc");
 
 
 // Store index between calls to malloc for efficiency.
-void __variable __register_map struct __heap_block * __heap_index;
+void __variable __mapregister struct __heap_block * __heap_index;
 
 // Heap starts after automatic variable stack and static variable section of
 // addressable space.

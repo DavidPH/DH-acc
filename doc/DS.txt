@@ -393,32 +393,32 @@ storage-class register
 storage-class register-global
   Allocates storage in global-scope registers. This is the storage class of ACS
   non-array variables defined as global.
-    "__register_global"
+    "__globalregister"
 
 storage-class register-map
   Allocates storage in map-scope registers. This is the storage class of ACS
   non-array variables defined outside any script or function.
-    "__register_map"
+    "__mapregister"
 
 storage-class register-world
   Allocates storage in world-scope registers. This is the storage class of ACS
   non-array variables defined as world.
-    "__register_world"
+    "__worldregister"
 
 storage-class registerarray-global
   Allocates storage in global-scope registerarrays. This is the storage class of
   ACS array variables defined as global.
-    "__registerarray_global"
+    "__globalarray"
 
 storage-class registerarray-map
   Allocates storage in map-scope registerarrays. This is the storage class of
   ACS array variables defined outside any script or function.
-    "__registerarray_map"
+    "__maparray"
 
 storage-class registerarray-world
   Allocates storage in world-scope registerarrays. This is the storage class of
   ACS array variables defined as world.
-    "__registerarray_world"
+    "__worldarray"
 
 storage-class static
   Allocates storage in addressable space.
