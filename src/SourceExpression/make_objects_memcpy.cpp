@@ -25,9 +25,23 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../option.hpp"
 #include "../ost_type.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
+
+
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
+
+static bool option_string_tag = true;
+static option::option_dptr<bool> option_string_tag_handler
+('\0', "string-tag", "features",
+ "For targets that support it, enables tagging of strings. On by default.",
+ "For targets that support it, enables tagging of strings. Turning this off "
+ "will very slightly improve performance, but at the cost of ACSE-library "
+ "compatibility. On by default.", &option_string_tag);
 
 
 //----------------------------------------------------------------------------|
@@ -80,7 +94,7 @@ static void make_objects_memcpy_post_part
 
          // ZDoom requires tagging strings.
          if (data->sectionL == VariableData::SL_STRING &&
-             target_type == TARGET_ZDoom)
+             target_type == TARGET_ZDoom && option_string_tag)
          {
             objects->addToken(OCODE_ACSE_STRING_TAG);
          }
