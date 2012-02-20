@@ -283,6 +283,10 @@ private:
 // Global Variables                                                           |
 //
 
+extern int option_addr_array;
+extern int option_addr_stack;
+extern int option_static_temp;
+
 extern bool option_string_fold;
 
 #endif /* HPP_ObjectExpression_ */

@@ -53,7 +53,8 @@ make_tokens(ObjectToken const &object,
       ObjectExpression::create_value_int(16, SourcePosition::builtin());
 
    static ObjectExpression::Pointer const indexTemp =
-      ObjectExpression::create_value_int(1, SourcePosition::builtin());
+      ObjectExpression::create_value_int
+      (option_static_temp, SourcePosition::builtin());
 
    static std::vector<std::string> const nolabels;
 

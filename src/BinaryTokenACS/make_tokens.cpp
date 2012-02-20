@@ -28,16 +28,27 @@
 #include "../SourceException.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
 
 #define TOKEN_CLASS BinaryTokenACS
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// BinaryTokenACS::make_tokens
+//
 void BinaryTokenACS::make_tokens(ObjectToken const & object, std::vector<BinaryTokenACS> * instructions)
 {
 	static ObjectExpression::Pointer const fracbits(ObjectExpression::create_value_int(16, SourcePosition::builtin()));
 
-	static ObjectExpression::Pointer const indexTemp(ObjectExpression::create_value_int(1, SourcePosition::builtin()));
+   static ObjectExpression::Pointer const indexTemp =
+      ObjectExpression::create_value_int
+      (option_static_temp, SourcePosition::builtin());
 
 	static std::vector<std::string> const nolabels;
 
@@ -60,10 +71,15 @@ void BinaryTokenACS::make_tokens(ObjectToken const & object, std::vector<BinaryT
 		throw SourceException("unknown OCODE: " + (std::string)make_string(object.getCode()), position, "BinaryTokenACS");
 	}
 }
+
+//
+// BinaryTokenACS::make_tokens
+//
 void BinaryTokenACS::make_tokens(ObjectVector const & objects, std::vector<BinaryTokenACS> * instructions)
 {
 	for (bigsint index(0); index < objects.size(); ++index)
 		make_tokens(objects[index], instructions);
 }
 
+// EOF
 
