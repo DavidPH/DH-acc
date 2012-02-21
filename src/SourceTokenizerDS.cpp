@@ -189,7 +189,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
 // SourceTokenizerDS::SourceTokenizerDS
 //
 SourceTokenizerDS::SourceTokenizerDS(SourceStream *_in)
- : canCommand(true), canExpand(true), canSkip(true)
+ : canCommand(true), canExpand(true), canSkip(true), canString(true)
 {
    #define CASE_TARGET(TARGET)                \
    case TARGET_##TARGET:                      \
@@ -401,7 +401,9 @@ void SourceTokenizerDS::doCommand_ifndef()
 //
 void SourceTokenizerDS::doCommand_include()
 {
+   canString = false;
    prep(); doAssert(SourceTokenC::TT_STRING);
+   canString = true;
 
    if (isSkip()) return;
 
@@ -658,6 +660,9 @@ bool SourceTokenizerDS::peekType
    return token.type == type && token.data == data;
 }
 
+//
+// SourceTokenizerDS::prep
+//
 void SourceTokenizerDS::prep()
 {
    while (true)
@@ -698,6 +703,21 @@ void SourceTokenizerDS::prep()
          continue;
 
       break;
+   }
+
+   // String literal concatenation.
+   if (canString && token.type == SourceTokenC::TT_STRING)
+   {
+      SourceTokenC tokenTemp = token;
+
+      prep();
+
+      if (token.type == SourceTokenC::TT_STRING)
+         tokenTemp.data += token.data;
+      else
+         unget(token);
+
+      token = tokenTemp;
    }
 }
 

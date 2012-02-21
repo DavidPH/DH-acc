@@ -107,9 +107,10 @@ private:
 
    SourceTokenC token;
 
-   unsigned canCommand : 1;
-   unsigned canExpand  : 1;
-   unsigned canSkip    : 1;
+   bool canCommand : 1;
+   bool canExpand  : 1;
+   bool canSkip    : 1;
+   bool canString  : 1;
 };
 
 #endif /* HPP_SourceTokenizerDS_ */
