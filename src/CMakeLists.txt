@@ -130,7 +130,7 @@ add_executable(DH-acc
 	SourceStream.cpp
 	SourceTokenASMPLX.cpp
 	SourceTokenC.cpp
-	SourceTokenizerC.cpp
+#  SourceTokenizerC.cpp
 	SourceTokenizerDS.cpp
 	SourceVariable.cpp
 	VariableData.cpp

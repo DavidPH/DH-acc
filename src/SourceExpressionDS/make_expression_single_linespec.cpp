@@ -40,7 +40,7 @@
 SRCEXPDS_EXPRSINGLE_DEFN(linespec)
 {
    // linespecName
-   std::string linespecName = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+   std::string linespecName = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
    // linespecArgTypes linespecReturn
    VariableType::Vector linespecArgTypes;
@@ -50,11 +50,12 @@ SRCEXPDS_EXPRSINGLE_DEFN(linespec)
 
    // linespecNumber
    in->get(SourceTokenC::TT_OP_AT);
-   bigsint linespecNumber = get_bigsint(in->get(SourceTokenC::TT_INTEGER));
+   bigsint linespecNumber =
+      make_expression_single(in, blocks, context)->makeObject()->resolveInt();
 
    // linespecObject
    ObjectExpression::Pointer linespecObject =
-      ObjectExpression::create_value_int(linespecNumber, token.getPosition());
+      ObjectExpression::create_value_int(linespecNumber, token.pos);
 
    // linespecVarType
    VariableType::Reference linespecVarType =
@@ -63,10 +64,10 @@ SRCEXPDS_EXPRSINGLE_DEFN(linespec)
    // linespecVariable
    SourceVariable::Pointer linespecVariable =
       SourceVariable::create_constant
-      (linespecName, linespecVarType, linespecObject, token.getPosition());
+      (linespecName, linespecVarType, linespecObject, token.pos);
 
    context->addVariable(linespecVariable);
-   return create_value_variable(linespecVariable, context, token.getPosition());
+   return create_value_variable(linespecVariable, context, token.pos);
 }
 
 // EOF

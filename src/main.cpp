@@ -151,7 +151,7 @@ static void read_source(std::string const &name, SourceType type,
 
       SourceTokenizerDS tokenizer(&in);
 
-      bool mainGen = tokenizer.peek().getType() == SourceTokenC::TT_OP_BRACE_O;
+      bool mainGen = tokenizer.peekType(SourceTokenC::TT_OP_BRACE_O);
 
       SourceExpression::Pointer expressions =
          SourceExpressionDS::make_expressions(&tokenizer);

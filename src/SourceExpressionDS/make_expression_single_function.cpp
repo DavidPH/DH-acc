@@ -60,7 +60,7 @@ bool option_string_func = true;
 SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
 {
    // functionName
-   std::string functionName = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+   std::string functionName = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
    // functionLabel
    std::string functionLabel = "function_" + functionName;
@@ -86,21 +86,21 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
    {
       functionVariable =
          SourceVariable::create_constant
-         (functionName, functionVarType, functionLabel, token.getPosition());
+         (functionName, functionVarType, functionLabel, token.pos);
    }
    else
    {
       functionVariable =
          SourceVariable::create_constant
-         (functionName, functionVarType, functionNameObject, token.getPosition());
+         (functionName, functionVarType, functionNameObject, token.pos);
    }
    context->addVariable(functionVariable);
 
    ObjectExpression::add_function
    (functionNameObject, functionLabel, functionArgCount, functionArgCount,
-    functionReturn->getSize(token.getPosition()), true);
+    functionReturn->getSize(token.pos), true);
 
-   return create_value_variable(functionVariable, context, token.getPosition());
+   return create_value_variable(functionVariable, context, token.pos);
 }
 
 //
@@ -122,7 +122,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 
    // functionName
    SourceTokenC functionNameToken = in->get(SourceTokenC::TT_IDENTIFIER);
-   std::string functionName = functionNameToken.getData();
+   std::string functionName = functionNameToken.data;
 
    // __func__
    if (option_string_func)
@@ -132,14 +132,14 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
       SourceVariable::Pointer funcVar =
          SourceVariable::create_constant
          ("__func__", VariableType::get_bt_string(), funcVarData,
-		functionNameToken.getPosition());
+		functionNameToken.pos);
 
       functionContext->addVariable(funcVar);
    }
 
    // functionLabel
    std::string functionLabel;
-   if (token.getData() != "__extfunc")
+   if (token.data != "__extfunc")
       functionLabel += context->makeLabel();
    functionLabel += "function_";
    functionLabel += functionName;
@@ -167,13 +167,13 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
    {
       functionVariable =
          SourceVariable::create_constant
-         (functionName, functionVarType, functionLabel, token.getPosition());
+         (functionName, functionVarType, functionLabel, token.pos);
    }
    else
    {
       functionVariable =
          SourceVariable::create_constant
-         (functionName, functionVarType, functionNameObject, token.getPosition());
+         (functionName, functionVarType, functionNameObject, token.pos);
    }
    context->addVariable(functionVariable);
 
@@ -184,9 +184,9 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
    blocks->push_back(functionExpression);
 
    SourceExpression::Pointer functionExprData =
-      create_value_data_garbage(functionReturn, functionContext, token.getPosition());
+      create_value_data_garbage(functionReturn, functionContext, token.pos);
    SourceExpression::Pointer functionExprRetn =
-      create_branch_return(functionExprData, functionContext, token.getPosition());
+      create_branch_return(functionExprData, functionContext, token.pos);
    blocks->push_back(functionExprRetn);
 
    // functionVarCount
@@ -195,9 +195,9 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 
    ObjectExpression::add_function
    (functionNameObject, functionLabel, functionArgCount, functionVarCount,
-    functionReturn->getSize(token.getPosition()), false);
+    functionReturn->getSize(token.pos), false);
 
-   return create_value_variable(functionVariable, context, token.getPosition());
+   return create_value_variable(functionVariable, context, token.pos);
 }
 
 // EOF

@@ -41,222 +41,225 @@
 //
 SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
-   #define PASS_A context, token.getPosition()
+   #define PASS_A context, token.pos
 
-	SourceExpression::Pointer expr;
-	SourceTokenC token(in->get());
+   SourceExpression::Pointer expr;
+   SourceTokenC token = in->get();
 
-	switch (token.getType())
-	{
-	case SourceTokenC::TT_CHARACTER:
-      expr = create_value_char(token.getData(), PASS_A);
-		break;
+   switch (token.type)
+   {
+   case SourceTokenC::TT_CHARACTER:
+      expr = create_value_char(token.data, PASS_A);
+      break;
 
 	case SourceTokenC::TT_FLOAT:
-      expr = create_value_real(token.getData(), PASS_A);
+      expr = create_value_real(token.data, PASS_A);
 		break;
 
-	case SourceTokenC::TT_IDENTIFIER:
-	{	// Check for keyword.
-		std::map<std::string, expression_single_handler>::iterator it(_expression_single_handlers.find(token.getData()));
+   case SourceTokenC::TT_IDENTIFIER:
+   {  // Check for keyword.
+      std::map<std::string, expression_single_handler>::iterator it =
+         _expression_single_handlers.find(token.data);
 
-		if (it != _expression_single_handlers.end())
-		{
-			expr = it->second(in, token, blocks, context);
-			break;
-		}
-	}
+      if (it != _expression_single_handlers.end())
+      {
+         expr = it->second(in, token, blocks, context);
+         break;
+      }
+   }
 
-		// Check for label.
-		if (in->peek().getType() == SourceTokenC::TT_OP_COLON && context->getAllowLabel())
-		{
-			in->get(SourceTokenC::TT_OP_COLON);
-			expr = make_expression(in, blocks, context);
-         expr->addLabel(context->getLabelGoto(token.getData(), token.getPosition()));
-			break;
-		}
+      // Check for label.
+      if (in->peekType(SourceTokenC::TT_OP_COLON) && context->getAllowLabel())
+      {
+         in->get(SourceTokenC::TT_OP_COLON);
+         expr = make_expression(in, blocks, context);
+         expr->addLabel(context->getLabelGoto(token.data, token.pos));
+         break;
+      }
 
-		// Must be a variable.
-      expr = create_value_variable(context->getVariable(token.getData(), token.getPosition()), PASS_A);
-		break;
+      // Must be a variable.
+      expr = create_value_variable(context->getVariable(token.data, token.pos), PASS_A);
+      break;
 
-	case SourceTokenC::TT_INTEGER:
-      expr = create_value_int(token.getData(), PASS_A);
-		break;
+   case SourceTokenC::TT_INTEGER:
+      expr = create_value_int(token.data, PASS_A);
+      break;
 
-	case SourceTokenC::TT_STRING:
-      expr = create_value_string(token.getData(), PASS_A);
-		break;
+   case SourceTokenC::TT_STRING:
+      expr = create_value_string(token.data, PASS_A);
+      break;
 
-	case SourceTokenC::TT_OP_AND:
+   case SourceTokenC::TT_OP_AND:
       expr = create_unary_reference(make_expression_single(in, blocks, context), PASS_A);
-		break;
+      break;
 
-	case SourceTokenC::TT_OP_AND2:
-	{
-		SourceTokenC labelToken(in->get(SourceTokenC::TT_IDENTIFIER));
+   case SourceTokenC::TT_OP_AND2:
+   {
+      SourceTokenC labelToken = in->get(SourceTokenC::TT_IDENTIFIER);
 
-		std::string label;
+      std::string label;
 
-		if (labelToken.getData() == "case")
-		{
-			if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER && in->peek().getData() == "default")
-			{
-				in->get(SourceTokenC::TT_IDENTIFIER);
-				label = context->getLabelCaseDefault(token.getPosition());
-			}
-			else
-			{
-				label = context->getLabelCase(make_expression_single(in, blocks, context)->makeObject()->resolveInt(), token.getPosition());
-			}
-		}
-		else
-		{
-			label = context->getLabelGoto(labelToken.getData(), labelToken.getPosition());
-		}
+      if (labelToken.data == "case")
+      {
+         if (in->peekType(SourceTokenC::TT_IDENTIFIER, "default"))
+         {
+            in->get(SourceTokenC::TT_IDENTIFIER);
+            label = context->getLabelCaseDefault(token.pos);
+         }
+         else
+         {
+            label = context->getLabelCase(make_expression_single(in, blocks, context)->makeObject()->resolveInt(), token.pos);
+         }
+      }
+      else
+      {
+         label = context->getLabelGoto(labelToken.data, labelToken.pos);
+      }
 
-      expr = create_value_variable(SourceVariable::create_literal(VariableType::get_bt_label(), label, labelToken.getPosition()), PASS_A);
-	}
-		break;
+      expr = create_value_variable(SourceVariable::create_literal(VariableType::get_bt_label(), label, labelToken.pos), PASS_A);
+   }
+      break;
 
-	case SourceTokenC::TT_OP_ASTERISK:
+   case SourceTokenC::TT_OP_ASTERISK:
       expr = create_unary_dereference(make_expression_single(in, blocks, context), PASS_A);
-		break;
+      break;
 
    case SourceTokenC::TT_OP_AT:
       expr = make_expression_single(in, blocks, context);
-      expr = create_value_variable(SourceVariable::create_literal(VariableType::get_bt_uint(), expr->getData()->address, token.getPosition()), PASS_A);
+      expr = create_value_variable(SourceVariable::create_literal(VariableType::get_bt_uint(), expr->getData()->address, token.pos), PASS_A);
       break;
 
-	case SourceTokenC::TT_OP_BRACE_O:
-	{
-		in->unget(token);
-		std::vector<SourceExpression::Pointer> expressions;
-		SourceContext::Reference blockContext = SourceContext::create(context, SourceContext::CT_BLOCK);
-		make_expressions(in, &expressions, blocks, blockContext);
-      expr = create_value_block(expressions, blockContext, token.getPosition());
-		break;
-	}
+   case SourceTokenC::TT_OP_BRACE_O:
+   {
+      in->unget(token);
+      Vector expressions;
+      SourceContext::Reference blockContext =
+         SourceContext::create(context, SourceContext::CT_BLOCK);
+      make_expressions(in, &expressions, blocks, blockContext);
+      expr = create_value_block(expressions, blockContext, token.pos);
+      break;
+   }
 
-	case SourceTokenC::TT_OP_BRACKET_O:
-	{
-		in->unget(token);
-		std::vector<SourceExpression::Pointer> expressions;
-		make_expressions(in, &expressions, blocks, context);
+   case SourceTokenC::TT_OP_BRACKET_O:
+   {
+      in->unget(token);
+      Vector expressions;
+      make_expressions(in, &expressions, blocks, context);
       expr = create_value_block(expressions, PASS_A);
-		break;
-	}
+      break;
+   }
 
-	case SourceTokenC::TT_OP_EXCLAMATION:
+   case SourceTokenC::TT_OP_EXCLAMATION:
       expr = create_branch_not(make_expression_single(in, blocks, context), PASS_A);
-		break;
+      break;
 
-	case SourceTokenC::TT_OP_MINUS:
+   case SourceTokenC::TT_OP_MINUS:
       expr = create_unary_sub(make_expression_single(in, blocks, context), PASS_A);
-		break;
+      break;
 
-	case SourceTokenC::TT_OP_MINUS2:
+   case SourceTokenC::TT_OP_MINUS2:
       expr = create_unary_dec_pre(make_expression_single(in, blocks, context), PASS_A);
-		break;
+      break;
 
-	case SourceTokenC::TT_OP_PARENTHESIS_C:
-	case SourceTokenC::TT_OP_SEMICOLON:
-		in->unget(token);
+   case SourceTokenC::TT_OP_PARENTHESIS_C:
+   case SourceTokenC::TT_OP_SEMICOLON:
+      in->unget(token);
       return create_value_data(VariableType::get_bt_void(), PASS_A);
 
-	case SourceTokenC::TT_OP_PARENTHESIS_O:
-		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER && is_expression_type(in->peek().getData(), context))
-		{
+   case SourceTokenC::TT_OP_PARENTHESIS_O:
+      if (in->peekType(SourceTokenC::TT_IDENTIFIER) && is_expression_type(in->peek().data, context))
+      {
          VariableType::Reference type =
             make_expression_type(in, blocks, context);
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+         in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
          expr = create_value_cast_explicit(make_expression_single(in, blocks, context), type, PASS_A);
-		}
-		else
-		{
-			expr = make_expression(in, blocks, context);
-			in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-		}
-		break;
+      }
+      else
+      {
+         expr = make_expression(in, blocks, context);
+         in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+      }
+      break;
 
-	case SourceTokenC::TT_OP_PLUS:
-		expr = make_expression_single(in, blocks, context);
-		break;
+   case SourceTokenC::TT_OP_PLUS:
+      expr = make_expression_single(in, blocks, context);
+      break;
 
-	case SourceTokenC::TT_OP_PLUS2:
+   case SourceTokenC::TT_OP_PLUS2:
       expr = create_unary_inc_pre(make_expression_single(in, blocks, context), PASS_A);
-		break;
+      break;
 
-	case SourceTokenC::TT_OP_TILDE:
+   case SourceTokenC::TT_OP_TILDE:
       expr = create_unary_not(make_expression_single(in, blocks, context), PASS_A);
-		break;
+      break;
 
-	default:
-		in->unget(token);
-		throw SourceException("unexpected token type: " + (std::string)make_string(token.getType()), token.getPosition(), "SourceExpressionDS::make_expression_single");
-	}
-
-	// Suffixes.
-	while (true) switch (in->peek().getType())
-	{
-	case SourceTokenC::TT_OP_BRACKET_O:
-		token = in->get(SourceTokenC::TT_OP_BRACKET_O);
-      expr = create_binary_array(expr, make_expression(in, blocks, context), PASS_A);
-		in->get(SourceTokenC::TT_OP_BRACKET_C);
-		break;
-
-	case SourceTokenC::TT_OP_MINUS_GT:
-   {
-		token = in->get(SourceTokenC::TT_OP_MINUS_GT);
-      SourceTokenC const &tokenMember = in->get(SourceTokenC::TT_IDENTIFIER);
-      expr = create_value_member(create_unary_dereference(expr, PASS_A), tokenMember.getData(), PASS_A);
+   default:
+      in->unget(token);
+      throw SourceException("unexpected token type:" + make_string(token.type), token.pos, __func__);
    }
-		break;
 
-	case SourceTokenC::TT_OP_MINUS2:
+   // Suffixes.
+   while (true) switch (in->peek().type)
+   {
+   case SourceTokenC::TT_OP_BRACKET_O:
+      token = in->get(SourceTokenC::TT_OP_BRACKET_O);
+      expr = create_binary_array(expr, make_expression(in, blocks, context), PASS_A);
+      in->get(SourceTokenC::TT_OP_BRACKET_C);
+      break;
+
+   case SourceTokenC::TT_OP_MINUS_GT:
+   {
+      token = in->get(SourceTokenC::TT_OP_MINUS_GT);
+      SourceTokenC const &tokenMember = in->get(SourceTokenC::TT_IDENTIFIER);
+      expr = create_value_member(create_unary_dereference(expr, PASS_A), tokenMember.data, PASS_A);
+   }
+      break;
+
+   case SourceTokenC::TT_OP_MINUS2:
       token = in->get(SourceTokenC::TT_OP_MINUS2);
       expr = create_unary_dec_suf(expr, PASS_A);
-		break;
+      break;
 
-	case SourceTokenC::TT_OP_PARENTHESIS_O:
-	{
-		token = in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
-
-		SourceContext::Reference contextCall = SourceContext::create(context, SourceContext::CT_BLOCK);
-
-		std::vector<SourceExpression::Pointer> args;
-
-		if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
-		{
-			args.push_back(make_expression(in, blocks, contextCall));
-
-			if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
-				break;
-
-			in->get(SourceTokenC::TT_OP_COMMA);
-		}
-		in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-		expr = create_branch_call(expr, args, contextCall, token.getPosition());
-	}
-		break;
-
-	case SourceTokenC::TT_OP_PERIOD:
+   case SourceTokenC::TT_OP_PARENTHESIS_O:
    {
-		token = in->get(SourceTokenC::TT_OP_PERIOD);
-      SourceTokenC const &tokenMember = in->get(SourceTokenC::TT_IDENTIFIER);
-      expr = create_value_member(expr, tokenMember.getData(), PASS_A);
-   }
-		break;
+      token = in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
-	case SourceTokenC::TT_OP_PLUS2:
+      SourceContext::Reference contextCall =
+         SourceContext::create(context, SourceContext::CT_BLOCK);
+
+      Vector args;
+
+      if (in->peek().type != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
+      {
+         args.push_back(make_expression(in, blocks, contextCall));
+
+         if (!in->peekType(SourceTokenC::TT_OP_COMMA))
+            break;
+
+         in->get(SourceTokenC::TT_OP_COMMA);
+      }
+      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+      expr = create_branch_call(expr, args, contextCall, token.pos);
+   }
+      break;
+
+   case SourceTokenC::TT_OP_PERIOD:
+   {
+      token = in->get(SourceTokenC::TT_OP_PERIOD);
+      SourceTokenC const &tokenMember = in->get(SourceTokenC::TT_IDENTIFIER);
+      expr = create_value_member(expr, tokenMember.data, PASS_A);
+   }
+      break;
+
+   case SourceTokenC::TT_OP_PLUS2:
       token = in->get(SourceTokenC::TT_OP_PLUS2);
       expr = create_unary_inc_suf(expr, PASS_A);
-		break;
+      break;
 
-	default:
-		return expr;
-	}
+   default:
+      return expr;
+   }
 
    #undef PASS_A
 }
@@ -266,9 +269,9 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 //
 SRCEXPDS_EXPRSINGLE_DEFN(break)
 {
-	(void)in; (void)blocks;
+   (void)in; (void)blocks;
 
-	return create_branch_break(context, token.getPosition());
+   return create_branch_break(context, token.pos);
 }
 
 //
@@ -276,15 +279,15 @@ SRCEXPDS_EXPRSINGLE_DEFN(break)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(case)
 {
-	context->setAllowLabel(false);
-	bigsint value(make_expression(in, blocks, context)->makeObject()->resolveInt());
-	context->setAllowLabel(true);
+   context->setAllowLabel(false);
+   bigsint value = make_expression(in, blocks, context)->makeObject()->resolveInt();
+   context->setAllowLabel(true);
 
-	in->get(SourceTokenC::TT_OP_COLON);
+   in->get(SourceTokenC::TT_OP_COLON);
 
-	SourceExpression::Pointer expr(make_expression(in, blocks, context));
-	expr->addLabel(context->addLabelCase(value, token.getPosition()));
-	return expr;
+   SourceExpression::Pointer expr = make_expression(in, blocks, context);
+   expr->addLabel(context->addLabelCase(value, token.pos));
+   return expr;
 }
 
 //
@@ -293,17 +296,17 @@ SRCEXPDS_EXPRSINGLE_DEFN(case)
 SRCEXPDS_EXPRSINGLE_DEFN(constexpr)
 {
    VariableType::Reference type = make_expression_type(in, blocks, context);
-   std::string name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+   std::string name = in->get(SourceTokenC::TT_IDENTIFIER).data;
    in->get(SourceTokenC::TT_OP_EQUALS);
    SourceExpression::Pointer data = make_expression(in, blocks, context);
 
    SourceVariable::Pointer var =
       SourceVariable::create_constant
-      (name, type, data->makeObject(), token.getPosition());
+      (name, type, data->makeObject(), token.pos);
 
    context->addVariable(var);
 
-   return create_value_variable(var, context, token.getPosition());
+   return create_value_variable(var, context, token.pos);
 }
 
 //
@@ -311,9 +314,9 @@ SRCEXPDS_EXPRSINGLE_DEFN(constexpr)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(continue)
 {
-	(void)in; (void)blocks;
+   (void)in; (void)blocks;
 
-	return create_branch_continue(context, token.getPosition());
+   return create_branch_continue(context, token.pos);
 }
 
 //
@@ -321,11 +324,11 @@ SRCEXPDS_EXPRSINGLE_DEFN(continue)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(default)
 {
-	in->get(SourceTokenC::TT_OP_COLON);
+   in->get(SourceTokenC::TT_OP_COLON);
 
-	SourceExpression::Pointer expr(make_expression(in, blocks, context));
-	expr->addLabel(context->addLabelCaseDefault(token.getPosition()));
-	return expr;
+   SourceExpression::Pointer expr = make_expression(in, blocks, context);
+   expr->addLabel(context->addLabelCaseDefault(token.pos));
+   return expr;
 }
 
 //
@@ -333,7 +336,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(default)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(delay)
 {
-	return create_root_delay(make_expression(in, blocks, context), context, token.getPosition());
+   return create_root_delay(make_expression(in, blocks, context), context, token.pos);
 }
 
 //
@@ -341,14 +344,13 @@ SRCEXPDS_EXPRSINGLE_DEFN(delay)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(library)
 {
-	(void)blocks; (void)context;
+   (void)blocks; (void)context;
 
-	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
-	ObjectExpression::set_library(in->get(SourceTokenC::TT_STRING).getData());
-	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   ObjectExpression::set_library(in->get(SourceTokenC::TT_STRING).data);
+   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-   return create_value_data
-          (VariableType::get_bt_void(), context, token.getPosition());
+   return create_value_data(VariableType::get_bt_void(), context, token.pos);
 }
 
 //
@@ -356,7 +358,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(library)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(output)
 {
-   return create_root_output(make_expression(in, blocks, context), context, token.getPosition());
+   return create_root_output(make_expression(in, blocks, context), context, token.pos);
 }
 
 //
@@ -364,7 +366,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(output)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(return)
 {
-	return create_branch_return(make_expression(in, blocks, context), context, token.getPosition());
+   return create_branch_return(make_expression(in, blocks, context), context, token.pos);
 }
 
 //
@@ -372,16 +374,15 @@ SRCEXPDS_EXPRSINGLE_DEFN(return)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(sizeof)
 {
-	bool hasParentheses(in->peek().getType() == SourceTokenC::TT_OP_PARENTHESIS_O);
+   bool hasParentheses = in->peekType(SourceTokenC::TT_OP_PARENTHESIS_O);
 
-	if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
-   bigsint size =
-      make_expression_type(in, blocks, context)->getSize(token.getPosition());
+   bigsint size = make_expression_type(in, blocks, context)->getSize(token.pos);
 
-	if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-   return create_value_int(size, context, token.getPosition());
+   return create_value_int(size, context, token.pos);
 }
 
 //
@@ -389,11 +390,10 @@ SRCEXPDS_EXPRSINGLE_DEFN(sizeof)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(type)
 {
-	in->unget(token);
-	make_expression_type(in, blocks, context);
+   in->unget(token);
+   make_expression_type(in, blocks, context);
 
-   return create_value_data
-          (VariableType::get_bt_void(), context, token.getPosition());
+   return create_value_data(VariableType::get_bt_void(), context, token.pos);
 }
 
 //
@@ -403,10 +403,9 @@ SRCEXPDS_EXPRSINGLE_DEFN(typedef)
 {
    VariableType::Reference type = make_expression_type(in, blocks, context);
    SourceTokenC name = in->get(SourceTokenC::TT_IDENTIFIER);
-   context->getVariableType_typedef(name.getData(), type, name.getPosition());
+   context->getVariableType_typedef(name.data, type, name.pos);
 
-   return create_value_data
-          (VariableType::get_bt_void(), context, token.getPosition());
+   return create_value_data(VariableType::get_bt_void(), context, token.pos);
 }
 
 //
@@ -416,7 +415,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(void)
 {
    return create_value_cast_explicit
           (make_expression(in, blocks, context), VariableType::get_bt_void(),
-		 context, token.getPosition());
+		 context, token.pos);
 }
 
 //
@@ -436,7 +435,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(while)
    SourceExpression::Pointer exprBody =
       make_expression_single(in, blocks, contextBody);
 
-	return create_branch_while(exprCond, exprBody, contextBody, token.getPosition());
+   return create_branch_while(exprCond, exprBody, contextBody, token.pos);
 }
 
 // EOF

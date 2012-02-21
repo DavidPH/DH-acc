@@ -23,6 +23,7 @@
 
 #include "../SourceExpressionDS.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
@@ -40,21 +41,35 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_variable)
 {
    SourceContext::NameType const nameType = SourceContext::NT_EXTERN;
 
+   SourceTokenC scToken = in->get(SourceTokenC::TT_IDENTIFIER);
    SourceVariable::StorageClass sc =
-      SourceVariable::get_StorageClass(in->get(SourceTokenC::TT_IDENTIFIER));
-   VariableType::Reference type = make_expression_type(in, blocks, context);
-   std::string name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+      SourceVariable::get_StorageClass(scToken.data, scToken.pos);
 
-   std::string nameObject =
-      context->makeNameObject(nameType, sc, type, name, token.getPosition());
+   VariableType::Reference type = make_expression_type(in, blocks, context);
+   std::string name = in->get(SourceTokenC::TT_IDENTIFIER).data;
+
+   std::string nameObject;
+   if (in->peekType(SourceTokenC::TT_OP_AT))
+   {
+      in->get(SourceTokenC::TT_OP_AT);
+      bigsint address =
+         make_expression_single(in, blocks, context)->makeObject()->resolveInt();
+      nameObject =
+         context->makeNameObject(nameType, sc, type, name, address, token.pos);
+   }
+   else
+   {
+      nameObject =
+         context->makeNameObject(nameType, sc, type, name, token.pos);
+   }
 
    SourceVariable::Pointer var =
       SourceVariable::create_variable
-      (name, type, nameObject, sc, token.getPosition());
+      (name, type, nameObject, sc, token.pos);
 
    context->addVariable(var);
 
-   return create_value_variable(var, context, token.getPosition());
+   return create_value_variable(var, context, token.pos);
 }
 
 //
@@ -62,47 +77,46 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_variable)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(variable)
 {
-   bool external = token.getData() == "__extvar";
+   bool external = token.data == "__extvar";
    SourceContext::NameType nameType =
       external ? SourceContext::NT_EXTLOCAL : SourceContext::NT_LOCAL;
 
+   SourceTokenC scToken = in->get(SourceTokenC::TT_IDENTIFIER);
    SourceVariable::StorageClass sc =
-      SourceVariable::get_StorageClass(in->get(SourceTokenC::TT_IDENTIFIER));
+      SourceVariable::get_StorageClass(scToken.data, scToken.pos);
+
    VariableType::Reference type = make_expression_type(in, blocks, context);
-   std::string name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+   std::string name = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
    std::string nameObject;
-   if (in->peek().getType() == SourceTokenC::TT_OP_AT)
+   if (in->peekType(SourceTokenC::TT_OP_AT))
    {
       in->get(SourceTokenC::TT_OP_AT);
-      bigsint address = get_bigsint(in->get(SourceTokenC::TT_INTEGER));
+      bigsint address =
+         make_expression_single(in, blocks, context)->makeObject()->resolveInt();
       nameObject =
-         context->makeNameObject
-         (nameType, sc, type, name, address, token.getPosition());
+         context->makeNameObject(nameType, sc, type, name, address, token.pos);
    }
    else
    {
       nameObject =
-         context->makeNameObject(nameType, sc, type, name, token.getPosition());
+         context->makeNameObject(nameType, sc, type, name, token.pos);
    }
 
    SourceVariable::Pointer var =
-      SourceVariable::create_variable
-      (name, type, nameObject, sc, token.getPosition());
+      SourceVariable::create_variable(name, type, nameObject, sc, token.pos);
 
    context->addVariable(var);
 
    SourceExpression::Pointer expr =
-      create_value_variable(var, context, token.getPosition());
+      create_value_variable(var, context, token.pos);
 
    // Semi-hack so that const vars can be initialized.
-   if (in->peek().getType() == SourceTokenC::TT_OP_EQUALS)
+   if (in->peekType(SourceTokenC::TT_OP_EQUALS))
    {
       in->get(SourceTokenC::TT_OP_EQUALS);
-      expr =
-         create_binary_assign_const
-         (expr, make_expression(in, blocks, context), context,
-		token.getPosition());
+      expr = create_binary_assign_const
+         (expr, make_expression(in, blocks, context), context, token.pos);
    }
 
    return expr;

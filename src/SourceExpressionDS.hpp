@@ -49,6 +49,7 @@
 // Types                                                                      |
 //
 
+class SourceTokenC;
 class SourceTokenizerDS;
 
 class SourceExpressionDS : public SourceExpression

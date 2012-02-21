@@ -39,22 +39,22 @@ SRCEXPDS_EXPRSINGLE_DEFN(printf)
 {
    std::string type;
 
-   if (in->peek().getType() == SourceTokenC::TT_OP_CMP_LT)
+   if (in->peekType(SourceTokenC::TT_OP_CMP_LT))
    {
       in->get(SourceTokenC::TT_OP_CMP_LT);
 
-      type = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+      type = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
       in->get(SourceTokenC::TT_OP_CMP_GT);
    }
 
-   SourceExpression::Vector expressions;
+   Vector expressions;
 
    in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
-   std::string const format = in->get(SourceTokenC::TT_STRING).getData();
+   std::string format = in->get(SourceTokenC::TT_STRING).data;
 
-   while (in->peek().getType() == SourceTokenC::TT_OP_COMMA)
+   while (in->peekType(SourceTokenC::TT_OP_COMMA))
    {
       in->get(SourceTokenC::TT_OP_COMMA);
       expressions.push_back(make_expression(in, blocks, context));
@@ -62,8 +62,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(printf)
 
    in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-   return create_root_printf
-          (type, format, expressions, context, token.getPosition());
+   return create_root_printf(type, format, expressions, context, token.pos);
 }
 
 // EOF

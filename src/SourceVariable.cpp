@@ -25,7 +25,6 @@
 
 #include "ObjectExpression.hpp"
 #include "SourceException.hpp"
-#include "SourceTokenC.hpp"
 #include "VariableData.hpp"
 #include "VariableType.hpp"
 
@@ -162,37 +161,38 @@ SourceVariable::Pointer SourceVariable::create_variable
 //
 // SourceVariable::get_StorageClass
 //
-SourceVariable::StorageClass SourceVariable::
-get_StorageClass(SourceTokenC const &token)
+SourceVariable::StorageClass SourceVariable::get_StorageClass
+(std::string const &data, SourcePosition const &position)
 {
-   if (token.getData() == "auto")
+   if (data == "auto")
       return SC_AUTO;
 
-   if (token.getData() == "register")
+   if (data == "register")
       return SC_REGISTER;
 
-   if (token.getData() == "static")
+   if (data == "static")
       return SC_STATIC;
 
-   if (token.getData() == "__mapregister")
+   if (data == "__mapregister")
       return SC_REGISTER_MAP;
 
-   if (token.getData() == "__worldregister")
+   if (data == "__worldregister")
       return SC_REGISTER_WORLD;
 
-   if (token.getData() == "__globalregister")
+   if (data == "__globalregister")
       return SC_REGISTER_GLOBAL;
 
-   if (token.getData() == "__maparray")
+   if (data == "__maparray")
       return SC_REGISTERARRAY_MAP;
 
-   if (token.getData() == "__worldarray")
+   if (data == "__worldarray")
       return SC_REGISTERARRAY_WORLD;
 
-   if (token.getData() == "__globalarray")
+   if (data == "__globalarray")
       return SC_REGISTERARRAY_GLOBAL;
 
-   throw SourceException("invalid storage-class '" + token.getData() + "'", token.getPosition(), "SourceVariable");
+   throw SourceException
+   ("invalid storage-class '" + data + "'", position, __func__);
 }
 
 //

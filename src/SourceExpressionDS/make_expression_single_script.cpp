@@ -50,7 +50,7 @@ extern bool option_string_func;
 SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
 {
    // scriptName
-   std::string scriptName(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+   std::string scriptName = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
    // scriptArgTypes/Names/Count scriptReturn
    VariableType::Vector scriptArgTypes;
@@ -73,10 +73,10 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
    // scriptVariable
    SourceVariable::Pointer scriptVariable =
       SourceVariable::create_constant
-      (scriptName, scriptVarType, scriptNameObject, token.getPosition());
+      (scriptName, scriptVarType, scriptNameObject, token.pos);
 
    context->addVariable(scriptVariable);
-   return create_value_variable(scriptVariable, context, token.getPosition());
+   return create_value_variable(scriptVariable, context, token.pos);
 }
 
 //
@@ -90,7 +90,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 
    // scriptName
    SourceTokenC scriptNameToken = in->get(SourceTokenC::TT_IDENTIFIER);
-   std::string scriptName = scriptNameToken.getData();
+   std::string scriptName = scriptNameToken.data;
 
    // __func__
    if (option_string_func)
@@ -100,17 +100,18 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
       SourceVariable::Pointer funcVar =
          SourceVariable::create_constant
          ("__func__", VariableType::get_bt_string(), funcVarData,
-		scriptNameToken.getPosition());
+		scriptNameToken.pos);
 
       scriptContext->addVariable(funcVar);
    }
 
    // scriptType
    ObjectData_Script::ScriptType scriptType;
-   if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
+   if (in->peekType(SourceTokenC::TT_IDENTIFIER))
    {
       SourceTokenC scriptTypeToken = in->get(SourceTokenC::TT_IDENTIFIER);
-      scriptType = odata_get_ScriptType(scriptTypeToken);
+      scriptType =
+         odata_get_ScriptType(scriptTypeToken.data, scriptTypeToken.pos);
    }
    else
    {
@@ -121,10 +122,12 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    int scriptFlags = 0;
    while (true)
    {
-      if (in->peek().getType() != SourceTokenC::TT_IDENTIFIER)
+      if (!in->peekType(SourceTokenC::TT_IDENTIFIER))
          break;
 
-      scriptFlags |= odata_get_ScriptFlag(in->get(SourceTokenC::TT_IDENTIFIER));
+      SourceTokenC scriptFlagToken = in->get(SourceTokenC::TT_IDENTIFIER);
+      scriptFlags |=
+         odata_get_ScriptFlag(scriptFlagToken.data, scriptFlagToken.pos);
    }
 
    // scriptArgTypes/Names/Count scriptReturn
@@ -138,11 +141,11 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 
    // scriptNumber
    bigsint scriptNumber;
-   if (in->peek().getType() == SourceTokenC::TT_OP_AT)
+   if (in->peekType(SourceTokenC::TT_OP_AT))
    {
       in->get(SourceTokenC::TT_OP_AT);
-      scriptNumber = make_expression_single
-                     (in, blocks, context)->makeObject()->resolveInt();
+      scriptNumber =
+         make_expression_single(in, blocks, context)->makeObject()->resolveInt();
    }
    else
    {
@@ -155,7 +158,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    {
       if (scriptNumber < 0)
          throw SourceException("name auto requires explicit number",
-						 token.getPosition(), __func__);
+						 token.pos, __func__);
 
       std::ostringstream oss;
       oss << "script" << scriptNumber;
@@ -168,7 +171,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 
    // scriptLabel
    std::string scriptLabel;
-   if (token.getData() != "__extscript")
+   if (token.data != "__extscript")
       scriptLabel += context->makeLabel();
    scriptLabel += "script_";
    scriptLabel += scriptNameSource;
@@ -184,21 +187,21 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    // Before scriptExpression to enable recursion.
    SourceVariable::Pointer scriptVariable =
       SourceVariable::create_constant
-      (scriptNameSource, scriptVarType, scriptNameObject, token.getPosition());
+      (scriptNameSource, scriptVarType, scriptNameObject, token.pos);
    context->addVariable(scriptVariable);
 
    // scriptExpression
    SourceExpression::Pointer scriptExpression =
-      create_root_script(scriptVarType, scriptContext, token.getPosition());
+      create_root_script(scriptVarType, scriptContext, token.pos);
    scriptExpression->addLabel(scriptLabel);
    blocks->push_back(scriptExpression);
 
    blocks->push_back(make_expression_single(in, blocks, scriptContext));
 
    SourceExpression::Pointer scriptExprData =
-      create_value_data_garbage(scriptReturn, scriptContext, token.getPosition());
+      create_value_data_garbage(scriptReturn, scriptContext, token.pos);
    SourceExpression::Pointer scriptExprRetn =
-      create_branch_return(scriptExprData, scriptContext, token.getPosition());
+      create_branch_return(scriptExprData, scriptContext, token.pos);
    blocks->push_back(scriptExprRetn);
 
    // scriptVarCount
@@ -213,7 +216,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
 	  scriptVarCount, scriptNumber);
 
-   return create_value_variable(scriptVariable, context, token.getPosition());
+   return create_value_variable(scriptVariable, context, token.pos);
 }
 
 // EOF

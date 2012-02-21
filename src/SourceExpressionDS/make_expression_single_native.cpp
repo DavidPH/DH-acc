@@ -40,7 +40,7 @@
 SRCEXPDS_EXPRSINGLE_DEFN(native)
 {
    // nativeName
-   std::string nativeName = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+   std::string nativeName = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
    // nativeArgTypes nativeReturn
    VariableType::Vector nativeArgTypes;
@@ -49,11 +49,12 @@ SRCEXPDS_EXPRSINGLE_DEFN(native)
 
    // nativeNumber
    in->get(SourceTokenC::TT_OP_AT);
-   bigsint nativeNumber = get_bigsint(in->get(SourceTokenC::TT_INTEGER));
+   bigsint nativeNumber =
+      make_expression_single(in, blocks, context)->makeObject()->resolveInt();
 
    // nativeObject
    ObjectExpression::Pointer nativeObject =
-      ObjectExpression::create_value_int(nativeNumber, token.getPosition());
+      ObjectExpression::create_value_int(nativeNumber, token.pos);
 
    // nativeVarType
    VariableType::Reference nativeVarType =
@@ -62,10 +63,10 @@ SRCEXPDS_EXPRSINGLE_DEFN(native)
    // nativeVariable
    SourceVariable::Pointer nativeVariable =
       SourceVariable::create_constant
-      (nativeName, nativeVarType, nativeObject, token.getPosition());
+      (nativeName, nativeVarType, nativeObject, token.pos);
 
    context->addVariable(nativeVariable);
-   return create_value_variable(nativeVariable, context, token.getPosition());
+   return create_value_variable(nativeVariable, context, token.pos);
 }
 
 // EOF

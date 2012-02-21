@@ -1,73 +1,76 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* ObjectData.cpp
-**
-** Defines the ObjectData related function.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Object-level data.
+//
+//-----------------------------------------------------------------------------
 
 #include "ObjectData.hpp"
 
 #include "object_io.hpp"
 #include "SourceException.hpp"
-#include "SourceTokenC.hpp"
 
 
 
-ObjectData_Script::ScriptFlag odata_get_ScriptFlag(SourceTokenC const & token)
+ObjectData_Script::ScriptFlag odata_get_ScriptFlag
+(std::string const &data, SourcePosition const &position)
 {
-	if (token.getData() == "__net")
-		return ObjectData_Script::SF_NET;
+   if (data == "__net")
+      return ObjectData_Script::SF_NET;
 
-	if (token.getData() == "__clientside")
-		return ObjectData_Script::SF_CLIENTSIDE;
+   if (data == "__clientside")
+      return ObjectData_Script::SF_CLIENTSIDE;
 
-	throw SourceException("invalid script-flag", token.getPosition(), "ObjectData");
+   throw SourceException("invalid script-flag", position, __func__);
 }
 
-ObjectData_Script::ScriptType odata_get_ScriptType(SourceTokenC const & token)
+ObjectData_Script::ScriptType odata_get_ScriptType
+(std::string const &data, SourcePosition const &position)
 {
-	if (token.getData() == "__closed")
-		return ObjectData_Script::ST_CLOSED;
+   if (data == "__closed")
+      return ObjectData_Script::ST_CLOSED;
 
-	if (token.getData() == "__open")
-		return ObjectData_Script::ST_OPEN;
+   if (data == "__open")
+      return ObjectData_Script::ST_OPEN;
 
-	if (token.getData() == "__respawn")
-		return ObjectData_Script::ST_RESPAWN;
+   if (data == "__respawn")
+      return ObjectData_Script::ST_RESPAWN;
 
-	if (token.getData() == "__death")
-		return ObjectData_Script::ST_DEATH;
+   if (data == "__death")
+      return ObjectData_Script::ST_DEATH;
 
-	if (token.getData() == "__enter")
-		return ObjectData_Script::ST_ENTER;
+   if (data == "__enter")
+      return ObjectData_Script::ST_ENTER;
 
-	if (token.getData() == "__lightning")
-		return ObjectData_Script::ST_LIGHTNING;
+   if (data == "__lightning")
+      return ObjectData_Script::ST_LIGHTNING;
 
-	if (token.getData() == "__unloading")
-		return ObjectData_Script::ST_UNLOADING;
+   if (data == "__unloading")
+      return ObjectData_Script::ST_UNLOADING;
 
-	if (token.getData() == "__disconnect")
-		return ObjectData_Script::ST_DISCONNECT;
+   if (data == "__disconnect")
+      return ObjectData_Script::ST_DISCONNECT;
 
-	if (token.getData() == "__return")
-		return ObjectData_Script::ST_RETURN;
+   if (data == "__return")
+      return ObjectData_Script::ST_RETURN;
 
-	throw SourceException("invalid script-type", token.getPosition(), "ObjectData");
+   throw SourceException("invalid script-type", position, __func__);
 }
 
 bool override_object(ObjectData_Auto * out, ObjectData_Auto const & in)

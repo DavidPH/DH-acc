@@ -49,8 +49,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(switch)
    SourceExpression::Pointer exprBody =
       make_expression(in, blocks, contextBody);
 
-   return create_branch_switch(exprCond, exprBody, contextBody,
-                               token.getPosition());
+   return create_branch_switch(exprCond, exprBody, contextBody, token.pos);
 }
 
 // EOF

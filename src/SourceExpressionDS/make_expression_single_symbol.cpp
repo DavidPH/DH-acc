@@ -40,13 +40,13 @@ SRCEXPDS_EXPRSINGLE_DEFN(symbol)
    in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
    VariableType::Reference type = make_expression_type(in, blocks, context);
    in->get(SourceTokenC::TT_OP_COMMA);
-   std::string name = in->get(SourceTokenC::TT_STRING).getData();
+   std::string name = in->get(SourceTokenC::TT_STRING).data;
    in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
    SourceVariable::Pointer var =
-      SourceVariable::create_literal(type, name, token.getPosition());
+      SourceVariable::create_literal(type, name, token.pos);
 
-   return create_value_variable(var, context, token.getPosition());
+   return create_value_variable(var, context, token.pos);
 }
 
 // EOF

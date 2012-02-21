@@ -71,16 +71,8 @@ ObjectCodeSet::ObjectCodeSet() : ocode(OCODE_NONE), ocode_imm(OCODE_NONE)
 //
 // ocode_get_code
 //
-ObjectCode ocode_get_code(SourceTokenC const & token)
-{
-   return ocode_get_code(token.getData(), token.getPosition());
-}
-
-//
-// ocode_get_code
-//
-ObjectCode ocode_get_code(std::string const &data,
-                          SourcePosition const &position)
+ObjectCode ocode_get_code
+(std::string const &data, SourcePosition const &position)
 {
    std::map<std::string, ObjectCode>::iterator codeIt(_ocode_map.find(data));
 

@@ -56,7 +56,7 @@ make_expression(SourceExpression::Vector const &expressions,
    #define EXPRL make_expression(expressions, operators, start, iter, context)
    #define EXPRR make_expression(expressions, operators, iter+1, stop, context)
 
-   #define CARGS context, operators[iter].getPosition()
+   #define CARGS context, operators[iter].pos
 
    // Terminating case. Only one expression, so just return it.
    if (start == stop) return expressions[start];
@@ -69,7 +69,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // &= &&= *= ^= ^^= >>= <<= = -= |= ||= += /=
    for (iter = start; iter < stop; ++iter)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_AND_EQUALS:
          return SourceExpression::create_binary_and_eq(EXPRL, EXPRR, CARGS);
@@ -121,7 +121,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // ?:
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_QUERY:
       {
@@ -137,7 +137,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // ||
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_PIPE2:
          return SourceExpression::create_branch_ior(EXPRL, EXPRR, CARGS);
@@ -150,7 +150,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // ^^
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_CARET2:
          return SourceExpression::create_branch_xor(EXPRL, EXPRR, CARGS);
@@ -163,7 +163,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // &&
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_AND2:
          return SourceExpression::create_branch_and(EXPRL, EXPRR, CARGS);
@@ -176,7 +176,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // |
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_PIPE:
          return SourceExpression::create_binary_ior(EXPRL, EXPRR, CARGS);
@@ -189,7 +189,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // ^
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_CARET:
          return SourceExpression::create_binary_xor(EXPRL, EXPRR, CARGS);
@@ -202,7 +202,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // &
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_AND:
          return SourceExpression::create_binary_and(EXPRL, EXPRR, CARGS);
@@ -215,7 +215,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // == !=
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_CMP_EQ:
          return SourceExpression::create_binary_eq(EXPRL, EXPRR, CARGS);
@@ -231,7 +231,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // >= > <= <
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_CMP_GE:
          return SourceExpression::create_binary_ge(EXPRL, EXPRR, CARGS);
@@ -253,7 +253,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // >> <<
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_CMP_GT2:
          return SourceExpression::create_binary_rsh(EXPRL, EXPRR, CARGS);
@@ -269,7 +269,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // - +
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_MINUS:
          return SourceExpression::create_binary_sub(EXPRL, EXPRR, CARGS);
@@ -285,7 +285,7 @@ make_expression(SourceExpression::Vector const &expressions,
    // * % /
    for (iter = stop; iter-- > start;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_ASTERISK:
          return SourceExpression::create_binary_mul(EXPRL, EXPRR, CARGS);
@@ -301,8 +301,7 @@ make_expression(SourceExpression::Vector const &expressions,
       }
    }
 
-   throw SourceException("unexpected operator", operators[start].getPosition(),
-                         __func__);
+   throw SourceException("unexpected operator", operators[start].pos, __func__);
 }
 
 
@@ -379,7 +378,7 @@ make_expression(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
 
    expressions.push_back(make_expression_single(in, blocks, context));
 
-   while (looping) switch ((token = in->get()).getType())
+   while (looping) switch ((token = in->get()).type)
    {
    case SourceTokenC::TT_OP_AND:
    case SourceTokenC::TT_OP_AND_EQUALS:
@@ -438,9 +437,9 @@ make_expression(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
 
    default:
       in->unget(token);
-      throw SourceException(std::string("unexpected token type '") +
-                            make_string(token.getType()) + "'",
-                            token.getPosition(), __func__);
+      throw SourceException
+            ("unexpected token type '" + make_string(token.type) + "'",
+             token.pos, __func__);
    }
 
    return ::make_expression(expressions, operators, 0, operators.size(), context);
@@ -470,15 +469,15 @@ void SourceExpressionDS::make_expression_arglist
 	if (argCount) *argCount = 0;
 
 	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
-	if (in->peek().getType() != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
+   if (!in->peekType(SourceTokenC::TT_OP_PARENTHESIS_C)) while (true)
 	{
       VariableType::Reference argType = make_expression_type(in, blocks, context);
       if (argCount) *argCount += argType->getSize(SourcePosition::none());
 		if (argTypes) argTypes->push_back(argType);
 
 		std::string argName;
-		if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
-			argName = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+      if (in->peekType(SourceTokenC::TT_IDENTIFIER))
+         argName = in->get(SourceTokenC::TT_IDENTIFIER).data;
 		if (argNames) argNames->push_back(argName);
 
 		if (argContext)
@@ -488,7 +487,7 @@ void SourceExpressionDS::make_expression_arglist
 			argContext->addVariable(argVariable);
 		}
 
-		if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
+		if (!in->peekType(SourceTokenC::TT_OP_COMMA))
 			break;
 
 		in->get(SourceTokenC::TT_OP_COMMA);
@@ -512,7 +511,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expressions(SourceTokenizerDS
 {
    SourceContext::Pointer context = SourceContext::global_context;
 
-	SourcePosition position(in->peek().getPosition());
+   SourcePosition position = in->peek().pos;
 	std::vector<SourceExpression::Pointer> expressions;
 	std::vector<SourceExpression::Pointer> blocks;
 
@@ -534,13 +533,13 @@ SourceExpression::Pointer SourceExpressionDS::make_expressions(SourceTokenizerDS
 //
 void SourceExpressionDS::make_expressions(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * expressions, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
 {
-	bool brackets(in->peek().getType() == SourceTokenC::TT_OP_BRACKET_O);
+   bool brackets(in->peekType(SourceTokenC::TT_OP_BRACKET_O));
 
 	in->get(brackets ? SourceTokenC::TT_OP_BRACKET_O : SourceTokenC::TT_OP_BRACE_O);
 
 	while (true)
 	{
-		if (in->peek().getType() == (brackets ? SourceTokenC::TT_OP_BRACKET_C : SourceTokenC::TT_OP_BRACE_C))
+		if (in->peekType(brackets ? SourceTokenC::TT_OP_BRACKET_C : SourceTokenC::TT_OP_BRACE_C))
 			break;
 
 		expressions->push_back(make_expression(in, blocks, context));

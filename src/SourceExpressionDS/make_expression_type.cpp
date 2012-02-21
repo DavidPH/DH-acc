@@ -53,8 +53,7 @@ static void do_qualifier
    SourceTokenC tokenQual = in->get(SourceTokenC::TT_IDENTIFIER);
 
    if ((*type)->getQualifier(qual))
-      throw SourceException
-            ("redundant qualifier", tokenQual.getPosition(), __func__);
+      throw SourceException("redundant qualifier", tokenQual.pos, __func__);
 
    *type = (*type)->setQualifier(qual);
 }
@@ -69,8 +68,7 @@ static void do_storage
    SourceTokenC tokenStore = in->get(SourceTokenC::TT_IDENTIFIER);
 
    if ((*type)->getStoreType() != VariableType::ST_ADDR)
-      throw SourceException
-            ("redundant storage", tokenStore.getPosition(), __func__);
+      throw SourceException("redundant storage", tokenStore.pos, __func__);
 
    *type = (*type)->setStorage(store);
 }
@@ -86,8 +84,7 @@ static void do_storage
    SourceTokenC tokenStore = in->get(SourceTokenC::TT_IDENTIFIER);
 
    if ((*type)->getStoreType() != VariableType::ST_ADDR)
-      throw SourceException
-            ("redundant storage", tokenStore.getPosition(), __func__);
+      throw SourceException("redundant storage", tokenStore.pos, __func__);
 
    in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
@@ -140,7 +137,7 @@ VariableType::Reference SourceExpressionDS::make_expression_type
    VariableType::Pointer type;
    VariableType::Vector types;
 
-   if (token.getData() == "__array")
+   if (token.data == "__array")
    {
       retn = make_expression_type(in, blocks, context);
       in->get(SourceTokenC::TT_OP_BRACKET_O);
@@ -148,19 +145,19 @@ VariableType::Reference SourceExpressionDS::make_expression_type
       in->get(SourceTokenC::TT_OP_BRACKET_C);
       type = retn->getArray(width);
    }
-   else if (token.getData() == "__asmfunc")
+   else if (token.data == "__asmfunc")
    {
       make_expression_arglist(in, blocks, context, &types, &retn);
 
       type = VariableType::get_bt_asmfunc(types, retn);
    }
-   else if (token.getData() == "__block")
+   else if (token.data == "__block")
    {
       in->get(SourceTokenC::TT_OP_BRACE_O);
 
       while (true)
       {
-         if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_C)
+         if (in->peekType(SourceTokenC::TT_OP_BRACE_C))
          break;
 
          types.push_back(make_expression_type(in, blocks, context));
@@ -172,24 +169,24 @@ VariableType::Reference SourceExpressionDS::make_expression_type
 
       type = VariableType::get_bt_block(types);
    }
-   else if (token.getData() == "enum")
+   else if (token.data == "enum")
    {
-      if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
-         name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+      if (in->peekType(SourceTokenC::TT_IDENTIFIER))
+         name = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
-      if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_O)
+      if (in->peekType(SourceTokenC::TT_OP_BRACE_O))
       {
          bigsint enumVal = 0;
 
-         type = context->getVariableType_enum(name, true, token.getPosition());
+         type = context->getVariableType_enum(name, true, token.pos);
 
          in->get(SourceTokenC::TT_OP_BRACE_O);
 
-         if (in->peek().getType() != SourceTokenC::TT_OP_BRACE_C) while (true)
+         if (!in->peekType(SourceTokenC::TT_OP_BRACE_C)) while (true)
          {
-            SourceTokenC enumTok(in->get(SourceTokenC::TT_IDENTIFIER));
+            SourceTokenC enumTok = in->get(SourceTokenC::TT_IDENTIFIER);
 
-            if (in->peek().getType() == SourceTokenC::TT_OP_EQUALS)
+            if (in->peekType(SourceTokenC::TT_OP_EQUALS))
             {
                in->get(SourceTokenC::TT_OP_EQUALS);
 
@@ -198,14 +195,13 @@ VariableType::Reference SourceExpressionDS::make_expression_type
             }
 
             ObjectExpression::Pointer enumObj =
-               ObjectExpression::create_value_int
-               (enumVal++, enumTok.getPosition());
+               ObjectExpression::create_value_int(enumVal++, enumTok.pos);
 
             context->addVariable
             (SourceVariable::create_constant
-             (enumTok.getData(), type, enumObj, enumTok.getPosition()));
+             (enumTok.data, type, enumObj, enumTok.pos));
 
-            if (in->peek().getType() != SourceTokenC::TT_OP_COMMA)
+            if (!in->peekType(SourceTokenC::TT_OP_COMMA))
                break;
 
             in->get(SourceTokenC::TT_OP_COMMA);
@@ -215,60 +211,60 @@ VariableType::Reference SourceExpressionDS::make_expression_type
       }
       else
       {
-         type = context->getVariableType_enum(name, false, token.getPosition());
+         type = context->getVariableType_enum(name, false, token.pos);
       }
    }
-   else if (token.getData() == "__function")
+   else if (token.data == "__function")
    {
       make_expression_arglist(in, blocks, context, &types, &retn);
 
       type = VariableType::get_bt_function(types, retn);
    }
-   else if (token.getData() == "__linespec")
+   else if (token.data == "__linespec")
    {
       make_expression_arglist(in, blocks, context, &types, &retn);
 
       type = VariableType::get_bt_linespec(types, retn);
    }
-   else if (token.getData() == "__native")
+   else if (token.data == "__native")
    {
       make_expression_arglist(in, blocks, context, &types, &retn);
 
       type = VariableType::get_bt_native(types, retn);
    }
-   else if (token.getData() == "__script")
+   else if (token.data == "__script")
    {
       make_expression_arglist(in, blocks, context, &types, &retn);
 
       type = VariableType::get_bt_script(types, retn);
    }
-   else if (token.getData() == "struct" || token.getData() == "union")
+   else if (token.data == "struct" || token.data == "union")
    {
-      bool isUnion = token.getData() == "union";
+      bool isUnion = token.data == "union";
 
       type = NULL;
 
-      if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER)
+      if (in->peekType(SourceTokenC::TT_IDENTIFIER))
       {
-         name = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+         name = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
          if (isUnion)
-            type = context->getVariableType_union(name, token.getPosition());
+            type = context->getVariableType_union(name, token.pos);
          else
-            type = context->getVariableType_struct(name, token.getPosition());
+            type = context->getVariableType_struct(name, token.pos);
       }
 
-      if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_O)
+      if (in->peekType(SourceTokenC::TT_OP_BRACE_O))
       {
          in->get(SourceTokenC::TT_OP_BRACE_O);
 
          while (true)
          {
-            if (in->peek().getType() == SourceTokenC::TT_OP_BRACE_C)
+            if (in->peekType(SourceTokenC::TT_OP_BRACE_C))
                break;
 
             types.push_back(make_expression_type(in, blocks, context));
-            names.push_back(in->get(SourceTokenC::TT_IDENTIFIER).getData());
+            names.push_back(in->get(SourceTokenC::TT_IDENTIFIER).data);
 
             in->get(SourceTokenC::TT_OP_SEMICOLON);
          }
@@ -276,62 +272,62 @@ VariableType::Reference SourceExpressionDS::make_expression_type
          in->get(SourceTokenC::TT_OP_BRACE_C);
 
          if (isUnion)
-            type = context->getVariableType_union
-                   (name, names, types, token.getPosition());
+            type =
+               context->getVariableType_union(name, names, types, token.pos);
          else
-            type = context->getVariableType_struct
-                   (name, names, types, token.getPosition());
+            type =
+               context->getVariableType_struct(name, names, types, token.pos);
       }
 
       if (!type)
       {
          if (isUnion)
-            type = context->getVariableType_union(name, token.getPosition());
+            type = context->getVariableType_union(name, token.pos);
          else
-            type = context->getVariableType_struct(name, token.getPosition());
+            type = context->getVariableType_struct(name, token.pos);
       }
    }
-   else if (token.getData() == "decltype")
+   else if (token.data == "decltype")
    {
       type = make_expression_single(in, blocks, context)->getType();
    }
    else
    {
-      type = context->getVariableType(token.getData(), token.getPosition());
+      type = context->getVariableType(token.data, token.pos);
    }
 
    // Suffix modifiers.
-   while (true) switch (in->peek().getType())
+   while (true) switch (in->peek().type)
    {
    case SourceTokenC::TT_IDENTIFIER:
-      if (in->peek().getData() == "const")
+      if (in->peek().data == "const")
          do_qualifier(&type, VariableType::QUAL_CONST, in);
 
-      else if (in->peek().getData() == "volatile")
+      else if (in->peek().data == "volatile")
          do_qualifier(&type, VariableType::QUAL_VOLATILE, in);
 
-      else if (in->peek().getData() == "restrict")
+      else if (in->peek().data == "restrict")
          do_qualifier(&type, VariableType::QUAL_RESTRICT, in);
 
-      else if (in->peek().getData() == "register")
+      else if (in->peek().data == "register")
          do_storage(&type, VariableType::ST_REGISTER, in);
 
-      else if (in->peek().getData() == "__mapregister")
+      else if (in->peek().data == "__mapregister")
          do_storage(&type, VariableType::ST_MAPREGISTER, in);
 
-      else if (in->peek().getData() == "__worldregister")
+      else if (in->peek().data == "__worldregister")
          do_storage(&type, VariableType::ST_WORLDREGISTER, in);
 
-      else if (in->peek().getData() == "__globalregister")
+      else if (in->peek().data == "__globalregister")
          do_storage(&type, VariableType::ST_GLOBALREGISTER, in);
 
-      else if (in->peek().getData() == "__maparray")
+      else if (in->peek().data == "__maparray")
          do_storage(&type, VariableType::ST_MAPARRAY, in, blocks, context, make_expression);
 
-      else if (in->peek().getData() == "__worldarray")
+      else if (in->peek().data == "__worldarray")
          do_storage(&type, VariableType::ST_WORLDARRAY, in, blocks, context, make_expression);
 
-      else if (in->peek().getData() == "__globalarray")
+      else if (in->peek().data == "__globalarray")
          do_storage(&type, VariableType::ST_GLOBALARRAY, in, blocks, context, make_expression);
 
       else

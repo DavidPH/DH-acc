@@ -42,29 +42,27 @@ SRCEXPDS_EXPRSINGLE_DEFN(goto)
 
    std::string label;
 
-   if (gotoToken.getData() == "case")
+   if (gotoToken.data == "case")
    {
-      if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER &&
-          in->peek().getData() == "default")
+      if (in->peekType(SourceTokenC::TT_IDENTIFIER, "default"))
       {
          in->get(SourceTokenC::TT_IDENTIFIER);
-         label = context->getLabelCaseDefault(token.getPosition());
+         label = context->getLabelCaseDefault(token.pos);
       }
       else
       {
          label =
             context->getLabelCase
             (make_expression(in, blocks, context)->makeObject()->resolveInt(),
-		   token.getPosition());
+		   token.pos);
       }
    }
    else
    {
-      label =
-         context->getLabelGoto(gotoToken.getData(), gotoToken.getPosition());
+      label = context->getLabelGoto(gotoToken.data, gotoToken.pos);
    }
 
-   return create_branch_goto(label, context, token.getPosition());
+   return create_branch_goto(label, context, token.pos);
 }
 
 //
@@ -73,8 +71,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(goto)
 SRCEXPDS_EXPRSINGLE_DEFN(goto_dyn)
 {
    return create_branch_goto
-          (make_expression_single(in, blocks, context), context,
-		 token.getPosition());
+          (make_expression(in, blocks, context), context, token.pos);
 }
 
 // EOF

@@ -28,8 +28,6 @@
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
 
-#include <sstream>
-
 
 //----------------------------------------------------------------------------|
 // Static Functions                                                           |
@@ -46,7 +44,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    #define EXPRL make_expression(expressions, operators, begin, iter)
    #define EXPRR make_expression(expressions, operators, iter+1, end)
 
-   #define CARGS operators[iter].getPosition()
+   #define CARGS operators[iter].pos
 
    // Terminating case. Only one expression, so just return it.
    if (begin == end) return expressions[begin];
@@ -58,7 +56,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // ||
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_PIPE2:
          return ObjectExpression::create_branch_ior(EXPRL, EXPRR, CARGS);
@@ -71,7 +69,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // ^^
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_CARET2:
          return ObjectExpression::create_branch_xor(EXPRL, EXPRR, CARGS);
@@ -84,7 +82,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // &&
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_AND2:
          return ObjectExpression::create_branch_and(EXPRL, EXPRR, CARGS);
@@ -97,7 +95,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // |
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_PIPE:
          return ObjectExpression::create_binary_ior(EXPRL, EXPRR, CARGS);
@@ -110,7 +108,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // ^
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_CARET:
          return ObjectExpression::create_binary_xor(EXPRL, EXPRR, CARGS);
@@ -123,7 +121,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // &
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_AND:
          return ObjectExpression::create_binary_and(EXPRL, EXPRR, CARGS);
@@ -142,7 +140,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // - +
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_MINUS:
          return ObjectExpression::create_binary_sub(EXPRL, EXPRR, CARGS);
@@ -158,7 +156,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // * % /
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].getType())
+      switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_ASTERISK:
          return ObjectExpression::create_binary_mul(EXPRL, EXPRR, CARGS);
@@ -174,8 +172,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
       }
    }
 
-   throw SourceException("unexpected operator", operators[begin].getPosition(),
-                         __func__);
+   throw SourceException("unexpected operator", operators[begin].pos, __func__);
 
    #undef CARGS
 
@@ -188,7 +185,11 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
 // Global Functions                                                           |
 //
 
-SourceTokenizerDS::SourceTokenizerDS(SourceStream * const in) : _canCommand(true), _canExpand(true), _canSkip(true)
+//
+// SourceTokenizerDS::SourceTokenizerDS
+//
+SourceTokenizerDS::SourceTokenizerDS(SourceStream *_in)
+ : canCommand(true), canExpand(true), canSkip(true)
 {
    #define CASE_TARGET(TARGET)                \
    case TARGET_##TARGET:                      \
@@ -208,24 +209,33 @@ SourceTokenizerDS::SourceTokenizerDS(SourceStream * const in) : _canCommand(true
 
    #undef CASE_TARGET
 
-   _in.push(in);
+   in.push(_in);
 }
+
+//
+// SourceTokenizerDS::~SourceTokenizerDS
+//
 SourceTokenizerDS::~SourceTokenizerDS()
 {
 	// All but the first SourceStream was alloc'd by this.
-	while (_in.size() > 1)
+	while (in.size() > 1)
 	{
-		delete _in.top();
-		_in.pop();
+		delete in.top();
+		in.pop();
 	}
 }
 
-void SourceTokenizerDS::addDefine(std::string const & name, SourcePosition const & position, std::vector<SourceTokenC> const & tokens)
+//
+// SourceTokenizerDS::addDefine
+//
+void SourceTokenizerDS::addDefine
+(std::string const &name, SourcePosition const &position,
+ std::vector<SourceTokenC> const &tokens)
 {
-	if (hasDefine(name))
-		throw SourceException("attempt to redefine define", position, "SourceTokenizerDS");
+   if (hasDefine(name))
+      throw SourceException("attempt to redefine define", position, __func__);
 
-	_defines[name] = tokens;
+   defines[name] = tokens;
 }
 
 //
@@ -234,62 +244,79 @@ void SourceTokenizerDS::addDefine(std::string const & name, SourcePosition const
 void SourceTokenizerDS::addSkip(bool skip)
 {
    skipStack.push_back(skip);
-	_unskipStack.push(!skip);
+   unskipStack.push(!skip);
 }
 
+//
+// SourceTokenizerDS::doAssert
+//
 void SourceTokenizerDS::doAssert(SourceTokenC::TokenType type)
 {
-	if (_token.getType() != type)
-	{
-		std::ostringstream out;
-		out << "expected " << make_string(type) << " got " << make_string(_token.getType());
-
-		throw SourceException(out.str(), _token.getPosition(), "SourceTokenizerDS");
-	}
+   if (token.type != type)
+      throw SourceException
+      ("expected " + make_string(type) + " got " + make_string(token.type),
+       token.pos, __func__);
 }
 
+//
+// SourceTokenizerDS::doAssert
+//
+void SourceTokenizerDS::doAssert(std::string const &data)
+{
+   if (token.data != data)
+      throw SourceException
+      ("expected '" + data + "' got '" + token.data + "'", token.pos, __func__);
+}
+
+//
+// SourceTokenizerDS::doCommand
+//
 void SourceTokenizerDS::doCommand()
 {
-	_canCommand = false;
-	_canExpand  = false;
-	_canSkip    = false;
+   canCommand = false;
+   canExpand  = false;
+   canSkip    = false;
 
-	prep(SourceTokenC::TT_IDENTIFIER);
+   prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
 
-	std::string const & command(_token.getData());
+	std::string const &command = token.data;
 
-	if (command == "define") doCommand_define();
-	else if (command == "else") doCommand_else();
-	else if (command == "elif") doCommand_elif();
-	else if (command == "endif") doCommand_endif();
-	else if (command == "error") doCommand_error();
-	else if (command == "if") doCommand_if();
-	else if (command == "ifdef") doCommand_ifdef();
-	else if (command == "ifndef") doCommand_ifndef();
-	else if (command == "include") doCommand_include();
-	else if (command == "undef") doCommand_undef();
+        if (command == "define")  doCommand_define();
+   else if (command == "else")    doCommand_else();
+   else if (command == "elif")    doCommand_elif();
+   else if (command == "endif")   doCommand_endif();
+   else if (command == "error")   doCommand_error();
+   else if (command == "if")      doCommand_if();
+   else if (command == "ifdef")   doCommand_ifdef();
+   else if (command == "ifndef")  doCommand_ifndef();
+   else if (command == "include") doCommand_include();
+   else if (command == "undef")   doCommand_undef();
 
-	else throw SourceException("unknown command", _token.getPosition(), "SourceTokenizerDS");
+   else throw SourceException("unknown command", token.pos, __func__);
 
-	_canCommand = true;
-	_canExpand  = true;
-	_canSkip    = true;
+   canCommand = true;
+   canExpand  = true;
+   canSkip    = true;
 }
+
+//
+// SourceTokenizerDS::doCommand_define
+//
 void SourceTokenizerDS::doCommand_define()
 {
-	prep(SourceTokenC::TT_IDENTIFIER);
+   prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
 
-	std::string name(_token.getData());
-	SourcePosition position(_token.getPosition());
+   std::string name = token.data;
+   SourcePosition position = token.pos;
 
-	std::vector<SourceTokenC> tokens;
+   std::vector<SourceTokenC> tokens;
 
-	for (prep(); _token.getType() != SourceTokenC::TT_OP_HASH; prep())
-		tokens.push_back(_token);
+   for (prep(); token.type != SourceTokenC::TT_OP_HASH; prep())
+      tokens.push_back(token);
 
-	if (isSkip()) return;
+   if (isSkip()) return;
 
-	addDefine(name, position, tokens);
+   addDefine(name, position, tokens);
 }
 
 //
@@ -298,10 +325,10 @@ void SourceTokenizerDS::doCommand_define()
 void SourceTokenizerDS::doCommand_else()
 {
    if (skipStack.empty())
-		throw SourceException("unmatched #else", _token.getPosition(), "SourceTokenizerDS");
+      throw SourceException("unmatched #else", token.pos, __func__);
 
-   skipStack.back() = _unskipStack.top();
-	_unskipStack.top() = true; // If it wasn't, it is now.
+   skipStack.back() = unskipStack.top();
+   unskipStack.top() = true; // If it wasn't, it is now.
 }
 
 //
@@ -310,12 +337,12 @@ void SourceTokenizerDS::doCommand_else()
 void SourceTokenizerDS::doCommand_elif()
 {
    if (skipStack.empty())
-		throw SourceException("unmatched #elif", _token.getPosition(), "SourceTokenizerDS");
+      throw SourceException("unmatched #elif", token.pos, __func__);
 
-	bool ifResult(getIf());
+   bool ifResult = getIf();
 
-   skipStack.back() = _unskipStack.top() || !ifResult;
-	_unskipStack.top() = _unskipStack.top() || ifResult;
+   skipStack.back()  = unskipStack.top() || !ifResult;
+   unskipStack.top() = unskipStack.top() ||  ifResult;
 }
 
 //
@@ -324,81 +351,125 @@ void SourceTokenizerDS::doCommand_elif()
 void SourceTokenizerDS::doCommand_endif()
 {
    if (skipStack.empty())
-		throw SourceException("unmatched #endif", _token.getPosition(), "SourceTokenizerDS");
+      throw SourceException("unmatched #endif", token.pos, __func__);
 
-	remSkip();
+   remSkip();
 }
 
+//
+// SourceTokenizerDS::doCommand_error
+//
 void SourceTokenizerDS::doCommand_error()
 {
-	prep(SourceTokenC::TT_STRING);
+   prep(); doAssert(SourceTokenC::TT_STRING);
 
-	if (isSkip()) return;
+   if (isSkip()) return;
 
-	throw SourceException(_token.getData(), _token.getPosition(), "#error");
+   throw SourceException(token.data, token.pos, "#error");
 }
+
+//
+// SourceTokenizerDS::doCommand_if
+//
 void SourceTokenizerDS::doCommand_if()
 {
-	addSkip(!getIf());
+   addSkip(!getIf());
 }
+
+//
+// SourceTokenizerDS::doCommand_ifdef
+//
 void SourceTokenizerDS::doCommand_ifdef()
 {
-	prep(SourceTokenC::TT_IDENTIFIER);
+   prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
 
-	addSkip(!hasDefine(_token.getData()));
+   addSkip(!hasDefine(token.data));
 }
+
+//
+// SourceTokenizerDS::doCommand_ifndef
+//
 void SourceTokenizerDS::doCommand_ifndef()
 {
-	prep(SourceTokenC::TT_IDENTIFIER);
+   prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
 
-	addSkip(hasDefine(_token.getData()));
+   addSkip(hasDefine(token.data));
 }
+
+//
+// SourceTokenizerDS::doCommand_include
+//
 void SourceTokenizerDS::doCommand_include()
 {
-	prep(SourceTokenC::TT_STRING);
+   prep(); doAssert(SourceTokenC::TT_STRING);
 
-	if (isSkip()) return;
+   if (isSkip()) return;
 
-	try
-	{
-		_in.push(new SourceStream(_token.getData(), SourceStream::ST_C));
-	}
-	catch (std::exception & e)
-	{
-		throw SourceException("file not found", _token.getPosition(), "SourceTokenizerDS");
-	}
+   try
+   {
+      in.push(new SourceStream(token.data, SourceStream::ST_C));
+   }
+   catch (std::exception & e)
+   {
+      throw SourceException("file not found", token.pos, __func__);
+   }
 }
+
+//
+// SourceTokenizerDS::doCommand_undef
+//
 void SourceTokenizerDS::doCommand_undef()
 {
-	prep(SourceTokenC::TT_IDENTIFIER);
+   prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
 
-	if (isSkip()) return;
+   if (isSkip()) return;
 
-	remDefine();
+   remDefine();
 }
 
-SourceTokenC const & SourceTokenizerDS::get()
+//
+// SourceTokenizerDS::get
+//
+SourceTokenC const &SourceTokenizerDS::get()
 {
-	prep();
+   prep();
 
-	return _token;
+   return token;
 }
-SourceTokenC const & SourceTokenizerDS::get(SourceTokenC::TokenType type)
+
+//
+// SourceTokenizerDS::get
+//
+SourceTokenC const &SourceTokenizerDS::get(SourceTokenC::TokenType type)
 {
-	prep(type);
+   prep(); doAssert(type);
 
-	return _token;
+   return token;
 }
 
+//
+// SourceTokenizerDS::get
+//
+SourceTokenC const &SourceTokenizerDS::get
+(SourceTokenC::TokenType type, std::string const &data)
+{
+   prep(); doAssert(type); doAssert(data);
+
+   return token;
+}
+
+//
+// SourceTokenizerDS::getIf
+//
 bool SourceTokenizerDS::getIf()
 {
-	_canExpand = true;
+   canExpand = true;
 
-	ObjectExpression::Pointer expr(getIfMultiple());
+   ObjectExpression::Pointer expr = getIfMultiple();
 
-	_canExpand = false;
+   canExpand = false;
 
-	return !!expr->resolveInt();
+   return !!expr->resolveInt();
 }
 
 //
@@ -411,9 +482,9 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
 
    expressions.push_back(getIfSingle());
 
-   for (prep(); _token.getType() != SourceTokenC::TT_OP_HASH; prep())
+   for (prep(); token.type != SourceTokenC::TT_OP_HASH; prep())
    {
-      switch (_token.getType())
+      switch (token.type)
       {
       case SourceTokenC::TT_OP_AND:
       case SourceTokenC::TT_OP_AND2:
@@ -435,7 +506,7 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
       case SourceTokenC::TT_OP_PLUS:
       case SourceTokenC::TT_OP_SLASH:
       case_expr:
-         operators.push_back(_token);
+         operators.push_back(token);
          expressions.push_back(getIfSingle());
          break;
 
@@ -444,14 +515,13 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
          goto done;
 
       case SourceTokenC::TT_OP_QUERY:
-         operators.push_back(_token);
+         operators.push_back(token);
          expressions.push_back(getIfMultiple());
-         prep(SourceTokenC::TT_OP_COLON);
+         prep(); doAssert(SourceTokenC::TT_OP_COLON);
          goto case_expr;
 
       default:
-         throw SourceException("unexpected token type", _token.getPosition(),
-                               __func__);
+         throw SourceException("unexpected token type", token.pos, __func__);
       }
    }
 
@@ -459,65 +529,83 @@ done:
    return make_expression(expressions, operators, 0, operators.size());
 }
 
+//
+// SourceTokenizerDS::getIfSingle
+//
 ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
 {
-	prep();
+   prep();
 
-	switch (_token.getType())
-	{
-	case SourceTokenC::TT_IDENTIFIER:
-		if (_token.getData() == "defined")
-		{
-			_canExpand = false;
+   switch (token.type)
+   {
+   case SourceTokenC::TT_IDENTIFIER:
+      if (token.data == "defined")
+      {
+         canExpand = false;
 
-			prep();
+         prep();
 
-			bool hasParentheses(_token.getType() == SourceTokenC::TT_OP_PARENTHESIS_O);
+         bool hasParentheses = token.type == SourceTokenC::TT_OP_PARENTHESIS_O;
 
-			if (hasParentheses) prep();
+         if (hasParentheses) prep();
 
-			doAssert(SourceTokenC::TT_IDENTIFIER);
+         doAssert(SourceTokenC::TT_IDENTIFIER);
 
-			ObjectExpression::Pointer expr(ObjectExpression::create_value_int(hasDefine(_token.getData()), _token.getPosition()));
+         ObjectExpression::Pointer expr =
+            ObjectExpression::create_value_int(hasDefine(token.data), token.pos);
 
-			if (hasParentheses) prep(SourceTokenC::TT_OP_PARENTHESIS_C);
+         if (hasParentheses)
+            {prep(); doAssert(SourceTokenC::TT_OP_PARENTHESIS_C);}
 
-			_canExpand = true;
+         canExpand = true;
 
-			return expr;
-		}
-		else
-		{
-			return ObjectExpression::create_value_int(0, _token.getPosition());
-		}
+         return expr;
+      }
+      else
+      {
+         // If this function sees any other identifier, that means it's not a
+         // define. C says that undefined identifiers evaluate to 0.
+         return ObjectExpression::create_value_int(0, token.pos);
+      }
 
-	case SourceTokenC::TT_INTEGER:
-		return ObjectExpression::create_value_int(get_bigsint(_token), _token.getPosition());
+   case SourceTokenC::TT_INTEGER:
+      return ObjectExpression::create_value_int
+      (get_bigsint(token.data, token.pos), token.pos);
 
-	case SourceTokenC::TT_OP_PARENTHESIS_O:
-	{
-		ObjectExpression::Pointer expr(getIfMultiple());
+   case SourceTokenC::TT_OP_EXCLAMATION:
+      return ObjectExpression::create_unary_lognot(getIfSingle(), token.pos);
 
-		doAssert(SourceTokenC::TT_OP_PARENTHESIS_C);
+   case SourceTokenC::TT_OP_PARENTHESIS_O:
+   {
+      ObjectExpression::Pointer expr = getIfMultiple();
 
-		return expr;
-	}
+      doAssert(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-	default:
-		throw SourceException("unexpected token type", _token.getPosition(), "SourceTokenizerDS::getIfSingle");
-	}
+      return expr;
+   }
+
+   default:
+      throw SourceException("unexpected token type", token.pos, __func__);
+   }
 }
 
+//
+// SourceTokenizerDS::hasDefine
+//
 bool SourceTokenizerDS::hasDefine()
 {
-	if (_token.getType() != SourceTokenC::TT_IDENTIFIER)
-		return false;
+   if (token.type != SourceTokenC::TT_IDENTIFIER)
+      return false;
 
-	return hasDefine(_token.getData());
+   return hasDefine(token.data);
 }
-bool SourceTokenizerDS::hasDefine(std::string const & name)
+
+//
+// SourceTokenizerDS::hasDefine
+//
+bool SourceTokenizerDS::hasDefine(std::string const &name)
 {
-	return _defines.find(name) != _defines.end();
+   return defines.find(name) != defines.end();
 }
 
 //
@@ -533,71 +621,103 @@ bool SourceTokenizerDS::isSkip()
    return false;
 }
 
-SourceTokenC const & SourceTokenizerDS::peek()
+//
+// SourceTokenizerDS::peek
+//
+SourceTokenC const &SourceTokenizerDS::peek()
 {
-	prep();
+   prep();
 
-	_ungetStack.push(_token);
+   ungetStack.push(token);
 
-	return _token;
+   return token;
+}
+
+//
+// SourceTokenizerDS::peekType
+//
+bool SourceTokenizerDS::peekType(SourceTokenC::TokenType type)
+{
+   prep();
+
+   ungetStack.push(token);
+
+   return token.type == type;
+}
+
+//
+// SourceTokenizerDS::peekType
+//
+bool SourceTokenizerDS::peekType
+(SourceTokenC::TokenType type, std::string const &data)
+{
+   prep();
+
+   ungetStack.push(token);
+
+   return token.type == type && token.data == data;
 }
 
 void SourceTokenizerDS::prep()
 {
-	start:
+   while (true)
+   {
+      if (!ungetStack.empty())
+      {
+         token = ungetStack.top();
+         ungetStack.pop();
+      }
+      else try
+      {
+         token.readToken(in.top());
+      }
+      catch (SourceStream::EndOfStream &e)
+      {
+         if (in.size() == 1) throw;
 
-	if (!_ungetStack.empty())
-	{
-		_token = _ungetStack.top();
-		_ungetStack.pop();
-	}
-	else try
-	{
-		_token = SourceTokenC(_in.top());
-	}
-	catch (SourceStream::EndOfStream & e)
-	{
-		if (_in.size() == 1) throw;
+         delete in.top();
+         in.pop();
 
-		delete _in.top();
-		_in.pop();
+         continue;
+      }
 
-		goto start;
-	}
+      // Preprocessor directive.
+      if (canCommand && token.type == SourceTokenC::TT_OP_HASH)
+      {
+         doCommand();
+         continue;
+      }
 
-	// Preprocessor directive.
-	if (_canCommand && _token.getType() == SourceTokenC::TT_OP_HASH)
-	{
-		doCommand();
-		goto start;
-	}
+      if (canExpand && hasDefine())
+      {
+         prepDefine();
+         continue;
+      }
 
-	if (_canExpand && hasDefine())
-	{
-		prepDefine();
-		goto start;
-	}
+      if (canSkip && isSkip())
+         continue;
 
-	if (_canSkip && isSkip())
-		goto start;
-}
-void SourceTokenizerDS::prep(SourceTokenC::TokenType type)
-{
-	prep();
-	doAssert(type);
+      break;
+   }
 }
 
+//
+// SourceTokenizerDS::prepDefine
+//
 void SourceTokenizerDS::prepDefine()
 {
-	std::vector<SourceTokenC> const & tokens(_defines[_token.getData()]);
+   std::vector<SourceTokenC> const &tokens(defines[token.data]);
 
-	for (size_t i(tokens.size()); i--;)
-		_ungetStack.push(tokens[i]);
+   for (size_t i(tokens.size()); i--;)
+      ungetStack.push(tokens[i]);
 }
 
+//
+// SourceTokenizerDS::remDefine
+//
 void SourceTokenizerDS::remDefine()
 {
-	_defines.erase(_token.getData());
+   defines.erase(token.data);
 }
 
 //
@@ -606,12 +726,15 @@ void SourceTokenizerDS::remDefine()
 void SourceTokenizerDS::remSkip()
 {
    skipStack.pop_back();
-	_unskipStack.pop();
+   unskipStack.pop();
 }
 
-void SourceTokenizerDS::unget(SourceTokenC const & token)
+//
+// SourceTokenizerDS::unget
+//
+void SourceTokenizerDS::unget(SourceTokenC const &_token)
 {
-	_ungetStack.push(token);
+   ungetStack.push(_token);
 }
 
 // EOF

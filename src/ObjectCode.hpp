@@ -32,7 +32,6 @@
 //
 
 class SourcePosition;
-class SourceTokenC;
 
 //
 // ObjectCode
@@ -64,9 +63,8 @@ struct ObjectCodeSet
 // Global Functions                                                           |
 //
 
-ObjectCode ocode_get_code(SourceTokenC const &token);
-ObjectCode ocode_get_code(std::string const &data,
-                          SourcePosition const &position);
+ObjectCode ocode_get_code
+(std::string const &data, SourcePosition const &position);
 
 // Returns true if the passed ocode pushes something to the stack without
 // taking anything.

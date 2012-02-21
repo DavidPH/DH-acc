@@ -49,7 +49,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(if)
    SourceExpression::Pointer exprBody =
       make_expression_single(in, blocks, contextBody);
 
-   if (in->peek().getType() == SourceTokenC::TT_IDENTIFIER && in->peek().getData() == "else")
+   if (in->peekType(SourceTokenC::TT_IDENTIFIER, "else"))
    {
       in->get();
 
@@ -58,13 +58,11 @@ SRCEXPDS_EXPRSINGLE_DEFN(if)
       SourceExpression::Pointer exprElse =
          make_expression_single(in, blocks, contextElse);
 
-      return create_branch_if(exprCond, exprBody, exprElse, context,
-                              token.getPosition());
+      return create_branch_if(exprCond, exprBody, exprElse, context, token.pos);
    }
    else
    {
-      return create_branch_if(exprCond, exprBody, context,
-                              token.getPosition());
+      return create_branch_if(exprCond, exprBody, context, token.pos);
    }
 }
 

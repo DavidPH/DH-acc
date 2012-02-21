@@ -41,16 +41,23 @@
 SRCEXPDS_EXPRSINGLE_DEFN(asmfunc)
 {
    // asmfuncName
-   std::string asmfuncName = in->get(SourceTokenC::TT_IDENTIFIER).getData();
+   std::string asmfuncName = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
    // asmfuncOCode
+   SourceTokenC asmfuncOCodeToken;
    ObjectCodeSet asmfuncOCode;
-   asmfuncOCode.ocode     = ocode_get_code(in->get(SourceTokenC::TT_IDENTIFIER));
-   asmfuncOCode.ocode_imm = ocode_get_code(in->get(SourceTokenC::TT_IDENTIFIER));
+
+   asmfuncOCodeToken = in->get(SourceTokenC::TT_IDENTIFIER);
+   asmfuncOCode.ocode =
+      ocode_get_code(asmfuncOCodeToken.data, asmfuncOCodeToken.pos);
+
+   asmfuncOCodeToken = in->get(SourceTokenC::TT_IDENTIFIER);
+   asmfuncOCode.ocode_imm =
+      ocode_get_code(asmfuncOCodeToken.data, asmfuncOCodeToken.pos);
 
    // asmfuncObject
    ObjectExpression::Pointer asmfuncObject =
-      ObjectExpression::create_value_ocode(asmfuncOCode, token.getPosition());
+      ObjectExpression::create_value_ocode(asmfuncOCode, token.pos);
 
    // asmfuncArgTypes asmfuncReturn
    VariableType::Vector asmfuncArgTypes;
@@ -64,10 +71,10 @@ SRCEXPDS_EXPRSINGLE_DEFN(asmfunc)
    // asmfuncVariable
    SourceVariable::Pointer asmfuncVariable =
       SourceVariable::create_constant
-      (asmfuncName, asmfuncVarType, asmfuncObject, token.getPosition());
+      (asmfuncName, asmfuncVarType, asmfuncObject, token.pos);
 
    context->addVariable(asmfuncVariable);
-   return create_value_variable(asmfuncVariable, context, token.getPosition());
+   return create_value_variable(asmfuncVariable, context, token.pos);
 }
 
 // EOF

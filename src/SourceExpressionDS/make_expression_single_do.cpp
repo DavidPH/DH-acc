@@ -42,11 +42,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(do)
    SourceExpression::Pointer exprBody =
       make_expression_single(in, blocks, contextBody);
 
-   SourceTokenC tokenWhile(in->get(SourceTokenC::TT_IDENTIFIER));
-
-   if (tokenWhile.getData() != "while")
-      throw SourceException("expected 'while' got '" + tokenWhile.getData() +
-                            "'", token.getPosition(), __func__);
+   SourceTokenC tokenWhile = in->get(SourceTokenC::TT_IDENTIFIER, "while");
 
    in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
    SourceContext::Reference contextCond =
@@ -55,7 +51,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(do)
       make_expression(in, blocks, contextCond);
    in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-   return create_branch_do(exprCond, exprBody, contextCond, token.getPosition());
+   return create_branch_do(exprCond, exprBody, contextCond, token.pos);
 }
 
 // EOF

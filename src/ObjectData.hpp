@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* ObjectData.hpp
-**
-** Defines the ObjectCode enum and related functions.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Object-level data.
+//
+//-----------------------------------------------------------------------------
 
 #ifndef HPP_ObjectData_
 #define HPP_ObjectData_
@@ -28,7 +30,7 @@
 #include <ostream>
 #include <string>
 
-class SourceTokenC;
+class SourcePosition;
 
 
 
@@ -127,8 +129,10 @@ struct ObjectData_String
 
 
 
-extern ObjectData_Script::ScriptFlag odata_get_ScriptFlag(SourceTokenC const & token);
-extern ObjectData_Script::ScriptType odata_get_ScriptType(SourceTokenC const & token);
+extern ObjectData_Script::ScriptFlag odata_get_ScriptFlag
+(std::string const &data, SourcePosition const &position);
+extern ObjectData_Script::ScriptType odata_get_ScriptType
+(std::string const &data, SourcePosition const &position);
 
 extern bool override_object(ObjectData_Auto          * out, ObjectData_Auto          const & in);
 extern bool override_object(ObjectData_Function      * out, ObjectData_Function      const & in);

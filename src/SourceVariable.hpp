@@ -39,7 +39,6 @@
 class ObjectExpression;
 class ObjectVector;
 class SourceExpression;
-class SourceTokenC;
 class VariableData;
 class VariableType;
 
@@ -98,7 +97,8 @@ public:
     std::string const &nameObject, StorageClass sc,
     SourcePosition const &position);
 
-   static StorageClass get_StorageClass(SourceTokenC const &token);
+   static StorageClass get_StorageClass
+   (std::string const &data, SourcePosition const &position);
 
 private:
    SourceVariable

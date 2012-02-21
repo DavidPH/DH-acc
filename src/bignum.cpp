@@ -23,8 +23,6 @@
 
 #include "bignum.hpp"
 
-#include "SourceTokenC.hpp"
-
 #include <sstream>
 
 
@@ -35,28 +33,12 @@
 //
 // get_bigreal
 //
-bigreal get_bigreal(SourceTokenC const & token)
-{
-   return get_bigreal(token.getData(), token.getPosition());
-}
-
-//
-// get_bigreal
-//
 bigreal get_bigreal(std::string const &value, SourcePosition const &)
 {
    bigreal f;
    std::istringstream iss(value);
    iss >> f;
    return f;
-}
-
-//
-// get_bigsint
-//
-bigsint get_bigsint(SourceTokenC const & token)
-{
-   return get_bigsint(token.getData(), token.getPosition());
 }
 
 //

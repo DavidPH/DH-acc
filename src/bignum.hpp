@@ -32,7 +32,6 @@
 //
 
 class SourcePosition;
-class SourceTokenC;
 
 // A long double should service all requirements of bigreal.
 typedef long double bigreal;
@@ -46,10 +45,8 @@ typedef unsigned long int biguint;
 // Global Functions                                                           |
 //
 
-bigreal get_bigreal(SourceTokenC const &token);
 bigreal get_bigreal(std::string const &value, SourcePosition const &position);
 
-bigsint get_bigsint(SourceTokenC const &token);
 bigsint get_bigsint(std::string const &value, SourcePosition const &position);
 
 
