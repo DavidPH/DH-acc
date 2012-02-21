@@ -321,6 +321,7 @@ public:
    static void output_ACSE(std::ostream *out, std::vector<T> const &instructions);
 
    static void write_ACSE_chunk(std::ostream *out, std::ostringstream *chunkout, char const *chunkname);
+   static void write_ACSE_counter(std::ostream *out);
    static void write_ACSE_function_FUNC(std::ostream *out, ObjectData_Function const &f);
    static void write_ACSE_function_FNAM(std::ostream *out, ObjectData_Function const &f);
    static void write_ACSE_library(std::ostream *out, std::string const &lib);
@@ -348,8 +349,6 @@ private:
 
 
    static int arg_counts[BCODE_NONE];
-
-   static bigsint temp_counter;
 };
 
 #endif//HPP_BinaryTokenZDACS_

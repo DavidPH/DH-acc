@@ -52,12 +52,8 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
       iter->writeACS0(out);
 
    // AIMP - Map Array Imports
-   temp_counter = 0;
    ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_AIMP_counter, &chunkout);
-
-   if (temp_counter)
-      BinaryTokenACS::write_ACS0_32(&chunkout, temp_counter);
-
+   write_ACSE_counter(&chunkout);
    ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_AIMP, &chunkout);
    write_ACSE_chunk(out, &chunkout, "AIMP");
 

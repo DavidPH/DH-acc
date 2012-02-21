@@ -34,6 +34,7 @@
 // Static Variables                                                           |
 //
 
+static bigsint counter_temp = 0;
 static std::vector<std::string> strings_temp;
 
 
@@ -58,6 +59,17 @@ write_ACSE_chunk(std::ostream *out, std::ostringstream *chunkout,
    }
 
    chunkout->str("");
+}
+
+//
+// BinaryTokenZDACS::write_ACSE_counter
+//
+void BinaryTokenZDACS::write_ACSE_counter(std::ostream *out)
+{
+   if (counter_temp)
+      BinaryTokenACS::write_ACS0_32(out, counter_temp);
+
+   counter_temp = 0;
 }
 
 //
@@ -181,7 +193,7 @@ write_ACSE_registerarray_AIMP_counter(std::ostream *,
 {
    if (!r.externDef) return;
 
-   ++temp_counter;
+   ++counter_temp;
 }
 
 //

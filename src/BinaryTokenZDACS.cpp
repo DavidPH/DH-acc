@@ -33,7 +33,6 @@
 //
 
 int BinaryTokenZDACS::arg_counts[BCODE_NONE];
-bigsint BinaryTokenZDACS::temp_counter;
 
 
 //----------------------------------------------------------------------------|
