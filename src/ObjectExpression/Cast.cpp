@@ -86,7 +86,9 @@ public:
 
       switch (srcType)
       {
+      case ET_ARRAY:
       case ET_OCODE:
+      case ET_STRUCT:
          break;
 
       case ET_FLOAT:
@@ -108,7 +110,9 @@ public:
 
       switch (srcType)
       {
+      case ET_ARRAY:
       case ET_OCODE:
+      case ET_STRUCT:
          break;
 
       case ET_FLOAT:

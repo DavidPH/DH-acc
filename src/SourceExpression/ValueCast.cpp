@@ -351,8 +351,8 @@ ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
          throw SourceException("invalid BT to", position, getName());
 
       case VariableType::BT_BOOLHARD:
-         obj = ObjectExpression::create_unary_lognot(obj, position);
-         obj = ObjectExpression::create_unary_lognot(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
          break;
 
       case VariableType::BT_BOOLSOFT:
@@ -398,16 +398,16 @@ ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
       case VariableType::BT_SCRIPT:
       case VariableType::BT_STRING:
       case VariableType::BT_UINT:
-         obj = ObjectExpression::create_unary_lognot(obj, position);
-         obj = ObjectExpression::create_unary_lognot(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
          break;
 
       case VariableType::BT_BOOLSOFT:
          break;
 
       case VariableType::BT_REAL:
-         obj = ObjectExpression::create_unary_lognot(obj, position);
-         obj = ObjectExpression::create_unary_lognot(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
          obj = ObjectExpression::create_cast_int_to_float(obj, position);
          break;
       }
@@ -426,8 +426,8 @@ ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
 
       case VariableType::BT_BOOLHARD:
          obj = ObjectExpression::create_cast_float_to_int(obj, position);
-         obj = ObjectExpression::create_unary_lognot(obj, position);
-         obj = ObjectExpression::create_unary_lognot(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
          break;
 
       case VariableType::BT_BOOLSOFT:

@@ -153,6 +153,10 @@ void read_object(std::istream * in, ObjectExpression::Pointer * out)
       *out = ObjectExpression::create_branch_ior(in);
       break;
 
+   case ObjectExpression::OT_BRANCH_NOT:
+      *out = ObjectExpression::create_branch_not(in);
+      break;
+
    case ObjectExpression::OT_BRANCH_XOR:
       *out = ObjectExpression::create_branch_xor(in);
       break;
@@ -165,29 +169,29 @@ void read_object(std::istream * in, ObjectExpression::Pointer * out)
 		*out = ObjectExpression::create_unary_add(in);
 		break;
 
-   case ObjectExpression::OT_UNARY_LOGNOT:
-      *out = ObjectExpression::create_unary_lognot(in);
-      break;
-
 	case ObjectExpression::OT_UNARY_SUB:
 		*out = ObjectExpression::create_unary_sub(in);
 		break;
 
-	case ObjectExpression::OT_VALUE_FLOAT:
-		*out = ObjectExpression::create_value_float(in);
-		break;
+   case ObjectExpression::OT_VALUE_COMPOUND:
+      *out = ObjectExpression::create_value_compound(in);
+      break;
 
-	case ObjectExpression::OT_VALUE_INT:
-		*out = ObjectExpression::create_value_int(in);
-		break;
+   case ObjectExpression::OT_VALUE_FLOAT:
+      *out = ObjectExpression::create_value_float(in);
+      break;
 
-	case ObjectExpression::OT_VALUE_OCODE:
-		*out = ObjectExpression::create_value_ocode(in);
-		break;
+   case ObjectExpression::OT_VALUE_INT:
+      *out = ObjectExpression::create_value_int(in);
+      break;
 
-	case ObjectExpression::OT_VALUE_SYMBOL:
-		*out = ObjectExpression::create_value_symbol(in);
-		break;
+   case ObjectExpression::OT_VALUE_OCODE:
+      *out = ObjectExpression::create_value_ocode(in);
+      break;
+
+   case ObjectExpression::OT_VALUE_SYMBOL:
+      *out = ObjectExpression::create_value_symbol(in);
+      break;
 
 	case ObjectExpression::OT_NONE:
 		*out = NULL;

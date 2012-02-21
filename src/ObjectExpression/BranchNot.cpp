@@ -32,27 +32,27 @@
 //
 
 //
-// ObjectExpression_Cast
+// ObjectExpression_BranchNot
 //
-class ObjectExpression_UnaryLogNot : public ObjectExpression_Unary
+class ObjectExpression_BranchNot : public ObjectExpression_Unary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_UnaryLogNot,
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_BranchNot,
                                    ObjectExpression_Unary);
 
 public:
    //
-   // ::ObjectExpression_UnaryLogNot
+   // ::ObjectExpression_BranchNot
    //
-   ObjectExpression_UnaryLogNot
+   ObjectExpression_BranchNot
    (ObjectExpression *_expr, SourcePosition const &_position)
    : Super(_expr, _position)
    {
    }
 
    //
-   // ::ObjectExpression_UnaryLogNot
+   // ::ObjectExpression_BranchNot
    //
-   ObjectExpression_UnaryLogNot(std::istream *in)
+   ObjectExpression_BranchNot(std::istream *in)
    : Super(in)
    {
    }
@@ -85,7 +85,7 @@ protected:
    //
    virtual void writeObject(std::ostream *out) const
    {
-      write_object(out, OT_UNARY_LOGNOT);
+      write_object(out, OT_BRANCH_NOT);
 
       Super::writeObject(out);
    }
@@ -97,21 +97,21 @@ protected:
 //
 
 //
-// ObjectExpression::create_unary_lognot
+// ObjectExpression::create_branch_not
 //
 ObjectExpression::Pointer ObjectExpression::
-create_unary_lognot(ObjectExpression *expr, SourcePosition const &position)
+create_branch_not(ObjectExpression *expr, SourcePosition const &position)
 {
-   return new ObjectExpression_UnaryLogNot(expr, position);
+   return new ObjectExpression_BranchNot(expr, position);
 }
 
 //
-// ObjectExpression::create_unary_lognot
+// ObjectExpression::create_branch_not
 //
 ObjectExpression::Pointer ObjectExpression::
-create_unary_lognot(std::istream *in)
+create_branch_not(std::istream *in)
 {
-   return new ObjectExpression_UnaryLogNot(in);
+   return new ObjectExpression_BranchNot(in);
 }
 
 // EOF

@@ -575,7 +575,7 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
       (get_bigsint(token.data, token.pos), token.pos);
 
    case SourceTokenC::TT_OP_EXCLAMATION:
-      return ObjectExpression::create_unary_lognot(getIfSingle(), token.pos);
+      return ObjectExpression::create_branch_not(getIfSingle(), token.pos);
 
    case SourceTokenC::TT_OP_PARENTHESIS_O:
    {

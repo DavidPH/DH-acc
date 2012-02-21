@@ -298,17 +298,46 @@ SourcePosition const & ObjectExpression::getPosition() const
 	return position;
 }
 
+//
+// ObjectExpression::resolveElement
+//
+ObjectExpression::Pointer ObjectExpression::resolveElement(bigsint) const
+{
+   throw SourceException("cannot resolve element", position, getName());
+}
+
+//
+// ObjectExpression::resolveFloat
+//
 bigreal ObjectExpression::resolveFloat() const
 {
-	throw SourceException("cannot resolve float", position, getName());
+   throw SourceException("cannot resolve float", position, getName());
 }
+
+//
+// ObjectExpression::resolveInt
+//
 bigsint ObjectExpression::resolveInt() const
 {
-	throw SourceException("cannot resolve int", position, getName());
+   throw SourceException("cannot resolve int", position, getName());
 }
+
+//
+// ObjectExpression::resolveMember
+//
+ObjectExpression::Pointer ObjectExpression::resolveMember
+(std::string const &name) const
+{
+   throw SourceException
+   ("cannot resolve memeber '" + name + "'", position, getName());
+}
+
+//
+// ObjectExpression::resolveOCode
+//
 ObjectCodeSet ObjectExpression::resolveOCode() const
 {
-	throw SourceException("cannot resolve ocode", position, getName());
+   throw SourceException("cannot resolve ocode", position, getName());
 }
 
 //

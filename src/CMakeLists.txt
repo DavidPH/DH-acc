@@ -29,6 +29,7 @@ add_executable(DH-acc
 	ObjectExpression/BinaryXOr.cpp
    ObjectExpression/BranchAnd.cpp
    ObjectExpression/BranchIOr.cpp
+   ObjectExpression/BranchNot.cpp
    ObjectExpression/BranchXOr.cpp
    ObjectExpression/Cast.cpp
 	ObjectExpression/do_deferred_allocation.cpp
@@ -36,8 +37,8 @@ add_executable(DH-acc
 	ObjectExpression/objects_io.cpp
 	ObjectExpression/Unary.cpp
 	ObjectExpression/UnaryAdd.cpp
-   ObjectExpression/UnaryLogNot.cpp
 	ObjectExpression/UnarySub.cpp
+   ObjectExpression/ValueCompound.cpp
 	ObjectExpression/ValueFloat.cpp
 	ObjectExpression/ValueInt.cpp
 	ObjectExpression/ValueOCode.cpp

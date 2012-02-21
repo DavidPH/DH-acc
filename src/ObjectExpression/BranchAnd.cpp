@@ -73,7 +73,9 @@ public:
    {
       switch (exprL->getType())
       {
+      case ET_ARRAY:
       case ET_OCODE:
+      case ET_STRUCT:
          break;
 
       case ET_FLOAT:
