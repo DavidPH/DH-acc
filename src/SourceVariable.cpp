@@ -24,6 +24,7 @@
 #include "SourceVariable.hpp"
 
 #include "ObjectExpression.hpp"
+#include "ost_type.hpp"
 #include "SourceException.hpp"
 #include "VariableData.hpp"
 #include "VariableType.hpp"
@@ -172,6 +173,22 @@ SourceVariable::StorageClass SourceVariable::get_StorageClass
 
    if (data == "static")
       return SC_STATIC;
+
+   if (data == "__autoreg")
+   {
+      if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
+         return SC_REGISTER;
+
+      return SC_AUTO;
+   }
+
+   if (data == "__staticreg")
+   {
+      if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
+         return SC_REGISTER_MAP;
+
+      return SC_STATIC;
+   }
 
    if (data == "__mapregister")
       return SC_REGISTER_MAP;
