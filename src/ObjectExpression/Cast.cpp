@@ -195,7 +195,7 @@ ObjectExpression::Pointer ObjectExpression::create_cast(std::istream *in)
 ObjectExpression::Pointer ObjectExpression::
 create_cast_float_to_int(ObjectExpression *expr, SourcePosition const &position)
 {
-   return new ObjectExpression_Cast(ET_FLOAT, ET_INT, expr, position);
+   return new ObjectExpression_Cast(ET_INT, ET_FLOAT, expr, position);
 }
 
 //
@@ -204,7 +204,7 @@ create_cast_float_to_int(ObjectExpression *expr, SourcePosition const &position)
 ObjectExpression::Pointer ObjectExpression::
 create_cast_int_to_float(ObjectExpression *expr, SourcePosition const &position)
 {
-   return new ObjectExpression_Cast(ET_INT, ET_FLOAT, expr, position);
+   return new ObjectExpression_Cast(ET_FLOAT, ET_INT, expr, position);
 }
 
 // EOF

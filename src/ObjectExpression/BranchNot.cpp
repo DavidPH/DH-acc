@@ -58,11 +58,11 @@ public:
    }
 
    //
-   // ::resolveFloat
+   // ::getType
    //
-   virtual bigreal resolveFloat() const
+   virtual ExpressionType getType() const
    {
-      return !expr->resolveFloat();
+      return ET_INT;
    }
 
    //
@@ -70,7 +70,21 @@ public:
    //
    virtual bigsint resolveInt() const
    {
-      return !expr->resolveInt();
+      switch (expr->getType())
+      {
+      case ET_ARRAY:
+      case ET_OCODE:
+      case ET_STRUCT:
+         break;
+
+      case ET_FLOAT:
+         return !expr->resolveFloat();
+
+      case ET_INT:
+         return !expr->resolveInt();
+      }
+
+      return Super::resolveInt();
    }
 
    virtual void writeACSPLong(std::ostream *out) const

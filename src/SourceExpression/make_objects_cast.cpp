@@ -35,6 +35,160 @@
 //
 
 //
+// SourceExpression::make_object_cast
+//
+ObjectExpression::Pointer SourceExpression::make_object_cast
+(ObjectExpression *src, VariableType *dstType, VariableType *srcType,
+ SourcePosition const &position)
+{
+   #define TYPES_STRING ("bad BT " + make_string(srcType->getBasicType()) + \
+                         "->"      + make_string(dstType->getBasicType()))
+
+   // Same type, so no cast.
+   if (dstType->getUnqualified() == srcType->getUnqualified())
+      return src;
+
+   VariableType::BasicType dstBT = dstType->getBasicType();
+   VariableType::BasicType srcBT = srcType->getBasicType();
+
+   ObjectExpression::Pointer obj = src;
+
+   switch (srcBT)
+   {
+   case VariableType::BT_ARRAY:
+   case VariableType::BT_ASMFUNC:
+   case VariableType::BT_BLOCK:
+   case VariableType::BT_STRUCT:
+   case VariableType::BT_UNION:
+   case VariableType::BT_VOID:
+      throw SourceException(TYPES_STRING, position, __func__);
+
+   case VariableType::BT_BOOLHARD:
+   case VariableType::BT_CHAR:
+   case VariableType::BT_ENUM:
+   case VariableType::BT_FUNCTION:
+   case VariableType::BT_INT:
+   case VariableType::BT_LABEL:
+   case VariableType::BT_LINESPEC:
+   case VariableType::BT_NATIVE:
+   case VariableType::BT_POINTER:
+   case VariableType::BT_SCRIPT:
+   case VariableType::BT_STRING:
+   case VariableType::BT_UINT:
+      switch (dstBT)
+      {
+      case VariableType::BT_ARRAY:
+      case VariableType::BT_ASMFUNC:
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_VOID:
+         throw SourceException(TYPES_STRING, position, __func__);
+
+      case VariableType::BT_BOOLHARD:
+         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
+         break;
+
+      case VariableType::BT_BOOLSOFT:
+      case VariableType::BT_CHAR:
+      case VariableType::BT_ENUM:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_INT:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_POINTER:
+      case VariableType::BT_SCRIPT:
+      case VariableType::BT_STRING:
+      case VariableType::BT_UINT:
+         break;
+
+      case VariableType::BT_REAL:
+         obj = ObjectExpression::create_cast_int_to_float(obj, position);
+         break;
+      }
+      break;
+
+   case VariableType::BT_BOOLSOFT:
+      switch (dstBT)
+      {
+      case VariableType::BT_ARRAY:
+      case VariableType::BT_ASMFUNC:
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_VOID:
+         throw SourceException(TYPES_STRING, position, __func__);
+
+      case VariableType::BT_BOOLHARD:
+      case VariableType::BT_CHAR:
+      case VariableType::BT_ENUM:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_INT:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_POINTER:
+      case VariableType::BT_SCRIPT:
+      case VariableType::BT_STRING:
+      case VariableType::BT_UINT:
+         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
+         break;
+
+      case VariableType::BT_BOOLSOFT:
+         break;
+
+      case VariableType::BT_REAL:
+         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_cast_int_to_float(obj, position);
+         break;
+      }
+      break;
+
+   case VariableType::BT_REAL:
+      switch (dstBT)
+      {
+      case VariableType::BT_ARRAY:
+      case VariableType::BT_ASMFUNC:
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_VOID:
+         throw SourceException(TYPES_STRING, position, __func__);
+
+      case VariableType::BT_BOOLHARD:
+      case VariableType::BT_BOOLSOFT:
+         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, position);
+         break;
+
+      case VariableType::BT_REAL:
+         break;
+
+      case VariableType::BT_CHAR:
+      case VariableType::BT_ENUM:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_INT:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_POINTER:
+      case VariableType::BT_SCRIPT:
+      case VariableType::BT_STRING:
+      case VariableType::BT_UINT:
+         obj = ObjectExpression::create_cast_float_to_int(obj, position);
+         break;
+      }
+      break;
+   }
+
+   return obj;
+}
+
+//
 // SourceExpression::make_objects_memcpy_cast
 //
 void SourceExpression::make_objects_memcpy_cast
