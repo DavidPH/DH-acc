@@ -304,17 +304,6 @@ VariableType::Reference VariableType::setQualifier(unsigned _quals)
 }
 
 //
-// VariableType::setReturn
-//
-void VariableType::setReturn(VariableType *type)
-{
-   if (basic == BT_ARRAY && typeRet->typeArr == this)
-      typeRet->typeArr = specnext == this ? NULL : specnext;
-
-   typeRet = static_cast<Reference>(type);
-}
-
-//
 // VariableType::setStorage
 //
 VariableType::Reference VariableType::setStorage(StoreType _store)
@@ -442,6 +431,41 @@ void VariableType::makeComplete(VecStr const &_names, Vector const &_types)
    types = _types;
    complete = true;
    next->makeComplete(_names, _types);
+}
+
+//
+// VariableType::setReturn
+//
+void VariableType::setReturn(VariableType *type)
+{
+   if (basic == BT_ARRAY)
+   {
+      // Unlink from old type's array list.
+      specnext->specprev = specprev;
+      specprev->specnext = specnext;
+
+      if (typeRet->typeArr == this)
+         typeRet->typeArr = specnext == this ? NULL : specnext;
+
+      typeRet = static_cast<Reference>(type);
+
+      // Link into new type's array list.
+      if (type->typeArr)
+      {
+         specnext = type->typeArr->specnext;
+         specprev = type->typeArr;
+         type->typeArr->specnext->specprev = this;
+         type->typeArr->specnext = this;
+      }
+      else
+      {
+         type->typeArr = this;
+         specnext = this;
+         specprev = this;
+      }
+   }
+
+   typeRet = static_cast<Reference>(type);
 }
 
 //===================================================================
