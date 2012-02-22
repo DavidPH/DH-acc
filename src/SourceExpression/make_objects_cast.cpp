@@ -37,6 +37,56 @@
 static ObjectExpression::Pointer make_object
 (VariableType *type, SourcePosition const &position)
 {
+   ObjectExpression::Vector    elems;
+   VariableType::VecStr const &names = type->getNames();
+   VariableType::Vector const &types = type->getTypes();
+
+   VariableType::Vector::const_iterator iter;
+
+   switch (type->getBasicType())
+   {
+   case VariableType::BT_ARRAY:
+      for (bigsint i = type->getWidth(); i--;)
+         elems.push_back(make_object(type->getReturn(), position));
+      return ObjectExpression::create_value_array(elems, position);
+
+   case VariableType::BT_ASMFUNC:
+      throw SourceException("make_object BT_ASMFUNC", position, __func__);
+
+   case VariableType::BT_BLOCK:
+      for (iter = types.begin(); iter != types.end(); ++iter)
+         elems.push_back(make_object(*iter, position));
+      return ObjectExpression::create_value_array(elems, position);
+
+   case VariableType::BT_BOOLHARD:
+   case VariableType::BT_BOOLSOFT:
+   case VariableType::BT_CHAR:
+   case VariableType::BT_ENUM:
+   case VariableType::BT_FUNCTION:
+   case VariableType::BT_INT:
+   case VariableType::BT_LABEL:
+   case VariableType::BT_LINESPEC:
+   case VariableType::BT_NATIVE:
+   case VariableType::BT_POINTER:
+   case VariableType::BT_SCRIPT:
+   case VariableType::BT_STRING:
+   case VariableType::BT_UINT:
+      return ObjectExpression::create_value_int(0, position);
+
+   case VariableType::BT_REAL:
+      return ObjectExpression::create_value_float(0, position);
+
+   case VariableType::BT_STRUCT:
+      for (iter = types.begin(); iter != types.end(); ++iter)
+         elems.push_back(make_object(*iter, position));
+      return ObjectExpression::create_value_struct(elems, names, position);
+
+   case VariableType::BT_UNION:
+      throw SourceException("make_object BT_UNION", position, __func__);
+
+   case VariableType::BT_VOID:
+      throw SourceException("make_object BT_VOID", position, __func__);
+   }
    throw SourceException("stub", position, __func__);
 }
 
@@ -75,25 +125,44 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
 
    case VariableType::BT_BLOCK:
    {
-      if (dstBT != VariableType::BT_ARRAY && dstBT != VariableType::BT_BLOCK &&
-          dstBT != VariableType::BT_STRUCT)
-         throw SourceException(TYPES_STRING, position, __func__);
-
-      VariableType::Vector const &dstTypes = dstType->getTypes();
       VariableType::Vector const &srcTypes = srcType->getTypes();
       ObjectExpression::Vector elems;
       obj->expandOnce(&elems);
 
-      for (size_t i = 0; i < dstTypes.size(); ++i)
+      if (dstBT == VariableType::BT_ARRAY)
       {
-         if (i < elems.size())
-            elems[i] = make_object_cast(elems[i], dstTypes[i], srcTypes[i], position);
-         else
-            elems[i] = make_object(dstTypes[i], position);
+         VariableType::Reference dstTypes = dstType->getReturn();
+         bigsint                 dstWidth = dstType->getWidth();
+
+         for (bigsint i = 0; i < dstWidth; ++i)
+         {
+            if (static_cast<size_t>(i) < elems.size())
+               elems[i] = make_object_cast
+               (elems[i], dstTypes, srcTypes[i], position);
+            else
+               elems.push_back(make_object(dstTypes, position));
+         }
       }
+      else if (dstBT == VariableType::BT_STRUCT ||
+               dstBT == VariableType::BT_BLOCK)
+      {
+         VariableType::Vector const &dstTypes = dstType->getTypes();
+
+         for (size_t i = 0; i < dstTypes.size(); ++i)
+         {
+            if (i < elems.size())
+               elems[i] = make_object_cast
+               (elems[i], dstTypes[i], srcTypes[i], position);
+            else
+               elems.push_back(make_object(dstTypes[i], position));
+         }
+      }
+      else
+         throw SourceException(TYPES_STRING, position, __func__);
 
       if (dstBT == VariableType::BT_STRUCT)
-         obj = ObjectExpression::create_value_struct(elems, dstType->getNames(), position);
+         obj = ObjectExpression::create_value_struct
+         (elems, dstType->getNames(), position);
       else
          obj = ObjectExpression::create_value_array(elems, position);
    }
