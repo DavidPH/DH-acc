@@ -76,6 +76,15 @@ public:
 private:
    void makeVoid(ObjectVector *objects) const;
 
+   //
+   // ::makeZero
+   //
+   void makeZero(ObjectVector *objects, VariableType *dstPartType) const
+   {
+      for (bigsint i = dstPartType->getSize(position); i--;)
+         objects->addTokenPushZero();
+   }
+
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
    virtual void virtual_makeObjectsCast
@@ -195,37 +204,38 @@ void SourceExpression_ValueBlock::virtual_makeObjectsCast
 
    if (dstType->getBasicType() == VariableType::BT_ARRAY)
    {
-      if (static_cast<bigsint>(expressions.size()) != dstType->getWidth())
-         throw SourceException("incorrect number of expressions to cast",
-                               position, getName());
+      bigsint dstTypes = dstType->getWidth();
 
       VariableType::Reference dstPartType = dstType->getReturn();
       bigsint                 dstPartSize = dstPartType->getSize(position);
       VariableData::Pointer   dstPart = VariableData::create_stack(dstPartSize);
 
-      for (size_t i = 0; i < expressions.size(); ++i)
+      for (bigsint i = 0; i < dstTypes; ++i)
       {
-         expressions[i]->makeObjectsCast(objects, dstPart, dstPartType);
+         if (static_cast<size_t>(i) < expressions.size())
+            expressions[i]->makeObjectsCast(objects, dstPart, dstPartType);
+         else
+            makeZero(objects, dstPartType);
       }
    }
    else
    {
       VariableType::Vector const &dstTypes = dstType->getTypes();
 
-      if (expressions.size() != dstTypes.size())
-         throw SourceException("incorrect number of expressions to cast",
-                               position, getName());
-
-      VariableData::Pointer dstPart;
-      bigsint               dstPartSize;
       VariableType::Pointer dstPartType;
+      bigsint               dstPartSize;
+      VariableData::Pointer dstPart;
 
-      for (size_t i = 0; i < expressions.size(); ++i)
+      for (size_t i = 0; i < dstTypes.size(); ++i)
       {
          dstPartType = dstTypes[i];
          dstPartSize = dstPartType->getSize(position);
          dstPart = VariableData::create_stack(dstPartSize);
-         expressions[i]->makeObjectsCast(objects, dstPart, dstPartType);
+
+         if (i < expressions.size())
+            expressions[i]->makeObjectsCast(objects, dstPart, dstPartType);
+         else
+            makeZero(objects, dstPartType);
       }
    }
 
