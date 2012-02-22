@@ -135,7 +135,7 @@ SRCEXP_EXPRVAL_DEFN(r, real)
 //
 SRCEXP_EXPRVAL_DEFN(s, real)
 {
-   return create_value_real(get_bigsint(value, position), context, position);
+   return create_value_real(get_bigreal(value, position), context, position);
 }
 
 //
