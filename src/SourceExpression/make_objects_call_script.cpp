@@ -51,10 +51,23 @@ void SourceExpression::make_objects_call_script
 
    FUNCTION_ARGS
 
+   ObjectExpression::Pointer oargc;
+
    // Determine which OCODE to use.
    ObjectCode ocode;
 
-   if (retnSize == 0)
+   if (option_named_scripts)
+   {
+      ocode = OCODE_MISC_NATIVE;
+      switch (callSize)
+      {
+      case  0: oargc = objects->getValue(1); break;
+      case  1: oargc = objects->getValue(2); break;
+      case  2: oargc = objects->getValue(3); break;
+      default: oargc = objects->getValue(4); break;
+      }
+   }
+   else if (retnSize == 0)
    {
       switch (callSize)
       {
@@ -78,7 +91,11 @@ void SourceExpression::make_objects_call_script
       throw SourceException("bad return-size", position, __func__);
 
    // Determine which line special to use.
-   ObjectExpression::Pointer ospec = objects->getValue(84);
+   ObjectExpression::Pointer ospec;
+   if (option_named_scripts)
+      ospec = objects->getValue(44); // ACSF_ACS_NamedExecuteWithResult
+   else
+      ospec = objects->getValue(84);
 
    // ZDoom handles one of the return bytes for us.
    if (target_type == TARGET_ZDoom && retnSize >= 1)
@@ -98,7 +115,10 @@ void SourceExpression::make_objects_call_script
    if (ocode == OCODE_ACSE_SPECIAL_EXEC5_RETN1) objects->addTokenPushZero();
 
    // The actual call.
-   objects->addToken(ocode, ospec);
+   if (option_named_scripts)
+      objects->addToken(ocode, oargc, ospec);
+   else
+      objects->addToken(ocode, ospec);
 
    // For any return bytes we're handling, push them onto the stack.
    // FIXME: Should be based on type.

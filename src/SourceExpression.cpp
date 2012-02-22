@@ -166,8 +166,10 @@ makeObjects(ObjectVector *objects, VariableData *dst)
       VariableData::SectionL section;
 
       VariableType::Reference type = getType();
+      VariableType::BasicType bt   = type->getBasicType();
 
-      if (type->getBasicType() == VariableType::BT_STRING)
+      if (bt == VariableType::BT_STRING ||
+         (bt == VariableType::BT_SCRIPT && option_named_scripts))
          section = VariableData::SL_STRING;
       else
          section = VariableData::SL_INT;

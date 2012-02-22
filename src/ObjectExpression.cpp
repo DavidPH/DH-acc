@@ -65,8 +65,6 @@ std::map<std::string, ObjectData_RegisterArray> ObjectExpression::_registerarray
 std::map<std::string, ObjectData_RegisterArray> ObjectExpression::_registerarray_map_table;
 std::map<std::string, ObjectData_RegisterArray> ObjectExpression::_registerarray_world_table;
 
-std::map<std::string, ObjectData_Script> ObjectExpression::_script_table;
-
 std::map<std::string, ObjectData_Static> ObjectExpression::_static_table;
 
 std::map<std::string, ObjectExpression::Pointer>        ObjectExpression::_symbol_table;
@@ -200,21 +198,6 @@ void ObjectExpression::add_registerarray_world(std::string const & name, bigsint
 {
 	ObjectData_RegisterArray r = {name, number, size, externDef, externVis};
 	_registerarray_world_table[name] = r;
-
-	add_symbol(name, create_value_int(number, SourcePosition::none()));
-}
-
-void ObjectExpression::add_script(std::string const & name, std::string const & label, ObjectData_Script::ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount)
-{
-	ObjectData_Script s = {label, name, stype, argCount, flags, -1, varCount};
-	_script_table[name] = s;
-
-	add_symbol(name, ET_INT);
-}
-void ObjectExpression::add_script(std::string const & name, std::string const & label, ObjectData_Script::ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount, bigsint number)
-{
-	ObjectData_Script s = {label, name, stype, argCount, flags, number, varCount};
-	_script_table[name] = s;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none()));
 }

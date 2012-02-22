@@ -297,10 +297,7 @@ void ObjectExpression::do_deferred_allocation()
 
 
    // scripts
-   usedMap.clear();
-
-   _iterator_map(_script_table, allocate_pre<ObjectData_Script>, &usedMap);
-   _iterator_map(_script_table, allocate<ObjectData_Script>, &usedMap);
+   ObjectData_Script::generate_symbols();
 
 
    // statics

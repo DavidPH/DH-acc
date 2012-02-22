@@ -50,7 +50,32 @@ extern bool option_string_func;
 SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
 {
    // scriptName
-   std::string scriptName = in->get(SourceTokenC::TT_IDENTIFIER).data;
+   std::string scriptNameSource = in->get(SourceTokenC::TT_IDENTIFIER).data;
+
+   // scriptType
+   ObjectData_Script::ScriptType scriptType;
+   if (in->peekType(SourceTokenC::TT_IDENTIFIER))
+   {
+      SourceTokenC scriptTypeToken = in->get(SourceTokenC::TT_IDENTIFIER);
+      scriptType =
+         ObjectData_Script::get_type(scriptTypeToken.data, scriptTypeToken.pos);
+   }
+   else
+   {
+      scriptType = ObjectData_Script::ST_CLOSED;
+   }
+
+   // scriptFlags
+   int scriptFlags = 0;
+   while (true)
+   {
+      if (!in->peekType(SourceTokenC::TT_IDENTIFIER))
+         break;
+
+      SourceTokenC scriptFlagToken = in->get(SourceTokenC::TT_IDENTIFIER);
+      scriptFlags |=
+         ObjectData_Script::get_flag(scriptFlagToken.data, scriptFlagToken.pos);
+   }
 
    // scriptArgTypes/Names/Count scriptReturn
    VariableType::Vector scriptArgTypes;
@@ -60,8 +85,21 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
    (in, blocks, context, &scriptArgTypes, NULL, &scriptArgCount, NULL,
     &scriptReturn);
 
+   // scriptNumber
+   bigsint scriptNumber;
+   if (in->peekType(SourceTokenC::TT_OP_AT))
+   {
+      in->get(SourceTokenC::TT_OP_AT);
+      scriptNumber =
+         make_expression_single(in, blocks, context)->makeObject()->resolveInt();
+   }
+   else
+   {
+      scriptNumber = -1;
+   }
+
    // scriptLabel
-   std::string scriptLabel = "script_" + scriptName;
+   std::string scriptLabel = scriptNameSource;
 
    // scriptNameObject
    std::string scriptNameObject = scriptLabel + "_id";
@@ -73,7 +111,16 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
    // scriptVariable
    SourceVariable::Pointer scriptVariable =
       SourceVariable::create_constant
-      (scriptName, scriptVarType, scriptNameObject, token.pos);
+      (scriptNameSource, scriptVarType, scriptNameObject, token.pos);
+
+   if (scriptNumber < 0)
+      ObjectData_Script::add
+      (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
+       scriptArgCount, true);
+   else
+      ObjectData_Script::add
+      (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
+       scriptArgCount, true, scriptNumber);
 
    context->addVariable(scriptVariable);
    return create_value_variable(scriptVariable, context, token.pos);
@@ -111,7 +158,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    {
       SourceTokenC scriptTypeToken = in->get(SourceTokenC::TT_IDENTIFIER);
       scriptType =
-         odata_get_ScriptType(scriptTypeToken.data, scriptTypeToken.pos);
+         ObjectData_Script::get_type(scriptTypeToken.data, scriptTypeToken.pos);
    }
    else
    {
@@ -127,7 +174,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 
       SourceTokenC scriptFlagToken = in->get(SourceTokenC::TT_IDENTIFIER);
       scriptFlags |=
-         odata_get_ScriptFlag(scriptFlagToken.data, scriptFlagToken.pos);
+         ObjectData_Script::get_flag(scriptFlagToken.data, scriptFlagToken.pos);
    }
 
    // scriptArgTypes/Names/Count scriptReturn
@@ -173,7 +220,6 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    std::string scriptLabel;
    if (token.data != "__extscript")
       scriptLabel += context->makeLabel();
-   scriptLabel += "script_";
    scriptLabel += scriptNameSource;
 
    // scriptNameObject
@@ -208,13 +254,13 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    bigsint scriptVarCount = scriptContext->getLimit(SourceVariable::SC_REGISTER);
 
    if (scriptNumber < 0)
-      ObjectExpression::add_script
+      ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-	  scriptVarCount);
+	  scriptVarCount, false);
    else
-      ObjectExpression::add_script
+      ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-	  scriptVarCount, scriptNumber);
+	  scriptVarCount, false, scriptNumber);
 
    return create_value_variable(scriptVariable, context, token.pos);
 }

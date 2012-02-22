@@ -27,51 +27,9 @@
 #include "SourceException.hpp"
 
 
-
-ObjectData_Script::ScriptFlag odata_get_ScriptFlag
-(std::string const &data, SourcePosition const &position)
-{
-   if (data == "__net")
-      return ObjectData_Script::SF_NET;
-
-   if (data == "__clientside")
-      return ObjectData_Script::SF_CLIENTSIDE;
-
-   throw SourceException("invalid script-flag", position, __func__);
-}
-
-ObjectData_Script::ScriptType odata_get_ScriptType
-(std::string const &data, SourcePosition const &position)
-{
-   if (data == "__closed")
-      return ObjectData_Script::ST_CLOSED;
-
-   if (data == "__open")
-      return ObjectData_Script::ST_OPEN;
-
-   if (data == "__respawn")
-      return ObjectData_Script::ST_RESPAWN;
-
-   if (data == "__death")
-      return ObjectData_Script::ST_DEATH;
-
-   if (data == "__enter")
-      return ObjectData_Script::ST_ENTER;
-
-   if (data == "__lightning")
-      return ObjectData_Script::ST_LIGHTNING;
-
-   if (data == "__unloading")
-      return ObjectData_Script::ST_UNLOADING;
-
-   if (data == "__disconnect")
-      return ObjectData_Script::ST_DISCONNECT;
-
-   if (data == "__return")
-      return ObjectData_Script::ST_RETURN;
-
-   throw SourceException("invalid script-type", position, __func__);
-}
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 bool override_object(ObjectData_Auto * out, ObjectData_Auto const & in)
 {
@@ -115,16 +73,6 @@ bool override_object(ObjectData_RegisterArray * out, ObjectData_RegisterArray co
 
 	out->externDef = out->externDef && in.externDef;
 	out->externVis = out->externVis || in.externVis;
-
-	if (out->number == -1)
-		*out = in;
-
-	return true;
-}
-bool override_object(ObjectData_Script * out, ObjectData_Script const & in)
-{
-	if (out->name != in.name)
-		return false;
 
 	if (out->number == -1)
 		*out = in;
@@ -181,16 +129,6 @@ void read_object(std::istream * in, ObjectData_RegisterArray * out)
 	read_object(in, &out->externDef);
 	read_object(in, &out->externVis);
 }
-void read_object(std::istream * in, ObjectData_Script * out)
-{
-	read_object(in, &out->label);
-	read_object(in, &out->name);
-	read_object(in, &out->stype);
-	read_object(in, &out->argCount);
-	read_object(in, &out->flags);
-	read_object(in, &out->number);
-	read_object(in, &out->varCount);
-}
 void read_object(std::istream * in, ObjectData_Script::ScriptType * out)
 {
 	read_object_raw(in, (char *)out, sizeof(*out));
@@ -242,16 +180,6 @@ void write_object(std::ostream * out, ObjectData_RegisterArray const & in)
 	write_object(out, in.externDef);
 	write_object(out, in.externVis);
 }
-void write_object(std::ostream * out, ObjectData_Script const & in)
-{
-	write_object(out, in.label);
-	write_object(out, in.name);
-	write_object(out, in.stype);
-	write_object(out, in.argCount);
-	write_object(out, in.flags);
-	write_object(out, in.number);
-	write_object(out, in.varCount);
-}
 void write_object(std::ostream * out, ObjectData_Script::ScriptType const & in)
 {
 	write_object_raw(out, (char const *)&in, sizeof(in));
@@ -268,5 +196,5 @@ void write_object(std::ostream * out, ObjectData_String const & in)
 	write_object(out, in.string);
 }
 
-
+// EOF
 

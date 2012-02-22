@@ -216,6 +216,8 @@ write_ACSE_registerarray_MEXP(std::ostream *, ObjectData_RegisterArray const &r)
 void BinaryTokenZDACS::
 write_ACSE_script(std::ostream *out, ObjectData_Script const &s)
 {
+   if (s.externDef) return;
+
    ObjectExpression::Pointer addr =
       ObjectExpression::get_symbol(s.label, SourcePosition::none());
 
@@ -231,6 +233,7 @@ write_ACSE_script(std::ostream *out, ObjectData_Script const &s)
 void BinaryTokenZDACS::
 write_ACSE_script_SFLG(std::ostream *out, ObjectData_Script const &s)
 {
+   if (s.externDef) return;
    if (!s.flags) return;
 
    BinaryTokenACS::write_ACS0_16(out, s.number);
@@ -243,6 +246,7 @@ write_ACSE_script_SFLG(std::ostream *out, ObjectData_Script const &s)
 void BinaryTokenZDACS::
 write_ACSE_script_SNAM(std::ostream *, ObjectData_Script const &s)
 {
+   if (s.externDef) return;
    // ACSE named scripts must be negative.
    if (s.number >= 0) return;
 
@@ -251,7 +255,7 @@ write_ACSE_script_SNAM(std::ostream *, ObjectData_Script const &s)
    if (strings_temp.size() <= index)
       strings_temp.resize(index+1);
 
-   strings_temp[index] = s.name;
+   strings_temp[index] = s.label;
 }
 
 //
@@ -260,6 +264,7 @@ write_ACSE_script_SNAM(std::ostream *, ObjectData_Script const &s)
 void BinaryTokenZDACS::
 write_ACSE_script_SVCT(std::ostream *out, ObjectData_Script const &s)
 {
+   if (s.externDef) return;
    if (s.varCount <= 10) return;
    if (s.varCount <= 20 && target_type == TARGET_ZDoom) return;
 

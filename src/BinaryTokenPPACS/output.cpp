@@ -39,7 +39,7 @@ template<typename T> void BinaryTokenPPACS::output_ACSP(std::ostream * out, std:
 	for (typename std::vector<T>::const_iterator instr(instructions.begin()); instr != instructions.end(); ++instr)
 		instr->writeACSP(out);
 
-	ObjectExpression ::iter_script(write_ACSP_script, out);
+   ObjectData_Script::iterate    (write_ACSP_script, out);
 	ObjectExpression ::iter_static(write_ACSP_static, out);
 	ObjectData_String::iterate    (write_ACSP_string, out);
 

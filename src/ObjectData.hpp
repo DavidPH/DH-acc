@@ -30,9 +30,12 @@
 #include <ostream>
 #include <string>
 
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
 class SourcePosition;
-
-
 
 struct ObjectData_Auto
 {
@@ -70,36 +73,66 @@ struct ObjectData_RegisterArray
 	bool externVis;
 };
 
+//
+// ObjectData_Script
+//
 struct ObjectData_Script
 {
-	enum ScriptFlag
-	{
-		SF_NET        = 1,
-		SF_CLIENTSIDE = 2
-	};
+   typedef void (*IterFunc)(std::ostream *, ObjectData_Script const &);
 
-	enum ScriptType
-	{
-		ST_CLOSED     =  0,
-		ST_OPEN       =  1,
-		ST_RESPAWN    =  2,
-		ST_DEATH      =  3,
-		ST_ENTER      =  4,
-		ST_LIGHTNING  = 12,
-		ST_UNLOADING  = 13,
-		ST_DISCONNECT = 14,
-		ST_RETURN     = 15,
+   enum ScriptFlag
+   {
+      SF_NET        = 1,
+      SF_CLIENTSIDE = 2
+   };
 
-		ST_NONE
-	};
+   enum ScriptType
+   {
+      ST_CLOSED     =  0,
+      ST_OPEN       =  1,
+      ST_RESPAWN    =  2,
+      ST_DEATH      =  3,
+      ST_ENTER      =  4,
+      ST_LIGHTNING  = 12,
+      ST_UNLOADING  = 13,
+      ST_DISCONNECT = 14,
+      ST_RETURN     = 15,
 
-	std::string label;
-	std::string name;
-	ScriptType stype;
-	bigsint argCount;
-	bigsint flags;
-	bigsint number;
-	bigsint varCount;
+      ST_NONE
+   };
+
+   std::string label;
+   std::string name;
+   ScriptType stype;
+   bigsint argCount;
+   bigsint flags;
+   bigsint number;
+   bigsint varCount;
+   bool externDef;
+
+
+   static std::string const &add
+   (std::string const &name, std::string const &label, ScriptType stype,
+    bigsint flags, bigsint argCount, bigsint varCount, bool externDef);
+
+   static std::string const &add
+   (std::string const &name, std::string const &label, ScriptType stype,
+    bigsint flags, bigsint argCount, bigsint varCount, bool externDef,
+    bigsint number);
+
+   static void generate_symbols();
+
+   static ScriptFlag get_flag
+   (std::string const &data, SourcePosition const &position);
+
+   static ScriptType get_type
+   (std::string const &data, SourcePosition const &position);
+
+   static void iterate(IterFunc iterFunc, std::ostream *out);
+
+   static void read_objects(std::istream *in);
+
+   static void write_objects(std::ostream *out);
 };
 
 struct ObjectData_Static
@@ -128,11 +161,16 @@ struct ObjectData_String
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
 
-extern ObjectData_Script::ScriptFlag odata_get_ScriptFlag
-(std::string const &data, SourcePosition const &position);
-extern ObjectData_Script::ScriptType odata_get_ScriptType
-(std::string const &data, SourcePosition const &position);
+extern bool option_named_scripts;
+
+
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 extern bool override_object(ObjectData_Auto          * out, ObjectData_Auto          const & in);
 extern bool override_object(ObjectData_Function      * out, ObjectData_Function      const & in);
@@ -161,8 +199,5 @@ extern void write_object(std::ostream * out, ObjectData_Static             const
 extern void write_object(std::ostream * out, ObjectData_String             const & in);
 
 
-
-#endif /* HPP_ObjectData_ */
-
-
+#endif//HPP_ObjectData_
 

@@ -139,7 +139,7 @@ static void read_source(std::string const &name, SourceType type,
 
       // Implicit main. Should be replaced by a proper script defining syntax.
       ObjectData_Script::ScriptType stype = ObjectData_Script::ST_OPEN;
-      ObjectExpression::add_script("main", 0, stype, 0, 0, 0);
+      ObjectData_Script::add("main", 0, stype, 0, 0, 0, false);
 
       SourceTokenASMPLX::make_objects(tokens, objects);
    }
@@ -167,7 +167,7 @@ static void read_source(std::string const &name, SourceType type,
             SourceContext::global_context->getLimit(SourceVariable::SC_REGISTER);
 
          expressions->addLabel(mainName);
-         ObjectExpression::add_script(mainID, mainName, stype, 0, 0, varCount);
+         ObjectData_Script::add(mainID, mainName, stype, 0, 0, varCount, false);
       }
 
       expressions->makeObjects(objects, VariableData::create_void(0));

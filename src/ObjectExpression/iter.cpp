@@ -46,13 +46,10 @@ void ObjectExpression::iter_registerarray_map(void (*iter)(std::ostream *, Objec
 {
 	_iterator_map(_registerarray_map_table, iter, out);
 }
-void ObjectExpression::iter_script(void (*iter)(std::ostream *, ObjectData_Script const &), std::ostream * out)
-{
-	_iterator_map(_script_table, iter, out);
-}
 void ObjectExpression::iter_static(void (*iter)(std::ostream *, ObjectData_Static const &), std::ostream * out)
 {
 	_iterator_map(_static_table, iter, out);
 }
 
+// EOF
 

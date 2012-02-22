@@ -121,9 +121,6 @@ public:
 	static void add_registerarray_world(std::string const & name, bigsint size, bool externDef, bool externVis);
 	static void add_registerarray_world(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
 
-	static void add_script(std::string const & name, std::string const & label, ObjectData_Script::ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount);
-	static void add_script(std::string const & name, std::string const & label, ObjectData_Script::ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount, bigsint number);
-
 	static void add_static(std::string const & name, bigsint size);
 	static void add_static(std::string const & name, bigsint size, bigsint number);
 
@@ -176,8 +173,6 @@ public:
 	static void iter_register_map(void (*iter)(std::ostream *, ObjectData_Register const &), std::ostream * out);
 
 	static void iter_registerarray_map(void (*iter)(std::ostream *, ObjectData_RegisterArray const &), std::ostream * out);
-
-	static void iter_script(void (*iter)(std::ostream *, ObjectData_Script const &), std::ostream * out);
 
 	static void iter_static(void (*iter)(std::ostream *, ObjectData_Static const &), std::ostream * out);
 
@@ -283,8 +278,6 @@ private:
 	static std::map<std::string, ObjectData_RegisterArray> _registerarray_global_table;
 	static std::map<std::string, ObjectData_RegisterArray> _registerarray_map_table;
 	static std::map<std::string, ObjectData_RegisterArray> _registerarray_world_table;
-
-	static std::map<std::string, ObjectData_Script> _script_table;
 
 	static std::map<std::string, ObjectData_Static> _static_table;
 
