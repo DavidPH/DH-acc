@@ -37,10 +37,12 @@
 //
 SRCEXPDS_EXPRSINGLE_DEFN(switch)
 {
+   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
    SourceContext::Reference contextCond =
       SourceContext::create(context, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprCond =
       make_expression(in, blocks, contextCond);
+   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
    in->unget(in->get(SourceTokenC::TT_OP_BRACE_O));
 
