@@ -45,6 +45,33 @@ class SourceExpression_BinaryArray : public SourceExpression_Binary
 public:
    SourceExpression_BinaryArray(SRCEXP_EXPRBIN_ARGS);
 
+   //
+   // ::canGetData
+   //
+   virtual bool canGetData() const
+   {
+      return exprL->getType()->getBasicType() == VariableType::BT_ARRAY;
+   }
+
+   //
+   // ::getData
+   //
+   virtual VariableData::Pointer getData() const
+   {
+      VariableType::Reference type = getType();
+      VariableType::BasicType bt   = type->getBasicType();
+      bigsint                 size = type->getSize(position);
+
+      ObjectExpression::Pointer obj = exprL->makeObject();
+      obj = obj->resolveElement(exprR->makeObject()->resolveInt());
+
+      VariableData::SectionL sectionL =
+         bt == VariableType::BT_STRING ? VariableData::SL_STRING
+                                       : VariableData::SL_INT;
+
+      return VariableData::create_literal(size, sectionL, obj);
+   }
+
    virtual VariableType::Reference getType() const;
 
 private:
@@ -70,11 +97,11 @@ SRCEXP_EXPRBIN_DEFN(array)
    // This allows C semantics for array access. Specifically that x[y] be the
    // same as *(x+y).
    if (btL == VariableType::BT_POINTER || btR == VariableType::BT_POINTER ||
-       btL == VariableType::BT_ARRAY   || btR == VariableType::BT_ARRAY)
+      (btL == VariableType::BT_ARRAY && !exprL->canMakeObject()) ||
+      (btR == VariableType::BT_ARRAY && !exprR->canMakeObject()))
    {
       return create_unary_dereference
-             (create_binary_add(exprL, exprR, context, position), context,
-              position);
+      (create_binary_add(exprL, exprR, context, position), context, position);
    }
 
    return new SourceExpression_BinaryArray(exprL, exprR, context, position);
@@ -89,10 +116,11 @@ SourceExpression_BinaryArray::SourceExpression_BinaryArray
 {
    VariableType::BasicType btL = exprL->getType()->getBasicType();
 
-   // Can only be done for BT_STRING.
-   if (btL != VariableType::BT_STRING)
-      throw SourceException("expected BT_STRING for exprL got "
-                            + make_string(btL), position, getName());
+   // Can only be done for BT_ARRAY or BT_STRING.
+   if (btL != VariableType::BT_ARRAY && btL != VariableType::BT_STRING)
+      throw SourceException
+      ("expected BT_ARRAY or BT_STRING for exprL got " + make_string(btL),
+       position, getName());
 }
 
 //

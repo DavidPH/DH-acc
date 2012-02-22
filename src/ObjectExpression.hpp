@@ -69,6 +69,7 @@ public:
    virtual bool canResolve() const = 0;
 
    virtual void expand(Vector *out) {out->push_back(this);}
+   virtual void expandOnce(Vector *out) {out->push_back(this);}
 
    SourcePosition const &getPosition() const;
 

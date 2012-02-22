@@ -90,13 +90,20 @@ static void make_objects_memcpy_post_part
 
       if (get)
       {
-         objects->addToken(OCODE_GET_LITERAL32I, data->address);
+         ObjectExpression::Vector elems;
+         data->address->expand(&elems);
 
-         // ZDoom requires tagging strings.
-         if (data->sectionL == VariableData::SL_STRING &&
-             target_type == TARGET_ZDoom && option_string_tag)
+         for (ObjectExpression::Vector::iterator iter = elems.begin();
+              iter != elems.end(); ++iter)
          {
-            objects->addToken(OCODE_ACSE_STRING_TAG);
+            objects->addToken(OCODE_GET_LITERAL32I, *iter);
+
+            // ZDoom requires tagging strings.
+            if (data->sectionL == VariableData::SL_STRING &&
+                target_type == TARGET_ZDoom && option_string_tag)
+            {
+               objects->addToken(OCODE_ACSE_STRING_TAG);
+            }
          }
       }
 

@@ -31,6 +31,17 @@
 
 
 //----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+static ObjectExpression::Pointer make_object
+(VariableType *type, SourcePosition const &position)
+{
+   throw SourceException("stub", position, __func__);
+}
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -57,11 +68,36 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
    {
    case VariableType::BT_ARRAY:
    case VariableType::BT_ASMFUNC:
-   case VariableType::BT_BLOCK:
    case VariableType::BT_STRUCT:
    case VariableType::BT_UNION:
    case VariableType::BT_VOID:
       throw SourceException(TYPES_STRING, position, __func__);
+
+   case VariableType::BT_BLOCK:
+   {
+      if (dstBT != VariableType::BT_ARRAY && dstBT != VariableType::BT_BLOCK &&
+          dstBT != VariableType::BT_STRUCT)
+         throw SourceException(TYPES_STRING, position, __func__);
+
+      VariableType::Vector const &dstTypes = dstType->getTypes();
+      VariableType::Vector const &srcTypes = srcType->getTypes();
+      ObjectExpression::Vector elems;
+      obj->expandOnce(&elems);
+
+      for (size_t i = 0; i < dstTypes.size(); ++i)
+      {
+         if (i < elems.size())
+            elems[i] = make_object_cast(elems[i], dstTypes[i], srcTypes[i], position);
+         else
+            elems[i] = make_object(dstTypes[i], position);
+      }
+
+      if (dstBT == VariableType::BT_STRUCT)
+         obj = ObjectExpression::create_value_struct(elems, dstType->getNames(), position);
+      else
+         obj = ObjectExpression::create_value_array(elems, position);
+   }
+      break;
 
    case VariableType::BT_BOOLHARD:
    case VariableType::BT_CHAR:

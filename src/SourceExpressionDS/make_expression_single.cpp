@@ -299,6 +299,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(constexpr)
    std::string name = in->get(SourceTokenC::TT_IDENTIFIER).data;
    in->get(SourceTokenC::TT_OP_EQUALS);
    SourceExpression::Pointer data = make_expression(in, blocks, context);
+   data = create_value_cast_implicit(data, type, context, token.pos);
 
    SourceVariable::Pointer var =
       SourceVariable::create_constant

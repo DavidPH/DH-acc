@@ -106,6 +106,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
    // Member data.
    bigsint                 memberOffset = srcType->getOffset(name, position);
    VariableType::Reference memberType   = srcType->getType(name, position);
+   VariableType::BasicType memberBT     = memberType->getBasicType();
    bigsint                 memberSize   = memberType->getSize(position);
 
    if (src->type == VariableData::MT_REGISTERARRAY)
@@ -119,6 +120,17 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
 
       return VariableData::create_registerarray(memberSize, src->sectionRA,
                                                 src->address, offset);
+   }
+
+   if (src->type == VariableData::MT_LITERAL)
+   {
+      VariableData::SectionL sectionL =
+         memberBT == VariableType::BT_STRING ? VariableData::SL_STRING
+                                             : VariableData::SL_INT;
+
+      ObjectExpression::Pointer obj = src->address->resolveMember(name);
+
+      return VariableData::create_literal(memberSize, sectionL, obj);
    }
 
    ObjectExpression::Pointer memberOffsetObj =

@@ -127,6 +127,7 @@ public:
    // Type information.
    BasicType getBasicType() const {return basic;}
    bool getComplete() const {return complete;}
+   VecStr const &getNames() const {return names;}
    bool getQualifier(unsigned _quals) const {return (quals&_quals) == _quals;}
    unsigned getQualifiers() const {return quals;}
    bigsint getSize(SourcePosition const &position) const;

@@ -23,6 +23,7 @@
 
 #include "../SourceExpression.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
@@ -44,7 +45,33 @@ class SourceExpression_ValueBlock : public SourceExpression
 public:
    SourceExpression_ValueBlock(Vector const &args, SRCEXP_EXPR_ARGS);
 
+   //
+   // ::canMakeObject
+   //
+   virtual bool canMakeObject() const
+   {
+      for (Vector::const_iterator iter = expressions.begin();
+           iter != expressions.end(); ++iter)
+         if (!(*iter)->canMakeObject()) return false;
+
+      return true;
+   }
+
    virtual VariableType::Reference getType() const;
+
+   //
+   // ::makeObject
+   //
+   virtual ObjectExpression::Pointer makeObject() const
+   {
+      ObjectExpression::Vector elems;
+
+      for (Vector::const_iterator iter = expressions.begin();
+           iter != expressions.end(); ++iter)
+         elems.push_back((*iter)->makeObject());
+
+      return ObjectExpression::create_value_array(elems, position);
+   }
 
 private:
    void makeVoid(ObjectVector *objects) const;

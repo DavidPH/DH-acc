@@ -233,15 +233,19 @@ bool SourceExpression_ValueCast::canMakeObject() const
 
    if (!expr->canMakeObject()) return false;
 
-   switch (type->getBasicType())
+   switch (exprBT)
    {
    case VariableType::BT_ARRAY:
    case VariableType::BT_ASMFUNC:
-   case VariableType::BT_BLOCK:
    case VariableType::BT_STRUCT:
    case VariableType::BT_UNION:
    case VariableType::BT_VOID:
       return false;
+
+   case VariableType::BT_BLOCK:
+      return thisBT == VariableType::BT_ARRAY ||
+             thisBT == VariableType::BT_BLOCK ||
+             thisBT == VariableType::BT_STRUCT;
 
    case VariableType::BT_BOOLHARD:
    case VariableType::BT_BOOLSOFT:
@@ -260,7 +264,7 @@ bool SourceExpression_ValueCast::canMakeObject() const
       break;
    }
 
-   switch (exprType->getBasicType())
+   switch (thisBT)
    {
    case VariableType::BT_ARRAY:
    case VariableType::BT_ASMFUNC:

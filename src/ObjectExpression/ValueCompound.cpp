@@ -85,6 +85,15 @@ public:
    }
 
    //
+   // ::expandOnce
+   //
+   virtual void expandOnce(Vector *out)
+   {
+      for (Vector::iterator iter = elems.begin(); iter != elems.end(); ++iter)
+         out->push_back(*iter);
+   }
+
+   //
    // ::getType
    //
    virtual ExpressionType getType() const
