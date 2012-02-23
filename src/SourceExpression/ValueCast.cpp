@@ -104,8 +104,13 @@ SourceExpression_ValueCast::SourceExpression_ValueCast
 
    std::string exceptString;
 
-   VariableType::Reference exprType = expr->getType()->getUnqualified();
+   VariableType::Reference exprType = expr->getType();
    VariableType           *thisType = type;
+
+   if (exprType->getBasicType() == VariableType::BT_ARRAY)
+      exprType = exprType->getReturn()->getPointer();
+   else
+      exprType = exprType->getUnqualified();
 
    // Can cast a type to itself safely, of course.
    if (exprType == type) return;
@@ -116,56 +121,37 @@ SourceExpression_ValueCast::SourceExpression_ValueCast
    // Implicit cast between fundamentally different types.
    if (exprBT != thisBT)
    {
-      // Any cast to/from BT_ASMFUNC must be explicit.
-      if (exprBT == VariableType::BT_ASMFUNC ||
-          thisBT == VariableType::BT_ASMFUNC)
-      {
-         BAD_CAST();
-      }
+      // Can implicitly cast between arithmetic types.
+      if (VariableType::is_bt_arithmetic(exprBT) &&
+          VariableType::is_bt_arithmetic(thisBT))
+         return;
 
-      // Any cast to/from BT_FUNCTION must be explicit.
-      if (exprBT == VariableType::BT_FUNCTION ||
-          thisBT == VariableType::BT_FUNCTION)
-      {
-         BAD_CAST();
-      }
+      // Can implicitly cast between integer and pointer.
+      if (VariableType::is_bt_integer(exprBT) &&
+          thisBT == VariableType::BT_POINTER)
+         return;
 
-      // Any cast to/from BT_LABEL must be explicit.
-      if (exprBT == VariableType::BT_LABEL ||
-          thisBT == VariableType::BT_LABEL)
-      {
-         BAD_CAST();
-      }
+      if (exprBT == VariableType::BT_POINTER &&
+          VariableType::is_bt_integer(thisBT))
+         return;
 
-      // Any cast to/from BT_LINESPEC must be explicit.
-      if (exprBT == VariableType::BT_LINESPEC ||
-          thisBT == VariableType::BT_LINESPEC)
-      {
-         BAD_CAST();
-      }
+      // Can implicitly cast from enum to integer.
+      if (exprBT == VariableType::BT_ENUM &&
+          VariableType::is_bt_integer(thisBT))
+         return;
 
-      // Any cast to/from BT_NATIVE must be explicit.
-      if (exprBT == VariableType::BT_NATIVE ||
-          thisBT == VariableType::BT_NATIVE)
-      {
-         BAD_CAST();
-      }
+      // Can implicitly cast from block to array/struct.
+      if (exprBT == VariableType::BT_BLOCK &&
+          (thisBT == VariableType::BT_ARRAY ||
+           thisBT == VariableType::BT_STRUCT))
+         return;
 
-      // Any cast to/from BT_SCRIPT must be explicit.
-      if (exprBT == VariableType::BT_SCRIPT ||
-          thisBT == VariableType::BT_SCRIPT)
-      {
-         BAD_CAST();
-      }
+      // Can always cast to void.
+      if (thisBT == VariableType::BT_VOID)
+         return;
 
-      // Any cast to/from BT_STRING must be explicit.
-      if (exprBT == VariableType::BT_STRING ||
-          thisBT == VariableType::BT_STRING)
-      {
-         BAD_CAST();
-      }
-
-      return;
+      // Anything else must be explicit.
+      BAD_CAST();
    }
 
    // Implicit pointer casts.
@@ -184,6 +170,13 @@ SourceExpression_ValueCast::SourceExpression_ValueCast
 
       // Casts that discard qualifiers must be explicit.
       if (!thisRetn->getQualifier(exprRetn->getQualifiers()))
+      {
+         BAD_CAST();
+      }
+
+      // Altering storage qualifiers must be explicit.
+      if (exprRetn->getStoreType() != thisRetn->getStoreType() ||
+          exprRetn->getStoreArea() != thisRetn->getStoreArea())
       {
          BAD_CAST();
       }
