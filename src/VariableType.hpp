@@ -183,8 +183,6 @@ private:
    explicit VariableType(BasicType basic);
    ~VariableType();
 
-   void setReturn(VariableType *type);
-
    VecStr names;
    Vector types;
 

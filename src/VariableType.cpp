@@ -231,6 +231,9 @@ VariableType::Reference VariableType::getArray(bigsint _width)
       typeArr = new VariableType(BT_ARRAY);
 
       typeArr->typeRet = static_cast<Reference>(this);
+      typeArr->storeArea = storeArea;
+      typeArr->quals = quals;
+      typeArr->store = store;
       typeArr->width = _width;
 
       return static_cast<Reference>(typeArr);
@@ -247,6 +250,9 @@ VariableType::Reference VariableType::getArray(bigsint _width)
    Reference type(new VariableType(BT_ARRAY));
 
    type->typeRet = Reference(this);
+   type->storeArea = storeArea;
+   type->quals = quals;
+   type->store = store;
    type->width = _width;
 
    // Link into speclist.
@@ -281,6 +287,9 @@ VariableType::Reference VariableType::setQualifier(unsigned _quals)
    if (quals == _quals)
       return static_cast<Reference>(this);
 
+   if (basic == BT_ARRAY)
+      return typeRet->setQualifier(_quals)->getArray(width);
+
    for (VariableType *iter = next; iter != this; iter = iter->next)
    {
       if (iter->quals == _quals &&
@@ -291,8 +300,6 @@ VariableType::Reference VariableType::setQualifier(unsigned _quals)
    VariableType::Reference type(new VariableType(*this));
 
    type->quals = _quals;
-   if (basic == BT_ARRAY)
-      type->setReturn(type->typeRet->setQualifier(_quals));
    if (basic == BT_STRUCT || basic == BT_UNION || basic == BT_BLOCK)
    {
       for (Vector::iterator iter = type->types.begin();
@@ -321,6 +328,9 @@ VariableType::Reference VariableType::setStorage
    if (store == _store && storeArea == _storeArea)
       return static_cast<Reference>(this);
 
+   if (basic == BT_ARRAY)
+      return typeRet->setStorage(_store, _storeArea)->getArray(width);
+
    for (VariableType *iter = next; iter != this; iter = iter->next)
    {
       if (iter->quals == quals &&
@@ -332,8 +342,6 @@ VariableType::Reference VariableType::setStorage
 
    type->store     = _store;
    type->storeArea = _storeArea;
-   if (basic == BT_ARRAY)
-      type->setReturn(type->typeRet->setStorage(_store, _storeArea));
    if (basic == BT_STRUCT || basic == BT_UNION || basic == BT_BLOCK)
    {
       for (Vector::iterator iter = type->types.begin();
@@ -431,41 +439,6 @@ void VariableType::makeComplete(VecStr const &_names, Vector const &_types)
    types = _types;
    complete = true;
    next->makeComplete(_names, _types);
-}
-
-//
-// VariableType::setReturn
-//
-void VariableType::setReturn(VariableType *type)
-{
-   if (basic == BT_ARRAY)
-   {
-      // Unlink from old type's array list.
-      specnext->specprev = specprev;
-      specprev->specnext = specnext;
-
-      if (typeRet->typeArr == this)
-         typeRet->typeArr = specnext == this ? NULL : specnext;
-
-      typeRet = static_cast<Reference>(type);
-
-      // Link into new type's array list.
-      if (type->typeArr)
-      {
-         specnext = type->typeArr->specnext;
-         specprev = type->typeArr;
-         type->typeArr->specnext->specprev = this;
-         type->typeArr->specnext = this;
-      }
-      else
-      {
-         type->typeArr = this;
-         specnext = this;
-         specprev = this;
-      }
-   }
-
-   typeRet = static_cast<Reference>(type);
 }
 
 //===================================================================
