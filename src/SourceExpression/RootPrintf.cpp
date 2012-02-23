@@ -117,6 +117,20 @@ private:
    }
 
    //
+   // ::makeChar
+   //
+   void makeChar(ObjectVector *objects, char c)
+   {
+      VariableType::Reference type = VariableType::get_bt_char();
+
+      VariableData::Pointer tmp =
+         VariableData::create_stack(type->getSize(position));
+
+      create_value_char(c, context, position)
+         ->makeObjects(objects, tmp);
+   }
+
+   //
    // ::makeExpr
    //
    // Evaluates the next expression onto the stack.
@@ -192,6 +206,11 @@ private:
                objects->addToken(OCODE_ACSP_STRING);
                continue;
 
+            case 'c':
+               makeExpr(objects, VariableType::get_bt_char());
+               objects->addToken(OCODE_ACSP_CHARACTER);
+               continue;
+
             case 'f':
                makeExpr(objects, VariableType::get_bt_real());
                objects->addToken(OCODE_ACSP_NUM_DEC32F);
@@ -223,7 +242,12 @@ private:
          string += *c;
       }
 
-      if (!string.empty())
+      if (string.size() == 1)
+      {
+         makeChar(objects, string[0]);
+         objects->addToken(OCODE_ACSP_CHARACTER);
+      }
+      else if (!string.empty())
       {
          makeString(objects, string);
          objects->addToken(OCODE_ACSP_STRING);
