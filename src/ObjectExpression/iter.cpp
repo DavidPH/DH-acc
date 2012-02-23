@@ -35,7 +35,6 @@ void ObjectExpression::iter_function(void (*iter)(std::ostream *, ObjectData_Fun
 void ObjectExpression::iter_library(void (*iter)(std::ostream *, std::string const &), std::ostream * out)
 {
 	for (std::set<std::string>::iterator it(_library_table.begin()); it != _library_table.end(); ++it)
-		if (*it != _library_original)
 			iter(out, *it);
 }
 void ObjectExpression::iter_register_map(void (*iter)(std::ostream *, ObjectData_Register const &), std::ostream * out)

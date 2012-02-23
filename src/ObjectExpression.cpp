@@ -50,7 +50,6 @@ bigsint ObjectExpression::_address_count;
 
 std::string ObjectExpression::_filename;
 
-std::string ObjectExpression::_library_original;
 std::set<std::string> ObjectExpression::_library_table;
 
 std::map<std::string, ObjectData_Auto> ObjectExpression::_auto_table;
@@ -343,9 +342,6 @@ void ObjectExpression::set_filename(std::string const & filename)
 
 void ObjectExpression::set_library(std::string const & library)
 {
-	if (_library_original.empty())
-		_library_original = library;
-
 	_library_table.insert(library);
 }
 

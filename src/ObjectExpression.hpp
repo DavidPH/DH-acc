@@ -264,7 +264,6 @@ private:
 
 	static std::string _filename;
 
-	static std::string _library_original;
 	static std::set<std::string> _library_table;
 
 	static std::map<std::string, ObjectData_Auto> _auto_table;
