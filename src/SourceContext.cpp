@@ -76,19 +76,6 @@ SourceContext::SourceContext() :
    caseDefault(false),
    inheritLocals(false)
 {
-   SourcePosition const &pos = SourcePosition::builtin();
-
-   getVariableType_typedef(  "bool",     VariableType::get_bt_boolhard(), pos);
-   getVariableType_typedef("__softbool", VariableType::get_bt_boolsoft(), pos);
-   getVariableType_typedef(  "char",     VariableType::get_bt_char(),     pos);
-   getVariableType_typedef(  "int",      VariableType::get_bt_int(),      pos);
-   getVariableType_typedef("__label",    VariableType::get_bt_label(),    pos);
-   getVariableType_typedef("__real",     VariableType::get_bt_real(),     pos);
-   getVariableType_typedef("__string",   VariableType::get_bt_string(),   pos);
-   getVariableType_typedef(  "unsigned", VariableType::get_bt_uint(),     pos);
-   getVariableType_typedef(  "void",     VariableType::get_bt_void(),     pos);
-
-
    addVariable(var_false);
    addVariable(var_true);
 }

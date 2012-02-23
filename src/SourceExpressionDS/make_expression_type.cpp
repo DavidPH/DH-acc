@@ -31,6 +31,18 @@
 
 
 //----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+#define TYPE_BASE_CHAR   1
+#define TYPE_BASE_INT    2
+#define TYPE_BASE_FLOAT  3
+#define TYPE_BASE_DOUBLE 4
+#define TYPE_BASE_FIXED  5
+#define TYPE_BASE_REAL   6
+
+
+//----------------------------------------------------------------------------|
 // Types                                                                      |
 //
 
@@ -96,6 +108,194 @@ static void do_storage
    *type = (*type)->setStorage(store, storeArea);
 }
 
+//
+// make_basic
+//
+// Tries to parse a basic type, returning NULL on failue.
+//
+static VariableType::Pointer make_basic
+(SourceTokenC token, SourceTokenizerDS *in)
+{
+   if (token.data == "void")
+      return VariableType::get_bt_void();
+
+   if (token.data == "bool" || token.data == "_Bool")
+      return VariableType::get_bt_boolhard();
+
+   if (token.data == "__boolsoft")
+      return VariableType::get_bt_boolsoft();
+
+   if (token.data == "__label")
+      return VariableType::get_bt_label();
+
+   if (token.data == "__string")
+      return VariableType::get_bt_string();
+
+   if (token.data != "char"   && token.data != "int"     &&
+       token.data != "float"  && token.data != "double"  &&
+       token.data != "__real" && token.data != "__fixed" &&
+       token.data != "short"  && token.data != "long"    &&
+       token.data != "signed" && token.data != "unsigned")
+      return NULL;
+
+   int typeBase  = 0;
+   int typeLong  = 0;
+   int typeShort = 0;
+   int typeSign  = 0;
+
+   while (true)
+   {
+      if (token.data == "char" && !typeBase)
+         typeBase = TYPE_BASE_CHAR;
+
+      else if (token.data == "int" && !typeBase)
+         typeBase = TYPE_BASE_INT;
+
+      else if (token.data == "float" && !typeBase)
+         typeBase = TYPE_BASE_FLOAT;
+
+      else if (token.data == "double" && !typeBase)
+         typeBase = TYPE_BASE_DOUBLE;
+
+      else if (token.data == "__fixed" && !typeBase)
+         typeBase = TYPE_BASE_FIXED;
+
+      else if (token.data == "__real" && !typeBase)
+         typeBase = TYPE_BASE_REAL;
+
+      else if (token.data == "short")
+         ++typeShort;
+
+      else if (token.data == "long")
+         ++typeLong;
+
+      else if (token.data == "signed" && !typeSign)
+         typeSign = -1;
+
+      else if (token.data == "unsigned" && !typeSign)
+         typeSign = +1;
+
+      else
+      {
+         in->unget(token);
+         break;
+      }
+
+      if (!in->peekType(SourceTokenC::TT_IDENTIFIER))
+         break;
+
+      token = in->get(SourceTokenC::TT_IDENTIFIER);
+   }
+
+   // Default to int.
+   if (!typeBase) typeBase = TYPE_BASE_INT;
+
+   // Default to signed.
+   if (!typeSign && typeBase != TYPE_BASE_CHAR) typeSign = -1;
+
+   switch (typeBase)
+   {
+   case TYPE_BASE_CHAR:
+      if (typeLong)
+         throw SourceException("long char", token.pos, __func__);
+
+      if (typeShort)
+         throw SourceException("short char", token.pos, __func__);
+
+      if (typeSign < 0)
+         return VariableType::get_bt_char(); // FIXME: BT_SCHAR
+
+      if (typeSign > 0)
+         return VariableType::get_bt_char(); // FIXME: BT_UCHAR
+
+      return VariableType::get_bt_char();
+
+   case TYPE_BASE_INT:
+      if (typeShort && typeLong)
+         throw SourceException("short long int", token.pos, __func__);
+
+      if (typeShort > 1)
+         throw SourceException("short short int", token.pos, __func__);
+
+      if (typeLong > 2)
+         throw SourceException("long long long int", token.pos, __func__);
+
+      if (typeSign > 0)
+      {
+         if (typeShort)
+            return VariableType::get_bt_uint(); // FIXME: BT_USHORT
+
+         if (typeLong == 1)
+            return VariableType::get_bt_uint(); // FIXME: BT_ULONG
+
+         if (typeLong == 2)
+            return VariableType::get_bt_uint(); // FIXME: BT_ULLONG
+
+         return VariableType::get_bt_uint();
+      }
+      else
+      {
+         if (typeShort)
+            return VariableType::get_bt_int(); // FIXME: BT_SHORT
+
+         if (typeLong == 1)
+            return VariableType::get_bt_int(); // FIXME: BT_LONG
+
+         if (typeLong == 2)
+            return VariableType::get_bt_int(); // FIXME: BT_LLONG
+
+         return VariableType::get_bt_int();
+      }
+
+   case TYPE_BASE_DOUBLE:
+      ++typeLong;
+   case TYPE_BASE_FLOAT:
+      if (typeShort)
+         throw SourceException("short float", token.pos, __func__);
+
+      if (typeSign > 0)
+         throw SourceException("unsigned float", token.pos, __func__);
+
+      if (typeLong == 0)
+         return VariableType::get_bt_real(); // FIXME: BT_FLOAT
+
+      if (typeLong == 1)
+         return VariableType::get_bt_real(); // FIXME: BT_LFLOAT
+
+      if (typeLong == 2)
+         return VariableType::get_bt_real(); // FIXME: BT_LLFLOAT
+
+      throw SourceException("long long long float", token.pos, __func__);
+
+   case TYPE_BASE_FIXED:
+      if (typeShort)
+         throw SourceException("short fixed", token.pos, __func__);
+
+      if (typeLong)
+         throw SourceException("long fixed", token.pos, __func__);
+
+      if (typeSign > 0)
+         throw SourceException("unsigned fixed", token.pos, __func__);
+
+      return VariableType::get_bt_real(); // FIXME: BT_FIXED
+
+   case TYPE_BASE_REAL:
+      if (typeShort)
+         throw SourceException("short real", token.pos, __func__);
+
+      if (typeLong)
+         throw SourceException("long real", token.pos, __func__);
+
+      if (typeSign > 0)
+         throw SourceException("unsigned real", token.pos, __func__);
+
+      return VariableType::get_bt_real();
+   }
+
+   // Should be unreachable.
+   return NULL;
+}
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -107,16 +307,39 @@ static void do_storage
 bool SourceExpressionDS::
 is_expression_type(std::string const &data, SourceContext *context)
 {
+   if (data == "void")
+      return true;
+
+   if (data == "bool" || data == "_Bool")
+      return true;
+
+   if (data == "__boolsoft")
+      return true;
+
+   if (data == "__label")
+      return true;
+
+   if (data == "__string")
+      return true;
+
+   if (data == "char"   || data == "int"     ||
+       data == "float"  || data == "double"  ||
+       data == "__real" || data == "__fixed" ||
+       data == "short"  || data == "long"    ||
+       data == "signed" || data == "unsigned")
+      return true;
+
    if (data == "__array")    return true;
-   if (data == "__asmfunc")  return true;
+   if (data == "__asmfunc_t")return true;
    if (data == "__block")    return true;
+   if (data ==   "decltype") return true;
    if (data ==   "enum")     return true;
-   if (data == "__function") return true;
-   if (data == "__linespec") return true;
-   if (data == "__native")   return true;
-   if (data == "__script")   return true;
+   if (data == "__func_t")   return true;
+   if (data == "__lnspec_t") return true;
+   if (data == "__native_t") return true;
+   if (data == "__script_t") return true;
    if (data ==   "struct")   return true;
-   if (data == "__typeof")   return true;
+   if (data ==   "typename") return true;
    if (data ==   "union")    return true;
 
    return context->getVariableTypeNull(data);
@@ -137,7 +360,10 @@ VariableType::Reference SourceExpressionDS::make_expression_type
    VariableType::Pointer type;
    VariableType::Vector types;
 
-   if (token.data == "__array")
+   if ((type = make_basic(token, in)) != NULL)
+   {
+   }
+   else if (token.data == "__array")
    {
       retn = make_expression_type(in, blocks, context);
       in->get(SourceTokenC::TT_OP_BRACKET_O);
@@ -145,7 +371,7 @@ VariableType::Reference SourceExpressionDS::make_expression_type
       in->get(SourceTokenC::TT_OP_BRACKET_C);
       type = retn->getArray(width);
    }
-   else if (token.data == "__asmfunc")
+   else if (token.data == "__asmfunc_t")
    {
       make_expression_arglist(in, blocks, context, &types, &retn);
 
@@ -168,6 +394,10 @@ VariableType::Reference SourceExpressionDS::make_expression_type
       in->get(SourceTokenC::TT_OP_BRACE_C);
 
       type = VariableType::get_bt_block(types);
+   }
+   else if (token.data == "decltype")
+   {
+      type = make_expression_single(in, blocks, context)->getType();
    }
    else if (token.data == "enum")
    {
@@ -214,25 +444,25 @@ VariableType::Reference SourceExpressionDS::make_expression_type
          type = context->getVariableType_enum(name, false, token.pos);
       }
    }
-   else if (token.data == "__function")
+   else if (token.data == "__func_t")
    {
       make_expression_arglist(in, blocks, context, &types, &retn);
 
       type = VariableType::get_bt_function(types, retn);
    }
-   else if (token.data == "__linespec")
+   else if (token.data == "__lnspec_t")
    {
       make_expression_arglist(in, blocks, context, &types, &retn);
 
       type = VariableType::get_bt_linespec(types, retn);
    }
-   else if (token.data == "__native")
+   else if (token.data == "__native_t")
    {
       make_expression_arglist(in, blocks, context, &types, &retn);
 
       type = VariableType::get_bt_native(types, retn);
    }
-   else if (token.data == "__script")
+   else if (token.data == "__script_t")
    {
       make_expression_arglist(in, blocks, context, &types, &retn);
 
@@ -287,9 +517,10 @@ VariableType::Reference SourceExpressionDS::make_expression_type
             type = context->getVariableType_struct(name, token.pos);
       }
    }
-   else if (token.data == "decltype")
+   else if (token.data == "typename")
    {
-      type = make_expression_single(in, blocks, context)->getType();
+      token = in->get(SourceTokenC::TT_IDENTIFIER);
+      type = context->getVariableType(token.data, token.pos);
    }
    else
    {
