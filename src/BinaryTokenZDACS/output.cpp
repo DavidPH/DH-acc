@@ -29,6 +29,13 @@
 
 
 //----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+extern bool option_fake_ACS0;
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -44,8 +51,16 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    std::ostringstream chunkout;
 
    // Header
-   *out << 'A' << 'C' << 'S' << 'E';
-   BinaryTokenACS::write_ACS0_32(out, ObjectExpression::get_address_count());
+   if (option_fake_ACS0)
+   {
+      *out << 'A' << 'C' << 'S' << '\0';
+      BinaryTokenACS::write_ACS0_32(out, 0);
+   }
+   else
+   {
+      *out << 'A' << 'C' << 'S' << 'E';
+      BinaryTokenACS::write_ACS0_32(out, ObjectExpression::get_address_count());
+   }
 
    // Instructions
    for (iter = instructions.begin(); iter != instructions.end(); ++iter)
@@ -111,6 +126,16 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    // SVCT - Script Variable Counts
    ObjectData_Script::iterate(write_ACSE_script_SVCT, &chunkout);
    write_ACSE_chunk(out, &chunkout, "SVCT");
+
+   // Header (really)
+   if (option_fake_ACS0)
+   {
+      BinaryTokenACS::write_ACS0_32(out, ObjectExpression::get_address_count());
+      *out << 'A' << 'C' << 'S' << 'E';
+
+      bigsint index = out->tellp(); out->seekp(4);
+      BinaryTokenACS::write_ACS0_32(out, index);
+   }
 }
 
 template void BinaryTokenZDACS::output_ACSE<BinaryTokenZDACS>(std::ostream *out, std::vector<BinaryTokenZDACS> const & instructions);

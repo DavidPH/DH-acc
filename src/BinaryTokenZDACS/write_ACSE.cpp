@@ -25,6 +25,7 @@
 
 #include "../ObjectData.hpp"
 #include "../ObjectExpression.hpp"
+#include "../option.hpp"
 #include "../ost_type.hpp"
 
 #include <sstream>
@@ -34,8 +35,21 @@
 // Static Variables                                                           |
 //
 
+extern bool option_fake_ACS0;
+static option::option_dptr<bool> option_fake_ACS0_handler
+('\0', "fake-ACS0", "output",
+ "For ACSE, generate a fake ACS0 header. On by default.", NULL,
+ &option_fake_ACS0);
+
 static bigsint counter_temp = 0;
 static std::vector<std::string> strings_temp;
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+bool option_fake_ACS0 = true;
 
 
 //----------------------------------------------------------------------------|
@@ -221,10 +235,20 @@ write_ACSE_script(std::ostream *out, ObjectData_Script const &s)
    ObjectExpression::Pointer addr =
       ObjectExpression::get_symbol(s.label, SourcePosition::none());
 
-   BinaryTokenACS::write_ACS0_16(out, s.number);
-   BinaryTokenACS::write_ACS0_16(out, s.stype);
-   BinaryTokenACS::write_ACS0_32(out, *addr);
-   BinaryTokenACS::write_ACS0_32(out, s.argCount <= 3 ? s.argCount : 3);
+   if (option_fake_ACS0)
+   {
+      BinaryTokenACS::write_ACS0_16(out, s.number);
+      BinaryTokenACS::write_ACS0_8 (out, s.stype);
+      BinaryTokenACS::write_ACS0_8 (out, s.argCount <= 3 ? s.argCount : 3);
+      BinaryTokenACS::write_ACS0_32(out, *addr);
+   }
+   else
+   {
+      BinaryTokenACS::write_ACS0_16(out, s.number);
+      BinaryTokenACS::write_ACS0_16(out, s.stype);
+      BinaryTokenACS::write_ACS0_32(out, *addr);
+      BinaryTokenACS::write_ACS0_32(out, s.argCount <= 3 ? s.argCount : 3);
+   }
 }
 
 //
