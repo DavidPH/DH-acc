@@ -23,6 +23,7 @@
 
 #include "VariableType.hpp"
 
+#include "option.hpp"
 #include "SourceException.hpp"
 
 #include <algorithm>
@@ -32,16 +33,28 @@
 // Static Variables                                                           |
 //
 
-static std::string basic_names[] =
+static std::string const basic_names[] =
 {
    "BT_BOOLHARD",
    "BT_BOOLSOFT",
    "BT_CHAR",
+   "BT_FIXED",
+   "BT_FLOAT",
    "BT_INT",
    "BT_LABEL",
+   "BT_LFLOAT",
+   "BT_LLFLOAT",
+   "BT_LLONG",
+   "BT_LONG",
    "BT_REAL",
+   "BT_SCHAR",
+   "BT_SHORT",
    "BT_STRING",
+   "BT_UCHAR",
    "BT_UINT",
+   "BT_ULLONG",
+   "BT_ULONG",
+   "BT_USHORT",
 
    "BT_VOID",
 
@@ -127,10 +140,22 @@ VariableType::VariableType(BasicType _basic)
    case BT_BOOLHARD:
    case BT_BOOLSOFT:
    case BT_CHAR:
+   case BT_FIXED:
+   case BT_FLOAT:
    case BT_INT:
    case BT_LABEL:
+   case BT_LFLOAT:
+   case BT_LLFLOAT:
+   case BT_LLONG:
+   case BT_LONG:
    case BT_REAL:
+   case BT_SCHAR:
+   case BT_SHORT:
+   case BT_UCHAR:
    case BT_UINT:
+   case BT_ULLONG:
+   case BT_ULONG:
+   case BT_USHORT:
       break;
 
    case BT_STRING:
@@ -180,11 +205,23 @@ VariableType::~VariableType()
    case BT_BOOLHARD:
    case BT_BOOLSOFT:
    case BT_CHAR:
+   case BT_FIXED:
+   case BT_FLOAT:
    case BT_INT:
    case BT_LABEL:
+   case BT_LFLOAT:
+   case BT_LLFLOAT:
+   case BT_LLONG:
+   case BT_LONG:
    case BT_REAL:
+   case BT_SCHAR:
+   case BT_SHORT:
    case BT_STRING:
+   case BT_UCHAR:
    case BT_UINT:
+   case BT_ULLONG:
+   case BT_ULONG:
+   case BT_USHORT:
       break;
 
    case BT_VOID:
@@ -387,17 +424,31 @@ bigsint VariableType::getSize(SourcePosition const &position) const
    case BT_BOOLSOFT:
    case BT_CHAR:
    case BT_ENUM:
+   case BT_FIXED:
+   case BT_FLOAT:
    case BT_FUNCTION:
    case BT_INT:
    case BT_LABEL:
    case BT_LINESPEC:
+   case BT_LONG:
    case BT_NATIVE:
    case BT_POINTER:
    case BT_REAL:
+   case BT_SCHAR:
    case BT_SCRIPT:
+   case BT_SHORT:
    case BT_STRING:
+   case BT_UCHAR:
    case BT_UINT:
+   case BT_ULONG:
+   case BT_USHORT:
       return 1;
+
+   case BT_LFLOAT:
+   case BT_LLFLOAT:
+   case BT_LLONG:
+   case BT_ULLONG:
+      return 2;
 
    case BT_UNION:
    {
@@ -508,6 +559,22 @@ VariableType::Reference VariableType::get_bt_char()
 }
 
 //
+// VariableType::get_bt_fixed
+//
+VariableType::Reference VariableType::get_bt_fixed()
+{
+   static Reference type(new VariableType(BT_FIXED)); return type;
+}
+
+//
+// VariableType::get_bt_float
+//
+VariableType::Reference VariableType::get_bt_float()
+{
+   static Reference type(new VariableType(BT_FLOAT)); return type;
+}
+
+//
 // VariableType::get_bt_int
 //
 VariableType::Reference VariableType::get_bt_int()
@@ -524,11 +591,59 @@ VariableType::Reference VariableType::get_bt_label()
 }
 
 //
+// VariableType::get_bt_lfloat
+//
+VariableType::Reference VariableType::get_bt_lfloat()
+{
+   static Reference type(new VariableType(BT_LFLOAT)); return type;
+}
+
+//
+// VariableType::get_bt_llfloat
+//
+VariableType::Reference VariableType::get_bt_llfloat()
+{
+   static Reference type(new VariableType(BT_LLFLOAT)); return type;
+}
+
+//
+// VariableType::get_bt_llong
+//
+VariableType::Reference VariableType::get_bt_llong()
+{
+   static Reference type(new VariableType(BT_LLONG)); return type;
+}
+
+//
+// VariableType::get_bt_long
+//
+VariableType::Reference VariableType::get_bt_long()
+{
+   static Reference type(new VariableType(BT_LONG)); return type;
+}
+
+//
 // VariableType::get_bt_real
 //
 VariableType::Reference VariableType::get_bt_real()
 {
    static Reference type(new VariableType(BT_REAL)); return type;
+}
+
+//
+// VariableType::get_bt_schar
+//
+VariableType::Reference VariableType::get_bt_schar()
+{
+   static Reference type(new VariableType(BT_SCHAR)); return type;
+}
+
+//
+// VariableType::get_bt_short
+//
+VariableType::Reference VariableType::get_bt_short()
+{
+   static Reference type(new VariableType(BT_SHORT)); return type;
 }
 
 //
@@ -540,11 +655,43 @@ VariableType::Reference VariableType::get_bt_string()
 }
 
 //
+// VariableType::get_bt_uchar
+//
+VariableType::Reference VariableType::get_bt_uchar()
+{
+   static Reference type(new VariableType(BT_UCHAR)); return type;
+}
+
+//
 // VariableType::get_bt_uint
 //
 VariableType::Reference VariableType::get_bt_uint()
 {
    static Reference type(new VariableType(BT_UINT)); return type;
+}
+
+//
+// VariableType::get_bt_ullong
+//
+VariableType::Reference VariableType::get_bt_ullong()
+{
+   static Reference type(new VariableType(BT_ULLONG)); return type;
+}
+
+//
+// VariableType::get_bt_ulong
+//
+VariableType::Reference VariableType::get_bt_ulong()
+{
+   static Reference type(new VariableType(BT_ULONG)); return type;
+}
+
+//
+// VariableType::get_bt_ushort
+//
+VariableType::Reference VariableType::get_bt_ushort()
+{
+   static Reference type(new VariableType(BT_USHORT)); return type;
 }
 
 //
@@ -711,9 +858,21 @@ bool VariableType::is_bt_arithmetic(BasicType type)
    case BT_BOOLHARD:
    case BT_BOOLSOFT:
    case BT_CHAR:
+   case BT_FIXED:
+   case BT_FLOAT:
    case BT_INT:
+   case BT_LFLOAT:
+   case BT_LLFLOAT:
+   case BT_LLONG:
+   case BT_LONG:
    case BT_REAL:
+   case BT_SCHAR:
+   case BT_SHORT:
+   case BT_UCHAR:
    case BT_UINT:
+   case BT_ULLONG:
+   case BT_ULONG:
+   case BT_USHORT:
       return true;
 
    default:
@@ -732,7 +891,15 @@ bool VariableType::is_bt_integer(BasicType type)
    case BT_BOOLSOFT:
    case BT_CHAR:
    case BT_INT:
+   case BT_LLONG:
+   case BT_LONG:
+   case BT_SCHAR:
+   case BT_SHORT:
+   case BT_UCHAR:
    case BT_UINT:
+   case BT_ULLONG:
+   case BT_ULONG:
+   case BT_USHORT:
       return true;
 
    default:

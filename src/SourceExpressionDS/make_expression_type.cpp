@@ -190,9 +190,6 @@ static VariableType::Pointer make_basic
    // Default to int.
    if (!typeBase) typeBase = TYPE_BASE_INT;
 
-   // Default to signed.
-   if (!typeSign && typeBase != TYPE_BASE_CHAR) typeSign = -1;
-
    switch (typeBase)
    {
    case TYPE_BASE_CHAR:
@@ -203,10 +200,10 @@ static VariableType::Pointer make_basic
          throw SourceException("short char", token.pos, __func__);
 
       if (typeSign < 0)
-         return VariableType::get_bt_char(); // FIXME: BT_SCHAR
+         return VariableType::get_bt_schar();
 
       if (typeSign > 0)
-         return VariableType::get_bt_char(); // FIXME: BT_UCHAR
+         return VariableType::get_bt_uchar();
 
       return VariableType::get_bt_char();
 
@@ -223,26 +220,26 @@ static VariableType::Pointer make_basic
       if (typeSign > 0)
       {
          if (typeShort)
-            return VariableType::get_bt_uint(); // FIXME: BT_USHORT
+            return VariableType::get_bt_ushort();
 
          if (typeLong == 1)
-            return VariableType::get_bt_uint(); // FIXME: BT_ULONG
+            return VariableType::get_bt_ulong();
 
          if (typeLong == 2)
-            return VariableType::get_bt_uint(); // FIXME: BT_ULLONG
+            return VariableType::get_bt_ullong();
 
          return VariableType::get_bt_uint();
       }
       else
       {
          if (typeShort)
-            return VariableType::get_bt_int(); // FIXME: BT_SHORT
+            return VariableType::get_bt_short();
 
          if (typeLong == 1)
-            return VariableType::get_bt_int(); // FIXME: BT_LONG
+            return VariableType::get_bt_long();
 
          if (typeLong == 2)
-            return VariableType::get_bt_int(); // FIXME: BT_LLONG
+            return VariableType::get_bt_llong();
 
          return VariableType::get_bt_int();
       }
@@ -256,14 +253,17 @@ static VariableType::Pointer make_basic
       if (typeSign > 0)
          throw SourceException("unsigned float", token.pos, __func__);
 
+      if (typeSign < 0)
+         throw SourceException("signed float", token.pos, __func__);
+
       if (typeLong == 0)
-         return VariableType::get_bt_real(); // FIXME: BT_FLOAT
+         return VariableType::get_bt_float();
 
       if (typeLong == 1)
-         return VariableType::get_bt_real(); // FIXME: BT_LFLOAT
+         return VariableType::get_bt_lfloat();
 
       if (typeLong == 2)
-         return VariableType::get_bt_real(); // FIXME: BT_LLFLOAT
+         return VariableType::get_bt_llfloat();
 
       throw SourceException("long long long float", token.pos, __func__);
 
@@ -277,7 +277,10 @@ static VariableType::Pointer make_basic
       if (typeSign > 0)
          throw SourceException("unsigned fixed", token.pos, __func__);
 
-      return VariableType::get_bt_real(); // FIXME: BT_FIXED
+      if (typeSign < 0)
+         throw SourceException("signed fixed", token.pos, __func__);
+
+      return VariableType::get_bt_fixed();
 
    case TYPE_BASE_REAL:
       if (typeShort)
@@ -288,6 +291,9 @@ static VariableType::Pointer make_basic
 
       if (typeSign > 0)
          throw SourceException("unsigned real", token.pos, __func__);
+
+      if (typeSign < 0)
+         throw SourceException("signed real", token.pos, __func__);
 
       return VariableType::get_bt_real();
    }

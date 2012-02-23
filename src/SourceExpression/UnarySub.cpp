@@ -103,7 +103,13 @@ void SourceExpression_UnarySub::virtual_makeObjects
    {
    case VariableType::BT_CHAR:
    case VariableType::BT_INT:
+   case VariableType::BT_LONG:
+   case VariableType::BT_SCHAR:
+   case VariableType::BT_SHORT:
+   case VariableType::BT_UCHAR:
    case VariableType::BT_UINT:
+   case VariableType::BT_ULONG:
+   case VariableType::BT_USHORT:
       objects->addToken(OCODE_MISC_NEGATE32I);
       break;
 

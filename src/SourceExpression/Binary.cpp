@@ -202,19 +202,26 @@ int SourceExpression_Binary::getOcodeType
    {
    case VariableType::BT_CHAR:
    case VariableType::BT_INT:
+   case VariableType::BT_LONG:
+   case VariableType::BT_SCHAR:
+   case VariableType::BT_SHORT:
       ocodeOpType = 1;
       if (ocodeGetType) *ocodeGetType = 1;
       break;
 
-   case VariableType::BT_POINTER:
-   case VariableType::BT_UINT:
-      ocodeOpType = 2;
-      if (ocodeGetType) *ocodeGetType = 1;
-      break;
-
+   case VariableType::BT_FIXED:
    case VariableType::BT_REAL:
       ocodeOpType = 0;
       if (ocodeGetType) *ocodeGetType = 0;
+      break;
+
+   case VariableType::BT_POINTER:
+   case VariableType::BT_UCHAR:
+   case VariableType::BT_UINT:
+   case VariableType::BT_ULONG:
+   case VariableType::BT_USHORT:
+      ocodeOpType = 2;
+      if (ocodeGetType) *ocodeGetType = 1;
       break;
 
    default:

@@ -26,6 +26,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../ost_type.hpp"
+#include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
@@ -169,6 +170,14 @@ void SourceExpression_RootOutput::doOut
       objects->addToken(OCODE_ACSP_CHARACTER);
       break;
 
+   case VariableType::BT_FIXED:
+      objects->addToken(OCODE_ACSP_NUM_DEC32F);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('F'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('I'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      break;
+
    case VariableType::BT_FUNCTION:
       objects->addToken(OCODE_ACSP_NUM_DEC32U);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));
@@ -197,6 +206,23 @@ void SourceExpression_RootOutput::doOut
       objects->addToken(OCODE_ACSP_CHARACTER);
       break;
 
+   case VariableType::BT_LLONG:
+      objects->addToken(OCODE_ACSP_NUM_DEC32I);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(' '));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_ACSP_NUM_DEC32I);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('L'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('L'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      break;
+
+   case VariableType::BT_LONG:
+      objects->addToken(OCODE_ACSP_NUM_DEC32I);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('L'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      break;
+
    case VariableType::BT_NATIVE:
       objects->addToken(OCODE_ACSP_NUM_DEC32U);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));
@@ -217,11 +243,25 @@ void SourceExpression_RootOutput::doOut
       objects->addToken(OCODE_ACSP_CHARACTER);
       break;
 
+   case VariableType::BT_SCHAR:
+      objects->addToken(OCODE_ACSP_NUM_DEC32I);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('H'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('H'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      break;
+
    case VariableType::BT_SCRIPT:
       objects->addToken(OCODE_ACSP_NUM_DEC32U);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));
       objects->addToken(OCODE_ACSP_CHARACTER);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('S'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      break;
+
+   case VariableType::BT_SHORT:
+      objects->addToken(OCODE_ACSP_NUM_DEC32I);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('H'));
       objects->addToken(OCODE_ACSP_CHARACTER);
       break;
 
@@ -258,9 +298,40 @@ void SourceExpression_RootOutput::doOut
 
       break;
 
+   case VariableType::BT_UCHAR:
+      objects->addToken(OCODE_ACSP_NUM_DEC32U);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('U'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('H'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('H'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      break;
+
    case VariableType::BT_UINT:
       objects->addToken(OCODE_ACSP_NUM_DEC32U);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('U'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      break;
+
+   case VariableType::BT_ULLONG:
+      objects->addToken(OCODE_ACSP_NUM_DEC32U);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(' '));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_ACSP_NUM_DEC32U);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('U'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('L'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('L'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      break;
+
+   case VariableType::BT_ULONG:
+      objects->addToken(OCODE_ACSP_NUM_DEC32U);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('U'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('L'));
       objects->addToken(OCODE_ACSP_CHARACTER);
       break;
 
@@ -288,10 +359,23 @@ void SourceExpression_RootOutput::doOut
 
       break;
 
+   case VariableType::BT_USHORT:
+      objects->addToken(OCODE_ACSP_NUM_DEC32U);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('U'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('H'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      break;
+
    case VariableType::BT_VOID:
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('V'));
       objects->addToken(OCODE_ACSP_CHARACTER);
       break;
+
+   case VariableType::BT_FLOAT:
+   case VariableType::BT_LFLOAT:
+   case VariableType::BT_LLFLOAT:
+      throw SourceException("unsupported BT", position, getName());
    }
 
    objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(';'));

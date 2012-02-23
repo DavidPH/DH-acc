@@ -59,11 +59,23 @@ public:
       BT_BOOLHARD,
       BT_BOOLSOFT,
       BT_CHAR,
+      BT_FIXED,
+      BT_FLOAT,
       BT_INT,
       BT_LABEL,
+      BT_LFLOAT,
+      BT_LLFLOAT,
+      BT_LLONG,
+      BT_LONG,
       BT_REAL,
+      BT_SCHAR,
+      BT_SHORT,
       BT_STRING,
+      BT_UCHAR,
       BT_UINT,
+      BT_ULLONG,
+      BT_ULONG,
+      BT_USHORT,
 
       BT_VOID,
 
@@ -151,11 +163,23 @@ public:
    static Reference get_bt_boolhard();
    static Reference get_bt_boolsoft();
    static Reference get_bt_char();
+   static Reference get_bt_fixed();
+   static Reference get_bt_float();
    static Reference get_bt_int();
    static Reference get_bt_label();
+   static Reference get_bt_lfloat();
+   static Reference get_bt_llfloat();
+   static Reference get_bt_llong();
+   static Reference get_bt_long();
    static Reference get_bt_real();
+   static Reference get_bt_schar();
+   static Reference get_bt_short();
    static Reference get_bt_string();
+   static Reference get_bt_uchar();
    static Reference get_bt_uint();
+   static Reference get_bt_ullong();
+   static Reference get_bt_ulong();
+   static Reference get_bt_ushort();
    static Reference get_bt_void();
 
    // Named types.
