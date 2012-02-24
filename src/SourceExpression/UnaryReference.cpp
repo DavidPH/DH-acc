@@ -147,16 +147,29 @@ private:
          throw SourceException("invalid MT", position, getName());
 
       case VariableData::MT_POINTER:
-      case VariableData::MT_REGISTERARRAY:
          if (data->offsetExpr)
             data->offsetExpr->makeObjects(objects, dst);
          else
             objects->addTokenPushZero();
+
+         if (!data->address->canResolve() || data->address->resolveInt())
+         {
+            objects->addToken(OCODE_GET_LITERAL32I, data->address);
+            objects->addToken(OCODE_ADD32U);
+         }
+
          break;
 
       case VariableData::MT_REGISTER:
       case VariableData::MT_STATIC:
          objects->addToken(OCODE_GET_LITERAL32I, data->address);
+         break;
+
+      case VariableData::MT_REGISTERARRAY:
+         if (data->offsetExpr)
+            data->offsetExpr->makeObjects(objects, dst);
+         else
+            objects->addTokenPushZero();
          break;
       }
    }

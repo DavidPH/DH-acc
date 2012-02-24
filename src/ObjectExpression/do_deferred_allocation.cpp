@@ -304,8 +304,8 @@ void ObjectExpression::do_deferred_allocation()
    usedMap.clear();
      set_used(&usedMap, Used(0, option_static_offset));
 
-   _iterator_map(_static_table, allocate_pre<ObjectData_Static>, &usedMap);
-   _iterator_map(_static_table, allocate<ObjectData_Static>, &usedMap);
+   _iterator_map(_static_table, allocate_pre_size<ObjectData_Static>, &usedMap);
+   _iterator_map(_static_table, allocate_size<ObjectData_Static>, &usedMap);
 
 
    // strings
