@@ -31,6 +31,13 @@
 
 
 //----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+extern bool option_string_tag;
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -241,6 +248,14 @@ VariableData::Pointer SourceVariable::getData() const
    case SC_CONSTANT:
       switch (type->getBasicType())
       {
+      case VariableType::BT_SCRIPT:
+         if (option_string_tag)
+            return VariableData::create_literal
+            (size, VariableData::SL_STRING, address);
+         else
+            return VariableData::create_literal
+            (size, VariableData::SL_INT, address);
+
       case VariableType::BT_STRING:
          return VariableData::create_literal
                 (size, VariableData::SL_STRING, address);

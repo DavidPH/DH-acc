@@ -457,5 +457,12 @@ private:
     SourcePosition const &position);
 };
 
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+extern bool option_string_tag;
+
 #endif//HPP_SourceExpression_
 

@@ -244,16 +244,28 @@ bool SourceExpression_ValueCast::canMakeObject() const
    case VariableType::BT_BOOLSOFT:
    case VariableType::BT_CHAR:
    case VariableType::BT_ENUM:
+   case VariableType::BT_FIXED:
+   case VariableType::BT_FLOAT:
    case VariableType::BT_FUNCTION:
    case VariableType::BT_INT:
    case VariableType::BT_LABEL:
+   case VariableType::BT_LFLOAT:
    case VariableType::BT_LINESPEC:
+   case VariableType::BT_LLFLOAT:
+   case VariableType::BT_LLONG:
+   case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
    case VariableType::BT_POINTER:
    case VariableType::BT_REAL:
+   case VariableType::BT_SCHAR:
    case VariableType::BT_SCRIPT:
+   case VariableType::BT_SHORT:
    case VariableType::BT_STRING:
+   case VariableType::BT_UCHAR:
    case VariableType::BT_UINT:
+   case VariableType::BT_ULLONG:
+   case VariableType::BT_ULONG:
+   case VariableType::BT_USHORT:
       break;
    }
 
@@ -271,16 +283,28 @@ bool SourceExpression_ValueCast::canMakeObject() const
    case VariableType::BT_BOOLSOFT:
    case VariableType::BT_CHAR:
    case VariableType::BT_ENUM:
+   case VariableType::BT_FIXED:
+   case VariableType::BT_FLOAT:
    case VariableType::BT_FUNCTION:
    case VariableType::BT_INT:
    case VariableType::BT_LABEL:
+   case VariableType::BT_LFLOAT:
    case VariableType::BT_LINESPEC:
+   case VariableType::BT_LLFLOAT:
+   case VariableType::BT_LLONG:
+   case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
    case VariableType::BT_POINTER:
    case VariableType::BT_REAL:
+   case VariableType::BT_SCHAR:
    case VariableType::BT_SCRIPT:
+   case VariableType::BT_SHORT:
    case VariableType::BT_STRING:
+   case VariableType::BT_UCHAR:
    case VariableType::BT_UINT:
+   case VariableType::BT_ULLONG:
+   case VariableType::BT_ULONG:
+   case VariableType::BT_USHORT:
       break;
    }
 

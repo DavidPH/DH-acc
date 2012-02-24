@@ -66,13 +66,25 @@ static ObjectExpression::Pointer make_object
    case VariableType::BT_INT:
    case VariableType::BT_LABEL:
    case VariableType::BT_LINESPEC:
+   case VariableType::BT_LLONG:
+   case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
    case VariableType::BT_POINTER:
+   case VariableType::BT_SCHAR:
    case VariableType::BT_SCRIPT:
+   case VariableType::BT_SHORT:
    case VariableType::BT_STRING:
+   case VariableType::BT_UCHAR:
    case VariableType::BT_UINT:
+   case VariableType::BT_ULLONG:
+   case VariableType::BT_ULONG:
+   case VariableType::BT_USHORT:
       return ObjectExpression::create_value_int(0, position);
 
+   case VariableType::BT_FIXED:
+   case VariableType::BT_FLOAT:
+   case VariableType::BT_LFLOAT:
+   case VariableType::BT_LLFLOAT:
    case VariableType::BT_REAL:
       return ObjectExpression::create_value_float(0, position);
 
@@ -175,11 +187,19 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
    case VariableType::BT_INT:
    case VariableType::BT_LABEL:
    case VariableType::BT_LINESPEC:
+   case VariableType::BT_LLONG:
+   case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
    case VariableType::BT_POINTER:
+   case VariableType::BT_SCHAR:
    case VariableType::BT_SCRIPT:
+   case VariableType::BT_SHORT:
    case VariableType::BT_STRING:
+   case VariableType::BT_UCHAR:
    case VariableType::BT_UINT:
+   case VariableType::BT_ULLONG:
+   case VariableType::BT_ULONG:
+   case VariableType::BT_USHORT:
       switch (dstBT)
       {
       case VariableType::BT_ARRAY:
@@ -202,13 +222,25 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_INT:
       case VariableType::BT_LABEL:
       case VariableType::BT_LINESPEC:
+      case VariableType::BT_LLONG:
+      case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
       case VariableType::BT_POINTER:
+      case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
+      case VariableType::BT_SHORT:
       case VariableType::BT_STRING:
+      case VariableType::BT_UCHAR:
       case VariableType::BT_UINT:
+      case VariableType::BT_ULLONG:
+      case VariableType::BT_ULONG:
+      case VariableType::BT_USHORT:
          break;
 
+      case VariableType::BT_FIXED:
+      case VariableType::BT_FLOAT:
+      case VariableType::BT_LFLOAT:
+      case VariableType::BT_LLFLOAT:
       case VariableType::BT_REAL:
          obj = ObjectExpression::create_cast_int_to_float(obj, position);
          break;
@@ -233,11 +265,19 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_INT:
       case VariableType::BT_LABEL:
       case VariableType::BT_LINESPEC:
+      case VariableType::BT_LLONG:
+      case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
       case VariableType::BT_POINTER:
+      case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
+      case VariableType::BT_SHORT:
       case VariableType::BT_STRING:
+      case VariableType::BT_UCHAR:
       case VariableType::BT_UINT:
+      case VariableType::BT_ULLONG:
+      case VariableType::BT_ULONG:
+      case VariableType::BT_USHORT:
          obj = ObjectExpression::create_branch_not(obj, position);
          obj = ObjectExpression::create_branch_not(obj, position);
          break;
@@ -245,6 +285,10 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_BOOLSOFT:
          break;
 
+      case VariableType::BT_FIXED:
+      case VariableType::BT_FLOAT:
+      case VariableType::BT_LFLOAT:
+      case VariableType::BT_LLFLOAT:
       case VariableType::BT_REAL:
          obj = ObjectExpression::create_branch_not(obj, position);
          obj = ObjectExpression::create_branch_not(obj, position);
@@ -253,6 +297,10 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       }
       break;
 
+   case VariableType::BT_FIXED:
+   case VariableType::BT_FLOAT:
+   case VariableType::BT_LFLOAT:
+   case VariableType::BT_LLFLOAT:
    case VariableType::BT_REAL:
       switch (dstBT)
       {
@@ -270,6 +318,10 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
          obj = ObjectExpression::create_branch_not(obj, position);
          break;
 
+      case VariableType::BT_FIXED:
+      case VariableType::BT_FLOAT:
+      case VariableType::BT_LFLOAT:
+      case VariableType::BT_LLFLOAT:
       case VariableType::BT_REAL:
          break;
 
@@ -279,11 +331,19 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_INT:
       case VariableType::BT_LABEL:
       case VariableType::BT_LINESPEC:
+      case VariableType::BT_LLONG:
+      case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
       case VariableType::BT_POINTER:
+      case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
+      case VariableType::BT_SHORT:
       case VariableType::BT_STRING:
+      case VariableType::BT_UCHAR:
       case VariableType::BT_UINT:
+      case VariableType::BT_ULLONG:
+      case VariableType::BT_ULONG:
+      case VariableType::BT_USHORT:
          obj = ObjectExpression::create_cast_float_to_int(obj, position);
          break;
       }
@@ -336,7 +396,12 @@ void SourceExpression::make_objects_memcpy_cast
    case VariableType::BT_ARRAY:
    case VariableType::BT_ASMFUNC:
    case VariableType::BT_BLOCK:
+   case VariableType::BT_FLOAT:
+   case VariableType::BT_LFLOAT:
+   case VariableType::BT_LLFLOAT:
+   case VariableType::BT_LLONG:
    case VariableType::BT_STRUCT:
+   case VariableType::BT_ULLONG:
    case VariableType::BT_UNION:
    case VariableType::BT_VOID:
       throw SourceException(TYPES_STRING, position, __func__);
@@ -348,17 +413,28 @@ void SourceExpression::make_objects_memcpy_cast
    case VariableType::BT_INT:
    case VariableType::BT_LABEL:
    case VariableType::BT_LINESPEC:
+   case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
    case VariableType::BT_POINTER:
+   case VariableType::BT_SCHAR:
    case VariableType::BT_SCRIPT:
+   case VariableType::BT_SHORT:
    case VariableType::BT_STRING:
+   case VariableType::BT_UCHAR:
    case VariableType::BT_UINT:
+   case VariableType::BT_ULONG:
+   case VariableType::BT_USHORT:
       switch (dstType->getBasicType())
       {
       case VariableType::BT_ARRAY:
       case VariableType::BT_ASMFUNC:
       case VariableType::BT_BLOCK:
+      case VariableType::BT_FLOAT:
+      case VariableType::BT_LFLOAT:
+      case VariableType::BT_LLFLOAT:
+      case VariableType::BT_LLONG:
       case VariableType::BT_STRUCT:
+      case VariableType::BT_ULLONG:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
          throw SourceException(TYPES_STRING, position, __func__);
@@ -375,13 +451,20 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_INT:
       case VariableType::BT_LABEL:
       case VariableType::BT_LINESPEC:
+      case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
       case VariableType::BT_POINTER:
+      case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
+      case VariableType::BT_SHORT:
       case VariableType::BT_STRING:
+      case VariableType::BT_UCHAR:
       case VariableType::BT_UINT:
+      case VariableType::BT_ULONG:
+      case VariableType::BT_USHORT:
          break;
 
+      case VariableType::BT_FIXED:
       case VariableType::BT_REAL:
          objects->addToken(OCODE_CONVERT_32I_32F);
          break;
@@ -394,7 +477,12 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_ARRAY:
       case VariableType::BT_ASMFUNC:
       case VariableType::BT_BLOCK:
+      case VariableType::BT_FLOAT:
+      case VariableType::BT_LFLOAT:
+      case VariableType::BT_LLFLOAT:
+      case VariableType::BT_LLONG:
       case VariableType::BT_STRUCT:
+      case VariableType::BT_ULLONG:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
          throw SourceException(TYPES_STRING, position, __func__);
@@ -406,11 +494,17 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_INT:
       case VariableType::BT_LABEL:
       case VariableType::BT_LINESPEC:
+      case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
       case VariableType::BT_POINTER:
+      case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
+      case VariableType::BT_SHORT:
       case VariableType::BT_STRING:
+      case VariableType::BT_UCHAR:
       case VariableType::BT_UINT:
+      case VariableType::BT_ULONG:
+      case VariableType::BT_USHORT:
          objects->addToken(OCODE_LOGICAL_NOT32I);
          objects->addToken(OCODE_LOGICAL_NOT32I);
          break;
@@ -418,6 +512,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_BOOLSOFT:
          break;
 
+      case VariableType::BT_FIXED:
       case VariableType::BT_REAL:
          objects->addToken(OCODE_LOGICAL_NOT32F);
          objects->addToken(OCODE_LOGICAL_NOT32F);
@@ -426,13 +521,19 @@ void SourceExpression::make_objects_memcpy_cast
       }
       break;
 
+   case VariableType::BT_FIXED:
    case VariableType::BT_REAL:
       switch (dstType->getBasicType())
       {
       case VariableType::BT_ARRAY:
       case VariableType::BT_ASMFUNC:
       case VariableType::BT_BLOCK:
+      case VariableType::BT_FLOAT:
+      case VariableType::BT_LFLOAT:
+      case VariableType::BT_LLFLOAT:
+      case VariableType::BT_LLONG:
       case VariableType::BT_STRUCT:
+      case VariableType::BT_ULLONG:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
          throw SourceException(TYPES_STRING, position, __func__);
@@ -443,6 +544,7 @@ void SourceExpression::make_objects_memcpy_cast
          break;
 
       case VariableType::BT_BOOLSOFT:
+      case VariableType::BT_FIXED:
       case VariableType::BT_REAL:
          break;
 
@@ -452,11 +554,17 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_INT:
       case VariableType::BT_LABEL:
       case VariableType::BT_LINESPEC:
+      case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
       case VariableType::BT_POINTER:
+      case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
+      case VariableType::BT_SHORT:
       case VariableType::BT_STRING:
+      case VariableType::BT_UCHAR:
       case VariableType::BT_UINT:
+      case VariableType::BT_ULONG:
+      case VariableType::BT_USHORT:
          objects->addToken(OCODE_CONVERT_32F_32I);
          break;
       }

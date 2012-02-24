@@ -73,7 +73,17 @@ bool SourceExpression::canGetData() const
 //
 bool SourceExpression::canMakeObject() const
 {
-   return canGetData() && getData()->type == VariableData::MT_LITERAL;
+   if (!canGetData()) return false;
+
+   VariableData::Pointer data = getData();
+
+   if (data->type != VariableData::MT_LITERAL)
+      return false;
+
+   if (data->sectionL == VariableData::SL_STRING && option_string_tag)
+      return false;
+
+   return true;
 }
 
 //
@@ -147,6 +157,10 @@ CounterPointer<ObjectExpression> SourceExpression::makeObject() const
    if (src->type != VariableData::MT_LITERAL)
       throw SourceException("makeObject on invalid expression", position,
                             getName());
+
+   if (src->sectionL == VariableData::SL_STRING && option_string_tag)
+      throw SourceException
+      ("makeObject on invalid expression", position, getName());
 
    return src->address;
 }
