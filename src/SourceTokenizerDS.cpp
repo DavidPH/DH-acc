@@ -24,14 +24,63 @@
 #include "SourceTokenizerDS.hpp"
 
 #include "ObjectExpression.hpp"
+#include "option.hpp"
 #include "ost_type.hpp"
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
+
+#include <cstring>
+
+
+//----------------------------------------------------------------------------|
+// Static Prototypes                                                          |
+//
+
+static int add_define_base
+(char const *opt, int optf, int argc, char const *const *argv);
+
+
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
+
+static option::option_call option_define_handler
+('D', "define", NULL, "Adds a define.", NULL, add_define_base);
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+SourceTokenizerDS::DefMap SourceTokenizerDS::defines_base;
 
 
 //----------------------------------------------------------------------------|
 // Static Functions                                                           |
 //
+
+//
+// add_define_base
+//
+static int add_define_base
+(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if (!argc) option::exception::error(opt, optf, "requires argument");
+
+   char const *eq = std::strchr(argv[0], '=');
+
+   if (eq)
+   {
+      std::string name(argv[0], eq-argv[0]);
+      SourceTokenizerDS::add_define_base(name, eq);
+   }
+   else
+   {
+      SourceTokenizerDS::add_define_base(argv[0]);
+   }
+
+   return 1;
+}
 
 //
 // make_expression
@@ -189,25 +238,17 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
 // SourceTokenizerDS::SourceTokenizerDS
 //
 SourceTokenizerDS::SourceTokenizerDS(SourceStream *_in)
- : canCommand(true), canExpand(true), canSkip(true), canString(true)
+ : defines(defines_base),
+   canCommand(true), canExpand(true), canSkip(true), canString(true)
 {
-   #define CASE_TARGET(TARGET)                \
-   case TARGET_##TARGET:                      \
-      addDefine("__TARGET_"#TARGET"__",       \
-                SourcePosition::builtin(),    \
-                std::vector<SourceTokenC>()); \
-      break
-
    switch (target_type)
    {
-   CASE_TARGET(Eternity);
-   CASE_TARGET(Hexen);
-   CASE_TARGET(HexPP);
-   CASE_TARGET(ZDoom);
-   CASE_TARGET(UNKNOWN);
+   case TARGET_Eternity: addDefine("__TARGET_Eternity__"); break;
+   case TARGET_Hexen:    addDefine("__TARGET_Hexen__");    break;
+   case TARGET_HexPP:    addDefine("__TARGET_HexPP__");    break;
+   case TARGET_ZDoom:    addDefine("__TARGET_ZDoom__");    break;
+   case TARGET_UNKNOWN:  addDefine("__TARGET_UNKNOWN__");  break;
    }
-
-   #undef CASE_TARGET
 
    in.push(_in);
 }
@@ -223,6 +264,56 @@ SourceTokenizerDS::~SourceTokenizerDS()
 		delete in.top();
 		in.pop();
 	}
+}
+
+//
+// SourceTokenizerDS::add_define_base
+//
+void SourceTokenizerDS::add_define_base(std::string const &name)
+{
+   static DefVec const tokens;
+   add_define_base(name, tokens);
+}
+
+//
+// SourceTokenizerDS::add_define_base
+//
+void SourceTokenizerDS::add_define_base
+(std::string const &name, DefVec const &tokens)
+{
+   defines_base[name] = tokens;
+}
+
+//
+// SourceTokenizerDS::add_define_base
+//
+void SourceTokenizerDS::add_define_base
+(std::string const &name, std::string const &source)
+{
+   DefVec tokens;
+   SourceStream in(source, SourceStream::ST_C);
+
+   try
+   {
+      tokens.resize(tokens.size()+1);
+      tokens.back().readToken(&in);
+   }
+   catch (SourceStream::EndOfStream &)
+   {
+      // Keep reading until end-of-stream.
+      // (I sure hope there aren't any incomplete tokens.)
+   }
+
+   add_define_base(name, tokens);
+}
+
+//
+// SourceTokenizerDS::addDefine
+//
+void SourceTokenizerDS::addDefine(std::string const &name)
+{
+   static DefVec const tokens;
+   addDefine(name, SourcePosition::builtin(), tokens);
 }
 
 //

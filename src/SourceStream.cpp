@@ -26,6 +26,7 @@
 #include "option.hpp"
 
 #include <fstream>
+#include <sstream>
 #include <vector>
 
 
@@ -47,228 +48,238 @@ static option::option_data<int> option_tab_columns
 // Global Functions                                                           |
 //
 
-SourceStream::SourceStream(std::string const & filename, SourceType const type) :
-_oldC(-2), _curC(-2), _newC(-2),
-_in(NULL),
-_filename(filename),
+SourceStream::SourceStream(std::string const &_filename, unsigned type)
+ :
+oldC(-2), curC(-2), newC(-2),
+in(NULL),
+filename(_filename),
 
-_countColumn(0),
-_countLine(1),
+countColumn(0),
+countLine(1),
 
-_depthComment(0),
+depthComment(0),
 
-_inComment(false),
+inComment(false),
 
-_inQuoteDouble(false),
-_inQuoteSingle(false)
+inQuoteDouble(false),
+inQuoteSingle(false)
 {
-	switch (type)
-	{
-	case ST_ASMPLX:
-		_doCommentASM = true;
-		_doCommentC   = false;
-		_doCommentCPP = false;
+   switch (type & ST_MASK)
+   {
+   case ST_ASMPLX:
+      doCommentASM = true;
+      doCommentC   = false;
+      doCommentCPP = false;
 
-		_doQuoteDouble = false;
-		_doQuoteSingle = false;
-		break;
+      doQuoteDouble = false;
+      doQuoteSingle = false;
+      break;
 
-	case ST_C:
-		_doCommentASM = false;
-		_doCommentC   = true;
-		_doCommentCPP = true;
+   case ST_C:
+      doCommentASM = false;
+      doCommentC   = true;
+      doCommentCPP = true;
 
-		_doQuoteDouble = true;
-		_doQuoteSingle = true;
-		break;
-	}
+      doQuoteDouble = true;
+      doQuoteSingle = true;
+      break;
+   }
 
-	for (std::vector<std::string>::iterator dir(option_include_dir.data.begin()); !_in && dir != option_include_dir.data.end(); ++dir)
-	{
-		_in = new std::ifstream((*dir + _filename).c_str());
+   if (type & STF_STRING)
+   {
+      in = new std::istringstream(filename);
+      filename = "string";
+   }
 
-		if (!*_in)
-		{
-			delete _in;
-			_in = NULL;
-		}
-	}
+   if (!in)
+   {
+      std::vector<std::string>::iterator dir;
+      for (dir  = option_include_dir.data.begin();
+           dir != option_include_dir.data.end() && !in; ++dir)
+      {
+         in = new std::ifstream((*dir + filename).c_str());
 
-	if (!_in) throw std::exception();
+         if (!*in)
+         {
+            delete in;
+            in = NULL;
+         }
+      }
+   }
+
+   if (!in) throw std::exception();
 }
 SourceStream::~SourceStream()
 {
-	delete _in;
+   delete in;
 }
 
 char SourceStream::get()
 {
-	if (!_ungetStack.empty())
-	{
-		char c = _ungetStack.top();
-		_ungetStack.pop();
-		return c;
-	}
+   if (!ungetStack.empty())
+   {
+      char c = ungetStack.top();
+      ungetStack.pop();
+      return c;
+   }
 
-	while (true)
-	{
-		_oldC = _curC;
-		_curC = _newC != -2 ? _newC : _in->get();
-		_newC = _in->get();
-
-
-
-		// \t has special counting
-		if (_curC == '\t')
-			_countColumn += option_tab_columns.data;
-		else
-			++_countColumn;
-
-		// \n end of line
-		if (_curC == '\n')
-		{
-			_inComment = false;
-			_countColumn = 0;
-			++_countLine;
-		}
-
-		// ; line comment start
-		if (_curC == ';' && _doCommentASM && !isInComment() && !isInQuote())
-		{
-			_inComment = true;
-		}
-
-		// // line comment start?
-		if (_curC == '/' && _newC == '/' && _doCommentCPP && !isInComment() && !isInQuote())
-		{
-			_inComment = true;
-		}
-
-		// /* comment start?
-		if (_curC == '/' && _newC == '*' && _doCommentC && !isInComment() && !isInQuote())
-		{
-			++_depthComment;
-		}
-
-		// */ commend end?
-		if (_curC == '*' && _newC == '/' && _doCommentC && !_inComment && _depthComment && !isInQuote())
-		{
-			--_depthComment;
-		}
-
-		// " double quote
-		if (_curC == '"' && _doQuoteDouble && !isInComment() && !_inQuoteSingle)
-		{
-			_inQuoteDouble = !_inQuoteDouble;
-		}
-
-		// " single quote
-		if (_curC == '\'' && _doQuoteSingle && !isInComment() && !_inQuoteDouble)
-		{
-			_inQuoteSingle = !_inQuoteSingle;
-		}
+   while (true)
+   {
+      oldC = curC;
+      curC = newC != -2 ? newC : in->get();
+      newC = in->get();
 
 
+      // \t has special counting
+      if (curC == '\t')
+         countColumn += option_tab_columns.data;
+      else
+         ++countColumn;
 
-		// Comments are stripped.
-		if (isInComment())
-			continue;
+      // \n end of line
+      if (curC == '\n')
+      {
+         inComment = false;
+         countColumn = 0;
+         ++countLine;
+      }
 
-		// End of multi-line comments are stripped, unless quoted.
-		if (((_curC == '*' && _newC == '/') || (_oldC == '*' && _curC == '/')) && !isInQuote())
-			continue;
+      // ; line comment start
+      if (curC == ';' && doCommentASM && !isInComment() && !isInQuote())
+      {
+         inComment = true;
+      }
+
+      // // line comment start?
+      if (curC == '/' && newC == '/' && doCommentCPP && !isInComment() && !isInQuote())
+      {
+         inComment = true;
+      }
+
+      // /* comment start?
+      if (curC == '/' && newC == '*' && doCommentC && !isInComment() && !isInQuote())
+      {
+         ++depthComment;
+      }
+
+      // */ commend end?
+      if (curC == '*' && newC == '/' && doCommentC && !inComment && depthComment && !isInQuote())
+      {
+         --depthComment;
+      }
+
+      // " double quote
+      if (curC == '"' && doQuoteDouble && !isInComment() && !inQuoteSingle)
+      {
+         inQuoteDouble = !inQuoteDouble;
+      }
+
+      // " single quote
+      if (curC == '\'' && doQuoteSingle && !isInComment() && !inQuoteDouble)
+      {
+         inQuoteSingle = !inQuoteSingle;
+      }
 
 
 
-		// Quoted string escape sequences.
-		if (isInQuote() && _curC == '\\')
-		{
-			int newC(_newC);
-			_newC = -2;
-			++_countColumn;
+      // Comments are stripped.
+      if (isInComment())
+         continue;
 
-			switch (newC)
-			{
-			case 'r': _curC = '\r'; break;
-			case 'n': _curC = '\n'; break;
-			case 't': _curC = '\t'; break;
-
-			case '\n':
-				_countColumn = 0;
-				++_countLine;
-				_curC = newC;
-				break;
-
-			case '\t':
-				_countColumn += option_tab_columns.data-1;
-			case '\\':
-			case '\'':
-			case '"':
-			case ' ':
-				_curC = newC;
-				break;
-
-			// TODO: \xXX
-
-			default:
-				_newC = newC;
-				break;
-			}
-		}
+      // End of multi-line comments are stripped, unless quoted.
+      if (((curC == '*' && newC == '/') || (oldC == '*' && curC == '/')) && !isInQuote())
+         continue;
 
 
 
-		if (!*_in) throw EndOfStream();
-		return (char)_curC;
-	}
+      // Quoted string escape sequences.
+      if (isInQuote() && curC == '\\')
+      {
+         int _newC = newC;
+         newC = -2;
+         ++countColumn;
+
+         switch (_newC)
+         {
+         case 'r': curC = '\r'; break;
+         case 'n': curC = '\n'; break;
+         case 't': curC = '\t'; break;
+
+         case '\n':
+            countColumn = 0;
+            ++countLine;
+            curC = _newC;
+            break;
+
+         case '\t':
+            countColumn += option_tab_columns.data-1;
+         case '\\':
+         case '\'':
+         case '"':
+         case ' ':
+            curC = _newC;
+            break;
+
+         // TODO: \xXX
+
+         default:
+            newC = _newC;
+            break;
+         }
+      }
+
+
+      if (!*in) throw EndOfStream();
+      return (char)curC;
+   }
 }
 
 long SourceStream::getColumn() const
 {
-	return _countColumn;
+   return countColumn;
 }
 
-std::string const & SourceStream::getFilename() const
+std::string const &SourceStream::getFilename() const
 {
-	return _filename;
+   return filename;
 }
 
 long SourceStream::getLineCount() const
 {
-	return _countLine;
+   return countLine;
 }
 
 bool SourceStream::is_HWS(char c)
 {
-	return c == ' ' || c == '\t';
+   return c == ' ' || c == '\t';
 }
 
 bool SourceStream::isInComment() const
 {
-	return _inComment || _depthComment;
+   return inComment || depthComment;
 }
 
 bool SourceStream::isInQuote() const
 {
-	return _inQuoteDouble || _inQuoteSingle;
+   return inQuoteDouble || inQuoteSingle;
 }
 
 bool SourceStream::skipHWS()
 {
-	bool found(false);
-	char c;
+   bool found(false);
+   char c;
 
-	while (is_HWS(c = get())) found = true;
-	unget(c);
+   while (is_HWS(c = get())) found = true;
+   unget(c);
 
-	return found;
+   return found;
 }
 
 void SourceStream::unget(char const c)
 {
-	_ungetStack.push(c);
-	_oldC = -2;
-	_curC = -2;
+   ungetStack.push(c);
+   oldC = -2;
+   curC = -2;
 }
 
 

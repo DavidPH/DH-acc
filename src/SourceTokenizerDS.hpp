@@ -43,6 +43,10 @@ class SourceStream;
 class SourceTokenizerDS
 {
 public:
+   typedef std::vector<SourceTokenC> DefVec;
+   typedef std::map<std::string, DefVec> DefMap;
+
+
    explicit SourceTokenizerDS(SourceStream *in);
    ~SourceTokenizerDS();
 
@@ -57,9 +61,15 @@ public:
 
    void unget(SourceTokenC const & token);
 
+
+   static void add_define_base(std::string const &name);
+   static void add_define_base(std::string const &name, DefVec const &tokens);
+   static void add_define_base(std::string const &name, std::string const &source);
+
 private:
    SourceTokenizerDS(SourceTokenizerDS const &tokenizer)/* = delete*/;
 
+   void addDefine(std::string const &name);
    void addDefine
    (std::string const &name, SourcePosition const &position,
     std::vector<SourceTokenC> const &tokens);
@@ -98,7 +108,7 @@ private:
    void remDefine();
    void remSkip();
 
-   std::map<std::string, std::vector<SourceTokenC> > defines;
+   DefMap defines;
 
    std::stack<SourceStream *> in;
    std::vector<bool> skipStack;
@@ -111,6 +121,9 @@ private:
    bool canExpand  : 1;
    bool canSkip    : 1;
    bool canString  : 1;
+
+
+   static DefMap defines_base;
 };
 
 #endif /* HPP_SourceTokenizerDS_ */
