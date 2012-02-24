@@ -24,6 +24,7 @@
 #include "../SourceExpressionDS.hpp"
 
 #include "../ObjectExpression.hpp"
+#include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenizerDS.hpp"
@@ -106,6 +107,16 @@ static void do_storage
    in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
    *type = (*type)->setStorage(store, storeArea);
+}
+
+//
+// do_storage_autoreg
+//
+static void do_storage_autoreg
+(VariableType::Pointer *type, SourceTokenizerDS *in)
+{
+   if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
+      do_storage(type, VariableType::ST_REGISTER, in);
 }
 
 //
@@ -548,6 +559,9 @@ VariableType::Reference SourceExpressionDS::make_expression_type
 
       else if (in->peek().data == "register")
          do_storage(&type, VariableType::ST_REGISTER, in);
+
+      else if (in->peek().data == "__autoreg")
+         do_storage_autoreg(&type, in);
 
       else if (in->peek().data == "__mapregister")
          do_storage(&type, VariableType::ST_MAPREGISTER, in);
