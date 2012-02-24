@@ -1,0 +1,450 @@
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// General utilities.
+//
+//-----------------------------------------------------------------------------
+
+[
+#include "stdlib.dh"
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
+//
+// heapdata
+//
+struct heapdata
+{
+   unsigned size;
+   unsigned used;
+   __array char[0] data;
+};
+
+
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
+
+constexpr size_t heapsize = 16*1024*1024;
+
+__variable static __array char[heapsize] heap;
+__variable static heapdata *heapptr;
+
+constexpr heapdata *heapbegin = (heapdata *)&heap[0];
+constexpr heapdata *heapend = (heapdata *)&heap[heapsize];
+
+__variable __staticreg unsigned randval = 1;
+
+
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
+
+//===================================================================
+// Numeric conversion functions.
+//
+
+//
+// atof
+//
+//__extfunc atof(char const *nptr) -> __real
+
+//
+// atoi
+//
+//__extfunc atoi(char const *nptr) -> int
+
+//
+// atol
+//
+//__extfunc atol(char const *nptr) -> int
+
+//
+// atoll
+//
+//__extfunc atoll(char const *nptr) -> int
+
+//
+// strtod
+//
+//__extfunc strtod(char const *restrict nptr, char **restrict endptr) -> double
+
+//
+// strtof
+//
+//__extfunc strtof(char const *restrict nptr, char **restrict endptr) -> float
+
+//
+// strtold
+//
+//__extfunc strtold
+//(char const *restrict nptr, char **restrict endptr) -> long double
+
+//
+// strtol
+//
+//__extfunc strtol(char const *restrict nptr, char **restrict endptr) -> long int
+
+//
+// strtoll
+//
+//__extfunc strtoll
+//(char const *restrict nptr, char **restrict endptr) -> long long int
+
+//
+// strtoul
+//
+//__extfunc strtoul
+//(char const *restrict nptr, char **restrict endptr) -> unsigned long int
+
+//
+// strtoull
+//
+//__extfunc strtoull
+//(char const *restrict nptr, char **restrict endptr) -> unsigned long long int
+
+//===================================================================
+// Pseudo-random sequence generation functions.
+//
+
+//
+// rand
+//
+__extfunc rand() -> int
+{
+   randval = randval * 1103515245 + 12345;
+   return (unsigned)(randval >> 8) & RAND_MAX;
+};
+
+//
+// srand
+//
+__extfunc srand(unsigned int seed) -> void
+{
+   randval = seed;
+};
+
+//===================================================================
+// Memory management functions.
+//
+
+//
+// calloc
+//
+__extfunc calloc(size_t nmemb, size_t size) -> void *
+{
+   nmemb = (size_t)malloc(size *= nmemb);
+
+   if (!nmemb) return NULL;
+
+   __variable __autoreg char *ptr = (char *)nmemb;
+   __variable __autoreg char *end = ptr + size;
+
+   while (ptr != end) {*ptr++ = 0;};
+
+   return (void *)nmemb;
+};
+
+//
+// free
+//
+__extfunc free(void *ptr) -> void
+{
+   if (!ptr) return;
+
+   __variable __autoreg heapdata *block = (heapdata *)ptr - 1;
+
+   block->used = 0;
+
+   if (block < heapptr) {heapptr = block;};
+};
+
+//
+// malloc
+//
+__extfunc malloc(size_t size) -> void *
+{
+   if (!size) return NULL;
+
+   if (!heapptr) {heapptr = heapbegin;};
+
+   while (true)
+   {
+      // Used block.
+      if (heapptr->used)
+      {
+         heapptr = (heapdata *)&heapptr->data[heapptr->size];
+         continue;
+      };
+
+      // Unused block.
+      if (heapptr->size)
+      {
+         if (heapptr->size >= size)
+         {
+            heapptr->used = size;
+            return (void *)&heapptr->data;
+         }
+         else
+         {
+            heapptr = (heapdata *)&heapptr->data[heapptr->size];
+            continue;
+         };
+      };
+
+      // No block.
+
+      // Verify that there is sufficient space first.
+      if ((heapdata *)&heapptr->data[size]+1 >= heapend)
+         return NULL;
+
+      heapptr->used = size;
+      heapptr->size = size;
+
+      __variable __autoreg void *ptr = (void *)&heapptr->data;
+
+      heapptr = (heapdata *)&heapptr->data[heapptr->size];
+
+      heapptr->used = 0;
+      heapptr->size = 0;
+
+      return ptr;
+   };
+
+   heapptr = heapbegin;
+
+   return NULL;
+};
+
+//
+// realloc
+//
+__extfunc realloc(void *ptr, size_t size) -> void *
+{
+   if (!ptr) return malloc(size);
+
+   if (!size) {free(ptr); return NULL;};
+
+   __variable __autoreg heapdata *block = (heapdata *)ptr - 1;
+
+   // Enough size in current block.
+   if (block->size >= size)
+   {
+      block->used = size;
+
+      return ptr;
+   };
+
+   __variable __autoreg heapdata *nextblock =
+      (heapdata *)&block->data[block->size];
+
+   // No next block, just resize current block. (If enough space.)
+   if (nextblock->size == 0 && (heapdata *)&block->data[size]+1 < heapend)
+   {
+      block->size = size;
+      block->used = size;
+
+      nextblock = (heapdata *)&block->data[block->size];
+
+      nextblock->size = 0;
+      nextblock->used = 0;
+
+      return ptr;
+   };
+
+   __variable __autoreg void *newptr = malloc(size);
+
+   if (!newptr) return NULL;
+
+   __variable __autoreg char *it1 = ptr;
+   __variable __autoreg char *it2 = newptr;
+   __variable __autoreg char *end = it1 + block->used;
+
+   while (it1 != end) {*it1++ = *it2++;};
+
+   return newptr;
+};
+
+//===================================================================
+// Communication with the environment.
+//
+
+//
+// abort
+//
+//__extfunc abort() -> void
+
+//
+// atexit
+//
+//__extfunc atexit(__func_t() -> void func) -> int
+
+//
+// exit
+//
+//__extfunc exit(int status) -> void
+
+//
+// _Exit
+//
+//__extfunc _Exit(int status) -> void
+
+//
+// getenv
+//
+//__extfunc getenv(char const *name) -> char *
+
+//
+// system
+//
+//__extfunc system(char const *string) -> int
+
+//===================================================================
+// Searching and sorting utilities.
+//
+
+//
+// bsearch
+//
+//__extfunc bsearch
+//(void const *key, void const *base, size_t nmemb, size_t size,
+// __func_t(void const *, void const *) -> int compar) -> void *
+
+//
+// qsort
+//
+//__extfunc qsort
+//(void *base, size_t nmemb, size_t size,
+// __func_t(void const *, void const *) -> int compar) -> void
+
+//===================================================================
+// Integer arithmetic functions.
+//
+
+//
+// abs
+//
+__extfunc abs(int j) -> int
+{
+   return j < 0 ? -j : j;
+};
+
+//
+// labs
+//
+__extfunc labs(long int j) -> long int
+{
+   return j < 0 ? -j : j;
+};
+
+//
+// llabs
+//
+__extfunc llabs(long long int j) -> long long int
+{
+   #define i ((int __autoreg *)&j) #
+
+   if (i[1] < 0)
+   {
+      i[0] = ~i[0];
+      i[1] = ~i[1];
+      if (!i[0]--) --i[1];
+      return j;
+   }
+   else
+      return j;
+
+   #undef i
+};
+
+//
+// div
+//
+__extfunc div(int numer, int denom) -> div_t
+{
+   __variable __autoreg div_t d;
+   d.quot = numer / denom;
+   d.rem  = numer % denom;
+   return d;
+};
+
+//
+// ldiv
+//
+__extfunc ldiv(long int numer, long int denom) -> ldiv_t
+{
+   __variable __autoreg ldiv_t d;
+   d.quot = numer / denom;
+   d.rem  = numer % denom;
+   return d;
+};
+
+//
+// lldiv
+//
+#if 0 #
+__extfunc lldiv(long long int numer, long long int denom) -> lldiv_t
+{
+   __variable __autoreg lldiv_t d;
+   d.quot = numer / denom;
+   d.rem  = numer % denom;
+   return d;
+};
+#endif
+
+//===================================================================
+// Multibyte/wide character conversion functions.
+//
+
+//
+// mblen
+//
+//__extfunc mblen(char const *s, size_t n) -> int
+
+//
+// mbtowc
+//
+//__extfunc mbtowc(wchar_t *restrict pwc, char const *restrict s, size_t n) -> int
+
+//
+// wctomb
+//
+//__extfunc wctomb(char *s, wchar_t wc) -> int
+
+//===================================================================
+// Multibyte/wide string conversion functions.
+//
+
+//
+// mbstowcs
+//
+//__extfunc mbstowcs
+//(wchar_t *restrict pwcs, char const *restrict s, size_t n) -> size_t
+
+//
+// wcstombs
+//
+//__extfunc wcstombs
+//(char *restrict s, wchar_t const *restrict pwcs, size_t n) -> size_t
+
+]
+// EOF
+
