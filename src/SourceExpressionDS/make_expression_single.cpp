@@ -125,8 +125,39 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
       break;
 
    case SourceTokenC::TT_OP_AT:
+   {
+      ObjectExpression::Pointer addr;
+
       expr = make_expression_single(in, blocks, context);
-      expr = create_value_variable(SourceVariable::create_literal(VariableType::get_bt_uint(), expr->getData()->address, token.pos), PASS_A);
+
+      VariableData::Pointer data = expr->getData();
+
+      switch (data->type)
+      {
+      case VariableData::MT_AUTO:
+      case VariableData::MT_POINTER:
+      case VariableData::MT_STATIC:
+         addr = ObjectExpression::create_value_int(option_addr_array, token.pos);
+         break;
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_NONE:
+      case VariableData::MT_REGISTER:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+         throw SourceException("invalid MT for @", token.pos, __func__);
+
+      case VariableData::MT_REGISTERARRAY:
+         addr = data->address;
+         break;
+      }
+
+      VariableType::Reference type = VariableType::get_bt_uint();
+      SourceVariable::Pointer var  =
+         SourceVariable::create_literal(type, addr, token.pos);
+
+      expr = create_value_variable(var, PASS_A);
+   }
       break;
 
    case SourceTokenC::TT_OP_BRACE_O:
