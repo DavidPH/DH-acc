@@ -188,8 +188,8 @@ void BinaryTokenACS::init(int *argCounts)
    DO_INIT(WAIT_POLYOBJECT_IMM,          1);
    DO_INIT(WAIT_SCRIPT,                  0);
    DO_INIT(WAIT_SCRIPT_IMM,              1);
-   DO_INIT(WAIT_SECTOR,                  0);
-   DO_INIT(WAIT_SECTOR_IMM,              1);
+   DO_INIT(WAIT_STAG,                    0);
+   DO_INIT(WAIT_STAG_IMM,                1);
    DO_INIT(WAIT_TICS,                    0);
    DO_INIT(WAIT_TICS_IMM,                2);
 

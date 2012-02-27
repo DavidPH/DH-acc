@@ -112,8 +112,8 @@ public:
       BCODE_MISC_RANDOM_IMM              =  58, \
       BCODE_GAME_GET_THINGCOUNT_SID      =  59, \
       BCODE_GAME_GET_THINGCOUNT_SID_IMM  =  60, \
-      BCODE_WAIT_SECTOR                  =  61, \
-      BCODE_WAIT_SECTOR_IMM              =  62, \
+      BCODE_WAIT_STAG                    =  61, \
+      BCODE_WAIT_STAG_IMM                =  62, \
       BCODE_WAIT_POLYOBJECT              =  63, \
       BCODE_WAIT_POLYOBJECT_IMM          =  64, \
       BCODE_STAG_SET_TEXTURE_FLOOR       =  65, \

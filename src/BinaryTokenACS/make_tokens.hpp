@@ -236,8 +236,8 @@
    CASE_MAP_ACS(WAIT_POLYOBJECT_IMM);          \
    CASE_MAP_ACS(WAIT_SCRIPT);                  \
    CASE_MAP_ACS(WAIT_SCRIPT_IMM);              \
-   CASE_MAP_ACS(WAIT_SECTOR);                  \
-   CASE_MAP_ACS(WAIT_SECTOR_IMM);              \
+   CASE_MAP_ACS(WAIT_STAG);                    \
+   CASE_MAP_ACS(WAIT_STAG_IMM);                \
    CASE_MAP_ACS(WAIT_TICS);                    \
    CASE_MAP_ACS(WAIT_TICS_IMM)
 
