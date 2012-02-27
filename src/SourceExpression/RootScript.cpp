@@ -52,6 +52,13 @@ private:
 
 
 //----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+extern int option_script_regargs;
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -93,11 +100,12 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       callSize += callTypes[i]->getSize(position);
    }
 
-   if (callSize > 3) for (bigsint i = callSize - 3; i--;)
+   if (callSize > option_script_regargs)
+      for (bigsint i = callSize - option_script_regargs; i--;)
    {
       // FIXME: Should be based on type.
       objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));
-      objects->addToken(OCODE_SET_REGISTER32I, objects->getValue(i+3));
+      objects->addToken(OCODE_SET_REGISTER32I, objects->getValue(i+option_script_regargs));
    }
 }
 

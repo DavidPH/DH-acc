@@ -27,10 +27,29 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../option.hpp"
 #include "../ost_type.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
+
+
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
+
+extern int option_script_regargs;
+static option::option_dptr<int> option_script_regargs_handler
+('\0', "script-regargs", "optimization",
+ "Selects how many script arguments get passed using the engine's internal "
+ "mechanisms. Defaults to 3.", NULL, &option_script_regargs);
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+int option_script_regargs = 3;
 
 
 //----------------------------------------------------------------------------|
@@ -56,39 +75,37 @@ void SourceExpression::make_objects_call_script
    // Determine which OCODE to use.
    ObjectCode ocode;
 
+   int argsSize = callSize;
+   if (argsSize > option_script_regargs)
+      argsSize = option_script_regargs;
+
    if (option_named_scripts)
    {
       ocode = OCODE_MISC_NATIVE;
-      switch (callSize)
+      switch (argsSize)
       {
       case  0: oargc = objects->getValue(1); break;
       case  1: oargc = objects->getValue(2); break;
       case  2: oargc = objects->getValue(3); break;
-      default: oargc = objects->getValue(4); break;
+      case  3: oargc = objects->getValue(4); break;
+      default: oargc = objects->getValue(5); break;
       }
    }
    else if (retnSize == 0)
    {
-      switch (callSize)
+      switch (argsSize)
       {
       case  0: ocode = OCODE_ACS_SPECIAL_EXEC1; break;
       case  1: ocode = OCODE_ACS_SPECIAL_EXEC2; break;
       case  2: ocode = OCODE_ACS_SPECIAL_EXEC3; break;
-      default: ocode = OCODE_ACS_SPECIAL_EXEC4; break;
-      }
-   }
-   else if (retnSize == 1)
-   {
-      switch (callSize)
-      {
-      case 0: objects->addTokenPushZero();
-      case 1: objects->addTokenPushZero();
-      case 2: objects->addTokenPushZero();
-      default: ocode = OCODE_ACSE_SPECIAL_EXEC5_RETN1; break;
+      case  3: ocode = OCODE_ACS_SPECIAL_EXEC4; break;
+      default: ocode = OCODE_ACS_SPECIAL_EXEC5; break;
       }
    }
    else
-      throw SourceException("bad return-size", position, __func__);
+   {
+      ocode = OCODE_ACSE_SPECIAL_EXEC5_RETN1;
+   }
 
    // Determine which line special to use.
    ObjectExpression::Pointer ospec;
@@ -108,11 +125,14 @@ void SourceExpression::make_objects_call_script
    objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
 
    // FIXME: Should be based on type.
-   if (callSize > 3) for (bigsint i = callSize - 3; i--;)
-      objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
+   if (callSize > option_script_regargs)
+      for (bigsint i = callSize - option_script_regargs; i--;)
+         objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
 
-   // Dummy arg.
-   if (ocode == OCODE_ACSE_SPECIAL_EXEC5_RETN1) objects->addTokenPushZero();
+   // Dummy args.
+   if (ocode == OCODE_ACSE_SPECIAL_EXEC5_RETN1)
+      while (argsSize++ < 4)
+         objects->addTokenPushZero();
 
    // The actual call.
    if (option_named_scripts)
