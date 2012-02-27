@@ -51,6 +51,8 @@ static std::vector<std::string> strings_temp;
 
 bool option_fake_ACS0 = true;
 
+extern int option_script_regargs;
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -235,11 +237,14 @@ write_ACSE_script(std::ostream *out, ObjectData_Script const &s)
    ObjectExpression::Pointer addr =
       ObjectExpression::get_symbol(s.label, SourcePosition::none());
 
+   bigsint args =
+      s.argCount <= option_script_regargs ? s.argCount : option_script_regargs;
+
    if (option_fake_ACS0)
    {
       BinaryTokenACS::write_ACS0_16(out, s.number);
       BinaryTokenACS::write_ACS0_8 (out, s.stype);
-      BinaryTokenACS::write_ACS0_8 (out, s.argCount <= 3 ? s.argCount : 3);
+      BinaryTokenACS::write_ACS0_8 (out, args);
       BinaryTokenACS::write_ACS0_32(out, *addr);
    }
    else
@@ -247,7 +252,7 @@ write_ACSE_script(std::ostream *out, ObjectData_Script const &s)
       BinaryTokenACS::write_ACS0_16(out, s.number);
       BinaryTokenACS::write_ACS0_16(out, s.stype);
       BinaryTokenACS::write_ACS0_32(out, *addr);
-      BinaryTokenACS::write_ACS0_32(out, s.argCount <= 3 ? s.argCount : 3);
+      BinaryTokenACS::write_ACS0_32(out, args);
    }
 }
 
