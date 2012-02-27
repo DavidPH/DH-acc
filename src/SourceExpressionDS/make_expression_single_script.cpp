@@ -37,6 +37,7 @@
 // Global Variables                                                           |
 //
 
+extern bool option_script_autoargs;
 extern bool option_string_func;
 
 
@@ -49,6 +50,14 @@ extern bool option_string_func;
 //
 SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
 {
+   // scriptArgClass
+   SourceVariable::StorageClass scriptArgClass;
+
+   if (option_script_autoargs)
+      scriptArgClass = SourceVariable::SC_AUTO;
+   else
+      scriptArgClass = SourceVariable::SC_REGISTER;
+
    // scriptName
    std::string scriptNameSource = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
@@ -83,7 +92,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
    VariableType::Pointer scriptReturn;
    make_expression_arglist
    (in, blocks, context, &scriptArgTypes, NULL, &scriptArgCount, NULL,
-    &scriptReturn);
+    &scriptReturn, scriptArgClass);
 
    // scriptNumber
    bigsint scriptNumber;
@@ -131,6 +140,14 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(script)
 {
+   // scriptArgClass
+   SourceVariable::StorageClass scriptArgClass;
+
+   if (option_script_autoargs)
+      scriptArgClass = SourceVariable::SC_AUTO;
+   else
+      scriptArgClass = SourceVariable::SC_REGISTER;
+
    // scriptContext
    SourceContext::Reference scriptContext =
       SourceContext::create(context, SourceContext::CT_SCRIPT);
@@ -184,7 +201,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    VariableType::Pointer scriptReturn;
    make_expression_arglist
    (in, blocks, context, &scriptArgTypes, &scriptArgNames, &scriptArgCount,
-    scriptContext, &scriptReturn);
+    scriptContext, &scriptReturn, scriptArgClass);
 
    // scriptNumber
    bigsint scriptNumber;

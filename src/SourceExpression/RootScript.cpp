@@ -55,6 +55,7 @@ private:
 // Global Variables                                                           |
 //
 
+extern bool option_script_autoargs;
 extern int option_script_regargs;
 
 
@@ -100,12 +101,24 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       callSize += callTypes[i]->getSize(position);
    }
 
-   if (callSize > option_script_regargs)
-      for (bigsint i = callSize - option_script_regargs; i--;)
+   if (option_script_autoargs)
    {
-      // FIXME: Should be based on type.
-      objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));
-      objects->addToken(OCODE_SET_REGISTER32I, objects->getValue(i+option_script_regargs));
+      for (bigsint i = 0; i < callSize && i < option_script_regargs; ++i)
+      {
+         // FIXME: Should be based on type.
+         objects->addToken(OCODE_GET_REGISTER32I, objects->getValue(i));
+         objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
+      }
+   }
+   else
+   {
+      if (callSize > option_script_regargs)
+         for (bigsint i = callSize - option_script_regargs; i--;)
+         {
+            // FIXME: Should be based on type.
+            objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));
+            objects->addToken(OCODE_SET_REGISTER32I, objects->getValue(i+option_script_regargs));
+         }
    }
 }
 

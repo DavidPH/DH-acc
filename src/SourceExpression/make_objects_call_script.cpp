@@ -38,9 +38,14 @@
 // Static Variables                                                           |
 //
 
+extern bool option_script_autoargs;
+static option::option_dptr<bool> option_script_autoargs_handlers
+('\0', "script-autoargs", "features",
+ "Makes script args automatic variables.", NULL, &option_script_autoargs);
+
 extern int option_script_regargs;
 static option::option_dptr<int> option_script_regargs_handler
-('\0', "script-regargs", "optimization",
+('\0', "script-regargs", "features",
  "Selects how many script arguments get passed using the engine's internal "
  "mechanisms. Defaults to 3.", NULL, &option_script_regargs);
 
@@ -49,6 +54,7 @@ static option::option_dptr<int> option_script_regargs_handler
 // Global Variables                                                           |
 //
 
+bool option_script_autoargs = false;
 int option_script_regargs = 3;
 
 
@@ -124,10 +130,22 @@ void SourceExpression::make_objects_call_script
    // Advance the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
 
-   // FIXME: Should be based on type.
+   // Need to handle args not handled by the engine.
    if (callSize > option_script_regargs)
-      for (bigsint i = callSize - option_script_regargs; i--;)
-         objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
+   {
+      if (option_script_autoargs)
+      {
+         // FIXME: Should be based on type.
+         for (bigsint i = callSize; i-- > option_script_regargs;)
+            objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
+      }
+      else
+      {
+         // FIXME: Should be based on type.
+         for (bigsint i = callSize - option_script_regargs; i--;)
+            objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
+      }
+   }
 
    // Dummy args.
    if (ocode == OCODE_ACSE_SPECIAL_EXEC5_RETN1)
