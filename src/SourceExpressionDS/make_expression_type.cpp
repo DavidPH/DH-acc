@@ -368,7 +368,7 @@ is_expression_type(std::string const &data, SourceContext *context)
 VariableType::Reference SourceExpressionDS::make_expression_type
 (SourceTokenizerDS *in, Vector *blocks, SourceContext *context)
 {
-   SourceTokenC token = in->get(SourceTokenC::TT_IDENTIFIER);
+   SourceTokenC token;
 
    bigsint width;
    std::string name;
@@ -377,7 +377,18 @@ VariableType::Reference SourceExpressionDS::make_expression_type
    VariableType::Pointer type;
    VariableType::Vector types;
 
-   if ((type = make_basic(token, in)) != NULL)
+   if (in->peekType(SourceTokenC::TT_OP_PARENTHESIS_O))
+   {
+      in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+      type = make_expression_type(in,blocks, context);
+      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   }
+   else
+   {
+      token = in->get(SourceTokenC::TT_IDENTIFIER);
+   }
+
+   if (type || (type = make_basic(token, in)) != NULL)
    {
    }
    else if (token.data == "__array")
