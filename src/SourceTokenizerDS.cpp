@@ -53,6 +53,8 @@ static option::option_call option_define_handler
 //
 
 SourceTokenizerDS::DefMap SourceTokenizerDS::defines_base;
+extern bool option_function_autoargs;
+extern bool option_script_autoargs;
 
 
 //----------------------------------------------------------------------------|
@@ -249,6 +251,12 @@ SourceTokenizerDS::SourceTokenizerDS(SourceStream *_in)
    case TARGET_ZDoom:    addDefine("__TARGET_ZDoom__");    break;
    case TARGET_UNKNOWN:  addDefine("__TARGET_UNKNOWN__");  break;
    }
+
+   if (option_function_autoargs)
+      addDefine("__FUNCTION_AUTOARGS__");
+
+   if (option_script_autoargs)
+      addDefine("__SCRIPT_AUTOARGS__");
 
    in.push(_in);
 }

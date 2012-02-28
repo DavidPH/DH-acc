@@ -519,6 +519,33 @@ void BinaryTokenZDACS::make_tokens
       PUSH_TOKEN(BCODE_SETOP_INC_GLOBALARRAY);
       break;
 
+      // MUL
+   case OCODE_SETOP_MUL_AUTO32I:
+   case OCODE_SETOP_MUL_AUTO32U:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      PUSH_TOKEN_ADD_ARG0();
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_MUL_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_MUL_POINTER32I:
+   case OCODE_SETOP_MUL_POINTER32U:
+      PUSH_TOKEN_ADD_ARG0();
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_MUL_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_MUL_STATIC32I:
+   case OCODE_SETOP_MUL_STATIC32U:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_MUL_GLOBALARRAY);
+      break;
+
    case OCODE_NONE:
    default:
       throw SourceException(std::string("unknown OCODE: ") +

@@ -27,10 +27,28 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../option.hpp"
 #include "../ost_type.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
+
+
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
+
+extern bool option_function_autoargs;
+static option::option_dptr<bool> option_function_autoargs_handlers
+('\0', "function-autoargs", "features",
+ "Makes function args automatic variables.", NULL, &option_function_autoargs);
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+bool option_function_autoargs = false;
 
 
 //----------------------------------------------------------------------------|
@@ -67,14 +85,18 @@ void SourceExpression::make_objects_call_function
    // Advance the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
 
-   // For not ZDoom...
-   if (target_type != TARGET_ZDoom)
+   // For not ZDoom or specified auto args...
+   if (option_function_autoargs || target_type != TARGET_ZDoom)
    {
       // ... Place args in auto vars.
       // FIXME: Should be based on type.
       for (bigsint i = callSize; i--;)
          objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
+   }
 
+   // For not ZDoom...
+   if (target_type != TARGET_ZDoom)
+   {
       // ... Push return address.
       ObjectExpression::Pointer retnExpr =
          ObjectExpression::create_value_symbol(labelReturn, position);

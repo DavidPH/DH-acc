@@ -47,6 +47,7 @@ static option::option_dptr<bool> option_string_func_handle
 // Global Variables                                                           |
 //
 
+extern bool option_function_autoargs;
 bool option_string_func = true;
 
 
@@ -59,6 +60,14 @@ bool option_string_func = true;
 //
 SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
 {
+   // functionArgClass
+   SourceVariable::StorageClass functionArgClass;
+
+   if (option_function_autoargs || target_type != TARGET_ZDoom)
+      functionArgClass = SourceVariable::SC_AUTO;
+   else
+      functionArgClass = SourceVariable::SC_REGISTER;
+
    // functionName
    std::string functionName = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
@@ -74,7 +83,10 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
    VariableType::Pointer functionReturn;
    make_expression_arglist
    (in, blocks, context, &functionArgTypes, NULL, &functionArgCount, NULL,
-    &functionReturn);
+    &functionReturn, functionArgClass);
+
+   // Don't count automatic variable args.
+   if (option_function_autoargs) functionArgCount = 0;
 
    // functionVarType
    VariableType::Reference functionVarType =
@@ -111,7 +123,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
    // functionArgClass
    SourceVariable::StorageClass functionArgClass;
 
-   if (target_type != TARGET_ZDoom)
+   if (option_function_autoargs || target_type != TARGET_ZDoom)
       functionArgClass = SourceVariable::SC_AUTO;
    else
       functionArgClass = SourceVariable::SC_REGISTER;
@@ -155,6 +167,9 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
    make_expression_arglist
    (in, blocks, context, &functionArgTypes, &functionArgNames,
     &functionArgCount, functionContext, &functionReturn, functionArgClass);
+
+   // Don't count automatic variable args.
+   if (option_function_autoargs) functionArgCount = 0;
 
    // functionVarType
    VariableType::Reference functionVarType =
