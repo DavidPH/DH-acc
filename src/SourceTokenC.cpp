@@ -358,9 +358,12 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
 
       if (c == '0')
       {
-         if (c == 'x' || c == 'X')
+         char cPeek = in->get();
+         in->unget(cPeek);
+
+         if (cPeek == 'x' || cPeek == 'X')
             base = 16;
-         else if (c == 'b' || c == 'B')
+         else if (cPeek == 'b' || cPeek == 'B')
             base = 2;
          else
             base = 8;
