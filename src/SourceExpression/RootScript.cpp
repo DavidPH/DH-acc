@@ -25,6 +25,8 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../ost_type.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
 
@@ -89,6 +91,16 @@ void SourceExpression_RootScript::
 virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
+
+   if (target_type == TARGET_ZDoom)
+   {
+      std::string label = context->makeLabel();
+      objects->setPosition(position);
+      objects->addToken(OCODE_ADDR_AUTO, objects->getValue(0));
+      objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(label));
+      objects->addToken(OCODE_ADDR_STACK_ADD_IMM, objects->getValue(1));
+      objects->addLabel(label);
+   }
 
    bigsint callSize = 0;
    VariableType::Vector const &callTypes = type->getTypes();
