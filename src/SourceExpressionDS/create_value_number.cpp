@@ -167,38 +167,38 @@ SourceExpression::Pointer SourceExpressionDS::create_value_integer
    goto doint;
 
 dointHH:
-   if (!isU && val < maxs_HH)
+   if (!isU && val <= maxs_HH)
       return create_value_schar(val, context, position);
 
-   if ((isU || isUU) && val < maxu_HH)
+   if ((isU || isUU) && val <= maxu_HH)
       return create_value_uchar(val, context, position);
 
 dointH:
-   if (!isU && val < maxs_H)
+   if (!isU && val <= maxs_H)
       return create_value_short(val, context, position);
 
-   if ((isU || isUU) && val < maxu_H)
+   if ((isU || isUU) && val <= maxu_H)
       return create_value_ushort(val, context, position);
 
 doint:
-   if (!isU && val < maxs)
+   if (!isU && val <= maxs)
       return create_value_int(val, context, position);
 
-   if ((isU || isUU) && val < maxu)
+   if ((isU || isUU) && val <= maxu)
       return create_value_uint(val, context, position);
 
 dointL:
-   if (!isU && val < maxs_L)
+   if (!isU && val <= maxs_L)
       return create_value_long(val, context, position);
 
-   if ((isU || isUU) && val < maxu_L)
+   if ((isU || isUU) && val <= maxu_L)
       return create_value_ulong(val, context, position);
 
 dointLL:
-   if (!isU /*&& val < maxs_LL*/) // FIXME
+   if (!isU /*&& val <= maxs_LL*/) // FIXME
       return create_value_llong(val, context, position);
 
-   if ((isU || isUU) /*&& val < maxu_LL*/) // FIXME
+   if ((isU || isUU) /*&& val <= maxu_LL*/) // FIXME
       return create_value_ullong(val, context, position);
 
    throw SourceException("integer literal out of range", position, __func__);
