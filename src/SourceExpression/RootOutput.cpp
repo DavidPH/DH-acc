@@ -207,10 +207,10 @@ void SourceExpression_RootOutput::doOut
       break;
 
    case VariableType::BT_LLONG:
-      objects->addToken(OCODE_ACSP_NUM_DEC32I);
+      objects->addToken(OCODE_ACSP_NUM_HEX32U);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(' '));
       objects->addToken(OCODE_ACSP_CHARACTER);
-      objects->addToken(OCODE_ACSP_NUM_DEC32I);
+      objects->addToken(OCODE_ACSP_NUM_HEX32U);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('L'));
       objects->addToken(OCODE_ACSP_CHARACTER);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('L'));
@@ -315,10 +315,10 @@ void SourceExpression_RootOutput::doOut
       break;
 
    case VariableType::BT_ULLONG:
-      objects->addToken(OCODE_ACSP_NUM_DEC32U);
+      objects->addToken(OCODE_ACSP_NUM_HEX32U);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(' '));
       objects->addToken(OCODE_ACSP_CHARACTER);
-      objects->addToken(OCODE_ACSP_NUM_DEC32U);
+      objects->addToken(OCODE_ACSP_NUM_HEX32U);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('U'));
       objects->addToken(OCODE_ACSP_CHARACTER);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('L'));

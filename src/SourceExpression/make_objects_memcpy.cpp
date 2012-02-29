@@ -129,9 +129,18 @@ static void make_objects_literal
       break;
 
    case VariableType::BT_LLONG:
-   case VariableType::BT_ULLONG:
+   {
       objects->addToken(OCODE_GET_LITERAL32I, elem);
-      objects->addToken(OCODE_GET_LITERAL32I, ObjectExpression::create_binary_div(elem, objects->getValue(0x10000000), position));
+
+      bigsint value = elem->resolveInt();
+
+      if (0 > value && value > -static_cast<bigsint>(0x100000000))
+         value = -1;
+      else
+         value /= static_cast<bigsint>(0x100000000);
+
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(value));
+   }
       break;
 
    case VariableType::BT_SCRIPT:
@@ -149,6 +158,11 @@ static void make_objects_literal
       if (target_type == TARGET_ZDoom && option_string_tag)
          objects->addToken(OCODE_ACSE_STRING_TAG);
 
+      break;
+
+   case VariableType::BT_ULLONG:
+      objects->addToken(OCODE_GET_LITERAL32I, elem);
+      objects->addToken(OCODE_GET_LITERAL32I, ObjectExpression::create_binary_div(elem, objects->getValue(0x10000000), position));
       break;
    }
 }
