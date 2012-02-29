@@ -99,7 +99,11 @@ void SourceExpression_UnarySub::virtual_makeObjects
 {
    Super::recurse_makeObjects(objects, dst);
 
-   switch (getType()->getBasicType())
+   VariableType::Reference type = getType();
+   VariableData::Pointer   src  =
+      VariableData::create_stack(type->getSize(position));
+
+   switch (type->getBasicType())
    {
    case VariableType::BT_CHAR:
    case VariableType::BT_INT:
@@ -121,8 +125,7 @@ void SourceExpression_UnarySub::virtual_makeObjects
       throw SourceException("invalid BT", position, getName());
    }
 
-   make_objects_memcpy_post
-   (objects, dst, VariableData::create_stack(getType()->getSize(position)), position);
+   make_objects_memcpy_post(objects, dst, src, type, position);
 }
 
 // EOF

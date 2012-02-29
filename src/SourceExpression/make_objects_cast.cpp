@@ -368,7 +368,7 @@ void SourceExpression::make_objects_memcpy_cast
    // If no cast, this just becomes a memcpy.
    if (dstType->getUnqualified() == srcType->getUnqualified())
    {
-      make_objects_memcpy_post(objects, dst, src, position);
+      make_objects_memcpy_post(objects, dst, src, srcType, position);
 
       return;
    }
@@ -389,7 +389,7 @@ void SourceExpression::make_objects_memcpy_cast
    VariableData::Pointer tmp = VariableData::create_stack(src->size);
 
    make_objects_memcpy_prep(objects, tmp, src, position);
-   make_objects_memcpy_post(objects, tmp, src, position);
+   make_objects_memcpy_post(objects, tmp, src, srcType, position);
 
    switch (srcType->getBasicType())
    {
@@ -571,7 +571,7 @@ void SourceExpression::make_objects_memcpy_cast
       break;
    }
 
-   make_objects_memcpy_post(objects, dst, tmp, position);
+   make_objects_memcpy_post(objects, dst, tmp, dstType, position);
 
    #undef TYPES_STRING
 }

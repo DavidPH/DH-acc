@@ -74,11 +74,14 @@ void SourceExpression_BranchNot::virtual_makeObjects
 {
    Super::recurse_makeObjects(objects, dst);
 
+   VariableType::Reference type = getType();
+   VariableData::Pointer   src  =
+      VariableData::create_stack(type->getSize(position));
+
    // FIXME: Shuld be based on type.
    objects->addToken(OCODE_LOGICAL_NOT32I);
 
-   make_objects_memcpy_post
-   (objects, dst, VariableData::create_stack(getType()->getSize(position)), position);
+   make_objects_memcpy_post(objects, dst, src, type, position);
 }
 
 // EOF

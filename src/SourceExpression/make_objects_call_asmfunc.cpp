@@ -85,7 +85,7 @@ void SourceExpression::make_objects_call_asmfunc
       objects->setPosition(position).addToken(ocode.ocode);
    }
 
-   make_objects_memcpy_post(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, position);
 }
 
 // EOF

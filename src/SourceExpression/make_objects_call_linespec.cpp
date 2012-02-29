@@ -80,7 +80,7 @@ void SourceExpression::make_objects_call_linespec
 
    objects->addToken(ocode, ospec);
 
-   make_objects_memcpy_post(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, position);
 }
 
 // EOF

@@ -178,8 +178,9 @@ private:
    {
       Super::recurse_makeObjects(objects, dst);
 
-      VariableData::Pointer src =
-         VariableData::create_stack(getType()->getSize(position));
+      VariableType::Reference type = getType();
+      VariableData::Pointer   src  =
+         VariableData::create_stack(type->getSize(position));
 
       std::string string;
 
@@ -340,7 +341,7 @@ private:
          break;
       }
 
-      make_objects_memcpy_post(objects, dst, src, position);
+      make_objects_memcpy_post(objects, dst, src, type, position);
    }
 
    SourceExpression::Vector expressions;

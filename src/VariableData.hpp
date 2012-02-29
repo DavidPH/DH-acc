@@ -57,12 +57,6 @@ public:
       MT_NONE
    };
 
-   enum SectionL // Literal
-   {
-      SL_INT,
-      SL_STRING
-   };
-
    enum SectionR // Register
    {
       SR_LOCAL,
@@ -85,7 +79,6 @@ public:
 
    union
    {
-      SectionL  sectionL;
       SectionR  sectionR;
       SectionRA sectionRA;
    };
@@ -98,8 +91,7 @@ public:
 
    static Pointer create_auto(bigsint size, ObjectExpression *address);
 
-   static Pointer create_literal(bigsint size, SectionL section,
-                                 ObjectExpression *value);
+   static Pointer create_literal(bigsint size, ObjectExpression *value);
 
    static Pointer create_pointer(bigsint size, ObjectExpression *address,
                                  SourceExpression *offset);
@@ -120,9 +112,6 @@ public:
 private:
    VariableData(MemoryType type, bigsint size, ObjectExpression *address,
                 SourceExpression *offset);
-
-   VariableData(MemoryType type, bigsint size, SectionL section,
-                ObjectExpression *address, SourceExpression *offset);
 
    VariableData(MemoryType type, bigsint size, SectionR section,
                 ObjectExpression *address, SourceExpression *offset);

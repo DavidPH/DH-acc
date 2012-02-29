@@ -142,7 +142,7 @@ void SourceExpression_Binary::doAssignBase
 
       objects->addToken(ocodeGet, src->address);
 
-      make_objects_memcpy_post(objects, dst, tmp, position);
+      make_objects_memcpy_post(objects, dst, tmp, typeL, position);
    }
 }
 
@@ -164,7 +164,7 @@ void SourceExpression_Binary::doEvaluateBase
 
    objects->addToken(ocode);
 
-   make_objects_memcpy_post(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, type, position);
 }
 
 //
@@ -250,7 +250,7 @@ recurse_makeObjects(ObjectVector *objects, VariableData *dst)
    // Special case, child handles expressions.
    if (arithmetic == 2) return;
 
-   VariableData::Pointer src =
+   VariableData::Pointer   src =
       VariableData::create_stack(getType()->getSize(position));
 
    make_objects_memcpy_prep(objects, dst, src, position);

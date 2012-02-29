@@ -116,7 +116,7 @@ void SourceExpression::make_objects_call_function
    // Reset the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
 
-   make_objects_memcpy_post(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, position);
 }
 
 //
@@ -162,7 +162,7 @@ void SourceExpression::make_objects_call_function
    // Reset the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
 
-   make_objects_memcpy_post(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, position);
 }
 
 // EOF

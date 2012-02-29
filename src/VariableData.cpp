@@ -55,19 +55,6 @@ VariableData(MemoryType _type, bigsint _size, ObjectExpression *_address,
 // VariableData::VariableData
 //
 VariableData::
-VariableData(MemoryType _type, bigsint _size, SectionL section,
-             ObjectExpression *_address, SourceExpression *offset)
-             : type(_type), size(_size), sectionL(section), address(_address),
-               offsetExpr(offset)
-{
-   if (!address)
-      address = address0;
-}
-
-//
-// VariableData::VariableData
-//
-VariableData::
 VariableData(MemoryType _type, bigsint _size, SectionR section,
              ObjectExpression *_address, SourceExpression *offset)
              : type(_type), size(_size), sectionR(section), address(_address),
@@ -110,9 +97,9 @@ create_auto(bigsint size, ObjectExpression *address)
 // VariableData::create_literal
 //
 VariableData::Pointer VariableData::
-create_literal(bigsint size, SectionL section, ObjectExpression *value)
+create_literal(bigsint size, ObjectExpression *value)
 {
-   return new VariableData(MT_LITERAL, size, section, value, NULL);
+   return new VariableData(MT_LITERAL, size, value, NULL);
 }
 
 //

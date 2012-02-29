@@ -114,12 +114,13 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    }
    else
    {
-      VariableData::Pointer dup = exprL->getData();
-      VariableData::Pointer src = VariableData::create_stack(dup->size);
+      VariableType::Reference type = getType();
+      VariableData::Pointer   dup  = exprL->getData();
+      VariableData::Pointer   src  = VariableData::create_stack(dup->size);
 
       make_objects_memcpy_prep(objects, dst, dup, src, position);
       exprR->makeObjects(objects, src);
-      make_objects_memcpy_post(objects, dst, dup, src, position);
+      make_objects_memcpy_post(objects, dst, dup, src, type, position);
    }
 }
 

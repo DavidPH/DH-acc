@@ -78,6 +78,10 @@ void SourceExpression_BinaryNE::virtual_makeObjects
 {
    Super::recurse_makeObjects(objects, dst);
 
+   VariableType::Reference type = getType();
+   VariableData::Pointer   src  =
+      VariableData::create_stack(type->getSize(position));
+
    switch (exprL->getType()->getBasicType())
    {
    case VariableType::BT_CHAR:
@@ -100,8 +104,7 @@ void SourceExpression_BinaryNE::virtual_makeObjects
       throw SourceException("invalid BT", position, getName());
    }
 
-   make_objects_memcpy_post
-   (objects, dst, VariableData::create_stack(getType()->getSize(position)), position);
+   make_objects_memcpy_post(objects, dst, src, type, position);
 }
 
 // EOF

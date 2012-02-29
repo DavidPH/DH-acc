@@ -48,7 +48,7 @@ void SourceExpression::make_objects_call_native
 
    objects->addToken(OCODE_MISC_NATIVE, objects->getValue(callSize), data);
 
-   make_objects_memcpy_post(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, position);
 }
 
 // EOF

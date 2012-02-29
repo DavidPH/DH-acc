@@ -59,17 +59,12 @@ public:
    virtual VariableData::Pointer getData() const
    {
       VariableType::Reference type = getType();
-      VariableType::BasicType bt   = type->getBasicType();
       bigsint                 size = type->getSize(position);
 
       ObjectExpression::Pointer obj = exprL->makeObject();
       obj = obj->resolveElement(exprR->makeObject()->resolveInt());
 
-      VariableData::SectionL sectionL =
-         bt == VariableType::BT_STRING ? VariableData::SL_STRING
-                                       : VariableData::SL_INT;
-
-      return VariableData::create_literal(size, sectionL, obj);
+      return VariableData::create_literal(size, obj);
    }
 
    virtual VariableType::Reference getType() const;
@@ -141,7 +136,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    if (exprL->getType()->getBasicType() == VariableType::BT_STRING)
    {
-      bigsint typeSize = getType()->getSize(position);
+      VariableType::Reference type = getType();
+      bigsint typeSize = type->getSize(position);
       bigsint sizeL = exprL->getType()->getSize(position);
       bigsint sizeR = exprR->getType()->getSize(position);
 
@@ -158,7 +154,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2),
                         objects->getValue(15));
 
-      make_objects_memcpy_post(objects, dst, src, position);
+      make_objects_memcpy_post(objects, dst, src, type, position);
    }
    else
    {

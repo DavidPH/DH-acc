@@ -178,7 +178,7 @@ void SourceExpression_UnaryDecInc::
 doDst(ObjectVector *objects, VariableData *dst, VariableData *src)
 {
    make_objects_memcpy_prep(objects, dst, NULL, position);
-   make_objects_memcpy_post(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, getType(), position);
 }
 
 //

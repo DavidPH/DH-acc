@@ -163,10 +163,12 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
 {
    Super::recurse_makeObjects(objects, dst);
 
+   VariableType::Reference type = getType();
+
    if (expr->getType()->getBasicType() == VariableType::BT_STRING)
    {
       VariableData::Pointer src =
-         VariableData::create_stack(getType()->getSize(position));
+         VariableData::create_stack(type->getSize(position));
       VariableData::Pointer tmp =
          VariableData::create_stack(expr->getType()->getSize(position));
 
@@ -176,7 +178,7 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
       objects->addTokenPushZero();
       objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2), objects->getValue(15));
 
-      make_objects_memcpy_post(objects, dst, src, position);
+      make_objects_memcpy_post(objects, dst, src, type, position);
 
       return;
    }
@@ -184,7 +186,7 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
    VariableData::Pointer src = getData();
 
    make_objects_memcpy_prep(objects, dst, src, position);
-   make_objects_memcpy_post(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, type, position);
 }
 
 // EOF

@@ -29,6 +29,7 @@
 #include "../ost_type.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
+#include "../VariableType.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -55,13 +56,111 @@ bool option_string_tag = true;
 //
 
 //
+// make_objects_literal
+//
+// Recursively handles a literal.
+//
+static void make_objects_literal
+(ObjectVector *objects, ObjectExpression *elem, VariableType *type,
+ SourcePosition const &position)
+{
+   switch (type->getBasicType())
+   {
+   case VariableType::BT_ARRAY:
+   {
+      ObjectExpression::Vector elems;
+      elem->expandOnce(&elems);
+      VariableType::Reference types = type->getReturn();
+
+      if (elems.size() != static_cast<size_t>(type->getWidth()))
+         throw SourceException("incorrect elem count", position, __func__);
+
+      for (size_t i = 0; i < elems.size(); ++i)
+         make_objects_literal(objects, elems[i], types, position);
+   }
+      break;
+
+   case VariableType::BT_ASMFUNC:
+   case VariableType::BT_FLOAT:
+   case VariableType::BT_LFLOAT:
+   case VariableType::BT_LLFLOAT:
+   case VariableType::BT_UNION:
+   case VariableType::BT_VOID:
+      throw SourceException("bad BT", position, __func__);
+
+   case VariableType::BT_BLOCK:
+   case VariableType::BT_STRUCT:
+   {
+      ObjectExpression::Vector elems;
+      elem->expandOnce(&elems);
+      VariableType::Vector const &types = type->getTypes();
+
+      if (elems.size() != types.size())
+         throw SourceException("incorrect elem count", position, __func__);
+
+      for (size_t i = 0; i < elems.size(); ++i)
+         make_objects_literal(objects, elems[i], types[i], position);
+   }
+      break;
+
+   case VariableType::BT_BOOLHARD:
+   case VariableType::BT_BOOLSOFT:
+   case VariableType::BT_CHAR:
+   case VariableType::BT_ENUM:
+   case VariableType::BT_FUNCTION:
+   case VariableType::BT_INT:
+   case VariableType::BT_LABEL:
+   case VariableType::BT_LINESPEC:
+   case VariableType::BT_LONG:
+   case VariableType::BT_NATIVE:
+   case VariableType::BT_POINTER:
+   case VariableType::BT_SCHAR:
+   case VariableType::BT_SHORT:
+   case VariableType::BT_UCHAR:
+   case VariableType::BT_UINT:
+   case VariableType::BT_ULONG:
+   case VariableType::BT_USHORT:
+      objects->addToken(OCODE_GET_LITERAL32I, elem);
+      break;
+
+   case VariableType::BT_FIXED:
+   case VariableType::BT_REAL:
+      objects->addToken(OCODE_GET_LITERAL32F, elem);
+      break;
+
+   case VariableType::BT_LLONG:
+   case VariableType::BT_ULLONG:
+      objects->addToken(OCODE_GET_LITERAL32I, elem);
+      objects->addToken(OCODE_GET_LITERAL32I, ObjectExpression::create_binary_div(elem, objects->getValue(0x10000000), position));
+      break;
+
+   case VariableType::BT_SCRIPT:
+      objects->addToken(OCODE_GET_LITERAL32I, elem);
+
+      if (target_type == TARGET_ZDoom && option_string_tag &&
+          option_named_scripts)
+         objects->addToken(OCODE_ACSE_STRING_TAG);
+
+      break;
+
+   case VariableType::BT_STRING:
+      objects->addToken(OCODE_GET_LITERAL32I, elem);
+
+      if (target_type == TARGET_ZDoom && option_string_tag)
+         objects->addToken(OCODE_ACSE_STRING_TAG);
+
+      break;
+   }
+}
+
+//
 // make_objects_memcpy_post_part
 //
 // Handles a single VariableData's worth of action.
 //
 static void make_objects_memcpy_post_part
-(ObjectVector *objects, VariableData *data, bool get, bool set,
- SourcePosition const position)
+(ObjectVector *objects, VariableData *data, VariableType *type, bool get,
+ bool set, SourcePosition const position)
 {
    static bigsint const ptrSize = 1;
 
@@ -96,21 +195,7 @@ static void make_objects_memcpy_post_part
 
       if (get)
       {
-         ObjectExpression::Vector elems;
-         data->address->expand(&elems);
-
-         for (ObjectExpression::Vector::iterator iter = elems.begin();
-              iter != elems.end(); ++iter)
-         {
-            objects->addToken(OCODE_GET_LITERAL32I, *iter);
-
-            // ZDoom requires tagging strings.
-            if (data->sectionL == VariableData::SL_STRING &&
-                target_type == TARGET_ZDoom && option_string_tag)
-            {
-               objects->addToken(OCODE_ACSE_STRING_TAG);
-            }
-         }
+         make_objects_literal(objects, data->address, type, position);
       }
 
       break;
@@ -408,9 +493,9 @@ static void make_objects_memcpy_post_part
 //
 // SourceExpression::make_objects_memcpy_prep
 //
-void SourceExpression::
-make_objects_memcpy_prep(ObjectVector *objects, VariableData *dst,
-                         VariableData *src, SourcePosition const &position)
+void SourceExpression::make_objects_memcpy_prep
+(ObjectVector *objects, VariableData *dst, VariableData *src,
+ SourcePosition const &position)
 {
    make_objects_memcpy_prep(objects, NULL, dst, src, position);
 }
@@ -418,10 +503,9 @@ make_objects_memcpy_prep(ObjectVector *objects, VariableData *dst,
 //
 // SourceExpression::make_objects_memcpy_prep
 //
-void SourceExpression::
-make_objects_memcpy_prep(ObjectVector *objects, VariableData *dup,
-                         VariableData *dst, VariableData *src,
-                         SourcePosition const &position)
+void SourceExpression::make_objects_memcpy_prep
+(ObjectVector *objects, VariableData *dup, VariableData *dst,
+ VariableData *src, SourcePosition const &position)
 {
    static bigsint const ptrSize = 1;
 
@@ -489,20 +573,19 @@ make_objects_memcpy_prep(ObjectVector *objects, VariableData *dup,
 //
 // SourceExpression::make_objects_memcpy_post
 //
-void SourceExpression::
-make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
-                         VariableData *src, SourcePosition const &position)
+void SourceExpression::make_objects_memcpy_post
+(ObjectVector *objects, VariableData *dst, VariableData *src,
+ VariableType *type, SourcePosition const &position)
 {
-   make_objects_memcpy_post(objects, NULL, dst, src, position);
+   make_objects_memcpy_post(objects, NULL, dst, src, type, position);
 }
 
 //
 // SourceExpression::make_objects_memcpy_post
 //
-void SourceExpression::
-make_objects_memcpy_post(ObjectVector *objects, VariableData *dup,
-                         VariableData *dst, VariableData *src,
-                         SourcePosition const &position)
+void SourceExpression::make_objects_memcpy_post
+(ObjectVector *objects, VariableData *dup, VariableData *dst,
+ VariableData *src, VariableType *type, SourcePosition const &position)
 {
    // Special handling for void destination.
    if (dst->type == VariableData::MT_VOID)
@@ -512,21 +595,20 @@ make_objects_memcpy_post(ObjectVector *objects, VariableData *dup,
    }
 
    // Move src onto the stack.
-   make_objects_memcpy_post_part(objects, src, true, false, position);
+   make_objects_memcpy_post_part(objects, src, type, true, false, position);
 
    // Move the stack into dst. (And possible back onto the stack.)
-   make_objects_memcpy_post_part(objects, dst, !!dup, true, position);
+   make_objects_memcpy_post_part(objects, dst, type, !!dup, true, position);
 
    // Move the stack into dup.
-   make_objects_memcpy_post_part(objects, dup, false, true,  position);
+   make_objects_memcpy_post_part(objects, dup, type, false, true,  position);
 }
 
 //
 // SourceExpression::make_objects_memcpy_void
 //
-void SourceExpression::
-make_objects_memcpy_void(ObjectVector *objects, VariableData *src,
-                         SourcePosition const &position)
+void SourceExpression::make_objects_memcpy_void
+(ObjectVector *objects, VariableData *src, SourcePosition const &position)
 {
    // Only need to do stuff for stuff on the stack.
    if (src->type != VariableData::MT_STACK)

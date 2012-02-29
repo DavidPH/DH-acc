@@ -394,25 +394,22 @@ protected:
     VariableType *dstType, VariableType *srcType,
     SourcePosition const &position);
 
-   static void
-   make_objects_memcpy_post(ObjectVector *objects, VariableData *dst,
-                            VariableData *src, SourcePosition const &position);
-   static void
-   make_objects_memcpy_post(ObjectVector *objects, VariableData *dup,
-                            VariableData *dst, VariableData *src,
-                            SourcePosition const &position);
+   static void make_objects_memcpy_post
+   (ObjectVector *objects, VariableData *dst, VariableData *src,
+    VariableType *type, SourcePosition const &position);
+   static void make_objects_memcpy_post
+   (ObjectVector *objects, VariableData *dup, VariableData *dst,
+    VariableData *src, VariableType *type, SourcePosition const &position);
 
-   static void
-   make_objects_memcpy_prep(ObjectVector *objects, VariableData *dst,
-                            VariableData *src, SourcePosition const &position);
-   static void
-   make_objects_memcpy_prep(ObjectVector *objects, VariableData *dup,
-                            VariableData *dst, VariableData *src,
-                            SourcePosition const &position);
+   static void make_objects_memcpy_prep
+   (ObjectVector *objects, VariableData *dst, VariableData *src,
+    SourcePosition const &position);
+   static void make_objects_memcpy_prep
+   (ObjectVector *objects, VariableData *dup, VariableData *dst,
+    VariableData *src, SourcePosition const &position);
 
-   static void
-   make_objects_memcpy_void(ObjectVector *objects, VariableData *src,
-                            SourcePosition const &position);
+   static void make_objects_memcpy_void
+   (ObjectVector *objects, VariableData *src, SourcePosition const &position);
 
 private:
    void makeObjectsBase(ObjectVector *objects, VariableData *dst);

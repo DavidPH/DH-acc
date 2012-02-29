@@ -117,7 +117,7 @@ void SourceExpression_ValueData::virtual_makeObjects
          objects->addTokenPushZero();
    }
 
-   make_objects_memcpy_post(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, type, position);
 }
 
 // EOF

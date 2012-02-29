@@ -80,9 +80,6 @@ bool SourceExpression::canMakeObject() const
    if (data->type != VariableData::MT_LITERAL)
       return false;
 
-   if (data->sectionL == VariableData::SL_STRING && option_string_tag)
-      return false;
-
    return true;
 }
 
@@ -158,10 +155,6 @@ CounterPointer<ObjectExpression> SourceExpression::makeObject() const
       throw SourceException("makeObject on invalid expression", position,
                             getName());
 
-   if (src->sectionL == VariableData::SL_STRING && option_string_tag)
-      throw SourceException
-      ("makeObject on invalid expression", position, getName());
-
    return src->address;
 }
 
@@ -177,23 +170,13 @@ makeObjects(ObjectVector *objects, VariableData *dst)
    {
       recurse_makeObjects(objects, dst);
 
-      VariableData::SectionL section;
-
       VariableType::Reference type = getType();
-      VariableType::BasicType bt   = type->getBasicType();
-
-      if (bt == VariableType::BT_STRING ||
-         (bt == VariableType::BT_SCRIPT && option_named_scripts))
-         section = VariableData::SL_STRING;
-      else
-         section = VariableData::SL_INT;
 
       VariableData::Pointer src =
-         VariableData::create_literal(type->getSize(position), section,
-                                      makeObject());
+         VariableData::create_literal(type->getSize(position), makeObject());
 
       make_objects_memcpy_prep(objects, dst, src, position);
-      make_objects_memcpy_post(objects, dst, src, position);
+      make_objects_memcpy_post(objects, dst, src, type, position);
    }
    else
       virtual_makeObjects(objects, dst);
@@ -272,10 +255,11 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    recurse_makeObjects(objects, dst);
 
-   VariableData::Pointer src = getData();
+   VariableData::Pointer   src  = getData();
+   VariableType::Reference type = getType();
 
    make_objects_memcpy_prep(objects, dst, src, position);
-   make_objects_memcpy_post(objects, dst, src, position);
+   make_objects_memcpy_post(objects, dst, src, type, position);
 }
 
 //
