@@ -82,7 +82,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
       break;
 
    case SourceTokenC::TT_INTEGER:
-      expr = create_value_int(token.data, PASS_A);
+      expr = create_value_integer(token.data, PASS_A);
       break;
 
    case SourceTokenC::TT_STRING:

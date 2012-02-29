@@ -112,6 +112,7 @@ add_executable(DH-acc
 #	SourceExpressionACS/Base.cpp
 #	SourceExpressionACS/BinaryAdd.cpp
 	SourceExpressionDS.cpp
+   SourceExpressionDS/create_value_number.cpp
 	SourceExpressionDS/make_expression_single.cpp
 	SourceExpressionDS/make_expression_single_asmfunc.cpp
 	SourceExpressionDS/make_expression_single_do.cpp

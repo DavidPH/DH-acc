@@ -468,6 +468,21 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
                continue;
             }
 
+            if ((c == 'H' || c == 'h') && !foundL)
+            {
+               foundL = true;
+               token->data += c;
+
+               char oldc = c;
+               c = in->get();
+
+               // HH or hh
+               if (c == oldc) token->data += c;
+               else in->unget(c);
+
+               continue;
+            }
+
             break;
          }
 

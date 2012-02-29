@@ -344,12 +344,19 @@ public:
    SRCEXP_EXPRVAL_DECL( t, data);
    SRCEXP_EXPRVAL_DECL( t, data_garbage);
    SRCEXP_EXPRVAL_DECL( i, int);
-   SRCEXP_EXPRVAL_DECL( s, int);
+   SRCEXP_EXPRVAL_DECL( i, llong);
+   SRCEXP_EXPRVAL_DECL( i, long);
    SRCEXP_EXPRVAL_DECL(es, member);
    SRCEXP_EXPRVAL_DECL( r, real);
    SRCEXP_EXPRVAL_DECL( s, real);
+   SRCEXP_EXPRVAL_DECL( i, schar);
+   SRCEXP_EXPRVAL_DECL( i, short);
    SRCEXP_EXPRVAL_DECL( s, string);
+   SRCEXP_EXPRVAL_DECL( i, uchar);
    SRCEXP_EXPRVAL_DECL( i, uint);
+   SRCEXP_EXPRVAL_DECL( i, ullong);
+   SRCEXP_EXPRVAL_DECL( i, ulong);
+   SRCEXP_EXPRVAL_DECL( i, ushort);
    SRCEXP_EXPRVAL_DECL( v, variable);
 
    // Root expressions.
