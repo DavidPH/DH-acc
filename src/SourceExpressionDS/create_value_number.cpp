@@ -39,10 +39,10 @@ static inline int char_to_int(char c)
       return c - '0';
 
    case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-      return c - 'A';
+      return c - 'A' + 10;
 
    case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-      return c - 'a';
+      return c - 'a' + 10;
 
    default:
       return -1;
