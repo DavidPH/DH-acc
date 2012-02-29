@@ -194,6 +194,25 @@ extern __function div(int numer, int denom) -> div_t;
 extern __function ldiv(long int numer, long int denom) -> ldiv_t;
 extern __function lldiv(long long int numer, long long int denom) -> lldiv_t;
 
+extern __function __lladd(long long int j, long long int k) -> long long int;
+
+extern __function __lland(long long int j, long long int k) -> long long int;
+
+extern __function __llcmp(long long int j, long long int k) -> int;
+extern __function __ucmp(unsigned int j, unsigned int k) -> int;
+
+extern __function __llinv(long long int j) -> long long int;
+
+extern __function __llior(long long int j, long long int k) -> long long int;
+
+extern __function __llneg(long long int j) -> long long int;
+
+extern __function __llnot(long long int j) -> bool;
+
+extern __function __llsub(long long int j, long long int k) -> long long int;
+
+extern __function __llxor(long long int j, long long int k) -> long long int;
+
 //
 // Multibyte/wide character conversion functions.
 //

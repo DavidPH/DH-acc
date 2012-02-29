@@ -24,6 +24,22 @@
 [
 #include "stdlib.dh"
 
+
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+#ifdef __FUNCTION_AUTOARGS__
+#  define DECL_jp_ll __variable __autoreg llbits_t *jp = (llbits_t *)&j #
+#  define DECL_kp_ll __variable __autoreg llbits_t *jk = (llbits_t *)&k #
+#else
+#  define DECL_jp_ll constexpr llbits_t __autoreg *jp = (llbits_t __autoreg *)&j #
+#  define DECL_kp_ll constexpr llbits_t __autoreg *kp = (llbits_t __autoreg *)&k #
+#endif
+
+#define DECL_jkp_ll DECL_jp_ll; DECL_kp_ll #
+
+
 //----------------------------------------------------------------------------|
 // Types                                                                      |
 //
@@ -36,6 +52,15 @@ struct heapdata
    unsigned size;
    unsigned used;
    __array char[0] data;
+};
+
+//
+// llbits
+//
+struct llbits_t
+{
+   unsigned int lo;
+     signed int hi;
 };
 
 
@@ -360,27 +385,23 @@ __extfunc labs(long int j) -> long int
 //
 __extfunc llabs(long long int j) -> long long int
 {
-   #ifdef __FUNCTION_AUTOARGS__
-   __variable __autoreg int *i = (int *)&j;
-   #else
-   #define i ((int __autoreg *)&j) #
-   #endif
+   DECL_jp_ll;
 
-   if (i[1] < 0)
+   if (jp->hi < 0)
    {
-      i[0] = ~i[0];
-      i[1] = ~i[1];
-      if (!i[1]++) ++i[0];
+      jp->lo = ~jp->lo;
+      jp->hi = ~jp->hi;
+      if (!++jp->lo) ++jp->hi;
       return j;
    }
    else
       return j;
-
-   #undef i
 };
 
 //
 // div
+//
+// "operator /"
 //
 __extfunc div(int numer, int denom) -> div_t
 {
@@ -393,6 +414,8 @@ __extfunc div(int numer, int denom) -> div_t
 //
 // ldiv
 //
+// "operator /"
+//
 __extfunc ldiv(long int numer, long int denom) -> ldiv_t
 {
    __variable __autoreg ldiv_t d;
@@ -404,6 +427,8 @@ __extfunc ldiv(long int numer, long int denom) -> ldiv_t
 //
 // lldiv
 //
+// "operator /"
+//
 #if 0 #
 __extfunc lldiv(long long int numer, long long int denom) -> lldiv_t
 {
@@ -413,6 +438,166 @@ __extfunc lldiv(long long int numer, long long int denom) -> lldiv_t
    return d;
 };
 #endif
+
+//
+// __lladd
+//
+// "operator +"
+//
+__extfunc __lladd(long long int j, long long int k) -> long long int
+{
+   DECL_jkp_ll;
+
+   __variable __autoreg unsigned int i = jp->lo;
+
+   jp->lo += kp->lo;
+   jp->hi += kp->hi;
+
+   // Overflow.
+   if (__ucmp(jp->lo, i) < 0) ++jp->hi;
+
+   return j;
+};
+
+//
+// __lland
+//
+// "operator &"
+//
+__extfunc __lland(long long int j, long long int k) -> long long int
+{
+   DECL_jkp_ll;
+
+   jp->lo &= kp->lo;
+   jp->hi &= kp->hi;
+   return j;
+};
+
+//
+// __llcmp
+//
+__extfunc __llcmp(long long int j, long long int k) -> int
+{
+   DECL_jkp_ll;
+
+   if (jp->hi < kp->hi) return -1;
+   if (jp->hi > kp->hi) return +1;
+
+   return __ucmp(jp->lo, kp->lo);
+};
+
+//
+// __ucmp
+//
+__extfunc __ucmp(unsigned int j, unsigned int k) -> int
+{
+   // Emulation of unsigned.
+   if (j & 0x80000000)
+   {
+      if (!(k & 0x80000000)) return -1;
+
+      if (j > k) return -1;
+      if (j < k) return +1;
+   }
+   else
+   {
+      if (k & 0x80000000) return +1;
+
+      if (j < k) return -1;
+      if (j > k) return +1;
+   };
+
+   return 0;
+};
+
+//
+// __llinv
+//
+// "operator ~"
+//
+__extfunc __llinv(long long int j) -> long long int
+{
+   DECL_jp_ll;
+
+   jp->lo = ~jp->lo;
+   jp->hi = ~jp->hi;
+   return j;
+};
+
+//
+// __llior
+//
+// "operator |"
+//
+__extfunc __llior(long long int j, long long int k) -> long long int
+{
+   DECL_jkp_ll;
+
+   jp->lo |= kp->lo;
+   jp->hi |= kp->hi;
+   return j;
+};
+
+//
+// __llneg
+//
+// "operator -"
+//
+__extfunc __llneg(long long int j) -> long long int
+{
+   DECL_jp_ll;
+
+   jp->lo = ~jp->lo;
+   jp->hi = ~jp->hi;
+   if (!++jp->lo) ++jp->hi;
+   return j;
+};
+
+//
+// __llnot
+//
+// "operator !"
+//
+__extfunc __llnot(long long int j) -> bool
+{
+   DECL_jp_ll;
+
+   return jp->lo || jp->hi;
+};
+
+//
+// __llsub
+//
+// "operator -"
+//
+__extfunc __llsub(long long int j, long long int k) -> long long int
+{
+   DECL_jkp_ll;
+
+   __variable __autoreg unsigned int i = jp->lo;
+
+   jp->lo -= kp->lo;
+   jp->hi -= kp->hi;
+
+   // Underflow.
+   if (__ucmp(jp->lo, i) > 0) --jp->hi;
+
+   return j;
+};
+
+//
+// __llxor
+//
+// "operator ^"
+//
+__extfunc __llxor(long long int j, long long int k) -> long long int
+{
+   DECL_jkp_ll;
+
+   jp->lo ^= kp->lo;
+   jp->hi ^= kp->hi;
+   return j;
+};
 
 //===================================================================
 // Multibyte/wide character conversion functions.
