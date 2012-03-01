@@ -20,17 +20,16 @@
 */
 
 #include "../ObjectExpression.hpp"
+
 #include "iter.hpp"
+
+#include "../ObjectData.hpp"
 
 
 
 void ObjectExpression::iter_auto(void (*iter)(std::ostream *, ObjectData_Auto const &), std::ostream * out)
 {
 	_iterator_map(_auto_table, iter, out);
-}
-void ObjectExpression::iter_function(void (*iter)(std::ostream *, ObjectData_Function const &), std::ostream * out)
-{
-	_iterator_map(_function_table, iter, out);
 }
 void ObjectExpression::iter_library(void (*iter)(std::ostream *, std::string const &), std::ostream * out)
 {

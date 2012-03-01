@@ -23,7 +23,9 @@
 
 #include "Binary.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
@@ -60,6 +62,14 @@ public:
    }
 
    //
+   // ::canMakeObject
+   //
+   virtual bool canMakeObject() const
+   {
+      return false;
+   }
+
+   //
    // ::getType
    //
    virtual VariableType::Reference getType() const
@@ -74,17 +84,16 @@ public:
    {
       Super::recurse_makeObjects(objects, dst);
 
-      VariableType::BasicType bt   = Super::getType()->getBasicType();
+      VariableType::Reference inType = Super::getType();
+      bigsint                 inSize = inType->getSize(position);
+      VariableType::BasicType inBT = inType->getBasicType();
       VariableType::Reference type = getType();
-      VariableData::Pointer   src  =
-         VariableData::create_stack(type->getSize(position));
+      bigsint                 size = type->getSize(position);
+      VariableData::Pointer   src  = VariableData::create_stack(size);
 
       int ocodeType;
 
-      if (ct < CMP_EQ)
-         ocodeType = getOcodeType(bt);
-      else
-         getOcodeType(bt, &ocodeType);
+      getOcodeType(inBT, &ocodeType);
 
       ObjectCode ocode = OCODE_NONE;
       switch (ct)
@@ -99,12 +108,77 @@ public:
 
       ocode = static_cast<ObjectCode>(ocode + ocodeType);
 
+      if (ct < CMP_EQ && VariableType::is_bt_unsigned(inBT) && inSize == 1)
+         return makeObjectsU(objects, ocode, dst, src, type);
+
       objects->addToken(ocode);
 
       make_objects_memcpy_post(objects, dst, src, type, position);
    }
 
 private:
+   //
+   // ::makeObjectsU
+   //
+   void makeObjectsU
+   (ObjectVector *objects, ObjectCode ocode, VariableData *dst,
+    VariableData *src, VariableType *type)
+   {
+      std::string label = context->makeLabel();
+      std::string labelCmp = label + "_cmp";
+      std::string labelEnd = label + "_end";
+      std::string labelPos = label + "_pos";
+
+      ObjectExpression::Pointer tmpJ = context->getTempVar(0);
+      ObjectExpression::Pointer tmpK = context->getTempVar(1);
+
+      // unsigned j; unsigned k;
+      objects->addToken(OCODE_SET_REGISTER32I, tmpK);
+      objects->addToken(OCODE_SET_REGISTER32I, tmpJ);
+
+      // if (j & 0x80000000) ...
+      objects->addToken(OCODE_GET_REGISTER32I, tmpJ);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
+      objects->addToken(OCODE_BITWISE_AND32);
+      objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelPos));
+
+      // ... then
+      //    if (!(k & 0x80000000)) return +1;
+      objects->addToken(OCODE_GET_REGISTER32I, tmpK);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
+      objects->addToken(OCODE_BITWISE_AND32);
+      objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelCmp));
+      if (ct == CMP_GE || ct == CMP_GT)
+         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));
+      else
+         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0));
+      objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelEnd));
+
+      // ... else
+      objects->addLabel(labelPos);
+      //    if (k & 0x80000000) return -1;
+      objects->addToken(OCODE_GET_REGISTER32I, tmpK);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
+      objects->addToken(OCODE_BITWISE_AND32);
+      objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelCmp));
+      if (ct == CMP_LE || ct == CMP_LT)
+         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));
+      else
+         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0));
+      objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelEnd));
+
+      // if (j < k) return -1;
+      // if (j > k) return +1;
+      objects->addLabel(labelCmp);
+      objects->addToken(OCODE_GET_REGISTER32I, tmpJ);
+      objects->addToken(OCODE_GET_REGISTER32I, tmpK);
+      objects->addToken(ocode);
+
+      objects->addLabel(labelEnd);
+
+      make_objects_memcpy_post(objects, dst, src, type, position);
+   }
+
    CmpType ct;
 };
 

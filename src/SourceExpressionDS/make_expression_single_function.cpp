@@ -23,6 +23,7 @@
 
 #include "../SourceExpressionDS.hpp"
 
+#include "../ObjectData.hpp"
 #include "../ObjectExpression.hpp"
 #include "../option.hpp"
 #include "../ost_type.hpp"
@@ -108,9 +109,9 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
    }
    context->addVariable(functionVariable);
 
-   ObjectExpression::add_function
-   (functionNameObject, functionLabel, functionArgCount, functionArgCount,
-    functionReturn->getSize(token.pos), true);
+   ObjectData_Function::add
+   (functionNameObject, functionLabel, functionArgCount,
+    functionReturn->getSize(token.pos), NULL);
 
    return create_value_variable(functionVariable, context, token.pos);
 }
@@ -204,13 +205,9 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
       create_branch_return(functionExprData, functionContext, token.pos);
    blocks->push_back(functionExprRetn);
 
-   // functionVarCount
-   int functionVarCount =
-      functionContext->getLimit(SourceVariable::SC_REGISTER);
-
-   ObjectExpression::add_function
-   (functionNameObject, functionLabel, functionArgCount, functionVarCount,
-    functionReturn->getSize(token.pos), false);
+   ObjectData_Function::add
+   (functionNameObject, functionLabel, functionArgCount,
+    functionReturn->getSize(token.pos), functionContext);
 
    return create_value_variable(functionVariable, context, token.pos);
 }

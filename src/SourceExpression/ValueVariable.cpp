@@ -23,6 +23,7 @@
 
 #include "../SourceExpression.hpp"
 
+#include "../ObjectData.hpp"
 #include "../ObjectExpression.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"

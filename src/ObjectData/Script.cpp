@@ -26,6 +26,7 @@
 #include "../ObjectExpression.hpp"
 #include "../object_io.hpp"
 #include "../option.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 
 #include <map>
@@ -89,9 +90,9 @@ static bigsint get_number()
 //
 std::string const &ObjectData_Script::add
 (std::string const &name, std::string const &label, ScriptType stype,
- bigsint flags, bigsint argCount, bigsint varCount, bool externDef)
+ bigsint flags, bigsint argCount, SourceContext *context)
 {
-   return add(name, label, stype, flags, argCount, varCount, externDef, -1);
+   return add(name, label, stype, flags, argCount, context, -1);
 }
 
 //
@@ -99,8 +100,7 @@ std::string const &ObjectData_Script::add
 //
 std::string const &ObjectData_Script::add
 (std::string const &name, std::string const &label, ScriptType stype,
- bigsint flags, bigsint argCount, bigsint varCount, bool externDef,
- bigsint number)
+ bigsint flags, bigsint argCount, SourceContext *context, bigsint number)
 {
    ObjectData_Script &data = script_table[name];
 
@@ -112,15 +112,15 @@ std::string const &ObjectData_Script::add
       data.argCount  = argCount;
       data.flags     = flags;
       data.number    = number;
-      data.varCount  = varCount;
-      data.externDef = externDef;
+      data.varCount  = -1;
+      data.context   = context;
+      data.externDef = !context;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
    }
-   else if (data.externDef && !externDef)
+   else if (data.externDef && context)
    {
       data.number    = number;
-      data.varCount  = varCount;
       data.externDef = false;
    }
 
@@ -220,7 +220,13 @@ void ObjectData_Script::iterate(IterFunc iterFunc, std::ostream *out)
    ScriptIter iter;
 
    for (iter = script_table.begin(); iter != script_table.end(); ++iter)
+   {
+      if (iter->second.context)
+         iter->second.varCount =
+            iter->second.context->getLimit(SourceVariable::SC_REGISTER);
+
       iterFunc(out, iter->second);
+   }
 }
 
 //
@@ -251,7 +257,7 @@ bool override_object(ObjectData_Script *out, ObjectData_Script const &in)
    {
       out->number    = in.number;
       out->varCount  = in.varCount;
-      out->externDef = true;
+      out->externDef = false;
    }
 
    return true;
@@ -270,6 +276,8 @@ void read_object(std::istream *in, ObjectData_Script *out)
    read_object(in, &out->number);
    read_object(in, &out->varCount);
    read_object(in, &out->externDef);
+
+   out->context = NULL;
 }
 
 //
@@ -277,6 +285,12 @@ void read_object(std::istream *in, ObjectData_Script *out)
 //
 void write_object(std::ostream *out, ObjectData_Script const &in)
 {
+   if (in.context)
+   {
+      const_cast<ObjectData_Script &>(in).varCount =
+         in.context->getLimit(SourceVariable::SC_REGISTER);
+   }
+
    write_object(out, in.label);
    write_object(out, in.name);
    write_object(out, in.stype);

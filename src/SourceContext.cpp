@@ -27,6 +27,7 @@
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 #include "SourceVariable.hpp"
+#include "VariableData.hpp"
 #include "VariableType.hpp"
 
 #include <cstring>
@@ -289,6 +290,19 @@ create(SourceContext *parent, ContextType typeContext)
 }
 
 //
+// SourceContext::findTempVar
+//
+SourceVariable::Pointer SourceContext::findTempVar(unsigned i)
+{
+   if (i < varTemp.size() && varTemp[i])
+      return varTemp[i];
+
+   if (inheritLocals) return parent->findTempVar(i);
+
+   return NULL;
+}
+
+//
 // SourceContext::getAllowLabel
 //
 bool SourceContext::getAllowLabel() const
@@ -486,6 +500,39 @@ VariableType::Reference SourceContext::getReturnType() const
 {
    return typeReturn ? VariableType::Reference(typeReturn)
                      : parent->getReturnType();
+}
+
+//
+// SourceContext::getTempVar
+//
+ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
+{
+   static NameType const nt = NT_LOCAL;
+   static SourcePosition const &pos = SourcePosition::builtin();
+   static SourceVariable::StorageClass const sc = SourceVariable::SC_REGISTER;
+   static VariableType::Reference const type = VariableType::get_bt_int();
+
+   static char const *const name[] =
+      {"__temp0__", "__temp1__", "__temp2__", "__temp3__", "__temp4__",
+       "__temp5__", "__temp6__", "__temp7__", "__temp8__", "__temp9__"};
+
+   SourceVariable::Pointer var = findTempVar(i);
+
+   if (!var)
+   {
+      if (i >= varTemp.size())
+         varTemp.resize(i+1);
+
+      std::string nameSrc = name[i];
+      std::string nameObj = makeNameObject(nt, sc, type, nameSrc, pos);
+
+      var = SourceVariable::create_variable(nameSrc, type, nameObj, sc, pos);
+
+      varTemp[i] = var;
+      addVariable(var);
+   }
+
+   return var->getData()->address;
 }
 
 //

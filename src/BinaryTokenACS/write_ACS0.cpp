@@ -23,6 +23,7 @@
 
 #include "../BinaryTokenACS.hpp"
 
+#include "../ObjectData.hpp"
 #include "../ObjectExpression.hpp"
 #include "../SourceException.hpp"
 

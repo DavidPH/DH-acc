@@ -23,6 +23,7 @@
 
 #include "../BinaryTokenZDACS.hpp"
 
+#include "../ObjectData.hpp"
 #include "../ObjectExpression.hpp"
 
 #include <sstream>
@@ -80,12 +81,12 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    write_ACSE_chunk(out, &chunkout, "ARAY");
 
    // FNAM - Function Names
-   ObjectExpression::iter_function(write_ACSE_function_FNAM, NULL);
+   ObjectData_Function::iterate(write_ACSE_function_FNAM, NULL);
    write_ACSE_stringtable(&chunkout, false);
    write_ACSE_chunk(out, &chunkout, "FNAM");
 
    // FUNC - Functions
-   ObjectExpression::iter_function(write_ACSE_function_FUNC, &chunkout);
+   ObjectData_Function::iterate(write_ACSE_function_FUNC, &chunkout);
    write_ACSE_chunk(out, &chunkout, "FUNC");
 
    // LOAD - Load Libraries

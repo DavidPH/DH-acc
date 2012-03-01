@@ -25,6 +25,7 @@
 #define HPP_ObjectData_
 
 #include "bignum.hpp"
+#include "Counter.hpp"
 
 #include <istream>
 #include <ostream>
@@ -35,6 +36,7 @@
 // Types                                                                      |
 //
 
+class SourceContext;
 class SourcePosition;
 
 struct ObjectData_Auto
@@ -46,13 +48,29 @@ struct ObjectData_Auto
 
 struct ObjectData_Function
 {
-	std::string label;
-	std::string name;
-	bigsint argCount;
-	bigsint number;
-	bigsint retCount;
-	bigsint varCount;
-	bool externDef;
+   typedef void (*IterFunc)(std::ostream *, ObjectData_Function const &);
+
+   std::string label;
+   std::string name;
+   bigsint argCount;
+   bigsint number;
+   bigsint retCount;
+   bigsint varCount;
+   CounterPointer<SourceContext> context;
+   bool externDef;
+
+
+   static std::string const &add
+   (std::string const &name, std::string const &label, bigsint argCount,
+    bigsint retCount, SourceContext *context);
+
+   static void generate_symbols();
+
+   static void iterate(IterFunc iterFunc, std::ostream *out);
+
+   static void read_objects(std::istream *in);
+
+   static void write_objects(std::ostream *out);
 };
 
 struct ObjectData_Register
@@ -108,17 +126,17 @@ struct ObjectData_Script
    bigsint flags;
    bigsint number;
    bigsint varCount;
+   CounterPointer<SourceContext> context;
    bool externDef;
 
 
    static std::string const &add
    (std::string const &name, std::string const &label, ScriptType stype,
-    bigsint flags, bigsint argCount, bigsint varCount, bool externDef);
+    bigsint flags, bigsint argCount, SourceContext *context);
 
    static std::string const &add
    (std::string const &name, std::string const &label, ScriptType stype,
-    bigsint flags, bigsint argCount, bigsint varCount, bool externDef,
-    bigsint number);
+    bigsint flags, bigsint argCount, SourceContext *context, bigsint number);
 
    static void generate_symbols();
 

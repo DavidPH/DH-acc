@@ -26,6 +26,7 @@
 #include "ACSP.hpp"
 #include "BinaryTokenACS.hpp"
 #include "ObjectCode.hpp"
+#include "ObjectData.hpp"
 #include "option.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
@@ -53,8 +54,6 @@ std::string ObjectExpression::_filename;
 std::set<std::string> ObjectExpression::_library_table;
 
 std::map<std::string, ObjectData_Auto> ObjectExpression::_auto_table;
-
-std::map<std::string, ObjectData_Function> ObjectExpression::_function_table;
 
 std::map<std::string, ObjectData_Register> ObjectExpression::_register_global_table;
 std::map<std::string, ObjectData_Register> ObjectExpression::_register_map_table;
@@ -96,14 +95,6 @@ void ObjectExpression::add_auto(std::string const & name, bigsint size, bigsint 
 	_auto_table[name] = s;
 
 	add_symbol(name, create_value_int(number, SourcePosition::none()));
-}
-
-void ObjectExpression::add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, bool externDef)
-{
-	ObjectData_Function f = {label, name, argCount, -1, retCount, varCount, externDef};
-	_function_table[name] = f;
-
-	add_symbol(name, ET_INT);
 }
 
 void ObjectExpression::add_label(std::string const & symbol)

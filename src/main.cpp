@@ -24,6 +24,7 @@
 #include "BinaryTokenACS.hpp"
 #include "BinaryTokenPPACS.hpp"
 #include "BinaryTokenZDACS.hpp"
+#include "ObjectData.hpp"
 #include "ObjectExpression.hpp"
 #include "ObjectToken.hpp"
 #include "ObjectVector.hpp"
@@ -139,7 +140,8 @@ static void read_source(std::string const &name, SourceType type,
 
       // Implicit main. Should be replaced by a proper script defining syntax.
       ObjectData_Script::ScriptType stype = ObjectData_Script::ST_OPEN;
-      ObjectData_Script::add("main", 0, stype, 0, 0, 0, false);
+      ObjectData_Script::add
+      ("main", 0, stype, 0, 0, SourceContext::global_context, false);
 
       SourceTokenASMPLX::make_objects(tokens, objects);
    }
@@ -163,11 +165,9 @@ static void read_source(std::string const &name, SourceType type,
 
          ObjectData_Script::ScriptType stype = ObjectData_Script::ST_OPEN;
 
-         bigsint varCount =
-            SourceContext::global_context->getLimit(SourceVariable::SC_REGISTER);
-
          expressions->addLabel(mainName);
-         ObjectData_Script::add(mainID, mainName, stype, 0, 0, varCount, false);
+         ObjectData_Script::add
+         (mainID, mainName, stype, 0, 0, SourceContext::global_context, false);
       }
 
       expressions->makeObjects(objects, VariableData::create_void(0));

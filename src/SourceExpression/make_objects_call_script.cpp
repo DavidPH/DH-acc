@@ -54,6 +54,7 @@ static option::option_dptr<int> option_script_regargs_handler
 // Global Variables                                                           |
 //
 
+extern bool option_named_scripts;
 bool option_script_autoargs = false;
 int option_script_regargs = 3;
 

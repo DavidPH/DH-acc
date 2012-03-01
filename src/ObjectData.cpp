@@ -41,18 +41,6 @@ bool override_object(ObjectData_Auto * out, ObjectData_Auto const & in)
 
 	return true;
 }
-bool override_object(ObjectData_Function * out, ObjectData_Function const & in)
-{
-	if (out->name != in.name)
-		return false;
-
-	out->externDef = out->externDef && in.externDef;
-
-	if (out->number == -1)
-		out->number = in.number;
-
-	return true;
-}
 bool override_object(ObjectData_Register * out, ObjectData_Register const & in)
 {
 	if (out->name != in.name)
@@ -103,16 +91,6 @@ void read_object(std::istream * in, ObjectData_Auto * out)
 	read_object(in, &out->number);
 	read_object(in, &out->size);
 }
-void read_object(std::istream * in, ObjectData_Function * out)
-{
-	read_object(in, &out->label);
-	read_object(in, &out->name);
-	read_object(in, &out->argCount);
-	read_object(in, &out->number);
-	read_object(in, &out->retCount);
-	read_object(in, &out->varCount);
-	read_object(in, &out->externDef);
-}
 void read_object(std::istream * in, ObjectData_Register * out)
 {
 	read_object(in, &out->name);
@@ -153,16 +131,6 @@ void write_object(std::ostream * out, ObjectData_Auto const & in)
 	write_object(out, in.name);
 	write_object(out, in.number);
 	write_object(out, in.size);
-}
-void write_object(std::ostream * out, ObjectData_Function const & in)
-{
-	write_object(out, in.label);
-	write_object(out, in.name);
-	write_object(out, in.argCount);
-	write_object(out, in.number);
-	write_object(out, in.retCount);
-	write_object(out, in.varCount);
-	write_object(out, in.externDef);
 }
 void write_object(std::ostream * out, ObjectData_Register const & in)
 {

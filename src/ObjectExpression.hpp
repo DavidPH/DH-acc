@@ -26,7 +26,6 @@
 
 #include "bignum.hpp"
 #include "Counter.hpp"
-#include "ObjectData.hpp"
 #include "SourcePosition.hpp"
 
 #include <istream>
@@ -37,6 +36,10 @@
 #include <vector>
 
 struct ObjectCodeSet;
+struct ObjectData_Auto;
+struct ObjectData_Register;
+struct ObjectData_RegisterArray;
+struct ObjectData_Static;
 class ObjectVector;
 class SourceTokenC;
 
@@ -97,8 +100,6 @@ public:
 	static void add_address_count(bigsint const addressCount);
 
 	static void add_auto(std::string const & name, bigsint size, bigsint number);
-
-	static void add_function(std::string const & name, std::string const & label, bigsint argCount, bigsint varCount, bigsint retCount, bool externDef);
 
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
@@ -165,8 +166,6 @@ public:
 	static ExpressionType get_symbol_type(std::string const & symbol, SourcePosition const & position);
 
 	static void iter_auto(void (*iter)(std::ostream *, ObjectData_Auto const &), std::ostream * out);
-
-	static void iter_function(void (*iter)(std::ostream *, ObjectData_Function const &), std::ostream * out);
 
 	static void iter_library(void (*iter)(std::ostream *, std::string const &), std::ostream * out);
 
@@ -267,8 +266,6 @@ private:
 	static std::set<std::string> _library_table;
 
 	static std::map<std::string, ObjectData_Auto> _auto_table;
-
-	static std::map<std::string, ObjectData_Function> _function_table;
 
 	static std::map<std::string, ObjectData_Register> _register_global_table;
 	static std::map<std::string, ObjectData_Register> _register_map_table;

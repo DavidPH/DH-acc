@@ -25,6 +25,7 @@
 
 #include "iter.hpp"
 
+#include "../ObjectData.hpp"
 #include "../option.hpp"
 #include "../ost_type.hpp"
 #include "../SourceException.hpp"
@@ -200,16 +201,6 @@ template<typename T> static void allocate_size(UsedMap *usedMap, T &data)
    ObjectExpression::add_symbol(data.name, create_int(data.number));
 }
 
-//
-// allocate_Function
-//
-static void allocate_Function(bigsint *number, ObjectData_Function &f)
-{
-   f.number = (*number)++;
-
-   ObjectExpression::add_symbol(f.name, create_int(f.number));
-}
-
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -288,12 +279,7 @@ void ObjectExpression::do_deferred_allocation()
 
 
    // functions
-   if (target_type == TARGET_ZDoom)
-   {
-      bigsint number(0);
-
-      _iterator_map(_function_table, allocate_Function, &number);
-   }
+   ObjectData_Function::generate_symbols();
 
 
    // scripts

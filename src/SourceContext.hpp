@@ -36,6 +36,7 @@
 // Types                                                                      |
 //
 
+class ObjectExpression;
 class VariableType;
 
 //
@@ -83,6 +84,8 @@ public:
    int getLimit(SourceVariable::StorageClass sc) const;
 
    CounterReference<VariableType> getReturnType() const;
+
+   CounterPointer<ObjectExpression> getTempVar(unsigned i);
 
    ContextType getType() const;
    ContextType getTypeRoot() const;
@@ -149,6 +152,8 @@ private:
    void addCount(int count, SourceVariable::StorageClass sc);
    void addLimit(int limit, SourceVariable::StorageClass sc);
 
+   CounterPointer<SourceVariable> findTempVar(unsigned i);
+
    int getCount(SourceVariable::StorageClass sc) const;
 
    CounterPointer<SourceVariable> getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
@@ -175,6 +180,7 @@ private:
 
    std::vector<std::string> varNames;
    std::vector<CounterPointer<SourceVariable> > varVars;
+   std::vector<CounterPointer<SourceVariable> > varTemp;
 
    std::string label;
 

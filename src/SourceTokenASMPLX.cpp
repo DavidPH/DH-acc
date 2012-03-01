@@ -21,6 +21,7 @@
 
 #include "SourceTokenASMPLX.hpp"
 
+#include "ObjectData.hpp"
 #include "ObjectCode.hpp"
 #include "ObjectExpression.hpp"
 #include "ObjectVector.hpp"

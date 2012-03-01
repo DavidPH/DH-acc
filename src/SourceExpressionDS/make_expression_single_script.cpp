@@ -23,6 +23,7 @@
 
 #include "../SourceExpressionDS.hpp"
 
+#include "../ObjectData.hpp"
 #include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
@@ -125,11 +126,11 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
    if (scriptNumber < 0)
       ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-       scriptArgCount, true);
+       NULL);
    else
       ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-       scriptArgCount, true, scriptNumber);
+       NULL, scriptNumber);
 
    context->addVariable(scriptVariable);
    return create_value_variable(scriptVariable, context, token.pos);
@@ -267,17 +268,14 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
       create_branch_return(scriptExprData, scriptContext, token.pos);
    blocks->push_back(scriptExprRetn);
 
-   // scriptVarCount
-   bigsint scriptVarCount = scriptContext->getLimit(SourceVariable::SC_REGISTER);
-
    if (scriptNumber < 0)
       ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-	  scriptVarCount, false);
+	  scriptContext);
    else
       ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-	  scriptVarCount, false, scriptNumber);
+	  scriptContext, scriptNumber);
 
    return create_value_variable(scriptVariable, context, token.pos);
 }

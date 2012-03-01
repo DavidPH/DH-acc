@@ -48,6 +48,7 @@ static option::option_dptr<bool> option_string_tag_handler
 // Global Variables                                                           |
 //
 
+extern bool option_named_scripts;
 bool option_string_tag = true;
 
 

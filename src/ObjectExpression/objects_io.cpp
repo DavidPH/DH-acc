@@ -23,18 +23,23 @@
 
 #include "../ObjectExpression.hpp"
 
+#include "../ObjectData.hpp"
 #include "../ObjectVector.hpp"
 #include "../object_io.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
+//
+// ObjectExpression::write_objects
+//
 void ObjectExpression::write_objects(std::ostream * out, ObjectVector const & objects)
 {
 	*out << "object";
 
 	write_object(out, objects);
-
-	write_object(out, _function_table);
 
 	write_object(out, _register_global_table);
 	write_object(out, _register_map_table);
@@ -49,18 +54,20 @@ void ObjectExpression::write_objects(std::ostream * out, ObjectVector const & ob
 	write_object(out, _symbol_table);
 	write_object(out, _symbol_type_table);
 
-     ObjectData_Script::write_objects(out);
-	ObjectData_String::write_objects(out);
+   ObjectData_Function::write_objects(out);
+   ObjectData_Script::write_objects(out);
+   ObjectData_String::write_objects(out);
 }
 
+//
+// ObjectExpression::read_objects
+//
 void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
 {
 	if (in->get() != 'o' || in->get() != 'b' || in->get() != 'j' || in->get() != 'e' || in->get() != 'c' || in->get() != 't')
 		throw "Not object file.";
 
 	read_object(in, objects);
-
-	read_object(in, &_function_table);
 
 	read_object(in, &_register_global_table);
 	read_object(in, &_register_map_table);
@@ -75,11 +82,10 @@ void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
 	read_object(in, &_symbol_table);
 	read_object(in, &_symbol_type_table);
 
-     ObjectData_Script::read_objects(in);
-	ObjectData_String::read_objects(in);
+   ObjectData_Function::read_objects(in);
+   ObjectData_Script::read_objects(in);
+   ObjectData_String::read_objects(in);
 }
-
-
 
 bool override_object(ObjectExpression::ExpressionType *, ObjectExpression::ExpressionType const &)
 {
@@ -210,4 +216,5 @@ void write_object(std::ostream * out, ObjectExpression::Pointer const & in)
 	in->writeObject(out);
 }
 
+// EOF
 
