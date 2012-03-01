@@ -398,7 +398,7 @@ protected:
 
    static void make_objects_memcpy_cast
    (ObjectVector *objects, VariableData *dst, VariableData *src,
-    VariableType *dstType, VariableType *srcType,
+    VariableType *dstType, VariableType *srcType, SourceContext *context,
     SourcePosition const &position);
 
    static void make_objects_memcpy_post

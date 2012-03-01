@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -358,7 +359,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
 //
 void SourceExpression::make_objects_memcpy_cast
 (ObjectVector *objects, VariableData *dst, VariableData *src,
- VariableType *dstType, VariableType *srcType, SourcePosition const &position)
+ VariableType *dstType, VariableType *srcType, SourceContext *context,
+ SourcePosition const &position)
 {
    // Don't want to slog through all that if not throwing, but also want to
    // avoid code duplication.
@@ -373,8 +375,11 @@ void SourceExpression::make_objects_memcpy_cast
       return;
    }
 
+   VariableType::BasicType dstBT = dstType->getBasicType();
+   VariableType::BasicType srcBT = srcType->getBasicType();
+
    // If casting to void, just memcpy to void.
-   if (dstType->getBasicType() == VariableType::BT_VOID)
+   if (dstBT == VariableType::BT_VOID)
    {
       make_objects_memcpy_void(objects, src, position);
 
@@ -391,7 +396,7 @@ void SourceExpression::make_objects_memcpy_cast
    make_objects_memcpy_prep(objects, tmp, src, position);
    make_objects_memcpy_post(objects, tmp, src, srcType, position);
 
-   switch (srcType->getBasicType())
+   switch (srcBT)
    {
    case VariableType::BT_ARRAY:
    case VariableType::BT_ASMFUNC:
@@ -399,9 +404,7 @@ void SourceExpression::make_objects_memcpy_cast
    case VariableType::BT_FLOAT:
    case VariableType::BT_LFLOAT:
    case VariableType::BT_LLFLOAT:
-   case VariableType::BT_LLONG:
    case VariableType::BT_STRUCT:
-   case VariableType::BT_ULLONG:
    case VariableType::BT_UNION:
    case VariableType::BT_VOID:
       throw SourceException(TYPES_STRING, position, __func__);
@@ -424,7 +427,7 @@ void SourceExpression::make_objects_memcpy_cast
    case VariableType::BT_UINT:
    case VariableType::BT_ULONG:
    case VariableType::BT_USHORT:
-      switch (dstType->getBasicType())
+      switch (dstBT)
       {
       case VariableType::BT_ARRAY:
       case VariableType::BT_ASMFUNC:
@@ -432,9 +435,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FLOAT:
       case VariableType::BT_LFLOAT:
       case VariableType::BT_LLFLOAT:
-      case VariableType::BT_LLONG:
       case VariableType::BT_STRUCT:
-      case VariableType::BT_ULLONG:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
          throw SourceException(TYPES_STRING, position, __func__);
@@ -467,12 +468,39 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FIXED:
       case VariableType::BT_REAL:
          objects->addToken(OCODE_CONVERT_32I_32F);
+         break;
+
+      case VariableType::BT_LLONG:
+         if (VariableType::is_bt_unsigned(srcBT))
+         {
+            objects->addTokenPushZero();
+            break;
+         }
+
+      {
+         // Must sign-extend. Which means... BRANCHING! AAAAAAAA!
+         std::string labelPos = context->makeLabel();
+         std::string labelEnd = context->makeLabel();
+         objects->addToken(OCODE_STACK_DUP32);
+         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
+         objects->addToken(OCODE_BITWISE_AND32);
+         objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelPos));
+         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0xFFFFFFFF));
+         objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelEnd));
+         objects->addLabel(labelPos);
+         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x00000000));
+         objects->addLabel(labelEnd);
+      }
+         break;
+
+      case VariableType::BT_ULLONG:
+         objects->addTokenPushZero();
          break;
       }
       break;
 
    case VariableType::BT_BOOLSOFT:
-      switch (dstType->getBasicType())
+      switch (dstBT)
       {
       case VariableType::BT_ARRAY:
       case VariableType::BT_ASMFUNC:
@@ -480,9 +508,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FLOAT:
       case VariableType::BT_LFLOAT:
       case VariableType::BT_LLFLOAT:
-      case VariableType::BT_LLONG:
       case VariableType::BT_STRUCT:
-      case VariableType::BT_ULLONG:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
          throw SourceException(TYPES_STRING, position, __func__);
@@ -517,6 +543,13 @@ void SourceExpression::make_objects_memcpy_cast
          objects->addToken(OCODE_LOGICAL_NOT32F);
          objects->addToken(OCODE_LOGICAL_NOT32F);
          objects->addToken(OCODE_CONVERT_32I_32F);
+         break;
+
+      case VariableType::BT_LLONG:
+      case VariableType::BT_ULLONG:
+         objects->addToken(OCODE_LOGICAL_NOT32I);
+         objects->addToken(OCODE_LOGICAL_NOT32I);
+         objects->addTokenPushZero();
          break;
       }
       break;
@@ -531,9 +564,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FLOAT:
       case VariableType::BT_LFLOAT:
       case VariableType::BT_LLFLOAT:
-      case VariableType::BT_LLONG:
       case VariableType::BT_STRUCT:
-      case VariableType::BT_ULLONG:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
          throw SourceException(TYPES_STRING, position, __func__);
@@ -566,6 +597,83 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_ULONG:
       case VariableType::BT_USHORT:
          objects->addToken(OCODE_CONVERT_32F_32I);
+         break;
+      case VariableType::BT_LLONG:
+      {
+         // Must sign-extend. Which means... BRANCHING! AAAAAAAA!
+         std::string labelPos = context->makeLabel();
+         std::string labelEnd = context->makeLabel();
+         objects->addToken(OCODE_STACK_DUP32);
+         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
+         objects->addToken(OCODE_BITWISE_AND32);
+         objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelPos));
+         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0xFFFFFFFF));
+         objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelEnd));
+         objects->addLabel(labelPos);
+         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x00000000));
+         objects->addLabel(labelEnd);
+      }
+         break;
+
+      case VariableType::BT_ULLONG:
+         objects->addTokenPushZero();
+         break;
+      }
+      break;
+
+   case VariableType::BT_LLONG:
+   case VariableType::BT_ULLONG:
+      switch (dstType->getBasicType())
+      {
+      case VariableType::BT_ARRAY:
+      case VariableType::BT_ASMFUNC:
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_FLOAT:
+      case VariableType::BT_LFLOAT:
+      case VariableType::BT_LLFLOAT:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_VOID:
+         throw SourceException(TYPES_STRING, position, __func__);
+
+      case VariableType::BT_BOOLHARD:
+         objects->addToken(OCODE_LOGICAL_IOR32I);
+         break;
+
+      case VariableType::BT_BOOLSOFT:
+         objects->addToken(OCODE_BITWISE_IOR32);
+         break;
+
+      case VariableType::BT_CHAR:
+      case VariableType::BT_ENUM:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_INT:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_LONG:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_POINTER:
+      case VariableType::BT_SCHAR:
+      case VariableType::BT_SCRIPT:
+      case VariableType::BT_SHORT:
+      case VariableType::BT_STRING:
+      case VariableType::BT_UCHAR:
+      case VariableType::BT_UINT:
+      case VariableType::BT_ULONG:
+      case VariableType::BT_USHORT:
+         objects->addToken(OCODE_STACK_DROP32);
+         break;
+
+      case VariableType::BT_FIXED:
+      case VariableType::BT_REAL:
+         // What about the high byte, you ask? If the high byte is meaningful,
+         // we've overflowed the fixed anyway. Therefore: Undefined behavior.
+         objects->addToken(OCODE_STACK_DROP32);
+         objects->addToken(OCODE_CONVERT_32I_32F);
+         break;
+
+      case VariableType::BT_LLONG:
+      case VariableType::BT_ULLONG:
          break;
       }
       break;

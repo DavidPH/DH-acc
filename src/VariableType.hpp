@@ -201,6 +201,9 @@ public:
    // Returns true if the given type is an integer type.
    static bool is_bt_integer(BasicType type);
 
+   // Returns true if the given type is an unsigned type.
+   static bool is_bt_unsigned(BasicType type);
+
 private:
    explicit VariableType();
    explicit VariableType(VariableType &type);

@@ -908,6 +908,33 @@ bool VariableType::is_bt_integer(BasicType type)
 }
 
 //
+// VariableType::is_bt_unsigned
+//
+bool VariableType::is_bt_unsigned(BasicType type)
+{
+   switch (type)
+   {
+   case BT_BOOLHARD:
+   case BT_BOOLSOFT:
+   case BT_FUNCTION:
+   case BT_LINESPEC:
+   case BT_NATIVE:
+   case BT_POINTER:
+   case BT_SCRIPT:
+   case BT_STRING:
+   case BT_UCHAR:
+   case BT_UINT:
+   case BT_ULLONG:
+   case BT_ULONG:
+   case BT_USHORT:
+      return true;
+
+   default:
+      return false;
+   }
+}
+
+//
 // make_string<VariableType::BasicType>
 //
 std::string const &make_string(VariableType::BasicType basic)

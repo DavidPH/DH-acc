@@ -275,7 +275,8 @@ void SourceExpression::virtual_makeObjectsCast
       VariableData::Pointer src = getData();
 
       make_objects_memcpy_prep(objects, dst, src, position);
-      make_objects_memcpy_cast(objects, dst, src, dstType, srcType, position);
+      make_objects_memcpy_cast
+      (objects, dst, src, dstType, srcType, context, position);
    }
    else
    {
@@ -284,7 +285,8 @@ void SourceExpression::virtual_makeObjectsCast
 
       make_objects_memcpy_prep(objects, dst, src, position);
       virtual_makeObjects(objects, src);
-      make_objects_memcpy_cast(objects, dst, src, dstType, srcType, position);
+      make_objects_memcpy_cast
+      (objects, dst, src, dstType, srcType, context, position);
    }
 }
 
