@@ -60,17 +60,12 @@ add_executable(DH-acc
 	SourceExpression/BinaryArray.cpp
 	SourceExpression/BinaryAssign.cpp
 	SourceExpression/BinaryCompare.cpp
+   SourceExpression/BinaryCmp.cpp
 	SourceExpression/BinaryDiv.cpp
-	SourceExpression/BinaryEQ.cpp
-	SourceExpression/BinaryGE.cpp
-	SourceExpression/BinaryGT.cpp
 	SourceExpression/BinaryIOr.cpp
-	SourceExpression/BinaryLE.cpp
    SourceExpression/BinaryLSh.cpp
-	SourceExpression/BinaryLT.cpp
 	SourceExpression/BinaryMod.cpp
 	SourceExpression/BinaryMul.cpp
-	SourceExpression/BinaryNE.cpp
    SourceExpression/BinaryRSh.cpp
 	SourceExpression/BinarySub.cpp
 	SourceExpression/BinaryXOr.cpp

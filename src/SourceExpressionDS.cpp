@@ -218,10 +218,10 @@ make_expression(SourceExpression::Vector const &expressions,
       switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_CMP_EQ:
-         return SourceExpression::create_binary_eq(EXPRL, EXPRR, CARGS);
+         return SourceExpression::create_binary_cmp_eq(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_CMP_NE:
-         return SourceExpression::create_binary_ne(EXPRL, EXPRR, CARGS);
+         return SourceExpression::create_binary_cmp_ne(EXPRL, EXPRR, CARGS);
 
       default:
          break;
@@ -234,16 +234,16 @@ make_expression(SourceExpression::Vector const &expressions,
       switch (operators[iter].type)
       {
       case SourceTokenC::TT_OP_CMP_GE:
-         return SourceExpression::create_binary_ge(EXPRL, EXPRR, CARGS);
+         return SourceExpression::create_binary_cmp_ge(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_CMP_GT:
-         return SourceExpression::create_binary_gt(EXPRL, EXPRR, CARGS);
+         return SourceExpression::create_binary_cmp_gt(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_CMP_LE:
-         return SourceExpression::create_binary_le(EXPRL, EXPRR, CARGS);
+         return SourceExpression::create_binary_cmp_le(EXPRL, EXPRR, CARGS);
 
       case SourceTokenC::TT_OP_CMP_LT:
-         return SourceExpression::create_binary_lt(EXPRL, EXPRR, CARGS);
+         return SourceExpression::create_binary_cmp_lt(EXPRL, EXPRR, CARGS);
 
       default:
          break;
