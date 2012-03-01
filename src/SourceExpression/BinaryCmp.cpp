@@ -85,15 +85,10 @@ public:
       Super::recurse_makeObjects(objects, dst);
 
       VariableType::Reference inType = Super::getType();
-      bigsint                 inSize = inType->getSize(position);
       VariableType::BasicType inBT = inType->getBasicType();
       VariableType::Reference type = getType();
       bigsint                 size = type->getSize(position);
       VariableData::Pointer   src  = VariableData::create_stack(size);
-
-      int ocodeType;
-
-      getOcodeType(inBT, &ocodeType);
 
       ObjectCode ocode = OCODE_NONE;
       switch (ct)
@@ -106,10 +101,18 @@ public:
       case CMP_NE: ocode = OCODE_CMP_NE32F; break;
       }
 
+      if (inBT == VariableType::BT_LLONG || inBT == VariableType::BT_ULLONG)
+      {
+         ocode = static_cast<ObjectCode>(ocode + 1);
+         return makeObjectsLL(objects, ocode, dst, src, type, inBT);
+      }
+
+      int ocodeType; getOcodeType(inBT, &ocodeType);
+
       ocode = static_cast<ObjectCode>(ocode + ocodeType);
 
-      if (ct < CMP_EQ && VariableType::is_bt_unsigned(inBT) && inSize == 1)
-         return makeObjectsU(objects, ocode, dst, src, type);
+      if (ct < CMP_EQ && VariableType::is_bt_unsigned(inBT))
+         return makeObjectsU(objects, ocode, dst, src, type, NULL, NULL);
 
       objects->addToken(ocode);
 
@@ -118,23 +121,106 @@ public:
 
 private:
    //
+   // ::makeObjectsLL
+   //
+   void makeObjectsLL
+   (ObjectVector *objects, ObjectCode ocode, VariableData *dst,
+    VariableData *src, VariableType *type, VariableType::BasicType inBT)
+   {
+      // Don't always need Jl, so don't allocate it yet.
+      ObjectExpression::Pointer tmpJl;
+      ObjectExpression::Pointer tmpJh = context->getTempVar(1);
+      ObjectExpression::Pointer tmpKl = context->getTempVar(2);
+      ObjectExpression::Pointer tmpKh = context->getTempVar(3);
+
+      // llbits_t j; llbits_t k;
+      objects->addToken(OCODE_SET_REGISTER32I, tmpKh);
+      objects->addToken(OCODE_SET_REGISTER32I, tmpKl);
+      objects->addToken(OCODE_SET_REGISTER32I, tmpJh);
+
+      if (ct == CMP_EQ)
+      {
+         // (j.lo == k.lo) & (j.hi == k.hi)
+         objects->addToken(OCODE_GET_REGISTER32I, tmpKl);
+         objects->addToken(OCODE_CMP_EQ32I);
+
+         objects->addToken(OCODE_GET_REGISTER32I, tmpJh);
+         objects->addToken(OCODE_GET_REGISTER32I, tmpKh);
+         objects->addToken(OCODE_CMP_EQ32I);
+
+         objects->addToken(OCODE_BITWISE_AND32);
+      }
+      else if (ct == CMP_EQ)
+      {
+         // (j.lo != k.lo) | (j.hi != k.hi)
+         objects->addToken(OCODE_GET_REGISTER32I, tmpKl);
+         objects->addToken(OCODE_CMP_NE32I);
+
+         objects->addToken(OCODE_GET_REGISTER32I, tmpJh);
+         objects->addToken(OCODE_GET_REGISTER32I, tmpKh);
+         objects->addToken(OCODE_CMP_NE32I);
+
+         objects->addToken(OCODE_BITWISE_IOR32);
+      }
+      else
+      {
+         std::string label = context->makeLabel();
+         std::string labelEnd = label + "_end";
+         std::string labelLow = label + "_low";
+
+         tmpJl = context->getTempVar(0);
+
+         objects->addToken(OCODE_SET_REGISTER32I, tmpJl);
+
+         objects->addToken(OCODE_GET_REGISTER32I, tmpJh);
+         objects->addToken(OCODE_GET_REGISTER32I, tmpKh);
+         objects->addToken(OCODE_CMP_EQ32I);
+         objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelLow));
+
+         // The two high byes differ, so they determine the result.
+         if (inBT == VariableType::BT_LLONG)
+         {
+            objects->addToken(OCODE_GET_REGISTER32I, tmpJh);
+            objects->addToken(OCODE_GET_REGISTER32I, tmpKh);
+            objects->addToken(ocode);
+         }
+         else
+            makeObjectsU(objects, ocode, dst, src, type, tmpJh, tmpKh);
+
+         objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelEnd));
+
+         // Compare the low bytes. Low bytes are always effectively unsigned.
+         objects->addLabel(labelLow);
+         makeObjectsU(objects, ocode, dst, src, type, tmpJl, tmpKl);
+
+         objects->addLabel(labelEnd);
+      }
+
+      make_objects_memcpy_post(objects, dst, src, type, position);
+   }
+
+   //
    // ::makeObjectsU
    //
    void makeObjectsU
    (ObjectVector *objects, ObjectCode ocode, VariableData *dst,
-    VariableData *src, VariableType *type)
+    VariableData *src, VariableType *type, ObjectExpression::Pointer tmpJ,
+    ObjectExpression::Pointer tmpK)
    {
       std::string label = context->makeLabel();
       std::string labelCmp = label + "_cmp";
       std::string labelEnd = label + "_end";
       std::string labelPos = label + "_pos";
 
-      ObjectExpression::Pointer tmpJ = context->getTempVar(0);
-      ObjectExpression::Pointer tmpK = context->getTempVar(1);
+      if (!tmpJ)
+      {
+         tmpJ = context->getTempVar(0);
+         tmpK = context->getTempVar(1);
 
-      // unsigned j; unsigned k;
-      objects->addToken(OCODE_SET_REGISTER32I, tmpK);
-      objects->addToken(OCODE_SET_REGISTER32I, tmpJ);
+         // unsigned j; unsigned k;
+         objects->addToken(OCODE_SET_REGISTER32I, tmpK);
+         objects->addToken(OCODE_SET_REGISTER32I, tmpJ);
+      }
 
       // if (j & 0x80000000) ...
       objects->addToken(OCODE_GET_REGISTER32I, tmpJ);
