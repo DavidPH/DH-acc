@@ -116,7 +116,7 @@ public:
 
       objects->addToken(ocode);
 
-      make_objects_memcpy_post(objects, dst, src, type, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, position);
    }
 
 private:
@@ -196,7 +196,7 @@ private:
          objects->addLabel(labelEnd);
       }
 
-      make_objects_memcpy_post(objects, dst, src, type, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, position);
    }
 
    //
@@ -262,7 +262,7 @@ private:
 
       objects->addLabel(labelEnd);
 
-      make_objects_memcpy_post(objects, dst, src, type, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, position);
    }
 
    CmpType ct;

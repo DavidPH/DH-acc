@@ -182,20 +182,10 @@ SourceVariable::StorageClass SourceVariable::get_StorageClass
       return SC_STATIC;
 
    if (data == "__autoreg")
-   {
-      if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
-         return SC_REGISTER;
-
-      return SC_AUTO;
-   }
+      return get_sc_autoreg();
 
    if (data == "__staticreg")
-   {
-      if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
-         return SC_REGISTER_MAP;
-
-      return SC_STATIC;
-   }
+      return get_sc_staticreg();
 
    if (data == "__mapregister")
       return SC_REGISTER_MAP;
@@ -217,6 +207,28 @@ SourceVariable::StorageClass SourceVariable::get_StorageClass
 
    throw SourceException
    ("invalid storage-class '" + data + "'", position, __func__);
+}
+
+//
+// SourceVariable::get_sc_autoreg
+//
+SourceVariable::StorageClass SourceVariable::get_sc_autoreg()
+{
+   if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
+      return SC_REGISTER;
+
+   return SC_AUTO;
+}
+
+//
+// SourceVariable::get_sc_staticreg
+//
+SourceVariable::StorageClass SourceVariable::get_sc_staticreg()
+{
+   if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
+      return SC_REGISTER_MAP;
+
+   return SC_STATIC;
 }
 
 //

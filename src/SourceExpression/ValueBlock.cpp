@@ -179,7 +179,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       expressions[i]->makeObjects(objects, dstPart);
    }
 
-   make_objects_memcpy_post(objects, dst, tmp, type, position);
+   make_objects_memcpy_post(objects, dst, tmp, type, context, position);
 }
 
 //
@@ -239,7 +239,7 @@ void SourceExpression_ValueBlock::virtual_makeObjectsCast
       }
    }
 
-   make_objects_memcpy_post(objects, dst, tmp, dstType, position);
+   make_objects_memcpy_post(objects, dst, tmp, dstType, context, position);
 }
 
 // EOF

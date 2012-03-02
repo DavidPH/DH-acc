@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -178,7 +179,7 @@ void SourceExpression_UnaryDecInc::
 doDst(ObjectVector *objects, VariableData *dst, VariableData *src)
 {
    make_objects_memcpy_prep(objects, dst, NULL, position);
-   make_objects_memcpy_post(objects, dst, src, getType(), position);
+   make_objects_memcpy_post(objects, dst, src, getType(), context, position);
 }
 
 //
@@ -347,10 +348,11 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
          // If we couldn't do delta because prefix, we do it now.
          if (src->type != VariableData::MT_REGISTERARRAY && !suf)
          {
-            objects->addToken(OCODE_SET_TEMP);
-            objects->addToken(OCODE_GET_TEMP);
+            ObjectExpression::Pointer tmpA = context->getTempVar(0);
+            objects->addToken(OCODE_SET_TEMP, tmpA);
+            objects->addToken(OCODE_GET_TEMP, tmpA);
             deltaType = doDelta(objects);
-            objects->addToken(OCODE_GET_TEMP);
+            objects->addToken(OCODE_GET_TEMP, tmpA);
          }
          else
          {
@@ -364,7 +366,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       // If stashing the offset on the stack, and pushing the result to the
       // stack, need to keep the offset in front of the result.
       if (offset && dst->type == VariableData::MT_STACK)
-         objects->addToken(OCODE_SET_TEMP);
+         objects->addToken(OCODE_SET_TEMP, context->getTempVar(0));
 
       doDst(objects, dst, src);
 
@@ -374,7 +376,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
             deltaType = doDelta(objects);
 
       if (offset && dst->type == VariableData::MT_STACK)
-         objects->addToken(OCODE_GET_TEMP);
+         objects->addToken(OCODE_GET_TEMP, context->getTempVar(0));
    }
 
    if (!deltaType)

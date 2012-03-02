@@ -120,7 +120,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
       make_objects_memcpy_prep(objects, dst, dup, src, position);
       exprR->makeObjects(objects, src);
-      make_objects_memcpy_post(objects, dst, dup, src, type, position);
+      make_objects_memcpy_post(objects, dst, dup, src, type, context, position);
    }
 }
 

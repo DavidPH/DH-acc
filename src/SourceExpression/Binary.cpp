@@ -96,6 +96,7 @@ void SourceExpression_Binary::doAssignBase
 (ObjectVector *objects, VariableData *dst, VariableData *src,
  ObjectCode ocodeOp, ObjectCode ocodeGet)
 {
+   ObjectExpression::Pointer tmpA = context->getTempVar(0);
    VariableType::Reference typeL = exprL->getType();
 
    VariableData::Pointer tmp = VariableData::create_stack(src->size);
@@ -128,8 +129,8 @@ void SourceExpression_Binary::doAssignBase
       // Extra address for get.
       if (dst->type != VariableData::MT_VOID)
       {
-         objects->addToken(OCODE_SET_TEMP);
-         objects->addToken(OCODE_GET_TEMP);
+         objects->addToken(OCODE_SET_TEMP, tmpA);
+         objects->addToken(OCODE_GET_TEMP, tmpA);
       }
    }
 
@@ -139,11 +140,11 @@ void SourceExpression_Binary::doAssignBase
    {
       // MT_POINTER addressing.
       if (src->type == VariableData::MT_POINTER)
-         objects->addToken(OCODE_GET_TEMP);
+         objects->addToken(OCODE_GET_TEMP, tmpA);
 
       objects->addToken(ocodeGet, src->address);
 
-      make_objects_memcpy_post(objects, dst, tmp, typeL, position);
+      make_objects_memcpy_post(objects, dst, tmp, typeL, context, position);
    }
 }
 
@@ -165,7 +166,7 @@ void SourceExpression_Binary::doEvaluateBase
 
    objects->addToken(ocode);
 
-   make_objects_memcpy_post(objects, dst, src, type, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, position);
 }
 
 //
@@ -193,31 +194,31 @@ void SourceExpression_Binary::doEvaluateBaseLLAS
    create_value_cast_implicit(exprL, type, context, position)
    ->makeObjects(objects, src);
 
-   objects->addToken(OCODE_SET_REGISTER32I, tmpH);
-   objects->addToken(OCODE_SET_REGISTER32I, tmpL);
-   objects->addToken(OCODE_GET_REGISTER32I, tmpL);
-   objects->addToken(OCODE_SET_REGISTER32I, tmpI);
+   objects->addToken(OCODE_SET_TEMP, tmpH);
+   objects->addToken(OCODE_SET_TEMP, tmpL);
+   objects->addToken(OCODE_GET_TEMP, tmpL);
+   objects->addToken(OCODE_SET_TEMP, tmpI);
 
    if (add)
    {
-      objects->addToken(OCODE_SETOP_ADD_REGISTER32I, tmpH);
-      objects->addToken(OCODE_SETOP_ADD_REGISTER32I, tmpL);
+      objects->addToken(OCODE_SETOP_ADD_TEMP, tmpH);
+      objects->addToken(OCODE_SETOP_ADD_TEMP, tmpL);
    }
    else
    {
-      objects->addToken(OCODE_SETOP_SUB_REGISTER32I, tmpH);
-      objects->addToken(OCODE_SETOP_SUB_REGISTER32I, tmpL);
+      objects->addToken(OCODE_SETOP_SUB_TEMP, tmpH);
+      objects->addToken(OCODE_SETOP_SUB_TEMP, tmpL);
    }
 
    // if (l & 0x80000000)
-   objects->addToken(OCODE_GET_REGISTER32I, tmpL);
+   objects->addToken(OCODE_GET_TEMP, tmpL);
    objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
    objects->addToken(OCODE_BITWISE_AND32);
    objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelPos));
 
    // ... then
    //    if (!(i & 0x80000000)) goto ovr/end;
-   objects->addToken(OCODE_GET_REGISTER32I, tmpI);
+   objects->addToken(OCODE_GET_TEMP, tmpI);
    objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
    objects->addToken(OCODE_BITWISE_AND32);
    objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(add ? labelEnd : labelOvr));
@@ -226,24 +227,24 @@ void SourceExpression_Binary::doEvaluateBaseLLAS
    // ... else
    //    if (i & 0x80000000) goto end/ovr;
    objects->addLabel(labelPos);
-   objects->addToken(OCODE_GET_REGISTER32I, tmpI);
+   objects->addToken(OCODE_GET_TEMP, tmpI);
    objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
    objects->addToken(OCODE_BITWISE_AND32);
    objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(add ? labelOvr : labelEnd));
 
    objects->addLabel(labelCmp);
-   objects->addToken(OCODE_GET_REGISTER32I, tmpL);
-   objects->addToken(OCODE_GET_REGISTER32I, tmpI);
+   objects->addToken(OCODE_GET_TEMP, tmpL);
+   objects->addToken(OCODE_GET_TEMP, tmpI);
    objects->addToken(add ? OCODE_CMP_LT32I : OCODE_CMP_GT32I);
    objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelEnd));
 
    objects->addLabel(labelOvr);
-   objects->addToken(OCODE_SETOP_INC_REGISTER32I, tmpH);
+   objects->addToken(OCODE_SETOP_INC_TEMP, tmpH);
    objects->addLabel(labelEnd);
-   objects->addToken(OCODE_GET_REGISTER32I, tmpL);
-   objects->addToken(OCODE_GET_REGISTER32I, tmpH);
+   objects->addToken(OCODE_GET_TEMP, tmpL);
+   objects->addToken(OCODE_GET_TEMP, tmpH);
 
-   make_objects_memcpy_post(objects, dst, src, type, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, position);
 }
 
 //
@@ -265,16 +266,16 @@ void SourceExpression_Binary::doEvaluateBaseLLB
    ObjectExpression::Pointer tmpL = context->getTempVar(0);
    ObjectExpression::Pointer tmpH = context->getTempVar(1);
 
-   objects->addToken(OCODE_SET_REGISTER32I, tmpH);
-   objects->addToken(OCODE_SET_REGISTER32I, tmpL);
+   objects->addToken(OCODE_SET_TEMP, tmpH);
+   objects->addToken(OCODE_SET_TEMP, tmpL);
 
    objects->addToken(ocode, tmpH);
    objects->addToken(ocode, tmpL);
 
-   objects->addToken(OCODE_GET_REGISTER32I, tmpL);
-   objects->addToken(OCODE_GET_REGISTER32I, tmpH);
+   objects->addToken(OCODE_GET_TEMP, tmpL);
+   objects->addToken(OCODE_GET_TEMP, tmpH);
 
-   make_objects_memcpy_post(objects, dst, src, type, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, position);
 }
 
 //

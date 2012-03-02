@@ -509,7 +509,8 @@ ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
 {
    static NameType const nt = NT_LOCAL;
    static SourcePosition const &pos = SourcePosition::builtin();
-   static SourceVariable::StorageClass const sc = SourceVariable::SC_REGISTER;
+   static SourceVariable::StorageClass const sc =
+      SourceVariable::get_sc_autoreg();
    static VariableType::Reference const type = VariableType::get_bt_int();
 
    static char const *const name[] =

@@ -131,7 +131,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
       objects->addLabel(labelEnd);
 
-      make_objects_memcpy_post(objects, dst, src, srcType, position);
+      make_objects_memcpy_post(objects, dst, src, srcType, context, position);
    }
 }
 

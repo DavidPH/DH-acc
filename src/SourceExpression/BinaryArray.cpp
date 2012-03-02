@@ -154,7 +154,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2),
                         objects->getValue(15));
 
-      make_objects_memcpy_post(objects, dst, src, type, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, position);
    }
    else
    {

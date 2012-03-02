@@ -373,10 +373,8 @@ __extfunc llabs(long long int j) -> long long int
    #ifdef __FUNCTION_AUTOARGS__
    __variable __autoreg llbits_t *jp = (llbits_t *)&j;
    #else
-   #define jp ((llbits_t __autoreg *)&j)
+   #define jp ((llbits_t __autoreg *)&j) #
    #endif
-
-   DECL_jp_ll;
 
    if (jp->hi < 0)
    {

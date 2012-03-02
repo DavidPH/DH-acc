@@ -110,8 +110,10 @@ void BinaryTokenZDACS::make_tokens
    // Variable Address
 
    // Variable Get
+   CASE_REMAP_PRE(GET, TEMP, REGISTER);
 
    // Variable Set
+   CASE_REMAP_PRE(SET, TEMP, REGISTER);
 
    // Variable Set Op
    CASE_REMAP_PRE(SETOP, AND_REGISTER32, AND_REGISTER);
@@ -119,6 +121,14 @@ void BinaryTokenZDACS::make_tokens
    CASE_REMAP_PRE(SETOP, LSH_REGISTER32, LSH_REGISTER);
    CASE_REMAP_PRE(SETOP, RSH_REGISTER32, RSH_REGISTER);
    CASE_REMAP_PRE(SETOP, XOR_REGISTER32, XOR_REGISTER);
+
+   CASE_REMAP_PRE(SETOP, ADD_TEMP, ADD_REGISTER);
+   CASE_REMAP_PRE(SETOP, AND_TEMP, AND_REGISTER);
+   CASE_REMAP_PRE(SETOP, DEC_TEMP, DEC_REGISTER);
+   CASE_REMAP_PRE(SETOP, INC_TEMP, INC_REGISTER);
+   CASE_REMAP_PRE(SETOP, IOR_TEMP, IOR_REGISTER);
+   CASE_REMAP_PRE(SETOP, SUB_TEMP, SUB_REGISTER);
+   CASE_REMAP_PRE(SETOP, XOR_TEMP, XOR_REGISTER);
 
    // Miscellaneous
    CASE_REMAP_PRE(MISC, NATIVE, NATIVE);
@@ -404,11 +414,6 @@ void BinaryTokenZDACS::make_tokens
       PUSH_TOKEN(BCODE_GET_GLOBALARRAY);
       break;
 
-   case OCODE_GET_TEMP:
-      args.push_back(indexTemp);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      break;
-
    // Variable Set
 
    case OCODE_SET_AUTO32F:
@@ -435,11 +440,6 @@ void BinaryTokenZDACS::make_tokens
       PUSH_TOKEN(BCODE_STACK_SWAP);
       args.push_back(indexAddr);
       PUSH_TOKEN(BCODE_SET_GLOBALARRAY);
-      break;
-
-   case OCODE_SET_TEMP:
-      args.push_back(indexTemp);
-      PUSH_TOKEN(BCODE_SET_WORLDREGISTER);
       break;
 
    // Variable Set Op

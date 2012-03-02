@@ -104,9 +104,9 @@ void SourceExpression_UnaryNot::virtual_makeObjects
       ObjectExpression::Pointer tmpH = context->getTempVar(0);
 
       objects->addToken(OCODE_BITWISE_NOT32);
-      objects->addToken(OCODE_SET_REGISTER32I, tmpH);
+      objects->addToken(OCODE_SET_TEMP, tmpH);
       objects->addToken(OCODE_BITWISE_NOT32);
-      objects->addToken(OCODE_GET_REGISTER32I, tmpH);
+      objects->addToken(OCODE_GET_TEMP, tmpH);
    }
       break;
 
@@ -114,7 +114,7 @@ void SourceExpression_UnaryNot::virtual_makeObjects
       throw SourceException("invalid BT", position, getName());
    }
 
-   make_objects_memcpy_post(objects, dst, src, type, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, position);
 }
 
 // EOF

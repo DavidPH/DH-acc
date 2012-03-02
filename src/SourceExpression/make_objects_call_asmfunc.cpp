@@ -41,7 +41,8 @@
 //
 void SourceExpression::make_objects_call_asmfunc
 (ObjectVector *objects, VariableData *dst, VariableType *type,
- ObjectExpression *data, Vector const &args, SourcePosition const &position)
+ ObjectExpression *data, Vector const &args, SourceContext *context,
+ SourcePosition const &position)
 {
    FUNCTION_PREAMBLE
 
@@ -85,7 +86,7 @@ void SourceExpression::make_objects_call_asmfunc
       objects->setPosition(position).addToken(ocode.ocode);
    }
 
-   make_objects_memcpy_post(objects, dst, src, retnType, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, context, position);
 }
 
 // EOF

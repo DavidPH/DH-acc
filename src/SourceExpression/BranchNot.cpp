@@ -88,7 +88,7 @@ void SourceExpression_BranchNot::virtual_makeObjects
 
    objects->addToken(OCODE_LOGICAL_NOT32I);
 
-   make_objects_memcpy_post(objects, dst, src, type, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, position);
 }
 
 // EOF

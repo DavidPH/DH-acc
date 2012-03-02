@@ -101,6 +101,8 @@ make_tokens(ObjectToken const &object,
    CASE_REMAP_PRE(GET, STATIC32F, STATIC);
    CASE_REMAP_PRE(GET, STATIC32I, STATIC);
 
+   CASE_REMAP_PRE(GET, TEMP, AUTO);
+
    // Variable Set
    CASE_REMAP_PRE(SET, AUTO32F, AUTO);
    CASE_REMAP_PRE(SET, AUTO32I, AUTO);
@@ -110,6 +112,8 @@ make_tokens(ObjectToken const &object,
 
    CASE_REMAP_PRE(SET, STATIC32F, STATIC);
    CASE_REMAP_PRE(SET, STATIC32I, STATIC);
+
+   CASE_REMAP_PRE(SET, TEMP, AUTO);
 
    // Variable Set Op
    CASE_REMAP_PRE(SETOP_ADD, AUTO32F,    AUTO);
@@ -222,20 +226,6 @@ make_tokens(ObjectToken const &object,
    case OCODE_ADDR_STACK_SUB_IMM:
       PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
       PUSH_TOKEN(BCODE_ADDR_STACK_SUB);
-      break;
-
-   // Variable Get
-
-   case OCODE_GET_TEMP:
-      args.push_back(indexTemp);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      break;
-
-   // Variable Set
-
-   case OCODE_SET_TEMP:
-      args.push_back(indexTemp);
-      PUSH_TOKEN(BCODE_SET_WORLDREGISTER);
       break;
 
    case OCODE_NONE:

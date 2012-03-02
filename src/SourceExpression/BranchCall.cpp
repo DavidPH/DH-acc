@@ -25,7 +25,6 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
 
@@ -43,9 +42,8 @@ class SourceExpression_BranchCall : public SourceExpression
                                    SourceExpression);
 
 public:
-   SourceExpression_BranchCall(SourceExpression *expr,
-                               SourceExpression::Vector const &args,
-                               SRCEXP_EXPR_ARGS);
+   SourceExpression_BranchCall
+   (SourceExpression *expr, Vector const &args, SRCEXP_EXPR_ARGS);
 
    virtual VariableType::Reference getType() const;
 
@@ -54,7 +52,6 @@ private:
 
    SourceExpression::Vector args;
    SourceExpression::Pointer expr;
-   bigsint stack;
 };
 
 
@@ -73,12 +70,9 @@ SRCEXP_EXPRBRA_DEFN(a, call)
 //
 // SourceExpression_BranchCall::SourceExpression_BranchCall
 //
-SourceExpression_BranchCall::
-SourceExpression_BranchCall
-(SourceExpression *_expr, SourceExpression::Vector const &_args,
- SRCEXP_EXPR_PARM)
- : Super(SRCEXP_EXPR_PASS),
-   args(_args), expr(_expr), stack(context->getLimit(SourceVariable::SC_AUTO))
+SourceExpression_BranchCall::SourceExpression_BranchCall
+(SourceExpression *_expr, Vector const &_args, SRCEXP_EXPR_PARM)
+ : Super(SRCEXP_EXPR_PASS), args(_args), expr(_expr)
 {
    VariableType::Reference type = expr->getType();
    VariableType::Vector const &types = type->getTypes();
@@ -112,10 +106,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   std::string labelReturn = label + "_retn";
-
-   make_objects_call(objects, dst, expr, args, objects->getValue(stack),
-                     labelReturn, position);
+   make_objects_call(objects, dst, expr, args, context, position);
 }
 
 // EOF

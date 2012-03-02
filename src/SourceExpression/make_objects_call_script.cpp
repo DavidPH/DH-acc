@@ -29,6 +29,7 @@
 #include "../ObjectVector.hpp"
 #include "../option.hpp"
 #include "../ost_type.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -68,7 +69,7 @@ int option_script_regargs = 3;
 //
 void SourceExpression::make_objects_call_script
 (ObjectVector *objects, VariableData *dst, VariableType *type,
- SourceExpression *data, Vector const &args, ObjectExpression *stack,
+ SourceExpression *data, Vector const &args, SourceContext *context,
  SourcePosition const &position)
 {
    FUNCTION_PREAMBLE
@@ -126,7 +127,8 @@ void SourceExpression::make_objects_call_script
       --retnSize;
 
    // Calculate total stack offset.
-   ObjectExpression::Pointer ostack = objects->getValueAdd(stack, retnSize);
+   ObjectExpression::Pointer ostack =
+      objects->getValueAdd(context->getLimit(SourceVariable::SC_AUTO), retnSize);
 
    // Advance the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
@@ -167,7 +169,7 @@ void SourceExpression::make_objects_call_script
    // Reset the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
 
-   make_objects_memcpy_post(objects, dst, src, retnType, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, context, position);
 }
 
 // EOF

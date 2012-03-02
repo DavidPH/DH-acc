@@ -100,6 +100,9 @@ public:
    static StorageClass get_StorageClass
    (std::string const &data, SourcePosition const &position);
 
+   static StorageClass get_sc_autoreg();
+   static StorageClass get_sc_staticreg();
+
 private:
    SourceVariable
    (std::string const &nameSource, VariableType *type, ObjectExpression *expr,

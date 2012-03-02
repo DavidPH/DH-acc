@@ -38,8 +38,7 @@
 //
 void SourceExpression::make_objects_call
 (ObjectVector *objects, VariableData *dst, SourceExpression *expr,
- Vector const &args, ObjectExpression *stack, std::string const &labelReturn,
- SourcePosition const &position)
+ Vector const &args, SourceContext *context, SourcePosition const &position)
 {
    VariableType::Reference type = expr->getType();
 
@@ -48,8 +47,8 @@ void SourceExpression::make_objects_call
    case VariableType::BT_ASMFUNC:
       if (expr->canMakeObject())
       {
-         make_objects_call_asmfunc(objects, dst, type, expr->makeObject(),
-                                   args, position);
+         make_objects_call_asmfunc
+         (objects, dst, type, expr->makeObject(), args, context, position);
       }
       else
       {
@@ -60,21 +59,21 @@ void SourceExpression::make_objects_call
    case VariableType::BT_FUNCTION:
       if (expr->canMakeObject())
       {
-         make_objects_call_function(objects, dst, type, expr->makeObject(),
-                                    args, stack, labelReturn, position);
+         make_objects_call_function
+         (objects, dst, type, expr->makeObject(), args, context, position);
       }
       else
       {
-         make_objects_call_function(objects, dst, type, expr, args, stack,
-                                    labelReturn, position);
+         make_objects_call_function
+         (objects, dst, type, expr, args, context, position);
       }
       break;
 
    case VariableType::BT_LINESPEC:
       if (expr->canMakeObject())
       {
-         make_objects_call_linespec(objects, dst, type, expr->makeObject(),
-                                    args, position);
+         make_objects_call_linespec
+         (objects, dst, type, expr->makeObject(), args, context, position);
       }
       else
       {
@@ -85,8 +84,8 @@ void SourceExpression::make_objects_call
    case VariableType::BT_NATIVE:
       if (expr->canMakeObject())
       {
-         make_objects_call_native(objects, dst, type, expr->makeObject(), args,
-                                  position);
+         make_objects_call_native
+         (objects, dst, type, expr->makeObject(), args, context, position);
       }
       else
       {
@@ -95,8 +94,8 @@ void SourceExpression::make_objects_call
       break;
 
    case VariableType::BT_SCRIPT:
-      make_objects_call_script(objects, dst, type, expr, args, stack,
-                               position);
+      make_objects_call_script
+      (objects, dst, type, expr, args, context, position);
       break;
 
    default:

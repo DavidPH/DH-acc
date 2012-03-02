@@ -341,7 +341,7 @@ private:
          break;
       }
 
-      make_objects_memcpy_post(objects, dst, src, type, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, position);
    }
 
    SourceExpression::Vector expressions;

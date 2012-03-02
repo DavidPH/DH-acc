@@ -385,12 +385,9 @@ protected:
 
 
 
-   static void
-   make_objects_call(ObjectVector *objects, VariableData *dst,
-                     SourceExpression *expr,
-                     std::vector<SourceExpression::Pointer> const &args,
-                     ObjectExpression *stack, std::string const &labelReturn,
-                     SourcePosition const &position);
+   static void make_objects_call
+   (ObjectVector *objects, VariableData *dst, SourceExpression *expr,
+    Vector const &args, SourceContext *context, SourcePosition const &position);
 
    static CounterPointer<ObjectExpression> make_object_cast
    (ObjectExpression *src, VariableType *dstType, VariableType *srcType,
@@ -403,10 +400,12 @@ protected:
 
    static void make_objects_memcpy_post
    (ObjectVector *objects, VariableData *dst, VariableData *src,
-    VariableType *type, SourcePosition const &position);
+    VariableType *type, SourceContext *context,
+    SourcePosition const &position);
    static void make_objects_memcpy_post
    (ObjectVector *objects, VariableData *dup, VariableData *dst,
-    VariableData *src, VariableType *type, SourcePosition const &position);
+    VariableData *src, VariableType *type, SourceContext *context,
+    SourcePosition const &position);
 
    static void make_objects_memcpy_prep
    (ObjectVector *objects, VariableData *dst, VariableData *src,
@@ -435,29 +434,32 @@ private:
 
    static void make_objects_call_asmfunc
    (ObjectVector *objects, VariableData *dst, VariableType *type,
-    ObjectExpression *data, Vector const &args, SourcePosition const &position);
+    ObjectExpression *data, Vector const &args, SourceContext *context,
+    SourcePosition const &position);
 
    static void make_objects_call_function
    (ObjectVector *objects, VariableData *dst, VariableType *type,
-    ObjectExpression *data, Vector const &args, ObjectExpression *stack,
-    std::string const &labelReturn, SourcePosition const &position);
+    ObjectExpression *data, Vector const &args, SourceContext *context,
+    SourcePosition const &position);
 
    static void  make_objects_call_function
    (ObjectVector *objects, VariableData *dst, VariableType *type,
-    SourceExpression *data, Vector const &args, ObjectExpression *stack,
-    std::string const &labelReturn, SourcePosition const &position);
+    SourceExpression *data, Vector const &args, SourceContext *context,
+    SourcePosition const &position);
 
    static void make_objects_call_linespec
    (ObjectVector *objects, VariableData *dst, VariableType *type,
-    ObjectExpression *data, Vector const &args, SourcePosition const &position);
+    ObjectExpression *data, Vector const &args, SourceContext *context,
+    SourcePosition const &position);
 
    static void make_objects_call_native
    (ObjectVector *objects, VariableData *dst, VariableType *type,
-    ObjectExpression *data, Vector const &args, SourcePosition const &position);
+    ObjectExpression *data, Vector const &args, SourceContext *context,
+    SourcePosition const &position);
 
    static void make_objects_call_script
    (ObjectVector *objects, VariableData *dst, VariableType *type,
-    SourceExpression *data, Vector const &args, ObjectExpression *stack,
+    SourceExpression *data, Vector const &args, SourceContext *context,
     SourcePosition const &position);
 };
 

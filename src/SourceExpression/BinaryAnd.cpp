@@ -85,7 +85,7 @@ private:
       EVALUATE_BITWISE_VARS(BITWISE_AND)
 
       if (bt == VariableType::BT_LLONG || bt == VariableType::BT_ULLONG)
-         doEvaluateBaseLLB(objects, dst, src, OCODE_SETOP_AND_REGISTER32);
+         doEvaluateBaseLLB(objects, dst, src, OCODE_SETOP_AND_TEMP);
       else
          doEvaluateBase(objects, dst, src, ocode);
    }

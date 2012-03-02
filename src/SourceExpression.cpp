@@ -200,7 +200,7 @@ makeObjects(ObjectVector *objects, VariableData *dst)
          VariableData::create_literal(type->getSize(position), makeObject());
 
       make_objects_memcpy_prep(objects, dst, src, position);
-      make_objects_memcpy_post(objects, dst, src, type, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, position);
    }
    else
       virtual_makeObjects(objects, dst);
@@ -283,7 +283,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    VariableType::Reference type = getType();
 
    make_objects_memcpy_prep(objects, dst, src, position);
-   make_objects_memcpy_post(objects, dst, src, type, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, position);
 }
 
 //

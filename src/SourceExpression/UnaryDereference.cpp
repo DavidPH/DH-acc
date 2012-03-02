@@ -178,7 +178,7 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
       objects->addTokenPushZero();
       objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2), objects->getValue(15));
 
-      make_objects_memcpy_post(objects, dst, src, type, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, position);
 
       return;
    }
@@ -186,7 +186,7 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
    VariableData::Pointer src = getData();
 
    make_objects_memcpy_prep(objects, dst, src, position);
-   make_objects_memcpy_post(objects, dst, src, type, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, position);
 }
 
 // EOF

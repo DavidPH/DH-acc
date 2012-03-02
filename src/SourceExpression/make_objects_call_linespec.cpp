@@ -41,7 +41,8 @@
 //
 void SourceExpression::make_objects_call_linespec
 (ObjectVector *objects, VariableData *dst, VariableType *type,
- ObjectExpression *data, Vector const &args, SourcePosition const &position)
+ ObjectExpression *data, Vector const &args, SourceContext *context,
+ SourcePosition const &position)
 {
    FUNCTION_PREAMBLE
    FUNCTION_ARGS
@@ -80,7 +81,7 @@ void SourceExpression::make_objects_call_linespec
 
    objects->addToken(ocode, ospec);
 
-   make_objects_memcpy_post(objects, dst, src, retnType, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, context, position);
 }
 
 // EOF

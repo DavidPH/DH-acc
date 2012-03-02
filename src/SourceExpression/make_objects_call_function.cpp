@@ -29,6 +29,7 @@
 #include "../ObjectVector.hpp"
 #include "../option.hpp"
 #include "../ost_type.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -60,9 +61,11 @@ bool option_function_autoargs = false;
 //
 void SourceExpression::make_objects_call_function
 (ObjectVector *objects, VariableData *dst, VariableType *type,
- ObjectExpression *data, Vector const &args, ObjectExpression *stack,
- std::string const &labelReturn, SourcePosition const &position)
+ ObjectExpression *data, Vector const &args, SourceContext *context,
+ SourcePosition const &position)
 {
+   std::string labelReturn = context->makeLabel();
+
    FUNCTION_PREAMBLE
    FUNCTION_ARGS
 
@@ -80,7 +83,8 @@ void SourceExpression::make_objects_call_function
       --retnSize;
 
    // Calculate total stack offset.
-   ObjectExpression::Pointer ostack = objects->getValueAdd(stack, retnSize);
+   ObjectExpression::Pointer ostack =
+      objects->getValueAdd(context->getLimit(SourceVariable::SC_AUTO), retnSize);
 
    // Advance the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
@@ -116,7 +120,7 @@ void SourceExpression::make_objects_call_function
    // Reset the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
 
-   make_objects_memcpy_post(objects, dst, src, retnType, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, context, position);
 }
 
 //
@@ -124,9 +128,11 @@ void SourceExpression::make_objects_call_function
 //
 void SourceExpression::make_objects_call_function
 (ObjectVector *objects, VariableData *dst, VariableType *type,
- SourceExpression *data, Vector const &args,  ObjectExpression *stack,
- std::string const &labelReturn, SourcePosition const &position)
+ SourceExpression *data, Vector const &args, SourceContext *context,
+ SourcePosition const &position)
 {
+   std::string labelReturn = context->makeLabel();
+
    FUNCTION_PREAMBLE
 
    // Must push return address before target address.
@@ -140,7 +146,9 @@ void SourceExpression::make_objects_call_function
    // Determine which OCODE to use.
    ObjectCode ocode = OCODE_BRANCH_GOTO;
 
-   ObjectExpression::Pointer ostack = objects->getValueAdd(stack, retnSize);
+   // Calculate total stack offset.
+   ObjectExpression::Pointer ostack =
+      objects->getValueAdd(context->getLimit(SourceVariable::SC_AUTO), retnSize);
 
    // Advance the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
@@ -162,7 +170,7 @@ void SourceExpression::make_objects_call_function
    // Reset the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
 
-   make_objects_memcpy_post(objects, dst, src, retnType, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, context, position);
 }
 
 // EOF

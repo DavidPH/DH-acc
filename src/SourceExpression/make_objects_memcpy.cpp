@@ -27,6 +27,7 @@
 #include "../ObjectVector.hpp"
 #include "../option.hpp"
 #include "../ost_type.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -174,8 +175,8 @@ static void make_objects_literal
 // Handles a single VariableData's worth of action.
 //
 static void make_objects_memcpy_post_part
-(ObjectVector *objects, VariableData *data, VariableType *type, bool get,
- bool set, SourcePosition const position)
+(ObjectVector *objects, VariableData *data, VariableType *type,
+ SourceContext *context, bool get, bool set, SourcePosition const position)
 {
    static bigsint const ptrSize = 1;
 
@@ -265,18 +266,19 @@ static void make_objects_memcpy_post_part
       }
       else
       {
-         objects->addToken(OCODE_SET_TEMP);
+         ObjectExpression::Pointer tmpA = context->getTempVar(0);
+         objects->addToken(OCODE_SET_TEMP, tmpA);
 
          if (set) for (i = data->size; i--;)
          {
-            objects->addToken(OCODE_GET_TEMP);
+            objects->addToken(OCODE_GET_TEMP, tmpA);
             objects->addToken(OCODE_SET_POINTER32I,
                               objects->getValueAdd(data->address, i));
          }
 
          if (get) for (i = 0; i < data->size; ++i)
          {
-            objects->addToken(OCODE_GET_TEMP);
+            objects->addToken(OCODE_GET_TEMP, tmpA);
             objects->addToken(OCODE_GET_POINTER32I,
                               objects->getValueAdd(data->address, i));
          }
@@ -401,11 +403,12 @@ static void make_objects_memcpy_post_part
          else
             objects->addTokenPushZero();
 
-         objects->addToken(OCODE_SET_TEMP);
+         ObjectExpression::Pointer tmpA = context->getTempVar(0);
+         objects->addToken(OCODE_SET_TEMP, tmpA);
 
          if (set) for (i = data->size; i--;)
          {
-            objects->addToken(OCODE_GET_TEMP);
+            objects->addToken(OCODE_GET_TEMP, tmpA);
 
             if (i)
             {
@@ -433,7 +436,7 @@ static void make_objects_memcpy_post_part
 
          if (get) for (i = 0; i < data->size; ++i)
          {
-            objects->addToken(OCODE_GET_TEMP);
+            objects->addToken(OCODE_GET_TEMP, tmpA);
 
             if (i)
             {
@@ -590,9 +593,9 @@ void SourceExpression::make_objects_memcpy_prep
 //
 void SourceExpression::make_objects_memcpy_post
 (ObjectVector *objects, VariableData *dst, VariableData *src,
- VariableType *type, SourcePosition const &position)
+ VariableType *type, SourceContext *context, SourcePosition const &position)
 {
-   make_objects_memcpy_post(objects, NULL, dst, src, type, position);
+   make_objects_memcpy_post(objects, NULL, dst, src, type, context, position);
 }
 
 //
@@ -600,7 +603,8 @@ void SourceExpression::make_objects_memcpy_post
 //
 void SourceExpression::make_objects_memcpy_post
 (ObjectVector *objects, VariableData *dup, VariableData *dst,
- VariableData *src, VariableType *type, SourcePosition const &position)
+ VariableData *src, VariableType *type, SourceContext *context,
+ SourcePosition const &position)
 {
    // Special handling for void destination.
    if (dst->type == VariableData::MT_VOID)
@@ -610,13 +614,13 @@ void SourceExpression::make_objects_memcpy_post
    }
 
    // Move src onto the stack.
-   make_objects_memcpy_post_part(objects, src, type, true, false, position);
+   make_objects_memcpy_post_part(objects, src, type, context, true, false, position);
 
    // Move the stack into dst. (And possible back onto the stack.)
-   make_objects_memcpy_post_part(objects, dst, type, !!dup, true, position);
+   make_objects_memcpy_post_part(objects, dst, type, context, !!dup, true, position);
 
    // Move the stack into dup.
-   make_objects_memcpy_post_part(objects, dup, type, false, true,  position);
+   make_objects_memcpy_post_part(objects, dup, type, context, false, true, position);
 }
 
 //
