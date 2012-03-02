@@ -35,11 +35,208 @@
 // Macros                                                                     |
 //
 
-#define DELTA_F 0
-#define DELTA_I 1
-#define DELTA_U 2
-#define DELTA_MASK 3
-#define DELTA_EXPR 4
+//
+// DO_I_ADDR
+//
+#define DO_I_ADDR(CODEG, CODEI, CODED)          \
+ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
+                                                \
+if (suf && dst->type != VariableData::MT_VOID)  \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+                                                \
+objects->addToken(ocode, addrL);                \
+                                                \
+if (!suf && dst->type != VariableData::MT_VOID) \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+break
+
+//
+// DO_I_OFFSET
+//
+#define DO_I_OFFSET(CODEG, CODEI, CODED)        \
+if (dst->type != VariableData::MT_VOID)         \
+   tempA = context->getTempVar(0);              \
+ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
+                                                \
+if (src->offsetExpr)                            \
+   src->offsetExpr->makeObjects(objects, tmp);  \
+else                                            \
+   objects->addTokenPushZero();                 \
+if (dst->type != VariableData::MT_VOID)         \
+   objects->addToken(OCODE_SET_TEMP, tempA);    \
+                                                \
+if (suf && dst->type != VariableData::MT_VOID)  \
+{                                               \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+}                                               \
+                                                \
+if (dst->type != VariableData::MT_VOID)         \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+objects->addToken(ocode, addrL);                \
+                                                \
+if (!suf && dst->type != VariableData::MT_VOID) \
+{                                               \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+}                                               \
+break
+
+//
+// DO_LL_ADDR
+//
+#define DO_LL_ADDR(CODEG, CODEI, CODED)         \
+addrH = objects->getValueAdd(addrL, 1);         \
+ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
+                                                \
+if (suf && dst->type != VariableData::MT_VOID)  \
+{                                               \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+   objects->addToken(OCODE_##CODEG, addrH);     \
+}                                               \
+                                                \
+objects->addToken(ocode, addrL);                \
+objects->addToken(OCODE_##CODEG, addrL);        \
+objects->addToken(OCODE_GET_LITERAL32I, wrapv); \
+objects->addToken(OCODE_CMP_EQ32I);             \
+objects->addToken(OCODE_BRANCH_ZERO, objEnd);   \
+objects->addToken(ocode, addrH);                \
+objects->addLabel(labelEnd);                    \
+                                                \
+if (!suf && dst->type != VariableData::MT_VOID) \
+{                                               \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+   objects->addToken(OCODE_##CODEG, addrH);     \
+}                                               \
+break
+
+//
+// DO_LL_OFFSET
+//
+#define DO_LL_OFFSET(CODEG, CODEI, CODED)       \
+tempA = context->getTempVar(0);                 \
+ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
+                                                \
+if (src->offsetExpr)                            \
+   src->offsetExpr->makeObjects(objects, tmp);  \
+else                                            \
+   objects->addTokenPushZero();                 \
+objects->addToken(OCODE_SET_TEMP, tempA);       \
+                                                \
+if (suf && dst->type != VariableData::MT_VOID)  \
+{                                               \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrH);     \
+}                                               \
+                                                \
+objects->addToken(OCODE_GET_TEMP, tempA);       \
+objects->addToken(ocode, addrL);                \
+objects->addToken(OCODE_GET_TEMP, tempA);       \
+objects->addToken(OCODE_##CODEG, addrL);        \
+objects->addToken(OCODE_GET_LITERAL32I, wrapv); \
+objects->addToken(OCODE_CMP_EQ32I);             \
+objects->addToken(OCODE_BRANCH_ZERO, objEnd);   \
+objects->addToken(OCODE_GET_TEMP, tempA);       \
+objects->addToken(ocode, addrH);                \
+objects->addLabel(labelEnd);                    \
+                                                \
+if (!suf && dst->type != VariableData::MT_VOID) \
+{                                               \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrH);     \
+}                                               \
+break
+
+//
+// DO_P_ADDR
+//
+#define DO_P_ADDR(CODEG, CODEI, CODED)          \
+ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
+                                                \
+if (suf && dst->type != VariableData::MT_VOID)  \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+                                                \
+objects->addToken(OCODE_GET_LITERAL32I, value); \
+objects->addToken(ocode, addrL);                \
+                                                \
+if (!suf && dst->type != VariableData::MT_VOID) \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+break
+
+//
+// DO_P_OFFSET
+//
+#define DO_P_OFFSET(CODEG, CODEI, CODED)        \
+if (dst->type != VariableData::MT_VOID)         \
+   tempA = context->getTempVar(0);              \
+ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
+                                                \
+if (src->offsetExpr)                            \
+   src->offsetExpr->makeObjects(objects, tmp);  \
+else                                            \
+   objects->addTokenPushZero();                 \
+if (dst->type != VariableData::MT_VOID)         \
+   objects->addToken(OCODE_SET_TEMP, tempA);    \
+                                                \
+if (suf && dst->type != VariableData::MT_VOID)  \
+{                                               \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+}                                               \
+                                                \
+if (dst->type != VariableData::MT_VOID)         \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+objects->addToken(OCODE_GET_LITERAL32I, value); \
+objects->addToken(ocode, addrL);                \
+                                                \
+if (!suf && dst->type != VariableData::MT_VOID) \
+{                                               \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+}                                               \
+break
+
+//
+// DO_P_POINTER
+//
+#define DO_P_POINTER(CODEG, CODEI, CODED)       \
+if (dst->type != VariableData::MT_VOID)         \
+   tempA = context->getTempVar(0);              \
+ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
+                                                \
+if (dst->type == VariableData::MT_VOID)         \
+   objects->addToken(OCODE_GET_LITERAL32I, value);\
+                                                \
+if (src->offsetExpr)                            \
+   src->offsetExpr->makeObjects(objects, tmp);  \
+else                                            \
+   objects->addTokenPushZero();                 \
+if (dst->type != VariableData::MT_VOID)         \
+   objects->addToken(OCODE_SET_TEMP, tempA);    \
+                                                \
+if (suf && dst->type != VariableData::MT_VOID)  \
+{                                               \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+}                                               \
+                                                \
+if (dst->type != VariableData::MT_VOID)         \
+{                                               \
+   objects->addToken(OCODE_GET_LITERAL32I, value);\
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+}                                               \
+objects->addToken(ocode, addrL);                \
+                                                \
+if (!suf && dst->type != VariableData::MT_VOID) \
+{                                               \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+}                                               \
+break
 
 
 //----------------------------------------------------------------------------|
@@ -49,23 +246,404 @@
 //
 // SourceExpression_UnaryDecInc
 //
-// Handles prefix/suffix decrement/increment.
-//
 class SourceExpression_UnaryDecInc : public SourceExpression_Unary
 {
    MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_UnaryDecInc,
                                    SourceExpression_Unary);
 
 public:
-   SourceExpression_UnaryDecInc(bool inc, bool suf, SRCEXP_EXPRUNA_ARGS);
+   //
+   // ::SourceExpression_UnaryDecInc
+   //
+   SourceExpression_UnaryDecInc(bool _inc, bool _suf, SRCEXP_EXPRUNA_PARM)
+    : Super(SRCEXP_EXPRUNA_PASS), inc(_inc), suf(_suf)
+   {
+   }
 
 private:
-   int doDelta(ObjectVector *objects);
-   void doDst(ObjectVector *objects, VariableData *dst, VariableData *src);
-   void doSrc(ObjectVector *objects, VariableData *src, int deltaType);
+   //
+   // ::doF
+   //
+   void doF
+   (ObjectVector *objects, VariableData *dst, VariableData *src,
+    VariableData *tmp)
+   {
+      ObjectExpression::Pointer addrL = src->address;
+      ObjectExpression::Pointer tempA;
+      ObjectExpression::Pointer value = objects->getValue(1.0);
+      ObjectCode ocode;
 
-   virtual void
-   virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+      switch (src->type)
+      {
+      case VariableData::MT_AUTO:
+         DO_P_ADDR(GET_AUTO32F,
+             SETOP_ADD_AUTO32F,
+             SETOP_SUB_AUTO32F);
+
+      case VariableData::MT_POINTER:
+         DO_P_POINTER(GET_POINTER32F,
+                SETOP_ADD_POINTER32F,
+                SETOP_SUB_POINTER32F);
+         break;
+
+      case VariableData::MT_REGISTER:
+         switch (src->sectionR)
+         {
+         case VariableData::SR_LOCAL:
+            DO_P_ADDR(GET_REGISTER32F,
+                SETOP_ADD_REGISTER32F,
+                SETOP_SUB_REGISTER32F);
+
+         case VariableData::SR_MAP:
+            DO_P_ADDR(ACS_GET_MAPREGISTER,
+                ACS_SETOP_ADD_MAPREGISTER,
+                ACS_SETOP_SUB_MAPREGISTER);
+
+         case VariableData::SR_WORLD:
+            DO_P_ADDR(ACS_GET_WORLDREGISTER,
+                ACS_SETOP_ADD_WORLDREGISTER,
+                ACS_SETOP_SUB_WORLDREGISTER);
+
+         case VariableData::SR_GLOBAL:
+            DO_P_ADDR(ACSE_GET_GLOBALREGISTER,
+                ACSE_SETOP_ADD_GLOBALREGISTER,
+                ACSE_SETOP_SUB_GLOBALREGISTER);
+      }
+      break;
+
+      case VariableData::MT_REGISTERARRAY:
+         switch (src->sectionRA)
+         {
+         case VariableData::SRA_MAP:
+            DO_P_OFFSET(ACSE_GET_MAPARRAY,
+                  ACSE_SETOP_ADD_MAPARRAY,
+                  ACSE_SETOP_SUB_MAPARRAY);
+            break;
+
+         case VariableData::SRA_WORLD:
+            DO_P_OFFSET(ACSE_GET_WORLDARRAY,
+                  ACSE_SETOP_ADD_WORLDARRAY,
+                  ACSE_SETOP_SUB_WORLDARRAY);
+            break;
+
+         case VariableData::SRA_GLOBAL:
+            DO_P_OFFSET(ACSE_GET_GLOBALARRAY,
+                  ACSE_SETOP_ADD_GLOBALARRAY,
+                  ACSE_SETOP_SUB_GLOBALARRAY);
+            break;
+      }
+      break;
+
+      case VariableData::MT_STATIC:
+         DO_P_ADDR(GET_STATIC32F,
+             SETOP_ADD_STATIC32F,
+             SETOP_SUB_STATIC32F);
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         throw SourceException("invalid MT", position, getName());
+      }
+   }
+
+   //
+   // ::doI
+   //
+   void doI
+   (ObjectVector *objects, VariableData *dst, VariableData *src,
+    VariableData *tmp)
+   {
+      ObjectExpression::Pointer addrL = src->address;
+      ObjectExpression::Pointer tempA;
+      ObjectCode ocode;
+
+      switch (src->type)
+      {
+      case VariableData::MT_AUTO:
+         DO_I_ADDR(GET_AUTO32I,
+             SETOP_INC_AUTO32I,
+             SETOP_DEC_AUTO32I);
+
+      case VariableData::MT_POINTER:
+         DO_I_OFFSET(GET_POINTER32I,
+               SETOP_INC_POINTER32I,
+               SETOP_DEC_POINTER32I);
+         break;
+
+      case VariableData::MT_REGISTER:
+         switch (src->sectionR)
+         {
+         case VariableData::SR_LOCAL:
+            DO_I_ADDR(GET_REGISTER32I,
+                SETOP_INC_REGISTER32I,
+                SETOP_DEC_REGISTER32I);
+
+         case VariableData::SR_MAP:
+            DO_I_ADDR(ACS_GET_MAPREGISTER,
+                ACS_SETOP_INC_MAPREGISTER,
+                ACS_SETOP_DEC_MAPREGISTER);
+
+         case VariableData::SR_WORLD:
+            DO_I_ADDR(ACS_GET_WORLDREGISTER,
+                ACS_SETOP_INC_WORLDREGISTER,
+                ACS_SETOP_DEC_WORLDREGISTER);
+
+         case VariableData::SR_GLOBAL:
+            DO_I_ADDR(ACSE_GET_GLOBALREGISTER,
+                ACSE_SETOP_INC_GLOBALREGISTER,
+                ACSE_SETOP_DEC_GLOBALREGISTER);
+      }
+      break;
+
+      case VariableData::MT_REGISTERARRAY:
+         switch (src->sectionRA)
+         {
+         case VariableData::SRA_MAP:
+            DO_I_OFFSET(ACSE_GET_MAPARRAY,
+                  ACSE_SETOP_INC_MAPARRAY,
+                  ACSE_SETOP_DEC_MAPARRAY);
+            break;
+
+         case VariableData::SRA_WORLD:
+            DO_I_OFFSET(ACSE_GET_WORLDARRAY,
+                  ACSE_SETOP_INC_WORLDARRAY,
+                  ACSE_SETOP_DEC_WORLDARRAY);
+            break;
+
+         case VariableData::SRA_GLOBAL:
+            DO_I_OFFSET(ACSE_GET_GLOBALARRAY,
+                  ACSE_SETOP_INC_GLOBALARRAY,
+                  ACSE_SETOP_DEC_GLOBALARRAY);
+            break;
+      }
+      break;
+
+      case VariableData::MT_STATIC:
+         DO_I_ADDR(GET_STATIC32I,
+             SETOP_INC_STATIC32I,
+             SETOP_DEC_STATIC32I);
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         throw SourceException("invalid MT", position, getName());
+      }
+   }
+
+   //
+   // ::doLL
+   //
+   void doLL
+   (ObjectVector *objects, VariableData *dst, VariableData *src,
+    VariableData *tmp)
+   {
+      ObjectExpression::Pointer addrL = src->address;
+      ObjectExpression::Pointer addrH;
+      ObjectExpression::Pointer tempA;
+      ObjectExpression::Pointer wrapv = objects->getValue(inc ? 0 : 0xFFFFFFFF);
+      ObjectCode ocode;
+
+      std::string labelEnd = label + "_end";
+      ObjectExpression::Pointer objEnd = objects->getValue(labelEnd);
+
+      switch (src->type)
+      {
+      case VariableData::MT_AUTO:
+         DO_LL_ADDR(GET_AUTO32I,
+              SETOP_INC_AUTO32I,
+              SETOP_DEC_AUTO32I);
+
+      case VariableData::MT_POINTER:
+         addrH = objects->getValueAdd(addrL, 1);
+         DO_LL_OFFSET(GET_POINTER32I,
+                SETOP_INC_POINTER32I,
+                SETOP_DEC_POINTER32I);
+         break;
+
+      case VariableData::MT_REGISTER:
+         switch (src->sectionR)
+         {
+         case VariableData::SR_LOCAL:
+            DO_LL_ADDR(GET_REGISTER32I,
+                 SETOP_INC_REGISTER32I,
+                 SETOP_DEC_REGISTER32I);
+
+         case VariableData::SR_MAP:
+            DO_LL_ADDR(ACS_GET_MAPREGISTER,
+                 ACS_SETOP_INC_MAPREGISTER,
+                 ACS_SETOP_DEC_MAPREGISTER);
+
+         case VariableData::SR_WORLD:
+            DO_LL_ADDR(ACS_GET_WORLDREGISTER,
+                 ACS_SETOP_INC_WORLDREGISTER,
+                 ACS_SETOP_DEC_WORLDREGISTER);
+
+         case VariableData::SR_GLOBAL:
+            DO_LL_ADDR(ACSE_GET_GLOBALREGISTER,
+                 ACSE_SETOP_INC_GLOBALREGISTER,
+                 ACSE_SETOP_DEC_GLOBALREGISTER);
+      }
+      break;
+
+      case VariableData::MT_REGISTERARRAY:
+         addrH = addrL;
+         switch (src->sectionRA)
+         {
+         case VariableData::SRA_MAP:
+            DO_LL_OFFSET(ACSE_GET_MAPARRAY,
+                   ACSE_SETOP_INC_MAPARRAY,
+                   ACSE_SETOP_DEC_MAPARRAY);
+            break;
+
+         case VariableData::SRA_WORLD:
+            DO_LL_OFFSET(ACSE_GET_WORLDARRAY,
+                   ACSE_SETOP_INC_WORLDARRAY,
+                   ACSE_SETOP_DEC_WORLDARRAY);
+            break;
+
+         case VariableData::SRA_GLOBAL:
+            DO_LL_OFFSET(ACSE_GET_GLOBALARRAY,
+                   ACSE_SETOP_INC_GLOBALARRAY,
+                   ACSE_SETOP_DEC_GLOBALARRAY);
+            break;
+      }
+      break;
+
+      case VariableData::MT_STATIC:
+         DO_LL_ADDR(GET_STATIC32I,
+              SETOP_INC_STATIC32I,
+              SETOP_DEC_STATIC32I);
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         throw SourceException("invalid MT", position, getName());
+      }
+   }
+
+   //
+   // ::doP
+   //
+   void doP
+   (ObjectVector *objects, VariableData *dst, VariableData *src,
+    VariableData *tmp, ObjectExpression *value)
+   {
+      ObjectExpression::Pointer addrL = src->address;
+      ObjectExpression::Pointer tempA;
+      ObjectCode ocode;
+
+      switch (src->type)
+      {
+      case VariableData::MT_AUTO:
+         DO_P_ADDR(GET_AUTO32I,
+             SETOP_ADD_AUTO32U,
+             SETOP_SUB_AUTO32U);
+
+      case VariableData::MT_POINTER:
+         DO_P_POINTER(GET_POINTER32I,
+                SETOP_ADD_POINTER32U,
+                SETOP_SUB_POINTER32U);
+         break;
+
+      case VariableData::MT_REGISTER:
+         switch (src->sectionR)
+         {
+         case VariableData::SR_LOCAL:
+            DO_P_ADDR(GET_REGISTER32I,
+                SETOP_ADD_REGISTER32U,
+                SETOP_SUB_REGISTER32U);
+
+         case VariableData::SR_MAP:
+            DO_P_ADDR(ACS_GET_MAPREGISTER,
+                ACS_SETOP_ADD_MAPREGISTER,
+                ACS_SETOP_SUB_MAPREGISTER);
+
+         case VariableData::SR_WORLD:
+            DO_P_ADDR(ACS_GET_WORLDREGISTER,
+                ACS_SETOP_ADD_WORLDREGISTER,
+                ACS_SETOP_SUB_WORLDREGISTER);
+
+         case VariableData::SR_GLOBAL:
+            DO_P_ADDR(ACSE_GET_GLOBALREGISTER,
+                ACSE_SETOP_ADD_GLOBALREGISTER,
+                ACSE_SETOP_SUB_GLOBALREGISTER);
+      }
+      break;
+
+      case VariableData::MT_REGISTERARRAY:
+         switch (src->sectionRA)
+         {
+         case VariableData::SRA_MAP:
+            DO_P_OFFSET(ACSE_GET_MAPARRAY,
+                  ACSE_SETOP_ADD_MAPARRAY,
+                  ACSE_SETOP_SUB_MAPARRAY);
+            break;
+
+         case VariableData::SRA_WORLD:
+            DO_P_OFFSET(ACSE_GET_WORLDARRAY,
+                  ACSE_SETOP_ADD_WORLDARRAY,
+                  ACSE_SETOP_SUB_WORLDARRAY);
+            break;
+
+         case VariableData::SRA_GLOBAL:
+            DO_P_OFFSET(ACSE_GET_GLOBALARRAY,
+                  ACSE_SETOP_ADD_GLOBALARRAY,
+                  ACSE_SETOP_SUB_GLOBALARRAY);
+            break;
+      }
+      break;
+
+      case VariableData::MT_STATIC:
+         DO_P_ADDR(GET_STATIC32I,
+             SETOP_ADD_STATIC32U,
+             SETOP_SUB_STATIC32U);
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         throw SourceException("invalid MT", position, getName());
+      }
+   }
+
+   //
+   // ::virtual_makeObjects
+   //
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+   {
+      VariableType::Reference type = getType();
+      bigsint                 size = type->getSize(position);
+      VariableType::BasicType bt   = type->getBasicType();
+      VariableData::Pointer   src  = expr->getData();
+      VariableData::Pointer   data = VariableData::create_stack(size);
+      VariableData::Pointer   tmp  = VariableData::create_stack(1);
+
+      if (dst->type != VariableData::MT_VOID)
+         make_objects_memcpy_prep(objects, dst, data, position);
+
+      if (bt == VariableType::BT_LLONG || bt == VariableType::BT_ULLONG)
+         doLL(objects, dst, src, tmp);
+      else if (VariableType::is_bt_integer(bt))
+         doI(objects, dst, src, tmp);
+      else if (bt == VariableType::BT_POINTER)
+      {
+         bigsint value = type->getReturn()->getSize(position);
+         if (value == 1)
+            doI(objects, dst, src, tmp);
+         else
+            doP(objects, dst, src, tmp, objects->getValue(value));
+      }
+      else if (bt == VariableType::BT_FIXED || bt == VariableType::BT_REAL)
+         doF(objects, dst, src, tmp);
+      else
+         throw SourceException("invalid BT", position, __func__);
+
+      if (dst->type != VariableData::MT_VOID)
+         make_objects_memcpy_post(objects, dst, data, type, context, position);
+   }
 
    bool inc;
    bool suf;
@@ -110,282 +688,6 @@ SRCEXP_EXPRUNA_DEFN(inc_suf)
 {
    return new SourceExpression_UnaryDecInc(true, true, expr, context,
                                            position);
-}
-
-//
-// SourceExpression_UnaryDecInc::SourceExpression_UnaryDecInc
-//
-SourceExpression_UnaryDecInc::
-SourceExpression_UnaryDecInc(bool _inc, bool _suf, SRCEXP_EXPRUNA_PARM)
-                             : Super(SRCEXP_EXPRUNA_PASS),
-                               inc(_inc), suf(_suf)
-{
-}
-
-//
-// SourceExpression_UnaryDecInc::doDelta
-//
-int SourceExpression_UnaryDecInc::
-doDelta(ObjectVector *objects)
-{
-   ObjectExpression::Pointer deltaExpr;
-   int deltaType = 0; // OCODE offset. Order is always F I U.
-
-   VariableType::Reference type = getType();
-
-   switch (type->getBasicType())
-   {
-   case VariableType::BT_CHAR:
-   case VariableType::BT_INT:
-      deltaType |= DELTA_I;
-      break;
-
-   case VariableType::BT_POINTER:
-   {
-      bigsint i = type->getReturn()->getSize(position);
-      if (i != 1)
-      {
-         deltaExpr = objects->getValue(i);
-         deltaType |= DELTA_EXPR;
-      }
-   }
-   case VariableType::BT_UINT:
-      deltaType |= DELTA_U;
-      break;
-
-   case VariableType::BT_REAL:
-      deltaExpr = objects->getValue(1.0);
-      deltaType |= DELTA_F|DELTA_EXPR;
-      break;
-
-   default:
-      throw SourceException("invalid BT", position, getName());
-   }
-
-   if (deltaExpr)
-   {
-      objects->addToken(deltaType == DELTA_F ? OCODE_GET_LITERAL32F
-                                             : OCODE_GET_LITERAL32I,
-                        deltaExpr);
-   }
-
-   return deltaType;
-}
-
-//
-// SourceExpression_UnaryDecInc::doDst
-//
-void SourceExpression_UnaryDecInc::
-doDst(ObjectVector *objects, VariableData *dst, VariableData *src)
-{
-   make_objects_memcpy_prep(objects, dst, NULL, position);
-   make_objects_memcpy_post(objects, dst, src, getType(), context, position);
-}
-
-//
-// SourceExpression_UnaryDecInc::doSrc
-//
-void SourceExpression_UnaryDecInc::
-doSrc(ObjectVector *objects, VariableData *src, int deltaType)
-{
-   ObjectCode ocode = OCODE_NONE;
-   bool       typed = false;
-
-   switch (src->type)
-   {
-   case VariableData::MT_AUTO:
-      if (deltaType & DELTA_EXPR)
-         ocode = inc ? OCODE_SETOP_ADD_AUTO32F
-                     : OCODE_SETOP_SUB_AUTO32F;
-      else
-         ocode = inc ? OCODE_SETOP_INC_AUTO32F
-                     : OCODE_SETOP_DEC_AUTO32F;
-      typed = true;
-      break;
-
-   case VariableData::MT_POINTER:
-      if (deltaType & DELTA_EXPR)
-         ocode = inc ? OCODE_SETOP_ADD_POINTER32F
-                     : OCODE_SETOP_SUB_POINTER32F;
-      else
-         ocode = inc ? OCODE_SETOP_INC_POINTER32F
-                     : OCODE_SETOP_DEC_POINTER32F;
-      typed = true;
-      break;
-
-   case VariableData::MT_REGISTER:
-      switch (src->sectionR)
-      {
-      case VariableData::SR_LOCAL:
-         if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_SETOP_ADD_REGISTER32F
-                        : OCODE_SETOP_SUB_REGISTER32F;
-         else
-            ocode = inc ? OCODE_SETOP_INC_REGISTER32F
-                        : OCODE_SETOP_DEC_REGISTER32F;
-         typed = true;
-         break;
-
-      case VariableData::SR_MAP:
-         if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_ACS_SETOP_ADD_MAPREGISTER
-                        : OCODE_ACS_SETOP_SUB_MAPREGISTER;
-         else
-            ocode = inc ? OCODE_ACS_SETOP_INC_MAPREGISTER
-                        : OCODE_ACS_SETOP_DEC_MAPREGISTER;
-         break;
-
-      case VariableData::SR_WORLD:
-         if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_ACS_SETOP_ADD_WORLDREGISTER
-                        : OCODE_ACS_SETOP_SUB_WORLDREGISTER;
-         else
-            ocode = inc ? OCODE_ACS_SETOP_INC_WORLDREGISTER
-                        : OCODE_ACS_SETOP_DEC_WORLDREGISTER;
-         break;
-
-      case VariableData::SR_GLOBAL:
-         if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_ACSE_SETOP_ADD_GLOBALREGISTER
-                        : OCODE_ACSE_SETOP_SUB_GLOBALREGISTER;
-         else
-            ocode = inc ? OCODE_ACSE_SETOP_INC_GLOBALREGISTER
-                        : OCODE_ACSE_SETOP_DEC_GLOBALREGISTER;
-         break;
-      }
-      break;
-
-   case VariableData::MT_REGISTERARRAY:
-      switch (src->sectionRA)
-      {
-      case VariableData::SRA_MAP:
-         if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_ACSE_SETOP_ADD_MAPARRAY
-                        : OCODE_ACSE_SETOP_SUB_MAPARRAY;
-         else
-            ocode = inc ? OCODE_ACSE_SETOP_INC_MAPARRAY
-                        : OCODE_ACSE_SETOP_DEC_MAPARRAY;
-         break;
-
-      case VariableData::SRA_WORLD:
-         if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_ACSE_SETOP_ADD_WORLDARRAY
-                        : OCODE_ACSE_SETOP_SUB_WORLDARRAY;
-         else
-            ocode = inc ? OCODE_ACSE_SETOP_INC_WORLDARRAY
-                        : OCODE_ACSE_SETOP_DEC_WORLDARRAY;
-         break;
-
-      case VariableData::SRA_GLOBAL:
-         if (deltaType & DELTA_EXPR)
-            ocode = inc ? OCODE_ACSE_SETOP_ADD_GLOBALARRAY
-                        : OCODE_ACSE_SETOP_SUB_GLOBALARRAY;
-         else
-            ocode = inc ? OCODE_ACSE_SETOP_INC_GLOBALARRAY
-                        : OCODE_ACSE_SETOP_DEC_GLOBALARRAY;
-         break;
-      }
-      break;
-
-   case VariableData::MT_STATIC:
-      if (deltaType & DELTA_EXPR)
-         ocode = inc ? OCODE_SETOP_ADD_STATIC32F
-                     : OCODE_SETOP_SUB_STATIC32F;
-      else
-         ocode = inc ? OCODE_SETOP_INC_STATIC32F
-                     : OCODE_SETOP_DEC_STATIC32F;
-      typed = true;
-      break;
-
-   case VariableData::MT_LITERAL:
-   case VariableData::MT_STACK:
-   case VariableData::MT_VOID:
-   case VariableData::MT_NONE:
-      throw SourceException("invalid MT", position, getName());
-   }
-
-   if (typed)
-      ocode = static_cast<ObjectCode>(ocode + (deltaType & DELTA_MASK));
-   objects->addToken(ocode, src->address);
-}
-
-//
-// SourceExpression_UnaryDecInc::virtual_makeObjects
-//
-void SourceExpression_UnaryDecInc::
-virtual_makeObjects(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   int deltaType = 0;
-
-   VariableData::Pointer src = expr->getData();
-
-   bool offset = src->type == VariableData::MT_POINTER
-              || src->type == VariableData::MT_REGISTERARRAY;
-
-   // For non-registerarray sources, need to put any possible delta on the
-   // stack before the src address.
-   if (src->type != VariableData::MT_REGISTERARRAY)
-   {
-      // If void dst, then just do it now regardless.
-      // Don't delta if prefix, because the extra address will be in the way.
-      // Or if doing stack dst, because the result will be in the way.
-      if (dst->type == VariableData::MT_VOID
-       || (suf && dst->type != VariableData::MT_STACK))
-         deltaType = doDelta(objects);
-   }
-
-   if (offset)
-   {
-      src->offsetTemp =
-         VariableData::create_stack(src->offsetExpr->getType()->getSize(position));
-
-      src->offsetExpr->makeObjects(objects, src->offsetTemp);
-
-      if (dst->type != VariableData::MT_VOID)
-      {
-         // If we couldn't do delta because prefix, we do it now.
-         if (src->type != VariableData::MT_REGISTERARRAY && !suf)
-         {
-            ObjectExpression::Pointer tmpA = context->getTempVar(0);
-            objects->addToken(OCODE_SET_TEMP, tmpA);
-            objects->addToken(OCODE_GET_TEMP, tmpA);
-            deltaType = doDelta(objects);
-            objects->addToken(OCODE_GET_TEMP, tmpA);
-         }
-         else
-         {
-            objects->addToken(OCODE_STACK_DUP32);
-         }
-      }
-   }
-
-   if (suf && dst->type != VariableData::MT_VOID)
-   {
-      // If stashing the offset on the stack, and pushing the result to the
-      // stack, need to keep the offset in front of the result.
-      if (offset && dst->type == VariableData::MT_STACK)
-         objects->addToken(OCODE_SET_TEMP, context->getTempVar(0));
-
-      doDst(objects, dst, src);
-
-      // If we couldn't do delta because stack dst, we do it now.
-      if (src->type != VariableData::MT_REGISTERARRAY
-       && dst->type == VariableData::MT_STACK)
-            deltaType = doDelta(objects);
-
-      if (offset && dst->type == VariableData::MT_STACK)
-         objects->addToken(OCODE_GET_TEMP, context->getTempVar(0));
-   }
-
-   if (!deltaType)
-      deltaType = doDelta(objects);
-
-   doSrc(objects, src, deltaType);
-
-   if (!suf && dst->type != VariableData::MT_VOID)
-      doDst(objects, dst, src);
 }
 
 // EOF
