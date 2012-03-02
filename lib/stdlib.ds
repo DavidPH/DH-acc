@@ -370,25 +370,7 @@ __extfunc labs(long int j) -> long int
 //
 __extfunc llabs(long long int j) -> long long int
 {
-   #ifdef __FUNCTION_AUTOARGS__
-   __variable __autoreg llbits_t *jp = (llbits_t *)&j;
-   #else
-   #define jp ((llbits_t __autoreg *)&j) #
-   #endif
-
-   if (jp->hi < 0)
-   {
-      jp->lo = ~jp->lo;
-      jp->hi = ~jp->hi;
-      if (!++jp->lo) ++jp->hi;
-      return j;
-   }
-   else
-      return j;
-
-   #ifndef __FUNCTION_AUTOARGS__
-   #undef jp
-   #endif
+   return j < 0 ? -j : j;
 };
 
 //

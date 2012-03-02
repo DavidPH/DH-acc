@@ -57,7 +57,7 @@ public:
    // ::SourceExpression_BinaryCmp
    //
    SourceExpression_BinaryCmp(CmpType _ct, SRCEXP_EXPRBIN_PARM)
-    : Super(false, SRCEXP_EXPRBIN_PASS), ct(_ct)
+    : Super(SRCEXP_EXPRBIN_PASS), ct(_ct)
    {
    }
 
@@ -84,11 +84,17 @@ public:
    {
       Super::recurse_makeObjects(objects, dst);
 
+      ObjectExpression::Pointer objR;
+      if (exprR->canMakeObject() && !(objR = exprR->makeObject())->canResolve())
+         objR = NULL;
+
       VariableType::Reference inType = Super::getType();
+      bigsint                 inSize = inType->getSize(position);
       VariableType::BasicType inBT = inType->getBasicType();
       VariableType::Reference type = getType();
       bigsint                 size = type->getSize(position);
       VariableData::Pointer   src  = VariableData::create_stack(size);
+      VariableData::Pointer   tmp  = VariableData::create_stack(inSize);
 
       ObjectCode ocode = OCODE_NONE;
       switch (ct)
@@ -100,6 +106,31 @@ public:
       case CMP_EQ: ocode = OCODE_CMP_EQ32F; break;
       case CMP_NE: ocode = OCODE_CMP_NE32F; break;
       }
+
+      make_objects_memcpy_prep(objects, dst, src, position);
+
+      // long long < 0 and long long >= 0 can be optimized by only checking the
+      // high byte.
+      if (inBT == VariableType::BT_LLONG && (ct == CMP_LT || ct == CMP_GE) &&
+          objR && !objR->resolveInt())
+      {
+         ObjectExpression::Pointer tmpH = context->getTempVar(0);
+
+         ocode = static_cast<ObjectCode>(ocode + 1);
+
+         exprL->makeObjects(objects, tmp);
+         objects->addToken(OCODE_SET_TEMP, tmpH);
+         objects->addToken(OCODE_STACK_DROP32);
+         objects->addToken(OCODE_GET_TEMP, tmpH);
+         objects->addToken(OCODE_GET_LITERAL32I, objR);
+         objects->addToken(ocode);
+
+         make_objects_memcpy_post(objects, dst, src, type, context, position);
+         return;
+      }
+
+      exprL->makeObjects(objects, tmp);
+      exprR->makeObjects(objects, tmp);
 
       if (inBT == VariableType::BT_LLONG || inBT == VariableType::BT_ULLONG)
       {
