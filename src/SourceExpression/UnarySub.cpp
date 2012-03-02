@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -100,10 +101,11 @@ void SourceExpression_UnarySub::virtual_makeObjects
    Super::recurse_makeObjects(objects, dst);
 
    VariableType::Reference type = getType();
-   VariableData::Pointer   src  =
-      VariableData::create_stack(type->getSize(position));
+   VariableType::BasicType bt   = type->getBasicType();
+   bigsint                 size = type->getSize(position);
+   VariableData::Pointer   src  = VariableData::create_stack(size);
 
-   switch (type->getBasicType())
+   switch (bt)
    {
    case VariableType::BT_CHAR:
    case VariableType::BT_INT:
@@ -115,6 +117,30 @@ void SourceExpression_UnarySub::virtual_makeObjects
    case VariableType::BT_ULONG:
    case VariableType::BT_USHORT:
       objects->addToken(OCODE_MISC_NEGATE32I);
+      break;
+
+   case VariableType::BT_LLONG:
+   case VariableType::BT_ULLONG:
+   {
+      std::string labelEnd = label + "_end";
+
+      ObjectExpression::Pointer tmpL = context->getTempVar(0);
+      ObjectExpression::Pointer tmpH = context->getTempVar(1);
+
+      objects->addToken(OCODE_BITWISE_NOT32);
+      objects->addToken(OCODE_SET_REGISTER32I, tmpH);
+      objects->addToken(OCODE_BITWISE_NOT32);
+      objects->addToken(OCODE_SET_REGISTER32I, tmpL);
+
+      objects->addToken(OCODE_SETOP_INC_REGISTER32I, tmpL);
+      objects->addToken(OCODE_GET_REGISTER32I, tmpL);
+      objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelEnd));
+      objects->addToken(OCODE_SETOP_INC_REGISTER32I, tmpH);
+
+      objects->addLabel(labelEnd);
+      objects->addToken(OCODE_GET_REGISTER32I, tmpL);
+      objects->addToken(OCODE_GET_REGISTER32I, tmpH);
+   }
       break;
 
    case VariableType::BT_REAL:

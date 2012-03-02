@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -163,6 +164,115 @@ void SourceExpression_Binary::doEvaluateBase
    ->makeObjects(objects, src);
 
    objects->addToken(ocode);
+
+   make_objects_memcpy_post(objects, dst, src, type, position);
+}
+
+//
+// SourceExpression_Binary::doEvaluateBaseLLAS
+//
+void SourceExpression_Binary::doEvaluateBaseLLAS
+(ObjectVector *objects, VariableData *dst, VariableData *src, bool add)
+{
+   VariableType::Reference type = getType();
+
+   std::string labelCmp = label + "_cmp";
+   std::string labelEnd = label + "_end";
+   std::string labelOvr = label + "_ovr";
+   std::string labelPos = label + "_pos";
+
+   ObjectExpression::Pointer tmpL = context->getTempVar(0);
+   ObjectExpression::Pointer tmpH = context->getTempVar(1);
+   ObjectExpression::Pointer tmpI = context->getTempVar(2);
+
+   make_objects_memcpy_prep(objects, dst, src, position);
+
+   create_value_cast_implicit(exprR, type, context, position)
+   ->makeObjects(objects, src);
+
+   create_value_cast_implicit(exprL, type, context, position)
+   ->makeObjects(objects, src);
+
+   objects->addToken(OCODE_SET_REGISTER32I, tmpH);
+   objects->addToken(OCODE_SET_REGISTER32I, tmpL);
+   objects->addToken(OCODE_GET_REGISTER32I, tmpL);
+   objects->addToken(OCODE_SET_REGISTER32I, tmpI);
+
+   if (add)
+   {
+      objects->addToken(OCODE_SETOP_ADD_REGISTER32I, tmpH);
+      objects->addToken(OCODE_SETOP_ADD_REGISTER32I, tmpL);
+   }
+   else
+   {
+      objects->addToken(OCODE_SETOP_SUB_REGISTER32I, tmpH);
+      objects->addToken(OCODE_SETOP_SUB_REGISTER32I, tmpL);
+   }
+
+   // if (l & 0x80000000)
+   objects->addToken(OCODE_GET_REGISTER32I, tmpL);
+   objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
+   objects->addToken(OCODE_BITWISE_AND32);
+   objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelPos));
+
+   // ... then
+   //    if (!(i & 0x80000000)) goto ovr/end;
+   objects->addToken(OCODE_GET_REGISTER32I, tmpI);
+   objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
+   objects->addToken(OCODE_BITWISE_AND32);
+   objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(add ? labelEnd : labelOvr));
+   objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelCmp));
+
+   // ... else
+   //    if (i & 0x80000000) goto end/ovr;
+   objects->addLabel(labelPos);
+   objects->addToken(OCODE_GET_REGISTER32I, tmpI);
+   objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
+   objects->addToken(OCODE_BITWISE_AND32);
+   objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(add ? labelOvr : labelEnd));
+
+   objects->addLabel(labelCmp);
+   objects->addToken(OCODE_GET_REGISTER32I, tmpL);
+   objects->addToken(OCODE_GET_REGISTER32I, tmpI);
+   objects->addToken(add ? OCODE_CMP_LT32I : OCODE_CMP_GT32I);
+   objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelEnd));
+
+   objects->addLabel(labelOvr);
+   objects->addToken(OCODE_SETOP_INC_REGISTER32I, tmpH);
+   objects->addLabel(labelEnd);
+   objects->addToken(OCODE_GET_REGISTER32I, tmpL);
+   objects->addToken(OCODE_GET_REGISTER32I, tmpH);
+
+   make_objects_memcpy_post(objects, dst, src, type, position);
+}
+
+//
+// SourceExpression_Binary::doEvaluateBaseLLB
+//
+void SourceExpression_Binary::doEvaluateBaseLLB
+(ObjectVector *objects, VariableData *dst, VariableData *src, ObjectCode ocode)
+{
+   VariableType::Reference type = getType();
+
+   make_objects_memcpy_prep(objects, dst, src, position);
+
+   create_value_cast_implicit(exprL, type, context, position)
+   ->makeObjects(objects, src);
+
+   create_value_cast_implicit(exprR, type, context, position)
+   ->makeObjects(objects, src);
+
+   ObjectExpression::Pointer tmpL = context->getTempVar(0);
+   ObjectExpression::Pointer tmpH = context->getTempVar(1);
+
+   objects->addToken(OCODE_SET_REGISTER32I, tmpH);
+   objects->addToken(OCODE_SET_REGISTER32I, tmpL);
+
+   objects->addToken(ocode, tmpH);
+   objects->addToken(ocode, tmpL);
+
+   objects->addToken(OCODE_GET_REGISTER32I, tmpL);
+   objects->addToken(OCODE_GET_REGISTER32I, tmpH);
 
    make_objects_memcpy_post(objects, dst, src, type, position);
 }

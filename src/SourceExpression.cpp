@@ -107,11 +107,35 @@ get_promoted_type(VariableType *type1, VariableType *type2,
    if (bt1 == VariableType::BT_REAL) return type1->getUnqualified();
    if (bt2 == VariableType::BT_REAL) return type2->getUnqualified();
 
+   if (bt1 == VariableType::BT_LLONG) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_LLONG) return type2->getUnqualified();
+
+   if (bt1 == VariableType::BT_ULLONG) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_ULLONG) return type2->getUnqualified();
+
+   if (bt1 == VariableType::BT_LONG) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_LONG) return type2->getUnqualified();
+
+   if (bt1 == VariableType::BT_ULONG) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_ULONG) return type2->getUnqualified();
+
    if (bt1 == VariableType::BT_INT) return type1->getUnqualified();
    if (bt2 == VariableType::BT_INT) return type2->getUnqualified();
 
    if (bt1 == VariableType::BT_UINT) return type1->getUnqualified();
    if (bt2 == VariableType::BT_UINT) return type2->getUnqualified();
+
+   if (bt1 == VariableType::BT_SHORT) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_SHORT) return type2->getUnqualified();
+
+   if (bt1 == VariableType::BT_USHORT) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_USHORT) return type2->getUnqualified();
+
+   if (bt1 == VariableType::BT_SCHAR) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_SCHAR) return type2->getUnqualified();
+
+   if (bt1 == VariableType::BT_UCHAR) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_UCHAR) return type2->getUnqualified();
 
    if (bt1 == VariableType::BT_CHAR) return type1->getUnqualified();
    if (bt2 == VariableType::BT_CHAR) return type2->getUnqualified();

@@ -67,7 +67,10 @@ private:
    {
       EVALUATE_BITWISE_VARS(BITWISE_IOR)
 
-      doEvaluateBase(objects, dst, src, ocode);
+      if (bt == VariableType::BT_LLONG || bt == VariableType::BT_ULLONG)
+         doEvaluateBaseLLB(objects, dst, src, OCODE_SETOP_IOR_REGISTER32);
+      else
+         doEvaluateBase(objects, dst, src, ocode);
    }
 
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);

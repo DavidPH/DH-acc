@@ -372,14 +372,13 @@ ASSIGN_GET_OCODE_GET
 //
 // EVALUATE_ARITHMETIC_VARS
 //
-#define EVALUATE_ARITHMETIC_VARS(OPER)                     \
-VariableType::Reference type = getType();                  \
-VariableType::BasicType bt   = type->getBasicType();       \
-bigsint                 size = type->getSize(position);    \
-                                                           \
-ObjectCode ocode = OCODE_##OPER##32F;                      \
-ocode = static_cast<ObjectCode>(ocode + getOcodeType(bt)); \
-                                                           \
+#define EVALUATE_ARITHMETIC_VARS(OPER)                  \
+VariableType::Reference type = getType();               \
+VariableType::BasicType bt   = type->getBasicType();    \
+bigsint                 size = type->getSize(position); \
+                                                        \
+ObjectCode ocode = OCODE_##OPER##32F;                   \
+                                                        \
 VariableData::Pointer src = VariableData::create_stack(size);
 
 //
@@ -387,6 +386,7 @@ VariableData::Pointer src = VariableData::create_stack(size);
 //
 #define EVALUATE_BITWISE_VARS(OPER)                     \
 VariableType::Reference type = getType();               \
+VariableType::BasicType bt   = type->getBasicType();    \
 bigsint                 size = type->getSize(position); \
                                                         \
 ObjectCode ocode = OCODE_##OPER##32;                    \
@@ -426,6 +426,13 @@ protected:
     ObjectCode ocodeOp, ObjectCode ocodeGet);
 
    void doEvaluateBase
+   (ObjectVector *objects, VariableData *dst, VariableData *src,
+    ObjectCode ocode);
+
+   void doEvaluateBaseLLAS
+   (ObjectVector *objects, VariableData *dst, VariableData *src, bool add);
+
+   void doEvaluateBaseLLB
    (ObjectVector *objects, VariableData *dst, VariableData *src,
     ObjectCode ocode);
 

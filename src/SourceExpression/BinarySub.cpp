@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -69,7 +70,13 @@ private:
 
       // TODO: X - 0
 
-      doEvaluateBase(objects, dst, src, ocode);
+      if (bt == VariableType::BT_LLONG || bt == VariableType::BT_ULLONG)
+         doEvaluateBaseLLAS(objects, dst, src, false);
+      else
+      {
+         ocode = static_cast<ObjectCode>(ocode + getOcodeType(bt));
+         doEvaluateBase(objects, dst, src, ocode);
+      }
    }
 
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);

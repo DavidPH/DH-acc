@@ -67,6 +67,8 @@ private:
    {
       EVALUATE_ARITHMETIC_VARS(DIV)
 
+      ocode = static_cast<ObjectCode>(ocode + getOcodeType(bt));
+
       // TODO: X / 1
       // TODO: X / PO2
 

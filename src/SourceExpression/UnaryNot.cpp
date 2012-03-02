@@ -23,7 +23,9 @@
 
 #include "Unary.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -86,8 +88,26 @@ void SourceExpression_UnaryNot::virtual_makeObjects
    {
    case VariableType::BT_CHAR:
    case VariableType::BT_INT:
+   case VariableType::BT_LONG:
+   case VariableType::BT_SCHAR:
+   case VariableType::BT_SHORT:
+   case VariableType::BT_UCHAR:
    case VariableType::BT_UINT:
+   case VariableType::BT_ULONG:
+   case VariableType::BT_USHORT:
       objects->addToken(OCODE_BITWISE_NOT32);
+      break;
+
+   case VariableType::BT_LLONG:
+   case VariableType::BT_ULLONG:
+   {
+      ObjectExpression::Pointer tmpH = context->getTempVar(0);
+
+      objects->addToken(OCODE_BITWISE_NOT32);
+      objects->addToken(OCODE_SET_REGISTER32I, tmpH);
+      objects->addToken(OCODE_BITWISE_NOT32);
+      objects->addToken(OCODE_GET_REGISTER32I, tmpH);
+   }
       break;
 
    default:

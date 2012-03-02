@@ -67,6 +67,8 @@ private:
    {
       EVALUATE_ARITHMETIC_VARS(MOD)
 
+      ocode = static_cast<ObjectCode>(ocode + getOcodeType(bt));
+
       // TODO: X % PO2
 
       doEvaluateBase(objects, dst, src, ocode);

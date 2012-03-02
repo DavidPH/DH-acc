@@ -43,9 +43,26 @@ class SourceExpression_BinaryAnd : public SourceExpression_Binary
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryAnd(bool assign, SRCEXP_EXPRBIN_ARGS);
+   //
+   // ::SourceExpression_BinaryAnd
+   //
+   SourceExpression_BinaryAnd(bool _assign, SRCEXP_EXPRBIN_PARM)
+    : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
+   {
+      CONSTRUCTOR_TYPE_VARS
+      CONSTRUCTOR_ARRAY_DECAY
 
-   virtual ObjectExpression::Pointer makeObject() const;
+      CONSTRAINT_INTEGER("&")
+   }
+
+   //
+   // ::makeObject
+   //
+   virtual ObjectExpression::Pointer makeObject() const
+   {
+      return ObjectExpression::create_binary_and
+      (exprL->makeObject(), exprR->makeObject(), position);
+   }
 
 private:
    //
@@ -67,10 +84,24 @@ private:
    {
       EVALUATE_BITWISE_VARS(BITWISE_AND)
 
-      doEvaluateBase(objects, dst, src, ocode);
+      if (bt == VariableType::BT_LLONG || bt == VariableType::BT_ULLONG)
+         doEvaluateBaseLLB(objects, dst, src, OCODE_SETOP_AND_REGISTER32);
+      else
+         doEvaluateBase(objects, dst, src, ocode);
    }
 
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   //
+   // ::virtual_makeObjects
+   //
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+   {
+      Super::recurse_makeObjects(objects, dst);
+
+      if (assign)
+         doAssign(objects, dst);
+      else
+         doEvaluate(objects, dst);
+   }
 
    bool assign;
 };
@@ -96,42 +127,6 @@ SRCEXP_EXPRBIN_DEFN(and_eq)
 {
    return new SourceExpression_BinaryAnd
               (true, exprL, exprR, context, position);
-}
-
-//
-// SourceExpression_BinaryAnd::SourceExpression_BinaryAnd
-//
-SourceExpression_BinaryAnd::SourceExpression_BinaryAnd
-(bool _assign, SRCEXP_EXPRBIN_PARM)
- : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
-{
-   CONSTRUCTOR_TYPE_VARS
-   CONSTRUCTOR_ARRAY_DECAY
-
-   CONSTRAINT_INTEGER("&")
-}
-
-//
-// SourceExpression_BinaryAnd::makeObject
-//
-ObjectExpression::Pointer SourceExpression_BinaryAnd::makeObject() const
-{
-   return ObjectExpression::create_binary_and
-          (exprL->makeObject(), exprR->makeObject(), position);
-}
-
-//
-// SourceExpression_BinaryAnd::virtual_makeObjects
-//
-void SourceExpression_BinaryAnd::virtual_makeObjects
-(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   if (assign)
-      doAssign(objects, dst);
-   else
-      doEvaluate(objects, dst);
 }
 
 // EOF
