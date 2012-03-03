@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -53,6 +54,9 @@ public:
       CONSTRUCTOR_ARRAY_DECAY
 
       CONSTRAINT_INTEGER(">>")
+
+      exprR = create_value_cast_implicit
+      (exprR, VariableType::get_bt_uint(), context, position);
    }
 
    //
@@ -63,6 +67,14 @@ public:
       return false;
    }
 
+   //
+   // ::getType
+   //
+   VariableType::Reference getType() const
+   {
+      return exprL->getType();
+   }
+
 private:
    //
    // ::doAssign
@@ -70,10 +82,226 @@ private:
    void doAssign(ObjectVector *objects, VariableData *dst)
    {
       ASSIGN_BITWISE_VARS
+      VariableType::BasicType bt = typeL->getBasicType();
+
+      if (VariableType::is_bt_unsigned(bt))
+         return doAssignU(objects, dst, src, typeL);
 
       ASSIGN_GET_OCODE_BITWISE(RSH)
 
       doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+   }
+
+   //
+   // ::doAssignU
+   //
+   void doAssignU
+   (ObjectVector *objects, VariableData *dst, VariableData *src,
+    VariableType *type)
+   {
+      ObjectExpression::Pointer tempA;
+      ObjectExpression::Pointer tempS = context->getTempVar(0);
+
+      VariableData::Pointer tmp = VariableData::create_stack(src->size);
+
+      std::string labelEnd = label + "_end";
+
+      if (src->type == VariableData::MT_POINTER ||
+          src->type == VariableData::MT_REGISTERARRAY)
+         tempA = context->getTempVar(1);
+
+      if (dst->type != VariableData::MT_VOID)
+         make_objects_memcpy_prep(objects, dst, tmp, position);
+
+      create_value_cast_implicit(exprR, type, context, position)
+      ->makeObjects(objects, tmp);
+      if (tempA)
+      {
+         if (src->offsetExpr)
+            src->offsetExpr->makeObjects(objects, tmp);
+         else
+            objects->addTokenPushZero();
+
+         objects->addToken(OCODE_SET_TEMP, tempA);
+      }
+      objects->addToken(OCODE_SET_TEMP, tempS);
+
+      // Fetch exprL.
+      switch (src->type)
+      {
+      case VariableData::MT_AUTO:
+         objects->addToken(OCODE_GET_AUTO32I, src->address);
+         break;
+
+      case VariableData::MT_POINTER:
+         objects->addToken(OCODE_GET_TEMP, tempA);
+         objects->addToken(OCODE_GET_POINTER32I, src->address);
+         break;
+
+      case VariableData::MT_REGISTER:
+         switch (src->sectionR)
+         {
+         case VariableData::SR_LOCAL:
+            objects->addToken(OCODE_GET_REGISTER32I, src->address);
+            break;
+
+         case VariableData::SR_MAP:
+            objects->addToken(OCODE_ACS_GET_MAPREGISTER, src->address);
+            break;
+
+         case VariableData::SR_WORLD:
+            objects->addToken(OCODE_ACS_GET_WORLDREGISTER, src->address);
+            break;
+
+         case VariableData::SR_GLOBAL:
+            objects->addToken(OCODE_ACSE_GET_GLOBALREGISTER, src->address);
+            break;
+         }
+      break;
+
+      case VariableData::MT_REGISTERARRAY:
+         // Leave an extra address on the stack to set by.
+         objects->addToken(OCODE_GET_TEMP, tempA);
+         objects->addToken(OCODE_GET_TEMP, tempA);
+
+         switch (src->sectionRA)
+         {
+         case VariableData::SRA_MAP:
+            objects->addToken(OCODE_ACSE_GET_MAPARRAY, src->address);
+            break;
+
+         case VariableData::SRA_WORLD:
+            objects->addToken(OCODE_ACSE_GET_WORLDARRAY, src->address);
+            break;
+
+         case VariableData::SRA_GLOBAL:
+            objects->addToken(OCODE_ACSE_GET_GLOBALARRAY, src->address);
+            break;
+         }
+      break;
+
+      case VariableData::MT_STATIC:
+         objects->addToken(OCODE_GET_STATIC32I, src->address);
+         break;
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         throw SourceException("invalid MT", position, getName());
+      }
+
+      // Calculate value.
+      objects->addToken(OCODE_GET_TEMP, tempS);
+      objects->addToken(OCODE_BITWISE_RSH32);
+      objects->addToken(OCODE_GET_TEMP, tempS);
+      objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelEnd));
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
+      objects->addToken(OCODE_SETOP_DEC_TEMP, tempS);
+      objects->addToken(OCODE_GET_TEMP, tempS);
+      objects->addToken(OCODE_BITWISE_RSH32);
+      objects->addToken(OCODE_BITWISE_NOT32);
+      objects->addToken(OCODE_BITWISE_AND32);
+
+      objects->addLabel(labelEnd);
+      // Assign exprL.
+      switch (src->type)
+      {
+      case VariableData::MT_AUTO:
+         objects->addToken(OCODE_SET_AUTO32I, src->address);
+         if (dst->type != VariableData::MT_VOID)
+            objects->addToken(OCODE_GET_AUTO32I, src->address);
+         break;
+
+      case VariableData::MT_POINTER:
+         objects->addToken(OCODE_GET_TEMP, tempA);
+         objects->addToken(OCODE_SET_POINTER32I, src->address);
+         if (dst->type != VariableData::MT_VOID)
+         {
+            objects->addToken(OCODE_GET_TEMP, tempA);
+            objects->addToken(OCODE_GET_POINTER32I, src->address);
+         }
+         break;
+
+      case VariableData::MT_REGISTER:
+         switch (src->sectionR)
+         {
+         case VariableData::SR_LOCAL:
+            objects->addToken(OCODE_SET_REGISTER32I, src->address);
+            if (dst->type != VariableData::MT_VOID)
+               objects->addToken(OCODE_GET_REGISTER32I, src->address);
+            break;
+
+         case VariableData::SR_MAP:
+            objects->addToken(OCODE_ACS_SET_MAPREGISTER, src->address);
+            if (dst->type != VariableData::MT_VOID)
+            objects->addToken(OCODE_ACS_SET_MAPREGISTER, src->address);
+            break;
+
+         case VariableData::SR_WORLD:
+            objects->addToken(OCODE_ACS_SET_WORLDREGISTER, src->address);
+            if (dst->type != VariableData::MT_VOID)
+            break;
+
+         case VariableData::SR_GLOBAL:
+            objects->addToken(OCODE_ACSE_SET_GLOBALREGISTER, src->address);
+            if (dst->type != VariableData::MT_VOID)
+            break;
+         }
+      break;
+
+      case VariableData::MT_REGISTERARRAY:
+         // Address already on stack.
+         switch (src->sectionRA)
+         {
+         case VariableData::SRA_MAP:
+            objects->addToken(OCODE_ACSE_SET_MAPARRAY, src->address);
+            break;
+
+         case VariableData::SRA_WORLD:
+            objects->addToken(OCODE_ACSE_SET_WORLDARRAY, src->address);
+            break;
+
+         case VariableData::SRA_GLOBAL:
+            objects->addToken(OCODE_ACSE_SET_GLOBALARRAY, src->address);
+            break;
+         }
+
+         if (dst->type != VariableData::MT_VOID)
+         {
+            objects->addToken(OCODE_GET_TEMP, tempA);
+            switch (src->sectionRA)
+            {
+            case VariableData::SRA_MAP:
+               objects->addToken(OCODE_ACSE_GET_MAPARRAY, src->address);
+               break;
+
+            case VariableData::SRA_WORLD:
+               objects->addToken(OCODE_ACSE_GET_WORLDARRAY, src->address);
+               break;
+
+            case VariableData::SRA_GLOBAL:
+               objects->addToken(OCODE_ACSE_GET_GLOBALARRAY, src->address);
+               break;
+            }
+         }
+      break;
+
+      case VariableData::MT_STATIC:
+         objects->addToken(OCODE_SET_STATIC32I, src->address);
+         if (dst->type != VariableData::MT_VOID)
+            objects->addToken(OCODE_GET_STATIC32I, src->address);
+         break;
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         throw SourceException("invalid MT", position, getName());
+      }
+
+      if (dst->type != VariableData::MT_VOID)
+         make_objects_memcpy_post(objects, dst, tmp, type, context, position);
    }
 
    //
@@ -83,9 +311,45 @@ private:
    {
       EVALUATE_BITWISE_VARS(BITWISE_RSH)
 
-      // FIXME: unsigned shift
+      if (VariableType::is_bt_unsigned(bt))
+         return doEvaluateU(objects, dst, src, type);
 
       doEvaluateBase(objects, dst, src, ocode);
+   }
+
+   //
+   // ::doEvaluateU
+   //
+   void doEvaluateU
+   (ObjectVector *objects, VariableData *dst, VariableData *src,
+    VariableType *type)
+   {
+      ObjectExpression::Pointer tempS = context->getTempVar(0);
+
+      std::string labelEnd = label + "_end";
+
+      make_objects_memcpy_prep(objects, dst, src, position);
+
+      create_value_cast_implicit(exprL, type, context, position)
+      ->makeObjects(objects, src);
+
+      create_value_cast_implicit(exprR, type, context, position)
+      ->makeObjects(objects, src);
+
+      objects->addToken(OCODE_SET_TEMP, tempS);
+      objects->addToken(OCODE_GET_TEMP, tempS);
+      objects->addToken(OCODE_BITWISE_RSH32);
+      objects->addToken(OCODE_GET_TEMP, tempS);
+      objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelEnd));
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
+      objects->addToken(OCODE_SETOP_DEC_TEMP, tempS);
+      objects->addToken(OCODE_GET_TEMP, tempS);
+      objects->addToken(OCODE_BITWISE_RSH32);
+      objects->addToken(OCODE_BITWISE_NOT32);
+      objects->addToken(OCODE_BITWISE_AND32);
+
+      objects->addLabel(labelEnd);
+      make_objects_memcpy_post(objects, dst, src, type, context, position);
    }
 
    //
