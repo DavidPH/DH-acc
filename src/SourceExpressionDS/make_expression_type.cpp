@@ -313,6 +313,85 @@ static VariableType::Pointer make_basic
    return NULL;
 }
 
+//
+// make_struct_lists
+//
+bool make_struct_lists
+(VariableType::VecStr *names, VariableType::Vector *types,
+ SourceTokenizerDS *in, SourceExpression::Vector *blocks,
+ SourceContext *context)
+{
+   if (!in->peekType(SourceTokenC::TT_OP_BRACE_O)) return false;
+
+   VariableType::Pointer type;
+
+   in->get(SourceTokenC::TT_OP_BRACE_O);
+
+   while (!in->peekType(SourceTokenC::TT_OP_BRACE_C))
+   {
+      type = SourceExpressionDS::make_expression_type(in, blocks, context);
+
+      types->push_back(type);
+      names->push_back(in->get(SourceTokenC::TT_IDENTIFIER).data);
+
+      while (in->peekType(SourceTokenC::TT_OP_COMMA))
+      {
+         in->get(SourceTokenC::TT_OP_COMMA);
+         types->push_back(type);
+         names->push_back(in->get(SourceTokenC::TT_IDENTIFIER).data);
+      }
+
+      in->get(SourceTokenC::TT_OP_SEMICOLON);
+   }
+
+   in->get(SourceTokenC::TT_OP_BRACE_C);
+
+   return true;
+}
+
+//
+// make_struct
+//
+VariableType::Reference make_struct
+(bool isUnion, SourceTokenizerDS *in, SourceExpression::Vector *blocks,
+ SourceContext *context)
+{
+   std::string           name;
+   VariableType::VecStr  names;
+   VariableType::Vector  types;
+   SourcePosition        pos;
+
+   // The name must be declared for the body.
+   if (in->peekType(SourceTokenC::TT_IDENTIFIER))
+   {
+      SourceTokenC const &token = in->get(SourceTokenC::TT_IDENTIFIER);
+      name = token.data;
+      pos  = token.pos;
+
+      if (isUnion)
+         context->getVariableType_union(name, token.pos);
+      else
+         context->getVariableType_struct(name, token.pos);
+   }
+   else
+      pos = in->peek(SourceTokenC::TT_OP_BRACE_O).pos;
+
+   if (isUnion)
+   {
+      if (make_struct_lists(&names, &types, in, blocks, context))
+         return context->getVariableType_union(name, names, types, pos);
+      else
+         return context->getVariableType_union(name, pos);
+   }
+   else
+   {
+      if (make_struct_lists(&names, &types, in, blocks, context))
+         return context->getVariableType_struct(name, names, types, pos);
+      else
+         return context->getVariableType_struct(name, pos);
+   }
+}
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -497,54 +576,8 @@ VariableType::Reference SourceExpressionDS::make_expression_type
       type = VariableType::get_bt_script(types, retn);
    }
    else if (token.data == "struct" || token.data == "union")
-   {
-      bool isUnion = token.data == "union";
+      type = make_struct(token.data == "union", in, blocks, context);
 
-      type = NULL;
-
-      if (in->peekType(SourceTokenC::TT_IDENTIFIER))
-      {
-         name = in->get(SourceTokenC::TT_IDENTIFIER).data;
-
-         if (isUnion)
-            type = context->getVariableType_union(name, token.pos);
-         else
-            type = context->getVariableType_struct(name, token.pos);
-      }
-
-      if (in->peekType(SourceTokenC::TT_OP_BRACE_O))
-      {
-         in->get(SourceTokenC::TT_OP_BRACE_O);
-
-         while (true)
-         {
-            if (in->peekType(SourceTokenC::TT_OP_BRACE_C))
-               break;
-
-            types.push_back(make_expression_type(in, blocks, context));
-            names.push_back(in->get(SourceTokenC::TT_IDENTIFIER).data);
-
-            in->get(SourceTokenC::TT_OP_SEMICOLON);
-         }
-
-         in->get(SourceTokenC::TT_OP_BRACE_C);
-
-         if (isUnion)
-            type =
-               context->getVariableType_union(name, names, types, token.pos);
-         else
-            type =
-               context->getVariableType_struct(name, names, types, token.pos);
-      }
-
-      if (!type)
-      {
-         if (isUnion)
-            type = context->getVariableType_union(name, token.pos);
-         else
-            type = context->getVariableType_struct(name, token.pos);
-      }
-   }
    else if (token.data == "typename")
    {
       token = in->get(SourceTokenC::TT_IDENTIFIER);

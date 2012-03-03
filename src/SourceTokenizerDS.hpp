@@ -54,7 +54,8 @@ public:
    SourceTokenC const &get(SourceTokenC::TokenType type);
    SourceTokenC const &get(SourceTokenC::TokenType type, std::string const &data);
 
-   SourceTokenC const & peek();
+   SourceTokenC const &peek();
+   SourceTokenC const &peek(SourceTokenC::TokenType type);
 
    bool peekType(SourceTokenC::TokenType type);
    bool peekType(SourceTokenC::TokenType type, std::string const &data);

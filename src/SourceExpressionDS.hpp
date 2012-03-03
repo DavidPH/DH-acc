@@ -67,6 +67,9 @@ public:
    static SourceExpression::Pointer create_value_integer
    (std::string const &value, SRCEXP_EXPR_ARGS);
 
+   static CounterReference<VariableType> make_expression_type
+   (SourceTokenizerDS * in, Vector *blocks, SourceContext *context);
+
    static SourceExpression::Pointer make_expressions
    (SourceTokenizerDS *tokenizer);
 
@@ -136,9 +139,6 @@ private:
    SRCEXPDS_EXPRSINGLE_DECL(variable);
    SRCEXPDS_EXPRSINGLE_DECL(void);
    SRCEXPDS_EXPRSINGLE_DECL(while);
-
-   static CounterReference<VariableType> make_expression_type
-   (SourceTokenizerDS * in, Vector *blocks, SourceContext *context);
 
    static expression_single_handler_map _expression_single_handlers;
    static expression_single_handler_map _expression_single_extern_handlers;

@@ -735,6 +735,18 @@ SourceTokenC const &SourceTokenizerDS::peek()
 }
 
 //
+// SourceTokenizerDS::peek
+//
+SourceTokenC const &SourceTokenizerDS::peek(SourceTokenC::TokenType type)
+{
+   prep(); doAssert(type);
+
+   ungetStack.push(token);
+
+   return token;
+}
+
+//
 // SourceTokenizerDS::peekType
 //
 bool SourceTokenizerDS::peekType(SourceTokenC::TokenType type)
