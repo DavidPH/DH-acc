@@ -114,6 +114,55 @@ break
 // DO_LL_OFFSET
 //
 #define DO_LL_OFFSET(CODEG, CODEI, CODED)       \
+addrH = addrL;                                  \
+tempA = context->getTempVar(0);                 \
+ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
+                                                \
+if (src->offsetExpr)                            \
+   src->offsetExpr->makeObjects(objects, tmp);  \
+else                                            \
+   objects->addTokenPushZero();                 \
+objects->addToken(OCODE_SET_TEMP, tempA);       \
+                                                \
+if (suf && dst->type != VariableData::MT_VOID)  \
+{                                               \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));\
+   objects->addToken(OCODE_ADD32U);             \
+   objects->addToken(OCODE_##CODEG, addrH);     \
+}                                               \
+                                                \
+objects->addToken(OCODE_GET_TEMP, tempA);       \
+objects->addToken(ocode, addrL);                \
+objects->addToken(OCODE_GET_TEMP, tempA);       \
+objects->addToken(OCODE_##CODEG, addrL);        \
+objects->addToken(OCODE_GET_LITERAL32I, wrapv); \
+objects->addToken(OCODE_CMP_EQ32I);             \
+objects->addToken(OCODE_BRANCH_ZERO, objEnd);   \
+objects->addToken(OCODE_GET_TEMP, tempA);       \
+objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));\
+objects->addToken(OCODE_ADD32U);                \
+objects->addToken(ocode, addrH);                \
+objects->addLabel(labelEnd);                    \
+                                                \
+if (!suf && dst->type != VariableData::MT_VOID) \
+{                                               \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_##CODEG, addrL);     \
+   objects->addToken(OCODE_GET_TEMP, tempA);    \
+   objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));\
+   objects->addToken(OCODE_ADD32U);             \
+   objects->addToken(OCODE_##CODEG, addrH);     \
+}                                               \
+break
+
+//
+// DO_LL_POINTER
+//
+#define DO_LL_POINTER(CODEG, CODEI, CODED)      \
+addrH = objects->getValueAdd(addrL, 1);         \
 tempA = context->getTempVar(0);                 \
 ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
                                                 \
@@ -456,10 +505,9 @@ private:
               SETOP_DEC_AUTO32I);
 
       case VariableData::MT_POINTER:
-         addrH = objects->getValueAdd(addrL, 1);
-         DO_LL_OFFSET(GET_POINTER32I,
-                SETOP_INC_POINTER32I,
-                SETOP_DEC_POINTER32I);
+         DO_LL_POINTER(GET_POINTER32I,
+                 SETOP_INC_POINTER32I,
+                 SETOP_DEC_POINTER32I);
          break;
 
       case VariableData::MT_REGISTER:
@@ -488,7 +536,6 @@ private:
       break;
 
       case VariableData::MT_REGISTERARRAY:
-         addrH = addrL;
          switch (src->sectionRA)
          {
          case VariableData::SRA_MAP:
