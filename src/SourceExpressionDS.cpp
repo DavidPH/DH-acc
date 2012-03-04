@@ -352,6 +352,7 @@ void SourceExpressionDS::init()
 	_expression_single_handlers[  "switch"]   = make_expression_single_switch;
 	_expression_single_handlers["__symbol"]   = make_expression_single_symbol;
 	_expression_single_handlers[  "typedef"]  = make_expression_single_typedef;
+   _expression_single_handlers["__typestr"]  = make_expression_single_typestr;
 	_expression_single_handlers[  "union"]    = make_expression_single_type;
 	_expression_single_handlers["__variable"] = make_expression_single_variable;
 	_expression_single_handlers[  "void"]     = make_expression_single_void;

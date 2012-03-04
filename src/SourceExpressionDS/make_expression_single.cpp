@@ -482,6 +482,16 @@ SRCEXPDS_EXPRSINGLE_DEFN(typedef)
 }
 
 //
+// SourceExpressionDS::make_expression_single_typestr
+//
+SRCEXPDS_EXPRSINGLE_DEFN(typestr)
+{
+   VariableType::Reference type = make_expression_type(in, blocks, context);
+
+   return create_value_string(make_string(type), context, token.pos);
+}
+
+//
 // SourceExpressionDS::make_expression_single_void
 //
 SRCEXPDS_EXPRSINGLE_DEFN(void)
