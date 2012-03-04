@@ -162,6 +162,16 @@ void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
 }
 
 //
+// SourceContext::addFunction
+//
+void SourceContext::addFunction(SourceVariable *func)
+{
+   funcNames.push_back(func->getNameSource());
+   funcTypes.push_back(func->getType());
+   funcVars .push_back(func);
+}
+
+//
 // SourceContext::addLabelCase
 //
 std::string SourceContext::
@@ -294,8 +304,8 @@ create(SourceContext *parent, ContextType typeContext)
 //
 SourceVariable::Pointer SourceContext::findTempVar(unsigned i)
 {
-   if (i < varTemp.size() && varTemp[i])
-      return varTemp[i];
+   if (i < tempVars.size() && tempVars[i])
+      return tempVars[i];
 
    if (inheritLocals) return parent->findTempVar(i);
 
@@ -375,6 +385,48 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
    }
 
    throw SourceException("invalid sc", SourcePosition::none(), __func__);
+}
+
+//
+// SourceContext::getFunction
+//
+SourceVariable::Pointer SourceContext::getFunction
+(std::string const &name, SourcePosition const &pos)
+{
+   for (size_t i = 0; i < funcVars.size(); ++i)
+      if (funcNames[i] == name) return funcVars[i];
+
+   if (parent) return parent->getFunction(name, pos);
+
+   throw SourceException("no suitable function", pos, __func__);
+}
+
+//
+// SourceContext::getFunction
+//
+SourceVariable::Pointer SourceContext::getFunction
+(std::string const &name, SourcePosition const &pos,
+ VariableType::Vector const &types)
+{
+   for (size_t i = 0; i < funcVars.size(); ++i)
+   {
+      if (funcNames[i] != name) continue;
+
+      VariableType::Vector const &funcTypeTypes = funcTypes[i]->getTypes();
+
+      if (funcTypeTypes.size() != types.size()) continue;
+
+      for (size_t j = 0; j < types.size(); ++j)
+         if (types[j] != funcTypeTypes[j]) goto do_continue;
+
+      return funcVars[i];
+
+      do_continue: continue;
+   }
+
+   if (parent) return parent->getFunction(name, pos, types);
+
+   throw SourceException("no suitable overload", pos, __func__);
 }
 
 //
@@ -521,15 +573,15 @@ ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
 
    if (!var)
    {
-      if (i >= varTemp.size())
-         varTemp.resize(i+1);
+      if (i >= tempVars.size())
+         tempVars.resize(i+1);
 
       std::string nameSrc = name[i];
       std::string nameObj = makeNameObject(nt, sc, type, nameSrc, pos);
 
       var = SourceVariable::create_variable(nameSrc, type, nameObj, sc, pos);
 
-      varTemp[i] = var;
+      tempVars[i] = var;
       addVariable(var);
    }
 
@@ -620,6 +672,20 @@ bool SourceContext::hasLabelCaseDefault() const
 void SourceContext::init()
 {
    global_context = new SourceContext;
+}
+
+//
+// SourceContext::isFunction
+//
+int SourceContext::isFunction(std::string const &name) const
+{
+   int count = 0;
+   for (size_t i = 0; i < funcVars.size(); ++i)
+      if (funcNames[i] == name) ++count;
+
+   if (!count && parent) return parent->isFunction(name);
+
+   return count;
 }
 
 //

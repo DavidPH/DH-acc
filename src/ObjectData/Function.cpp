@@ -52,7 +52,7 @@ static FunctionTable function_table;
 //
 // ObjectData_Function::add
 //
-std::string const &ObjectData_Function::add
+bool ObjectData_Function::add
 (std::string const &name, std::string const &label, bigsint argCount,
  bigsint retCount, SourceContext *context)
 {
@@ -70,13 +70,15 @@ std::string const &ObjectData_Function::add
       data.externDef = !context;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
+
+      return true;
    }
    else if (data.externDef && context)
    {
       data.externDef = false;
    }
 
-   return data.name;
+   return false;
 }
 
 //

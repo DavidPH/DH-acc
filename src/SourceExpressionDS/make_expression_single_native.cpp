@@ -65,7 +65,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(native)
       SourceVariable::create_constant
       (nativeName, nativeVarType, nativeObject, token.pos);
 
-   context->addVariable(nativeVariable);
+   context->addFunction(nativeVariable);
    return create_value_variable(nativeVariable, context, token.pos);
 }
 

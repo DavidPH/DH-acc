@@ -66,7 +66,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(linespec)
       SourceVariable::create_constant
       (linespecName, linespecVarType, linespecObject, token.pos);
 
-   context->addVariable(linespecVariable);
+   context->addFunction(linespecVariable);
    return create_value_variable(linespecVariable, context, token.pos);
 }
 

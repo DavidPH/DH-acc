@@ -64,6 +64,8 @@ public:
    };
 
 
+   void addFunction(SourceVariable *func);
+
    std::string addLabelCase(bigsint value, SourcePosition const & position);
    std::string addLabelCaseDefault(SourcePosition const & position);
    std::string addLabelGoto(std::string const &name, SourcePosition const &position);
@@ -73,6 +75,12 @@ public:
    bool getAllowLabel() const;
 
    std::vector<bigsint> getCases(SourcePosition const & position) const;
+
+   CounterPointer<SourceVariable> getFunction
+   (std::string const &name, SourcePosition const &pos);
+   CounterPointer<SourceVariable> getFunction
+   (std::string const &name, SourcePosition const &pos,
+    std::vector<CounterPointer<VariableType> > const &types);
 
    std::string getLabel() const;
    std::string getLabelBreak(SourcePosition const & position) const;
@@ -128,6 +136,8 @@ public:
 
    bool hasLabelCaseDefault() const;
 
+   int isFunction(std::string const &name) const;
+
    std::string makeLabel();
 
    std::string makeNameObject(NameType nameType, SourceVariable::StorageClass sc, VariableType *type, std::string const & nameSource, SourcePosition const & position) const;
@@ -169,8 +179,14 @@ private:
    std::vector<std::string> enumNames;
    std::vector<CounterReference<VariableType> > enumTypes;
 
+   std::vector<std::string> funcNames;
+   std::vector<CounterReference<VariableType> > funcTypes;
+   std::vector<CounterPointer<SourceVariable> > funcVars;
+
    std::vector<std::string> structNames;
    std::vector<CounterReference<VariableType> > structTypes;
+
+   std::vector<CounterPointer<SourceVariable> > tempVars;
 
    std::vector<std::string> typedefNames;
    std::vector<CounterReference<VariableType> > typedefTypes;
@@ -180,7 +196,6 @@ private:
 
    std::vector<std::string> varNames;
    std::vector<CounterPointer<SourceVariable> > varVars;
-   std::vector<CounterPointer<SourceVariable> > varTemp;
 
    std::string label;
 

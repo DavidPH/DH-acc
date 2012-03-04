@@ -88,7 +88,7 @@ static bigsint get_number()
 //
 // ObjectData_Script::add
 //
-std::string const &ObjectData_Script::add
+bool ObjectData_Script::add
 (std::string const &name, std::string const &label, ScriptType stype,
  bigsint flags, bigsint argCount, SourceContext *context)
 {
@@ -98,7 +98,7 @@ std::string const &ObjectData_Script::add
 //
 // ObjectData_Script::add
 //
-std::string const &ObjectData_Script::add
+bool ObjectData_Script::add
 (std::string const &name, std::string const &label, ScriptType stype,
  bigsint flags, bigsint argCount, SourceContext *context, bigsint number)
 {
@@ -117,6 +117,8 @@ std::string const &ObjectData_Script::add
       data.externDef = !context;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
+
+      return true;
    }
    else if (data.externDef && context)
    {
@@ -124,7 +126,7 @@ std::string const &ObjectData_Script::add
       data.externDef = false;
    }
 
-   return data.name;
+   return false;
 }
 
 //

@@ -198,6 +198,8 @@ public:
    // Returns true if the given type is an arithmetic type.
    static bool is_bt_arithmetic(BasicType type);
 
+   static bool is_bt_function(BasicType type);
+
    // Returns true if the given type is an integer type.
    static bool is_bt_integer(BasicType type);
 
@@ -243,6 +245,7 @@ private:
 // Global Functions                                                           |
 //
 
+std::string make_string(VariableType const *type);
 std::string const &make_string(VariableType::BasicType basic);
 
 #endif//HPP_VariableType_

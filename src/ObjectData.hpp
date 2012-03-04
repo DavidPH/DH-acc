@@ -60,7 +60,7 @@ struct ObjectData_Function
    bool externDef;
 
 
-   static std::string const &add
+   static bool add
    (std::string const &name, std::string const &label, bigsint argCount,
     bigsint retCount, SourceContext *context);
 
@@ -130,11 +130,11 @@ struct ObjectData_Script
    bool externDef;
 
 
-   static std::string const &add
+   static bool add
    (std::string const &name, std::string const &label, ScriptType stype,
     bigsint flags, bigsint argCount, SourceContext *context);
 
-   static std::string const &add
+   static bool add
    (std::string const &name, std::string const &label, ScriptType stype,
     bigsint flags, bigsint argCount, SourceContext *context, bigsint number);
 

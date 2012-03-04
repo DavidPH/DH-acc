@@ -263,6 +263,9 @@ public:
 
    virtual CounterReference<VariableType> getType() const;
 
+   virtual SourceExpression::Pointer makeExpressionFunction
+   (std::vector<CounterPointer<VariableType> > const &types);
+
    virtual CounterPointer<ObjectExpression> makeObject() const;
 
    void makeObjects(ObjectVector *objects, VariableData *dst);
@@ -343,6 +346,7 @@ public:
    SRCEXP_EXPRVAL_DECL( s, char);
    SRCEXP_EXPRVAL_DECL( t, data);
    SRCEXP_EXPRVAL_DECL( t, data_garbage);
+   SRCEXP_EXPRVAL_DECL( s, function);
    SRCEXP_EXPRVAL_DECL( i, int);
    SRCEXP_EXPRVAL_DECL( i, llong);
    SRCEXP_EXPRVAL_DECL( i, long);

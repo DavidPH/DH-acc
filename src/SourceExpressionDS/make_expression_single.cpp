@@ -77,6 +77,22 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
          break;
       }
 
+   {  // Check for function designator.
+      int count = context->isFunction(token.data);
+      if (count == 1)
+      {
+         SourceVariable::Pointer func =
+            context->getFunction(token.data, token.pos);
+         expr = create_value_variable(func, PASS_A);
+         break;
+      }
+      else if (count)
+      {
+         expr = create_value_function(token.data, PASS_A);
+         break;
+      }
+   }
+
       // Must be a variable.
       expr = create_value_variable(context->getVariable(token.data, token.pos), PASS_A);
       break;
@@ -252,27 +268,52 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
       break;
 
    case SourceTokenC::TT_OP_PARENTHESIS_O:
-   {
       token = in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
-      SourceContext::Reference contextCall =
-         SourceContext::create(context, SourceContext::CT_BLOCK);
-
-      Vector args;
-
-      if (in->peek().type != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
+      if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+          is_expression_type(in->peek().data, context))
       {
-         args.push_back(make_expression(in, blocks, contextCall));
+         VariableType::Vector types;
 
-         if (!in->peekType(SourceTokenC::TT_OP_COMMA))
-            break;
+         if (in->peek().type != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
+         {
+            types.push_back(make_expression_type(in, blocks, context));
 
-         in->get(SourceTokenC::TT_OP_COMMA);
+            if (!in->peekType(SourceTokenC::TT_OP_COMMA))
+               break;
+
+            in->get(SourceTokenC::TT_OP_COMMA);
+         }
+         in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+         if (types.size() == 1 && types[0] == VariableType::get_bt_void())
+            types.pop_back();
+
+         expr = expr->makeExpressionFunction(types);
       }
-      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+      else
+      {
+         SourceContext::Reference contextCall =
+            SourceContext::create(context, SourceContext::CT_BLOCK);
 
-      expr = create_branch_call(expr, args, contextCall, token.pos);
-   }
+         Vector args;
+         VariableType::Vector types;
+
+         if (in->peek().type != SourceTokenC::TT_OP_PARENTHESIS_C) while (true)
+         {
+            args.push_back(make_expression(in, blocks, contextCall));
+            types.push_back(args.back()->getType()->getUnqualified());
+
+            if (!in->peekType(SourceTokenC::TT_OP_COMMA))
+               break;
+
+            in->get(SourceTokenC::TT_OP_COMMA);
+         }
+         in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+         expr = expr->makeExpressionFunction(types);
+         expr = create_branch_call(expr, args, contextCall, token.pos);
+      }
       break;
 
    case SourceTokenC::TT_OP_PERIOD:

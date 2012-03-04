@@ -107,11 +107,13 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
          SourceVariable::create_constant
          (functionName, functionVarType, functionNameObject, token.pos);
    }
-   context->addVariable(functionVariable);
 
-   ObjectData_Function::add
+   bool added = ObjectData_Function::add
    (functionNameObject, functionLabel, functionArgCount,
     functionReturn->getSize(token.pos), NULL);
+
+   if (added)
+      context->addFunction(functionVariable);
 
    return create_value_variable(functionVariable, context, token.pos);
 }
@@ -191,7 +193,13 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
          SourceVariable::create_constant
          (functionName, functionVarType, functionNameObject, token.pos);
    }
-   context->addVariable(functionVariable);
+
+   bool added = ObjectData_Function::add
+   (functionNameObject, functionLabel, functionArgCount,
+    functionReturn->getSize(token.pos), functionContext);
+
+   if (added)
+      context->addFunction(functionVariable);
 
    // functionExpression
    SourceExpression::Pointer functionExpression =
@@ -204,10 +212,6 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
    SourceExpression::Pointer functionExprRetn =
       create_branch_return(functionExprData, functionContext, token.pos);
    blocks->push_back(functionExprRetn);
-
-   ObjectData_Function::add
-   (functionNameObject, functionLabel, functionArgCount,
-    functionReturn->getSize(token.pos), functionContext);
 
    return create_value_variable(functionVariable, context, token.pos);
 }

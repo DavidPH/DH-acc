@@ -123,16 +123,19 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
       SourceVariable::create_constant
       (scriptNameSource, scriptVarType, scriptNameObject, token.pos);
 
+   bool added;
    if (scriptNumber < 0)
-      ObjectData_Script::add
+      added = ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
        NULL);
    else
-      ObjectData_Script::add
+      added = ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
        NULL, scriptNumber);
 
-   context->addVariable(scriptVariable);
+   if (added)
+      context->addFunction(scriptVariable);
+
    return create_value_variable(scriptVariable, context, token.pos);
 }
 
@@ -252,7 +255,19 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    SourceVariable::Pointer scriptVariable =
       SourceVariable::create_constant
       (scriptNameSource, scriptVarType, scriptNameObject, token.pos);
-   context->addVariable(scriptVariable);
+
+   bool added;
+   if (scriptNumber < 0)
+      added = ObjectData_Script::add
+      (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
+       scriptContext);
+   else
+      added = ObjectData_Script::add
+      (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
+       scriptContext, scriptNumber);
+
+   if (added)
+      context->addFunction(scriptVariable);
 
    // scriptExpression
    SourceExpression::Pointer scriptExpression =
@@ -267,15 +282,6 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    SourceExpression::Pointer scriptExprRetn =
       create_branch_return(scriptExprData, scriptContext, token.pos);
    blocks->push_back(scriptExprRetn);
-
-   if (scriptNumber < 0)
-      ObjectData_Script::add
-      (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-	  scriptContext);
-   else
-      ObjectData_Script::add
-      (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-	  scriptContext, scriptNumber);
 
    return create_value_variable(scriptVariable, context, token.pos);
 }

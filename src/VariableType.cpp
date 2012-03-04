@@ -27,6 +27,18 @@
 #include "SourceException.hpp"
 
 #include <algorithm>
+#include <sstream>
+
+
+//----------------------------------------------------------------------------|
+// Static Prototypes                                                          |
+//
+
+static std::ostream &operator <<
+(std::ostream &out, VariableType const *type);
+
+static std::ostream &operator <<
+(std::ostream &out, VariableType::BasicType basic);
 
 
 //----------------------------------------------------------------------------|
@@ -78,6 +90,120 @@ static std::string const basic_names[] =
 // Static Functions                                                           |
 //
 
+//
+// operator << <VariableType>
+//
+static std::ostream &operator <<
+(std::ostream &out, VariableType const *type)
+{
+   switch (type->getBasicType())
+   {
+   case VariableType::BT_ARRAY:
+      out << type->getReturn();
+      out << '[' << type->getWidth() << ']';
+      return out; // Don't show qualifiers on array.
+
+   case VariableType::BT_BLOCK:
+      out << make_string(type->getBasicType());
+      out << '{';
+   {
+      VariableType::Vector const &types = type->getTypes();
+
+      for (size_t i = 0; i < types.size(); ++i)
+         out << types[i] << ';';
+   }
+      out << '}';
+      break;
+
+   case VariableType::BT_BOOLHARD:
+   case VariableType::BT_BOOLSOFT:
+   case VariableType::BT_CHAR:
+   case VariableType::BT_ENUM:
+   case VariableType::BT_FIXED:
+   case VariableType::BT_FLOAT:
+   case VariableType::BT_INT:
+   case VariableType::BT_LABEL:
+   case VariableType::BT_LFLOAT:
+   case VariableType::BT_LLFLOAT:
+   case VariableType::BT_LLONG:
+   case VariableType::BT_LONG:
+   case VariableType::BT_REAL:
+   case VariableType::BT_SCHAR:
+   case VariableType::BT_SHORT:
+   case VariableType::BT_UCHAR:
+   case VariableType::BT_UINT:
+   case VariableType::BT_ULLONG:
+   case VariableType::BT_ULONG:
+   case VariableType::BT_USHORT:
+   case VariableType::BT_STRING:
+   case VariableType::BT_VOID:
+      out << type->getBasicType();
+      break;
+
+   case VariableType::BT_POINTER:
+      out << type->getReturn() << " *";
+      break;
+
+   case VariableType::BT_STRUCT:
+   case VariableType::BT_UNION:
+      out << type->getBasicType();
+      out << '{';
+   {
+      VariableType::VecStr const &names = type->getNames();
+      VariableType::Vector const &types = type->getTypes();
+
+      for (size_t i = 0; i < types.size(); ++i)
+         out << types[i] << ' ' << names[i] << ';';
+   }
+      out << '}';
+      break;
+
+   // Anonymous types.
+   case VariableType::BT_ASMFUNC:
+   case VariableType::BT_FUNCTION:
+   case VariableType::BT_LINESPEC:
+   case VariableType::BT_NATIVE:
+   case VariableType::BT_SCRIPT:
+      out << type->getBasicType();
+      out << '(';
+   {
+      VariableType::Vector const &types = type->getTypes();
+
+      for (size_t i = 0; i < types.size(); ++i)
+      {
+         out << types[i];
+         if (i+1 < types.size()) out << ',';
+      }
+   }
+      out << ')';
+      out << "->(" << type->getReturn() << ')';
+      break;
+   }
+
+   if (type->getQualifier(VariableType::QUAL_CONST))
+      out << " const";
+
+   if (type->getQualifier(VariableType::QUAL_VOLATILE))
+      out << " volatile";
+
+   if (type->getQualifier(VariableType::QUAL_RESTRICT))
+      out << " restrict";
+
+   return out;
+}
+
+//
+// operator << <VariableType::BasicType>
+//
+static std::ostream &operator <<
+(std::ostream &out, VariableType::BasicType basic)
+{
+   return out << basic_names[basic];
+}
+
+//
+// operator != <std::vector>
+//
 template<typename T>
 static bool operator != (std::vector<T> const &l, std::vector<T> const &r)
 {
@@ -330,7 +456,7 @@ VariableType::Reference VariableType::setQualifier(unsigned _quals)
    for (VariableType *iter = next; iter != this; iter = iter->next)
    {
       if (iter->quals == _quals &&
-          iter->store == store && iter->storeArea == iter->storeArea)
+          iter->store == store && iter->storeArea == storeArea)
          return Reference(iter);
    }
 
@@ -881,6 +1007,25 @@ bool VariableType::is_bt_arithmetic(BasicType type)
 }
 
 //
+// VariableType::is_bt_function
+//
+bool VariableType::is_bt_function(BasicType type)
+{
+   switch (type)
+   {
+   case BT_ASMFUNC:
+   case BT_FUNCTION:
+   case BT_LINESPEC:
+   case BT_NATIVE:
+   case BT_SCRIPT:
+      return true;
+
+   default:
+      return false;
+   }
+}
+
+//
 // VariableType::is_bt_integer
 //
 bool VariableType::is_bt_integer(BasicType type)
@@ -932,6 +1077,18 @@ bool VariableType::is_bt_unsigned(BasicType type)
    default:
       return false;
    }
+}
+
+//
+// make_string<VariableType>
+//
+std::string make_string(VariableType const *type)
+{
+   std::ostringstream name;
+
+   name << type;
+
+   return name.str();
 }
 
 //

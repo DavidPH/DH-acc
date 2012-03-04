@@ -169,6 +169,21 @@ VariableType::Reference SourceExpression::getType() const
 }
 
 //
+// SourceExpression::makeExpressionFunction
+//
+SourceExpression::Pointer SourceExpression::makeExpressionFunction
+(VariableType::Vector const &)
+{
+   VariableType::Reference type = getType();
+
+   if (VariableType::is_bt_function(type->getBasicType()))
+      return this;
+
+   throw SourceException
+   ("makeExpressionFunction on invalid expression", position, getName());
+}
+
+//
 // SourceExpression::makeObject
 //
 CounterPointer<ObjectExpression> SourceExpression::makeObject() const

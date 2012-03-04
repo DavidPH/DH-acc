@@ -73,7 +73,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(asmfunc)
       SourceVariable::create_constant
       (asmfuncName, asmfuncVarType, asmfuncObject, token.pos);
 
-   context->addVariable(asmfuncVariable);
+   context->addFunction(asmfuncVariable);
    return create_value_variable(asmfuncVariable, context, token.pos);
 }
 
