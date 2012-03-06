@@ -41,20 +41,14 @@ void ObjectExpression::write_objects(std::ostream * out, ObjectVector const & ob
 
 	write_object(out, objects);
 
-	write_object(out, _register_global_table);
-	write_object(out, _register_map_table);
-	write_object(out, _register_world_table);
-
-	write_object(out, _registerarray_global_table);
-	write_object(out, _registerarray_map_table);
-	write_object(out, _registerarray_world_table);
-
 	write_object(out, _static_table);
 
 	write_object(out, _symbol_table);
 	write_object(out, _symbol_type_table);
 
+   ObjectData_Array::write_objects(out);
    ObjectData_Function::write_objects(out);
+   ObjectData_Register::write_objects(out);
    ObjectData_Script::write_objects(out);
    ObjectData_String::write_objects(out);
 }
@@ -68,14 +62,6 @@ void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
 		throw "Not object file.";
 
 	read_object(in, objects);
-
-	read_object(in, &_register_global_table);
-	read_object(in, &_register_map_table);
-	read_object(in, &_register_world_table);
-
-	read_object(in, &_registerarray_global_table);
-	read_object(in, &_registerarray_map_table);
-	read_object(in, &_registerarray_world_table);
 
 	read_object(in, &_static_table);
 

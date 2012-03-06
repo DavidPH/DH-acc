@@ -31,6 +31,7 @@
 
 
 template<typename Tk, typename Tv> bool override_object(std::map<Tk, Tv> * out, std::pair<Tk, Tv> const & in);
+bool override_object(int *out, int const &in);
 bool override_object(std::string * out, std::string const & in);
 template<typename T> bool override_object(std::vector<T> * out, T const & in);
 

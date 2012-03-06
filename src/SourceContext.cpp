@@ -23,6 +23,7 @@
 
 #include "SourceContext.hpp"
 
+#include "ObjectData.hpp"
 #include "ObjectExpression.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
@@ -715,7 +716,7 @@ std::string SourceContext::makeNameObject
 (NameType nameType, SourceVariable::StorageClass sc, VariableType *type,
  std::string const &nameSource, SourcePosition const &position) const
 {
-   #define PARM nameObject, typeSize, nameType == NT_EXTERN, \
+   #define PARM nameObject, type, nameType == NT_EXTERN, \
                 nameType != NT_LOCAL
 
    std::string nameObject;
@@ -738,27 +739,27 @@ std::string SourceContext::makeNameObject
       throw SourceException("SC_CONSTANT", position, __func__);
 
    case SourceVariable::SC_REGISTER_GLOBAL:
-      ObjectExpression::add_register_global(PARM);
+      ObjectData_Register::add_global(PARM);
       break;
 
    case SourceVariable::SC_REGISTER_MAP:
-      ObjectExpression::add_register_map(PARM);
+      ObjectData_Register::add_map(PARM);
       break;
 
    case SourceVariable::SC_REGISTER_WORLD:
-      ObjectExpression::add_register_world(PARM);
+      ObjectData_Register::add_world(PARM);
       break;
 
    case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-      ObjectExpression::add_registerarray_global(PARM);
+      ObjectData_Array::add_global(PARM);
       break;
 
    case SourceVariable::SC_REGISTERARRAY_MAP:
-      ObjectExpression::add_registerarray_map(PARM);
+      ObjectData_Array::add_map(PARM);
       break;
 
    case SourceVariable::SC_REGISTERARRAY_WORLD:
-      ObjectExpression::add_registerarray_world(PARM);
+      ObjectData_Array::add_world(PARM);
       break;
 
    case SourceVariable::SC_STATIC:
@@ -779,7 +780,7 @@ std::string SourceContext::makeNameObject
  std::string const &nameSource, bigsint address,
  SourcePosition const &position) const
 {
-   #define PARM nameObject, typeSize, address, nameType == NT_EXTERN, \
+   #define PARM nameObject, type, address, nameType == NT_EXTERN, \
                 nameType != NT_LOCAL
 
    std::string nameObject;
@@ -802,27 +803,27 @@ std::string SourceContext::makeNameObject
       throw SourceException("makeNameObject on SC_CONSTANT", position, "SourceContext");
 
    case SourceVariable::SC_REGISTER_GLOBAL:
-      ObjectExpression::add_register_global(PARM);
+      ObjectData_Register::add_global(PARM);
       break;
 
    case SourceVariable::SC_REGISTER_MAP:
-      ObjectExpression::add_register_map(PARM);
+      ObjectData_Register::add_map(PARM);
       break;
 
    case SourceVariable::SC_REGISTER_WORLD:
-      ObjectExpression::add_register_world(PARM);
+      ObjectData_Register::add_world(PARM);
       break;
 
    case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-      ObjectExpression::add_registerarray_global(PARM);
+      ObjectData_Array::add_global(PARM);
       break;
 
    case SourceVariable::SC_REGISTERARRAY_MAP:
-      ObjectExpression::add_registerarray_map(PARM);
+      ObjectData_Array::add_map(PARM);
       break;
 
    case SourceVariable::SC_REGISTERARRAY_WORLD:
-      ObjectExpression::add_registerarray_world(PARM);
+      ObjectData_Array::add_world(PARM);
       break;
 
    case SourceVariable::SC_STATIC:

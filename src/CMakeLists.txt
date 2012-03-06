@@ -16,7 +16,9 @@ add_executable(DH-acc
 	BinaryTokenZDACS/write_ACSE.cpp
 	ObjectCode.cpp
 	ObjectData.cpp
+   ObjectData/Array.cpp
    ObjectData/Function.cpp
+   ObjectData/Register.cpp
    ObjectData/Script.cpp
 	ObjectData/String.cpp
 	ObjectExpression.cpp

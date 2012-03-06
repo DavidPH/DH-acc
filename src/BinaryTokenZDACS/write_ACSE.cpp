@@ -59,6 +59,56 @@ extern int option_script_regargs;
 //
 
 //
+// BinaryTokenZDACS::write_ACSE_array_ARAY
+//
+void BinaryTokenZDACS::write_ACSE_array_ARAY
+(std::ostream *out, ObjectData_Array const &a)
+{
+   if (a.externDef) return;
+
+   BinaryTokenACS::write_ACS0_32(out, a.number);
+   BinaryTokenACS::write_ACS0_32(out, a.size);
+}
+
+//
+// BinaryTokenZDACS::write_ACSE_array_AIMP
+//
+void BinaryTokenZDACS::write_ACSE_array_AIMP
+(std::ostream *out, ObjectData_Array const &a)
+{
+   if (!a.externDef) return;
+
+   BinaryTokenACS::write_ACS0_32(out, a.number);
+   BinaryTokenACS::write_ACS0_32(out, a.size);
+   *out << a.name << '\0';
+}
+
+//
+// BinaryTokenZDACS::write_ACSE_array_AIMP_counter
+//
+void BinaryTokenZDACS::write_ACSE_array_AIMP_counter
+(std::ostream *, ObjectData_Array const &a)
+{
+   if (!a.externDef) return;
+
+   ++counter_temp;
+}
+
+//
+// BinaryTokenZDACS::write_ACSE_array_MEXP
+//
+void BinaryTokenZDACS::write_ACSE_array_MEXP
+(std::ostream *, ObjectData_Array const &a)
+{
+   if (!a.externDef) return;
+
+   if (strings_temp.size() < static_cast<size_t>(a.number + 1))
+      strings_temp.resize(a.number + 1);
+
+   strings_temp[a.number] = a.name;
+}
+
+//
 // BinaryTokenZDACS::write_ACSE_chunk
 //
 void BinaryTokenZDACS::
@@ -171,59 +221,6 @@ write_ACSE_register_MEXP(std::ostream *, ObjectData_Register const &r)
       s[s.size()-1] = (char)(i+1);
       strings_temp[r.number+i] = s;
    }
-}
-
-//
-// BinaryTokenZDACS::write_ACSE_registerarray_ARAY
-//
-void BinaryTokenZDACS::
-write_ACSE_registerarray_ARAY(std::ostream *out,
-                              ObjectData_RegisterArray const &r)
-{
-   if (r.externDef) return;
-
-   BinaryTokenACS::write_ACS0_32(out, r.number);
-   BinaryTokenACS::write_ACS0_32(out, r.size);
-}
-
-//
-// BinaryTokenZDACS::write_ACSE_registerarray_AIMP
-//
-void BinaryTokenZDACS::
-write_ACSE_registerarray_AIMP(std::ostream *out,
-                              ObjectData_RegisterArray const &r)
-{
-   if (!r.externDef) return;
-
-   BinaryTokenACS::write_ACS0_32(out, r.number);
-   BinaryTokenACS::write_ACS0_32(out, r.size);
-   *out << r.name << '\0';
-}
-
-//
-// BinaryTokenZDACS::write_ACSE_registerarray_AIMP_counter
-//
-void BinaryTokenZDACS::
-write_ACSE_registerarray_AIMP_counter(std::ostream *,
-                                      ObjectData_RegisterArray const &r)
-{
-   if (!r.externDef) return;
-
-   ++counter_temp;
-}
-
-//
-// BinaryTokenZDACS::write_ACSE_registerarray_MEXP
-//
-void BinaryTokenZDACS::
-write_ACSE_registerarray_MEXP(std::ostream *, ObjectData_RegisterArray const &r)
-{
-   if (!r.externDef) return;
-
-   if (strings_temp.size() < static_cast<size_t>(r.number + 1))
-      strings_temp.resize(r.number + 1);
-
-   strings_temp[r.number] = r.name;
 }
 
 //

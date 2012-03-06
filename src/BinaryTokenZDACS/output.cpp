@@ -68,17 +68,20 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
       iter->writeACS0(out);
 
    // AIMP - Map Array Imports
-   ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_AIMP_counter, &chunkout);
+   ObjectData_Array::iterate_map(write_ACSE_array_AIMP_counter, &chunkout);
    write_ACSE_counter(&chunkout);
-   ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_AIMP, &chunkout);
+   ObjectData_Array::iterate_map(write_ACSE_array_AIMP, &chunkout);
    write_ACSE_chunk(out, &chunkout, "AIMP");
 
    // AINI - Map Array Initialization
    // TODO
 
    // ARAY - Map Array Declarations
-   ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_ARAY, &chunkout);
+   ObjectData_Array::iterate_map(write_ACSE_array_ARAY, &chunkout);
    write_ACSE_chunk(out, &chunkout, "ARAY");
+
+   // ASTR - Map Array Strings
+   // TODO
 
    // FNAM - Function Names
    ObjectData_Function::iterate(write_ACSE_function_FNAM, NULL);
@@ -94,16 +97,19 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    write_ACSE_chunk(out, &chunkout, "LOAD");
 
    // MEXP - Map Register Exports
-   ObjectExpression::iter_register_map(write_ACSE_register_MEXP, NULL);
-   ObjectExpression::iter_registerarray_map(write_ACSE_registerarray_MEXP, NULL);
+   ObjectData_Register::iterate_map(write_ACSE_register_MEXP, NULL);
+   ObjectData_Array   ::iterate_map(write_ACSE_array_MEXP,    NULL);
    write_ACSE_stringtable(&chunkout, false);
    write_ACSE_chunk(out, &chunkout, "MEXP");
 
    // MIMP - Map Register Imports
-   ObjectExpression::iter_register_map(write_ACSE_register_MIMP, &chunkout);
+   ObjectData_Register::iterate_map(write_ACSE_register_MIMP, &chunkout);
    write_ACSE_chunk(out, &chunkout, "MIMP");
 
    // MINI - Map Register Initialization
+   // TODO
+
+   // MSTR - Map Register Strings
    // TODO
 
    // SPTR - Script Pointers

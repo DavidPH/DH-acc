@@ -23,6 +23,10 @@
 
 
 
+bool override_object(int *, int const &)
+{
+   return false;
+}
 bool override_object(std::string *, std::string const &)
 {
 	return false;

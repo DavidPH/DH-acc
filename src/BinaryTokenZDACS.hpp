@@ -37,9 +37,9 @@
 // Types                                                                      |
 //
 
+struct ObjectData_Array;
 struct ObjectData_Function;
 struct ObjectData_Register;
-struct ObjectData_RegisterArray;
 struct ObjectData_Script;
 struct ObjectData_String;
 class ObjectExpression;
@@ -320,6 +320,10 @@ public:
    template<typename T>
    static void output_ACSE(std::ostream *out, std::vector<T> const &instructions);
 
+   static void write_ACSE_array_ARAY(std::ostream *out, ObjectData_Array const &a);
+   static void write_ACSE_array_AIMP(std::ostream *out, ObjectData_Array const &a);
+   static void write_ACSE_array_AIMP_counter(std::ostream *out, ObjectData_Array const &a);
+   static void write_ACSE_array_MEXP(std::ostream *out, ObjectData_Array const &a);
    static void write_ACSE_chunk(std::ostream *out, std::ostringstream *chunkout, char const *chunkname);
    static void write_ACSE_counter(std::ostream *out);
    static void write_ACSE_function_FUNC(std::ostream *out, ObjectData_Function const &f);
@@ -327,10 +331,6 @@ public:
    static void write_ACSE_library(std::ostream *out, std::string const &lib);
    static void write_ACSE_register_MEXP(std::ostream *out, ObjectData_Register const &r);
    static void write_ACSE_register_MIMP(std::ostream *out, ObjectData_Register const &r);
-   static void write_ACSE_registerarray_ARAY(std::ostream *out, ObjectData_RegisterArray const &r);
-   static void write_ACSE_registerarray_AIMP(std::ostream *out, ObjectData_RegisterArray const &r);
-   static void write_ACSE_registerarray_AIMP_counter(std::ostream *out, ObjectData_RegisterArray const &r);
-   static void write_ACSE_registerarray_MEXP(std::ostream *out, ObjectData_RegisterArray const &r);
    static void write_ACSE_script(std::ostream *out, ObjectData_Script const &s);
    static void write_ACSE_script_SFLG(std::ostream *out, ObjectData_Script const &s);
    static void write_ACSE_script_SNAM(std::ostream *out, ObjectData_Script const &s);

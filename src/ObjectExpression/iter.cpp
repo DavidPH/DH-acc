@@ -36,14 +36,6 @@ void ObjectExpression::iter_library(void (*iter)(std::ostream *, std::string con
 	for (std::set<std::string>::iterator it(_library_table.begin()); it != _library_table.end(); ++it)
 			iter(out, *it);
 }
-void ObjectExpression::iter_register_map(void (*iter)(std::ostream *, ObjectData_Register const &), std::ostream * out)
-{
-	_iterator_map(_register_map_table, iter, out);
-}
-void ObjectExpression::iter_registerarray_map(void (*iter)(std::ostream *, ObjectData_RegisterArray const &), std::ostream * out)
-{
-	_iterator_map(_registerarray_map_table, iter, out);
-}
 void ObjectExpression::iter_static(void (*iter)(std::ostream *, ObjectData_Static const &), std::ostream * out)
 {
 	_iterator_map(_static_table, iter, out);

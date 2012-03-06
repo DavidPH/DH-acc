@@ -94,11 +94,6 @@ static option::option_dptr<int> option_static_offset_handler
  "Sets the allocation offset for static variables. 8192 by default.",
  NULL, &option_static_offset);
 
-static option::option_dptr<int> option_static_temp_handler
-('\0', "static-temp", "features",
- "Selects which world register to use for temporary storage. 1 by default.",
- NULL, &option_static_offset);
-
 
 //----------------------------------------------------------------------------|
 // Global Variables                                                           |
@@ -213,78 +208,20 @@ void ObjectExpression::do_deferred_allocation()
 {
    UsedMap usedMap;
 
+   // registers
+   ObjectData_Register::generate_symbols();
 
-   // mapregisters and maparrays
-   if (output_type == OUTPUT_ACSE)
-   {
-      // ACSE's MEXP uses the same addresses for both.
-      // TODO: !externVis registers/arrays should not reserve the
-      // corresponding arrays/registers.
-      usedMap.clear();
-
-      _iterator_map(_register_map_table, allocate_pre_size<ObjectData_Register>, &usedMap);
-      _iterator_map(_registerarray_map_table, allocate_pre<ObjectData_RegisterArray>, &usedMap);
-      _iterator_map(_register_map_table, allocate_size<ObjectData_Register>, &usedMap);
-      _iterator_map(_registerarray_map_table, allocate<ObjectData_RegisterArray>, &usedMap);
-   }
-   else
-   {
-      // mapregisters
-      usedMap.clear();
-
-      _iterator_map(_register_map_table, allocate_pre_size<ObjectData_Register>, &usedMap);
-      _iterator_map(_register_map_table, allocate_size<ObjectData_Register>, &usedMap);
-
-      // maparrays
-      usedMap.clear();
-
-      _iterator_map(_registerarray_map_table, allocate_pre<ObjectData_RegisterArray>, &usedMap);
-      _iterator_map(_registerarray_map_table, allocate<ObjectData_RegisterArray>, &usedMap);
-   }
-
-
-   // worldregisters
-   usedMap.clear();
-   set_used(&usedMap, Used(option_addr_stack, 1));
-   set_used(&usedMap, Used(option_static_temp, 1));
-
-   _iterator_map(_register_world_table, allocate_pre_size<ObjectData_Register>, &usedMap);
-   _iterator_map(_register_world_table, allocate_size<ObjectData_Register>, &usedMap);
-
-
-   // globalregisters
-   usedMap.clear();
-
-   _iterator_map(_register_global_table, allocate_pre_size<ObjectData_Register>, &usedMap);
-   _iterator_map(_register_global_table, allocate_size<ObjectData_Register>, &usedMap);
-
-
-   // worldarrays
-   usedMap.clear();
-
-   _iterator_map(_registerarray_world_table, allocate_pre<ObjectData_RegisterArray>, &usedMap);
-   _iterator_map(_registerarray_world_table, allocate<ObjectData_RegisterArray>, &usedMap);
-
-
-   // globalarrays
-   usedMap.clear();
-   set_used(&usedMap, Used(option_addr_array, 1));
-
-   _iterator_map(_registerarray_global_table, allocate_pre<ObjectData_RegisterArray>, &usedMap);
-   _iterator_map(_registerarray_global_table, allocate<ObjectData_RegisterArray>, &usedMap);
-
+   // registerarrays
+   ObjectData_Array::generate_symbols();
 
    // For ACS+, all the following allocation is done by the linker.
    if (output_type == OUTPUT_ACSP) return;
 
-
    // functions
    ObjectData_Function::generate_symbols();
 
-
    // scripts
    ObjectData_Script::generate_symbols();
-
 
    // statics
    usedMap.clear();
@@ -292,7 +229,6 @@ void ObjectExpression::do_deferred_allocation()
 
    _iterator_map(_static_table, allocate_pre_size<ObjectData_Static>, &usedMap);
    _iterator_map(_static_table, allocate_size<ObjectData_Static>, &usedMap);
-
 
    // strings
    ObjectData_String::generate_symbols();

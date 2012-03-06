@@ -37,8 +37,6 @@
 
 struct ObjectCodeSet;
 struct ObjectData_Auto;
-struct ObjectData_Register;
-struct ObjectData_RegisterArray;
 struct ObjectData_Static;
 class ObjectVector;
 class SourceTokenC;
@@ -104,24 +102,6 @@ public:
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
 
-	static void add_register_global(std::string const & name, bigsint size, bool externDef, bool externVis);
-	static void add_register_global(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
-
-	static void add_register_map(std::string const & name, bigsint size, bool externDef, bool externVis);
-	static void add_register_map(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
-
-	static void add_register_world(std::string const & name, bigsint size, bool externDef, bool externVis);
-	static void add_register_world(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
-
-	static void add_registerarray_global(std::string const & name, bigsint size, bool externDef, bool externVis);
-	static void add_registerarray_global(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
-
-	static void add_registerarray_map(std::string const & name, bigsint size, bool externDef, bool externVis);
-	static void add_registerarray_map(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
-
-	static void add_registerarray_world(std::string const & name, bigsint size, bool externDef, bool externVis);
-	static void add_registerarray_world(std::string const & name, bigsint size, bool externDef, bool externVis, bigsint number);
-
 	static void add_static(std::string const & name, bigsint size);
 	static void add_static(std::string const & name, bigsint size, bigsint number);
 
@@ -168,10 +148,6 @@ public:
 	static void iter_auto(void (*iter)(std::ostream *, ObjectData_Auto const &), std::ostream * out);
 
 	static void iter_library(void (*iter)(std::ostream *, std::string const &), std::ostream * out);
-
-	static void iter_register_map(void (*iter)(std::ostream *, ObjectData_Register const &), std::ostream * out);
-
-	static void iter_registerarray_map(void (*iter)(std::ostream *, ObjectData_RegisterArray const &), std::ostream * out);
 
 	static void iter_static(void (*iter)(std::ostream *, ObjectData_Static const &), std::ostream * out);
 
@@ -266,14 +242,6 @@ private:
 	static std::set<std::string> _library_table;
 
 	static std::map<std::string, ObjectData_Auto> _auto_table;
-
-	static std::map<std::string, ObjectData_Register> _register_global_table;
-	static std::map<std::string, ObjectData_Register> _register_map_table;
-	static std::map<std::string, ObjectData_Register> _register_world_table;
-
-	static std::map<std::string, ObjectData_RegisterArray> _registerarray_global_table;
-	static std::map<std::string, ObjectData_RegisterArray> _registerarray_map_table;
-	static std::map<std::string, ObjectData_RegisterArray> _registerarray_world_table;
 
 	static std::map<std::string, ObjectData_Static> _static_table;
 
