@@ -58,10 +58,9 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 
    case SourceTokenC::TT_IDENTIFIER:
    {  // Check for keyword.
-      std::map<std::string, expression_single_handler>::iterator it =
-         _expression_single_handlers.find(token.data);
+      expr_single_handler_map::iterator it = expr_single.find(token.data);
 
-      if (it != _expression_single_handlers.end())
+      if (it != expr_single.end())
       {
          expr = it->second(in, token, blocks, context);
          break;

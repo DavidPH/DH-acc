@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,15 +17,12 @@
 //
 //-----------------------------------------------------------------------------
 //
-// DS handling of extern.
+// DS handling of template-casts.
 //
 //-----------------------------------------------------------------------------
 
 #include "../SourceExpressionDS.hpp"
 
-#include "../ObjectExpression.hpp"
-#include "../ost_type.hpp"
-#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenizerDS.hpp"
 #include "../VariableType.hpp"
@@ -36,21 +33,31 @@
 //
 
 //
-// SourceExpressionDS::make_expression_single_extern
+// SourceExpressionDS::make_expression_single_cast
 //
-SRCEXPDS_EXPRSINGLE_DEFN(extern)
+SRCEXPDS_EXPRSINGLE_DEFN(cast)
 {
-   (void)token;
+   in->get(SourceTokenC::TT_OP_CMP_LT);
+   VariableType::Reference type = make_expression_type(in, blocks, context);
+   in->get(SourceTokenC::TT_OP_CMP_GT);
 
-   SourceTokenC externToken = in->get(SourceTokenC::TT_IDENTIFIER);
+   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   SourceExpression::Pointer expr = make_expression(in, blocks, context);
+   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
-   expr_single_handler_map::iterator it =
-      expr_single_extern.find(externToken.data);
+   if (token.data == "const_cast")
+      return create_value_cast_qualifier(expr, type, context, token.pos);
 
-   if (it == expr_single_extern.end())
-      throw SourceException("unknown extern type", externToken.pos, __func__);
+   if (token.data == "reinterpret_cast")
+      return create_value_cast_reinterpret(expr, type, context, token.pos);
 
-   return it->second(in, externToken, blocks, context);
+   if (token.data == "static_cast")
+      return create_value_cast_static(expr, type, context, token.pos);
+
+   if (token.data == "__force_cast")
+      return create_value_cast_force(expr, type, context, token.pos);
+
+   throw SourceException(token.data, token.pos, __func__);
 }
 
 // EOF

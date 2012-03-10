@@ -341,7 +341,11 @@ public:
    // Values.
    SRCEXP_EXPRVAL_DECL( a, block);
    SRCEXP_EXPRVAL_DECL(et, cast_explicit);
+   SRCEXP_EXPRVAL_DECL(et, cast_force);
    SRCEXP_EXPRVAL_DECL(et, cast_implicit);
+   SRCEXP_EXPRVAL_DECL(et, cast_qualifier);
+   SRCEXP_EXPRVAL_DECL(et, cast_reinterpret);
+   SRCEXP_EXPRVAL_DECL(et, cast_static);
    SRCEXP_EXPRVAL_DECL( c, char);
    SRCEXP_EXPRVAL_DECL( s, char);
    SRCEXP_EXPRVAL_DECL( t, data);

@@ -77,8 +77,8 @@ protected:
    SourceExpressionDS(SRCEXP_EXPR_ARGS);
 
 private:
-   typedef SourceExpression::Pointer (*expression_single_handler)(SRCEXPDS_EXPRSINGLE_ARGS);
-   typedef std::map<std::string, expression_single_handler> expression_single_handler_map;
+   typedef SourceExpression::Pointer (*expr_single_handler)(SRCEXPDS_EXPRSINGLE_ARGS);
+   typedef std::map<std::string, expr_single_handler> expr_single_handler_map;
 
 
    static bool is_expression_type
@@ -110,6 +110,7 @@ private:
    SRCEXPDS_EXPRSINGLE_DECL(asmfunc);
    SRCEXPDS_EXPRSINGLE_DECL(break);
    SRCEXPDS_EXPRSINGLE_DECL(case);
+   SRCEXPDS_EXPRSINGLE_DECL(cast);
    SRCEXPDS_EXPRSINGLE_DECL(constexpr);
    SRCEXPDS_EXPRSINGLE_DECL(continue);
    SRCEXPDS_EXPRSINGLE_DECL(default);
@@ -141,8 +142,8 @@ private:
    SRCEXPDS_EXPRSINGLE_DECL(void);
    SRCEXPDS_EXPRSINGLE_DECL(while);
 
-   static expression_single_handler_map _expression_single_handlers;
-   static expression_single_handler_map _expression_single_extern_handlers;
+   static expr_single_handler_map expr_single;
+   static expr_single_handler_map expr_single_extern;
 };
 
 #endif//HPP_SourceExpressionDS_

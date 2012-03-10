@@ -114,6 +114,7 @@ add_executable(DH-acc
    SourceExpressionDS/create_value_number.cpp
 	SourceExpressionDS/make_expression_single.cpp
 	SourceExpressionDS/make_expression_single_asmfunc.cpp
+   SourceExpressionDS/make_expression_single_cast.cpp
 	SourceExpressionDS/make_expression_single_do.cpp
 	SourceExpressionDS/make_expression_single_extern.cpp
 	SourceExpressionDS/make_expression_single_for.cpp

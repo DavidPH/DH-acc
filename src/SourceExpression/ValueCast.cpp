@@ -88,12 +88,48 @@ SRCEXP_EXPRVAL_DEFN(et, cast_explicit)
 }
 
 //
+// SourceExpression::create_value_cast_force
+//
+SRCEXP_EXPRVAL_DEFN(et, cast_force)
+{
+   return new SourceExpression_ValueCast
+   (VariableType::CAST_FORCE, expr, type, context, position);
+}
+
+//
 // SourceExpression::create_value_cast_implicit
 //
 SRCEXP_EXPRVAL_DEFN(et, cast_implicit)
 {
    return new SourceExpression_ValueCast
    (VariableType::CAST_EXPLICIT, expr, type, context, position);
+}
+
+//
+// SourceExpression::create_value_cast_qualifier
+//
+SRCEXP_EXPRVAL_DEFN(et, cast_qualifier)
+{
+   return new SourceExpression_ValueCast
+   (VariableType::CAST_QUALIFIER, expr, type, context, position);
+}
+
+//
+// SourceExpression::create_value_cast_reinterpret
+//
+SRCEXP_EXPRVAL_DEFN(et, cast_reinterpret)
+{
+   return new SourceExpression_ValueCast
+   (VariableType::CAST_REINTERPRET, expr, type, context, position);
+}
+
+//
+// SourceExpression::create_value_cast_static
+//
+SRCEXP_EXPRVAL_DEFN(et, cast_static)
+{
+   return new SourceExpression_ValueCast
+   (VariableType::CAST_STATIC, expr, type, context, position);
 }
 
 //

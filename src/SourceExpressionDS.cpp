@@ -33,8 +33,8 @@
 // Global Variables                                                           |
 //
 
-SourceExpressionDS::expression_single_handler_map SourceExpressionDS::_expression_single_handlers;
-SourceExpressionDS::expression_single_handler_map SourceExpressionDS::_expression_single_extern_handlers;
+SourceExpressionDS::expr_single_handler_map SourceExpressionDS::expr_single;
+SourceExpressionDS::expr_single_handler_map SourceExpressionDS::expr_single_extern;
 
 
 //----------------------------------------------------------------------------|
@@ -322,45 +322,52 @@ SourceExpressionDS::SourceExpressionDS(SRCEXP_EXPR_PARM)
 //
 void SourceExpressionDS::init()
 {
-	_expression_single_handlers["__asmfunc"]  = make_expression_single_asmfunc;
-	_expression_single_handlers[  "break"]    = make_expression_single_break;
-	_expression_single_handlers[  "case"]     = make_expression_single_case;
-	_expression_single_handlers[  "constexpr"]= make_expression_single_constexpr;
-	_expression_single_handlers[  "continue"] = make_expression_single_continue;
-	_expression_single_handlers[  "default"]  = make_expression_single_default;
-	_expression_single_handlers["__delay"]    = make_expression_single_delay;
-	_expression_single_handlers[  "do"]       = make_expression_single_do;
-	_expression_single_handlers[  "enum"]     = make_expression_single_type;
-	_expression_single_handlers["__extfunc"]  = make_expression_single_function;
-	_expression_single_handlers[  "extern"]   = make_expression_single_extern;
-	_expression_single_handlers["__extscript"]= make_expression_single_script;
-	_expression_single_handlers["__extvar"]   = make_expression_single_variable;
-	_expression_single_handlers[  "for"]      = make_expression_single_for;
-	_expression_single_handlers["__function"] = make_expression_single_function;
-	_expression_single_handlers[  "goto"]     = make_expression_single_goto;
-	_expression_single_handlers["__goto_dyn"] = make_expression_single_goto_dyn;
-	_expression_single_handlers[  "if"]       = make_expression_single_if;
-	_expression_single_handlers["__library"]  = make_expression_single_library;
-	_expression_single_handlers["__linespec"] = make_expression_single_linespec;
-	_expression_single_handlers["__native"]   = make_expression_single_native;
-	_expression_single_handlers["__output"]   = make_expression_single_output;
-	_expression_single_handlers["__printf"]   = make_expression_single_printf;
-	_expression_single_handlers[  "return"]   = make_expression_single_return;
-	_expression_single_handlers["__script"]   = make_expression_single_script;
-	_expression_single_handlers[  "sizeof"]   = make_expression_single_sizeof;
-	_expression_single_handlers[  "struct"]   = make_expression_single_type;
-	_expression_single_handlers[  "switch"]   = make_expression_single_switch;
-	_expression_single_handlers["__symbol"]   = make_expression_single_symbol;
-	_expression_single_handlers[  "typedef"]  = make_expression_single_typedef;
-   _expression_single_handlers["__typestr"]  = make_expression_single_typestr;
-	_expression_single_handlers[  "union"]    = make_expression_single_type;
-	_expression_single_handlers["__variable"] = make_expression_single_variable;
-	_expression_single_handlers[  "void"]     = make_expression_single_void;
-	_expression_single_handlers[  "while"]    = make_expression_single_while;
+   expr_single["__asmfunc"]  = make_expression_single_asmfunc;
+   expr_single[  "break"]    = make_expression_single_break;
+   expr_single[  "case"]     = make_expression_single_case;
+   expr_single[  "constexpr"]= make_expression_single_constexpr;
+   expr_single[  "continue"] = make_expression_single_continue;
+   expr_single[  "default"]  = make_expression_single_default;
+   expr_single["__delay"]    = make_expression_single_delay;
+   expr_single[  "do"]       = make_expression_single_do;
+   expr_single[  "enum"]     = make_expression_single_type;
+   expr_single["__extfunc"]  = make_expression_single_function;
+   expr_single[  "extern"]   = make_expression_single_extern;
+   expr_single["__extscript"]= make_expression_single_script;
+   expr_single["__extvar"]   = make_expression_single_variable;
+   expr_single[  "for"]      = make_expression_single_for;
+   expr_single["__function"] = make_expression_single_function;
+   expr_single[  "goto"]     = make_expression_single_goto;
+   expr_single["__goto_dyn"] = make_expression_single_goto_dyn;
+   expr_single[  "if"]       = make_expression_single_if;
+   expr_single["__library"]  = make_expression_single_library;
+   expr_single["__linespec"] = make_expression_single_linespec;
+   expr_single["__native"]   = make_expression_single_native;
+   expr_single["__output"]   = make_expression_single_output;
+   expr_single["__printf"]   = make_expression_single_printf;
+   expr_single[  "return"]   = make_expression_single_return;
+   expr_single["__script"]   = make_expression_single_script;
+   expr_single[  "sizeof"]   = make_expression_single_sizeof;
+   expr_single[  "struct"]   = make_expression_single_type;
+   expr_single[  "switch"]   = make_expression_single_switch;
+   expr_single["__symbol"]   = make_expression_single_symbol;
+   expr_single[  "typedef"]  = make_expression_single_typedef;
+   expr_single["__typestr"]  = make_expression_single_typestr;
+   expr_single[  "union"]    = make_expression_single_type;
+   expr_single["__variable"] = make_expression_single_variable;
+   expr_single[  "void"]     = make_expression_single_void;
+   expr_single[  "while"]    = make_expression_single_while;
 
-	_expression_single_extern_handlers["__function"] = make_expression_single_extern_function;
-	_expression_single_extern_handlers["__script"]   = make_expression_single_extern_script;
-	_expression_single_extern_handlers["__variable"] = make_expression_single_extern_variable;
+   // Template casts.
+   expr_single[  "const_cast"]       = make_expression_single_cast;
+   expr_single[  "dynamic_cast"]     = make_expression_single_cast;
+   expr_single[  "reinterpret_cast"] = make_expression_single_cast;
+   expr_single[  "static_cast"]      = make_expression_single_cast;
+   expr_single["__force_cast"]       = make_expression_single_cast;
+
+   expr_single_extern["__function"] = make_expression_single_extern_function;
+   expr_single_extern["__script"]   = make_expression_single_extern_script;
+   expr_single_extern["__variable"] = make_expression_single_extern_variable;
 }
 
 //
