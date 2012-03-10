@@ -975,6 +975,152 @@ VariableType::Reference VariableType::get_bt_script
 //
 
 //
+// VariableType::get_cast
+//
+unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
+{
+   if (dst == src || dst->getUnqualified() == src->getUnqualified())
+      return CAST_ANY;
+
+   BasicType dstBT = dst->getBasicType();
+   BasicType srcBT = src->getBasicType();
+
+   // Just pretend it's a pointer.
+   if (dstBT == BT_POINTER && srcBT == BT_ARRAY)
+      srcBT = BT_POINTER;
+
+   if (dstBT != srcBT)
+   {
+      // arithmetic<->arithmetic
+      if (is_bt_arithmetic(srcBT) && is_bt_arithmetic(dstBT))
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
+      // arithmetic->enum
+      if (is_bt_arithmetic(srcBT) && dstBT == BT_ENUM)
+         return CAST_EXPLICIT|CAST_REINTERPRET;
+
+      // block->array,struct
+      if (srcBT == BT_BLOCK && (dstBT == BT_ARRAY || dstBT == BT_STRUCT))
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
+      // enum->arithmetic
+      if (srcBT == BT_ENUM && is_bt_arithmetic(dstBT))
+         return CAST_EXPLICIT|CAST_REINTERPRET;
+
+      // enum->int
+      if (srcBT == BT_ENUM && is_bt_integer(dstBT))
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
+      // function<->function
+      if (is_bt_function(srcBT) && is_bt_function(dstBT))
+         return CAST_EXPLICIT;
+
+      // int->enum
+      if (is_bt_integer(srcBT) && dstBT == BT_ENUM)
+         return CAST_EXPLICIT|CAST_REINTERPRET;
+
+      // int->pointer
+      if (is_bt_integer(srcBT) && dstBT == BT_POINTER)
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
+      // pointer->int
+      if (srcBT == BT_POINTER && is_bt_integer(dstBT))
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
+
+      // *->void
+      if (dstBT == BT_VOID)
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
+
+      // *->*
+      return CAST_EXPLICIT;
+   }
+   else switch (dstBT)
+   {
+   case BT_ARRAY:
+   case BT_BLOCK:
+   case BT_STRUCT:
+   case BT_UNION:
+      return 0;
+
+   case BT_ASMFUNC:
+   case BT_FUNCTION:
+   case BT_LINESPEC:
+   case BT_NATIVE:
+   case BT_SCRIPT:
+      return CAST_EXPLICIT|CAST_REINTERPRET;
+
+   case BT_BOOLHARD:
+   case BT_BOOLSOFT:
+   case BT_CHAR:
+   case BT_FIXED:
+   case BT_FLOAT:
+   case BT_INT:
+   case BT_LABEL:
+   case BT_LFLOAT:
+   case BT_LLFLOAT:
+   case BT_LLONG:
+   case BT_LONG:
+   case BT_REAL:
+   case BT_SCHAR:
+   case BT_STRING:
+   case BT_SHORT:
+   case BT_UCHAR:
+   case BT_UINT:
+   case BT_ULLONG:
+   case BT_ULONG:
+   case BT_USHORT:
+   case BT_VOID:
+      // Should have been handled by the previous equality test...
+      return CAST_ANY;
+
+   case BT_ENUM:
+      return CAST_EXPLICIT|CAST_REINTERPRET;
+
+   case BT_POINTER:
+      Reference dstR = dst->getReturn();
+      Reference srcR = src->getReturn();
+
+      BasicType dstRBT = dstR->getBasicType();
+      BasicType srcRBT = srcR->getBasicType();
+
+      // Should have been handled by the previous equality test...
+      if (srcR == dstR)
+         return CAST_ANY;
+
+      // Altering storage qualifiers must be explicit. (Not even const_cast.)
+      if (srcR->getStoreType() != dstR->getStoreType() ||
+          srcR->getStoreArea() != dstR->getStoreArea())
+         return CAST_EXPLICIT;
+
+      // If they differ only in qualifiers, it's time for const_cast!
+      if (srcR->getUnqualified() == dstR->getUnqualified())
+      {
+         // This means the qualifiers are being lost.
+         if (!dstR->getQualifier(srcR->getQualifiers()))
+            return CAST_EXPLICIT|CAST_QUALIFIER;
+         // Otherwise, they're being added, which means implicit is allowed.
+         else
+            return CAST_EXPLICIT|CAST_IMPLICIT|CAST_QUALIFIER;
+      }
+
+      // Losing qualifiers with differing types, it's time for explicit!
+      if (!dstR->getQualifier(srcR->getQualifiers()))
+         return CAST_EXPLICIT;
+
+      // Cast to/from void* is acceptable.
+      if (srcRBT == BT_VOID || dstRBT == BT_VOID)
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
+      // Not losing qualifiers, but still differing types.
+      return CAST_EXPLICIT|CAST_REINTERPRET;
+   }
+
+   return 0;
+}
+
+//
 // VariableType::is_bt_arithmetic
 //
 bool VariableType::is_bt_arithmetic(BasicType type)

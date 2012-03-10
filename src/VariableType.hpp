@@ -51,6 +51,21 @@ public:
    typedef std::vector<Pointer> Vector;
 
    //
+   // ::CastType
+   //
+   enum CastType
+   {
+      CAST_FORCE       = 0x00,
+      CAST_NONE        = 0x01,
+      CAST_EXPLICIT    = 0x02,
+      CAST_IMPLICIT    = 0x04,
+      CAST_QUALIFIER   = 0x08,
+      CAST_STATIC      = 0x10,
+      CAST_REINTERPRET = 0x20,
+      CAST_ANY         = 0x3F
+   };
+
+   //
    // BasicType
    //
    enum BasicType
@@ -194,6 +209,8 @@ public:
    static Reference get_bt_linespec(Vector const &types, VariableType *typeRet);
    static Reference get_bt_native(Vector const &types, VariableType *typeRet);
    static Reference get_bt_script(Vector const &types, VariableType *typeRet);
+
+   static unsigned get_cast(VariableType *dst, VariableType *src);
 
    // Returns true if the given type is an arithmetic type.
    static bool is_bt_arithmetic(BasicType type);
