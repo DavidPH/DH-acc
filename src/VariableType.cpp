@@ -1121,6 +1121,23 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
 }
 
 //
+// VariableType::get_cast
+//
+unsigned VariableType::get_cast(Vector const &dst, Vector const &src)
+{
+   if (dst.size() != src.size()) return 0;
+
+   unsigned cast = CAST_ANY;
+
+   Vector::const_iterator dstIt = dst.begin(), srcIt = src.begin();
+   Vector::const_iterator dstEnd = dst.end();
+   while (dstIt != dstEnd)
+      cast &= get_cast(*dstIt++, *srcIt++);
+
+   return cast;
+}
+
+//
 // VariableType::is_bt_arithmetic
 //
 bool VariableType::is_bt_arithmetic(BasicType type)

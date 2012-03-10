@@ -211,6 +211,7 @@ public:
    static Reference get_bt_script(Vector const &types, VariableType *typeRet);
 
    static unsigned get_cast(VariableType *dst, VariableType *src);
+   static unsigned get_cast(Vector const &dst, Vector const &src);
 
    // Returns true if the given type is an arithmetic type.
    static bool is_bt_arithmetic(BasicType type);

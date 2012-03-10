@@ -409,21 +409,28 @@ SourceVariable::Pointer SourceContext::getFunction
 (std::string const &name, SourcePosition const &pos,
  VariableType::Vector const &types)
 {
+   unsigned cast, funcCount = 0;
+   SourceVariable *func;
+
    for (size_t i = 0; i < funcVars.size(); ++i)
    {
       if (funcNames[i] != name) continue;
 
-      VariableType::Vector const &funcTypeTypes = funcTypes[i]->getTypes();
+      func = funcVars[i];
+      cast = VariableType::get_cast(funcTypes[i]->getTypes(), types);
 
-      if (funcTypeTypes.size() != types.size()) continue;
+      if (cast & VariableType::CAST_NONE)
+         return func;
 
-      for (size_t j = 0; j < types.size(); ++j)
-         if (types[j] != funcTypeTypes[j]) goto do_continue;
-
-      return funcVars[i];
-
-      do_continue: continue;
+      if (cast & VariableType::CAST_IMPLICIT)
+         ++funcCount;
    }
+
+   if (funcCount == 1)
+      return func;
+
+   if (funcCount > 1)
+      throw SourceException("ambiguous overload", pos, __func__);
 
    if (parent) return parent->getFunction(name, pos, types);
 
