@@ -691,6 +691,8 @@ bigsint VariableType::getOffset
    if (!complete)
       throw SourceException("incomplete type", position, __func__);
 
+   if (basic == BT_UNION) return 0;
+
    bigsint offset = 0;
    for (size_t i = 0; i < names.size(); ++i)
    {
