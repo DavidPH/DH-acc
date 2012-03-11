@@ -25,6 +25,7 @@
 
 #include "../ObjectData.hpp"
 #include "../ObjectExpression.hpp"
+#include "../option.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
@@ -35,11 +36,39 @@
 
 
 //----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
+
+extern bool option_script_mangle_types;
+static option::option_dptr<bool> option_script_mangle_types_handle
+('\0', "script-mangle-types", "features",
+ "Enables script name mangling based on types.",
+ "Enables script name mangling based on types. Without this, overloading "
+ "scripts may not work. However, this mangling may be incompatible with other "
+ "compilers. It also makes the external use of named scripts precarious.",
+ &option_script_mangle_types);
+
+
+//----------------------------------------------------------------------------|
 // Global Variables                                                           |
 //
 
 extern bool option_script_autoargs;
+bool option_script_mangle_types;
 extern bool option_string_func;
+
+
+//----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+static void mangle_types(VariableType::Vector const &types, std::string &name)
+{
+   name += "$";
+   VariableType::Vector::const_iterator type;
+   for (type = types.begin(); type != types.end(); ++type)
+      {name += '$'; (*type)->getNameMangled(name);}
+}
 
 
 //----------------------------------------------------------------------------|
@@ -110,6 +139,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
 
    // scriptLabel
    std::string scriptLabel = scriptNameSource;
+   if (option_script_mangle_types)
+      mangle_types(scriptArgTypes, scriptLabel);
 
    // scriptNameObject
    std::string scriptNameObject = scriptLabel + "_id";
@@ -159,19 +190,6 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    // scriptName
    SourceTokenC scriptNameToken = in->get(SourceTokenC::TT_IDENTIFIER);
    std::string scriptName = scriptNameToken.data;
-
-   // __func__
-   if (option_string_func)
-   {
-      std::string funcVarData = ObjectData_String::add(scriptName);
-
-      SourceVariable::Pointer funcVar =
-         SourceVariable::create_constant
-         ("__func__", VariableType::get_bt_string(), funcVarData,
-		scriptNameToken.pos);
-
-      scriptContext->addVariable(funcVar);
-   }
 
    // scriptType
    ObjectData_Script::ScriptType scriptType;
@@ -237,11 +255,51 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
       scriptNameSource = scriptName;
    }
 
+   // __func__
+   if (option_string_func)
+   {
+      std::string funcVarData = scriptName;
+
+      if (option_script_mangle_types)
+      {
+         if (!scriptArgTypes.empty())
+         {
+            funcVarData += '(';
+
+            VariableType::Vector::iterator it = scriptArgTypes.begin();
+            funcVarData += make_string(*it);
+            for (++it; it != scriptArgTypes.end(); ++it)
+            {
+               funcVarData += ", ";
+               funcVarData += make_string(*it);
+            }
+
+            funcVarData += ')';
+         }
+         else
+            funcVarData += "(void)";
+
+         funcVarData += " -> ";
+         funcVarData += make_string(scriptReturn);
+      }
+
+      funcVarData = ObjectData_String::add(funcVarData);
+
+      SourceVariable::Pointer funcVar =
+         SourceVariable::create_constant
+         ("__func__", VariableType::get_bt_string(), funcVarData,
+          scriptNameToken.pos);
+
+      scriptContext->addVariable(funcVar);
+   }
+
    // scriptLabel
    std::string scriptLabel;
    if (token.data != "__extscript")
       scriptLabel += context->makeLabel();
    scriptLabel += scriptNameSource;
+   if (option_script_mangle_types)
+      mangle_types(scriptArgTypes, scriptLabel);
 
    // scriptNameObject
    std::string scriptNameObject = scriptLabel + "_id";

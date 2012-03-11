@@ -154,6 +154,8 @@ public:
    // Type information.
    BasicType getBasicType() const {return basic;}
    bool getComplete() const {return complete;}
+   std::string const &getName() const {return name;}
+   void getNameMangled(std::string &out) const;
    VecStr const &getNames() const {return names;}
    bool getQualifier(unsigned _quals) const {return (quals&_quals) == _quals;}
    unsigned getQualifiers() const {return quals;}
@@ -198,9 +200,9 @@ public:
    static Reference get_bt_void();
 
    // Named types.
-   static Reference get_bt_enum();
-   static Reference get_bt_struct();
-   static Reference get_bt_union();
+   static Reference get_bt_enum(std::string const &name);
+   static Reference get_bt_struct(std::string const &name);
+   static Reference get_bt_union(std::string const &name);
 
    // Anonymous types.
    static Reference get_bt_asmfunc(Vector const &types, VariableType *typeRet);
@@ -244,6 +246,7 @@ private:
    Reference     typeRet;
    Pointer       typeUnq;
 
+   std::string name;
    std::string storeArea;
 
    BasicType basic;

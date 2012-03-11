@@ -37,6 +37,15 @@
 // Static Variables                                                           |
 //
 
+extern bool option_function_mangle_types;
+static option::option_dptr<bool> option_function_mangle_types_handle
+('\0', "function-mangle-types", "features",
+ "Enables function name mangling based on types. On by default.",
+ "Enables function name mangling based on types. Without this, overloading "
+ "functions may not work. However, this mangling may be incompatible with "
+ "other compilers. On by default.",
+ &option_function_mangle_types);
+
 extern bool option_string_func;
 static option::option_dptr<bool> option_string_func_handle
 ('\0', "string-func", "features",
@@ -49,7 +58,21 @@ static option::option_dptr<bool> option_string_func_handle
 //
 
 extern bool option_function_autoargs;
+bool option_function_mangle_types = true;
 bool option_string_func = true;
+
+
+//----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+static void mangle_types(VariableType::Vector const &types, std::string &name)
+{
+   name += "$";
+   VariableType::Vector::const_iterator type;
+   for (type = types.begin(); type != types.end(); ++type)
+      {name += '$'; (*type)->getNameMangled(name);}
+}
 
 
 //----------------------------------------------------------------------------|
@@ -72,12 +95,6 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
    // functionName
    std::string functionName = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
-   // functionLabel
-   std::string functionLabel = "function_" + functionName;
-
-   // functionNameObject
-   std::string functionNameObject= functionLabel + "_id";
-
    // functionArgTypes/Count functionReturn
    VariableType::Vector functionArgTypes;
    int functionArgCount;
@@ -85,9 +102,16 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
    make_expression_arglist
    (in, blocks, context, &functionArgTypes, NULL, &functionArgCount, NULL,
     &functionReturn, functionArgClass);
-
    // Don't count automatic variable args.
    if (option_function_autoargs) functionArgCount = 0;
+
+   // functionLabel
+   std::string functionLabel = "::" + functionName;
+   if (option_function_mangle_types)
+      mangle_types(functionArgTypes, functionLabel);
+
+   // functionNameObject
+   std::string functionNameObject = functionLabel + "_id";
 
    // functionVarType
    VariableType::Reference functionVarType =
@@ -139,29 +163,6 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
    SourceTokenC functionNameToken = in->get(SourceTokenC::TT_IDENTIFIER);
    std::string functionName = functionNameToken.data;
 
-   // __func__
-   if (option_string_func)
-   {
-      std::string funcVarData = ObjectData_String::add(functionName);
-
-      SourceVariable::Pointer funcVar =
-         SourceVariable::create_constant
-         ("__func__", VariableType::get_bt_string(), funcVarData,
-		functionNameToken.pos);
-
-      functionContext->addVariable(funcVar);
-   }
-
-   // functionLabel
-   std::string functionLabel;
-   if (token.data != "__extfunc")
-      functionLabel += context->makeLabel();
-   functionLabel += "function_";
-   functionLabel += functionName;
-
-   // functionNameObject
-   std::string functionNameObject = functionLabel + "_id";
-
    // functionArgTypes/Names/Count functionReturn
    VariableType::Vector functionArgTypes;
    VariableType::VecStr functionArgNames;
@@ -170,9 +171,57 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
    make_expression_arglist
    (in, blocks, context, &functionArgTypes, &functionArgNames,
     &functionArgCount, functionContext, &functionReturn, functionArgClass);
-
    // Don't count automatic variable args.
    if (option_function_autoargs) functionArgCount = 0;
+
+   // functionLabel
+   std::string functionLabel = "::";
+   if (token.data != "__extfunc")
+      functionLabel += context->makeLabel();
+   functionLabel += functionName;
+   if (option_function_mangle_types)
+      mangle_types(functionArgTypes, functionLabel);
+
+   // functionNameObject
+   std::string functionNameObject = functionLabel + "_id";
+
+   // __func__
+   if (option_string_func)
+   {
+      std::string funcVarData = functionName;
+
+      if (option_function_mangle_types)
+      {
+         if (!functionArgTypes.empty())
+         {
+            funcVarData += '(';
+
+            VariableType::Vector::iterator it = functionArgTypes.begin();
+            funcVarData += make_string(*it);
+            for (++it; it != functionArgTypes.end(); ++it)
+            {
+               funcVarData += ", ";
+               funcVarData += make_string(*it);
+            }
+
+            funcVarData += ')';
+         }
+         else
+            funcVarData += "(void)";
+
+         funcVarData += " -> ";
+         funcVarData += make_string(functionReturn);
+      }
+
+      funcVarData = ObjectData_String::add(funcVarData);
+
+      SourceVariable::Pointer funcVar =
+         SourceVariable::create_constant
+         ("__func__", VariableType::get_bt_string(), funcVarData,
+          functionNameToken.pos);
+
+      functionContext->addVariable(funcVar);
+   }
 
    // functionVarType
    VariableType::Reference functionVarType =

@@ -84,7 +84,7 @@ VariableType::Reference SourceContext::getVariableType_enum
    }
    else
    {
-      type = VariableType::get_bt_enum();
+      type = VariableType::get_bt_enum(name.empty() ? makeLabel() : name);
 
       if (block)
          type->makeComplete();
@@ -123,7 +123,7 @@ VariableType::Reference SourceContext::getVariableType_struct
 
    if (!type)
    {
-      type = VariableType::get_bt_struct();
+      type = VariableType::get_bt_struct(name.empty() ? makeLabel() : name);
 
       structNames.push_back(name);
       structTypes.push_back(type.ref());
@@ -192,7 +192,7 @@ VariableType::Reference SourceContext::getVariableType_union
 
    if (!type)
    {
-      type = VariableType::get_bt_union();
+      type = VariableType::get_bt_union(name.empty() ? makeLabel() : name);
 
       unionNames.push_back(name);
       unionTypes.push_back(type.ref());

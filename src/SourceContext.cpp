@@ -430,7 +430,7 @@ SourceVariable::Pointer SourceContext::getFunction
       return func;
 
    if (funcCount > 1)
-      throw SourceException("ambiguous overload", pos, __func__);
+      throw SourceException("ambiguous overload: " + name, pos, __func__);
 
    if (parent) return parent->getFunction(name, pos, types);
 
@@ -445,7 +445,7 @@ std::string SourceContext::getLabel() const
    if (parent)
       return parent->getLabel() + label;
    else
-      return ObjectExpression::get_filename() + label;
+      return ObjectExpression::get_filename() + "::" + label;
 }
 
 //
@@ -711,7 +711,7 @@ std::string SourceContext::makeLabelShort()
 {
    std::ostringstream oss;
 
-   oss << "block" << ++labelCount;
+   oss << ++labelCount << "::";
 
    return oss.str();
 }

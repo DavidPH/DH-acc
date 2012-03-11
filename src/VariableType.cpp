@@ -158,7 +158,6 @@ static std::ostream &operator <<
       out << '}';
       break;
 
-   // Anonymous types.
    case VariableType::BT_ASMFUNC:
    case VariableType::BT_FUNCTION:
    case VariableType::BT_LINESPEC:
@@ -520,6 +519,67 @@ VariableType::Reference VariableType::setStorage
 //
 
 //
+// VariableType::getNameMangled
+//
+void VariableType::getNameMangled(std::string &out) const
+{
+   #define RETRN typeRet->getNameMangled(out)
+
+   #define TYPES                             \
+   for (size_t i = 0; i < types.size(); ++i) \
+   {                                         \
+      types[i]->getNameMangled(out);         \
+      if (i+1 < types.size()) out += ':';    \
+   }
+
+   #define WIDTH {std::ostringstream oss; oss << width; out += oss.str();}
+
+   switch (basic)
+   {
+   case BT_ARRAY:    out += "A{"; RETRN; out += "}:["; WIDTH; out += ']'; break;
+   case BT_BLOCK:    out += "B{"; TYPES; out += '}'; break;
+   case BT_BOOLHARD: out += 'B'; break;
+   case BT_BOOLSOFT: out += "BS"; break;
+   case BT_CHAR:     out += 'C'; break;
+   case BT_ENUM:     out += "E("; out += name; out += ')'; break;
+   case BT_FIXED:    out += "FI"; break;
+   case BT_FLOAT:    out += 'F'; break;
+   case BT_LFLOAT:   out += "FL"; break;
+   case BT_LLFLOAT:  out += "FLL"; break;
+   case BT_FUNCTION: out += "F{"; TYPES; out += '}'; break;
+   case BT_ASMFUNC:  out += "FA{"; TYPES; out += '}'; break;
+   case BT_LINESPEC: out += "FL{"; TYPES; out += '}'; break;
+   case BT_NATIVE:   out += "FN{"; TYPES; out += '}'; break;
+   case BT_SCRIPT:   out += "FS{"; TYPES; out += '}'; break;
+   case BT_SCHAR:    out += "IHH"; break;
+   case BT_SHORT:    out += "IH"; break;
+   case BT_INT:      out += 'I'; break;
+   case BT_LONG:     out += "IL"; break;
+   case BT_LLONG:    out += "ILL"; break;
+   case BT_LABEL:    out += "LABEL"; break;
+   case BT_POINTER:  out += "P{"; RETRN; out += '}'; break;
+   case BT_REAL:     out += 'R'; break;
+   case BT_STRING:   out += 'S'; break;
+   case BT_STRUCT:   out += "S("; out += name; out += ')'; break;
+   case BT_UCHAR:    out += "UHH"; break;
+   case BT_USHORT:   out += "UH"; break;
+   case BT_UINT:     out += 'U'; break;
+   case BT_ULONG:    out += "UL"; break;
+   case BT_ULLONG:   out += "ULL"; break;
+   case BT_UNION:    out += "U("; out += name; out += ')'; break;
+   case BT_VOID:     out += 'V'; break;
+   }
+
+   if (getQualifier(QUAL_CONST))    out += 'c';
+   if (getQualifier(QUAL_VOLATILE)) out += 'v';
+   if (getQualifier(QUAL_RESTRICT)) out += 'r';
+
+   #undef WIDTH
+   #undef TYPES
+   #undef RETRN
+}
+
+//
 // VariableType::getSize
 //
 bigsint VariableType::getSize(SourcePosition const &position) const
@@ -626,7 +686,7 @@ void VariableType::makeComplete(VecStr const &_names, Vector const &_types)
 // VariableType::getOffset
 //
 bigsint VariableType::getOffset
-(std::string const &name, SourcePosition const &position)
+(std::string const &memName, SourcePosition const &position)
 {
    if (!complete)
       throw SourceException("incomplete type", position, __func__);
@@ -634,26 +694,26 @@ bigsint VariableType::getOffset
    bigsint offset = 0;
    for (size_t i = 0; i < names.size(); ++i)
    {
-      if (names[i] == name) return offset;
+      if (names[i] == memName) return offset;
       offset += types[i]->getSize(position);
    }
 
-   throw SourceException("no such member '" + name + "'", position, __func__);
+   throw SourceException("no such member:" + memName, position, __func__);
 }
 
 //
 // VariableType::getType
 //
 VariableType::Reference VariableType::getType
-(std::string const &name, SourcePosition const &position)
+(std::string const &memName, SourcePosition const &position)
 {
    if (!complete)
       throw SourceException("incomplete type", position, __func__);
 
    for (size_t i = 0; i < names.size(); ++i)
-      if (names[i] == name) return Reference(types[i]);
+      if (names[i] == memName) return Reference(types[i]);
 
-   throw SourceException("no such member '" + name + "'", position, __func__);
+   throw SourceException("no such member:" + memName, position, __func__);
 }
 
 //===================================================================
@@ -835,25 +895,31 @@ VariableType::Reference VariableType::get_bt_void()
 //
 // VariableType::get_bt_enum
 //
-VariableType::Reference VariableType::get_bt_enum()
+VariableType::Reference VariableType::get_bt_enum(std::string const &name)
 {
-   return Reference(new VariableType(BT_ENUM));
+   VariableType *type = new VariableType(BT_ENUM);
+   type->name = name;
+   return static_cast<Reference>(type);
 }
 
 //
 // VariableType::get_bt_struct
 //
-VariableType::Reference VariableType::get_bt_struct()
+VariableType::Reference VariableType::get_bt_struct(std::string const &name)
 {
-   return Reference(new VariableType(BT_STRUCT));
+   VariableType *type = new VariableType(BT_STRUCT);
+   type->name = name;
+   return static_cast<Reference>(type);
 }
 
 //
 // VariableType::get_bt_union
 //
-VariableType::Reference VariableType::get_bt_union()
+VariableType::Reference VariableType::get_bt_union(std::string const &name)
 {
-   return Reference(new VariableType(BT_UNION));
+   VariableType *type = new VariableType(BT_UNION);
+   type->name = name;
+   return static_cast<Reference>(type);
 }
 
 //===================================================================
