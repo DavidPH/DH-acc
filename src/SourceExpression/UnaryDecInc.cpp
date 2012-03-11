@@ -392,7 +392,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         throw SourceException("invalid MT", position, getName());
+         throw SourceException("invalid MT", position, getClassName());
       }
    }
 
@@ -477,7 +477,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         throw SourceException("invalid MT", position, getName());
+         throw SourceException("invalid MT", position, getClassName());
       }
    }
 
@@ -567,7 +567,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         throw SourceException("invalid MT", position, getName());
+         throw SourceException("invalid MT", position, getClassName());
       }
    }
 
@@ -652,7 +652,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         throw SourceException("invalid MT", position, getName());
+         throw SourceException("invalid MT", position, getClassName());
       }
    }
 

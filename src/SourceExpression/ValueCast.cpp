@@ -56,7 +56,7 @@ public:
       {
          std::string exceptString =
             "invalid cast:" + make_string(exprType) + ':' + make_string(type);
-         throw SourceException(exceptString, position, getName());
+         throw SourceException(exceptString, position, getClassName());
       }
    }
 

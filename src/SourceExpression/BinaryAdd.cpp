@@ -122,13 +122,13 @@ SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
    {
       // Pointer constraints.
       if (btL == VariableType::BT_POINTER && btR == VariableType::BT_POINTER)
-         throw SourceException("pointer + pointer", position, getName());
+         throw SourceException("pointer + pointer", position, getClassName());
 
       if (btL == VariableType::BT_POINTER && !VariableType::is_bt_integer(btR))
-         throw SourceException("pointer + non-integer", position, getName());
+         throw SourceException("pointer + non-integer", position, getClassName());
 
       if (!VariableType::is_bt_integer(btL) && btR == VariableType::BT_POINTER)
-         throw SourceException("non-integer + pointer", position, getName());
+         throw SourceException("non-integer + pointer", position, getClassName());
    }
    else
    {
@@ -136,7 +136,7 @@ SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
    }
 
    if (assign && !VariableType::is_bt_arithmetic(btR))
-      throw SourceException("X -= non-arithmetic", position, getName());
+      throw SourceException("X -= non-arithmetic", position, getClassName());
 
    CONSTRUCTOR_POINTER_PREAMBLE
 

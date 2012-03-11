@@ -80,10 +80,10 @@ SourceExpression_BranchCall::SourceExpression_BranchCall
    for (size_t i = 0; i < types.size(); ++i)
    {
       if (!types[i])
-         throw SourceException("variadic call", position, getName());
+         throw SourceException("variadic call", position, getClassName());
 
       if (i >= args.size())
-         throw SourceException("incorrect arg count", position, getName());
+         throw SourceException("incorrect arg count", position, getClassName());
 
       args[i] = create_value_cast_implicit
                 (args[i], types[i], context, position);

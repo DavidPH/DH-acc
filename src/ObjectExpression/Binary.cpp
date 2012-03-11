@@ -34,7 +34,7 @@
 ObjectExpression_Binary::ObjectExpression_Binary(ObjectExpression * exprL_, ObjectExpression * exprR_, SourcePosition const & position_) : Super(position_), exprL(exprL_), exprR(exprR_)
 {
 	if (exprL->getType() != exprR->getType())
-		throw SourceException("type mismatch", position, getName());
+      throw SourceException("type mismatch", position, getClassName());
 }
 
 //

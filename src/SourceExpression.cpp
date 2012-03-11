@@ -157,7 +157,8 @@ get_promoted_type(VariableType *type1, VariableType *type2,
 //
 VariableData::Pointer SourceExpression::getData() const
 {
-   throw SourceException("getData on invalid expression", position, getName());
+   throw SourceException
+   ("getData on invalid expression", position, getClassName());
 }
 
 //
@@ -180,7 +181,7 @@ SourceExpression::Pointer SourceExpression::makeExpressionFunction
       return this;
 
    throw SourceException
-   ("makeExpressionFunction on invalid expression", position, getName());
+   ("makeExpressionFunction on invalid expression", position, getClassName());
 }
 
 //
@@ -191,8 +192,8 @@ CounterPointer<ObjectExpression> SourceExpression::makeObject() const
    VariableData::Pointer src = getData();
 
    if (src->type != VariableData::MT_LITERAL)
-      throw SourceException("makeObject on invalid expression", position,
-                            getName());
+      throw SourceException
+      ("makeObject on invalid expression", position, getClassName());
 
    return src->address;
 }

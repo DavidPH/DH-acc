@@ -115,7 +115,7 @@ SourceExpression_BinaryArray::SourceExpression_BinaryArray
    if (btL != VariableType::BT_ARRAY && btL != VariableType::BT_STRING)
       throw SourceException
       ("expected BT_ARRAY or BT_STRING for exprL got " + make_string(btL),
-       position, getName());
+       position, getClassName());
 }
 
 //
@@ -158,7 +158,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    }
    else
    {
-      throw SourceException("invalid BT", position, getName());
+      throw SourceException("invalid BT", position, getClassName());
    }
 }
 

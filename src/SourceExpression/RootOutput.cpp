@@ -375,7 +375,7 @@ void SourceExpression_RootOutput::doOut
    case VariableType::BT_FLOAT:
    case VariableType::BT_LFLOAT:
    case VariableType::BT_LLFLOAT:
-      throw SourceException("unsupported BT", position, getName());
+      throw SourceException("unsupported BT", position, getClassName());
    }
 
    objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(';'));

@@ -178,7 +178,7 @@ SourcePosition const & ObjectExpression::getPosition() const
 //
 ObjectExpression::Pointer ObjectExpression::resolveElement(bigsint) const
 {
-   throw SourceException("cannot resolve element", position, getName());
+   throw SourceException("cannot resolve element", position, getClassName());
 }
 
 //
@@ -186,7 +186,7 @@ ObjectExpression::Pointer ObjectExpression::resolveElement(bigsint) const
 //
 bigreal ObjectExpression::resolveFloat() const
 {
-   throw SourceException("cannot resolve float", position, getName());
+   throw SourceException("cannot resolve float", position, getClassName());
 }
 
 //
@@ -194,7 +194,7 @@ bigreal ObjectExpression::resolveFloat() const
 //
 bigsint ObjectExpression::resolveInt() const
 {
-   throw SourceException("cannot resolve int", position, getName());
+   throw SourceException("cannot resolve int", position, getClassName());
 }
 
 //
@@ -204,7 +204,7 @@ ObjectExpression::Pointer ObjectExpression::resolveMember
 (std::string const &name) const
 {
    throw SourceException
-   ("cannot resolve memeber '" + name + "'", position, getName());
+   ("cannot resolve memeber '" + name + "'", position, getClassName());
 }
 
 //
@@ -212,7 +212,7 @@ ObjectExpression::Pointer ObjectExpression::resolveMember
 //
 ObjectCodeSet ObjectExpression::resolveOCode() const
 {
-   throw SourceException("cannot resolve ocode", position, getName());
+   throw SourceException("cannot resolve ocode", position, getClassName());
 }
 
 //
@@ -220,7 +220,7 @@ ObjectCodeSet ObjectExpression::resolveOCode() const
 //
 std::string ObjectExpression::resolveSymbol() const
 {
-     throw SourceException("cannot resolve symbol", position, getName());
+   throw SourceException("cannot resolve symbol", position, getClassName());
 }
 
 void ObjectExpression::set_address_count(bigsint addressCount)
@@ -257,7 +257,7 @@ void ObjectExpression::writeACSP(std::ostream *out) const
 //
 void ObjectExpression::writeACSPLong(std::ostream *) const
 {
-   throw SourceException("cannot write ACS+", position, getName());
+   throw SourceException("cannot write ACS+", position, getClassName());
 }
 
 void ObjectExpression::writeObject(std::ostream * out) const

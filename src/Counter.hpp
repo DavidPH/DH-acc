@@ -29,16 +29,16 @@
 // Macros                                                                     |
 //
 
-#define MAKE_COMMON_COUNTER_CLASS(CLASS)              \
-public:                                               \
-virtual char const *getName() const {return #CLASS;}  \
-typedef CounterPointer<CLASS> Pointer;                \
-typedef CounterPointer<CLASS const> ConstPointer;     \
-friend class CounterPointer<CLASS>;                   \
-friend class CounterPointer<CLASS const>;             \
-typedef CounterReference<CLASS> Reference;            \
-typedef CounterReference<CLASS const> ConstReference; \
-friend class CounterReference<CLASS>;                 \
+#define MAKE_COMMON_COUNTER_CLASS(CLASS)                  \
+public:                                                   \
+virtual char const *getClassName() const {return #CLASS;} \
+typedef CounterPointer<CLASS> Pointer;                    \
+typedef CounterPointer<CLASS const> ConstPointer;         \
+friend class CounterPointer<CLASS>;                       \
+friend class CounterPointer<CLASS const>;                 \
+typedef CounterReference<CLASS> Reference;                \
+typedef CounterReference<CLASS const> ConstReference;     \
+friend class CounterReference<CLASS>;                     \
 friend class CounterReference<CLASS const>
 
 //
