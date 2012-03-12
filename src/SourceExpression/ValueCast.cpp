@@ -54,9 +54,8 @@ public:
 
       if (ct && !(VariableType::get_cast(type, exprType) & ct))
       {
-         std::string exceptString =
-            "invalid cast:" + make_string(exprType) + ':' + make_string(type);
-         throw SourceException(exceptString, position, getClassName());
+         ERROR_N(position, "invalid cast: %s to %s",
+                 make_string(exprType).c_str(), make_string(type).c_str());
       }
    }
 

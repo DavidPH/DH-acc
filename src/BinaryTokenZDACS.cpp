@@ -344,7 +344,7 @@ size_t BinaryTokenZDACS::size() const
       return args.size()*6 + 4;
 
    default:
-      throw SourceException("???", SourcePosition::none(), __func__);
+      ERROR(position, "???");
    }
    else
       return arg_counts[code]*4 + 4;
@@ -372,7 +372,7 @@ void BinaryTokenZDACS::writeACS0(std::ostream * out) const
       break;
 
    default:
-      throw SourceException("???", SourcePosition::none(), __func__);
+      ERROR(position, "???");
    }
    else
    {
@@ -407,8 +407,7 @@ write_all(std::ostream *out, std::vector<BinaryTokenZDACS> const &instructions)
       break;
 
    default:
-      throw SourceException("unknown output type", SourcePosition::none(),
-                            __func__);
+      ERROR_p("unknown output type");
    }
 }
 

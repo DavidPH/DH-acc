@@ -36,13 +36,13 @@
 //
 // SourceContext::getVariableType
 //
-VariableType::Reference SourceContext::
-getVariableType(std::string const &name, SourcePosition const &position)
+VariableType::Reference SourceContext::getVariableType
+(std::string const &name, SourcePosition const &pos)
 {
    VariableType::Pointer type = getVariableTypeNull(name);
 
    if (!type)
-      throw SourceException("no such type '" + name + "'", position, __func__);
+      ERROR_NP("no such type: %s", name.c_str());
 
    return type.ref();
 }
@@ -68,7 +68,7 @@ getVariableType_enum(std::string const &name)
 // SourceContext::getVariableType_enum
 //
 VariableType::Reference SourceContext::getVariableType_enum
-(std::string const &name, bool block, SourcePosition const &position)
+(std::string const &name, bool block, SourcePosition const &pos)
 {
    VariableType::Pointer type = getVariableType_enum(name);
 
@@ -77,7 +77,7 @@ VariableType::Reference SourceContext::getVariableType_enum
       if (block)
 	 {
          if (type->getComplete())
-            throw SourceException("enum redefined", position, __func__);
+            ERROR_NP("enum redefined: %s", name.c_str());
          else
             type->makeComplete();
       }
@@ -137,12 +137,12 @@ VariableType::Reference SourceContext::getVariableType_struct
 //
 VariableType::Reference SourceContext::getVariableType_struct
 (std::string const &name, VariableType::VecStr const &names,
- VariableType::Vector const &types, SourcePosition const &position)
+ VariableType::Vector const &types, SourcePosition const &pos)
 {
-   VariableType::Reference type = getVariableType_struct(name, position);
+   VariableType::Reference type = getVariableType_struct(name, pos);
 
    if (type->getComplete())
-      throw SourceException("struct redefined", position, __func__);
+      ERROR_NP("struct redefined: %s", name.c_str());
 
    type->makeComplete(names, types);
 
@@ -153,11 +153,11 @@ VariableType::Reference SourceContext::getVariableType_struct
 // SourceContext::getVariableType_typedef
 //
 VariableType::Reference SourceContext::getVariableType_typedef
-(std::string const &name, VariableType *type, SourcePosition const &position)
+(std::string const &name, VariableType *type, SourcePosition const &pos)
 {
    for (size_t i = 0; i < typedefNames.size(); ++i)
       if (typedefNames[i] == name)
-         throw SourceException("typedef redefined", position, __func__);
+         ERROR_NP("typedef redefined: %s", name.c_str());
 
    typedefNames.push_back(name);
    typedefTypes.push_back(static_cast<VariableType::Reference>(type));
@@ -206,12 +206,12 @@ VariableType::Reference SourceContext::getVariableType_union
 //
 VariableType::Reference SourceContext::getVariableType_union
 (std::string const &name, VariableType::VecStr const &names,
- VariableType::Vector const &types, SourcePosition const &position)
+ VariableType::Vector const &types, SourcePosition const &pos)
 {
-   VariableType::Reference type = getVariableType_union(name, position);
+   VariableType::Reference type = getVariableType_union(name, pos);
 
    if (type->getComplete())
-      throw SourceException("union redefined", position, __func__);
+      ERROR_NP("union redefined: %s", name.c_str());
 
    type->makeComplete(names, types);
 

@@ -243,8 +243,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    if (scriptName == "auto")
    {
       if (scriptNumber < 0)
-         throw SourceException("name auto requires explicit number",
-						 token.pos, __func__);
+         ERROR(token.pos, "name auto requires explicit number");
 
       std::ostringstream oss;
       oss << "script" << scriptNumber;

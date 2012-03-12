@@ -82,9 +82,10 @@ SourceExpression_RootOutput::SourceExpression_RootOutput(SRCEXP_EXPRUNA_PARM)
 void SourceExpression_RootOutput::doOut
 (ObjectVector *objects, VariableType *type) const
 {
+   VariableType::BasicType bt = type->getBasicType();
    VariableType::Vector const *types;
 
-   switch (type->getBasicType())
+   switch (bt)
    {
    case VariableType::BT_ARRAY:
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('A'));
@@ -375,7 +376,7 @@ void SourceExpression_RootOutput::doOut
    case VariableType::BT_FLOAT:
    case VariableType::BT_LFLOAT:
    case VariableType::BT_LLFLOAT:
-      throw SourceException("unsupported BT", position, getClassName());
+      ERROR_N(position, "unsupported BT: %s", make_string(bt).c_str());
    }
 
    objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(';'));

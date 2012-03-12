@@ -223,7 +223,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
       }
    }
 
-   throw SourceException("unexpected operator", operators[begin].pos, __func__);
+   ERROR(operators[begin].pos, "unexpected operator");
 
    #undef CARGS
 
@@ -328,11 +328,11 @@ void SourceTokenizerDS::addDefine(std::string const &name)
 // SourceTokenizerDS::addDefine
 //
 void SourceTokenizerDS::addDefine
-(std::string const &name, SourcePosition const &position,
+(std::string const &name, SourcePosition const &pos,
  std::vector<SourceTokenC> const &tokens)
 {
    if (hasDefine(name))
-      throw SourceException("attempt to redefine define", position, __func__);
+      ERROR_P("attempt to redefine define");
 
    defines[name] = tokens;
 }
@@ -352,9 +352,8 @@ void SourceTokenizerDS::addSkip(bool skip)
 void SourceTokenizerDS::doAssert(SourceTokenC::TokenType type)
 {
    if (token.type != type)
-      throw SourceException
-      ("expected " + make_string(type) + " got " + make_string(token.type),
-       token.pos, __func__);
+      ERROR(token.pos, "expected %s got %s", make_string(type).c_str(),
+            make_string(token.type).c_str());
 }
 
 //
@@ -363,8 +362,7 @@ void SourceTokenizerDS::doAssert(SourceTokenC::TokenType type)
 void SourceTokenizerDS::doAssert(std::string const &data)
 {
    if (token.data != data)
-      throw SourceException
-      ("expected '" + data + "' got '" + token.data + "'", token.pos, __func__);
+      ERROR(token.pos, "expected %s got %s", data.c_str(), token.data.c_str());
 }
 
 //
@@ -378,7 +376,7 @@ void SourceTokenizerDS::doCommand()
 
    prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
 
-	std::string const &command = token.data;
+   std::string const &command = token.data;
 
         if (command == "define")  doCommand_define();
    else if (command == "else")    doCommand_else();
@@ -391,7 +389,7 @@ void SourceTokenizerDS::doCommand()
    else if (command == "include") doCommand_include();
    else if (command == "undef")   doCommand_undef();
 
-   else throw SourceException("unknown command", token.pos, __func__);
+   else ERROR(token.pos, "unknown command: %s", command.c_str());
 
    canCommand = true;
    canExpand  = true;
@@ -424,7 +422,7 @@ void SourceTokenizerDS::doCommand_define()
 void SourceTokenizerDS::doCommand_else()
 {
    if (skipStack.empty())
-      throw SourceException("unmatched #else", token.pos, __func__);
+      ERROR(token.pos, "unmatched #else");
 
    skipStack.back() = unskipStack.top();
    unskipStack.top() = true; // If it wasn't, it is now.
@@ -436,7 +434,7 @@ void SourceTokenizerDS::doCommand_else()
 void SourceTokenizerDS::doCommand_elif()
 {
    if (skipStack.empty())
-      throw SourceException("unmatched #elif", token.pos, __func__);
+      ERROR(token.pos, "unmatched #elif");
 
    bool ifResult = getIf();
 
@@ -450,7 +448,7 @@ void SourceTokenizerDS::doCommand_elif()
 void SourceTokenizerDS::doCommand_endif()
 {
    if (skipStack.empty())
-      throw SourceException("unmatched #endif", token.pos, __func__);
+      ERROR(token.pos, "unmatched #endif");
 
    remSkip();
 }
@@ -464,7 +462,7 @@ void SourceTokenizerDS::doCommand_error()
 
    if (isSkip()) return;
 
-   throw SourceException(token.data, token.pos, "#error");
+   ERROR(token.pos, "#error %s", token.data.c_str());
 }
 
 //
@@ -512,7 +510,7 @@ void SourceTokenizerDS::doCommand_include()
    }
    catch (std::exception & e)
    {
-      throw SourceException("file not found", token.pos, __func__);
+      ERROR(token.pos, "file not found: %s", token.data.c_str());
    }
 }
 
@@ -622,7 +620,7 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
          goto case_expr;
 
       default:
-         throw SourceException("unexpected token type", token.pos, __func__);
+         ERROR(token.pos, "unexpected token type");
       }
    }
 
@@ -686,7 +684,7 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
    }
 
    default:
-      throw SourceException("unexpected token type", token.pos, __func__);
+      ERROR(token.pos, "unexpected token type");
    }
 }
 

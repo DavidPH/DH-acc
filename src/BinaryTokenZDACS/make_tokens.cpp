@@ -67,15 +67,11 @@ void BinaryTokenZDACS::make_tokens
       ObjectExpression::create_value_int
       (option_addr_stack, SourcePosition::builtin());
 
-   static ObjectExpression::Pointer const indexTemp =
-      ObjectExpression::create_value_int
-      (option_static_temp, SourcePosition::builtin());
-
    static std::vector<std::string> const nolabels;
 
    std::vector<ObjectExpression::Pointer> args;
 
-   SourcePosition const &position = object.getPosition();
+   SourcePosition const &pos = object.getPosition();
 
    std::vector<std::string> const *labels = &object.getLabels();
 
@@ -363,7 +359,7 @@ void BinaryTokenZDACS::make_tokens
    case OCODE_BRANCH_TABLE:
       args = object.getArgs();
       if (args.size() % 2)
-         throw SourceException("uneven OCODE_BRANCH_TABLE", position, __func__);
+         ERROR_P("uneven OCODE_BRANCH_TABLE");
       PUSH_TOKEN(BCODE__BRANCH_TABLE);
       break;
 
@@ -548,9 +544,7 @@ void BinaryTokenZDACS::make_tokens
 
    case OCODE_NONE:
    default:
-      throw SourceException(std::string("unknown OCODE: ") +
-                            make_string(object.getCode()),
-                            position, __func__);
+      ERROR_P("unknown OCODE: %s", make_string(object.getCode()));
    }
 }
 

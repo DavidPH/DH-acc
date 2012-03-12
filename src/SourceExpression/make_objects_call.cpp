@@ -38,7 +38,7 @@
 //
 void SourceExpression::make_objects_call
 (ObjectVector *objects, VariableData *dst, SourceExpression *expr,
- Vector const &args, SourceContext *context, SourcePosition const &position)
+ Vector const &args, SourceContext *context, SourcePosition const &pos)
 {
    VariableType::Reference type = expr->getType();
 
@@ -48,24 +48,22 @@ void SourceExpression::make_objects_call
       if (expr->canMakeObject())
       {
          make_objects_call_asmfunc
-         (objects, dst, type, expr->makeObject(), args, context, position);
+         (objects, dst, type, expr->makeObject(), args, context, pos);
       }
       else
-      {
-         throw SourceException("non-constant asmfunc", position, __func__);
-      }
+         ERROR_P("non-constant asmfunc");
       break;
 
    case VariableType::BT_FUNCTION:
       if (expr->canMakeObject())
       {
          make_objects_call_function
-         (objects, dst, type, expr->makeObject(), args, context, position);
+         (objects, dst, type, expr->makeObject(), args, context, pos);
       }
       else
       {
          make_objects_call_function
-         (objects, dst, type, expr, args, context, position);
+         (objects, dst, type, expr, args, context, pos);
       }
       break;
 
@@ -73,37 +71,31 @@ void SourceExpression::make_objects_call
       if (expr->canMakeObject())
       {
          make_objects_call_linespec
-         (objects, dst, type, expr->makeObject(), args, context, position);
+         (objects, dst, type, expr->makeObject(), args, context, pos);
       }
       else
-      {
-         throw SourceException("non-constant linespec", position, __func__);
-      }
+         ERROR_P("non-constant linespec");
       break;
 
    case VariableType::BT_NATIVE:
       if (expr->canMakeObject())
       {
          make_objects_call_native
-         (objects, dst, type, expr->makeObject(), args, context, position);
+         (objects, dst, type, expr->makeObject(), args, context, pos);
       }
       else
-      {
-         throw SourceException("non-constant native", position, __func__);
-      }
+         ERROR_P("non-constant native");
       break;
 
    case VariableType::BT_SCRIPT:
       make_objects_call_script
-      (objects, dst, type, expr, args, context, position);
+      (objects, dst, type, expr, args, context, pos);
       break;
 
    default:
-      throw SourceException("attempt to call uncallable", position, __func__);
+      ERROR_P("attempt to call uncallable");
    }
 }
-
-
 
 // EOF
 

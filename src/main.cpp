@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
    }
    catch (SourceException const &e)
    {
-      std::cerr << e.where() << " (" << e.who() << "): " << e.what() << std::endl;
+      std::cerr << e.what() << std::endl;
    }
    catch (option::exception const &e)
    {

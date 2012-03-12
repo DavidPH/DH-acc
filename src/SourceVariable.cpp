@@ -170,7 +170,7 @@ SourceVariable::Pointer SourceVariable::create_variable
 // SourceVariable::get_StorageClass
 //
 SourceVariable::StorageClass SourceVariable::get_StorageClass
-(std::string const &data, SourcePosition const &position)
+(std::string const &data, SourcePosition const &pos)
 {
    if (data == "auto")
       return SC_AUTO;
@@ -205,8 +205,7 @@ SourceVariable::StorageClass SourceVariable::get_StorageClass
    if (data == "__globalarray")
       return SC_REGISTERARRAY_GLOBAL;
 
-   throw SourceException
-   ("invalid storage-class '" + data + "'", position, __func__);
+   ERROR_P("invalid storage-class: %s", data.c_str());
 }
 
 //
@@ -292,7 +291,7 @@ VariableData::Pointer SourceVariable::getData() const
       return VariableData::create_static(size, address);
    }
 
-   throw SourceException("invalid SC", position, "SourceVariable::getData");
+   ERROR(position, "invalid SC");
 }
 
 //

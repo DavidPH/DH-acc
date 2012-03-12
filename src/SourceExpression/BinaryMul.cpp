@@ -114,7 +114,7 @@ SourceExpression_BinaryMul::SourceExpression_BinaryMul
    CONSTRUCTOR_TYPE_VARS
    CONSTRUCTOR_ARRAY_DECAY
 
-   CONSTRAINT_ARITHMETIC("%")
+   CONSTRAINT_ARITHMETIC("*")
 }
 
 //

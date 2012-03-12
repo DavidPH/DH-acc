@@ -34,9 +34,9 @@
 #define PUSH_ARGS1(STOP) \
    PUSH_ARGS2(0, STOP)
 
-#define PUSH_TOKEN(BCODE)                                                \
-   instructions->push_back(TOKEN_CLASS(BCODE, position, *labels, args)); \
-   args.clear();                                                         \
+#define PUSH_TOKEN(BCODE)                                           \
+   instructions->push_back(TOKEN_CLASS(BCODE, pos, *labels, args)); \
+   args.clear();                                                    \
    labels = &nolabels;
 
 #define PUSH_TOKEN_ARGS1(BCODE,STOP) \

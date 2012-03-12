@@ -31,10 +31,12 @@
 //
 // ObjectExpression_Binary::ObjectExpression_Binary
 //
-ObjectExpression_Binary::ObjectExpression_Binary(ObjectExpression * exprL_, ObjectExpression * exprR_, SourcePosition const & position_) : Super(position_), exprL(exprL_), exprR(exprR_)
+ObjectExpression_Binary::ObjectExpression_Binary
+(ObjectExpression *_exprL, ObjectExpression *_exprR, SourcePosition const &_pos)
+ : Super(_pos), exprL(_exprL), exprR(_exprR)
 {
-	if (exprL->getType() != exprR->getType())
-      throw SourceException("type mismatch", position, getClassName());
+   if (exprL->getType() != exprR->getType())
+      ERROR_N(position, "type mismatch");
 }
 
 //

@@ -144,7 +144,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         throw SourceException("invalid MT", position, getClassName());
+         ERROR_N(position, "invalid MT");
 
       case VariableData::MT_POINTER:
          if (data->offsetExpr)

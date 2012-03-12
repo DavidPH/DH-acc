@@ -57,7 +57,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(cast)
    if (token.data == "__force_cast")
       return create_value_cast_force(expr, type, context, token.pos);
 
-   throw SourceException(token.data, token.pos, __func__);
+   ERROR(token.pos, "unknown cast: %s", token.data.c_str());
 }
 
 // EOF

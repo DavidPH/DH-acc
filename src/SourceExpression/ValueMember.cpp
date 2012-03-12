@@ -101,7 +101,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
    VariableType::Reference srcType = expr->getType();
 
    if (!src->address)
-      throw SourceException("cannot getData", position, getClassName());
+      ERROR_N(position, "cannot getData");
 
    // Member data.
    bigsint                 memberOffset = srcType->getOffset(name, position);
@@ -150,7 +150,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
       return VariableData::create_static(memberSize, address);
 
    default:
-      throw SourceException("cannot getData", position, getClassName());
+      ERROR_N(position, "cannot getData");
    }
 
    return data;

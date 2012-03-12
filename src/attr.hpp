@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,41 +17,47 @@
 //
 //-----------------------------------------------------------------------------
 //
-// DS handling of extern.
+// Attribute macros.
 //
 //-----------------------------------------------------------------------------
 
-#include "../SourceExpressionDS.hpp"
-
-#include "../ObjectExpression.hpp"
-#include "../ost_type.hpp"
-#include "../SourceContext.hpp"
-#include "../SourceException.hpp"
-#include "../SourceTokenizerDS.hpp"
-#include "../VariableType.hpp"
+#ifndef HPP_attr_
+#define HPP_attr_
 
 
 //----------------------------------------------------------------------------|
-// Global Functions                                                           |
+// Macros                                                                     |
 //
 
 //
-// SourceExpressionDS::make_expression_single_extern
+// ATTR_FORMAT
 //
-SRCEXPDS_EXPRSINGLE_DEFN(extern)
-{
-   (void)token;
+#if defined(__GNUC__)
+#  define ATTR_FORMAT(A,B,C) __attribute__((__format__(A,B,C)))
+#elif defined(__clang__)
+#  if __has_attribute(__format__)
+#     define ATTR_FORMAT(A,B,C) __attribute__((__format__(A,B,C)))
+#  else
+#     define ATTR_FORMAT(A,B,C)
+#  endif
+#else
+#  define ATTR_FORMAT(A,B,C)
+#endif
 
-   SourceTokenC externToken = in->get(SourceTokenC::TT_IDENTIFIER);
+//
+// ATTR_NORETURN
+//
+#if defined(__GNUC__)
+#  define ATTR_NORETURN __attribute__((__noreturn__))
+#elif defined(__clang__)
+#  if __has_attribute(__noreturn__)
+#     define ATTR_NORETURN __attribute__((__noreturn__))
+#  else
+#     define ATTR_NORETURN
+#  endif
+#else
+#  define ATTR_NORETURN
+#endif
 
-   expr_single_handler_map::iterator it =
-      expr_single_extern.find(externToken.data);
-
-   if (it == expr_single_extern.end())
-      ERROR(externToken.pos, "unknown extern type");
-
-   return it->second(in, externToken, blocks, context);
-}
-
-// EOF
+#endif//HPP_attr_
 

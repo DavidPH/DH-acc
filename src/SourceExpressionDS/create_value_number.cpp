@@ -99,7 +99,7 @@ SourceExpression::Pointer SourceExpressionDS::create_value_integer
       int i = char_to_int(c);
 
       if (i > base)
-         throw SourceException("character out of range", position, __func__);
+         ERROR(position, "character out of range");
 
       if (i < 0)
       {
@@ -108,7 +108,7 @@ SourceExpression::Pointer SourceExpressionDS::create_value_integer
              c == 'H' || c == 'h')   // short
             break;
 
-         throw SourceException("character out of range", position, __func__);
+         ERROR(position, "character out of range");
       }
 
       val *= base;
@@ -156,7 +156,7 @@ SourceExpression::Pointer SourceExpressionDS::create_value_integer
          break;
 
       default:
-         throw SourceException("character out of range", position, __func__);
+         ERROR(position, "character out of range");
       }
    }
 
@@ -201,7 +201,7 @@ dointLL:
    if ((isU || isUU) /*&& val <= maxu_LL*/) // FIXME
       return create_value_ullong(val, context, position);
 
-   throw SourceException("integer literal out of range", position, __func__);
+   ERROR(position, "integer literal out of range");
 }
 
 // EOF

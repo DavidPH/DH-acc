@@ -62,7 +62,7 @@ bool option_function_autoargs = false;
 void SourceExpression::make_objects_call_function
 (ObjectVector *objects, VariableData *dst, VariableType *type,
  ObjectExpression *data, Vector const &args, SourceContext *context,
- SourcePosition const &position)
+ SourcePosition const &pos)
 {
    std::string labelReturn = context->makeLabel();
 
@@ -103,7 +103,7 @@ void SourceExpression::make_objects_call_function
    {
       // ... Push return address.
       ObjectExpression::Pointer retnExpr =
-         ObjectExpression::create_value_symbol(labelReturn, position);
+         ObjectExpression::create_value_symbol(labelReturn, pos);
 
       objects->addToken(OCODE_GET_LITERAL32I, retnExpr);
    }
@@ -120,7 +120,7 @@ void SourceExpression::make_objects_call_function
    // Reset the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
 
-   make_objects_memcpy_post(objects, dst, src, retnType, context, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }
 
 //
@@ -129,7 +129,7 @@ void SourceExpression::make_objects_call_function
 void SourceExpression::make_objects_call_function
 (ObjectVector *objects, VariableData *dst, VariableType *type,
  SourceExpression *data, Vector const &args, SourceContext *context,
- SourcePosition const &position)
+ SourcePosition const &pos)
 {
    std::string labelReturn = context->makeLabel();
 
@@ -139,7 +139,7 @@ void SourceExpression::make_objects_call_function
    objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(labelReturn));
 
    // Determine jump target.
-   data->makeObjects(objects, VariableData::create_stack(type->getSize(position)));
+   data->makeObjects(objects, VariableData::create_stack(type->getSize(pos)));
 
    FUNCTION_ARGS
 
@@ -170,7 +170,7 @@ void SourceExpression::make_objects_call_function
    // Reset the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
 
-   make_objects_memcpy_post(objects, dst, src, retnType, context, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }
 
 // EOF

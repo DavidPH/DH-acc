@@ -112,7 +112,7 @@ SourceExpression_BinaryMod::SourceExpression_BinaryMod
    CONSTRUCTOR_TYPE_VARS
    CONSTRUCTOR_ARRAY_DECAY
 
-   CONSTRAINT_ARITHMETIC("%")
+   CONSTRAINT_ARITHMETIC("%%")
 }
 
 //

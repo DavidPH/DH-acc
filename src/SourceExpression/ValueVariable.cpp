@@ -100,8 +100,7 @@ SRCEXP_EXPRVAL_DEFN(c, char)
 SRCEXP_EXPRVAL_DEFN(s, char)
 {
    if (value.size() != 1)
-      throw SourceException
-      ("invalid length for character literal", position, __func__);
+      ERROR(position, "invalid length for character literal");
 
    return create_value_char(value[0], context, position);
 }
@@ -242,7 +241,7 @@ SourceExpression_ValueVariable(SourceVariable *_var, SRCEXP_EXPR_PARM)
                                  var(_var)
 {
    if (!_var->getType()->getComplete())
-      throw SourceException("incomplete type", position, getClassName());
+      ERROR_N(position, "incomplete type");
 }
 
 //

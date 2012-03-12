@@ -148,10 +148,10 @@ SourceExpression_BinarySub::SourceExpression_BinarySub
    {
       // Pointer constraints.
       if (btR != VariableType::BT_POINTER && !VariableType::is_bt_integer(btR))
-         throw SourceException("pointer - non-integer", position, getClassName());
+         ERROR_N(position, "pointer - non-integer");
 
       if (btL != VariableType::BT_POINTER)
-         throw SourceException("non-pointer - pointer", position, getClassName());
+         ERROR_N(position, "non-pointer - pointer");
    }
    else
    {
@@ -159,7 +159,7 @@ SourceExpression_BinarySub::SourceExpression_BinarySub
    }
 
    if (assign && !VariableType::is_bt_arithmetic(btR))
-      throw SourceException("X -= non-arithmetic", position, getClassName());
+      ERROR_N(position, "X -= non-arithmetic");
 
    CONSTRUCTOR_POINTER_PREAMBLE
 

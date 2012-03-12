@@ -133,12 +133,12 @@ std::string const & ObjectExpression::get_filename()
 // ObjectExpression::get_symbol
 //
 ObjectExpression::Pointer ObjectExpression::
-get_symbol(std::string const &symbol, SourcePosition const &position)
+get_symbol(std::string const &symbol, SourcePosition const &pos)
 {
    ObjectExpression::Pointer value = get_symbol_null(symbol);
 
    if (!value)
-      throw SourceException("unknown symbol '" + symbol + "'", position, "ObjectExpression");
+      ERROR_P("unknown symbol: %s", symbol.c_str());
 
    return value;
 }
@@ -158,14 +158,16 @@ get_symbol_null(std::string const &symbol)
 //
 // ObjectExpression::get_symbol_type
 //
-ObjectExpression::ExpressionType ObjectExpression::get_symbol_type(std::string const & symbol, SourcePosition const & position)
+ObjectExpression::ExpressionType ObjectExpression::get_symbol_type
+(std::string const &symbol, SourcePosition const &pos)
 {
-	std::map<std::string, ExpressionType>::iterator typeIt(_symbol_type_table.find(symbol));
+   std::map<std::string, ExpressionType>::iterator typeIt =
+      _symbol_type_table.find(symbol);
 
-	if (typeIt == _symbol_type_table.end())
-		throw SourceException("unknown symbol '" + symbol + "'", position, "ObjectExpression");
+   if (typeIt == _symbol_type_table.end())
+      ERROR_P("unknown symbol: %s", symbol.c_str());
 
-	return typeIt->second;
+   return typeIt->second;
 }
 
 SourcePosition const & ObjectExpression::getPosition() const
@@ -178,7 +180,7 @@ SourcePosition const & ObjectExpression::getPosition() const
 //
 ObjectExpression::Pointer ObjectExpression::resolveElement(bigsint) const
 {
-   throw SourceException("cannot resolve element", position, getClassName());
+   ERROR_N(position, "cannot resolve element");
 }
 
 //
@@ -186,7 +188,7 @@ ObjectExpression::Pointer ObjectExpression::resolveElement(bigsint) const
 //
 bigreal ObjectExpression::resolveFloat() const
 {
-   throw SourceException("cannot resolve float", position, getClassName());
+   ERROR_N(position, "cannot resolve float");
 }
 
 //
@@ -194,7 +196,7 @@ bigreal ObjectExpression::resolveFloat() const
 //
 bigsint ObjectExpression::resolveInt() const
 {
-   throw SourceException("cannot resolve int", position, getClassName());
+   ERROR_N(position, "cannot resolve int");
 }
 
 //
@@ -203,8 +205,7 @@ bigsint ObjectExpression::resolveInt() const
 ObjectExpression::Pointer ObjectExpression::resolveMember
 (std::string const &name) const
 {
-   throw SourceException
-   ("cannot resolve memeber '" + name + "'", position, getClassName());
+   ERROR_N(position, "cannot resolve member: %s", name.c_str());
 }
 
 //
@@ -212,7 +213,7 @@ ObjectExpression::Pointer ObjectExpression::resolveMember
 //
 ObjectCodeSet ObjectExpression::resolveOCode() const
 {
-   throw SourceException("cannot resolve ocode", position, getClassName());
+   ERROR_N(position, "cannot resolve ocode");
 }
 
 //
@@ -220,7 +221,7 @@ ObjectCodeSet ObjectExpression::resolveOCode() const
 //
 std::string ObjectExpression::resolveSymbol() const
 {
-   throw SourceException("cannot resolve symbol", position, getClassName());
+   ERROR_N(position, "cannot resolve symbol");
 }
 
 void ObjectExpression::set_address_count(bigsint addressCount)
@@ -257,7 +258,7 @@ void ObjectExpression::writeACSP(std::ostream *out) const
 //
 void ObjectExpression::writeACSPLong(std::ostream *) const
 {
-   throw SourceException("cannot write ACS+", position, getClassName());
+   ERROR_N(position, "cannot write ACS+");
 }
 
 void ObjectExpression::writeObject(std::ostream * out) const

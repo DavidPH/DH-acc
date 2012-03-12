@@ -82,7 +82,7 @@ public:
       else if (type == "__printf_string")
          printfType = PT_STRING;
       else
-         throw SourceException("unrecognized printfType", position, __func__);
+         ERROR_N(position, "unrecognized printfType: %s", type.c_str());
    }
 
    //
@@ -104,7 +104,7 @@ public:
          return VariableType::get_bt_string();
       }
 
-      throw SourceException("unrecognized printfType", position, __func__);
+      ERROR_N(position, "unrecognized printfType");
    }
 
 private:
@@ -165,8 +165,7 @@ private:
    //
    SourceExpression::Pointer nextExpr(VariableType *type)
    {
-      if (!*expr) throw SourceException("insufficient arguments for printf",
-                                        position, __func__);
+      if (!*expr) ERROR_N(position, "insufficient arguments");
 
       return create_value_cast_implicit(*expr++, type, context, position);
    }
@@ -235,8 +234,7 @@ private:
                continue;
 
             default:
-               throw SourceException("unrecognized printf format char",
-                                     position, __func__);
+               ERROR_N(position, "unrecognized format char: %c", *c);
             }
          }
 
@@ -302,8 +300,7 @@ private:
             break;
 
          default:
-            throw SourceException("unrecognized printf hud msgtype",
-                                  position, __func__);
+            ERROR_N(position, "unrecognized hud msgtype");
          }
       }
          break;

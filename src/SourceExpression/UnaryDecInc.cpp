@@ -392,7 +392,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         throw SourceException("invalid MT", position, getClassName());
+         ERROR_N(position, "invalid MT");
       }
    }
 
@@ -477,7 +477,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         throw SourceException("invalid MT", position, getClassName());
+         ERROR_N(position, "invalid MT");
       }
    }
 
@@ -567,7 +567,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         throw SourceException("invalid MT", position, getClassName());
+         ERROR_N(position, "invalid MT");
       }
    }
 
@@ -652,7 +652,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         throw SourceException("invalid MT", position, getClassName());
+         ERROR_N(position, "invalid MT");
       }
    }
 
@@ -686,7 +686,7 @@ private:
       else if (bt == VariableType::BT_FIXED || bt == VariableType::BT_REAL)
          doF(objects, dst, src, tmp);
       else
-         throw SourceException("invalid BT", position, __func__);
+         ERROR_N(position, "invalid BT");
 
       if (dst->type != VariableData::MT_VOID)
          make_objects_memcpy_post(objects, dst, data, type, context, position);

@@ -42,14 +42,14 @@
 void SourceExpression::make_objects_call_native
 (ObjectVector *objects, VariableData *dst, VariableType *type,
  ObjectExpression *data, Vector const &args, SourceContext *context,
- SourcePosition const &position)
+ SourcePosition const &pos)
 {
    FUNCTION_PREAMBLE
    FUNCTION_ARGS
 
    objects->addToken(OCODE_MISC_NATIVE, objects->getValue(callSize), data);
 
-   make_objects_memcpy_post(objects, dst, src, retnType, context, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }
 
 // EOF

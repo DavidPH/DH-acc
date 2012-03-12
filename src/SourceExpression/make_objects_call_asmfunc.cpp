@@ -42,7 +42,7 @@
 void SourceExpression::make_objects_call_asmfunc
 (ObjectVector *objects, VariableData *dst, VariableType *type,
  ObjectExpression *data, Vector const &args, SourceContext *context,
- SourcePosition const &position)
+ SourcePosition const &pos)
 {
    FUNCTION_PREAMBLE
 
@@ -53,15 +53,15 @@ void SourceExpression::make_objects_call_asmfunc
    for (size_t i = 0; i < callTypes.size(); ++i)
    {
       if (!callTypes[i])
-         throw SourceException("variadic", position, __func__);
+         ERROR_P("variadic");
 
-      callSize += callTypes[i]->getSize(position);
+      callSize += callTypes[i]->getSize(pos);
 
       if (i >= args.size())
-         throw SourceException("bad count", position, __func__);
+         ERROR_P("bad count");
 
       if (args[i]->getType() != callTypes[i])
-         throw SourceException("bad type", args[i]->position, __func__);
+         ERROR(args[i]->position, "bad type");
 
       immediate = immediate && args[i]->canMakeObject();
    }
@@ -73,20 +73,20 @@ void SourceExpression::make_objects_call_asmfunc
       for (size_t i = 0; i < args.size(); ++i)
          oargs.push_back(args[i]->makeObject());
 
-      objects->setPosition(position).addToken(ocode.ocode_imm, oargs);
+      objects->setPosition(pos).addToken(ocode.ocode_imm, oargs);
    }
    else
    {
       if (ocode.ocode == OCODE_NONE)
-         throw SourceException("no ocode", position, __func__);
+         ERROR_P("no ocode");
 
       for (size_t i = 0; i < args.size(); ++i)
-         args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->getSize(position)));
+         args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->getSize(pos)));
 
-      objects->setPosition(position).addToken(ocode.ocode);
+      objects->setPosition(pos).addToken(ocode.ocode);
    }
 
-   make_objects_memcpy_post(objects, dst, src, retnType, context, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }
 
 // EOF

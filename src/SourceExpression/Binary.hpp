@@ -81,24 +81,22 @@ SourceExpression::Pointer exprSize =                          \
 //
 // CONSTRAINT_ARITHMETIC
 //
-#define CONSTRAINT_ARITHMETIC(OPER)                         \
-if (!VariableType::is_bt_arithmetic(btL))                   \
-   throw SourceException                                    \
-   ("non-arithmetic " OPER " X", position, getClassName()); \
-                                                            \
-if (!VariableType::is_bt_arithmetic(btR))                   \
-   throw SourceException                                    \
-   ("X " OPER " non-arithmetic", position, getClassName());
+#define CONSTRAINT_ARITHMETIC(OPER)                \
+if (!VariableType::is_bt_arithmetic(btL))          \
+   ERROR_N(position, "non-arithmetic " OPER " X"); \
+                                                   \
+if (!VariableType::is_bt_arithmetic(btR))          \
+   ERROR_N(position, "X " OPER " non-arithmetic");
 
 //
 // CONSTRAINT_INTEGER
 //
-#define CONSTRAINT_INTEGER(OPER)                                              \
-if (!VariableType::is_bt_integer(btL))                                        \
-   throw SourceException("non-integer " OPER " X", position, getClassName()); \
-                                                                              \
-if (!VariableType::is_bt_integer(btR))                                        \
-   throw SourceException("X " OPER " non-integer", position, getClassName());
+#define CONSTRAINT_INTEGER(OPER)                \
+if (!VariableType::is_bt_integer(btL))          \
+   ERROR_N(position, "non-integer " OPER " X"); \
+                                                \
+if (!VariableType::is_bt_integer(btR))          \
+   ERROR_N(position, "X " OPER " non-integer");
 
 //
 // ASSIGN_ARITHMETIC_VARS
@@ -172,43 +170,43 @@ case VariableData::SRA_GLOBAL:            \
 //
 // ASSIGN_GET_OCODE_GET
 //
-#define ASSIGN_GET_OCODE_GET                                      \
-switch (src->type)                                                \
-{                                                                 \
-case VariableData::MT_AUTO:                                       \
-   ocodeGet = OCODE_GET_AUTO32F;                                  \
-   ocodeTyped = true;                                             \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_POINTER:                                    \
-   ocodeGet = OCODE_GET_POINTER32F;                               \
-   ocodeTyped = true;                                             \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_REGISTER:                                   \
-   ASSIGN_GET_OCODE_GET_REGISTER                                  \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_REGISTERARRAY:                              \
-   ASSIGN_GET_OCODE_GET_ARRAY                                     \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_STATIC:                                     \
-   ocodeGet = OCODE_GET_STATIC32F;                                \
-   ocodeTyped = true;                                             \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_LITERAL:                                    \
-case VariableData::MT_STACK:                                      \
-case VariableData::MT_VOID:                                       \
-case VariableData::MT_NONE:                                       \
-   throw SourceException("invalid MT", position, getClassName()); \
-}                                                                 \
-                                                                  \
-if (ocodeTyped)                                                   \
-{                                                                 \
-   ocodeOp  = static_cast<ObjectCode>(ocodeOp  + ocodeOpType);    \
-   ocodeGet = static_cast<ObjectCode>(ocodeGet + ocodeGetType);   \
+#define ASSIGN_GET_OCODE_GET                                    \
+switch (src->type)                                              \
+{                                                               \
+case VariableData::MT_AUTO:                                     \
+   ocodeGet = OCODE_GET_AUTO32F;                                \
+   ocodeTyped = true;                                           \
+   break;                                                       \
+                                                                \
+case VariableData::MT_POINTER:                                  \
+   ocodeGet = OCODE_GET_POINTER32F;                             \
+   ocodeTyped = true;                                           \
+   break;                                                       \
+                                                                \
+case VariableData::MT_REGISTER:                                 \
+   ASSIGN_GET_OCODE_GET_REGISTER                                \
+   break;                                                       \
+                                                                \
+case VariableData::MT_REGISTERARRAY:                            \
+   ASSIGN_GET_OCODE_GET_ARRAY                                   \
+   break;                                                       \
+                                                                \
+case VariableData::MT_STATIC:                                   \
+   ocodeGet = OCODE_GET_STATIC32F;                              \
+   ocodeTyped = true;                                           \
+   break;                                                       \
+                                                                \
+case VariableData::MT_LITERAL:                                  \
+case VariableData::MT_STACK:                                    \
+case VariableData::MT_VOID:                                     \
+case VariableData::MT_NONE:                                     \
+   ERROR_N(position, "invalid MT");                             \
+}                                                               \
+                                                                \
+if (ocodeTyped)                                                 \
+{                                                               \
+   ocodeOp  = static_cast<ObjectCode>(ocodeOp  + ocodeOpType);  \
+   ocodeGet = static_cast<ObjectCode>(ocodeGet + ocodeGetType); \
 }
 
 //
@@ -289,7 +287,7 @@ case VariableData::MT_LITERAL:                                    \
 case VariableData::MT_STACK:                                      \
 case VariableData::MT_VOID:                                       \
 case VariableData::MT_NONE:                                       \
-   throw SourceException("invalid MT", position, getClassName()); \
+   ERROR_N(position, "invalid MT");                               \
 }                                                                 \
                                                                   \
 ASSIGN_GET_OCODE_GET
@@ -339,36 +337,36 @@ case VariableData::SRA_GLOBAL:                       \
 //
 // ASSIGN_GET_OCODE_BITWISE
 //
-#define ASSIGN_GET_OCODE_BITWISE(OPER)                            \
-switch (src->type)                                                \
-{                                                                 \
-case VariableData::MT_AUTO:                                       \
-   ocodeOp  = OCODE_SETOP_##OPER##_AUTO32;                        \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_POINTER:                                    \
-   ocodeOp  = OCODE_SETOP_##OPER##_POINTER32;                     \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_REGISTER:                                   \
-   ASSIGN_GET_OCODE_BITWISE_REGISTER(OPER)                        \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_REGISTERARRAY:                              \
-   ASSIGN_GET_OCODE_BITWISE_ARRAY(OPER)                           \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_STATIC:                                     \
-   ocodeOp  = OCODE_SETOP_##OPER##_STATIC32;                      \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_LITERAL:                                    \
-case VariableData::MT_STACK:                                      \
-case VariableData::MT_VOID:                                       \
-case VariableData::MT_NONE:                                       \
-   throw SourceException("invalid MT", position, getClassName()); \
-}                                                                 \
-                                                                  \
+#define ASSIGN_GET_OCODE_BITWISE(OPER)        \
+switch (src->type)                            \
+{                                             \
+case VariableData::MT_AUTO:                   \
+   ocodeOp  = OCODE_SETOP_##OPER##_AUTO32;    \
+   break;                                     \
+                                              \
+case VariableData::MT_POINTER:                \
+   ocodeOp  = OCODE_SETOP_##OPER##_POINTER32; \
+   break;                                     \
+                                              \
+case VariableData::MT_REGISTER:               \
+   ASSIGN_GET_OCODE_BITWISE_REGISTER(OPER)    \
+   break;                                     \
+                                              \
+case VariableData::MT_REGISTERARRAY:          \
+   ASSIGN_GET_OCODE_BITWISE_ARRAY(OPER)       \
+   break;                                     \
+                                              \
+case VariableData::MT_STATIC:                 \
+   ocodeOp  = OCODE_SETOP_##OPER##_STATIC32;  \
+   break;                                     \
+                                              \
+case VariableData::MT_LITERAL:                \
+case VariableData::MT_STACK:                  \
+case VariableData::MT_VOID:                   \
+case VariableData::MT_NONE:                   \
+   ERROR_N(position, "invalid MT");           \
+}                                             \
+                                              \
 ASSIGN_GET_OCODE_GET
 
 //

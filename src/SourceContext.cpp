@@ -176,43 +176,43 @@ void SourceContext::addFunction(SourceVariable *func)
 // SourceContext::addLabelCase
 //
 std::string SourceContext::
-addLabelCase(bigsint value, SourcePosition const &position)
+addLabelCase(bigsint value, SourcePosition const &pos)
 {
    if (typeContext == CT_SWITCH)
    {
       if (cases.find(value) == cases.end() || !cases[value])
          cases[value] = true;
       else
-         throw SourceException("case redefined", position, __func__);
+         ERROR_NP("case redefined: %lli", static_cast<long long int>(value));
 
-      return getLabelCase(value, position);
+      return getLabelCase(value, pos);
    }
 
    if (inheritLocals && parent)
-      return parent->addLabelCase(value, position);
+      return parent->addLabelCase(value, pos);
 
-   throw SourceException("not CT_SWITCH", position, __func__);
+   ERROR_NP("not CT_SWITCH");
 }
 
 //
 // SourceContext::addLabelCaseDefault
 //
-std::string SourceContext::addLabelCaseDefault(SourcePosition const &position)
+std::string SourceContext::addLabelCaseDefault(SourcePosition const &pos)
 {
    if (typeContext == CT_SWITCH)
    {
       if (!caseDefault)
          caseDefault = true;
       else
-         throw SourceException("case default redefined", position, __func__);
+         ERROR_NP("case default redefined");
 
-      return getLabelCaseDefault(position);
+      return getLabelCaseDefault(pos);
    }
 
    if (inheritLocals && parent)
-      return parent->addLabelCaseDefault(position);
+      return parent->addLabelCaseDefault(pos);
 
-   throw SourceException("not CT_SWITCH", position, __func__);
+   ERROR_NP("not CT_SWITCH");
 }
 
 //
@@ -328,8 +328,7 @@ bool SourceContext::getAllowLabel() const
 //
 // SourceContext::getCases
 //
-std::vector<bigsint> SourceContext::
-getCases(SourcePosition const & position) const
+std::vector<bigsint> SourceContext::getCases(SourcePosition const &pos) const
 {
    if (typeContext == CT_SWITCH)
    {
@@ -340,7 +339,8 @@ getCases(SourcePosition const & position) const
            iter != cases.end(); ++iter)
       {
          if (!iter->second)
-            throw SourceException("case undefined", position, __func__);
+            ERROR_NP
+            ("case undefined: %lli", static_cast<long long int>(iter->first));
 
          casev[i++] = iter->first;
       }
@@ -350,9 +350,9 @@ getCases(SourcePosition const & position) const
    }
 
    if (inheritLocals && parent)
-      return parent->getCases(position);
+      return parent->getCases(pos);
 
-   throw SourceException("not CT_SWITCH", position, __func__);
+   ERROR_NP("not CT_SWITCH");
 }
 
 //
@@ -385,7 +385,7 @@ int SourceContext::getCount(SourceVariable::StorageClass sc) const
       return 0;
    }
 
-   throw SourceException("invalid sc", SourcePosition::none(), __func__);
+   ERROR_Np("invalid SC");
 }
 
 //
@@ -399,7 +399,7 @@ SourceVariable::Pointer SourceContext::getFunction
 
    if (parent) return parent->getFunction(name, pos);
 
-   throw SourceException("no suitable function", pos, __func__);
+   ERROR_NP("no suitable function");
 }
 
 //
@@ -430,11 +430,11 @@ SourceVariable::Pointer SourceContext::getFunction
       return func;
 
    if (funcCount > 1)
-      throw SourceException("ambiguous overload: " + name, pos, __func__);
+      ERROR_NP("ambiguous overload: %s", name.c_str());
 
    if (parent) return parent->getFunction(name, pos, types);
 
-   throw SourceException("no suitable overload", pos, __func__);
+   ERROR_NP("no suitable overload: %s", name.c_str());
 }
 
 //
@@ -451,22 +451,22 @@ std::string SourceContext::getLabel() const
 //
 // SourceContext::getLabelBreak
 //
-std::string SourceContext::getLabelBreak(SourcePosition const &position) const
+std::string SourceContext::getLabelBreak(SourcePosition const &pos) const
 {
    if (typeContext == CT_LOOP || typeContext == CT_SWITCH)
       return getLabel() + "_break";
 
    if (inheritLocals && parent)
-      return parent->getLabelBreak(position);
+      return parent->getLabelBreak(pos);
 
-   throw SourceException("not break CT", position, __func__);
+   ERROR_NP("not break CT");
 }
 
 //
 // SourceContext::getLabelCase
 //
 std::string SourceContext::
-getLabelCase(bigsint value, SourcePosition const &position)
+getLabelCase(bigsint value, SourcePosition const &pos)
 {
    if (typeContext == CT_SWITCH)
    {
@@ -479,49 +479,49 @@ getLabelCase(bigsint value, SourcePosition const &position)
    }
 
    if (inheritLocals && parent)
-      return parent->getLabelCase(value, position);
+      return parent->getLabelCase(value, pos);
 
-   throw SourceException("not CT_SWITCH", position, __func__);
+   ERROR_NP("not CT_SWITCH");
 }
 
 //
 // SourceContext::getLabelCaseDefault
 //
 std::string SourceContext::
-getLabelCaseDefault(SourcePosition const &position) const
+getLabelCaseDefault(SourcePosition const &pos) const
 {
    if (typeContext == CT_SWITCH)
       return getLabel() + "_casedefault";
 
    if (inheritLocals && parent)
-      return parent->getLabelCaseDefault(position);
+      return parent->getLabelCaseDefault(pos);
 
-   throw SourceException("not CT_SWITCH", position, __func__);
+   ERROR_NP("not CT_SWITCH");
 }
 
 //
 // SourceContext::getLabelContinue
 //
 std::string SourceContext::
-getLabelContinue(SourcePosition const &position) const
+getLabelContinue(SourcePosition const &pos) const
 {
    if (typeContext == CT_LOOP)
       return getLabel() + "_continue";
 
    if (inheritLocals && parent)
-      return parent->getLabelContinue(position);
+      return parent->getLabelContinue(pos);
 
-   throw SourceException("not CT_LOOP", position, __func__);
+   ERROR_NP("not CT_LOOP");
 }
 
 //
 // SourceContext::getLabelGoto
 //
 std::string SourceContext::
-getLabelGoto(std::string const &name, SourcePosition const &position) const
+getLabelGoto(std::string const &name, SourcePosition const &pos) const
 {
    if (parent && inheritLocals)
-      return parent->getLabelGoto(name, position);
+      return parent->getLabelGoto(name, pos);
 
    return getLabel() + "_goto" + name;
 }
@@ -550,7 +550,7 @@ int SourceContext::getLimit(SourceVariable::StorageClass sc) const
       return 0;
    }
 
-   throw SourceException("invalid sc", SourcePosition::none(), __func__);
+   ERROR_Np("invalid SC");
 }
 
 //
@@ -581,6 +581,8 @@ ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
 
    if (!var)
    {
+      if (i > 9) ERROR_Np("temp var out of range: %u", i);
+
       if (i >= tempVars.size())
          tempVars.resize(i+1);
 
@@ -630,9 +632,8 @@ getVariable(std::string const &name, SourcePosition const &position) const
 //
 // SourceContext::getVariable
 //
-SourceVariable::Pointer SourceContext::
-getVariable(std::string const &name, SourcePosition const &position,
-            bool canLocal) const
+SourceVariable::Pointer SourceContext::getVariable
+(std::string const &name, SourcePosition const &pos, bool canLocal) const
 {
    for (size_t i = varNames.size(); i--;)
    {
@@ -661,9 +662,9 @@ getVariable(std::string const &name, SourcePosition const &position,
    }
 
    if (parent)
-      return parent->getVariable(name, position, canLocal && inheritLocals);
+      return parent->getVariable(name, pos, canLocal && inheritLocals);
 
-   throw SourceException("no such variable '" + name + "'", position, __func__);
+   ERROR_NP("no such variable: %s", name.c_str());
 }
 
 //
@@ -721,7 +722,7 @@ std::string SourceContext::makeLabelShort()
 //
 std::string SourceContext::makeNameObject
 (NameType nameType, SourceVariable::StorageClass sc, VariableType *type,
- std::string const &nameSource, SourcePosition const &position) const
+ std::string const &nameSource, SourcePosition const &pos) const
 {
    #define PARM nameObject, type, nameType == NT_EXTERN, \
                 nameType != NT_LOCAL
@@ -731,7 +732,7 @@ std::string SourceContext::makeNameObject
       nameObject += getLabel();
    nameObject += nameSource;
 
-   bigsint typeSize = type->getSize(position);
+   bigsint typeSize = type->getSize(pos);
 
    switch (sc)
    {
@@ -743,7 +744,7 @@ std::string SourceContext::makeNameObject
       break;
 
    case SourceVariable::SC_CONSTANT:
-      throw SourceException("SC_CONSTANT", position, __func__);
+      ERROR_NP("SC_CONSTANT");
 
    case SourceVariable::SC_REGISTER_GLOBAL:
       ObjectData_Register::add_global(PARM);
@@ -785,7 +786,7 @@ std::string SourceContext::makeNameObject
 std::string SourceContext::makeNameObject
 (NameType nameType, SourceVariable::StorageClass sc, VariableType *type,
  std::string const &nameSource, bigsint address,
- SourcePosition const &position) const
+ SourcePosition const &pos) const
 {
    #define PARM nameObject, type, address, nameType == NT_EXTERN, \
                 nameType != NT_LOCAL
@@ -795,7 +796,7 @@ std::string SourceContext::makeNameObject
       nameObject += getLabel();
    nameObject += nameSource;
 
-   bigsint typeSize = type->getSize(position);
+   bigsint typeSize = type->getSize(pos);
 
    switch (sc)
    {
@@ -807,7 +808,7 @@ std::string SourceContext::makeNameObject
       break;
 
    case SourceVariable::SC_CONSTANT:
-      throw SourceException("makeNameObject on SC_CONSTANT", position, "SourceContext");
+      ERROR_NP("makeNameObject on SC_CONSTANT");
 
    case SourceVariable::SC_REGISTER_GLOBAL:
       ObjectData_Register::add_global(PARM);

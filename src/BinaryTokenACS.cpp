@@ -259,8 +259,7 @@ write_all(std::ostream *out, std::vector<BinaryTokenACS> const &instructions)
       break;
 
    default:
-      throw SourceException("unknown output type", SourcePosition::none(),
-                            __func__);
+      ERROR_p("unknown output type");
    }
 }
 

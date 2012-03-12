@@ -82,7 +82,7 @@ void BinaryTokenACS::write_ACS0_32
       break;
 
    default:
-      throw SourceException("invalid ET", SourcePosition::none(), __func__);
+      ERROR(expr.getPosition(), "invalid ET");
    }
 }
 

@@ -45,22 +45,17 @@
 //
 // BinaryTokenPPACS::make_tokens
 //
-void BinaryTokenPPACS::
-make_tokens(ObjectToken const &object,
-            std::vector<BinaryTokenPPACS> *instructions)
+void BinaryTokenPPACS::make_tokens
+(ObjectToken const &object, std::vector<BinaryTokenPPACS> *instructions)
 {
    static ObjectExpression::Pointer const fracbits =
       ObjectExpression::create_value_int(16, SourcePosition::builtin());
-
-   static ObjectExpression::Pointer const indexTemp =
-      ObjectExpression::create_value_int
-      (option_static_temp, SourcePosition::builtin());
 
    static std::vector<std::string> const nolabels;
 
    std::vector<ObjectExpression::Pointer> args;
 
-   SourcePosition const &position = object.getPosition();
+   SourcePosition const &pos = object.getPosition();
 
    std::vector<std::string> const *labels = &object.getLabels();
 
@@ -230,8 +225,7 @@ make_tokens(ObjectToken const &object,
 
    case OCODE_NONE:
    default:
-      throw SourceException("unknown OCODE: " + std::string(make_string(object.getCode())),
-                            position, __func__);
+      ERROR_P("unknown OCODE: %s", make_string(object.getCode()));
    }
 }
 

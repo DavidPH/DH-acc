@@ -160,7 +160,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
       case VariableData::MT_REGISTER:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
-         throw SourceException("invalid MT for @", token.pos, __func__);
+         ERROR(token.pos, "invalid MT for @");
 
       case VariableData::MT_REGISTERARRAY:
          addr = data->address;
@@ -241,7 +241,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 
    default:
       in->unget(token);
-      throw SourceException("unexpected token type:" + make_string(token.type), token.pos, __func__);
+      ERROR(token.pos, "unexpected token type: %s", make_string(token.type).c_str());
    }
 
    // Suffixes.

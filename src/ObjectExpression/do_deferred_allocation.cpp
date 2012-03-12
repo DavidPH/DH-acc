@@ -144,7 +144,7 @@ static Used get_used(UsedMap *usedMap, bigsint size)
    while (is_used(usedMap, used) && used.end >= 0) ++used;
 
    if (used.end < 0)
-      throw SourceException("no more used", SourcePosition::none(), __func__);
+      ERROR_p("no more used");
 
    set_used(usedMap, used);
 

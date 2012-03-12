@@ -336,8 +336,7 @@ int SourceExpression_Binary::getOcodeType
       break;
 
    default:
-      throw SourceException
-      ("invalid BT: " + make_string(bt), position, getClassName());
+      ERROR_N(position, "invalid BT: %s", make_string(bt).c_str());
    }
 
    return ocodeOpType;

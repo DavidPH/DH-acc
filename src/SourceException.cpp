@@ -1,53 +1,80 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* SourceException.cpp
-**
-** SourceException methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Source-level error exception.
+//
+//-----------------------------------------------------------------------------
 
 #include "SourceException.hpp"
 
+#include "SourcePosition.hpp"
+
+#include <cstdarg>
+#include <cstdio>
 
 
-SourceException::SourceException() : _what(), _where(), _who()
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
+
+void SourceException::error
+(char const *file, int line, char const *func, char const *name,
+ SourcePosition const &pos, char const *fmt, ...)
 {
+   char *whatstr;
+   size_t whatlen, whatprt;
+   va_list whatarg;
 
-}
-SourceException::SourceException(std::string const & what_, SourcePosition const & where_, std::string const & who_) : _what(what_), _where(where_), _who(who_)
-{
+   if (name)
+      whatlen = snprintf
+      (NULL, 0, "%s:%li:%li (%s:%i %s::%s): ", pos.filename.c_str(), pos.line,
+       pos.column, file, line, name, func);
+   else
+      whatlen = snprintf
+      (NULL, 0, "%s:%li:%li (%s:%i %s): ", pos.filename.c_str(), pos.line,
+       pos.column, file, line, func);
 
-}
-SourceException::~SourceException() throw()
-{
+   va_start(whatarg, fmt);
 
+   whatlen += vsnprintf(NULL, 0, fmt, whatarg);
+
+   va_end(whatarg);
+
+   whatstr = new char[++whatlen];
+
+   if (name)
+      whatprt = snprintf
+      (whatstr, whatlen, "%s:%li:%li (%s:%i %s::%s): ", pos.filename.c_str(), pos.line,
+       pos.column, file, line, name, func);
+   else
+      whatprt = snprintf
+      (whatstr, whatlen, "%s:%li:%li (%s:%i %s): ", pos.filename.c_str(), pos.line,
+       pos.column, file, line, func);
+
+   va_start(whatarg, fmt);
+
+   whatprt += vsnprintf(whatstr+whatprt, whatlen-whatprt, fmt, whatarg);
+
+   va_end(whatarg);
+
+   throw SourceException(whatstr);
 }
 
-char const * SourceException::what() const throw()
-{
-	return _what.c_str();
-}
-SourcePosition const & SourceException::where() const
-{
-	return _where;
-}
-std::string const & SourceException::who() const
-{
-	return _who;
-}
-
-
+// EOF
 

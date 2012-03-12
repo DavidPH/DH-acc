@@ -36,7 +36,7 @@
 //
 
 static ObjectExpression::Pointer make_object
-(VariableType *type, SourcePosition const &position)
+(VariableType *type, SourcePosition const &pos)
 {
    ObjectExpression::Vector    elems;
    VariableType::VecStr const &names = type->getNames();
@@ -48,16 +48,16 @@ static ObjectExpression::Pointer make_object
    {
    case VariableType::BT_ARRAY:
       for (bigsint i = type->getWidth(); i--;)
-         elems.push_back(make_object(type->getReturn(), position));
-      return ObjectExpression::create_value_array(elems, position);
+         elems.push_back(make_object(type->getReturn(), pos));
+      return ObjectExpression::create_value_array(elems, pos);
 
    case VariableType::BT_ASMFUNC:
-      throw SourceException("make_object BT_ASMFUNC", position, __func__);
+      ERROR_P("make_object BT_ASMFUNC");
 
    case VariableType::BT_BLOCK:
       for (iter = types.begin(); iter != types.end(); ++iter)
-         elems.push_back(make_object(*iter, position));
-      return ObjectExpression::create_value_array(elems, position);
+         elems.push_back(make_object(*iter, pos));
+      return ObjectExpression::create_value_array(elems, pos);
 
    case VariableType::BT_BOOLHARD:
    case VariableType::BT_BOOLSOFT:
@@ -80,27 +80,28 @@ static ObjectExpression::Pointer make_object
    case VariableType::BT_ULLONG:
    case VariableType::BT_ULONG:
    case VariableType::BT_USHORT:
-      return ObjectExpression::create_value_int(0, position);
+      return ObjectExpression::create_value_int(0, pos);
 
    case VariableType::BT_FIXED:
    case VariableType::BT_FLOAT:
    case VariableType::BT_LFLOAT:
    case VariableType::BT_LLFLOAT:
    case VariableType::BT_REAL:
-      return ObjectExpression::create_value_float(0, position);
+      return ObjectExpression::create_value_float(0, pos);
 
    case VariableType::BT_STRUCT:
       for (iter = types.begin(); iter != types.end(); ++iter)
-         elems.push_back(make_object(*iter, position));
-      return ObjectExpression::create_value_struct(elems, names, position);
+         elems.push_back(make_object(*iter, pos));
+      return ObjectExpression::create_value_struct(elems, names, pos);
 
    case VariableType::BT_UNION:
-      throw SourceException("make_object BT_UNION", position, __func__);
+      ERROR_P("make_object BT_UNION");
 
    case VariableType::BT_VOID:
-      throw SourceException("make_object BT_VOID", position, __func__);
+      ERROR_P("make_object BT_VOID");
    }
-   throw SourceException("stub", position, __func__);
+
+   ERROR_P("unknown BT");
 }
 
 
@@ -113,11 +114,8 @@ static ObjectExpression::Pointer make_object
 //
 ObjectExpression::Pointer SourceExpression::make_object_cast
 (ObjectExpression *src, VariableType *dstType, VariableType *srcType,
- SourcePosition const &position)
+ SourcePosition const &pos)
 {
-   #define TYPES_STRING ("bad BT " + make_string(srcType->getBasicType()) + \
-                         "->"      + make_string(dstType->getBasicType()))
-
    // Same type, so no cast.
    if (dstType->getUnqualified() == srcType->getUnqualified())
       return src;
@@ -134,7 +132,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
    case VariableType::BT_STRUCT:
    case VariableType::BT_UNION:
    case VariableType::BT_VOID:
-      throw SourceException(TYPES_STRING, position, __func__);
+      ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
+              make_string(dstType).c_str());
 
    case VariableType::BT_BLOCK:
    {
@@ -151,9 +150,9 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
          {
             if (static_cast<size_t>(i) < elems.size())
                elems[i] = make_object_cast
-               (elems[i], dstTypes, srcTypes[i], position);
+               (elems[i], dstTypes, srcTypes[i], pos);
             else
-               elems.push_back(make_object(dstTypes, position));
+               elems.push_back(make_object(dstTypes, pos));
          }
       }
       else if (dstBT == VariableType::BT_STRUCT ||
@@ -165,19 +164,20 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
          {
             if (i < elems.size())
                elems[i] = make_object_cast
-               (elems[i], dstTypes[i], srcTypes[i], position);
+               (elems[i], dstTypes[i], srcTypes[i], pos);
             else
-               elems.push_back(make_object(dstTypes[i], position));
+               elems.push_back(make_object(dstTypes[i], pos));
          }
       }
       else
-         throw SourceException(TYPES_STRING, position, __func__);
+         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
+                 make_string(dstType).c_str());
 
       if (dstBT == VariableType::BT_STRUCT)
          obj = ObjectExpression::create_value_struct
-         (elems, dstType->getNames(), position);
+         (elems, dstType->getNames(), pos);
       else
-         obj = ObjectExpression::create_value_array(elems, position);
+         obj = ObjectExpression::create_value_array(elems, pos);
    }
       break;
 
@@ -209,11 +209,12 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
-         throw SourceException(TYPES_STRING, position, __func__);
+         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
+                 make_string(dstType).c_str());
 
       case VariableType::BT_BOOLHARD:
-         obj = ObjectExpression::create_branch_not(obj, position);
-         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_branch_not(obj, pos);
          break;
 
       case VariableType::BT_BOOLSOFT:
@@ -243,7 +244,7 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_LFLOAT:
       case VariableType::BT_LLFLOAT:
       case VariableType::BT_REAL:
-         obj = ObjectExpression::create_cast_int_to_float(obj, position);
+         obj = ObjectExpression::create_cast_int_to_float(obj, pos);
          break;
       }
       break;
@@ -257,7 +258,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
-         throw SourceException(TYPES_STRING, position, __func__);
+         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
+                 make_string(dstType).c_str());
 
       case VariableType::BT_BOOLHARD:
       case VariableType::BT_CHAR:
@@ -279,8 +281,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_ULLONG:
       case VariableType::BT_ULONG:
       case VariableType::BT_USHORT:
-         obj = ObjectExpression::create_branch_not(obj, position);
-         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_branch_not(obj, pos);
          break;
 
       case VariableType::BT_BOOLSOFT:
@@ -291,9 +293,9 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_LFLOAT:
       case VariableType::BT_LLFLOAT:
       case VariableType::BT_REAL:
-         obj = ObjectExpression::create_branch_not(obj, position);
-         obj = ObjectExpression::create_branch_not(obj, position);
-         obj = ObjectExpression::create_cast_int_to_float(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_cast_int_to_float(obj, pos);
          break;
       }
       break;
@@ -311,12 +313,13 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
-         throw SourceException(TYPES_STRING, position, __func__);
+         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
+                 make_string(dstType).c_str());
 
       case VariableType::BT_BOOLHARD:
       case VariableType::BT_BOOLSOFT:
-         obj = ObjectExpression::create_branch_not(obj, position);
-         obj = ObjectExpression::create_branch_not(obj, position);
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_branch_not(obj, pos);
          break;
 
       case VariableType::BT_FIXED:
@@ -345,7 +348,7 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_ULLONG:
       case VariableType::BT_ULONG:
       case VariableType::BT_USHORT:
-         obj = ObjectExpression::create_cast_float_to_int(obj, position);
+         obj = ObjectExpression::create_cast_float_to_int(obj, pos);
          break;
       }
       break;
@@ -360,17 +363,12 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
 void SourceExpression::make_objects_memcpy_cast
 (ObjectVector *objects, VariableData *dst, VariableData *src,
  VariableType *dstType, VariableType *srcType, SourceContext *context,
- SourcePosition const &position)
+ SourcePosition const &pos)
 {
-   // Don't want to slog through all that if not throwing, but also want to
-   // avoid code duplication.
-   #define TYPES_STRING ("bad BT " + make_string(srcType->getBasicType()) + \
-                         "->"      + make_string(dstType->getBasicType()))
-
    // If no cast, this just becomes a memcpy.
    if (dstType->getUnqualified() == srcType->getUnqualified())
    {
-      make_objects_memcpy_post(objects, dst, src, srcType, context, position);
+      make_objects_memcpy_post(objects, dst, src, srcType, context, pos);
 
       return;
    }
@@ -381,11 +379,11 @@ void SourceExpression::make_objects_memcpy_cast
    // If casting to void, just memcpy to void.
    if (dstBT == VariableType::BT_VOID)
    {
-      make_objects_memcpy_void(objects, src, position);
+      make_objects_memcpy_void(objects, src, pos);
 
       // If there's an offset temp, it needs to be dealt with.
       if (dst->offsetTemp)
-         make_objects_memcpy_void(objects, dst->offsetTemp, position);
+         make_objects_memcpy_void(objects, dst->offsetTemp, pos);
 
       return;
    }
@@ -393,8 +391,8 @@ void SourceExpression::make_objects_memcpy_cast
    // All casting is stack-ops.
    VariableData::Pointer tmp = VariableData::create_stack(src->size);
 
-   make_objects_memcpy_prep(objects, tmp, src, position);
-   make_objects_memcpy_post(objects, tmp, src, srcType, context, position);
+   make_objects_memcpy_prep(objects, tmp, src, pos);
+   make_objects_memcpy_post(objects, tmp, src, srcType, context, pos);
 
    switch (srcBT)
    {
@@ -407,7 +405,8 @@ void SourceExpression::make_objects_memcpy_cast
    case VariableType::BT_STRUCT:
    case VariableType::BT_UNION:
    case VariableType::BT_VOID:
-      throw SourceException(TYPES_STRING, position, __func__);
+      ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
+              make_string(dstType).c_str());
 
    case VariableType::BT_BOOLHARD:
    case VariableType::BT_CHAR:
@@ -438,7 +437,8 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
-         throw SourceException(TYPES_STRING, position, __func__);
+         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
+                 make_string(dstType).c_str());
 
       case VariableType::BT_BOOLHARD:
          objects->addToken(OCODE_LOGICAL_NOT32I);
@@ -511,7 +511,8 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
-         throw SourceException(TYPES_STRING, position, __func__);
+         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
+                 make_string(dstType).c_str());
 
       case VariableType::BT_BOOLHARD:
       case VariableType::BT_CHAR:
@@ -567,7 +568,8 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
-         throw SourceException(TYPES_STRING, position, __func__);
+         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
+                 make_string(dstType).c_str());
 
       case VariableType::BT_BOOLHARD:
          objects->addToken(OCODE_LOGICAL_NOT32F);
@@ -598,6 +600,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_USHORT:
          objects->addToken(OCODE_CONVERT_32F_32I);
          break;
+
       case VariableType::BT_LLONG:
       {
          // Must sign-extend. Which means... BRANCHING! AAAAAAAA!
@@ -634,7 +637,8 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
       case VariableType::BT_VOID:
-         throw SourceException(TYPES_STRING, position, __func__);
+         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
+                 make_string(dstType).c_str());
 
       case VariableType::BT_BOOLHARD:
          objects->addToken(OCODE_LOGICAL_IOR32I);
@@ -679,7 +683,7 @@ void SourceExpression::make_objects_memcpy_cast
       break;
    }
 
-   make_objects_memcpy_post(objects, dst, tmp, dstType, context, position);
+   make_objects_memcpy_post(objects, dst, tmp, dstType, context, pos);
 
    #undef TYPES_STRING
 }

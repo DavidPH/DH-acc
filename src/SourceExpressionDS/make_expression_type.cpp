@@ -66,7 +66,7 @@ static void do_qualifier
    SourceTokenC tokenQual = in->get(SourceTokenC::TT_IDENTIFIER);
 
    if ((*type)->getQualifier(qual))
-      throw SourceException("redundant qualifier", tokenQual.pos, __func__);
+      ERROR(tokenQual.pos, "redundant qualifier");
 
    *type = (*type)->setQualifier(qual);
 }
@@ -81,7 +81,7 @@ static void do_storage
    SourceTokenC tokenStore = in->get(SourceTokenC::TT_IDENTIFIER);
 
    if ((*type)->getStoreType() != VariableType::ST_ADDR)
-      throw SourceException("redundant storage", tokenStore.pos, __func__);
+      ERROR(tokenStore.pos, "redundant storage");
 
    *type = (*type)->setStorage(store);
 }
@@ -97,7 +97,7 @@ static void do_storage
    SourceTokenC tokenStore = in->get(SourceTokenC::TT_IDENTIFIER);
 
    if ((*type)->getStoreType() != VariableType::ST_ADDR)
-      throw SourceException("redundant storage", tokenStore.pos, __func__);
+      ERROR(tokenStore.pos, "redundant storage");
 
    in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
 
@@ -205,10 +205,10 @@ static VariableType::Pointer make_basic
    {
    case TYPE_BASE_CHAR:
       if (typeLong)
-         throw SourceException("long char", token.pos, __func__);
+         ERROR(token.pos, "long char");
 
       if (typeShort)
-         throw SourceException("short char", token.pos, __func__);
+         ERROR(token.pos, "short char");
 
       if (typeSign < 0)
          return VariableType::get_bt_schar();
@@ -220,13 +220,13 @@ static VariableType::Pointer make_basic
 
    case TYPE_BASE_INT:
       if (typeShort && typeLong)
-         throw SourceException("short long int", token.pos, __func__);
+         ERROR(token.pos, "short long int");
 
       if (typeShort > 1)
-         throw SourceException("short short int", token.pos, __func__);
+         ERROR(token.pos, "short short int");
 
       if (typeLong > 2)
-         throw SourceException("long long long int", token.pos, __func__);
+         ERROR(token.pos, "long long long int");
 
       if (typeSign > 0)
       {
@@ -259,13 +259,13 @@ static VariableType::Pointer make_basic
       ++typeLong;
    case TYPE_BASE_FLOAT:
       if (typeShort)
-         throw SourceException("short float", token.pos, __func__);
+         ERROR(token.pos, "short float");
 
       if (typeSign > 0)
-         throw SourceException("unsigned float", token.pos, __func__);
+         ERROR(token.pos, "unsigned float");
 
       if (typeSign < 0)
-         throw SourceException("signed float", token.pos, __func__);
+         ERROR(token.pos, "signed float");
 
       if (typeLong == 0)
          return VariableType::get_bt_float();
@@ -276,35 +276,35 @@ static VariableType::Pointer make_basic
       if (typeLong == 2)
          return VariableType::get_bt_llfloat();
 
-      throw SourceException("long long long float", token.pos, __func__);
+      ERROR(token.pos, "long long long float");
 
    case TYPE_BASE_FIXED:
       if (typeShort)
-         throw SourceException("short fixed", token.pos, __func__);
+         ERROR(token.pos, "short fixed");
 
       if (typeLong)
-         throw SourceException("long fixed", token.pos, __func__);
+         ERROR(token.pos, "long fixed");
 
       if (typeSign > 0)
-         throw SourceException("unsigned fixed", token.pos, __func__);
+         ERROR(token.pos, "unsigned fixed");
 
       if (typeSign < 0)
-         throw SourceException("signed fixed", token.pos, __func__);
+         ERROR(token.pos, "signed fixed");
 
       return VariableType::get_bt_fixed();
 
    case TYPE_BASE_REAL:
       if (typeShort)
-         throw SourceException("short real", token.pos, __func__);
+         ERROR(token.pos, "short real");
 
       if (typeLong)
-         throw SourceException("long real", token.pos, __func__);
+         ERROR(token.pos, "long real");
 
       if (typeSign > 0)
-         throw SourceException("unsigned real", token.pos, __func__);
+         ERROR(token.pos, "unsigned real");
 
       if (typeSign < 0)
-         throw SourceException("signed real", token.pos, __func__);
+         ERROR(token.pos, "signed real");
 
       return VariableType::get_bt_real();
    }

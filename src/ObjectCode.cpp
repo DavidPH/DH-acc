@@ -72,12 +72,12 @@ ObjectCodeSet::ObjectCodeSet() : ocode(OCODE_NONE), ocode_imm(OCODE_NONE)
 // ocode_get_code
 //
 ObjectCode ocode_get_code
-(std::string const &data, SourcePosition const &position)
+(std::string const &data, SourcePosition const &pos)
 {
    std::map<std::string, ObjectCode>::iterator codeIt(_ocode_map.find(data));
 
    if (codeIt == _ocode_map.end())
-      throw SourceException("no such OCODE '" + data + "'", position, __func__);
+      ERROR_P("no such OCODE: %s", data.c_str());
 
    return codeIt->second;
 }

@@ -137,7 +137,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       break;
 
    default:
-      throw SourceException("invalid CT", position, getClassName());
+      ERROR_N(position, "invalid CT");
    }
 }
 

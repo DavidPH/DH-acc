@@ -42,7 +42,7 @@
 void SourceExpression::make_objects_call_linespec
 (ObjectVector *objects, VariableData *dst, VariableType *type,
  ObjectExpression *data, Vector const &args, SourceContext *context,
- SourcePosition const &position)
+ SourcePosition const &pos)
 {
    FUNCTION_PREAMBLE
    FUNCTION_ARGS
@@ -60,7 +60,7 @@ void SourceExpression::make_objects_call_linespec
       case 3: ocode = OCODE_ACS_SPECIAL_EXEC3; break;
       case 4: ocode = OCODE_ACS_SPECIAL_EXEC4; break;
       case 5: ocode = OCODE_ACS_SPECIAL_EXEC5; break;
-      default: throw SourceException("bad call-size", position, __func__);
+      default: ERROR_P("bad call-size");
       }
    }
    else if (retnSize == 1)
@@ -73,15 +73,15 @@ void SourceExpression::make_objects_call_linespec
       case 3: objects->addTokenPushZero();
       case 4: objects->addTokenPushZero();
       case 5: ocode = OCODE_ACSE_SPECIAL_EXEC5_RETN1; break;
-      default: throw SourceException("bad call-size", position, __func__);
+      default: ERROR_P("bad call-size");
       }
    }
    else
-      throw SourceException("bad return-size", position, __func__);
+      ERROR_P("bad return-size");
 
    objects->addToken(ocode, ospec);
 
-   make_objects_memcpy_post(objects, dst, src, retnType, context, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }
 
 // EOF

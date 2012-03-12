@@ -64,7 +64,7 @@ bool option_string_tag = true;
 //
 static void make_objects_literal
 (ObjectVector *objects, ObjectExpression *elem, VariableType *type,
- SourcePosition const &position)
+ SourcePosition const &pos)
 {
    switch (type->getBasicType())
    {
@@ -75,10 +75,10 @@ static void make_objects_literal
       VariableType::Reference types = type->getReturn();
 
       if (elems.size() != static_cast<size_t>(type->getWidth()))
-         throw SourceException("incorrect elem count", position, __func__);
+         ERROR_P("incorrect elem count");
 
       for (size_t i = 0; i < elems.size(); ++i)
-         make_objects_literal(objects, elems[i], types, position);
+         make_objects_literal(objects, elems[i], types, pos);
    }
       break;
 
@@ -88,7 +88,7 @@ static void make_objects_literal
    case VariableType::BT_LLFLOAT:
    case VariableType::BT_UNION:
    case VariableType::BT_VOID:
-      throw SourceException("bad BT", position, __func__);
+      ERROR_P("bad BT");
 
    case VariableType::BT_BLOCK:
    case VariableType::BT_STRUCT:
@@ -98,10 +98,10 @@ static void make_objects_literal
       VariableType::Vector const &types = type->getTypes();
 
       if (elems.size() != types.size())
-         throw SourceException("incorrect elem count", position, __func__);
+         ERROR_P("incorrect elem count");
 
       for (size_t i = 0; i < elems.size(); ++i)
-         make_objects_literal(objects, elems[i], types[i], position);
+         make_objects_literal(objects, elems[i], types[i], pos);
    }
       break;
 
@@ -164,7 +164,7 @@ static void make_objects_literal
 
    case VariableType::BT_ULLONG:
       objects->addToken(OCODE_GET_LITERAL32I, elem);
-      objects->addToken(OCODE_GET_LITERAL32I, ObjectExpression::create_binary_div(elem, objects->getValue(0x10000000), position));
+      objects->addToken(OCODE_GET_LITERAL32I, ObjectExpression::create_binary_div(elem, objects->getValue(0x10000000), pos));
       break;
    }
 }
@@ -176,7 +176,7 @@ static void make_objects_literal
 //
 static void make_objects_memcpy_post_part
 (ObjectVector *objects, VariableData *data, VariableType *type,
- SourceContext *context, bool get, bool set, SourcePosition const position)
+ SourceContext *context, bool get, bool set, SourcePosition const pos)
 {
    static bigsint const ptrSize = 1;
 
@@ -206,26 +206,16 @@ static void make_objects_memcpy_post_part
    // MT_LITERAL
    //
    case VariableData::MT_LITERAL:
-      if (set)
-         throw SourceException("MT_LITERAL as dst", position, __func__);
-
-      if (get)
-      {
-         make_objects_literal(objects, data->address, type, position);
-      }
-
+      if (set) ERROR_P("MT_LITERAL as dst");
+      if (get) make_objects_literal(objects, data->address, type, pos);
       break;
 
    //
    // MT_NONE
    //
    case VariableData::MT_NONE:
-      if (set)
-         throw SourceException("MT_NONE as dst", position, __func__);
-
-      if (get)
-         throw SourceException("MT_NONE as src", position, __func__);
-
+      if (set) ERROR_P("MT_NONE as dst");
+      if (get) ERROR_P("MT_NONE as src");
       break;
 
    //
@@ -250,7 +240,7 @@ static void make_objects_memcpy_post_part
             data->offsetTemp = ptrStack;
 
          if (data->offsetTemp->type != VariableData::MT_STACK)
-            throw SourceException("offsetTemp not MT_STACK", position, __func__);
+            ERROR_P("offsetTemp not MT_STACK");
 
          data->offsetExpr->makeObjects(objects, data->offsetTemp);
       }
@@ -352,7 +342,7 @@ static void make_objects_memcpy_post_part
          data->offsetTemp = ptrStack;
 
       if (data->offsetTemp->type != VariableData::MT_STACK)
-         throw SourceException("offsetTemp not MT_STACK", position, __func__);
+         ERROR_P("offsetTemp not MT_STACK");
 
       // If only get or set and size is 1, only need one copy of the address.
       // Furthermore, that one copy has already been setup by prep.
@@ -471,8 +461,7 @@ static void make_objects_memcpy_post_part
       // Already on stack, no need to do anything.
 
       // But if asked to dup, that can only be done for single-byte values.
-      if (get && set)
-         throw SourceException("cannot dup from MT_STACK", position, __func__);
+      if (get && set) ERROR_P("MT_STACK as dup");
 
       break;
 
@@ -496,8 +485,7 @@ static void make_objects_memcpy_post_part
       if (set) for (i = data->size; i--;)
          objects->addToken(OCODE_STACK_DROP32);
 
-      if (get)
-         throw SourceException("MT_NONE as src", position, __func__);
+      if (get) ERROR_P("MT_VOID as src");
 
       break;
    }
@@ -523,7 +511,7 @@ void SourceExpression::make_objects_memcpy_prep
 //
 void SourceExpression::make_objects_memcpy_prep
 (ObjectVector *objects, VariableData *dup, VariableData *dst,
- VariableData *src, SourcePosition const &position)
+ VariableData *src, SourcePosition const &pos)
 {
    static bigsint const ptrSize = 1;
 
@@ -531,7 +519,7 @@ void SourceExpression::make_objects_memcpy_prep
    if (dst->type == VariableData::MT_VOID)
       return;
 
-   objects->setPosition(position);
+   objects->setPosition(pos);
 
    // Set up destination by pushing the address onto the stack now. This way it
    // is there before the data. Of course, this only works with single-byte
@@ -547,10 +535,10 @@ void SourceExpression::make_objects_memcpy_prep
       break;
 
    case VariableData::MT_LITERAL:
-      throw SourceException("MT_LITERAL as dst", position, "SourceExpression");
+      ERROR_P("MT_LITERAL as dst");
 
    case VariableData::MT_NONE:
-      throw SourceException("MT_NONE as dst", position, "SourceExpression");
+      ERROR_P("MT_NONE as dst");
 
    case VariableData::MT_REGISTERARRAY:
       if (!dst->offsetTemp)
@@ -562,8 +550,7 @@ void SourceExpression::make_objects_memcpy_prep
          objects->addTokenPushZero();
 
       if (dst->offsetTemp->type != VariableData::MT_STACK)
-         throw SourceException("offsetTemp not MT_STACK", position,
-                               "SourceExpression::make_objects_memcpy_prep");
+         ERROR_P("offsetTemp not MT_STACK");
 
       break;
    }
@@ -581,10 +568,10 @@ void SourceExpression::make_objects_memcpy_prep
       break;
 
    case VariableData::MT_NONE:
-      throw SourceException("MT_NONE as src", position, "SourceExpression");
+      ERROR_P("MT_NONE as src");
 
    case VariableData::MT_VOID:
-      throw SourceException("MT_VOID as src", position, "SourceExpression");
+      ERROR_P("MT_VOID as src");
    }
 }
 

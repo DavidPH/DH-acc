@@ -29,44 +29,45 @@
 // Macros                                                                     |
 //
 
-#define FUNCTION_DATA                                                     \
-   VariableType::Vector const &callTypes = type->getTypes();              \
-   bigsint callSize = 0;                                                  \
-                                                                          \
-   VariableType::Reference retnType = type->getReturn();                  \
-   bigsint retnSize = retnType->getSize(position);                        \
-                                                                          \
+#define FUNCTION_DATA                                        \
+   VariableType::Vector const &callTypes = type->getTypes(); \
+   bigsint callSize = 0;                                     \
+                                                             \
+   VariableType::Reference retnType = type->getReturn();     \
+   bigsint retnSize = retnType->getSize(pos);                \
+                                                             \
    VariableData::Pointer src = VariableData::create_stack(retnSize);
 
-#define FUNCTION_PREAMBLE                                                 \
-   FUNCTION_DATA                                                          \
-                                                                          \
-   make_objects_memcpy_prep(objects, dst, src, position);
+#define FUNCTION_PREAMBLE \
+   FUNCTION_DATA          \
+                          \
+   make_objects_memcpy_prep(objects, dst, src, pos);
 
-#define FUNCTION_ARGS                                                     \
-   /* Evaluate the arguments. */                                          \
-   for (size_t i = 0; i < callTypes.size(); ++i)                          \
-   {                                                                      \
-      if (!callTypes[i])                                                  \
-         throw SourceException("variadic", position, __func__);           \
-                                                                          \
-      callSize += callTypes[i]->getSize(position);                        \
-                                                                          \
-      if (i >= args.size())                                               \
-         throw SourceException("bad count", position, __func__);          \
-                                                                          \
-      SourceExpression::Pointer arg = args[i];                            \
-      VariableType::Reference argType = arg->getType();                   \
-      bigsint argSize = argType->getSize(position);                       \
-      VariableData::Pointer argDst = VariableData::create_stack(argSize); \
-                                                                          \
-      if (argType != callTypes[i])                                        \
-         throw SourceException("bad type", args[i]->position, __func__);  \
-                                                                          \
-      arg->makeObjects(objects, argDst);                                  \
-   }                                                                      \
-                                                                          \
-   objects->setPosition(position);
+#define FUNCTION_ARGS                                   \
+   /* Evaluate the arguments. */                        \
+   for (size_t i = 0; i < callTypes.size(); ++i)        \
+   {                                                    \
+      if (!callTypes[i])                                \
+         ERROR_P("variadic");                           \
+                                                        \
+      callSize += callTypes[i]->getSize(pos);           \
+                                                        \
+      if (i >= args.size())                             \
+         ERROR_P("bad count");                          \
+                                                        \
+      SourceExpression::Pointer arg = args[i];          \
+      VariableType::Reference argType = arg->getType(); \
+      bigsint argSize = argType->getSize(pos);          \
+      VariableData::Pointer argDst =                    \
+         VariableData::create_stack(argSize);           \
+                                                        \
+      if (argType != callTypes[i])                      \
+         ERROR(args[i]->position, "bad type");          \
+                                                        \
+      arg->makeObjects(objects, argDst);                \
+   }                                                    \
+                                                        \
+   objects->setPosition(pos);
 
 #endif//HPP_make_objects_call__SourceExpression_
 

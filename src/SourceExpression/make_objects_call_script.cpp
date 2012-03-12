@@ -70,11 +70,11 @@ int option_script_regargs = 3;
 void SourceExpression::make_objects_call_script
 (ObjectVector *objects, VariableData *dst, VariableType *type,
  SourceExpression *data, Vector const &args, SourceContext *context,
- SourcePosition const &position)
+ SourcePosition const &pos)
 {
    FUNCTION_PREAMBLE
 
-   data->makeObjects(objects, VariableData::create_stack(type->getSize(position)));
+   data->makeObjects(objects, VariableData::create_stack(type->getSize(pos)));
 
    FUNCTION_ARGS
 
@@ -169,7 +169,7 @@ void SourceExpression::make_objects_call_script
    // Reset the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
 
-   make_objects_memcpy_post(objects, dst, src, retnType, context, position);
+   make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }
 
 // EOF

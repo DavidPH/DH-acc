@@ -167,7 +167,7 @@ void ObjectData_Script::generate_symbols()
 // ObjectData_Script::get_flag
 //
 ObjectData_Script::ScriptFlag ObjectData_Script::get_flag
-(std::string const &data, SourcePosition const &position)
+(std::string const &data, SourcePosition const &pos)
 {
    if (data == "__net")
       return ObjectData_Script::SF_NET;
@@ -175,14 +175,14 @@ ObjectData_Script::ScriptFlag ObjectData_Script::get_flag
    if (data == "__clientside")
       return ObjectData_Script::SF_CLIENTSIDE;
 
-   throw SourceException("invalid script-flag", position, __func__);
+   ERROR_P("invalid script-flag: %s", data.c_str());
 }
 
 //
 // ObjectData_Script::get_type
 //
 ObjectData_Script::ScriptType ObjectData_Script::get_type
-(std::string const &data, SourcePosition const &position)
+(std::string const &data, SourcePosition const &pos)
 {
    if (data == "__closed")
       return ObjectData_Script::ST_CLOSED;
@@ -211,7 +211,7 @@ ObjectData_Script::ScriptType ObjectData_Script::get_type
    if (data == "__return")
       return ObjectData_Script::ST_RETURN;
 
-   throw SourceException("invalid script-type", position, __func__);
+   ERROR_P("invalid script-type: %s", data.c_str());
 }
 
 //

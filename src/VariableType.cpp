@@ -582,15 +582,15 @@ void VariableType::getNameMangled(std::string &out) const
 //
 // VariableType::getSize
 //
-bigsint VariableType::getSize(SourcePosition const &position) const
+bigsint VariableType::getSize(SourcePosition const &pos) const
 {
    if (!complete)
-      throw SourceException("incomplete type", position, __func__);
+      ERROR_NP("incomplete type");
 
    switch (basic)
    {
    case BT_ARRAY:
-      return typeRet->getSize(position) * width;
+      return typeRet->getSize(pos) * width;
 
    case BT_ASMFUNC:
    case BT_VOID:
@@ -602,7 +602,7 @@ bigsint VariableType::getSize(SourcePosition const &position) const
       bigsint size = 0;
       for (Vector::const_iterator iter = types.begin(); iter != types.end();
            ++iter)
-         size += (*iter)->getSize(position);
+         size += (*iter)->getSize(pos);
       return size;
    }
 
@@ -642,14 +642,14 @@ bigsint VariableType::getSize(SourcePosition const &position) const
       for (Vector::const_iterator iter = types.begin(); iter != types.end();
            ++iter)
 	 {
-         bigsint sizeNext = (*iter)->getSize(position);
+         bigsint sizeNext = (*iter)->getSize(pos);
          if (sizeNext > size) size = sizeNext;
 	 }
       return size;
    }
    }
 
-   throw SourceException("invalid type", position, __func__);
+   ERROR_NP("invalid type");
 }
 
 //===================================================================
@@ -686,10 +686,10 @@ void VariableType::makeComplete(VecStr const &_names, Vector const &_types)
 // VariableType::getOffset
 //
 bigsint VariableType::getOffset
-(std::string const &memName, SourcePosition const &position)
+(std::string const &memName, SourcePosition const &pos)
 {
    if (!complete)
-      throw SourceException("incomplete type", position, __func__);
+      ERROR_NP("incomplete type");
 
    if (basic == BT_UNION) return 0;
 
@@ -697,25 +697,25 @@ bigsint VariableType::getOffset
    for (size_t i = 0; i < names.size(); ++i)
    {
       if (names[i] == memName) return offset;
-      offset += types[i]->getSize(position);
+      offset += types[i]->getSize(pos);
    }
 
-   throw SourceException("no such member:" + memName, position, __func__);
+   ERROR_NP("no such member: %s", memName.c_str());
 }
 
 //
 // VariableType::getType
 //
 VariableType::Reference VariableType::getType
-(std::string const &memName, SourcePosition const &position)
+(std::string const &memName, SourcePosition const &pos)
 {
    if (!complete)
-      throw SourceException("incomplete type", position, __func__);
+      ERROR_NP("incomplete type");
 
    for (size_t i = 0; i < names.size(); ++i)
       if (names[i] == memName) return Reference(types[i]);
 
-   throw SourceException("no such member:" + memName, position, __func__);
+   ERROR_NP("no such member: %s", memName.c_str());
 }
 
 //===================================================================

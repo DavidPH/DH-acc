@@ -53,7 +53,7 @@ SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name()
 	}
 	else if (c <= 0x20 || c >= 0x7F)
 	{
-		throw SourceException("invalid statement type", _position, "SourceTokenASMPLX");
+      ERROR(_position, "invalid statement type");
 	}
 	else
 	{
@@ -63,7 +63,7 @@ SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name()
 
 	// Read name.
 	if (!isalpha(c) && c != '_')
-		throw SourceException("missing statement name", _position, "SourceTokenASMPLX");
+      ERROR(_position, "missing statement name");
 
 	while (isalnum(c) || c == '_')
 	{
@@ -78,7 +78,7 @@ SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name()
 
 	// Check for and skip HWS after name.
 	if (!in->skipHWS())
-		throw SourceException("statement name not followed by HWS", _position, "SourceTokenASMPLX");
+      ERROR(_position, "statement name not followed by HWS");
 
 	// Read expression list.
 	while (true)
@@ -94,7 +94,7 @@ SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name()
 		if (c == ',') continue;
 		if (c == '\n') break;
 
-		throw SourceException("invalid expression", _position, "SourceTokenASMPLX");
+      ERROR(_position, "invalid expression");
 	}
 }
 
@@ -106,19 +106,19 @@ bigsint SourceTokenASMPLX::char_to_int(char c, bigsint base, SourcePosition cons
 		if (c >= '0' && c <= '1')
 			return c - '0';
 		else
-			throw SourceException("invalid bin number", position, "SourceTokenASMPLX");
+         ERROR(position, "invalid bin number");
 
 	case 8:
 		if (c >= '0' && c <= '7')
 			return c - '0';
 		else
-			throw SourceException("invalid oct number", position, "SourceTokenASMPLX");
+         ERROR(position, "invalid oct number");
 
 	case 10:
 		if (c >= '0' && c <= '9')
 			return c - '0';
 		else
-			throw SourceException("invalid dec number", position, "SourceTokenASMPLX");
+         ERROR(position, "invalid dec number");
 
 	case 16:
 		if (c >= '0' && c <= '9')
@@ -126,10 +126,10 @@ bigsint SourceTokenASMPLX::char_to_int(char c, bigsint base, SourcePosition cons
 		else if (c >= 'A' && c <= 'F')
 			return (c - 'A') + 10;
 		else
-			throw SourceException("invalid hex number", position, "SourceTokenASMPLX");
+         ERROR(position, "invalid hex number");
 
 	default:
-		throw SourceException("invalid base number", position, "SourceTokenASMPLX");
+      ERROR(position, "invalid base number");
 	}
 }
 
@@ -169,7 +169,7 @@ ObjectExpression::Pointer SourceTokenASMPLX::make_expression(std::string const &
 		case '+': return ObjectExpression::create_unary_add(make_expression(expr.substr(1), position), position);
 		case '-': return ObjectExpression::create_unary_sub(make_expression(expr.substr(1), position), position);
 
-		default: throw SourceException("unknown prefix operator", position, "SourceTokenASMPLX");
+      default: ERROR(position, "unknown prefix operator");
 		}
 	}
 	else
@@ -199,7 +199,7 @@ ObjectExpression::Pointer SourceTokenASMPLX::make_expression(std::string const &
 		case '&': return ObjectExpression::create_binary_and(make_expression(exprL, position), make_expression(exprR, position), position);
 		case '|': return ObjectExpression::create_binary_ior(make_expression(exprL, position), make_expression(exprR, position), position);
 		case '^': return ObjectExpression::create_binary_xor(make_expression(exprL, position), make_expression(exprR, position), position);
-		default: throw SourceException("unknown operator", position, "SourceTokenASMPLX");
+      default: ERROR(position, "unknown operator");
 		}
 	}
 }
@@ -262,7 +262,8 @@ void SourceTokenASMPLX::read_tokens(SourceStream * const in, std::vector<SourceT
 
 	if (idstring != "ASMPLX")
 	{
-		throw SourceException("bad idstring", SourcePosition(in->getFilename(), in->getLineCount(), in->getColumn()), "SourceTokenASMPLX");
+      SourcePosition pos(in->getFilename(), in->getLineCount(), in->getColumn());
+      ERROR_P("bad idstring");
 	}
 
 	while (true)
@@ -280,7 +281,7 @@ bigsint SourceTokenASMPLX::string_to_base(std::string const & s, SourcePosition 
 	if (s.empty() || s == "0") return -1;
 
 	if (s.size() < 2 || s[0] != '0')
-		throw SourceException("invalid number", position, "SourceTokenASMPLX");
+      ERROR(position, "invalid number");
 
 	switch (s[1])
 	{
@@ -289,7 +290,7 @@ bigsint SourceTokenASMPLX::string_to_base(std::string const & s, SourcePosition 
 	case 'd': return 10;
 	case 'x': return 16;
 
-	default: throw SourceException("invalid base", position, "SourceTokenASMPLX");
+   default: ERROR(position, "invalid base");
 	}
 }
 bigsint SourceTokenASMPLX::string_to_int(std::string const & s, SourcePosition const & position)
@@ -333,5 +334,5 @@ bigreal SourceTokenASMPLX::string_to_real(std::string const & s, SourcePosition 
 	return fInt + fFrac;
 }
 
-
+// EOF
 

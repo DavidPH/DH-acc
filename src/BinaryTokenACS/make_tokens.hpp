@@ -305,17 +305,7 @@
 
 #define BINTOKACS_TOKENS_TRAN_STACK()
 
-#define BINTOKACS_TOKENS_TRAN_STACK_ALL()  \
-   BINTOKACS_TOKENS_TRAN_STACK();          \
-                                           \
-   case OCODE_STACK_DUP32:                 \
-      args.push_back(indexTemp);           \
-      PUSH_TOKEN(BCODE_SET_WORLDREGISTER); \
-      args.push_back(indexTemp);           \
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER); \
-      args.push_back(indexTemp);           \
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER); \
-      break
+#define BINTOKACS_TOKENS_TRAN_STACK_ALL()
 
 
 #define BINTOKACS_TOKENS_TRAN_ALL() \

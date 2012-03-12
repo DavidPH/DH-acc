@@ -301,7 +301,7 @@ make_expression(SourceExpression::Vector const &expressions,
       }
    }
 
-   throw SourceException("unexpected operator", operators[start].pos, __func__);
+   ERROR(operators[start].pos, "unexpected operator");
 }
 
 
@@ -445,9 +445,7 @@ make_expression(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
 
    default:
       in->unget(token);
-      throw SourceException
-            ("unexpected token type '" + make_string(token.type) + "'",
-             token.pos, __func__);
+      ERROR(token.pos, "unexpected token type: %s", make_string(token.type).c_str());
    }
 
    return ::make_expression(expressions, operators, 0, operators.size(), context);

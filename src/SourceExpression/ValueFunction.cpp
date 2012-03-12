@@ -53,7 +53,7 @@ public:
    //
    virtual CounterReference<VariableType> getType() const
    {
-      throw SourceException("designator has no type", position, getClassName());
+      ERROR_N(position, "designator has no type");
    }
 
    //
