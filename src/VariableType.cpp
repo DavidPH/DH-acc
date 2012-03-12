@@ -238,7 +238,8 @@ VariableType::VariableType()
 // VariableType::VariableType
 //
 VariableType::VariableType(VariableType &type)
- : names(type.names), types(type.types),
+ : Super(type),
+   names(type.names), types(type.types),
    next(type.next), prev(&type), specnext(this), specprev(this),
    typeArr(NULL), typePtr(NULL), typeRet(type.typeRet),
    typeUnq(type.getUnqualified()),
