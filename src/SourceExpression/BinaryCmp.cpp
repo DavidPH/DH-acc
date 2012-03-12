@@ -195,7 +195,7 @@ private:
       }
       else
       {
-         std::string label = context->makeLabel();
+         label = context->makeLabel();
          std::string labelEnd = label + "_end";
          std::string labelLow = label + "_low";
 
@@ -238,7 +238,7 @@ private:
     VariableData *src, VariableType *type, ObjectExpression::Pointer tmpJ,
     ObjectExpression::Pointer tmpK)
    {
-      std::string label = context->makeLabel();
+      label = context->makeLabel();
       std::string labelCmp = label + "_cmp";
       std::string labelEnd = label + "_end";
       std::string labelPos = label + "_pos";

@@ -26,7 +26,6 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../ost_type.hpp"
-#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
 
@@ -94,7 +93,6 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    if (target_type == TARGET_ZDoom)
    {
-      std::string label = context->makeLabel();
       objects->setPosition(position);
       objects->addToken(OCODE_ADDR_AUTO, objects->getValue(0));
       objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(label));
