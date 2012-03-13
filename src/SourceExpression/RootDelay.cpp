@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -91,10 +92,14 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    objects->setPosition(position);
 
-   ObjectExpression::Pointer stackObj(objects->getValue(stack));
-   objects->addToken(OCODE_ADDR_STACK_ADD_IMM, stackObj);
+   ObjectExpression::Pointer stackObj;
+
+   if (stack)
+      stackObj = objects->getValue(stack);
+
+   if (stackObj) objects->addToken(OCODE_ADDR_STACK_ADD_IMM, stackObj);
    objects->addToken(OCODE_ACS_WAIT_TICS);
-   objects->addToken(OCODE_ADDR_STACK_SUB_IMM, stackObj);
+   if (stackObj) objects->addToken(OCODE_ADDR_STACK_SUB_IMM, stackObj);
 }
 
 // EOF
