@@ -441,6 +441,7 @@ void BinaryTokenZDACS::make_tokens
    // Variable Set Op
 
       // ADD
+   case OCODE_SETOP_ADD_AUTO32F:
    case OCODE_SETOP_ADD_AUTO32I:
    case OCODE_SETOP_ADD_AUTO32U:
       args.push_back(indexStack);
@@ -451,6 +452,7 @@ void BinaryTokenZDACS::make_tokens
       PUSH_TOKEN(BCODE_SETOP_ADD_GLOBALARRAY);
       break;
 
+   case OCODE_SETOP_ADD_POINTER32F:
    case OCODE_SETOP_ADD_POINTER32I:
    case OCODE_SETOP_ADD_POINTER32U:
       PUSH_TOKEN_ADD_ARG0();
@@ -459,6 +461,7 @@ void BinaryTokenZDACS::make_tokens
       PUSH_TOKEN(BCODE_SETOP_ADD_GLOBALARRAY);
       break;
 
+   case OCODE_SETOP_ADD_STATIC32F:
    case OCODE_SETOP_ADD_STATIC32I:
    case OCODE_SETOP_ADD_STATIC32U:
       PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
