@@ -502,9 +502,14 @@ void SourceExpressionDS::make_expression_arglist
 
 	if (returnType)
 	{
-		in->get(SourceTokenC::TT_OP_MINUS_GT);
+      if (in->peekType(SourceTokenC::TT_OP_MINUS_GT))
+      {
+         in->get(SourceTokenC::TT_OP_MINUS_GT);
 
-		*returnType = make_expression_type(in, blocks, context);
+         *returnType = make_expression_type(in, blocks, context);
+      }
+      else
+         *returnType = VariableType::get_bt_void();
 
 		if (argContext) argContext->setReturnType(*returnType);
 	}
