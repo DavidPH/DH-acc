@@ -434,8 +434,6 @@ static void make_objects_memcpy_post_part
                objects->addToken(OCODE_ADD32U);
             }
 
-            objects->addToken(OCODE_STACK_SWAP32);
-
             switch (data->sectionRA)
             {
             case VariableData::SRA_MAP:
