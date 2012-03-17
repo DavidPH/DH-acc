@@ -4,7 +4,9 @@ written as a series of expressions.
 
 
 arglist = "(" [ type [ identifier ] [ "," type [ identifier ] ]... ] ")"
-arglist_return = arglist "->" type
+arglist_return = arglist [ "->" type ]
+
+ocode_set = "__ocode" "(" identifier [ "," identifier ] ")"
 
 
 
@@ -210,7 +212,8 @@ operator :
 operator asmfunc
   Defines a function executed as a single instruction. Yields a pointer to the
   function, which is a void type.
-    "__asmfunc" name ocode ocode_imm arglist_return
+    "__asmfunc" type name arglist "@" ocode_set
+    "__asmfunc" name arglist_return "@" ocode_set
 
 operator break
   Branches out of the current loop or switch. Yields void.
@@ -294,12 +297,12 @@ operator library
 operator linespec
   Defines a function executed as a line special. Yields a pointer to the
   function.
-    "__linespec" name arglist_return @ integer
+    "__linespec" name arglist_return @ expression_single
 
 operator native
   Defines a function executed as a native function. Yields a pointer to the
   function.
-    "__native" name arglist_return @ integer
+    "__native" name arglist_return @ expression_single
 
 operator output
   Prints expression for debugging. Yields void.
@@ -335,10 +338,10 @@ operator script
   Defines a script. Yields a pointer to the script. Creates a new context for
   expression based on current context. The first form makes a script that can be
   exposed globally using extern.
-    "__extscript" name [ type [ flag... ] ] arglist_return [ "@" integer ]
-      expression_single
-    "__script" name [ type [ flag... ] ] arglist_return [ "@" integer ]
-      expression_single
+    "__extscript" name [ type [ flag... ] ] arglist_return
+      [ "@" expression_single ] expression_single
+    "__script" name [ type [ flag... ] ] arglist_return
+      [ "@" expression_single ] expression_single
 
 operator switch
   Performs a jump into a jump table. Yields void. Creates a new context for

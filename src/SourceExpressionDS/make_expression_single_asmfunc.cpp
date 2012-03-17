@@ -40,29 +40,47 @@
 //
 SRCEXPDS_EXPRSINGLE_DEFN(asmfunc)
 {
+   VariableType::Pointer asmfuncReturn;
+
+   // asmfuncReturn
+   if (!in->peekType(SourceTokenC::TT_IDENTIFIER) ||
+       is_expression_type(in->peek().data, context))
+      asmfuncReturn = make_expression_type(in, blocks, context);
+
    // asmfuncName
    std::string asmfuncName = in->get(SourceTokenC::TT_IDENTIFIER).data;
+
+   // asmfuncArgTypes asmfuncReturn
+   VariableType::Vector asmfuncArgTypes;
+   make_expression_arglist(in, blocks, context, &asmfuncArgTypes,
+                           asmfuncReturn ? NULL : &asmfuncReturn);
 
    // asmfuncOCode
    SourceTokenC asmfuncOCodeToken;
    ObjectCodeSet asmfuncOCode;
 
+   in->get(SourceTokenC::TT_OP_AT);
+   in->get(SourceTokenC::TT_IDENTIFIER, "__ocode");
+   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+
    asmfuncOCodeToken = in->get(SourceTokenC::TT_IDENTIFIER);
    asmfuncOCode.ocode =
       ocode_get_code(asmfuncOCodeToken.data, asmfuncOCodeToken.pos);
 
-   asmfuncOCodeToken = in->get(SourceTokenC::TT_IDENTIFIER);
-   asmfuncOCode.ocode_imm =
-      ocode_get_code(asmfuncOCodeToken.data, asmfuncOCodeToken.pos);
+   if (!in->peekType(SourceTokenC::TT_OP_PARENTHESIS_C))
+   {
+      in->get(SourceTokenC::TT_OP_COMMA);
+
+      asmfuncOCodeToken = in->get(SourceTokenC::TT_IDENTIFIER);
+      asmfuncOCode.ocode_imm =
+         ocode_get_code(asmfuncOCodeToken.data, asmfuncOCodeToken.pos);
+   }
+
+   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
 
    // asmfuncObject
    ObjectExpression::Pointer asmfuncObject =
       ObjectExpression::create_value_ocode(asmfuncOCode, token.pos);
-
-   // asmfuncArgTypes asmfuncReturn
-   VariableType::Vector asmfuncArgTypes;
-   VariableType::Pointer asmfuncReturn;
-   make_expression_arglist(in, blocks, context, &asmfuncArgTypes, &asmfuncReturn);
 
    // asmfuncVarType
    VariableType::Reference asmfuncVarType =
