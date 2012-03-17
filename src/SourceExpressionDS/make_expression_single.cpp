@@ -442,22 +442,6 @@ SRCEXPDS_EXPRSINGLE_DEFN(return)
 }
 
 //
-// SourceExpressionDS::make_expression_single_sizeof
-//
-SRCEXPDS_EXPRSINGLE_DEFN(sizeof)
-{
-   bool hasParentheses = in->peekType(SourceTokenC::TT_OP_PARENTHESIS_O);
-
-   if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
-
-   bigsint size = make_expression_type(in, blocks, context)->getSize(token.pos);
-
-   if (hasParentheses) in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-   return create_value_int(size, context, token.pos);
-}
-
-//
 // SourceExpressionDS::make_expression_single_type
 //
 SRCEXPDS_EXPRSINGLE_DEFN(type)

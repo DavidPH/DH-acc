@@ -93,9 +93,9 @@ operator && (unary)
     "&&" identifier
 
 operator sizeof
-  Yields the size of a type.
+  Yields the size of a type or expression.
+    "sizeof" expression_single
     "sizeof" "(" type ")"
-    "sizeof" type
 
 operator * (binary)
     expression "*" expression_single
