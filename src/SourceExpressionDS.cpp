@@ -325,6 +325,7 @@ void SourceExpressionDS::init()
    expr_single["__asmfunc"]  = make_expression_single_asmfunc;
    expr_single[  "break"]    = make_expression_single_break;
    expr_single[  "case"]     = make_expression_single_case;
+   expr_single[  "const"]    = make_expression_single_constexpr;
    expr_single[  "constexpr"]= make_expression_single_constexpr;
    expr_single[  "continue"] = make_expression_single_continue;
    expr_single[  "default"]  = make_expression_single_default;
