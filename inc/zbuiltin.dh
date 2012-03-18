@@ -1,0 +1,183 @@
+//-----------------------------------------------------------------------------
+//
+// Definitions compatible with acc builtins.
+//
+//-----------------------------------------------------------------------------
+
+#ifndef __HEADER__ZBUILTIN_DH__
+#define __HEADER__ZBUILTIN_DH__ #
+
+
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+#define function __function #
+#define script __script #
+
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
+typedef __fixed fixed;
+typedef __string str;
+
+
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
+
+// Actors
+__asmfunc ActivatorTID() -> int @ __ocode(ACSE_THING_GET_MTAG);
+__asmfunc CheckActorCeilingTexture(int, __string) -> bool @ __ocode(ACSE_MTAG_CHK_TEXTURE_CEILING);
+__asmfunc CheckActorFloorTexture(int, __string) -> bool @ __ocode(ACSE_MTAG_CHK_TEXTURE_FLOOR);
+__asmfunc ClassifyActor(int) -> int @ __ocode(ACSE_MTAG_GET_CLASSIFICATION);
+__asmfunc GetActorAngle(int) -> __fixed @ __ocode(ACSE_MTAG_GET_ANGLE);
+__asmfunc GetActorCeilingZ(int) -> __fixed @ __ocode(ACSE_MTAG_GET_CEILINGZ);
+__asmfunc GetActorFloorZ(int) -> __fixed @ __ocode(ACSE_MTAG_GET_FLOORZ);
+__asmfunc GetActorLightLevel(int) -> int @ __ocode(ACSE_MTAG_GET_LIGHTLEVEL);
+__asmfunc GetActorPitch(int) -> __fixed @ __ocode(ACSE_MTAG_GET_PITCH);
+__asmfunc GetActorProperty(int, int) -> int @ __ocode(ACSE_MTAG_GET);
+__asmfunc GetActorPropertyFixed(int, int) -> __fixed @ __ocode(ACSE_MTAG_GET);
+__asmfunc GetActorPropertyString(int, int) -> __string @ __ocode(ACSE_MTAG_GET);
+__asmfunc GetActorX(int) -> __fixed @ __ocode(ACSE_MTAG_GET_X);
+__asmfunc GetActorY(int) -> __fixed @ __ocode(ACSE_MTAG_GET_Y);
+__asmfunc GetActorZ(int) -> __fixed @ __ocode(ACSE_MTAG_GET_Z);
+__asmfunc MorphActor(int, __string, __string, int, int, __string, __string) -> int @ __ocode(ACSE_MTAG_MORPH);
+__asmfunc SetActorAngle(int, __fixed) @ __ocode(ACSE_MTAG_SET_ANGLE);
+__asmfunc SetActorPitch(int, __fixed) @ __ocode(ACSE_MTAG_SET_PITCH);
+__asmfunc SetActorPosition(int, __fixed, __fixed, __fixed, bool) -> bool @ __ocode(ACSE_MTAG_SET_XYZ);
+__asmfunc SetActorProperty(int, int, int) @ __ocode(ACSE_MTAG_SET);
+__asmfunc SetActorPropertyFixed(int, int, __fixed) @ __ocode(ACSE_MTAG_SET);
+__asmfunc SetActorPropertyString(int, int, __string) @ __ocode(ACSE_MTAG_SET);
+__asmfunc SetActorState(int, __string, bool) -> int @ __ocode(ACSE_MTAG_SET_STATE);
+__asmfunc SetCameraToTexture(int, __string, int) @ __ocode(ACSE_MTAG_SET_CAMERATEXTURE);
+__asmfunc SetMarineSprite(int, __string) @ __ocode(ACSE_MTAG_SET_MARINESPRITE);
+__asmfunc SetMarineWeapon(int, int) @ __ocode(ACSE_MTAG_SET_MARINEWEAPON);
+__asmfunc SetThingSpecial(int, int, int, int, int, int, int) @ __ocode(ACSE_MTAG_SET_SPECIAL);
+__asmfunc Thing_Damage2(int, int, __string) -> int @ __ocode(ACSE_MTAG_DAMAGE);
+__asmfunc UnMorphActor(int, bool) -> int @ __ocode(ACSE_MTAG_UNMORPH);
+
+// Display
+__asmfunc CancelFade() @ __ocode(ACSE_SCREEN_FADE_STOP);
+__asmfunc FadeRange(int, int, int, __fixed, int, int, int, __fixed, __fixed) @ __ocode(ACSE_SCREEN_FADE_RANGE);
+__asmfunc FadeTo(int, int, int, __fixed, __fixed) @ __ocode(ACSE_SCREEN_FADE_START);
+__asmfunc GetScreenHeight() -> int @ __ocode(ACSE_SCREEN_GET_HEIGHT);
+__asmfunc GetScreenWidth() -> int @ __ocode(ACSE_SCREEN_GET_WIDTH);
+__asmfunc SetFont(__string) @ __ocode(ACSP_SET_FONT, ACSP_SET_FONT_IMM);
+__asmfunc SetHudSize(int, int, int) @ __ocode(ACSE_SCREEN_SET_HUDSIZE);
+__asmfunc SetMugShotState(__string) @ __ocode(ACSE_THING_SET_MUGSHOT);
+
+// Inventory
+__asmfunc CheckActorInventory(int, __string) -> int @ __ocode(ACSE_MTAG_GET_INVENTORY);
+__asmfunc CheckInventory(__string) -> int @ __ocode(ACSE_THING_GET_INVENTORY, ACSE_THING_GET_INVENTORY_IMM);
+__asmfunc CheckWeapon(__string) -> bool @ __ocode(ACSE_THING_CHK_WEAPON);
+__asmfunc ClearActorInventory(int) @ __ocode(ACSE_MTAG_CLR_INVENTORY);
+__asmfunc ClearInventory() @ __ocode(ACSE_THING_CLR_INVENTORY);
+__asmfunc GetAmmoCapacity(__string) -> int @ __ocode(ACSE_THING_GET_AMMOCAP);
+__asmfunc GiveActorInventory(int, __string, int) @ __ocode(ACSE_MTAG_ADD_INVENTORY);
+__asmfunc GiveInventory(__string, int) @ __ocode(ACSE_THING_ADD_INVENTORY, ACSE_THING_ADD_INVENTORY_IMM);
+__asmfunc SetAmmoCapacity(__string, int) @ __ocode(ACSE_THING_SET_AMMOCAP);
+__asmfunc SetWeapon(__string) -> bool @ __ocode(ACSE_THING_SET_WEAPON);
+__asmfunc TakeActorInventory(int, __string, int) @ __ocode(ACSE_MTAG_SUB_INVENTORY);
+__asmfunc TakeInventory(__string, int) @ __ocode(ACSE_THING_SUB_INVENTORY, ACSE_THING_SUB_INVENTORY_IMM);
+__asmfunc UseActorInventory(int, __string) -> int @ __ocode(ACSE_MTAG_USEINVENTORY);
+__asmfunc UseInventory(__string) -> bool @ __ocode(ACSE_THING_USEINVENTORY);
+
+// Level/Game
+__asmfunc ChangeLevel(__string, int, int, int) @ __ocode(ACSE_GAME_SET_LEVEL);
+__asmfunc ChangeSky(__string, __string) @ __ocode(ACSE_GAME_SET_SKY);
+__asmfunc GameSkill() -> int @ __ocode(ACS_GAME_GET_SKILL);
+__asmfunc GameType() -> int @ __ocode(ACS_GAME_GET_TYPE);
+__asmfunc GetCVar(__string) -> int @ __ocode(ACSE_GAME_GET_CVAR);
+__asmfunc GetCVarFixed(__string) -> __fixed @ __ocode(ACSE_GAME_GET_CVAR);
+__asmfunc GetCVarString(__string) -> __string @ __ocode(ACSE_GAME_GET_CVAR);
+__asmfunc GetLevelInfo(int) -> int @ __ocode(ACSE_GAME_GET_LEVELINFO);
+__asmfunc PlayerCount() -> int @ __ocode(ACS_GAME_GET_PLAYERCOUNT);
+__asmfunc ReplaceTextures(__string, __string, int) @ __ocode(ACSE_GAME_REPLACETEXTURES);
+__asmfunc SetAirControl(__fixed) @ __ocode(ACSE_GAME_SET_AIRCONTROL, ACSE_GAME_SET_AIRCONTROL_IMM);
+__asmfunc SetGravity(__fixed) @ __ocode(ACSE_GAME_SET_GRAVITY, ACSE_GAME_SET_GRAVITY_IMM);
+__asmfunc ThingCount(int, int) -> int @ __ocode(ACS_GAME_GET_THINGCOUNT_SID, ACS_GAME_GET_THINGCOUNT_SID_IMM);
+__asmfunc ThingCountName(__string, int) -> int @ __ocode(ACSE_GAME_GET_THINGCOUNT_STR);
+__asmfunc Timer() -> int @ __ocode(ACS_GAME_GET_TIME);
+
+// Lines
+__asmfunc ClearLineSpecial() @ __ocode(ACS_LINE_CLR_SPECIAL);
+__asmfunc GetLineRowOffset() -> int @ __ocode(ACSE_LINE_GET_OFFSETY);
+__asmfunc SetLineBlocking(int, int) @ __ocode(ACS_LTAG_SET_BLOCK);
+__asmfunc LineSide() -> int @ __ocode(ACS_LINE_GET_SIDE);
+__asmfunc SetLineMonsterBlocking(int, int) @ __ocode(ACSE_LTAG_SET_BLOCKMONSTER);
+__asmfunc SetLineSpecial(int, int, int, int, int, int, int) @ __ocode(ACS_LTAG_SET_SPECIAL);
+__asmfunc SetLineTexture(int, int, int, __string) @ __ocode(ACS_LTAG_SET_TEXTURE);
+
+// Math
+__asmfunc Cos(__fixed) -> __fixed @ __ocode(TRIG_COS32F);
+__asmfunc FixedDiv(__fixed, __fixed) -> __fixed @ __ocode(DIV32F);
+__asmfunc FixedMul(__fixed, __fixed) -> __fixed @ __ocode(MUL32F);
+__asmfunc Random(int, int) -> int @ __ocode(ACS_MISC_RANDOM, ACS_MISC_RANDOM_IMM);
+__asmfunc RandomFixed(__fixed, __fixed) -> __fixed @ __ocode(ACS_MISC_RANDOM, ACS_MISC_RANDOM_IMM);
+__asmfunc Sin(__fixed) -> __fixed @ __ocode(TRIG_SIN32F);
+__asmfunc VectorAngle(__fixed, __fixed) -> __fixed @ __ocode(ACSE_TRIG_VECTORANGLE);
+
+// Miscellaneous
+__asmfunc CreateTranslationStart(int transnumber) @ __ocode(ACSE_TRANSLATION_START);
+__asmfunc CreateTranslationPalette(int a, int b, int c, int d) @ __ocode(ACSE_TRANSLATION_PALETTE);
+__asmfunc CreateTranslationRGB(int a, int b, int r1, int g1, int b1, int r2, int g2, int b2) @ __ocode(ACSE_TRANSLATION_RGB);
+__asmfunc CreateTranslationEnd() @ __ocode(ACSE_TRANSLATION_END);
+__asmfunc SetResultValue(int) @ __ocode(ACSE_SCRIPT_SETRETURN);
+
+// Players
+__asmfunc CheckPlayerCamera(int) -> int @ __ocode(ACSE_PLAYER_GET_CAMERA);
+__asmfunc GetPlayerInfo(int, int) -> int @ __ocode(ACSE_PLAYER_GET_INFO);
+__asmfunc GetPlayerInput(int, int) -> int @ __ocode(ACSE_PLAYER_GET_INPUT);
+__asmfunc PlayerClass(int) -> int @ __ocode(ACSE_PLAYER_GET_CLASS);
+__asmfunc PlayerFrags() -> int @ __ocode(ACSE_THING_GET_FRAGS);
+__asmfunc PlayerInGame(int) -> bool @ __ocode(ACSE_PLAYER_GET_INGAME);
+__asmfunc PlayerIsBot(int) -> bool @ __ocode(ACSE_PLAYER_GET_ISBOT);
+__asmfunc PlayerNumber() -> int @ __ocode(ACSE_THING_GET_PLAYERNUMBER);
+
+// Sectors
+__asmfunc ChangeCeiling(int, __string) @ __ocode(ACS_STAG_SET_TEXTURE_CEILING, ACS_STAG_SET_TEXTURE_CEILING_IMM);
+__asmfunc ChangeFloor(int, __string) @ __ocode(ACS_STAG_SET_TEXTURE_FLOOR, ACS_STAG_SET_TEXTURE_FLOOR_IMM);
+__asmfunc GetSectorCeilingZ(int, int, int) -> __fixed @ __ocode(ACSE_STAG_GET_Z_CEILING);
+__asmfunc GetSectorFloorZ(int, int, int) -> __fixed @ __ocode(ACSE_STAG_GET_Z_FLOOR);
+__asmfunc GetSectorLightLevel(int) -> int @ __ocode(ACSE_STAG_GET_LIGHTLEVEL);
+__asmfunc SectorDamage(int, int, __string, __string, int) @ __ocode(ACSE_STAG_DAMAGE);
+__asmfunc SetCeilingTrigger(int, int, int, int, int, int, int, int) @ __ocode(ACSE_STAG_SET_TRIGGER_CEILING);
+__asmfunc SetFloorTrigger(int, int, int, int, int, int, int, int) @ __ocode(ACSE_STAG_SET_TRIGGER_FLOOR);
+__asmfunc ThingCountNameSector(__string, int, int) -> int @ __ocode(ACSE_STAG_GET_THINGCOUNT_STR);
+__asmfunc ThingCountSector(int, int, int) -> int @ __ocode(ACSE_STAG_GET_THINGCOUNT_SID);
+
+// Sounds
+__asmfunc ActivatorSound(__string, int) @ __ocode(ACSE_SOUND_THING);
+__asmfunc AmbientSound(__string, int) @ __ocode(ACS_SOUND_AMBIENT);
+__asmfunc LocalAmbientSound(__string, int) @ __ocode(ACSE_SOUND_AMBIENTLOCAL);
+__asmfunc LocalSetMusic(__string, int, int) @ __ocode(ACSE_GAME_SET_MUSICLOCAL, ACSE_GAME_SET_MUSICLOCAL_IMM);
+__asmfunc SectorSound(__string, int) @ __ocode(ACS_SOUND_SECTOR);
+__asmfunc SetMusic(__string, int, int) @ __ocode(ACSE_GAME_SET_MUSIC, ACSE_GAME_SET_MUSIC_IMM);
+__asmfunc SoundSequence(__string) @ __ocode(ACS_SOUND_SEQUENCE);
+__asmfunc ThingSound(int, __string, int) @ __ocode(ACS_SOUND_MTAG);
+
+// Spawning
+__asmfunc Spawn(__string, __fixed, __fixed, __fixed, int, int) -> int @ __ocode(ACSE_SPAWN_POINT, ACSE_SPAWN_POINT_IMM);
+__asmfunc SpawnProjectile(int, __string, int, int, int, int, int) @ __ocode(ACSE_SPAWN_PROJECTILE_STR);
+__asmfunc SpawnSpot(__string, int, int, int) -> int @ __ocode(ACSE_SPAWN_SPOT_ANGLE, ACSE_SPAWN_SPOT_ANGLE_IMM);
+__asmfunc SpawnSpotFacing(__string, int, int) -> int @ __ocode(ACSE_SPAWN_SPOT);
+__asmfunc Thing_Projectile2(int, int, int, int, int, int, int) @ __ocode(ACSE_SPAWN_PROJECTILE_SID);
+
+// Strings
+__asmfunc StrCopy(char *dst, int dstArray, int, int dstSize, __string src, int srcOffset) -> bool @ __ocode(ACSE_STRING_COPY_GLOBALRANGE);
+__asmfunc StrCopyMap(int dstIndex, int dstArray, int, int dstSize, __string src, int srcOffset) -> bool @ __ocode(ACSE_STRING_COPY_MAPRANGE);
+__asmfunc StrCopyWorld(int dstIndex, int dstArray, int, int dstSize, __string src, int srcOffset) -> bool @ __ocode(ACSE_STRING_COPY_WORLDRANGE);
+__asmfunc StrCopyGlobal(int dstIndex, int dstArray, int, int dstSize, __string src, int srcOffset) -> bool @ __ocode(ACSE_STRING_COPY_GLOBALRANGE);
+__asmfunc StrLen(__string) -> int @ __ocode(ACSE_STRING_GET_LENGTH);
+
+// Waiting
+__asmfunc Delay(int) @ __ocode(ACS_WAIT_TICS, ACS_WAIT_TICS_IMM);
+__asmfunc PolyWait(int) @ __ocode(ACS_WAIT_POLYOBJECT, ACS_WAIT_POLYOBJECT_IMM);
+__asmfunc ScriptWait(int) @ __ocode(ACS_WAIT_SCRIPT, ACS_WAIT_SCRIPT_IMM);
+__asmfunc TagWait(int) @ __ocode(ACS_WAIT_STAG, ACS_WAIT_STAG_IMM);
+
+#endif//__HEADER__ZBUILTIN_DH__
+

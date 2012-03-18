@@ -1,0 +1,93 @@
+//-----------------------------------------------------------------------------
+//
+// Definitions compatible with zspecial.acs.
+//
+//-----------------------------------------------------------------------------
+
+#ifndef __HEADER__ZNATIVE_DH__
+#define __HEADER__ZNATIVE_DH__ #
+
+
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
+
+__native GetLineUDMFInt(int, __string) -> int @ 1;
+__native GetLineUDMFFixed(int, __string) -> __fixed @ 2;
+__native GetThingUDMFInt(int, __string) -> int @ 3;
+__native GetThingUDMFFixed(int, __string) -> __fixed @ 4;
+__native GetSectorUDMFInt(int, __string) -> int @ 5;
+__native GetSectorUDMFFixed(int, __string) -> __fixed @ 6;
+__native GetSideUDMFInt(int, bool, __string) -> int @ 7;
+__native GetSideUDMFFixed(int, bool, __string) -> __fixed @ 8;
+__native GetActorVelX(int) -> __fixed @ 9;
+__native GetActorVelY(int) -> __fixed @ 10;
+__native GetActorVelZ(int) -> __fixed @ 11;
+__native SetActivator(int) -> bool @ 12;
+__native SetActivator(int, int) -> bool @ 12;
+__native SetActivatorToTarget(int) -> bool @ 13;
+__native GetActorViewHeight(int) -> __fixed @ 14;
+__native GetChar(__string, int) -> char @ 15;
+__native GetAirSupply(int) -> int @ 16;
+__native SetAirSupply(int, int) -> bool @ 17;
+__native SetSkyScrollSpeed(int, __fixed) -> void @ 18;
+__native GetArmorType(__string, int) -> int @ 19;
+__native SpawnSpotForced(__string, int) -> int @ 20;
+__native SpawnSpotForced(__string, int, int) -> int @ 20;
+__native SpawnSpotForced(__string, int, int, int) -> int @ 20;
+__native SpawnSpotFacingForced(__string, int) -> int @ 21;
+__native SpawnSpotFacingForced(__string, int, int) -> int @ 21;
+__native CheckActorProperty(int, int, int) -> bool @ 22;
+__native CheckActorPropertyFixed(int, int, __fixed) -> bool @ 22;
+__native CheckActorPropertyString(int, int, __string) -> bool @ 22;
+__native SetActorVelocity(int, __fixed, __fixed, __fixed) -> void @ 23;
+__native SetActorVelocity(int, __fixed, __fixed, __fixed, bool) -> void @ 23;
+__native SetActorVelocity(int, __fixed, __fixed, __fixed, bool, bool) -> void @ 23;
+__native SetUserVariable(int, __string, int) -> void @ 24;
+__native SetUserVariableFixed(int, __string, __fixed) -> void @ 24;
+__native GetUserVariable(int, __string) -> int @ 25;
+__native GetUserVariableFixed(int, __string) -> __fixed @ 25;
+__native Radius_Quake2(int, int, int, int, int, __string) -> void @ 26;
+__native CheckActorClass(int, __string) -> bool @ 27;
+__native SetUserArray(int, __string, int, int) -> void @ 28;
+__native SetUserArrayFixed(int, __string, int, __fixed) -> void @ 28;
+__native GetUserArray(int, __string, int) -> int @ 29;
+__native GetUserArrayFixed(int, __string, int) -> __fixed @ 29;
+__native SoundSequenceOnActor(int, __string) -> void @ 30;
+__native SoundSequenceOnSector(int, __string, int) -> void @ 31;
+__native SoundSequenceOnPolyobj(int, __string) -> void @ 32;
+__native GetPolyobjX(int) -> __fixed @ 33;
+__native GetPolyobjY(int) -> __fixed @ 34;
+__native CheckSight(int, int, int) -> bool @ 35;
+__native SpawnForced(__string, __fixed, __fixed, __fixed) -> int @ 36;
+__native SpawnForced(__string, __fixed, __fixed, __fixed, int) -> int @ 36;
+__native SpawnForced(__string, __fixed, __fixed, __fixed, int, int) -> int @ 36;
+__native AnnouncerSound(__string, int) -> void @ 37;
+__native SetPointer(int, int) -> bool @ 38;
+__native SetPointer(int, int, int) -> bool @ 38;
+__native SetPointer(int, int, int, int) -> bool @ 38;
+__native ACS_NamedExecute(__string, int) -> bool @ 39;
+__native ACS_NamedExecute(__string, int, int) -> bool @ 39;
+__native ACS_NamedExecute(__string, int, int, int) -> bool @ 39;
+__native ACS_NamedExecute(__string, int, int, int, int) -> bool @ 39;
+__native ACS_NamedSuspend(__string, int) -> bool @ 40;
+__native ACS_NamedTerminate(__string, int) -> bool @ 41;
+__native ACS_NamedLockedExecute(__string, int, int, int, int) -> bool @ 42;
+__native ACS_NamedLockedExecuteDoor(__string, int, int, int, int) -> bool @ 43;
+__native ACS_NamedExecuteWithResult(__string) -> int @ 44;
+__native ACS_NamedExecuteWithResult(__string, int) -> int @ 44;
+__native ACS_NamedExecuteWithResult(__string, int, int) -> int @ 44;
+__native ACS_NamedExecuteWithResult(__string, int, int, int) -> int @ 44;
+__native ACS_NamedExecuteWithResult(__string, int, int, int, int) -> int @ 44;
+__native ACS_NamedExecuteWithResultFixed(__string) -> __fixed @ 44;
+__native ACS_NamedExecuteWithResultFixed(__string, int) -> __fixed @ 44;
+__native ACS_NamedExecuteWithResultFixed(__string, int, int) -> __fixed @ 44;
+__native ACS_NamedExecuteWithResultFixed(__string, int, int, int) -> __fixed @ 44;
+__native ACS_NamedExecuteWithResultFixed(__string, int, int, int, int) -> __fixed @ 44;
+__native ACS_NamedExecuteAlways(__string, int) -> bool @ 45;
+__native ACS_NamedExecuteAlways(__string, int, int) -> bool @ 45;
+__native ACS_NamedExecuteAlways(__string, int, int, int) -> bool @ 45;
+__native ACS_NamedExecuteAlways(__string, int, int, int, int) -> bool @ 45;
+
+#endif//__HEADER__ZNATIVE_DH__
+
