@@ -575,6 +575,18 @@ void VariableType::getNameMangled(std::string &out) const
    if (getQualifier(QUAL_VOLATILE)) out += 'v';
    if (getQualifier(QUAL_RESTRICT)) out += 'r';
 
+   switch (store)
+   {
+   case ST_ADDR: break;
+   case ST_REGISTER:       out += "sR"; break;
+   case ST_MAPREGISTER:    out += "sMR"; break;
+   case ST_WORLDREGISTER:  out += "sWR"; break;
+   case ST_GLOBALREGISTER: out += "sGR"; break;
+   case ST_MAPARRAY:       out += "sMA("; out += storeArea; out += ')'; break;
+   case ST_WORLDARRAY:     out += "sWA("; out += storeArea; out += ')'; break;
+   case ST_GLOBALARRAY:    out += "sGA("; out += storeArea; out += ')'; break;
+   }
+
    #undef WIDTH
    #undef TYPES
    #undef RETRN
