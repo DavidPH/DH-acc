@@ -105,7 +105,8 @@ void BinaryTokenPPACS::write_ACSP_string
 {
    std::ostringstream token;
 
-   write_ACSP_string(&token, s.name);
+   // For ACS+ output, there should only be one name.
+   write_ACSP_string(&token, s.names[0]);
    write_ACSP_string(&token, s.string);
 
    BinaryTokenACS::write_ACS0_32(out, ACSP_TOKEN_STRING);

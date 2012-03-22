@@ -51,13 +51,6 @@ bool override_object(ObjectData_Static * out, ObjectData_Static const & in)
 
 	return true;
 }
-bool override_object(ObjectData_String * out, ObjectData_String const & in)
-{
-	if (out->name != in.name)
-		return false;
-
-	return true;
-}
 
 void read_object(std::istream * in, ObjectData_Auto * out)
 {
@@ -78,11 +71,6 @@ void read_object(std::istream * in, ObjectData_Static * out)
 	read_object(in, &out->number);
 	read_object(in, &out->size);
 }
-void read_object(std::istream * in, ObjectData_String * out)
-{
-	read_object(in, &out->name);
-	read_object(in, &out->string);
-}
 
 void write_object(std::ostream * out, ObjectData_Auto const & in)
 {
@@ -99,11 +87,6 @@ void write_object(std::ostream * out, ObjectData_Static const & in)
 	write_object(out, in.name);
 	write_object(out, in.number);
 	write_object(out, in.size);
-}
-void write_object(std::ostream * out, ObjectData_String const & in)
-{
-	write_object(out, in.name);
-	write_object(out, in.string);
 }
 
 // EOF

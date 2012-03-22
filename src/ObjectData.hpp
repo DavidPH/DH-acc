@@ -262,20 +262,23 @@ struct ObjectData_Static
 //
 struct ObjectData_String
 {
-	std::string name;
-	std::string string;
+   typedef void (*IterFunc)(std::ostream *, ObjectData_String const &);
 
-	// Returns the new string's name.
-	static std::string const & add(std::string const & string);
 
-	static void generate_symbols();
+   std::vector<std::string> names;
+   std::string string;
 
-	typedef void (*IterFunc)(std::ostream *, ObjectData_String const &);
-	static void iterate(IterFunc iterFunc, std::ostream * out);
 
-	static void read_objects(std::istream * in);
+   // Returns the new string's name.
+   static std::string const &add(std::string const &string);
 
-	static void write_objects(std::ostream * out);
+   static void generate_symbols();
+
+   static void iterate(IterFunc iterFunc, std::ostream *out);
+
+   static void read_objects(std::istream *in);
+
+   static void write_objects(std::ostream *out);
 };
 
 
