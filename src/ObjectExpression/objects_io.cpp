@@ -68,7 +68,9 @@ void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
 	read_object(in, &_symbol_table);
 	read_object(in, &_symbol_type_table);
 
+   ObjectData_Array::read_objects(in);
    ObjectData_Function::read_objects(in);
+   ObjectData_Register::read_objects(in);
    ObjectData_Script::read_objects(in);
    ObjectData_String::read_objects(in);
 }
