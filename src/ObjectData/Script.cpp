@@ -282,6 +282,14 @@ void read_object(std::istream *in, ObjectData_Script *out)
    out->context = NULL;
 }
 
+void read_object(std::istream *in, ObjectData_Script::ScriptType *out)
+{
+   read_object_raw(in, reinterpret_cast<char *>(out), sizeof(*out));
+
+   if (*out > ObjectData_Script::ST_NONE)
+      *out = ObjectData_Script::ST_NONE;
+}
+
 //
 // write_object<ObjectData_Script>
 //
@@ -301,6 +309,14 @@ void write_object(std::ostream *out, ObjectData_Script const &in)
    write_object(out, in.number);
    write_object(out, in.varCount);
    write_object(out, in.externDef);
+}
+
+//
+// write_object<ObjectData_Script::ScriptType>
+//
+void write_object(std::ostream *out, ObjectData_Script::ScriptType const &in)
+{
+   write_object_raw(out, reinterpret_cast<char const *>(&in), sizeof(in));
 }
 
 // EOF

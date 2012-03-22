@@ -58,13 +58,6 @@ void read_object(std::istream * in, ObjectData_Auto * out)
 	read_object(in, &out->number);
 	read_object(in, &out->size);
 }
-void read_object(std::istream * in, ObjectData_Script::ScriptType * out)
-{
-	read_object_raw(in, (char *)out, sizeof(*out));
-
-	if (*out > ObjectData_Script::ST_NONE)
-		*out = ObjectData_Script::ST_NONE;
-}
 void read_object(std::istream * in, ObjectData_Static * out)
 {
 	read_object(in, &out->name);
@@ -77,10 +70,6 @@ void write_object(std::ostream * out, ObjectData_Auto const & in)
 	write_object(out, in.name);
 	write_object(out, in.number);
 	write_object(out, in.size);
-}
-void write_object(std::ostream * out, ObjectData_Script::ScriptType const & in)
-{
-	write_object_raw(out, (char const *)&in, sizeof(in));
 }
 void write_object(std::ostream * out, ObjectData_Static const & in)
 {
