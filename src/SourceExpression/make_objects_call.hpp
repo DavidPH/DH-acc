@@ -44,6 +44,9 @@
    make_objects_memcpy_prep(objects, dst, src, pos);
 
 #define FUNCTION_ARGS                                   \
+   if (callTypes.size() < args.size())                  \
+      ERROR_P("bad count");                             \
+                                                        \
    /* Evaluate the arguments. */                        \
    for (size_t i = 0; i < callTypes.size(); ++i)        \
    {                                                    \
