@@ -104,6 +104,18 @@ get_promoted_type(VariableType *type1, VariableType *type2,
    if (bt1 == VariableType::BT_ARRAY) return type1->getReturn()->getPointer();
    if (bt2 == VariableType::BT_ARRAY) return type2->getReturn()->getPointer();
 
+   if (bt1 == VariableType::BT_LLFLOAT) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_LLFLOAT) return type2->getUnqualified();
+
+   if (bt1 == VariableType::BT_LFLOAT) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_LFLOAT) return type2->getUnqualified();
+
+   if (bt1 == VariableType::BT_FLOAT) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_FLOAT) return type2->getUnqualified();
+
+   if (bt1 == VariableType::BT_FIXED) return type1->getUnqualified();
+   if (bt2 == VariableType::BT_FIXED) return type2->getUnqualified();
+
    if (bt1 == VariableType::BT_REAL) return type1->getUnqualified();
    if (bt2 == VariableType::BT_REAL) return type2->getUnqualified();
 
