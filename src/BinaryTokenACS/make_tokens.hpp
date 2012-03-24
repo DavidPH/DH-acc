@@ -191,6 +191,7 @@
    CASE_MAP_ACS(LTAG_SET_SPECIAL);             \
    CASE_MAP_ACS(LTAG_SET_TEXTURE);             \
    CASE_MAP_ACS(MISC_RANDOM);                  \
+   CASE_MAP_ACS(MISC_RANDOM_IMM);              \
    CASE_MAP_ACS(SCRIPT_RESTART);               \
    CASE_MAP_ACS(SCRIPT_SUSPEND);               \
    CASE_MAP_ACS(SCRIPT_TERMINATE);             \
