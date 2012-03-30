@@ -53,7 +53,12 @@
 //
 
 static option::option_data<std::string> option_out
-('\0', "out", "output", "Output File.", NULL);
+('o', "out", "output", "Output File.", NULL);
+
+static option::option_data<std::string> option_script_list
+('\0', "script-list", "output",
+ "Indicates a file to list script names and numbers to. Use - to dump to "
+ "stdout.", NULL);
 
 
 //----------------------------------------------------------------------------|
@@ -116,6 +121,14 @@ static SourceType divine_source_type(std::string const &name)
 
 
    return SOURCE_UNKNOWN;
+}
+
+//
+// dump_scripts
+//
+static void dump_script(std::ostream *out, ObjectData_Script const &s)
+{
+   *out << s.name << ' ' << s.label << ' ' << s.number << '\n';
 }
 
 //
@@ -249,6 +262,18 @@ static inline int _main()
    // Process object data.
    ObjectExpression::do_deferred_allocation();
    objects.optimize();
+
+   // Dump script list, if requested.
+   if (!option_script_list.data.empty())
+   {
+      if (option_script_list.data == "-")
+         ObjectData_Script::iterate(dump_script, &std::cout);
+      else
+      {
+         std::ofstream ofs(option_script_list.data.c_str());
+         ObjectData_Script::iterate(dump_script, &ofs);
+      }
+   }
 
    // Default output.
    if (output_type == OUTPUT_UNKNOWN) switch (target_type)
