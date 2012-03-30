@@ -119,6 +119,11 @@ void SourceExpression_UnarySub::virtual_makeObjects
       objects->addToken(OCODE_MISC_NEGATE32I);
       break;
 
+   case VariableType::BT_FIXED:
+   case VariableType::BT_REAL:
+      objects->addToken(OCODE_MISC_NEGATE32F);
+      break;
+
    case VariableType::BT_LLONG:
    case VariableType::BT_ULLONG:
    {
@@ -141,10 +146,6 @@ void SourceExpression_UnarySub::virtual_makeObjects
       objects->addToken(OCODE_GET_TEMP, tmpL);
       objects->addToken(OCODE_GET_TEMP, tmpH);
    }
-      break;
-
-   case VariableType::BT_REAL:
-      objects->addToken(OCODE_MISC_NEGATE32F);
       break;
 
    default:
