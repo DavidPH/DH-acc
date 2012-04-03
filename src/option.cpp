@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011-2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -50,8 +50,8 @@ char const **option::option_args::arg_vector = new char const*[8];
 //
 // option::option
 //
-option::option() : descL(NULL), descS(NULL), group(NULL), nameL(NULL),
-                   nameS('\0'), next(this), prev(this)
+option::option() : handled(false), descL(NULL), descS(NULL), group(NULL),
+                   nameL(NULL), nameS('\0'), next(this), prev(this)
 {
 }
 
@@ -60,8 +60,8 @@ option::option() : descL(NULL), descS(NULL), group(NULL), nameL(NULL),
 //
 option::option(char _nameS, char const *_nameL, char const *_group,
                char const *_descS, char const *_descL)
-               : descL(_descL ? _descL : _descS), descS(_descS), group(_group),
-                 nameL(_nameL), nameS(_nameS)
+               : handled(false), descL(_descL ? _descL : _descS), descS(_descS),
+                 group(_group), nameL(_nameL), nameS(_nameS)
 {
    option *start = find_group_start(group);
    option *end = find_group_end(group, start);
@@ -420,6 +420,7 @@ int option::process_option_long(int argc, char const *const *argv, int optf)
       try
       {
          opt = find(optsTemp);
+         opt->handled = true;
          used = opt->handle(optsTemp, optf, optc, optv);
       }
       catch (...)
@@ -440,6 +441,7 @@ int option::process_option_long(int argc, char const *const *argv, int optf)
    else
    {
       opt = find(opts);
+      opt->handled = true;
       used = opt->handle(opts, optf, optc, argv+1) + 1;
    }
 
@@ -471,6 +473,7 @@ int option::process_option_short(int argc, char const *const *argv, int optf)
       for (opts = argv[0]+1; *opts; ++opts)
       {
          opt = find(*opts);
+         opt->handled = true;
 
          if (opts[1])
          {
