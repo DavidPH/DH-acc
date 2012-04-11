@@ -49,6 +49,12 @@ static option::option_dptr<bool> option_named_scripts_handler
  "Does codegen for named scripts. When enabled, explicitly numbered scripts "
  "cannot be called normally.", NULL, &option_named_scripts);
 
+static int option_script_start = 1;
+static option::option_dptr<int> option_script_start_handler
+('\0', "script-start", "features",
+ "Sets the lowest number to use for automatically allocated script numbers.",
+ NULL, &option_script_start);
+
 static ScriptTable script_table;
 
 
@@ -66,7 +72,7 @@ bool option_named_scripts = false;
 static bigsint get_number()
 {
    ScriptIter iter;
-   bigsint number = 1;
+   bigsint number = option_script_start;
 
    for (iter = script_table.begin(); iter != script_table.end(); ++iter)
    {
