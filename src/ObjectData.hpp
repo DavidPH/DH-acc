@@ -222,15 +222,17 @@ struct ObjectData_Script
    bigsint varCount;
    CounterPointer<SourceContext> context;
    bool externDef;
+   bool externVis;
 
 
    static bool add
    (std::string const &name, std::string const &label, ScriptType stype,
-    bigsint flags, bigsint argCount, SourceContext *context);
+    bigsint flags, bigsint argCount, SourceContext *context, bool externVis);
 
    static bool add
    (std::string const &name, std::string const &label, ScriptType stype,
-    bigsint flags, bigsint argCount, SourceContext *context, bigsint number);
+    bigsint flags, bigsint argCount, SourceContext *context, bool externVis,
+    bigsint number);
 
    static void generate_symbols();
 

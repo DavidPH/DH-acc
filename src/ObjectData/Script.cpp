@@ -96,9 +96,9 @@ static bigsint get_number()
 //
 bool ObjectData_Script::add
 (std::string const &name, std::string const &label, ScriptType stype,
- bigsint flags, bigsint argCount, SourceContext *context)
+ bigsint flags, bigsint argCount, SourceContext *context, bool externVis)
 {
-   return add(name, label, stype, flags, argCount, context, -1);
+   return add(name, label, stype, flags, argCount, context, externVis, -1);
 }
 
 //
@@ -106,7 +106,8 @@ bool ObjectData_Script::add
 //
 bool ObjectData_Script::add
 (std::string const &name, std::string const &label, ScriptType stype,
- bigsint flags, bigsint argCount, SourceContext *context, bigsint number)
+ bigsint flags, bigsint argCount, SourceContext *context, bool externVis,
+ bigsint number)
 {
    ObjectData_Script &data = script_table[name];
 
@@ -121,6 +122,7 @@ bool ObjectData_Script::add
       data.varCount  = -1;
       data.context   = context;
       data.externDef = !context;
+      data.externVis = externVis;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
 
@@ -147,7 +149,7 @@ void ObjectData_Script::generate_symbols()
    // Generate numbers.
    for (iter = script_table.begin(); iter != script_table.end(); ++iter)
    {
-      if (iter->second.number >= 0) continue;
+      if (iter->second.number >= 0 || iter->second.externDef) continue;
 
       if (option_named_scripts)
          iter->second.number = --number;
@@ -284,10 +286,14 @@ void read_object(std::istream *in, ObjectData_Script *out)
    read_object(in, &out->number);
    read_object(in, &out->varCount);
    read_object(in, &out->externDef);
+   read_object(in, &out->externVis);
 
    out->context = NULL;
 }
 
+//
+// read_object<ObjectData_Script::ScriptType>
+//
 void read_object(std::istream *in, ObjectData_Script::ScriptType *out)
 {
    read_object_raw(in, reinterpret_cast<char *>(out), sizeof(*out));
@@ -315,6 +321,7 @@ void write_object(std::ostream *out, ObjectData_Script const &in)
    write_object(out, in.number);
    write_object(out, in.varCount);
    write_object(out, in.externDef);
+   write_object(out, in.externVis);
 }
 
 //

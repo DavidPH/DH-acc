@@ -128,7 +128,8 @@ static SourceType divine_source_type(std::string const &name)
 //
 static void dump_script(std::ostream *out, ObjectData_Script const &s)
 {
-   *out << s.name << ' ' << s.label << ' ' << s.number << '\n';
+   if (!s.externDef && s.externVis)
+      *out << s.name << ' ' << s.label << ' ' << s.number << '\n';
 }
 
 //

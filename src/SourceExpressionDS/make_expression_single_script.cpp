@@ -158,11 +158,11 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
    if (scriptNumber < 0)
       added = ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-       NULL);
+       NULL, true);
    else
       added = ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-       NULL, scriptNumber);
+       NULL, true, scriptNumber);
 
    if (added)
       context->addFunction(scriptVariable);
@@ -175,6 +175,8 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_script)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(script)
 {
+   bool externVis = token.data == "__extscript";
+
    // scriptArgClass
    SourceVariable::StorageClass scriptArgClass;
 
@@ -294,7 +296,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 
    // scriptLabel
    std::string scriptLabel;
-   if (token.data != "__extscript")
+   if (!externVis)
       scriptLabel += context->makeLabel();
    scriptLabel += scriptNameSource;
    if (option_script_mangle_types)
@@ -317,11 +319,11 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
    if (scriptNumber < 0)
       added = ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-       scriptContext);
+       scriptContext, externVis);
    else
       added = ObjectData_Script::add
       (scriptNameObject, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-       scriptContext, scriptNumber);
+       scriptContext, externVis, scriptNumber);
 
    if (added)
       context->addFunction(scriptVariable);
