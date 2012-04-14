@@ -55,6 +55,11 @@
 static option::option_data<std::string> option_out
 ('o', "out", "output", "Output File.", NULL);
 
+static option::option_data<bool> option_init_code
+('\0', "init-code", "features",
+ "Enables the implicit creation of an initialization function/script for "
+ "top-level code. On-as-needed by default.", NULL, true);
+
 static option::option_data<std::string> option_script_list
 ('\0', "script-list", "output",
  "Indicates a file to list script names and numbers to. Use - to dump to "
@@ -167,10 +172,14 @@ static void read_source(std::string const &name, SourceType type,
 
       SourceTokenizerDS tokenizer(&in);
 
-      bool mainGen = tokenizer.peekType(SourceTokenC::TT_OP_BRACE_O);
-
       SourceExpression::Pointer expressions =
          SourceExpressionDS::make_expressions(&tokenizer);
+
+      bool mainGen;
+      if (!option_init_code.handled)
+         mainGen = !expressions->canMakeObject();
+      else
+         mainGen = option_init_code.data;
 
       if (mainGen)
       {
