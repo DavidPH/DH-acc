@@ -177,20 +177,20 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
 
    case SourceTokenC::TT_OP_BRACE_O:
    {
-      in->unget(token);
       Vector expressions;
       SourceContext::Reference blockContext =
          SourceContext::create(context, SourceContext::CT_BLOCK);
       make_expressions(in, &expressions, blocks, blockContext);
+      in->get(SourceTokenC::TT_OP_BRACE_C);
       expr = create_value_block(expressions, blockContext, token.pos);
       break;
    }
 
    case SourceTokenC::TT_OP_BRACKET_O:
    {
-      in->unget(token);
       Vector expressions;
       make_expressions(in, &expressions, blocks, context);
+      in->get(SourceTokenC::TT_OP_BRACKET_C);
       expr = create_value_block(expressions, PASS_A);
       break;
    }

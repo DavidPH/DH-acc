@@ -25,6 +25,7 @@
 
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
+#include "SourceStream.hpp"
 #include "SourceTokenizerDS.hpp"
 #include "VariableType.hpp"
 
@@ -519,46 +520,61 @@ void SourceExpressionDS::make_expression_arglist
 //
 // SourceExpressionDS::make_expressions
 //
-SourceExpression::Pointer SourceExpressionDS::make_expressions(SourceTokenizerDS * in)
+SourceExpression::Pointer SourceExpressionDS::make_expressions
+(SourceTokenizerDS *in)
 {
-   SourceContext::Pointer context = SourceContext::global_context;
+   Vector::iterator block;
+   SourceTokenC const *token;
 
-   SourcePosition position = in->peek().pos;
-	std::vector<SourceExpression::Pointer> expressions;
-	std::vector<SourceExpression::Pointer> blocks;
+   SourceContext::Reference context(SourceContext::global_context);
+   VariableType::Reference retnType = VariableType::get_bt_void();
 
-	make_expressions(in, &expressions, &blocks, SourceContext::global_context);
+   try
+   {
+      token = &in->peek();
+   }
+   catch (SourceStream::EndOfStream const &)
+   {
+      return create_value_data(retnType, context, SourcePosition::builtin());
+   }
 
-   expressions.push_back
-   (create_branch_return
-    (create_value_data
-     (VariableType::get_bt_void(), context, position), context, position));
+   SourcePosition pos = token->pos;
 
-	for (size_t i(0); i < blocks.size(); ++i)
-		expressions.push_back(blocks[i]);
+   Vector exprs;
+   Vector blocks;
 
-   return create_value_block(expressions, context, position);
+   make_expressions(in, &exprs, &blocks, context);
+
+   exprs.push_back(create_branch_return
+      (create_value_data(retnType, context, pos), context, pos));
+
+   for (block = blocks.begin(); block != blocks.end(); ++block)
+      exprs.push_back(*block);
+
+   return create_value_block(exprs, context, pos);
 }
 
 //
 // SourceExpressionDS::make_expressions
 //
-void SourceExpressionDS::make_expressions(SourceTokenizerDS * in, std::vector<SourceExpression::Pointer> * expressions, std::vector<SourceExpression::Pointer> * blocks, SourceContext * context)
+void SourceExpressionDS::make_expressions
+(SourceTokenizerDS *in, Vector *exprs, Vector *blocks, SourceContext *context)
 {
-   bool brackets(in->peekType(SourceTokenC::TT_OP_BRACKET_O));
+   while (true)
+   {
+      try
+      {
+         if (in->peekType(SourceTokenC::TT_OP_BRACE_C)) return;
+         if (in->peekType(SourceTokenC::TT_OP_BRACKET_C)) return;
+      }
+      catch (SourceStream::EndOfStream const &)
+      {
+         return;
+      }
 
-	in->get(brackets ? SourceTokenC::TT_OP_BRACKET_O : SourceTokenC::TT_OP_BRACE_O);
-
-	while (true)
-	{
-		if (in->peekType(brackets ? SourceTokenC::TT_OP_BRACKET_C : SourceTokenC::TT_OP_BRACE_C))
-			break;
-
-		expressions->push_back(make_expression(in, blocks, context));
-		in->get(SourceTokenC::TT_OP_SEMICOLON);
-	}
-
-	in->get(brackets ? SourceTokenC::TT_OP_BRACKET_C : SourceTokenC::TT_OP_BRACE_C);
+      exprs->push_back(make_expression(in, blocks, context));
+      in->get(SourceTokenC::TT_OP_SEMICOLON);
+   }
 }
 
 // EOF
