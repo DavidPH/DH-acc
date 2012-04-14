@@ -156,12 +156,6 @@ static void read_source(std::string const &name, SourceType type,
 
       std::vector<SourceTokenASMPLX> tokens;
       SourceTokenASMPLX::read_tokens(&in, &tokens);
-
-      // Implicit main. Should be replaced by a proper script defining syntax.
-      ObjectData_Script::ScriptType stype = ObjectData_Script::ST_OPEN;
-      ObjectData_Script::add
-      ("main", 0, stype, 0, 0, SourceContext::global_context, false);
-
       SourceTokenASMPLX::make_objects(tokens, objects);
    }
       break;
@@ -183,7 +177,8 @@ static void read_source(std::string const &name, SourceType type,
 
       if (mainGen)
       {
-         std::string mainName = name + "_main";
+         std::string mainName =
+            SourceContext::global_context->makeLabel() + "::main";
          std::string mainID = mainName + "_id";
 
          ObjectData_Script::ScriptType stype = ObjectData_Script::ST_OPEN;
