@@ -217,7 +217,8 @@ void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & toke
 			for (std::vector<std::string>::const_iterator it(token->_data.begin()); it != token->_data.end(); ++it)
 				oargs.push_back(make_expression(*it, token->_position));
 
-			objects->setPosition(token->_position).addToken(ocode, oargs);
+         objects->setPosition(token->_position);
+         objects->addToken(ocode, oargs);
 		}
 		else if (token->_type == '=')
 		{

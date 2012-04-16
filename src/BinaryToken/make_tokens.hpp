@@ -29,7 +29,7 @@
 
 #define PUSH_ARGS2(START,STOP)       \
    for (int i(START); i < STOP; ++i) \
-      args.push_back(object.getArg(i))
+      args.push_back(object->getArg(i))
 
 #define PUSH_ARGS1(STOP) \
    PUSH_ARGS2(0, STOP)

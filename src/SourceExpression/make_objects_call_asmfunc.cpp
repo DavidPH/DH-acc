@@ -73,7 +73,8 @@ void SourceExpression::make_objects_call_asmfunc
       for (size_t i = 0; i < args.size(); ++i)
          oargs.push_back(args[i]->makeObject());
 
-      objects->setPosition(pos).addToken(ocode.ocode_imm, oargs);
+      objects->setPosition(pos);
+      objects->addToken(ocode.ocode_imm, oargs);
    }
    else
    {
@@ -83,7 +84,8 @@ void SourceExpression::make_objects_call_asmfunc
       for (size_t i = 0; i < args.size(); ++i)
          args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->getSize(pos)));
 
-      objects->setPosition(pos).addToken(ocode.ocode);
+      objects->setPosition(pos);
+      objects->addToken(ocode.ocode);
    }
 
    make_objects_memcpy_post(objects, dst, src, retnType, context, pos);

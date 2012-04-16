@@ -45,7 +45,7 @@
 // BinaryTokenACS::make_tokens
 //
 void BinaryTokenACS::make_tokens
-(ObjectToken const &object, std::vector<BinaryTokenACS> *instructions)
+(ObjectVector const &objects, std::vector<BinaryTokenACS> *instructions)
 {
    static ObjectExpression::Pointer const fracbits =
       ObjectExpression::create_value_int(16, SourcePosition::builtin());
@@ -54,11 +54,14 @@ void BinaryTokenACS::make_tokens
 
    std::vector<ObjectExpression::Pointer> args;
 
-   SourcePosition const &pos = object.getPosition();
+   ObjectVector::const_iterator object;
+   for (object = objects.begin(); object != objects.end(); ++object)
+   {
+   SourcePosition const &pos = object->pos;
 
-   std::vector<std::string> const *labels = &object.getLabels();
+   std::vector<std::string> const *labels = &object->labels;
 
-   switch (object.getCode())
+   switch (object->code)
    {
    // Direct Mappings
    BINTOKACS_TOKENS_MAP_ALL_ALL();
@@ -68,18 +71,9 @@ void BinaryTokenACS::make_tokens
 
    case OCODE_NONE:
    default:
-      ERROR_P("unknown OCODE: %s", make_string(object.getCode()));
+      ERROR_P("unknown OCODE: %s", make_string(object->code));
    }
-}
-
-//
-// BinaryTokenACS::make_tokens
-//
-void BinaryTokenACS::make_tokens
-(ObjectVector const &objects, std::vector<BinaryTokenACS> *instructions)
-{
-   for (bigsint index(0); index < objects.size(); ++index)
-      make_tokens(objects[index], instructions);
+   }
 }
 
 // EOF

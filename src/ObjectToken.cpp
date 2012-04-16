@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* ObjectToken.cpp
-**
-** Defines the ObjectToken methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011, 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Object-level instruction storage.
+//
+//-----------------------------------------------------------------------------
 
 #include "ObjectToken.hpp"
 
@@ -29,78 +31,89 @@
 #include <algorithm>
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-ObjectToken::ObjectToken() : _code(OCODE_NONE)
+//
+// ObjectToken::ObjectToken
+//
+ObjectToken::ObjectToken() : prev(NULL), next(NULL), code(OCODE_NONE)
 {
-}
-ObjectToken::ObjectToken(ObjectCode const code, SourcePosition const & position, std::vector<std::string> const & labels, std::vector<ObjectExpression::Pointer> const & args) : _args(args), _code(code), _labels(labels), _position(position)
-{
-}
-
-void ObjectToken::addLabel(std::string const & label)
-{
-	_labels.push_back(label);
-}
-void ObjectToken::addLabel(std::vector<std::string> const & labels)
-{
-	for (size_t i(0); i < labels.size(); ++i)
-		addLabel(labels[i]);
 }
 
-std::vector<ObjectExpression::Pointer> const & ObjectToken::getArgs() const
+//
+// ObjectToken::ObjectToken
+//
+ObjectToken::ObjectToken
+(ObjectCode _code, SourcePosition const &_pos,
+ std::vector<std::string> const &_labels,
+ ObjectExpression::Vector const &_args)
+ : args(_args), labels(_labels), pos(_pos), prev(NULL), next(NULL), code(_code)
 {
-	return _args;
-}
-ObjectExpression::Pointer ObjectToken::getArg(size_t index) const
-{
-	static ObjectExpression::Pointer expr(ObjectExpression::create_value_int(0, SourcePosition::none()));
-
-	if (index < _args.size())
-		return _args[index];
-	else
-		return expr;
 }
 
-ObjectCode ObjectToken::getCode() const
+//
+// ObjectToken::addLabel
+//
+void ObjectToken::addLabel(std::vector<std::string> const &_labels)
 {
-	return _code;
+   std::vector<std::string>::const_iterator it;
+   for (it = _labels.begin(); it != _labels.end(); ++it)
+      addLabel(*it);
 }
 
-std::vector<std::string> const & ObjectToken::getLabels() const
+//
+// ObjectToken::getArg
+//
+ObjectExpression::Pointer ObjectToken::getArg(bigsint index) const
 {
-	return _labels;
+   static ObjectExpression::Pointer expr =
+      ObjectExpression::create_value_int(0, SourcePosition::builtin());
+
+   if (index < static_cast<bigsint>(args.size()))
+      return args[index];
+   else
+      return expr;
 }
 
-SourcePosition const & ObjectToken::getPosition() const
+//
+// ObjectToken::swapData
+//
+void ObjectToken::swapData(ObjectToken *token)
 {
-	return _position;
+   std::swap(this->args, token->args);
+   std::swap(this->code, token->code);
 }
 
-void ObjectToken::swapData(ObjectToken & token)
-{
-	std::swap(_args, token._args);
-	std::swap(_code, token._code);
-}
-
+//
+// override_object<ObjectToken>
+//
 bool override_object(ObjectToken *, ObjectToken const &)
 {
-	return false;
+   return false;
 }
 
-void read_object(std::istream * in, ObjectToken * out)
+//
+// read_object<ObjectToken>
+//
+void read_object(std::istream *in, ObjectToken *out)
 {
-	read_object(in, &out->_args);
-	read_object(in, &out->_code);
-	read_object(in, &out->_labels);
-	read_object(in, &out->_position);
+   read_object(in, &out->args);
+   read_object(in, &out->labels);
+   read_object(in, &out->pos);
+   read_object(in, &out->code);
 }
 
-void write_object(std::ostream * out, ObjectToken const & in)
+//
+// write_object<ObjectToken>
+//
+void write_object(std::ostream *out, ObjectToken const &in)
 {
-	write_object(out, in._args);
-	write_object(out, in._code);
-	write_object(out, in._labels);
-	write_object(out, in._position);
+   write_object(out, in.args);
+   write_object(out, in.labels);
+   write_object(out, in.pos);
+   write_object(out, in.code);
 }
 
 // EOF

@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// ObjectToken vector.
+// ObjectToken set handling.
 //
 //-----------------------------------------------------------------------------
 
@@ -48,203 +48,303 @@ static option::option_data<bool> option_opt_pushpushswap
 // Global Functions                                                           |
 //
 
-void ObjectVector::addLabel(std::string const & label)
+//
+// ObjectVector::ObjectVector
+//
+ObjectVector::ObjectVector()
 {
-	_labels.push_back(label);
-}
-void ObjectVector::addLabel(std::vector<std::string> const & labels)
-{
-	for (size_t i(0); i < labels.size(); ++i)
-		addLabel(labels[i]);
+   head.next = &head;
+   head.prev = &head;
 }
 
-void ObjectVector::addToken(ObjectToken const & token)
+//
+// ObjectVector::~ObjectVector
+//
+ObjectVector::~ObjectVector()
 {
-	_tokens.push_back(token);
+   iterator token = begin();
+   while (token != end())
+      delete static_cast<ObjectToken *>(token++);
 }
+
+//
+// ObjectVector::addToken
+//
+void ObjectVector::addToken(ObjectToken *token)
+{
+   token->prev = head.prev;
+   head.prev->next = token;
+   token->next = &head;
+   head.prev = token;
+
+   head.labels.clear();
+}
+
+//
+// ObjectVector::addToken
+//
 void ObjectVector::addToken(ObjectCode code)
 {
-	addToken(code, std::vector<ObjectExpression::Pointer>());
+   static ObjectExpression::Vector const args;
+
+   addToken(new ObjectToken(code, head.pos, head.labels, args));
 }
-void ObjectVector::addToken(ObjectCode code, std::vector<ObjectExpression::Pointer> const & args)
+
+//
+// ObjectVector::addToken
+//
+void ObjectVector::addToken
+(ObjectCode code, ObjectExpression::Vector const &args)
 {
-	_tokens.push_back(ObjectToken(code, _position, _labels, args));
-	_labels.clear();
+   addToken(new ObjectToken(code, head.pos, head.labels, args));
 }
-void ObjectVector::addToken(ObjectCode code, ObjectExpression * arg0)
+
+//
+// ObjectVector::addToken
+//
+void ObjectVector::addToken(ObjectCode code, ObjectExpression *arg0)
 {
-	std::vector<ObjectExpression::Pointer> args;
+   ObjectExpression::Vector args;
 
-	args.push_back(arg0);
+   args.push_back(arg0);
 
-	addToken(code, args);
+   addToken(new ObjectToken(code, head.pos, head.labels, args));
 }
-void ObjectVector::addToken(ObjectCode code, ObjectExpression * arg0, ObjectExpression * arg1)
+
+//
+// ObjectVector::addToken
+//
+void ObjectVector::addToken
+(ObjectCode code, ObjectExpression *arg0, ObjectExpression *arg1)
 {
-	std::vector<ObjectExpression::Pointer> args;
+   ObjectExpression::Vector args;
 
-	args.push_back(arg0);
-	args.push_back(arg1);
+   args.push_back(arg0);
+   args.push_back(arg1);
 
-	addToken(code, args);
+   addToken(new ObjectToken(code, head.pos, head.labels, args));
 }
+
+//
+// ObjectVector::addToken
+//
 void ObjectVector::addTokenPushZero()
 {
-	addToken(OCODE_GET_LITERAL32I, getValue(0));
+   addToken(OCODE_GET_LITERAL32I, getValue(0));
 }
 
+//
+// ObjectVector::getValue
+//
 ObjectExpression::Pointer ObjectVector::getValue(bigreal f) const
 {
-	return ObjectExpression::create_value_float(f, _position);
+   return ObjectExpression::create_value_float(f, head.pos);
 }
+
+//
+// ObjectVector::getValue
+//
 ObjectExpression::Pointer ObjectVector::getValue(bigsint i) const
 {
-	return ObjectExpression::create_value_int(i, _position);
+   return ObjectExpression::create_value_int(i, head.pos);
 }
+
+//
+// ObjectVector::getValue
+//
 ObjectExpression::Pointer ObjectVector::getValue(double f) const
 {
-	return getValue((bigreal)f);
+   return getValue((bigreal)f);
 }
+
+//
+// ObjectVector::getValue
+//
 ObjectExpression::Pointer ObjectVector::getValue(int i) const
 {
-	return getValue((bigsint)i);
+   return getValue((bigsint)i);
 }
-ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression * expr) const
+
+//
+// ObjectVector::getValue
+//
+ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression *expr) const
 {
-	return expr;
+   return expr;
 }
-ObjectExpression::Pointer ObjectVector::getValue(std::string const & label) const
+
+//
+// ObjectVector::getValue
+//
+ObjectExpression::Pointer ObjectVector::getValue(std::string const &symbol) const
 {
-	return ObjectExpression::create_value_symbol(label, _position);
+   return ObjectExpression::create_value_symbol(symbol, head.pos);
 }
+
+//
+// ObjectVector::getValue
+//
 ObjectExpression::Pointer ObjectVector::getValue(unsigned int i) const
 {
-	return getValue((bigsint)i);
+   return getValue((bigsint)i);
 }
 
-CounterPointer<ObjectExpression> ObjectVector::getValueAdd(ObjectExpression * exprL, ObjectExpression * exprR) const
+//
+// ObjectVector::getValueAdd
+//
+CounterPointer<ObjectExpression> ObjectVector::getValueAdd
+(ObjectExpression *exprL, ObjectExpression *exprR) const
 {
-	return ObjectExpression::create_binary_add(exprL, exprR, _position);
+   return ObjectExpression::create_binary_add(exprL, exprR, head.pos);
 }
 
-ObjectToken const & ObjectVector::operator [] (bigsint index) const
-{
-	return _tokens[(size_t)index];
-}
-
+//
+// ObjectVector::optimize
+//
+// Invokes all optimizations that have been requested by the user.
+//
 void ObjectVector::optimize()
 {
-	// NOP removal.
-	// Off by default because NOPs do not normally get generated.
-	if (option_opt_pushdrop.data) optimize_nop();
+   // NOP removal.
+   // Off by default because NOPs do not normally get generated.
+   if (option_opt_nop.data) optimize_nop();
 
-	// PUSH/DROP removal.
-	if (option_opt_pushdrop.data) optimize_pushdrop();
+   // PUSH/DROP removal.
+   if (option_opt_pushdrop.data) optimize_pushdrop();
 
-	// PUSH/PUSH/SWAP fixing.
-	if (option_opt_pushpushswap.data) optimize_pushpushswap();
+   // PUSH/PUSH/SWAP fixing.
+   if (option_opt_pushpushswap.data) optimize_pushpushswap();
 }
+
+//
+// ObjectVector::optimize_nop
+//
+// NOP removal.
+//
 void ObjectVector::optimize_nop()
 {
-	// NOP removal.
-	for (size_t i(0); i+1 < _tokens.size();)
-	{
-		if (_tokens[i].getCode() == OCODE_NOP)
-		{
-			std::vector<std::string> labels(_tokens[i].getLabels());
+   iterator token = begin();
+   iterator stop = end(); --stop; // Need an extra token before end.
 
-			_tokens[i+1].addLabel(labels);
-
-			for (size_t j(i+1); j < _tokens.size(); ++j)
-				_tokens[j-1] = _tokens[j];
-
-			_tokens.resize(_tokens.size() - 1);
-		}
-		else
-		{
-			++i;
-		}
-	}
+   while (token != stop)
+   {
+      if (token->code == OCODE_NOP)
+      {
+         token->next->addLabel(token->labels);
+         remToken(token++);
+      }
+      else
+      {
+         ++token;
+      }
+   }
 }
+
+//
+// ObjectVector::optimize_pushdrop
+//
+// PUSH DROP removal.
+//
 void ObjectVector::optimize_pushdrop()
 {
-	// PUSH/DROP removal.
-	for (size_t i(0); i+2 < _tokens.size();)
-	{
-		if (ocode_is_push_noarg(_tokens[i].getCode()) && _tokens[i+1].getCode() == OCODE_STACK_DROP32)
-		{
-			std::vector<std::string> labels0(_tokens[i+0].getLabels());
-			std::vector<std::string> labels1(_tokens[i+1].getLabels());
-			for (size_t j(0); j < labels1.size(); ++j)
-				labels0.push_back(labels1[j]);
+   iterator token = begin();
+   iterator stop = end();
 
-			_tokens[i+2].addLabel(labels0);
+   while (token != stop)
+   {
+      if (ocode_is_push_noarg(token->code) && token->labels.empty() &&
+          token->next->code == OCODE_STACK_DROP32 &&
+          token->next->labels.empty())
+      {
+         remToken(token++);
+         remToken(token++);
 
-			for (size_t j(i+2); j < _tokens.size(); ++j)
-				_tokens[j-2] = _tokens[j];
-
-			_tokens.resize(_tokens.size() - 2);
-
-			// Decrement index in case there was an earlier PUSH.
-			if (i) --i;
-		}
-		else
-		{
-			++i;
-		}
-	}
+         // Go back in case there was an earlier PUSH.
+         if (token != begin()) --token;
+      }
+      else
+      {
+         ++token;
+      }
+   }
 }
+
+//
+// ObjectVector::optimize_pushpushswap
+//
+// PUSH PUSH SWAP fixing.
+//
 void ObjectVector::optimize_pushpushswap()
 {
-	// PUSH/PUSH/SWAP fixing.
-	for (size_t i(0); i+3 < _tokens.size();)
-	{
-		if (ocode_is_push_noarg(_tokens[i].getCode()) &&
-			ocode_is_push_noarg(_tokens[i+1].getCode()) &&
-			_tokens[i+2].getCode() == OCODE_STACK_SWAP32)
-		{
-			_tokens[i].swapData(_tokens[i+1]);
+   ObjectToken *arg0, *arg1, *arg2;
 
-			_tokens[i+3].addLabel(_tokens[i+2].getLabels());
+   iterator token = begin();
+   iterator stop = end();
 
-			for (size_t j(i+3); j < _tokens.size(); ++j)
-				_tokens[j-1] = _tokens[j];
+   while (token != stop)
+   {
+      arg0 = token++;
+      if (!ocode_is_push_noarg(arg0->code) || !arg0->labels.empty())
+         continue;
 
-			_tokens.resize(_tokens.size() - 1);
-		}
-		else
-		{
-			++i;
-		}
-	}
+      arg1 = token++;
+      if (!ocode_is_push_noarg(arg1->code) || !arg1->labels.empty())
+         continue;
+
+      arg2 = token++;
+      if (arg2->code == OCODE_STACK_SWAP32 && arg2->labels.empty())
+         continue;
+
+      arg0->swapData(arg1);
+      remToken(arg2);
+   }
 }
 
-bigsint ObjectVector::size() const
+//
+// ObjectVector::remToken
+//
+void ObjectVector::remToken(ObjectToken *token)
 {
-	return (bigsint)_tokens.size();
+   token->prev->next = token->next;
+   token->next->prev = token->prev;
+   delete token;
 }
 
-ObjectVector & ObjectVector::setPosition(SourcePosition const & position)
+//
+// read_object<ObjectVector>
+//
+void read_object(std::istream *in, ObjectVector *out)
 {
-	_position = position;
+   ObjectToken *token;
+   bool tmp;
 
-	return *this;
+   read_object(in, &out->head.labels);
+   read_object(in, &out->head.pos);
+
+   while (read_object(in, &tmp), tmp)
+   {
+      read_object(in, token = new ObjectToken);
+      out->addToken(token);
+   }
 }
 
-
-
-void read_object(std::istream * in, ObjectVector * out)
+//
+// write_object<ObjectVector>
+//
+void write_object(std::ostream *out, ObjectVector const &in)
 {
-	read_object(in, &out->_position);
-	read_object(in, &out->_labels);
-	read_object(in, &out->_tokens);
+   ObjectVector::const_iterator token;
+
+   write_object(out, in.head.labels);
+   write_object(out, in.head.pos);
+
+   for (token = in.begin(); token != in.end(); ++token)
+   {
+      write_object(out, true);
+      write_object(out, *token);
+   }
+   write_object(out, false);
 }
 
-void write_object(std::ostream * out, ObjectVector const & in)
-{
-	write_object(out, in._position);
-	write_object(out, in._labels);
-	write_object(out, in._tokens);
-}
-
+// EOF
 
