@@ -543,7 +543,6 @@ void VariableType::getNameMangled(std::string &out) const
    case BT_BOOLSOFT: out += "BS"; break;
    case BT_CHAR:     out += 'C'; break;
    case BT_ENUM:     out += "E("; out += name; out += ')'; break;
-   case BT_FIXED:    out += "FI"; break;
    case BT_FLOAT:    out += 'F'; break;
    case BT_LFLOAT:   out += "FL"; break;
    case BT_LLFLOAT:  out += "FLL"; break;
@@ -569,6 +568,7 @@ void VariableType::getNameMangled(std::string &out) const
    case BT_ULLONG:   out += "ULL"; break;
    case BT_UNION:    out += "U("; out += name; out += ')'; break;
    case BT_VOID:     out += 'V'; break;
+   case BT_FIXED:    out += 'X'; break;
    }
 
    if (getQualifier(QUAL_CONST))    out += 'c';
