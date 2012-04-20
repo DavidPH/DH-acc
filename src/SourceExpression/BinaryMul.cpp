@@ -122,8 +122,8 @@ SourceExpression_BinaryMul::SourceExpression_BinaryMul
 //
 ObjectExpression::Pointer SourceExpression_BinaryMul::makeObject() const
 {
-   return ObjectExpression::create_binary_mul
-          (exprL->makeObject(), exprR->makeObject(), position);
+   EVALUATE_OBJECTS();
+   return ObjectExpression::create_binary_mul(objL, objR, position);
 }
 
 //

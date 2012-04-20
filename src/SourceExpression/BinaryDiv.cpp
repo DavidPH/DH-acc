@@ -121,8 +121,8 @@ SourceExpression_BinaryDiv::SourceExpression_BinaryDiv
 //
 ObjectExpression::Pointer SourceExpression_BinaryDiv::makeObject() const
 {
-   return ObjectExpression::create_binary_div
-          (exprL->makeObject(), exprR->makeObject(), position);
+   EVALUATE_OBJECTS();
+   return ObjectExpression::create_binary_div(objL, objR, position);
 }
 
 //

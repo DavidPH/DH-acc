@@ -120,8 +120,8 @@ SourceExpression_BinaryMod::SourceExpression_BinaryMod
 //
 ObjectExpression::Pointer SourceExpression_BinaryMod::makeObject() const
 {
-   return ObjectExpression::create_binary_mod
-          (exprL->makeObject(), exprR->makeObject(), position);
+   EVALUATE_OBJECTS();
+   return ObjectExpression::create_binary_mod(objL, objR, position);
 }
 
 //

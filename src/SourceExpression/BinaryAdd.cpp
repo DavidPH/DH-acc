@@ -152,8 +152,8 @@ SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
 //
 ObjectExpression::Pointer SourceExpression_BinaryAdd::makeObject() const
 {
-   return ObjectExpression::create_binary_add
-          (exprL->makeObject(), exprR->makeObject(), position);
+   EVALUATE_OBJECTS();
+   return ObjectExpression::create_binary_add(objL, objR, position);
 }
 
 //

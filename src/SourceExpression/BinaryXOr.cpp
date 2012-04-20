@@ -45,7 +45,14 @@ class SourceExpression_BinaryXOr : public SourceExpression_Binary
 public:
    SourceExpression_BinaryXOr(bool assign, SRCEXP_EXPRBIN_ARGS);
 
-   virtual ObjectExpression::Pointer makeObject() const;
+   //
+   // ::makeObject
+   //
+   virtual ObjectExpression::Pointer makeObject() const
+   {
+      EVALUATE_OBJECTS();
+      return ObjectExpression::create_binary_xor(objL, objR, position);
+   }
 
 private:
    //
@@ -112,15 +119,6 @@ SourceExpression_BinaryXOr::SourceExpression_BinaryXOr
    CONSTRUCTOR_ARRAY_DECAY
 
    CONSTRAINT_INTEGER("^")
-}
-
-//
-// SourceExpression_BinaryXOr::makeObject
-//
-CounterPointer<ObjectExpression> SourceExpression_BinaryXOr::makeObject() const
-{
-   return ObjectExpression::create_binary_xor
-          (exprL->makeObject(), exprR->makeObject(), position);
 }
 
 //

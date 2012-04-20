@@ -172,8 +172,8 @@ SourceExpression_BinarySub::SourceExpression_BinarySub
 //
 ObjectExpression::Pointer SourceExpression_BinarySub::makeObject() const
 {
-   return ObjectExpression::create_binary_sub
-          (exprL->makeObject(), exprR->makeObject(), position);
+   EVALUATE_OBJECTS();
+   return ObjectExpression::create_binary_sub(objL, objR, position);
 }
 
 //

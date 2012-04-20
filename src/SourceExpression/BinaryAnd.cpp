@@ -60,8 +60,8 @@ public:
    //
    virtual ObjectExpression::Pointer makeObject() const
    {
-      return ObjectExpression::create_binary_and
-      (exprL->makeObject(), exprR->makeObject(), position);
+      EVALUATE_OBJECTS();
+      return ObjectExpression::create_binary_and(objL, objR, position);
    }
 
 private:

@@ -393,6 +393,16 @@ ObjectCode ocode = OCODE_##OPER##32;                    \
                                                         \
 VariableData::Pointer src = VariableData::create_stack(size);
 
+//
+// EVALUATE_OBJECTS
+//
+#define EVALUATE_OBJECTS()                                                   \
+VariableType::Reference type = getType();                                    \
+ObjectExpression::Pointer objL =                                             \
+   create_value_cast_implicit(exprL, type, context, position)->makeObject(); \
+ObjectExpression::Pointer objR =                                             \
+   create_value_cast_implicit(exprR, type, context, position)->makeObject();
+
 
 //----------------------------------------------------------------------------|
 // Types                                                                      |
