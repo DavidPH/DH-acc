@@ -292,7 +292,7 @@ void ObjectVector::optimize_pushpushswap()
          continue;
 
       arg2 = token++;
-      if (arg2->code == OCODE_STACK_SWAP32 && arg2->labels.empty())
+      if (arg2->code != OCODE_STACK_SWAP32 || !arg2->labels.empty())
          continue;
 
       arg0->swapData(arg1);
