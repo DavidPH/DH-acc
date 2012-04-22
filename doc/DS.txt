@@ -1,5 +1,6 @@
 DS is a language for writing game logic for scripting engines. This logic is
-written as a series of expressions.
+written as a series of expressions. The meaning of operators as well as their
+precedence generally follows C rules.
 
 
 
@@ -19,8 +20,6 @@ block []
   Groups a set of expressions without a new context. Yields contained
   expressions. Can be cast to a struct or array.
     "[" [ expression ";" ]... "]"
-
-A DS script is a single block.
 
 
 
