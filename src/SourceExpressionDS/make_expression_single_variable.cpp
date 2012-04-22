@@ -84,6 +84,10 @@ static SourceExpression::Pointer make_var
    // Variable initialization. (But not for external declaration.)
    if (!externDef && in->peekType(SourceTokenC::TT_OP_EQUALS))
    {
+      static SourceContext::NameType const initNT = SourceContext::NT_LOCAL;
+      static VariableType::Reference const initType =
+         VariableType::get_bt_boolhard();
+
       SourceExpression::Pointer initSrc;
       ObjectExpression::Pointer initObj;
 
@@ -93,11 +97,57 @@ static SourceExpression::Pointer make_var
       if (initSrc->canMakeObject())
          initObj = initSrc->makeObject();
 
+      // Generate expression to set variable.
+      SourceExpression::Pointer exprSet = SourceExpression::
+            create_binary_assign_const(expr, initSrc, context, pos);
+
       switch (sc)
       {
-      default:
+         // Only initialize static-duration storage-classes once.
+      case SourceVariable::SC_STATIC:
+      {
+         // Generate source/object name
+         std::string initNameSrc = nameSrc + "$init";
+         std::string initNameObj =
+            context->makeNameObject(initNT, sc, initType, initNameSrc, pos);
+
+         // Generate variable.
+         SourceVariable::Pointer initVar = SourceVariable::
+            create_variable(initNameSrc, initType, initNameObj, sc, pos);
+         context->addVariable(initVar);
+
+         // Generate expression.
+         SourceExpression::Pointer initExpr = SourceExpression::
+            create_value_variable(initVar, context, pos);
+
+         // Generate expression of value if initialized.
+         SourceExpression::Pointer initVal = SourceExpression::
+            create_value_int(1, context, pos);
+
+         // Generate expression to set flag.
+         SourceExpression::Pointer initSet = SourceExpression::
+            create_binary_assign(initExpr, initVal, context, pos);
+
+         // Generate expression to check if initialized.
+         SourceExpression::Pointer initChk = SourceExpression::
+            create_branch_not(initExpr, context, pos);
+
+         // Generate expression to set variable and flag.
+         SourceExpression::Vector initBothVector;
+         initBothVector.push_back(exprSet);
+         initBothVector.push_back(initSet);
+         SourceExpression::Pointer initBoth = SourceExpression::
+            create_value_block(initBothVector, context, pos);
+
+         // Generate expression to conditionally set variable and flag.
          expr = SourceExpression::
-            create_binary_assign_const(expr, initSrc, context, pos);
+            create_branch_if(initChk, initBoth, context, pos);
+      }
+
+         break;
+
+      default:
+         expr = exprSet;
          break;
       }
    }
