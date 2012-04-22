@@ -100,8 +100,6 @@ static void add
 //
 static void count_register(std::ostream *, ObjectData_Register const &r)
 {
-   if (!r.externVis || r.externDef) return;
-
    for (bigsint i = r.size; i--;)
       used.insert(r.number+i);
 }
