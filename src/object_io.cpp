@@ -1,27 +1,32 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* object_io.cpp
-**
-** Defines the read_object and write_object functions.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011-2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Object-format I/O.
+//
+//-----------------------------------------------------------------------------
 
 #include "object_io.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
 bool override_object(int *, int const &)
 {
@@ -44,6 +49,15 @@ void read_object(std::istream * in, long * out)
 {
 	read_object_raw(in, (char *)out, sizeof(*out));
 }
+
+//
+// read_object<long long>
+//
+void read_object(std::istream *in, long long *out)
+{
+   read_object_raw(in, (char *)out, sizeof(*out));
+}
+
 void read_object(std::istream * in, long double * out)
 {
 	read_object_raw(in, (char *)out, sizeof(*out));
@@ -84,6 +98,15 @@ void write_object(std::ostream * out, long const & in)
 {
 	write_object_raw(out, (char const *)&in, sizeof(in));
 }
+
+//
+// write_object<long long>
+//
+void write_object(std::ostream *out, long long const &in)
+{
+   write_object_raw(out, (char const *)&in, sizeof(in));
+}
+
 void write_object(std::ostream * out, long double const & in)
 {
 	write_object_raw(out, (char const *)&in, sizeof(in));
@@ -110,4 +133,5 @@ void write_object_raw(std::ostream * out, char const * in, size_t size)
 		out->put(*in++);
 }
 
+// EOF
 

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011-2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,9 +36,9 @@ class SourcePosition;
 // A long double should service all requirements of bigreal.
 typedef long double bigreal;
 
-// 32 bits services the ACS VM. Will need 64 bits for ScriptPLX.
-typedef   signed long int bigsint;
-typedef unsigned long int biguint;
+// Will want something bigger eventually.
+typedef   signed long long int bigsint;
+typedef unsigned long long int biguint;
 
 
 //----------------------------------------------------------------------------|
@@ -51,7 +51,5 @@ bigsint get_bigsint(std::string const &value, SourcePosition const &position);
 
 
 
-#endif /* HPP_bignum_ */
-
-
+#endif//HPP_bignum_
 

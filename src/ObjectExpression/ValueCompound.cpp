@@ -43,16 +43,16 @@ public:
    // ::ObjectExpression_ValueCompound
    //
    ObjectExpression_ValueCompound
-   (Vector const &_elems, VecStr const &_names, SourcePosition const &position)
-   : Super(position), elems(_elems), names(_names), type(ET_STRUCT)
+   (Vector const &_elems, VecStr const &_names, SourcePosition const &_pos)
+   : Super(_pos), elems(_elems), names(_names), type(ET_STRUCT)
    {
    }
    //
    // ::ObjectExpression_ValueCompound
    //
    ObjectExpression_ValueCompound
-   (Vector const &_elems, SourcePosition const &position)
-   : Super(position), elems(_elems), type(ET_ARRAY)
+   (Vector const &_elems, SourcePosition const &_pos)
+   : Super(_pos), elems(_elems), type(ET_ARRAY)
    {
    }
 

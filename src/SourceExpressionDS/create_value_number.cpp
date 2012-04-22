@@ -60,21 +60,21 @@ static inline int char_to_int(char c)
 SourceExpression::Pointer SourceExpressionDS::create_value_integer
 (std::string const &value, SRCEXP_EXPR_ARGS)
 {
-   static bigsint const maxs_HH = 0x7FFFFFFF;
-   static bigsint const maxs_H  = 0x7FFFFFFF;
-   static bigsint const maxs    = 0x7FFFFFFF;
-   static bigsint const maxs_L  = 0x7FFFFFFF;
-   static bigsint const maxs_LL = 0x7FFFFFFFFFFFFFFF; // FIXME
+   static biguint const maxs_HH = 0x7FFFFFFF;
+   static biguint const maxs_H  = 0x7FFFFFFF;
+   static biguint const maxs    = 0x7FFFFFFF;
+   static biguint const maxs_L  = 0x7FFFFFFF;
+   static biguint const maxs_LL = 0x7FFFFFFFFFFFFFFF;
 
-   static bigsint const maxu_HH = 0xFFFFFFFF;
-   static bigsint const maxu_H  = 0xFFFFFFFF;
-   static bigsint const maxu    = 0xFFFFFFFF;
-   static bigsint const maxu_L  = 0xFFFFFFFF;
-   static bigsint const maxu_LL = 0xFFFFFFFFFFFFFFFF; // FIXME
+   static biguint const maxu_HH = 0xFFFFFFFF;
+   static biguint const maxu_H  = 0xFFFFFFFF;
+   static biguint const maxu    = 0xFFFFFFFF;
+   static biguint const maxu_L  = 0xFFFFFFFF;
+   static biguint const maxu_LL = 0xFFFFFFFFFFFFFFFF;
 
    int         base = 10;
    char const *str  = value.c_str();
-   bigsint     val  = 0;
+   biguint     val  = 0;
 
    if (*str == '0')
    {
@@ -195,10 +195,10 @@ dointL:
       return create_value_ulong(val, context, position);
 
 dointLL:
-   if (!isU /*&& val <= maxs_LL*/) // FIXME
+   if (!isU && val <= maxs_LL)
       return create_value_llong(val, context, position);
 
-   if ((isU || isUU) /*&& val <= maxu_LL*/) // FIXME
+   if ((isU || isUU) && val <= maxu_LL)
       return create_value_ullong(val, context, position);
 
    ERROR(position, "integer literal out of range");
