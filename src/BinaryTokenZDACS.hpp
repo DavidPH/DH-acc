@@ -331,6 +331,8 @@ public:
    static void write_ACSE_library(std::ostream *out, std::string const &lib);
    static void write_ACSE_register_MEXP(std::ostream *out, ObjectData_Register const &r);
    static void write_ACSE_register_MIMP(std::ostream *out, ObjectData_Register const &r);
+   static void write_ACSE_register_MINI(std::ostream *out, ObjectData_Register const &r);
+   static void write_ACSE_register_MSTR(std::ostream *out, ObjectData_Register const &r);
    static void write_ACSE_script(std::ostream *out, ObjectData_Script const &s);
    static void write_ACSE_script_SFLG(std::ostream *out, ObjectData_Script const &s);
    static void write_ACSE_script_SNAM(std::ostream *out, ObjectData_Script const &s);

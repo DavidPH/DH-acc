@@ -224,6 +224,45 @@ write_ACSE_register_MEXP(std::ostream *, ObjectData_Register const &r)
 }
 
 //
+// BinaryTokenZDACS::write_ACSE_register_MINI
+//
+void BinaryTokenZDACS::write_ACSE_register_MINI
+(std::ostream *out, ObjectData_Register const &r)
+{
+   if (r.externDef) return;
+   if (!r.init) return;
+
+   *out << 'M' << 'I' << 'N' << 'I';
+   BinaryTokenACS::write_ACS0_32(out, r.size*4+4);
+   BinaryTokenACS::write_ACS0_32(out, r.number);
+
+   ObjectExpression::Vector init;
+   r.init->expand(&init);
+
+   for (size_t i = 0, end = r.size; i != end; ++i)
+   {
+      if (i < init.size())
+         BinaryTokenACS::write_ACS0_32(out, *init[i]);
+      else
+         BinaryTokenACS::write_ACS0_32(out, 0);
+   }
+}
+
+//
+// BinaryTokenZDACS::write_ACSE_register_MSTR
+//
+void BinaryTokenZDACS::write_ACSE_register_MSTR
+(std::ostream *out, ObjectData_Register const &r)
+{
+   if (r.externDef) return;
+   if (!r.init) return;
+
+   for (size_t i = r.strings.size(); i--;)
+      if (r.strings[i])
+         BinaryTokenACS::write_ACS0_32(out, r.number + i);
+}
+
+//
 // BinaryTokenZDACS::write_ACSE_script
 //
 void BinaryTokenZDACS::

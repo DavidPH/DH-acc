@@ -175,6 +175,8 @@ struct ObjectData_Register
 
    static void generate_symbols();
 
+   static void ini_map(std::string const &name, ObjectExpression *ini);
+
    static void iterate_map(IterFunc iterFunc, std::ostream *out);
    static void iterate_world(IterFunc iterFunc, std::ostream *out);
    static void iterate_global(IterFunc iterFunc, std::ostream *out);

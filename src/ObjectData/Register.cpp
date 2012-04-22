@@ -128,28 +128,38 @@ static void iterate
 //
 static void set_number(RegisterTable &table, ObjectData_Register &data)
 {
-   RegisterIter iter;
-   bigsint index = 0, limit = index + data.size, iterN, iterL;
+   RegisterIter iter = table.begin();
+   bigsint index = 0, limit, iterI, iterL;
 
-   for (iter = table.begin(); iter != table.end(); ++iter)
+   while (iter != table.end())
    {
+      if (iter->second.number < 0) {++iter; continue;}
+
+      limit = index + data.size;
+
       // If this is the world table and stack-pointer is in range, try again.
       if (&table == &world_table &&
           option_addr_stack >= index && limit > option_addr_stack)
-         {++index; ++limit; iter = table.begin(); continue;}
-
-      iterN = iter->second.number;
-      iterL = iterN + iter->second.size;
-
-      // If either end of the iter's range is in range, try again.
-      if ((iterN >= index && limit > iterN) ||
-          (iterL >= index && limit > iterL))
       {
-         index = iterL;
-         limit = index + data.size;
+         index = option_addr_stack + 1;
          iter = table.begin();
          continue;
       }
+
+      iterI = iter->second.number;
+      iterL = iterI + iter->second.size;
+      if (!iter->second.size) ++iterL;
+
+      // If either end of the iter's range is in range, try again.
+      if ((iterI >= index && limit > iterI) ||
+          (iterL >  index && limit > iterL))
+      {
+         index = iterL;
+         iter = table.begin();
+         continue;
+      }
+
+      ++iter;
    }
 
    data.number = index;
@@ -306,6 +316,17 @@ void ObjectData_Register::generate_symbols()
    ::generate_symbols(map_table);
    ::generate_symbols(world_table);
    ::generate_symbols(global_table);
+}
+
+//
+// ObjectData_Register::ini_map
+//
+void ObjectData_Register::ini_map
+(std::string const &name, ObjectExpression *ini)
+{
+   RegisterIter r = map_table.find(name);
+   if (r == map_table.end()) return;
+   r->second.init = ini;
 }
 
 //

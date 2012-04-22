@@ -23,7 +23,9 @@
 
 #include "../SourceExpressionDS.hpp"
 
+#include "../ObjectData.hpp"
 #include "../ObjectExpression.hpp"
+#include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
@@ -77,6 +79,9 @@ static SourceExpression::Pointer make_var
    SourceVariable::Pointer var =
       SourceVariable::create_variable(nameSrc, type, nameObj, sc, pos);
 
+   // Add variable to context.
+   context->addVariable(var);
+
    // Generate expression.
    SourceExpression::Pointer expr =
       SourceExpression::create_value_variable(var, context, pos);
@@ -103,8 +108,17 @@ static SourceExpression::Pointer make_var
 
       switch (sc)
       {
+      case SourceVariable::SC_REGISTER_MAP:
+         if (!initObj || target_type != TARGET_ZDoom)
+            goto case_static;
+
+         ObjectData_Register::ini_map(nameObj, initObj);
+
+         break;
+
          // Only initialize static-duration storage-classes once.
       case SourceVariable::SC_STATIC:
+      case_static:
       {
          // Generate source/object name
          std::string initNameSrc = nameSrc + "$init";
@@ -151,9 +165,6 @@ static SourceExpression::Pointer make_var
          break;
       }
    }
-
-   // Add variable to context.
-   context->addVariable(var);
 
    return expr;
 }

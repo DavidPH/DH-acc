@@ -107,10 +107,11 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    write_ACSE_chunk(out, &chunkout, "MIMP");
 
    // MINI - Map Register Initialization
-   // TODO
+   ObjectData_Register::iterate_map(write_ACSE_register_MINI, out);
 
    // MSTR - Map Register Strings
-   // TODO
+   ObjectData_Register::iterate_map(write_ACSE_register_MSTR, &chunkout);
+   write_ACSE_chunk(out, &chunkout, "MSTR");
 
    // SPTR - Script Pointers
    ObjectData_Script::iterate(write_ACSE_script, &chunkout);
