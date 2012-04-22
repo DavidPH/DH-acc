@@ -31,6 +31,130 @@
 
 
 //----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
+typedef SourceVariable::StorageClass StorageClass;
+
+
+//----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+//
+// make_var
+//
+static SourceExpression::Pointer make_var
+(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
+ SourceContext *context, SourcePosition const &pos, std::string const &nameSrc,
+ VariableType *type, StorageClass sc, bool externDef, bool externVis)
+{
+   // Determine "name type".
+   SourceContext::NameType nt;
+   if (externDef)
+      nt = SourceContext::NT_EXTERN;
+
+   else if (externVis)
+      nt = SourceContext::NT_EXTLOCAL;
+
+   else
+      nt = SourceContext::NT_LOCAL;
+
+   // Generate object name.
+   std::string nameObj;
+   if (in->peekType(SourceTokenC::TT_OP_AT))
+   {
+      in->get(SourceTokenC::TT_OP_AT);
+      bigsint addr =
+         SourceExpressionDS::make_expression_single(in, blocks, context)
+         ->makeObject()->resolveInt();
+      nameObj = context->makeNameObject(nt, sc, type, nameSrc, addr, pos);
+   }
+   else
+      nameObj = context->makeNameObject(nt, sc, type, nameSrc, pos);
+
+   // Generate variable.
+   SourceVariable::Pointer var =
+      SourceVariable::create_variable(nameSrc, type, nameObj, sc, pos);
+
+   // Generate expression.
+   SourceExpression::Pointer expr =
+      SourceExpression::create_value_variable(var, context, pos);
+
+   // Variable initialization. (But not for external declaration.)
+   if (!externDef && in->peekType(SourceTokenC::TT_OP_EQUALS))
+   {
+      SourceExpression::Pointer initSrc;
+      ObjectExpression::Pointer initObj;
+
+      in->get(SourceTokenC::TT_OP_EQUALS);
+      initSrc = SourceExpressionDS::make_expression(in, blocks, context);
+
+      if (initSrc->canMakeObject())
+         initObj = initSrc->makeObject();
+
+      switch (sc)
+      {
+      default:
+         expr = SourceExpression::
+            create_binary_assign_const(expr, initSrc, context, pos);
+         break;
+      }
+   }
+
+   // Add variable to context.
+   context->addVariable(var);
+
+   return expr;
+}
+
+//
+// make_var
+//
+static SourceExpression::Pointer make_var
+(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
+ SourceContext *context, SourcePosition const &pos, VariableType *type,
+ StorageClass sc, bool externDef, bool externVis)
+{
+   // Read source name.
+   std::string nameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
+
+   return make_var(in, blocks, context, pos, nameSrc, type, sc, externDef, externVis);
+}
+
+//
+// make_var
+//
+static SourceExpression::Pointer make_var
+(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
+ SourceContext *context, SourcePosition const &pos, StorageClass sc,
+ bool externDef, bool externVis)
+{
+   // Read variable type.
+   VariableType::Reference type =
+      SourceExpressionDS::make_expression_type(in, blocks, context);
+
+   return make_var(in, blocks, context, pos, type, sc, externDef, externVis);
+}
+
+//
+// make_var
+//
+static SourceExpression::Pointer make_var
+(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
+ SourceContext *context, SourcePosition const &pos,
+ bool externDef, bool externVis)
+{
+   // Read storage class.
+   SourceTokenC const &scTok = in->get(SourceTokenC::TT_IDENTIFIER);
+   SourceVariable::StorageClass sc =
+      SourceVariable::get_StorageClass(scTok.data, scTok.pos);
+
+   return make_var(in, blocks, context, pos, sc, externDef, externVis);
+}
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -39,37 +163,7 @@
 //
 SRCEXPDS_EXPRSINGLE_DEFN(extern_variable)
 {
-   SourceContext::NameType const nameType = SourceContext::NT_EXTERN;
-
-   SourceTokenC scToken = in->get(SourceTokenC::TT_IDENTIFIER);
-   SourceVariable::StorageClass sc =
-      SourceVariable::get_StorageClass(scToken.data, scToken.pos);
-
-   VariableType::Reference type = make_expression_type(in, blocks, context);
-   std::string name = in->get(SourceTokenC::TT_IDENTIFIER).data;
-
-   std::string nameObject;
-   if (in->peekType(SourceTokenC::TT_OP_AT))
-   {
-      in->get(SourceTokenC::TT_OP_AT);
-      bigsint address =
-         make_expression_single(in, blocks, context)->makeObject()->resolveInt();
-      nameObject =
-         context->makeNameObject(nameType, sc, type, name, address, token.pos);
-   }
-   else
-   {
-      nameObject =
-         context->makeNameObject(nameType, sc, type, name, token.pos);
-   }
-
-   SourceVariable::Pointer var =
-      SourceVariable::create_variable
-      (name, type, nameObject, sc, token.pos);
-
-   context->addVariable(var);
-
-   return create_value_variable(var, context, token.pos);
+   return make_var(in, blocks, context, token.pos, true, true);
 }
 
 //
@@ -77,49 +171,9 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_variable)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(variable)
 {
-   bool external = token.data == "__extvar";
-   SourceContext::NameType nameType =
-      external ? SourceContext::NT_EXTLOCAL : SourceContext::NT_LOCAL;
+   bool externVis = token.data == "__extvar";
 
-   SourceTokenC scToken = in->get(SourceTokenC::TT_IDENTIFIER);
-   SourceVariable::StorageClass sc =
-      SourceVariable::get_StorageClass(scToken.data, scToken.pos);
-
-   VariableType::Reference type = make_expression_type(in, blocks, context);
-   std::string name = in->get(SourceTokenC::TT_IDENTIFIER).data;
-
-   std::string nameObject;
-   if (in->peekType(SourceTokenC::TT_OP_AT))
-   {
-      in->get(SourceTokenC::TT_OP_AT);
-      bigsint address =
-         make_expression_single(in, blocks, context)->makeObject()->resolveInt();
-      nameObject =
-         context->makeNameObject(nameType, sc, type, name, address, token.pos);
-   }
-   else
-   {
-      nameObject =
-         context->makeNameObject(nameType, sc, type, name, token.pos);
-   }
-
-   SourceVariable::Pointer var =
-      SourceVariable::create_variable(name, type, nameObject, sc, token.pos);
-
-   context->addVariable(var);
-
-   SourceExpression::Pointer expr =
-      create_value_variable(var, context, token.pos);
-
-   // Semi-hack so that const vars can be initialized.
-   if (in->peekType(SourceTokenC::TT_OP_EQUALS))
-   {
-      in->get(SourceTokenC::TT_OP_EQUALS);
-      expr = create_binary_assign_const
-         (expr, make_expression(in, blocks, context), context, token.pos);
-   }
-
-   return expr;
+   return make_var(in, blocks, context, token.pos, false, externVis);
 }
 
 // EOF

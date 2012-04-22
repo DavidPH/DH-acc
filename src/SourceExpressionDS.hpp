@@ -67,6 +67,12 @@ public:
    static SourceExpression::Pointer create_value_integer
    (std::string const &value, SRCEXP_EXPR_ARGS);
 
+   static SourceExpression::Pointer make_expression
+   (SourceTokenizerDS *in, Vector *blocks, SourceContext *context);
+
+   static SourceExpression::Pointer make_expression_single
+   (SourceTokenizerDS *in, Vector *blocks, SourceContext *context);
+
    static CounterReference<VariableType> make_expression_type
    (SourceTokenizerDS * in, Vector *blocks, SourceContext *context);
 
@@ -84,9 +90,6 @@ private:
    static bool is_expression_type
    (std::string const &data, SourceContext *context);
 
-   static SourceExpression::Pointer make_expression
-   (SourceTokenizerDS *in, Vector *blocks, SourceContext *context);
-
    static void make_expression_arglist
    (SourceTokenizerDS *in, Vector *blocks, SourceContext *context,
     std::vector<CounterPointer<VariableType> > *argTypes,
@@ -103,9 +106,6 @@ private:
    static void make_expressions
    (SourceTokenizerDS *in, Vector *expressions, Vector *blocks,
     SourceContext *context);
-
-   static SourceExpression::Pointer make_expression_single
-   (SourceTokenizerDS *in, Vector *blocks, SourceContext *context);
 
    SRCEXPDS_EXPRSINGLE_DECL(asmfunc);
    SRCEXPDS_EXPRSINGLE_DECL(break);
