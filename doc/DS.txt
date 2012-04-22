@@ -438,7 +438,7 @@ type array
 
 type assembly function
   A pointer type used for assembly functions. Can only be used at compile-time.
-    "__asmfunc" arglist_return
+    "__asmfunc_t" arglist_return
 
 type block
     "__block" "{" [ type ]... "}"
@@ -457,7 +457,7 @@ type enum
 
 type function
   A pointer type used for functions.
-    "__function" arglist_return
+    "__func_t" arglist_return
 
 type hard bool
   A boolean type that is guaranteed to always be 0 (false) or 1 (true).
@@ -473,11 +473,11 @@ type label
 
 type line special
   A pointer type used for line specials.
-    "__linespec" arglist_return
+    "__lnspec_t" arglist_return
 
 type native
   A pointer type used for native/builtin functions.
-    "__native" arglist_return
+    "__native_t" arglist_return
 
 type pointer
   A pointer type used for addressable memory.
@@ -489,7 +489,7 @@ type real
 
 type script
   A pointer type used for scripts.
-    "__script" arglist_return
+    "__script_t" arglist_return
 
 type soft bool
   A boolean type that has indeterminate representation. Proper casting, however,
