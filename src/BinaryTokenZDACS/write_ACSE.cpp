@@ -192,11 +192,19 @@ write_ACSE_register_MIMP(std::ostream *out, ObjectData_Register const &r)
 {
    if (!r.externDef) return;
 
-   // A bit of a hack, really.
-   for (int i = 0; i < r.size; i++)
+   if (r.size > 1)
    {
-      BinaryTokenACS::write_ACS0_32(out, r.number+i);
-      *out << r.name << (char)(i+1) << '\0';
+      // Mangle the name for each byte.
+      for (bigsint i = 0; i < r.size; ++i)
+      {
+         BinaryTokenACS::write_ACS0_32(out, r.number + i);
+         *out << r.name << "::" << i << '\0';
+      }
+   }
+   else
+   {
+      BinaryTokenACS::write_ACS0_32(out, r.number);
+      *out << r.name << '\0';
    }
 }
 
@@ -208,18 +216,24 @@ write_ACSE_register_MEXP(std::ostream *, ObjectData_Register const &r)
 {
    if (!r.externVis) return;
 
-   std::string s(r.name);
-   s += '\0';
+   std::ostringstream oss;
 
    if (strings_temp.size() < static_cast<size_t>(r.number + r.size))
       strings_temp.resize(r.number + r.size);
 
-   // A bit of a hack, really.
-   // More specifically, this is how multi-byte variable names get translated.
-   for (int i = 0; i < r.size; i++)
+   if (r.size > 1)
    {
-      s[s.size()-1] = (char)(i+1);
-      strings_temp[r.number+i] = s;
+      // Mangle the name for each byte.
+      for (bigsint i = 0; i < r.size; ++i)
+      {
+         oss.str(r.name);
+         oss << "::" << i;
+         strings_temp[r.number + i] = oss.str();
+      }
+   }
+   else
+   {
+      strings_temp[r.number] = r.name;
    }
 }
 
