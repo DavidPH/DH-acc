@@ -23,6 +23,7 @@
 
 #include "SourceTokenC.hpp"
 
+#include "SourceException.hpp"
 #include "SourceStream.hpp"
 
 
@@ -507,6 +508,8 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
 
       return;
    }
+
+   ERROR(token->pos, "unexpected character '%c' (%i)", c, static_cast<int>(c));
 }
 
 //
