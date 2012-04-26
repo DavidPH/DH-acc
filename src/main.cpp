@@ -257,7 +257,8 @@ static inline int _main()
    // If doing object output, don't process object data.
    if (output_type == OUTPUT_object)
    {
-      std::ofstream ofs(option_out.data.c_str());
+      std::ofstream ofs(option_out.data.c_str(),
+                        std::ios_base::out|std::ios_base::binary);
 
       ObjectExpression::write_objects(&ofs, &objects);
 
@@ -291,7 +292,8 @@ static inline int _main()
    }
 
    // Write output file.
-   std::ofstream ofs(option_out.data.c_str());
+   std::ofstream ofs(option_out.data.c_str(),
+                     std::ios_base::out|std::ios_base::binary);
 
    switch (target_type)
    {
