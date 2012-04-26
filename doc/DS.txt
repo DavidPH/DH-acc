@@ -434,7 +434,7 @@ almost all types can be converted to any other type as needed without any
 warning.
 
 type array
-    type "[" expression "]"
+    "__array" type "[" expression "]"
 
 type assembly function
   A pointer type used for assembly functions. Can only be used at compile-time.
