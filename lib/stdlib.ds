@@ -35,7 +35,7 @@ struct heapdata
 {
    unsigned size;
    unsigned used;
-   __array char[0] data;
+   char[0] data;
 };
 
 //
@@ -54,7 +54,7 @@ struct llbits_t
 
 constexpr size_t heapsize = 16*1024*1024;
 
-__variable static __array char[heapsize] heap;
+__variable static char[heapsize] heap;
 __variable static heapdata *heapptr;
 
 constexpr heapdata *heapbegin = (heapdata *)&heap[0];

@@ -425,7 +425,6 @@ is_expression_type(std::string const &data, SourceContext *context)
        data == "signed" || data == "unsigned")
       return true;
 
-   if (data == "__array")    return true;
    if (data == "__asmfunc_t")return true;
    if (data == "__block")    return true;
    if (data ==   "decltype") return true;
@@ -469,14 +468,6 @@ VariableType::Reference SourceExpressionDS::make_expression_type
 
    if (type || (type = make_basic(token, in)) != NULL)
    {
-   }
-   else if (token.data == "__array")
-   {
-      retn = make_expression_type(in, blocks, context);
-      in->get(SourceTokenC::TT_OP_BRACKET_O);
-      width = make_expression(in, blocks, context)->makeObject()->resolveInt();
-      in->get(SourceTokenC::TT_OP_BRACKET_C);
-      type = retn->getArray(width);
    }
    else if (token.data == "__asmfunc_t")
    {
@@ -633,6 +624,13 @@ VariableType::Reference SourceExpressionDS::make_expression_type
    case SourceTokenC::TT_OP_ASTERISK:
       in->get(SourceTokenC::TT_OP_ASTERISK);
       type = type->getPointer();
+      break;
+
+   case SourceTokenC::TT_OP_BRACKET_O:
+      in->get(SourceTokenC::TT_OP_BRACKET_O);
+      width = make_expression(in, blocks, context)->makeObject()->resolveInt();
+      in->get(SourceTokenC::TT_OP_BRACKET_C);
+      type = type->getArray(width);
       break;
 
    default:
