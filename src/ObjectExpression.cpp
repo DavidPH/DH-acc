@@ -261,9 +261,12 @@ void ObjectExpression::writeACSPLong(std::ostream *) const
    ERROR_N(position, "cannot write ACS+");
 }
 
+//
+// ObjectExpression::writeObject
+//
 void ObjectExpression::writeObject(std::ostream * out) const
 {
-	write_object(out, position);
+   write_object(out, &position);
 }
 
 // EOF

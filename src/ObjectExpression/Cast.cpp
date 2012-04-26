@@ -163,10 +163,10 @@ protected:
 
       Super::writeObject(out);
 
-      write_object(out, expr);
+      write_object(out, &expr);
 
-      write_object(out, dstType);
-      write_object(out, srcType);
+      write_object(out, &dstType);
+      write_object(out, &srcType);
    }
 
 private:

@@ -35,112 +35,119 @@
 // Global Functions                                                           |
 //
 
-template<typename Tk, typename Tv> bool override_object(std::map<Tk, Tv> * out, std::pair<Tk, Tv> const & in);
-bool override_object(int *out, int const &in);
-bool override_object(std::string * out, std::string const & in);
-template<typename T> bool override_object(std::vector<T> * out, T const & in);
+void read_object(std::istream *in, bool *out);
+void read_object(std::istream *in, long double *out);
+void read_object(std::istream *in, signed int *out);
+void read_object(std::istream *in, signed long int *out);
+void read_object(std::istream *in, signed long long int *out);
+void read_object(std::istream *in, unsigned int *out);
+void read_object(std::istream *in, unsigned long int *out);
+void read_object(std::istream *in, std::string *out);
 
-void read_object(std::istream * in, bool * out);
-void read_object(std::istream * in, int * out);
-void read_object(std::istream * in, long * out);
-void read_object(std::istream *in, long long *out);
-void read_object(std::istream * in, long double * out);
-template<typename Tk, typename Tv> void read_object(std::istream * in, std::map<Tk, Tv> * out);
-template<typename Tk, typename Tv> void read_object(std::istream * in, std::pair<Tk, Tv> * out);
-void read_object(std::istream * in, std::string * out);
-template<typename T> void read_object(std::istream * in, std::vector<T> * out);
-void read_object(std::istream * in, unsigned int * out);
-void read_object(std::istream * in, unsigned long * out);
+bool read_object_bit(std::istream *in);
+void read_object_raw(std::istream *in, char *out, size_t size);
 
-void read_object_raw(std::istream * in, char * out, size_t size);
+void write_object(std::ostream *out, bool const *in);
+void write_object(std::ostream *out, long double const *in);
+void write_object(std::ostream *out, signed int const *in);
+void write_object(std::ostream *out, signed long int const *in);
+void write_object(std::ostream *out, signed long long int const *in);
+void write_object(std::ostream *out, unsigned int const *in);
+void write_object(std::ostream *out, unsigned long int const *in);
+void write_object(std::ostream *out, std::string const *in);
 
-void write_object(std::ostream * out, bool const & in);
-void write_object(std::ostream * out, int const & in);
-void write_object(std::ostream * out, long const & in);
-void write_object(std::ostream *out, long long const &in);
-void write_object(std::ostream * out, long double const & in);
-template<typename Tk, typename Tv> void write_object(std::ostream * out, std::map<Tk, Tv> const & in);
-template<typename Tk, typename Tv> void write_object(std::ostream * out, std::pair<Tk, Tv> const & in);
-void write_object(std::ostream * out, std::string const & in);
-template<typename T> void write_object(std::ostream * out, std::vector<T> const & in);
-void write_object(std::ostream * out, unsigned int const & in);
-void write_object(std::ostream * out, unsigned long const & in);
+void write_object_bit(std::ostream *out, bool in);
+void write_object_raw(std::ostream *out, char const *in, size_t size);
 
-void write_object_raw(std::ostream * out, char const * in, size_t size);
-
-template<typename Tk, typename Tv> bool override_object(std::map<Tk, Tv> * out, std::pair<Tk, Tv> const & in)
+//
+// read_object<std::map>
+//
+template<typename Tk, typename Tv>
+void read_object(std::istream *in, std::map<Tk, Tv> *out)
 {
-	typename std::map<Tk, Tv>::iterator it(out->find(in.first));
+   typename std::map<Tk, Tv>::iterator  iter;
+   typename std::map<Tk, Tv>::size_type count;
 
-	if (it == out->end())
-	{
-		out->insert(in);
-		return false;
-	}
-	else
-		return override_object(&it->second, in.second);
-}
-template<typename T> bool override_object(std::vector<T> * out, T const & in)
-{
-	for (typename std::vector<T>::iterator it(out->begin()); it != out->end(); ++it)
-		if (override_object(&*it, in))
-			return true;
+   read_object(in, &count);
 
-	return false;
+   while (count--)
+   {
+      std::pair<Tk, Tv> o;
+      read_object(in, &o);
+
+      if ((iter = out->find(o.first)) == out->end())
+         out->insert(o);
+      else
+         override_object(&iter->second, &o.second);
+   }
 }
 
-template<typename Tk, typename Tv> void read_object(std::istream * in, std::map<Tk, Tv> * out)
+//
+// read_object<std::pair>
+//
+template<typename Tk, typename Tv>
+void read_object(std::istream *in, std::pair<Tk, Tv> *out)
 {
-	typename std::map<Tk, Tv>::size_type size;
-	read_object(in, &size);
-
-	while (size--)
-	{
-		std::pair<Tk, Tv> o;
-		read_object(in, &o);
-
-		override_object(out, o);
-	}
-
-}
-template<typename Tk, typename Tv> void read_object(std::istream * in, std::pair<Tk, Tv> * out)
-{
-	read_object(in, &out->first);
-	read_object(in, &out->second);
-}
-template<typename T> void read_object(std::istream * in, std::vector<T> * out)
-{
-	typename std::vector<T>::size_type size;
-	read_object(in, &size);
-
-	while (size--)
-	{
-		T o;
-		read_object(in, &o);
-
-		if (!override_object(out, o))
-			out->push_back(o);
-	}
+   read_object(in, &out->first);
+   read_object(in, &out->second);
 }
 
-template<typename Tk, typename Tv> void write_object(std::ostream * out, std::map<Tk, Tv> const & in)
+//
+// read_object<std::vector>
+//
+template<typename T>
+void read_object(std::istream *in, std::vector<T> *out)
 {
-	write_object(out, in.size());
+   typename std::vector<T>::iterator  iter, end;
+   typename std::vector<T>::size_type size = out->size(), count;
 
-	for (typename std::map<Tk, Tv>::const_iterator it(in.begin()); it != in.end(); ++it)
-		write_object(out, *it);
-}
-template<typename Tk, typename Tv> void write_object(std::ostream * out, std::pair<Tk, Tv> const & in)
-{
-	write_object(out, in.first);
-	write_object(out, in.second);
-}
-template<typename T> void write_object(std::ostream * out, std::vector<T> const & in)
-{
-	write_object(out, in.size());
+   read_object(in, &count);
 
-	for (typename std::vector<T>::const_iterator it(in.begin()); it != in.end(); ++it)
-		write_object(out, *it);
+   out->resize(size + count);
+   end = out->end();
+
+   for (iter = out->begin() + size; iter != end; ++iter)
+      read_object(in, &*iter);
+}
+
+//
+// write_object<std::map>
+//
+template<typename Tk, typename Tv>
+void write_object(std::ostream *out, std::map<Tk, Tv> const *in)
+{
+   typename std::map<Tk, Tv>::const_iterator iter, end = in->end();
+   typename std::map<Tk, Tv>::size_type      size = in->size();
+
+   write_object(out, &size);
+
+   for (iter = in->begin(); iter != end; ++iter)
+      write_object(out, &*iter);
+}
+
+//
+// write_object<std::pair>
+//
+template<typename Tk, typename Tv>
+void write_object(std::ostream *out, std::pair<Tk, Tv> const *in)
+{
+   write_object(out, &in->first);
+   write_object(out, &in->second);
+}
+
+//
+// write_object<std::vector>
+//
+template<typename T>
+void write_object(std::ostream *out, std::vector<T> const *in)
+{
+   typename std::vector<T>::const_iterator iter, end = in->end();
+   typename std::vector<T>::size_type      size = in->size();
+
+   write_object(out, &size);
+
+   for (iter = in->begin(); iter != end; ++iter)
+      write_object(out, &*iter);
 }
 
 #endif//HPP_object_io_

@@ -368,26 +368,21 @@ void ObjectData_Register::read_objects(std::istream *in)
 //
 void ObjectData_Register::write_objects(std::ostream *out)
 {
-   write_object(out, map_table);
-   write_object(out, world_table);
-   write_object(out, global_table);
+   write_object(out, &map_table);
+   write_object(out, &world_table);
+   write_object(out, &global_table);
 }
 
 //
 // override_object<ObjectData_Register>
 //
-bool override_object(ObjectData_Register *out, ObjectData_Register const &in)
+void override_object(ObjectData_Register *out, ObjectData_Register const *in)
 {
-   if (out->name != in.name)
-      return false;
-
-   if (out->externDef && !in.externDef)
+   if (out->externDef && !in->externDef)
    {
-      out->number    = in.number;
+      out->number    = in->number;
       out->externDef = false;
    }
-
-   return true;
 }
 
 //
@@ -407,15 +402,15 @@ void read_object(std::istream *in, ObjectData_Register *out)
 //
 // write_object<ObjectData_Register>
 //
-void write_object(std::ostream * out, ObjectData_Register const & in)
+void write_object(std::ostream *out, ObjectData_Register const *in)
 {
-   write_object(out, in.strings);
-   write_object(out, in.name);
-   write_object(out, in.number);
-   write_object(out, in.size);
-   write_object(out, in.init);
-   write_object(out, in.externDef);
-   write_object(out, in.externVis);
+   write_object(out, &in->strings);
+   write_object(out, &in->name);
+   write_object(out, &in->number);
+   write_object(out, &in->size);
+   write_object(out, &in->init);
+   write_object(out, &in->externDef);
+   write_object(out, &in->externVis);
 }
 
 // EOF

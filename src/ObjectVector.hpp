@@ -157,7 +157,7 @@ public:
 
 
    friend void read_object(std::istream *in, ObjectVector *out);
-   friend void write_object(std::ostream *out, ObjectVector const &in);
+   friend void write_object(std::ostream *out, ObjectVector const *in);
 
 private:
    void addToken(ObjectToken *token);

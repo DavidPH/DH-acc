@@ -31,25 +31,22 @@
 // Global Functions                                                           |
 //
 
-bool override_object(ObjectData_Auto * out, ObjectData_Auto const & in)
+//
+// override_object<ObjectData_Auto>
+//
+void override_object(ObjectData_Auto *out, ObjectData_Auto const *in)
 {
-	if (out->name != in.name)
-		return false;
-
-	if (out->number == -1)
-		*out = in;
-
-	return true;
+   if (out->number == -1)
+      *out = *in;
 }
-bool override_object(ObjectData_Static * out, ObjectData_Static const & in)
+
+//
+// override_object<ObjectData_Static>
+//
+void override_object(ObjectData_Static *out, ObjectData_Static const *in)
 {
-	if (out->name != in.name)
-		return false;
-
-	if (out->number == -1)
-		*out = in;
-
-	return true;
+   if (out->number == -1)
+      *out = *in;
 }
 
 void read_object(std::istream * in, ObjectData_Auto * out)
@@ -65,17 +62,24 @@ void read_object(std::istream * in, ObjectData_Static * out)
 	read_object(in, &out->size);
 }
 
-void write_object(std::ostream * out, ObjectData_Auto const & in)
+//
+// write_object<ObjectData_Auto>
+//
+void write_object(std::ostream *out, ObjectData_Auto const *in)
 {
-	write_object(out, in.name);
-	write_object(out, in.number);
-	write_object(out, in.size);
+   write_object(out, &in->name);
+   write_object(out, &in->number);
+   write_object(out, &in->size);
 }
-void write_object(std::ostream * out, ObjectData_Static const & in)
+
+//
+// write_object<ObjectData_Static>
+//
+void write_object(std::ostream *out, ObjectData_Static const *in)
 {
-	write_object(out, in.name);
-	write_object(out, in.number);
-	write_object(out, in.size);
+   write_object(out, &in->name);
+   write_object(out, &in->number);
+   write_object(out, &in->size);
 }
 
 // EOF

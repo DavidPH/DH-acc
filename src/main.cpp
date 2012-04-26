@@ -259,7 +259,7 @@ static inline int _main()
    {
       std::ofstream ofs(option_out.data.c_str());
 
-      ObjectExpression::write_objects(&ofs, objects);
+      ObjectExpression::write_objects(&ofs, &objects);
 
       return 0;
    }

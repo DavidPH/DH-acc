@@ -75,8 +75,8 @@ char const *make_string(ObjectCode ocode);
 void read_object(std::istream *in, ObjectCode *out);
 void read_object(std::istream *in, ObjectCodeSet *out);
 
-void write_object(std::ostream *out, ObjectCode const &in);
-void write_object(std::ostream *out, ObjectCodeSet const &in);
+void write_object(std::ostream *out, ObjectCode const *in);
+void write_object(std::ostream *out, ObjectCodeSet const *in);
 
 #endif//HPP_ObjectCode_
 

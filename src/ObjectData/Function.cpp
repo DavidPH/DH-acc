@@ -131,24 +131,19 @@ void ObjectData_Function::read_objects(std::istream *in)
 //
 void ObjectData_Function::write_objects(std::ostream *out)
 {
-   write_object(out, function_table);
+   write_object(out, &function_table);
 }
 
 //
 // override_object<ObjectData_Function>
 //
-bool override_object(ObjectData_Function *out, ObjectData_Function const &in)
+void override_object(ObjectData_Function *out, ObjectData_Function const *in)
 {
-   if (out->name != in.name)
-      return false;
-
-   if (out->externDef && !in.externDef)
+   if (out->externDef && !in->externDef)
    {
-      out->varCount = in.varCount;
+      out->varCount = in->varCount;
       out->externDef = false;
    }
-
-   return true;
 }
 
 //
@@ -170,21 +165,21 @@ void read_object(std::istream *in, ObjectData_Function *out)
 //
 // write_object<ObjectData_Function>
 //
-void write_object(std::ostream *out, ObjectData_Function const &in)
+void write_object(std::ostream *out, ObjectData_Function const *in)
 {
-   if (in.context)
+   if (in->context)
    {
-      const_cast<ObjectData_Function &>(in).varCount =
-         in.context->getLimit(SourceVariable::SC_REGISTER);
+      const_cast<ObjectData_Function *>(in)->varCount =
+         in->context->getLimit(SourceVariable::SC_REGISTER);
    }
 
-   write_object(out, in.label);
-   write_object(out, in.name);
-   write_object(out, in.argCount);
-   write_object(out, in.number);
-   write_object(out, in.retCount);
-   write_object(out, in.varCount);
-   write_object(out, in.externDef);
+   write_object(out, &in->label);
+   write_object(out, &in->name);
+   write_object(out, &in->argCount);
+   write_object(out, &in->number);
+   write_object(out, &in->retCount);
+   write_object(out, &in->varCount);
+   write_object(out, &in->externDef);
 }
 
 // EOF

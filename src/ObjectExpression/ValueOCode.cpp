@@ -89,7 +89,7 @@ void ObjectExpression_ValueOCode::writeObject(std::ostream * out) const
 
 	Super::writeObject(out);
 
-	write_object(out, _value);
+   write_object(out, &_value);
 }
 
 // EOF

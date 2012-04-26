@@ -134,10 +134,10 @@ protected:
    {
       Super::writeObject(out);
 
-      write_object(out, elems);
-      write_object(out, names);
+      write_object(out, &elems);
+      write_object(out, &names);
 
-      write_object(out, type);
+      write_object(out, &type);
    }
 
 private:

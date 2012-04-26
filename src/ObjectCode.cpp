@@ -142,18 +142,18 @@ void read_object(std::istream *in, ObjectCodeSet *out)
 //
 // write_object<ObjectCode>
 //
-void write_object(std::ostream *out, ObjectCode const &in)
+void write_object(std::ostream *out, ObjectCode const *in)
 {
-   write_object_raw(out, (char const *)&in, sizeof(in));
+   write_object_raw(out, (char const *)in, sizeof(*in));
 }
 
 //
 // write_object<ObjectCodeSet>
 //
-void write_object(std::ostream *out, ObjectCodeSet const &in)
+void write_object(std::ostream *out, ObjectCodeSet const *in)
 {
-   write_object(out, in.ocode);
-   write_object(out, in.ocode_imm);
+   write_object(out, &in->ocode);
+   write_object(out, &in->ocode_imm);
 }
 
 // EOF

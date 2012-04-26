@@ -28,109 +28,177 @@
 // Global Functions                                                           |
 //
 
-bool override_object(int *, int const &)
+//
+// read_object<bool>
+//
+void read_object(std::istream *in, bool *out)
 {
-   return false;
-}
-bool override_object(std::string *, std::string const &)
-{
-	return false;
-}
-
-void read_object(std::istream * in, bool * out)
-{
-	*out = !!in->get();
-}
-void read_object(std::istream * in, int * out)
-{
-	read_object_raw(in, (char *)out, sizeof(*out));
-}
-void read_object(std::istream * in, long * out)
-{
-	read_object_raw(in, (char *)out, sizeof(*out));
+   *out = read_object_bit(in);
 }
 
 //
-// read_object<long long>
+// read_object<long double>
 //
-void read_object(std::istream *in, long long *out)
+void read_object(std::istream *in, long double *out)
 {
    read_object_raw(in, (char *)out, sizeof(*out));
 }
 
-void read_object(std::istream * in, long double * out)
+//
+// read_object<signed int>
+//
+void read_object(std::istream *in, signed int *out)
 {
-	read_object_raw(in, (char *)out, sizeof(*out));
-}
-void read_object(std::istream * in, std::string * out)
-{
-	std::string::size_type size;
-	read_object(in, &size);
-
-	out->reserve(size);
-	while (size--)
-		*out += (char)in->get();
-}
-void read_object(std::istream * in, unsigned int * out)
-{
-	read_object_raw(in, (char *)out, sizeof(*out));
-}
-void read_object(std::istream * in, unsigned long * out)
-{
-	read_object_raw(in, (char *)out, sizeof(*out));
-}
-
-void read_object_raw(std::istream * in, char * out, size_t size)
-{
-	while (size--)
-		*out++ = (char)in->get();
-}
-
-void write_object(std::ostream * out, bool const & in)
-{
-	out->put((char)in);
-}
-void write_object(std::ostream * out, int const & in)
-{
-	write_object_raw(out, (char const *)&in, sizeof(in));
-}
-void write_object(std::ostream * out, long const & in)
-{
-	write_object_raw(out, (char const *)&in, sizeof(in));
+   read_object_raw(in, (char *)out, sizeof(*out));
 }
 
 //
-// write_object<long long>
+// read_object<signed long int>
 //
-void write_object(std::ostream *out, long long const &in)
+void read_object(std::istream *in, long *out)
 {
-   write_object_raw(out, (char const *)&in, sizeof(in));
+   read_object_raw(in, (char *)out, sizeof(*out));
 }
 
-void write_object(std::ostream * out, long double const & in)
+//
+// read_object<signed long long int>
+//
+void read_object(std::istream *in, signed long long int *out)
 {
-	write_object_raw(out, (char const *)&in, sizeof(in));
-}
-void write_object(std::ostream * out, std::string const & in)
-{
-	std::string::size_type size(in.size());
-	write_object(out, size);
-
-	write_object_raw(out, in.c_str(), size);
-}
-void write_object(std::ostream * out, unsigned int const & in)
-{
-	write_object_raw(out, (char const *)&in, sizeof(in));
-}
-void write_object(std::ostream * out, unsigned long const & in)
-{
-	write_object_raw(out, (char const *)&in, sizeof(in));
+   read_object_raw(in, (char *)out, sizeof(*out));
 }
 
-void write_object_raw(std::ostream * out, char const * in, size_t size)
+//
+// read_object<unsigned int>
+//
+void read_object(std::istream *in, unsigned int *out)
 {
-	while (size--)
-		out->put(*in++);
+   read_object_raw(in, (char *)out, sizeof(*out));
+}
+
+//
+// read_object<unsigned long int>
+//
+void read_object(std::istream *in, unsigned long int *out)
+{
+   read_object_raw(in, (char *)out, sizeof(*out));
+}
+
+//
+// read_object<std::string>
+//
+void read_object(std::istream *in, std::string *out)
+{
+   std::string::iterator  iter, end;
+   std::string::size_type size;
+
+   read_object(in, &size);
+
+   out->resize(size);
+   end = out->end();
+
+   for (iter = out->begin(); iter != end; ++iter)
+      *iter = static_cast<char>(in->get());
+}
+
+//
+// read_object_bit
+//
+bool read_object_bit(std::istream *in)
+{
+   return static_cast<bool>(in->get());
+}
+
+//
+// read_object_raw
+//
+void read_object_raw(std::istream *in, char *out, size_t size)
+{
+   while (size--) *out++ = static_cast<char>(in->get());
+}
+
+//
+// write_object<bool>
+//
+void write_object(std::ostream *out, bool const *in)
+{
+   write_object_bit(out, *in);
+}
+
+//
+// write_object<long double>
+//
+void write_object(std::ostream *out, long double const *in)
+{
+   write_object_raw(out, (char const *)in, sizeof(*in));
+}
+
+//
+// write_object<signed int>
+//
+void write_object(std::ostream *out, signed int const *in)
+{
+   write_object_raw(out, (char const *)in, sizeof(*in));
+}
+
+//
+// write_object<signed long int>
+//
+void write_object(std::ostream *out, signed long int const *in)
+{
+   write_object_raw(out, (char const *)in, sizeof(*in));
+}
+
+//
+// write_object<signed long long int>
+//
+void write_object(std::ostream *out, signed long long int const *in)
+{
+   write_object_raw(out, (char const *)in, sizeof(*in));
+}
+
+//
+// write_object<unsigned int>
+//
+void write_object(std::ostream *out, unsigned int const *in)
+{
+   write_object_raw(out, (char const *)in, sizeof(*in));
+}
+
+//
+// write_object<unsigned long int>
+//
+void write_object(std::ostream *out, unsigned long int const *in)
+{
+   write_object_raw(out, (char const *)in, sizeof(*in));
+}
+
+//
+// write_object<std::string>
+//
+void write_object(std::ostream *out, std::string const *in)
+{
+   std::string::size_type size = in->size();
+
+   write_object(out, &size);
+
+   write_object_raw(out, in->c_str(), size);
+}
+
+//
+// write_object_bit
+//
+void write_object_bit(std::ostream *out, bool in)
+{
+   out->put(static_cast<char>(in));
+}
+
+//
+// write_object_raw
+//
+void write_object_raw(std::ostream *out, char const *in, size_t size)
+{
+   while (size--) out->put(*in++);
 }
 
 // EOF

@@ -33,27 +33,6 @@
 //
 
 //
-// ObjectExpression::write_objects
-//
-void ObjectExpression::write_objects(std::ostream * out, ObjectVector const & objects)
-{
-	*out << "object";
-
-	write_object(out, objects);
-
-	write_object(out, _static_table);
-
-	write_object(out, _symbol_table);
-	write_object(out, _symbol_type_table);
-
-   ObjectData_Array::write_objects(out);
-   ObjectData_Function::write_objects(out);
-   ObjectData_Register::write_objects(out);
-   ObjectData_Script::write_objects(out);
-   ObjectData_String::write_objects(out);
-}
-
-//
 // ObjectExpression::read_objects
 //
 void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
@@ -75,13 +54,42 @@ void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
    ObjectData_String::read_objects(in);
 }
 
-bool override_object(ObjectExpression::ExpressionType *, ObjectExpression::ExpressionType const &)
+//
+// ObjectExpression::write_objects
+//
+void ObjectExpression::write_objects
+(std::ostream *out, ObjectVector const *objects)
 {
-	return false;
+   *out << "object";
+
+   write_object(out, objects);
+
+   write_object(out, &_static_table);
+
+   write_object(out, &_symbol_table);
+   write_object(out, &_symbol_type_table);
+
+   ObjectData_Array::write_objects(out);
+   ObjectData_Function::write_objects(out);
+   ObjectData_Register::write_objects(out);
+   ObjectData_Script::write_objects(out);
+   ObjectData_String::write_objects(out);
 }
-bool override_object(ObjectExpression::Pointer *, ObjectExpression::Pointer const &)
+
+//
+// override_object<ObjectExpression::ExpressionType>
+//
+void override_object
+(ObjectExpression::ExpressionType *, ObjectExpression::ExpressionType const *)
 {
-	return false;
+}
+
+//
+// override_object<ObjectExpression::Pointer>
+//
+void override_object
+(ObjectExpression::Pointer *, ObjectExpression::Pointer const *)
+{
 }
 
 void read_object(std::istream * in, ObjectExpression::ExpressionType * out)
@@ -191,17 +199,32 @@ void read_object(std::istream * in, ObjectExpression::Pointer * out)
 	}
 }
 
-void write_object(std::ostream * out, ObjectExpression::ExpressionType const & in)
+//
+// write_object<ObjectExpression::ExpressionType>
+//
+void write_object(std::ostream *out, ObjectExpression::ExpressionType const *in)
 {
-	write_object_raw(out, (char const *)&in, sizeof(in));
+   write_object_raw(out, (char const *)in, sizeof(*in));
 }
-void write_object(std::ostream * out, ObjectExpression::ObjectType const & in)
+
+//
+// write_object<ObjectExpression::ObjectType>
+//
+void write_object(std::ostream *out, ObjectExpression::ObjectType const *in)
 {
-	write_object_raw(out, (char const *)&in, sizeof(in));
+   write_object_raw(out, (char const *)in, sizeof(*in));
 }
-void write_object(std::ostream * out, ObjectExpression::Pointer const & in)
+void write_object(std::ostream *out, ObjectExpression::ObjectType const &in)
 {
-	in->writeObject(out);
+   write_object(out, &in);
+}
+
+//
+// write_object<ObjectExpression::Pointer>
+//
+void write_object(std::ostream *out, ObjectExpression::Pointer const *in)
+{
+   (*in)->writeObject(out);
 }
 
 // EOF

@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* ObjectExpression/ValueFloat.cpp
-**
-** Defines the ObjectExpression_ValueFloat class and methods.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011-2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// ObjectExpression handling of floating-point numbers.
+//
+//-----------------------------------------------------------------------------
 
 #include "../ObjectExpression.hpp"
 
@@ -26,85 +28,104 @@
 #include "../object_io.hpp"
 
 
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
 
+//
+// ObjectExpression_ValueFloat
+//
 class ObjectExpression_ValueFloat : public ObjectExpression
 {
-	MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueFloat, ObjectExpression);
+   MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueFloat, ObjectExpression);
 
 public:
-	ObjectExpression_ValueFloat(bigreal value, SourcePosition const & position);
-	ObjectExpression_ValueFloat(std::istream * in);
+   //
+   // ::ObjectExpression_ValueFloat
+   //
+   ObjectExpression_ValueFloat(bigreal _value, SourcePosition const &_pos)
+    : Super(_pos), value(_value)
+   {
+   }
 
-   virtual bool canResolve() const;
+   //
+   // ::ObjectExpression_ValueFloat
+   //
+   ObjectExpression_ValueFloat(std::istream *in) : Super(in)
+   {
+      read_object(in, &value);
+   }
 
-	virtual ExpressionType getType() const;
+   //
+   // ::canResolve
+   //
+   virtual bool canResolve() const
+   {
+      return true;
+   }
 
-	virtual bigreal resolveFloat() const;
+   //
+   // ::getType
+   //
+   virtual ExpressionType getType() const
+   {
+      return ET_FLOAT;
+   }
+
+   //
+   // ::resolveFloat
+   //
+   virtual bigreal resolveFloat() const
+   {
+      return value;
+   }
 
 protected:
-	virtual void writeObject(std::ostream * out) const;
+   //
+   // ::writeObject
+   //
+   virtual void writeObject(std::ostream * out) const
+   {
+      write_object(out, OT_VALUE_FLOAT);
+
+      Super::writeObject(out);
+
+      write_object(out, &value);
+   }
 
 private:
-   virtual void writeACSPLong(std::ostream *out) const;
+   //
+   // ::writeACSPLong
+   //
+   virtual void writeACSPLong(std::ostream *out) const
+   {
+      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LITERAL);
+      BinaryTokenACS::write_ACS0_32(out, *this);
+   }
 
-	bigreal _value;
+   bigreal value;
 };
 
 
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
 
-ObjectExpression::Pointer ObjectExpression::create_value_float(bigreal value, SourcePosition const & position)
+//
+// ObjectExpression::create_value_float
+//
+ObjectExpression::Pointer ObjectExpression::create_value_float
+(bigreal value, SourcePosition const &pos)
 {
-	return new ObjectExpression_ValueFloat(value, position);
-}
-
-ObjectExpression::Pointer ObjectExpression::create_value_float(std::istream * in)
-{
-	return new ObjectExpression_ValueFloat(in);
-}
-
-ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(bigreal value, SourcePosition const & position_) : Super(position_), _value(value)
-{
-}
-
-ObjectExpression_ValueFloat::ObjectExpression_ValueFloat(std::istream * in) : Super(in)
-{
-	read_object(in, &_value);
+   return new ObjectExpression_ValueFloat(value, pos);
 }
 
 //
-// ObjectExpression_ValueFloat::canResolve
+// ObjectExpression::create_value_float
 //
-bool ObjectExpression_ValueFloat::canResolve() const
+ObjectExpression::Pointer ObjectExpression::create_value_float(std::istream *in)
 {
-   return true;
-}
-
-ObjectExpression::ExpressionType ObjectExpression_ValueFloat::getType() const
-{
-	return ET_FLOAT;
-}
-
-bigreal ObjectExpression_ValueFloat::resolveFloat() const
-{
-	return _value;
-}
-
-//
-// ObjectExpression_ValueFloat::writeACSPLong
-//
-void ObjectExpression_ValueFloat::writeACSPLong(std::ostream *out) const
-{
-	BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LITERAL);
-	BinaryTokenACS::write_ACS0_32(out, *this);
-}
-
-void ObjectExpression_ValueFloat::writeObject(std::ostream * out) const
-{
-	write_object(out, OT_VALUE_FLOAT);
-
-	Super::writeObject(out);
-
-	write_object(out, _value);
+   return new ObjectExpression_ValueFloat(in);
 }
 
 // EOF

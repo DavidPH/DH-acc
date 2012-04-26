@@ -252,25 +252,20 @@ void ObjectData_Script::read_objects(std::istream *in)
 //
 void ObjectData_Script::write_objects(std::ostream *out)
 {
-   write_object(out, script_table);
+   write_object(out, &script_table);
 }
 
 //
 // override_object<ObjectData_Script>
 //
-bool override_object(ObjectData_Script *out, ObjectData_Script const &in)
+void override_object(ObjectData_Script *out, ObjectData_Script const *in)
 {
-   if (out->name != in.name)
-      return false;
-
-   if (out->externDef && !in.externDef)
+   if (out->externDef && !in->externDef)
    {
-      out->number    = in.number;
-      out->varCount  = in.varCount;
+      out->number    = in->number;
+      out->varCount  = in->varCount;
       out->externDef = false;
    }
-
-   return true;
 }
 
 //
@@ -305,31 +300,31 @@ void read_object(std::istream *in, ObjectData_Script::ScriptType *out)
 //
 // write_object<ObjectData_Script>
 //
-void write_object(std::ostream *out, ObjectData_Script const &in)
+void write_object(std::ostream *out, ObjectData_Script const *in)
 {
-   if (in.context)
+   if (in->context)
    {
-      const_cast<ObjectData_Script &>(in).varCount =
-         in.context->getLimit(SourceVariable::SC_REGISTER);
+      const_cast<ObjectData_Script *>(in)->varCount =
+         in->context->getLimit(SourceVariable::SC_REGISTER);
    }
 
-   write_object(out, in.label);
-   write_object(out, in.name);
-   write_object(out, in.stype);
-   write_object(out, in.argCount);
-   write_object(out, in.flags);
-   write_object(out, in.number);
-   write_object(out, in.varCount);
-   write_object(out, in.externDef);
-   write_object(out, in.externVis);
+   write_object(out, &in->label);
+   write_object(out, &in->name);
+   write_object(out, &in->stype);
+   write_object(out, &in->argCount);
+   write_object(out, &in->flags);
+   write_object(out, &in->number);
+   write_object(out, &in->varCount);
+   write_object(out, &in->externDef);
+   write_object(out, &in->externVis);
 }
 
 //
 // write_object<ObjectData_Script::ScriptType>
 //
-void write_object(std::ostream *out, ObjectData_Script::ScriptType const &in)
+void write_object(std::ostream *out, ObjectData_Script::ScriptType const *in)
 {
-   write_object_raw(out, reinterpret_cast<char const *>(&in), sizeof(in));
+   write_object_raw(out, reinterpret_cast<char const *>(in), sizeof(*in));
 }
 
 // EOF

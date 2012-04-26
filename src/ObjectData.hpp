@@ -297,13 +297,13 @@ extern bool option_named_scripts;
 // Global Functions                                                           |
 //
 
-extern bool override_object(ObjectData_Array    *out, ObjectData_Array    const &in);
-extern bool override_object(ObjectData_Auto     *out, ObjectData_Auto     const &in);
-extern bool override_object(ObjectData_Function *out, ObjectData_Function const &in);
-extern bool override_object(ObjectData_Register *out, ObjectData_Register const &in);
-extern bool override_object(ObjectData_Script   *out, ObjectData_Script   const &in);
-extern bool override_object(ObjectData_Static   *out, ObjectData_Static   const &in);
-extern bool override_object(ObjectData_String   *out, ObjectData_String   const &in);
+extern void override_object(ObjectData_Array    *out, ObjectData_Array    const *in);
+extern void override_object(ObjectData_Auto     *out, ObjectData_Auto     const *in);
+extern void override_object(ObjectData_Function *out, ObjectData_Function const *in);
+extern void override_object(ObjectData_Register *out, ObjectData_Register const *in);
+extern void override_object(ObjectData_Script   *out, ObjectData_Script   const *in);
+extern void override_object(ObjectData_Static   *out, ObjectData_Static   const *in);
+extern void override_object(ObjectData_String   *out, ObjectData_String   const *in);
 
 extern void read_object(std::istream *in, ObjectData_Array    *out);
 extern void read_object(std::istream *in, ObjectData_Auto     *out);
@@ -314,14 +314,14 @@ extern void read_object(std::istream *in, ObjectData_Static   *out);
 extern void read_object(std::istream *in, ObjectData_String   *out);
 extern void read_object(std::istream *in, ObjectData_Script::ScriptType *out);
 
-extern void write_object(std::ostream *out, ObjectData_Array    const &in);
-extern void write_object(std::ostream *out, ObjectData_Auto     const &in);
-extern void write_object(std::ostream *out, ObjectData_Function const &in);
-extern void write_object(std::ostream *out, ObjectData_Register const &in);
-extern void write_object(std::ostream *out, ObjectData_Script   const &in);
-extern void write_object(std::ostream *out, ObjectData_Static   const &in);
-extern void write_object(std::ostream *out, ObjectData_String   const &in);
-extern void write_object(std::ostream *out, ObjectData_Script::ScriptType const &in);
+extern void write_object(std::ostream *out, ObjectData_Array    const *in);
+extern void write_object(std::ostream *out, ObjectData_Auto     const *in);
+extern void write_object(std::ostream *out, ObjectData_Function const *in);
+extern void write_object(std::ostream *out, ObjectData_Register const *in);
+extern void write_object(std::ostream *out, ObjectData_Script   const *in);
+extern void write_object(std::ostream *out, ObjectData_Static   const *in);
+extern void write_object(std::ostream *out, ObjectData_String   const *in);
+extern void write_object(std::ostream *out, ObjectData_Script::ScriptType const *in);
 
 #endif//HPP_ObjectData_
 

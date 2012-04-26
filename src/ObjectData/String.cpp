@@ -115,23 +115,21 @@ void ObjectData_String::read_objects(std::istream *in)
 //
 void ObjectData_String::write_objects(std::ostream *out)
 {
-   write_object(out, string_table);
+   write_object(out, &string_table);
 }
 
 //
 // override_object<ObjectData_String>
 //
-bool override_object(ObjectData_String *out, ObjectData_String const &in)
+void override_object(ObjectData_String *out, ObjectData_String const *in)
 {
    // This function only gets called when the relevant key is the same. For
    // strings that inherently means override, which means adding more symbols
    // for the data.
 
    std::vector<std::string>::const_iterator it;
-   for (it = in.names.begin(); it != in.names.end(); ++it)
+   for (it = in->names.begin(); it != in->names.end(); ++it)
       out->names.push_back(*it);
-
-   return true;
 }
 
 //
@@ -146,10 +144,10 @@ void read_object(std::istream *in, ObjectData_String *out)
 //
 // write_object<ObjectData_String>
 //
-void write_object(std::ostream *out, ObjectData_String const &in)
+void write_object(std::ostream *out, ObjectData_String const *in)
 {
-   write_object(out, in.names);
-   write_object(out, in.string);
+   write_object(out, &in->names);
+   write_object(out, &in->string);
 }
 
 // EOF

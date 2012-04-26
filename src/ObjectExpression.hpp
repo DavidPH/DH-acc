@@ -86,14 +86,14 @@ public:
    void writeACSP(std::ostream *out) const;
 
 
-	friend bool override_object(ObjectExpression::ExpressionType * out, ObjectExpression::ExpressionType const & in);
-	friend bool override_object(ObjectExpression::Pointer * out, ObjectExpression::Pointer const & in);
+   friend void override_object(ExpressionType *out, ExpressionType const *in);
+   friend void override_object(Pointer        *out, Pointer        const *in);
 
 	friend void read_object(std::istream * in, ExpressionType * out);
 	friend void read_object(std::istream * in, Pointer * out);
 
-	friend void write_object(std::ostream * out, ExpressionType const & in);
-	friend void write_object(std::ostream * out, Pointer const & in);
+   friend void write_object(std::ostream *out, ExpressionType const *in);
+   friend void write_object(std::ostream *out, Pointer        const *in);
 
 	static void add_address_count(bigsint const addressCount);
 
@@ -160,7 +160,7 @@ public:
 
 	static void set_library(std::string const & library);
 
-	static void write_objects(std::ostream * out, ObjectVector const & objects);
+   static void write_objects(std::ostream *out, ObjectVector const *objects);
 
 protected:
    enum ObjectType
@@ -204,7 +204,8 @@ protected:
 
 	friend void read_object(std::istream * in, ObjectType * out);
 
-	friend void write_object(std::ostream * out, ObjectType const & in);
+   friend void write_object(std::ostream *out, ObjectType const *in);
+   friend void write_object(std::ostream *out, ObjectType const &in);
 
 	static Pointer create_binary_add(std::istream * in);
 	static Pointer create_binary_and(std::istream * in);

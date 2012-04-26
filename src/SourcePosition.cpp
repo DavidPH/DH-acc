@@ -56,11 +56,14 @@ void read_object(std::istream * in, SourcePosition * out)
 	read_object(in, &out->column);
 }
 
-void write_object(std::ostream * out, SourcePosition const & in)
+//
+// write_object<SourcePosition>
+//
+void write_object(std::ostream *out, SourcePosition const *in)
 {
-	write_object(out, in.filename);
-	write_object(out, in.line);
-	write_object(out, in.column);
+   write_object(out, &in->filename);
+   write_object(out, &in->line);
+   write_object(out, &in->column);
 }
 
 // EOF

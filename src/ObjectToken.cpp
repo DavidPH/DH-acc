@@ -108,12 +108,12 @@ void read_object(std::istream *in, ObjectToken *out)
 //
 // write_object<ObjectToken>
 //
-void write_object(std::ostream *out, ObjectToken const &in)
+void write_object(std::ostream *out, ObjectToken const *in)
 {
-   write_object(out, in.args);
-   write_object(out, in.labels);
-   write_object(out, in.pos);
-   write_object(out, in.code);
+   write_object(out, &in->args);
+   write_object(out, &in->labels);
+   write_object(out, &in->pos);
+   write_object(out, &in->code);
 }
 
 // EOF

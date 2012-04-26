@@ -316,12 +316,11 @@ void ObjectVector::remToken(ObjectToken *token)
 void read_object(std::istream *in, ObjectVector *out)
 {
    ObjectToken *token;
-   bool tmp;
 
    read_object(in, &out->head.labels);
    read_object(in, &out->head.pos);
 
-   while (read_object(in, &tmp), tmp)
+   while (read_object_bit(in))
    {
       read_object(in, token = new ObjectToken);
       out->addToken(token);
@@ -331,19 +330,19 @@ void read_object(std::istream *in, ObjectVector *out)
 //
 // write_object<ObjectVector>
 //
-void write_object(std::ostream *out, ObjectVector const &in)
+void write_object(std::ostream *out, ObjectVector const *in)
 {
    ObjectVector::const_iterator token;
 
-   write_object(out, in.head.labels);
-   write_object(out, in.head.pos);
+   write_object(out, &in->head.labels);
+   write_object(out, &in->head.pos);
 
-   for (token = in.begin(); token != in.end(); ++token)
+   for (token = in->begin(); token != in->end(); ++token)
    {
-      write_object(out, true);
-      write_object(out, *token);
+      write_object_bit(out, true);
+      write_object(out, token);
    }
-   write_object(out, false);
+   write_object_bit(out, false);
 }
 
 // EOF
