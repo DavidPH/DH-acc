@@ -47,6 +47,8 @@ public:
    //
    class EndOfStream : public std::exception
    {
+   public:
+      char const *what() const throw() {return "SourceStream::EndOfStream";}
    };
 
    enum SourceType
