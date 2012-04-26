@@ -85,6 +85,14 @@ void read_object(std::istream *in, unsigned long int *out)
 }
 
 //
+// read_object<unsigned long long int>
+//
+void read_object(std::istream *in, unsigned long long int *out)
+{
+   read_object_raw(in, (char *)out, sizeof(*out));
+}
+
+//
 // read_object<std::string>
 //
 void read_object(std::istream *in, std::string *out)
@@ -169,6 +177,14 @@ void write_object(std::ostream *out, unsigned int const *in)
 // write_object<unsigned long int>
 //
 void write_object(std::ostream *out, unsigned long int const *in)
+{
+   write_object_raw(out, (char const *)in, sizeof(*in));
+}
+
+//
+// write_object<unsigned long long int>
+//
+void write_object(std::ostream *out, unsigned long long int const *in)
 {
    write_object_raw(out, (char const *)in, sizeof(*in));
 }

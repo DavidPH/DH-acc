@@ -42,6 +42,7 @@ void read_object(std::istream *in, signed long int *out);
 void read_object(std::istream *in, signed long long int *out);
 void read_object(std::istream *in, unsigned int *out);
 void read_object(std::istream *in, unsigned long int *out);
+void read_object(std::istream *in, unsigned long long int *out);
 void read_object(std::istream *in, std::string *out);
 
 bool read_object_bit(std::istream *in);
@@ -54,6 +55,7 @@ void write_object(std::ostream *out, signed long int const *in);
 void write_object(std::ostream *out, signed long long int const *in);
 void write_object(std::ostream *out, unsigned int const *in);
 void write_object(std::ostream *out, unsigned long int const *in);
+void write_object(std::ostream *out, unsigned long long int const *in);
 void write_object(std::ostream *out, std::string const *in);
 
 void write_object_bit(std::ostream *out, bool in);
