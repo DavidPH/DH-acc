@@ -124,7 +124,7 @@ char const *make_string(ObjectCode ocode)
 //
 void read_object(std::istream *in, ObjectCode *out)
 {
-   read_object_raw(in, (char *)out, sizeof(*out));
+   *out = static_cast<ObjectCode>(read_object_int(in));
 
    if (*out > OCODE_NONE)
       *out = OCODE_NONE;
@@ -144,7 +144,7 @@ void read_object(std::istream *in, ObjectCodeSet *out)
 //
 void write_object(std::ostream *out, ObjectCode const *in)
 {
-   write_object_raw(out, (char const *)in, sizeof(*in));
+   write_object_int(out, static_cast<bigsint>(*in));
 }
 
 //

@@ -24,6 +24,8 @@
 #ifndef HPP_object_io_
 #define HPP_object_io_
 
+#include "bignum.hpp"
+
 #include <istream>
 #include <map>
 #include <ostream>
@@ -45,8 +47,10 @@ void read_object(std::istream *in, unsigned long int *out);
 void read_object(std::istream *in, unsigned long long int *out);
 void read_object(std::istream *in, std::string *out);
 
-bool read_object_bit(std::istream *in);
-void read_object_raw(std::istream *in, char *out, size_t size);
+bool    read_object_bit(std::istream *in);
+bigreal read_object_flt(std::istream *in);
+bigsint read_object_int(std::istream *in);
+biguint read_object_uns(std::istream *in);
 
 void write_object(std::ostream *out, bool const *in);
 void write_object(std::ostream *out, long double const *in);
@@ -58,8 +62,10 @@ void write_object(std::ostream *out, unsigned long int const *in);
 void write_object(std::ostream *out, unsigned long long int const *in);
 void write_object(std::ostream *out, std::string const *in);
 
-void write_object_bit(std::ostream *out, bool in);
-void write_object_raw(std::ostream *out, char const *in, size_t size);
+void write_object_bit(std::ostream *out, bool    in);
+void write_object_flt(std::ostream *out, bigreal in);
+void write_object_int(std::ostream *out, bigsint in);
+void write_object_uns(std::ostream *out, biguint in);
 
 //
 // read_object<std::map>

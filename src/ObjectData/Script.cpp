@@ -291,7 +291,7 @@ void read_object(std::istream *in, ObjectData_Script *out)
 //
 void read_object(std::istream *in, ObjectData_Script::ScriptType *out)
 {
-   read_object_raw(in, reinterpret_cast<char *>(out), sizeof(*out));
+   *out = static_cast<ObjectData_Script::ScriptType>(read_object_int(in));
 
    if (*out > ObjectData_Script::ST_NONE)
       *out = ObjectData_Script::ST_NONE;
@@ -324,7 +324,7 @@ void write_object(std::ostream *out, ObjectData_Script const *in)
 //
 void write_object(std::ostream *out, ObjectData_Script::ScriptType const *in)
 {
-   write_object_raw(out, reinterpret_cast<char const *>(in), sizeof(*in));
+   write_object_int(out, static_cast<bigsint>(*in));
 }
 
 // EOF

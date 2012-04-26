@@ -35,17 +35,18 @@
 //
 // ObjectExpression::read_objects
 //
-void ObjectExpression::read_objects(std::istream * in, ObjectVector * objects)
+void ObjectExpression::read_objects(std::istream *in, ObjectVector *objects)
 {
-	if (in->get() != 'o' || in->get() != 'b' || in->get() != 'j' || in->get() != 'e' || in->get() != 'c' || in->get() != 't')
-		throw "Not object file.";
+   if (in->get() != 'o' || in->get() != 'b' || in->get() != 'j' ||
+       in->get() != 'e' || in->get() != 'c' || in->get() != 't')
+      throw "Not object file.";
 
-	read_object(in, objects);
+   read_object(in, objects);
 
-	read_object(in, &_static_table);
+   read_object(in, &_static_table);
 
-	read_object(in, &_symbol_table);
-	read_object(in, &_symbol_type_table);
+   read_object(in, &_symbol_table);
+   read_object(in, &_symbol_type_table);
 
    ObjectData_Array::read_objects(in);
    ObjectData_Function::read_objects(in);
@@ -92,58 +93,69 @@ void override_object
 {
 }
 
-void read_object(std::istream * in, ObjectExpression::ExpressionType * out)
+//
+// read_object<ObjectExpression::ExpressionType>
+//
+void read_object(std::istream *in, ObjectExpression::ExpressionType *out)
 {
-	read_object_raw(in, (char *)out, sizeof(*out));
+   *out = static_cast<ObjectExpression::ExpressionType>(read_object_int(in));
 
-	if (*out > ObjectExpression::ET_INT)
-		*out = ObjectExpression::ET_INT;
+   if (*out > ObjectExpression::ET_INT)
+      *out = ObjectExpression::ET_INT;
 }
-void read_object(std::istream * in, ObjectExpression::ObjectType * out)
-{
-	read_object_raw(in, (char *)out, sizeof(*out));
 
-	if (*out > ObjectExpression::OT_NONE)
-		*out = ObjectExpression::OT_NONE;
+//
+// read_object<ObjectExpression::ObjectType>
+//
+void read_object(std::istream *in, ObjectExpression::ObjectType *out)
+{
+   *out = static_cast<ObjectExpression::ObjectType>(read_object_int(in));
+
+   if (*out > ObjectExpression::OT_NONE)
+      *out = ObjectExpression::OT_NONE;
 }
-void read_object(std::istream * in, ObjectExpression::Pointer * out)
+
+//
+// read_object<ObjectExpression::Pointer>
+//
+void read_object(std::istream *in, ObjectExpression::Pointer *out)
 {
-	ObjectExpression::ObjectType type;
-	read_object(in, &type);
+   ObjectExpression::ObjectType type;
+   read_object(in, &type);
 
-	switch (type)
-	{
-	case ObjectExpression::OT_BINARY_ADD:
-		*out = ObjectExpression::create_binary_add(in);
-		break;
+   switch (type)
+   {
+   case ObjectExpression::OT_BINARY_ADD:
+      *out = ObjectExpression::create_binary_add(in);
+      break;
 
-	case ObjectExpression::OT_BINARY_AND:
-		*out = ObjectExpression::create_binary_and(in);
-		break;
+   case ObjectExpression::OT_BINARY_AND:
+      *out = ObjectExpression::create_binary_and(in);
+      break;
 
-	case ObjectExpression::OT_BINARY_DIV:
-		*out = ObjectExpression::create_binary_div(in);
-		break;
+   case ObjectExpression::OT_BINARY_DIV:
+      *out = ObjectExpression::create_binary_div(in);
+      break;
 
-	case ObjectExpression::OT_BINARY_IOR:
-		*out = ObjectExpression::create_binary_ior(in);
-		break;
+   case ObjectExpression::OT_BINARY_IOR:
+      *out = ObjectExpression::create_binary_ior(in);
+      break;
 
-	case ObjectExpression::OT_BINARY_MOD:
-		*out = ObjectExpression::create_binary_mod(in);
-		break;
+   case ObjectExpression::OT_BINARY_MOD:
+      *out = ObjectExpression::create_binary_mod(in);
+      break;
 
-	case ObjectExpression::OT_BINARY_MUL:
-		*out = ObjectExpression::create_binary_mul(in);
-		break;
+   case ObjectExpression::OT_BINARY_MUL:
+      *out = ObjectExpression::create_binary_mul(in);
+      break;
 
-	case ObjectExpression::OT_BINARY_SUB:
-		*out = ObjectExpression::create_binary_sub(in);
-		break;
+   case ObjectExpression::OT_BINARY_SUB:
+      *out = ObjectExpression::create_binary_sub(in);
+      break;
 
-	case ObjectExpression::OT_BINARY_XOR:
-		*out = ObjectExpression::create_binary_xor(in);
-		break;
+   case ObjectExpression::OT_BINARY_XOR:
+      *out = ObjectExpression::create_binary_xor(in);
+      break;
 
    case ObjectExpression::OT_BRANCH_AND:
       *out = ObjectExpression::create_branch_and(in);
@@ -165,13 +177,13 @@ void read_object(std::istream * in, ObjectExpression::Pointer * out)
       *out = ObjectExpression::create_cast(in);
       break;
 
-	case ObjectExpression::OT_UNARY_ADD:
-		*out = ObjectExpression::create_unary_add(in);
-		break;
+   case ObjectExpression::OT_UNARY_ADD:
+      *out = ObjectExpression::create_unary_add(in);
+      break;
 
-	case ObjectExpression::OT_UNARY_SUB:
-		*out = ObjectExpression::create_unary_sub(in);
-		break;
+   case ObjectExpression::OT_UNARY_SUB:
+      *out = ObjectExpression::create_unary_sub(in);
+      break;
 
    case ObjectExpression::OT_VALUE_COMPOUND:
       *out = ObjectExpression::create_value_compound(in);
@@ -193,10 +205,10 @@ void read_object(std::istream * in, ObjectExpression::Pointer * out)
       *out = ObjectExpression::create_value_symbol(in);
       break;
 
-	case ObjectExpression::OT_NONE:
-		*out = NULL;
-		break;
-	}
+   case ObjectExpression::OT_NONE:
+      *out = NULL;
+      break;
+   }
 }
 
 //
@@ -204,7 +216,7 @@ void read_object(std::istream * in, ObjectExpression::Pointer * out)
 //
 void write_object(std::ostream *out, ObjectExpression::ExpressionType const *in)
 {
-   write_object_raw(out, (char const *)in, sizeof(*in));
+   write_object_int(out, static_cast<bigsint>(*in));
 }
 
 //
@@ -212,7 +224,7 @@ void write_object(std::ostream *out, ObjectExpression::ExpressionType const *in)
 //
 void write_object(std::ostream *out, ObjectExpression::ObjectType const *in)
 {
-   write_object_raw(out, (char const *)in, sizeof(*in));
+   write_object_int(out, static_cast<bigsint>(*in));
 }
 void write_object(std::ostream *out, ObjectExpression::ObjectType const &in)
 {

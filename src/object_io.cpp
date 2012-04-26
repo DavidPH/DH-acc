@@ -23,6 +23,27 @@
 
 #include "object_io.hpp"
 
+#include <cmath>
+
+
+//----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+//
+// write_object_flt_part
+//
+static void write_object_flt_part(unsigned char *&p, bigreal in)
+{
+   if (!in) return;
+
+   unsigned char &out = *p++;
+
+   write_object_flt_part(p, std::floor(in / 256));
+
+   out = static_cast<unsigned char>(in) & 0xFF;
+}
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -41,7 +62,7 @@ void read_object(std::istream *in, bool *out)
 //
 void read_object(std::istream *in, long double *out)
 {
-   read_object_raw(in, (char *)out, sizeof(*out));
+   *out = read_object_flt(in);
 }
 
 //
@@ -49,7 +70,7 @@ void read_object(std::istream *in, long double *out)
 //
 void read_object(std::istream *in, signed int *out)
 {
-   read_object_raw(in, (char *)out, sizeof(*out));
+   *out = read_object_int(in);
 }
 
 //
@@ -57,7 +78,7 @@ void read_object(std::istream *in, signed int *out)
 //
 void read_object(std::istream *in, long *out)
 {
-   read_object_raw(in, (char *)out, sizeof(*out));
+   *out = read_object_int(in);
 }
 
 //
@@ -65,7 +86,7 @@ void read_object(std::istream *in, long *out)
 //
 void read_object(std::istream *in, signed long long int *out)
 {
-   read_object_raw(in, (char *)out, sizeof(*out));
+   *out = read_object_int(in);
 }
 
 //
@@ -73,7 +94,7 @@ void read_object(std::istream *in, signed long long int *out)
 //
 void read_object(std::istream *in, unsigned int *out)
 {
-   read_object_raw(in, (char *)out, sizeof(*out));
+   *out = read_object_uns(in);
 }
 
 //
@@ -81,7 +102,7 @@ void read_object(std::istream *in, unsigned int *out)
 //
 void read_object(std::istream *in, unsigned long int *out)
 {
-   read_object_raw(in, (char *)out, sizeof(*out));
+   *out = read_object_uns(in);
 }
 
 //
@@ -89,7 +110,7 @@ void read_object(std::istream *in, unsigned long int *out)
 //
 void read_object(std::istream *in, unsigned long long int *out)
 {
-   read_object_raw(in, (char *)out, sizeof(*out));
+   *out = read_object_uns(in);
 }
 
 //
@@ -97,12 +118,9 @@ void read_object(std::istream *in, unsigned long long int *out)
 //
 void read_object(std::istream *in, std::string *out)
 {
-   std::string::iterator  iter, end;
-   std::string::size_type size;
+   std::string::iterator iter, end;
 
-   read_object(in, &size);
-
-   out->resize(size);
+   out->resize(read_object_uns(in));
    end = out->end();
 
    for (iter = out->begin(); iter != end; ++iter)
@@ -118,11 +136,56 @@ bool read_object_bit(std::istream *in)
 }
 
 //
-// read_object_raw
+// read_object_flt
 //
-void read_object_raw(std::istream *in, char *out, size_t size)
+bigreal read_object_flt(std::istream *in)
 {
-   while (size--) *out++ = static_cast<char>(in->get());
+   unsigned char len, neg;
+   bigreal out;
+
+   if ((neg = (len = in->get() & 0xFF) & 0x80)) len &= 0x7F;
+   out = in->get() & 0xFF;
+   while (len--) out = (out * 256) + (in->get() & 0xFF);
+
+   if ((len = in->get() & 0xFF) & 0x80)
+   {
+      len &= 0x7F;
+      while (--len) out /= 256;
+   }
+   else if (len)
+      while (--len) out *= 256;
+
+   return neg ? -out : out;
+}
+
+//
+// read_object_int
+//
+bigsint read_object_int(std::istream *in)
+{
+   unsigned char len, neg;
+   bigsint out;
+
+   if ((neg = (len = in->get() & 0xFF) & 0x80)) len &= 0x7F;
+   out = in->get() & 0xFF;
+   while (len--) out = (out << 8) | (in->get() & 0xFF);
+
+   return neg ? -out : out;
+}
+
+//
+// read_object_uns
+//
+biguint read_object_uns(std::istream *in)
+{
+   unsigned char len;
+   biguint out;
+
+   len = in->get() & 0x7F; // Discard sign bit.
+   out = in->get() & 0xFF;
+   while (len--) out = (out << 8) | (in->get() & 0xFF);
+
+   return out;
 }
 
 //
@@ -138,7 +201,7 @@ void write_object(std::ostream *out, bool const *in)
 //
 void write_object(std::ostream *out, long double const *in)
 {
-   write_object_raw(out, (char const *)in, sizeof(*in));
+   write_object_flt(out, *in);
 }
 
 //
@@ -146,7 +209,7 @@ void write_object(std::ostream *out, long double const *in)
 //
 void write_object(std::ostream *out, signed int const *in)
 {
-   write_object_raw(out, (char const *)in, sizeof(*in));
+   write_object_int(out, *in);
 }
 
 //
@@ -154,7 +217,7 @@ void write_object(std::ostream *out, signed int const *in)
 //
 void write_object(std::ostream *out, signed long int const *in)
 {
-   write_object_raw(out, (char const *)in, sizeof(*in));
+   write_object_int(out, *in);
 }
 
 //
@@ -162,7 +225,7 @@ void write_object(std::ostream *out, signed long int const *in)
 //
 void write_object(std::ostream *out, signed long long int const *in)
 {
-   write_object_raw(out, (char const *)in, sizeof(*in));
+   write_object_int(out, *in);
 }
 
 //
@@ -170,7 +233,7 @@ void write_object(std::ostream *out, signed long long int const *in)
 //
 void write_object(std::ostream *out, unsigned int const *in)
 {
-   write_object_raw(out, (char const *)in, sizeof(*in));
+   write_object_uns(out, *in);
 }
 
 //
@@ -178,7 +241,7 @@ void write_object(std::ostream *out, unsigned int const *in)
 //
 void write_object(std::ostream *out, unsigned long int const *in)
 {
-   write_object_raw(out, (char const *)in, sizeof(*in));
+   write_object_uns(out, *in);
 }
 
 //
@@ -186,7 +249,7 @@ void write_object(std::ostream *out, unsigned long int const *in)
 //
 void write_object(std::ostream *out, unsigned long long int const *in)
 {
-   write_object_raw(out, (char const *)in, sizeof(*in));
+   write_object_uns(out, *in);
 }
 
 //
@@ -194,11 +257,12 @@ void write_object(std::ostream *out, unsigned long long int const *in)
 //
 void write_object(std::ostream *out, std::string const *in)
 {
-   std::string::size_type size = in->size();
+   std::string::const_iterator iter, end = in->end();
 
-   write_object(out, &size);
+   write_object_uns(out, in->size());
 
-   write_object_raw(out, in->c_str(), size);
+   for (iter = in->begin(); iter != end; ++iter)
+      out->put(*iter);
 }
 
 //
@@ -210,11 +274,56 @@ void write_object_bit(std::ostream *out, bool in)
 }
 
 //
-// write_object_raw
+// write_object_flt
 //
-void write_object_raw(std::ostream *out, char const *in, size_t size)
+void write_object_flt(std::ostream *out, bigreal in)
 {
-   while (size--) out->put(*in++);
+   // Handle 0.      len          buf          exp
+   if (!in) {out->put(0); out->put(0); out->put(0); return;}
+
+   unsigned char buf[128];
+   unsigned char *p = buf, neg, exp = 0;
+
+   if (in < 0) {in = -in; neg = 0x80;} else neg = 0;
+
+   write_object_flt_part(p, in);
+
+   for (; (in = std::fmod(in, 1) * 256); ++exp)
+      *p++ = static_cast<unsigned char>(in) & 0xFF;
+
+   out->put((p-buf-1) | neg);
+   while (p != buf) out->put(*--p);
+   out->put(exp ? (exp | 0x80) : 0);
+}
+
+//
+// write_object_int
+//
+void write_object_int(std::ostream *out, bigsint in)
+{
+   unsigned char buf[128];
+   unsigned char *p = buf, neg;
+
+   if (in < 0) {in = -in; neg = 0x80;} else neg = 0;
+
+   do *p++ = in & 0xFF; while (in >>= 8);
+
+   out->put((p-buf-1) | neg);
+   while (p != buf) out->put(*--p);
+}
+
+//
+// write_object_uns
+//
+void write_object_uns(std::ostream *out, biguint in)
+{
+   unsigned char buf[128];
+   unsigned char *p = buf;
+
+   do *p++ = in & 0xFF; while (in >>= 8);
+
+   out->put(p-buf-1);
+   while (p != buf) out->put(*--p);
 }
 
 // EOF
