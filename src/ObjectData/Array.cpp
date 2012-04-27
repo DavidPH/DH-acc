@@ -312,6 +312,25 @@ void ObjectData_Array::generate_symbols()
 }
 
 //
+// ObjectData_Array::ini_map
+//
+bool ObjectData_Array::ini_map
+(std::string const &name, ObjectExpression *ini)
+{
+   ArrayIter a = map_table.find(name);
+   if (a == map_table.end()) return false;
+
+   // Only allow if either all strings or all not strings.
+   std::vector<int>::iterator iter, end = a->second.strings.end(), begin;
+   for (iter = begin = a->second.strings.begin(); iter != end; ++iter)
+      if (*iter != *begin)
+         return false;
+
+   a->second.init = ini;
+   return true;
+}
+
+//
 // ObjectData_Array::iterate_map
 //
 void ObjectData_Array::iterate_map(IterFunc iterFunc, std::ostream *out)

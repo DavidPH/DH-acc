@@ -116,6 +116,15 @@ static SourceExpression::Pointer make_var
 
          break;
 
+      case SourceVariable::SC_REGISTERARRAY_MAP:
+         if (!initObj || target_type != TARGET_ZDoom)
+            goto case_set;
+
+         if (!ObjectData_Array::ini_map(nameObj, initObj))
+            goto case_set;
+
+         break;
+
          // Only initialize static-duration storage-classes once.
       case SourceVariable::SC_STATIC:
       case_static:
@@ -161,6 +170,7 @@ static SourceExpression::Pointer make_var
          break;
 
       default:
+      case_set:
          expr = exprSet;
          break;
       }

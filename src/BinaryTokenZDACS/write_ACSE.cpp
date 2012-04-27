@@ -95,6 +95,48 @@ void BinaryTokenZDACS::write_ACSE_array_AIMP_counter
 }
 
 //
+// BinaryTokenZDACS::write_ACSE_array_AINI
+//
+void BinaryTokenZDACS::write_ACSE_array_AINI
+(std::ostream *out, ObjectData_Array const &a)
+{
+   if (a.externDef) return;
+   if (!a.init) return;
+
+   *out << 'A' << 'I' << 'N' << 'I';
+   BinaryTokenACS::write_ACS0_32(out, a.size*4+4);
+   BinaryTokenACS::write_ACS0_32(out, a.number);
+
+   ObjectExpression::Vector init;
+   a.init->expand(&init);
+
+   for (size_t i = 0, end = a.size; i != end; ++i)
+   {
+      if (i < init.size())
+         BinaryTokenACS::write_ACS0_32(out, *init[i]);
+      else
+         BinaryTokenACS::write_ACS0_32(out, 0);
+   }
+}
+
+//
+// BinaryTokenZDACS::write_ACSE_array_ASTR
+//
+void BinaryTokenZDACS::write_ACSE_array_ASTR
+(std::ostream *out, ObjectData_Array const &a)
+{
+   if (a.externDef) return;
+   if (!a.init) return;
+
+   for (size_t i = a.strings.size(); i--;)
+      if (a.strings[i])
+      {
+         BinaryTokenACS::write_ACS0_32(out, a.number);
+         break;
+      }
+}
+
+//
 // BinaryTokenZDACS::write_ACSE_array_MEXP
 //
 void BinaryTokenZDACS::write_ACSE_array_MEXP

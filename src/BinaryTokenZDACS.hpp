@@ -323,6 +323,8 @@ public:
    static void write_ACSE_array_ARAY(std::ostream *out, ObjectData_Array const &a);
    static void write_ACSE_array_AIMP(std::ostream *out, ObjectData_Array const &a);
    static void write_ACSE_array_AIMP_counter(std::ostream *out, ObjectData_Array const &a);
+   static void write_ACSE_array_AINI(std::ostream *out, ObjectData_Array const &a);
+   static void write_ACSE_array_ASTR(std::ostream *out, ObjectData_Array const &a);
    static void write_ACSE_array_MEXP(std::ostream *out, ObjectData_Array const &a);
    static void write_ACSE_chunk(std::ostream *out, std::ostringstream *chunkout, char const *chunkname);
    static void write_ACSE_counter(std::ostream *out);

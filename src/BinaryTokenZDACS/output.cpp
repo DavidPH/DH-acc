@@ -74,14 +74,15 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    write_ACSE_chunk(out, &chunkout, "AIMP");
 
    // AINI - Map Array Initialization
-   // TODO
+   ObjectData_Array::iterate_map(write_ACSE_array_AINI, out);
 
    // ARAY - Map Array Declarations
    ObjectData_Array::iterate_map(write_ACSE_array_ARAY, &chunkout);
    write_ACSE_chunk(out, &chunkout, "ARAY");
 
    // ASTR - Map Array Strings
-   // TODO
+   ObjectData_Array::iterate_map(write_ACSE_array_ASTR, &chunkout);
+   write_ACSE_chunk(out, &chunkout, "ASTR");
 
    // FNAM - Function Names
    ObjectData_Function::iterate(write_ACSE_function_FNAM, NULL);
