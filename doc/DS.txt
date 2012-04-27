@@ -428,13 +428,12 @@ storage-class static
 
 
 
-These are the types in DS. As of the time of this writing, there is no
-distinction between explicit type-cast and implicit type-cast. Consequently,
-almost all types can be converted to any other type as needed without any
-warning.
+These are the types in DS.
 
 type array
-    "__array" type "[" expression "]"
+  An array of type. If multiple sizes are specified, they are applied to the
+  type in reverse order. A size of 0 is legal and makes a 0-length array.
+    type "[" expression "]" [ "[" expression "]" ]...
 
 type assembly function
   A pointer type used for assembly functions. Can only be used at compile-time.

@@ -425,7 +425,6 @@ is_expression_type(std::string const &data, SourceContext *context)
        data == "signed" || data == "unsigned")
       return true;
 
-   if (data == "__array")    return true;
    if (data == "__asmfunc_t")return true;
    if (data == "__block")    return true;
    if (data ==   "decltype") return true;
@@ -469,14 +468,6 @@ VariableType::Reference SourceExpressionDS::make_expression_type
 
    if (type || (type = make_basic(token, in)) != NULL)
    {
-   }
-   else if (token.data == "__array")
-   {
-      retn = make_expression_type(in, blocks, context);
-      in->get(SourceTokenC::TT_OP_BRACKET_O);
-      width = make_expression(in, blocks, context)->makeObject()->resolveInt();
-      in->get(SourceTokenC::TT_OP_BRACKET_C);
-      type = retn->getArray(width);
    }
    else if (token.data == "__asmfunc_t")
    {
@@ -633,6 +624,79 @@ VariableType::Reference SourceExpressionDS::make_expression_type
    case SourceTokenC::TT_OP_ASTERISK:
       in->get(SourceTokenC::TT_OP_ASTERISK);
       type = type->getPointer();
+      break;
+
+   case SourceTokenC::TT_OP_BRACKET_O:
+      // Time for type-fucking. This should be an option, but who'd use it?
+      //
+      // I want to make it clear that I think this syntax is at best completely
+      // backwards to all other type-related syntax. As easily demonstrated by
+      // using typedefs in place of directly using the multiple dimensions.
+      //
+      // And for what? The one benefit is that you specify the sizes in the
+      // same order as the indexes. In exchange you open things up to subtle
+      // syntax eccentricities and inconsistencies. Such as the typedef
+      // scenario mentioned before. These two array types are not the same:
+      //
+      //   typedef int[1] arr;
+      //   int[1][2]; // 1 of int[2]
+      //   arr[2];    // 2 of int[1]
+      //
+      // Why is that a problem? Because they don't appear to be different. (I
+      // certainly don't see them as being different, and that may be telling
+      // of where I'm coming from.) They seem to get their sizes in the same
+      // order, and yet they are two very different types. This results in a
+      // more complicated syntax specification for a highly superficial gain.
+      //
+      // And the "intuitive" ordering only works when not put under scrutiny.
+      // The [] operator applies to the expression on the left. The type
+      // specifier does not. It applies either to the expression to the left or
+      // to the array specifer to the right. Thus the specifiers must be taken
+      // as a whole to be one specifier, which is semantically different from
+      // the operator it's supposed to be similar to!
+      //
+      //   int[1][2]; // These are different...
+      //   (int[1])[2];
+      //
+      //   __variable auto int[2][3] arr;
+      //   arr[1][2]; // ... And yet, these are the same.
+      //   (arr[1])[2];
+      //
+      //   __variable auto int[3] ar2 = arr[1];
+      //   ar2[2]; // And this is still the same, unlike the typedef case.
+      //
+      // However, at some point in all this I have to explain why I'm putting
+      // up with it. There are two basic reasons. Firstly, and the most gross,
+      // is that this is how it's done. "Familiar is intuitive." Secondly, all
+      // of the above only applies from a type-centric perspective. As in, the
+      // one that you'd have while writing this piece of code. If you're not
+      // thinking of it as arbitrary types being affected by arbitrary type
+      // specifiers, then the point is lost.
+      //
+      // In short, I don't like it, but I'll do it anyway.
+      //
+      if (true)
+      {
+         std::vector<bigsint> widths;
+         do
+         {
+            in->get(SourceTokenC::TT_OP_BRACKET_O);
+            widths.push_back(make_expression(in, blocks, context)->makeObject()->resolveInt());
+            in->get(SourceTokenC::TT_OP_BRACKET_C);
+         }
+         while (in->peekType(SourceTokenC::TT_OP_BRACKET_O));
+
+         std::vector<bigsint>::size_type i = widths.size();
+         while (i--) type = type->getArray(widths[i]);
+      }
+      else
+      {
+         in->get(SourceTokenC::TT_OP_BRACKET_O);
+         width = make_expression(in, blocks, context)->makeObject()->resolveInt();
+         in->get(SourceTokenC::TT_OP_BRACKET_C);
+
+         type = type->getArray(width);
+      }
       break;
 
    default:
