@@ -65,6 +65,10 @@ static option::option_data<std::string> option_script_list
  "Indicates a file to list script names and numbers to. Use - to dump to "
  "stdout.", NULL);
 
+static option::option_data<std::string> option_static_list_debug
+('\0', "debug-static-list", "debugging",
+ "Indicates a file to list all statics to. Use - to dump to stdout.", NULL);
+
 
 //----------------------------------------------------------------------------|
 // Static Functions                                                           |
@@ -135,6 +139,14 @@ static void dump_script(std::ostream *out, ObjectData_Script const &s)
 {
    if (!s.externDef && s.externVis)
       *out << s.name << ' ' << s.label << ' ' << s.number << '\n';
+}
+
+//
+// dump_static_debug
+//
+static void dump_static_debug(std::ostream *out, ObjectData_Static const &s)
+{
+   *out << s.name << ' ' << s.number << ' ' << s.size << '\n';
 }
 
 //
@@ -278,6 +290,18 @@ static inline int _main()
       {
          std::ofstream ofs(option_script_list.data.c_str());
          ObjectData_Script::iterate(dump_script, &ofs);
+      }
+   }
+
+   // Dump static list, if requested.
+   if (option_static_list_debug.handled)
+   {
+      if (option_static_list_debug.data == "-")
+         ObjectExpression::iter_static(dump_static_debug, &std::cout);
+      else
+      {
+         std::ofstream ofs(option_static_list_debug.data.c_str());
+         ObjectExpression::iter_static(dump_static_debug, &ofs);
       }
    }
 
