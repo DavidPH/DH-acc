@@ -29,6 +29,7 @@
 #include <istream>
 #include <map>
 #include <ostream>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -101,6 +102,24 @@ void read_object(std::istream *in, std::pair<Tk, Tv> *out)
 }
 
 //
+// read_object<std::set>
+//
+template<typename T>
+void read_object(std::istream *in, std::set<T> *out)
+{
+   typename std::set<T>::size_type count;
+
+   read_object(in, &count);
+
+   while (count--)
+   {
+      T o;
+      read_object(in, &o);
+      out->insert(o);
+   }
+}
+
+//
 // read_object<std::vector>
 //
 template<typename T>
@@ -141,6 +160,20 @@ void write_object(std::ostream *out, std::pair<Tk, Tv> const *in)
 {
    write_object(out, &in->first);
    write_object(out, &in->second);
+}
+
+//
+// write_object<std::set>
+//
+template<typename T>
+void write_object(std::ostream *out, std::set<T> const *in)
+{
+   typename std::set<T>::const_iterator iter, end = in->end();
+
+   write_object_uns(out, in->size());
+
+   for (iter = in->begin(); iter != end; ++iter)
+      write_object(out, &*iter);
 }
 
 //

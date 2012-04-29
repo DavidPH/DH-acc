@@ -43,6 +43,8 @@ void ObjectExpression::read_objects(std::istream *in, ObjectVector *objects)
 
    read_object(in, objects);
 
+   read_object(in, &_library_table);
+
    read_object(in, &_static_table);
 
    read_object(in, &_symbol_table);
@@ -64,6 +66,8 @@ void ObjectExpression::write_objects
    *out << "object";
 
    write_object(out, objects);
+
+   write_object(out, &_library_table);
 
    write_object(out, &_static_table);
 
