@@ -245,13 +245,6 @@ operator do
   based on current context.
     "do" expression_single "while" "(" expression ")"
 
-operator enum
-  Defines an enumeration. Yields void.
-    "enum" identifier
-    "enum" [ identifier ]
-      "{" [ identifier [ "=" expression ] [ ","
-            identifier [ "=" expression ] ]... ] "}"
-
 operator extern
   Performs forward-declaration. Yields the thing declared.
     "extern" "__function" name arglist_return
@@ -455,7 +448,7 @@ type enum
     "enum" identifier
     "enum" [ identifier ]
       "{" [ identifier [ "=" expression ] [ ","
-            identifier [ "=" expression ] ]... ] "}"
+            identifier [ "=" expression ] ]... ] [ "," ] "}"
 
 type function
   A pointer type used for functions.

@@ -533,6 +533,9 @@ VariableType::Reference SourceExpressionDS::make_expression_type
                break;
 
             in->get(SourceTokenC::TT_OP_COMMA);
+
+            if (in->peekType(SourceTokenC::TT_OP_BRACE_C))
+               break;
          }
 
          in->get(SourceTokenC::TT_OP_BRACE_C);

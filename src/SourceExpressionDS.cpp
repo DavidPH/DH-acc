@@ -428,6 +428,7 @@ make_expression(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
       expressions.push_back(make_expression_single(in, blocks, context));
       break;
 
+   case SourceTokenC::TT_OP_BRACE_C:
    case SourceTokenC::TT_OP_BRACKET_C:
    case SourceTokenC::TT_OP_COLON:
    case SourceTokenC::TT_OP_COMMA:
