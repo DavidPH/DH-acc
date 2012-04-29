@@ -23,6 +23,8 @@
 
 #include "stdlib.dh"
 
+#include "string.dh"
+
 
 //----------------------------------------------------------------------------|
 // Types                                                                      |
@@ -343,6 +345,35 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 //__extfunc qsort
 //(void *base, size_t nmemb, size_t size,
 // __func_t(void const *, void const *) -> int compar) -> void
+
+//
+// qsort
+//
+// Definitely need a better algorithm than this.
+//
+__extfunc qsort(void *base, size_t nmemb, size_t size,
+ __script_t(void const *, void const *) -> int compar) -> void
+{
+   __variable __autoreg char const *iter = (char const *)base;
+   __variable __autoreg char const *end = (char const *)base + nmemb*size;
+
+   while (iter != end)
+   {
+      // If iter >= iter+1...
+      if (compar(iter, iter+size) >= 0)
+      {
+         // Swap the two elements.
+         __memswp(iter, iter+size, size);
+
+         // Reset the iterator.
+         if (iter != (char const *)base) (iter -= size);
+
+         continue;
+      };
+
+      iter += size;
+   };
+};
 
 //===================================================================
 // Integer arithmetic functions.

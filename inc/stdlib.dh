@@ -182,6 +182,9 @@ extern __function qsort
 (void *base, size_t nmemb, size_t size,
  __func_t(void const *, void const *) -> int compar) -> void;
 
+extern __function qsort(void *base, size_t nmemb, size_t size,
+ __script_t(void const *, void const *) -> int compar) -> void;
+
 //
 // Integer arithmetic functions.
 //

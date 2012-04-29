@@ -71,6 +71,10 @@ extern __function memcpy
 // Copies a chunk of memory.
 extern __function memmove(void *s1, void const *s2, size_t n) -> void *;
 
+// Swaps two chunks of memory.
+extern __function __memswp
+(void *restrict s1, void *restrict s2, size_t n) -> void *;
+
 // Copies a null-terminated string.
 extern __function strcpy(char *restrict s1, char const *restrict s2) -> char *;
 

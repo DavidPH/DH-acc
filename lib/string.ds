@@ -84,6 +84,28 @@ __extfunc memmove(void *s1, void const *s2, size_t n) -> void *
 };
 
 //
+// __memswp
+//
+__extfunc __memswp(void *restrict s1, void *restrict s2, size_t n) -> void *
+{
+   __variable __autoreg char const *end = (char const *)s2 + n;
+
+   __variable __autoreg char *i1 = (char *)s1;
+   __variable __autoreg char *i2 = (char *)s2;
+
+   __variable __autoreg char tmp;
+
+   while (i2 != end)
+   {
+      tmp = *i1;
+      *i1++ = *i2;
+      *i2++ = tmp;
+   };
+
+   return s1;
+};
+
+//
 // strcpy
 //
 __extfunc strcpy(char *restrict s1, char const *restrict s2) -> char *
