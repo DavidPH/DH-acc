@@ -194,7 +194,7 @@ static void read_source(std::string const &name, SourceType type,
 
    case SOURCE_object:
    {
-      std::ifstream in(name.c_str());
+      std::ifstream in(name.c_str(), std::ios_base::in|std::ios_base::binary);
       ObjectExpression::read_objects(&in, objects);
    }
       break;
