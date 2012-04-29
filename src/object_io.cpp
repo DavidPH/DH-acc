@@ -30,6 +30,8 @@
 // Macros                                                                     |
 //
 
+// I hope to re-enable this some day.
+#define USE_BIN_FLTS 0
 #define USE_OBJ_TAGS 1
 
 
@@ -91,6 +93,7 @@ static void check_object_tag(std::istream *in, int tag)
    #endif
 }
 
+#if USE_BIN_FLTS
 //
 // write_object_flt_part
 //
@@ -104,6 +107,29 @@ static void write_object_flt_part(unsigned char *&p, bigreal in)
 
    out = static_cast<unsigned char>(in) & 0xFF;
 }
+#else
+//
+// write_object_flt_f
+//
+static void write_object_flt_f(std::string &out, bigreal in)
+{
+   while ((in = std::fmod(in, 1) * 10))
+      out += static_cast<int>(in) + '0';
+}
+
+//
+// write_object_flt_i
+//
+static void write_object_flt_i(std::string &out, bigreal in)
+{
+   if (!in) return;
+
+   int i = static_cast<int>(std::fmod(in, 10));
+
+   write_object_flt_i(out, std::floor(in / 10));
+   out += i + '0';
+}
+#endif
 
 //
 // write_object_tag
@@ -219,6 +245,7 @@ bigreal read_object_flt(std::istream *in)
 {
    check_object_tag(in, OBJ_FLT);
 
+   #if USE_BIN_FLTS
    unsigned char len, neg;
    bigreal out;
 
@@ -235,6 +262,34 @@ bigreal read_object_flt(std::istream *in)
       while (--len) out *= 256;
 
    return neg ? -out : out;
+   #else
+   std::string::iterator itr, end;
+   std::string buf;
+   bigreal out = 0, outf = 0;
+   bool neg;
+
+   read_object(in, &buf);
+   end = buf.end();
+   itr = buf.begin();
+
+   if (*itr == '-') {neg = true; ++itr;} else neg = false;
+
+   while (itr != end && *itr != '.')
+   {
+      out *= 10;
+      out += *itr++ - '0';
+   }
+
+   if (itr != end) while (itr != --end)
+   {
+      outf += *end - '0';
+      outf /= 10;
+   }
+
+   out += outf;
+
+   return neg ? -out : out;
+   #endif
 }
 
 //
@@ -367,6 +422,7 @@ void write_object_flt(std::ostream *out, bigreal in)
 {
    write_object_tag(out, OBJ_FLT);
 
+   #if USE_BIN_FLTS
    // Handle 0.      len          buf          exp
    if (!in) {out->put(0); out->put(0); out->put(0); return;}
 
@@ -383,6 +439,17 @@ void write_object_flt(std::ostream *out, bigreal in)
    out->put((p-buf-1) | neg);
    while (p != buf) out->put(*--p);
    out->put(exp ? (exp | 0x80) : 0);
+   #else
+   std::string buf;
+
+   if (in < 0) {in = -in; buf = "-";}
+
+   write_object_flt_i(buf, in);
+   buf += '.';
+   write_object_flt_f(buf, in);
+
+   write_object(out, &buf);
+   #endif
 }
 
 //
