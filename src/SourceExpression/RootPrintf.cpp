@@ -201,6 +201,21 @@ private:
 
             switch (*c)
             {
+            case 'K':
+               makeExpr(objects, VariableType::get_bt_int());
+               objects->addToken(OCODE_ACSP_KEYBIND);
+               continue;
+
+            case 'L':
+               makeExpr(objects, VariableType::get_bt_int());
+               objects->addToken(OCODE_ACSP_STRING_LOCALIZED);
+               continue;
+
+            case 'N':
+               makeExpr(objects, VariableType::get_bt_int());
+               objects->addToken(OCODE_ACSP_PLAYER_NAME);
+               continue;
+
             case 'S':
                makeExpr(objects, VariableType::get_bt_string());
                objects->addToken(OCODE_ACSP_STRING);

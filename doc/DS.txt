@@ -315,6 +315,9 @@ operator printf
   number of arguments based on the msgtype. Consequently, that field must be a
   compile-time constant. Yield depends on operation.
   Supported conversion specifiers:
+   %K (int) keybind (ACS k:)
+   %L (__string) LANGUAGE-lump entry (ACS l:)
+   %N (int) name (ACS n:)
    %S (__string)
    %f (__real)
    %i (int)
