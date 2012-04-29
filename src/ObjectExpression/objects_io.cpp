@@ -236,7 +236,10 @@ void write_object(std::ostream *out, ObjectExpression::ObjectType const &in)
 //
 void write_object(std::ostream *out, ObjectExpression::Pointer const *in)
 {
-   (*in)->writeObject(out);
+   if (*in)
+      (*in)->writeObject(out);
+   else
+      write_object(out, ObjectExpression::OT_NONE);
 }
 
 // EOF

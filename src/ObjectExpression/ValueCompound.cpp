@@ -132,6 +132,8 @@ protected:
    //
    virtual void writeObject(std::ostream *out) const
    {
+      write_object(out, OT_VALUE_COMPOUND);
+
       Super::writeObject(out);
 
       write_object(out, &elems);
