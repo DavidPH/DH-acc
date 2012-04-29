@@ -35,6 +35,9 @@
 static int output_handler
 (char const *opt, int optf, int argc, char const *const *argv);
 
+static int output_object
+(char const *opt, int optf, int argc, char const *const *argv);
+
 static int source_handler
 (char const *opt, int optf, int argc, char const *const *argv);
 
@@ -48,6 +51,9 @@ static int target_handler
 
 static option::option_call option_output
 ('\0', "output-type", "output", "Output type.", NULL, output_handler);
+
+static option::option_call option_output_object
+('c', NULL, "output", "Equal to --output-type=object.", NULL, output_object);
 
 static option::option_call option_source
 ('\0', "source-type", "input", "Source file type.", NULL, source_handler);
@@ -89,6 +95,13 @@ static int output_handler
       option::exception::error(opt, optf, "unrecognized type");
 
    return 1;
+}
+
+static int output_object(char const *, int, int, char const *const *)
+{
+   output_type = OUTPUT_object;
+
+   return 0;
 }
 
 static int source_handler
