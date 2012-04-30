@@ -246,10 +246,18 @@ operator do
     "do" expression_single "while" "(" expression ")"
 
 operator extern
-  Performs forward-declaration. Yields the thing declared.
-    "extern" "__function" name arglist_return
-    "extern" "__script" name arglist_return
-    "extern" "__variable" storage_class type name
+  Performs forward-declaration. Yields the thing declared. The string is a
+  linkage-specifier and must be one of the following (defaults to "DS"):
+   "ACS" Performs name mangling compatible with acc's codegen.
+   "DS" Default.
+    "extern" [ string ] "__function" name arglist_return
+    "extern" [ string ] "__script" name arglist_return
+    "extern" [ string ] "__variable" storage_class type name
+    "extern" [ string ] "{" [
+      "__function" name arglist_return |
+      "__script" name arglist_return |
+      "__variable" storage_class type name
+      ]... "}"
 
 operator for
   Performs iteration. Yields void. Creates a new context for initializer based
@@ -261,7 +269,8 @@ operator function
   Defines a function. Yields a pointer to the function. Creates a new context
   for expression based on current context. The first form makes a function that
   can be exposed globally using extern.
-    "__extfunc"  name arglist_return expression_single
+    "__extfunc" [ string ] name arglist_return expression_single
+    "__intfunc" name arglist_return expression_single
     "__function" name arglist_return expression_single
 
 operator goto
@@ -333,7 +342,9 @@ operator script
   Defines a script. Yields a pointer to the script. Creates a new context for
   expression based on current context. The first form makes a script that can be
   exposed globally using extern.
-    "__extscript" name [ type [ flag... ] ] arglist_return
+    "__extscript" [ string ] name [ type [ flag... ] ] arglist_return
+      [ "@" expression_single ] expression_single
+    "__intscript" name [ type [ flag... ] ] arglist_return
       [ "@" expression_single ] expression_single
     "__script" name [ type [ flag... ] ] arglist_return
       [ "@" expression_single ] expression_single
@@ -364,8 +375,9 @@ operator union
 operator variable
   Declares a variable. Yields the variable. The first form makes a variable that
   can be exposed globally using extern.
-    "__extvar"   storage_class type name [ "@" integer ]
-    "__variable" storage_class type name [ "@" integer ]
+    "__extvar" [ string ] storage_class type name [ "@" expression_single ]
+    "__intvar" storage_class type name [ "@" expression_single ]
+    "__variable" storage_class type name [ "@" expression_single ]
 
 operator void
   Drops the result of expression. Yields void.

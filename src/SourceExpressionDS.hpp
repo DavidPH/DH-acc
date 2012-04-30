@@ -33,18 +33,28 @@
 // Macros                                                                     |
 //
 
-#define SRCEXPDS_EXPRSINGLE_ARGS                            \
-   SourceTokenizerDS * in, SourceTokenC const & token, \
-   std::vector<SourceExpression::Pointer> * blocks,    \
-   SourceContext * context
+#define SRCEXPDS_EXPREXTERN_ARGS \
+SRCEXPDS_EXPRSINGLE_ARGS, LinkageSpecifier linkSpec
 
-#define SRCEXPDS_EXPRSINGLE_DECL(NAME)   \
-   static SourceExpression::Pointer \
-   make_expression_single_##NAME(SRCEXPDS_EXPRSINGLE_ARGS)
+#define SRCEXPDS_EXPREXTERN_DECL(NAME) \
+static SourceExpression::Pointer       \
+make_expression_extern_##NAME(SRCEXPDS_EXPREXTERN_ARGS)
 
-#define SRCEXPDS_EXPRSINGLE_DEFN(NAME)                 \
-   SourceExpression::Pointer SourceExpressionDS:: \
-   make_expression_single_##NAME(SRCEXPDS_EXPRSINGLE_ARGS)
+#define SRCEXPDS_EXPREXTERN_DEFN(NAME)         \
+SourceExpression::Pointer SourceExpressionDS:: \
+make_expression_extern_##NAME(SRCEXPDS_EXPREXTERN_ARGS)
+
+#define SRCEXPDS_EXPRSINGLE_ARGS                  \
+SourceTokenizerDS *in, SourceTokenC const &token, \
+SourceExpression::Vector *blocks, SourceContext *context
+
+#define SRCEXPDS_EXPRSINGLE_DECL(NAME) \
+static SourceExpression::Pointer       \
+make_expression_single_##NAME(SRCEXPDS_EXPRSINGLE_ARGS)
+
+#define SRCEXPDS_EXPRSINGLE_DEFN(NAME)         \
+SourceExpression::Pointer SourceExpressionDS:: \
+make_expression_single_##NAME(SRCEXPDS_EXPRSINGLE_ARGS)
 
 
 //----------------------------------------------------------------------------|
@@ -59,6 +69,13 @@ class SourceExpressionDS : public SourceExpression
    MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpressionDS, SourceExpression);
 
 public:
+   enum LinkageSpecifier
+   {
+      LS_INTERN,
+      LS_ACS,
+      LS_DS,
+   };
+
    static void init();
 
    static SourceExpression::Pointer create_value_float
@@ -69,26 +86,6 @@ public:
 
    static SourceExpression::Pointer make_expression
    (SourceTokenizerDS *in, Vector *blocks, SourceContext *context);
-
-   static SourceExpression::Pointer make_expression_single
-   (SourceTokenizerDS *in, Vector *blocks, SourceContext *context);
-
-   static CounterReference<VariableType> make_expression_type
-   (SourceTokenizerDS * in, Vector *blocks, SourceContext *context);
-
-   static SourceExpression::Pointer make_expressions
-   (SourceTokenizerDS *tokenizer);
-
-protected:
-   SourceExpressionDS(SRCEXP_EXPR_ARGS);
-
-private:
-   typedef SourceExpression::Pointer (*expr_single_handler)(SRCEXPDS_EXPRSINGLE_ARGS);
-   typedef std::map<std::string, expr_single_handler> expr_single_handler_map;
-
-
-   static bool is_expression_type
-   (std::string const &data, SourceContext *context);
 
    static void make_expression_arglist
    (SourceTokenizerDS *in, Vector *blocks, SourceContext *context,
@@ -103,9 +100,37 @@ private:
     SourceContext *argContext, CounterPointer<VariableType> *returnType,
     SourceVariable::StorageClass argClass = SourceVariable::SC_REGISTER);
 
+   static SourceExpression::Pointer make_expression_single
+   (SourceTokenizerDS *in, Vector *blocks, SourceContext *context);
+
+   static CounterReference<VariableType> make_expression_type
+   (SourceTokenizerDS *in, Vector *blocks, SourceContext *context);
+
+   static SourceExpression::Pointer make_expressions(SourceTokenizerDS *in);
+
+   static LinkageSpecifier make_linkage_specifier(SourceTokenizerDS *in);
+
+protected:
+   SourceExpressionDS(SRCEXP_EXPR_ARGS);
+
+private:
+   typedef SourceExpression::Pointer (*ExternHandler)(SRCEXPDS_EXPREXTERN_ARGS);
+   typedef std::map<std::string, ExternHandler> ExternMap;
+
+   typedef SourceExpression::Pointer (*SingleHandler)(SRCEXPDS_EXPRSINGLE_ARGS);
+   typedef std::map<std::string, SingleHandler> SingleMap;
+
+
+   static bool is_expression_type
+   (std::string const &data, SourceContext *context);
+
    static void make_expressions
    (SourceTokenizerDS *in, Vector *expressions, Vector *blocks,
     SourceContext *context);
+
+   SRCEXPDS_EXPREXTERN_DECL(function);
+   SRCEXPDS_EXPREXTERN_DECL(script);
+   SRCEXPDS_EXPREXTERN_DECL(variable);
 
    SRCEXPDS_EXPRSINGLE_DECL(asmfunc);
    SRCEXPDS_EXPRSINGLE_DECL(break);
@@ -117,9 +142,6 @@ private:
    SRCEXPDS_EXPRSINGLE_DECL(delay);
    SRCEXPDS_EXPRSINGLE_DECL(do);
    SRCEXPDS_EXPRSINGLE_DECL(extern);
-   SRCEXPDS_EXPRSINGLE_DECL(extern_function);
-   SRCEXPDS_EXPRSINGLE_DECL(extern_script);
-   SRCEXPDS_EXPRSINGLE_DECL(extern_variable);
    SRCEXPDS_EXPRSINGLE_DECL(for);
    SRCEXPDS_EXPRSINGLE_DECL(function);
    SRCEXPDS_EXPRSINGLE_DECL(goto);
@@ -142,8 +164,8 @@ private:
    SRCEXPDS_EXPRSINGLE_DECL(void);
    SRCEXPDS_EXPRSINGLE_DECL(while);
 
-   static expr_single_handler_map expr_single;
-   static expr_single_handler_map expr_single_extern;
+   static ExternMap expr_extern;
+   static SingleMap expr_single;
 };
 
 #endif//HPP_SourceExpressionDS_

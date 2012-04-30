@@ -48,17 +48,16 @@ typedef SourceVariable::StorageClass StorageClass;
 //
 static SourceExpression::Pointer make_var
 (SourceTokenizerDS *in, SourceExpression::Vector *blocks,
- SourceContext *context, SourcePosition const &pos, std::string const &nameSrc,
- VariableType *type, StorageClass sc, bool externDef, bool externVis)
+ SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
+ SourcePosition const &pos, std::string const &nameSrc, VariableType *type,
+ StorageClass sc, bool externDef)
 {
    // Determine "name type".
    SourceContext::NameType nt;
    if (externDef)
       nt = SourceContext::NT_EXTERN;
-
-   else if (externVis)
+   else if (linkSpec != SourceExpressionDS::LS_INTERN)
       nt = SourceContext::NT_EXTLOCAL;
-
    else
       nt = SourceContext::NT_LOCAL;
 
@@ -184,13 +183,13 @@ static SourceExpression::Pointer make_var
 //
 static SourceExpression::Pointer make_var
 (SourceTokenizerDS *in, SourceExpression::Vector *blocks,
- SourceContext *context, SourcePosition const &pos, VariableType *type,
- StorageClass sc, bool externDef, bool externVis)
+ SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
+ SourcePosition const &pos, VariableType *type, StorageClass sc, bool externDef)
 {
    // Read source name.
    std::string nameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
-   return make_var(in, blocks, context, pos, nameSrc, type, sc, externDef, externVis);
+   return make_var(in, blocks, context, linkSpec, pos, nameSrc, type, sc, externDef);
 }
 
 //
@@ -198,14 +197,14 @@ static SourceExpression::Pointer make_var
 //
 static SourceExpression::Pointer make_var
 (SourceTokenizerDS *in, SourceExpression::Vector *blocks,
- SourceContext *context, SourcePosition const &pos, StorageClass sc,
- bool externDef, bool externVis)
+ SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
+ SourcePosition const &pos, StorageClass sc, bool externDef)
 {
    // Read variable type.
    VariableType::Reference type =
       SourceExpressionDS::make_expression_type(in, blocks, context);
 
-   return make_var(in, blocks, context, pos, type, sc, externDef, externVis);
+   return make_var(in, blocks, context, linkSpec, pos, type, sc, externDef);
 }
 
 //
@@ -213,15 +212,15 @@ static SourceExpression::Pointer make_var
 //
 static SourceExpression::Pointer make_var
 (SourceTokenizerDS *in, SourceExpression::Vector *blocks,
- SourceContext *context, SourcePosition const &pos,
- bool externDef, bool externVis)
+ SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
+ SourcePosition const &pos, bool externDef)
 {
    // Read storage class.
    SourceTokenC const &scTok = in->get(SourceTokenC::TT_IDENTIFIER);
    SourceVariable::StorageClass sc =
       SourceVariable::get_StorageClass(scTok.data, scTok.pos);
 
-   return make_var(in, blocks, context, pos, sc, externDef, externVis);
+   return make_var(in, blocks, context, linkSpec, pos, sc, externDef);
 }
 
 
@@ -230,11 +229,11 @@ static SourceExpression::Pointer make_var
 //
 
 //
-// SourceExpressionDS::make_expression_single_extern_variable
+// SourceExpressionDS::make_expression_extern_variable
 //
-SRCEXPDS_EXPRSINGLE_DEFN(extern_variable)
+SRCEXPDS_EXPREXTERN_DEFN(variable)
 {
-   return make_var(in, blocks, context, token.pos, true, true);
+   return make_var(in, blocks, context, linkSpec, token.pos, true);
 }
 
 //
@@ -242,9 +241,19 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_variable)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(variable)
 {
-   bool externVis = token.data == "__extvar";
+   LinkageSpecifier linkSpec;
 
-   return make_var(in, blocks, context, token.pos, false, externVis);
+   if (token.data == "__extvar")
+   {
+      if (in->peekType(SourceTokenC::TT_STRING))
+         linkSpec = make_linkage_specifier(in);
+      else
+         linkSpec = LS_DS;
+   }
+   else
+      linkSpec = LS_INTERN;
+
+   return make_var(in, blocks, context, linkSpec, token.pos, false);
 }
 
 // EOF

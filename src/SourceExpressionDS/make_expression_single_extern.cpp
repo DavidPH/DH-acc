@@ -40,17 +40,53 @@
 //
 SRCEXPDS_EXPRSINGLE_DEFN(extern)
 {
-   (void)token;
+   ExternMap::iterator externFunc;
+   LinkageSpecifier linkSpec;
 
-   SourceTokenC externToken = in->get(SourceTokenC::TT_IDENTIFIER);
+   if (token.data != "extern")
+      linkSpec = LS_INTERN;
+   else if (in->peekType(SourceTokenC::TT_STRING))
+      linkSpec = make_linkage_specifier(in);
+   else
+      linkSpec = LS_DS;
 
-   expr_single_handler_map::iterator it =
-      expr_single_extern.find(externToken.data);
+   if (in->peekType(SourceTokenC::TT_OP_BRACE_O))
+   {
+      Vector exprs;
 
-   if (it == expr_single_extern.end())
-      ERROR(externToken.pos, "unknown extern type");
+      in->get(SourceTokenC::TT_OP_BRACE_O);
 
-   return it->second(in, externToken, blocks, context);
+      while (!in->peekType(SourceTokenC::TT_OP_BRACE_C))
+      {
+         SourceTokenC externToken = in->get(SourceTokenC::TT_IDENTIFIER);
+
+         externFunc = expr_extern.find(externToken.data);
+
+         if (externFunc == expr_extern.end())
+            ERROR(externToken.pos, "unknown extern type %s",
+                  externToken.data.c_str());
+
+         exprs.push_back(externFunc->second(in, externToken, blocks, context, linkSpec));
+
+         in->get(SourceTokenC::TT_OP_SEMICOLON);
+      }
+
+      in->get(SourceTokenC::TT_OP_BRACE_C);
+
+      return create_value_block(exprs, context, token.pos);
+   }
+   else
+   {
+      SourceTokenC externToken = in->get(SourceTokenC::TT_IDENTIFIER);
+
+      externFunc = expr_extern.find(externToken.data);
+
+      if (externFunc == expr_extern.end())
+         ERROR(externToken.pos, "unknown extern type %s",
+               externToken.data.c_str());
+
+      return externFunc->second(in, externToken, blocks, context, linkSpec);
+   }
 }
 
 // EOF

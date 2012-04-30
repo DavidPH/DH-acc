@@ -34,6 +34,13 @@
 
 
 //----------------------------------------------------------------------------|
+// Static Prototypes                                                          |
+//
+
+static void mangle_types(VariableType::Vector const &types, std::string &name);
+
+
+//----------------------------------------------------------------------------|
 // Static Variables                                                           |
 //
 
@@ -66,6 +73,146 @@ bool option_string_func = true;
 // Static Functions                                                           |
 //
 
+//
+// make_func
+//
+static SourceExpression::Pointer make_func
+(SourceTokenizerDS *in, SourceTokenC const &token,
+ SourceExpression::Vector *blocks, SourceContext *context,
+ SourceExpressionDS::LinkageSpecifier linkSpec, bool externDef)
+{
+   // funcArgClass
+   SourceVariable::StorageClass funcArgClass;
+
+   if (option_function_autoargs || target_type != TARGET_ZDoom)
+      funcArgClass = SourceVariable::SC_AUTO;
+   else
+      funcArgClass = SourceVariable::SC_REGISTER;
+
+   // funcContext
+   SourceContext::Pointer funcContext;
+   if (!externDef)
+      funcContext = SourceContext::create(context, SourceContext::CT_FUNCTION);
+
+   // funcNameSrc
+   std::string funcNameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
+
+   // funcArgTypes/Names/Count funcReturn
+   VariableType::Vector funcArgTypes;
+   VariableType::VecStr funcArgNames;
+   int funcArgCount;
+   VariableType::Pointer funcReturn;
+   SourceExpressionDS::make_expression_arglist
+   (in, blocks, context, &funcArgTypes, &funcArgNames, &funcArgCount,
+    funcContext, &funcReturn, funcArgClass);
+   // Don't count automatic variable args.
+   if (option_function_autoargs) funcArgCount = 0;
+
+   // funcLabel
+   std::string funcLabel;
+   switch (linkSpec)
+   {
+   case SourceExpressionDS::LS_INTERN:
+      funcLabel  = context->makeLabel();
+      funcLabel += funcNameSrc;
+      mangle_types(funcArgTypes, funcLabel);
+      break;
+
+   case SourceExpressionDS::LS_ACS:
+      funcLabel  = funcNameSrc;
+      break;
+
+   case SourceExpressionDS::LS_DS:
+      funcLabel  = funcNameSrc;
+      if (option_function_mangle_types)
+         mangle_types(funcArgTypes, funcLabel);
+      break;
+   }
+
+   // funcNameObject
+   std::string funcNameObj = funcLabel + "_id";
+
+   // __func__
+   if (!externDef && option_string_func)
+   {
+      std::string funcFunc = funcNameSrc;
+
+      if (option_function_mangle_types)
+      {
+         if (!funcArgTypes.empty())
+         {
+            funcFunc += '(';
+
+            VariableType::Vector::iterator it = funcArgTypes.begin();
+            funcFunc += make_string(*it);
+            for (++it; it != funcArgTypes.end(); ++it)
+            {
+               funcFunc += ", ";
+               funcFunc += make_string(*it);
+            }
+
+            funcFunc += ')';
+         }
+         else
+            funcFunc += "(void)";
+
+         funcFunc += " -> ";
+         funcFunc += make_string(funcReturn);
+      }
+
+      funcFunc = ObjectData_String::add(funcFunc);
+
+      funcContext->addVariable(SourceVariable::create_constant
+         ("__func__", VariableType::get_bt_string(), funcFunc, token.pos));
+   }
+
+   // funcVarType
+   VariableType::Reference funcVarType =
+      VariableType::get_bt_function(funcArgTypes, funcReturn);
+
+   // funcVar
+   SourceVariable::Pointer funcVar;
+   if (target_type != TARGET_ZDoom)
+   {
+      funcVar = SourceVariable::create_constant
+         (funcNameSrc, funcVarType, funcLabel, token.pos);
+   }
+   else
+   {
+      funcVar = SourceVariable::create_constant
+         (funcNameSrc, funcVarType, funcNameObj, token.pos);
+   }
+
+   // funcAdded
+   bool funcAdded = ObjectData_Function::add
+      (funcNameObj, funcLabel, funcArgCount, funcReturn->getSize(token.pos),
+       funcContext);
+
+   if (funcAdded)
+      context->addFunction(funcVar);
+
+   // funcExpr
+   if (!externDef)
+   {
+      SourceExpression::Pointer funcExpr = SourceExpressionDS::
+         make_expression_single(in, blocks, funcContext);
+
+      SourceExpression::Pointer funcExprData = SourceExpression::
+         create_value_data_garbage(funcReturn, funcContext, token.pos);
+      SourceExpression::Pointer funcExprRetn = SourceExpression::
+         create_branch_return(funcExprData, funcContext, token.pos);
+
+      funcExpr->addLabel(funcLabel);
+      blocks->push_back(funcExpr);
+      blocks->push_back(funcExprRetn);
+   }
+
+   return SourceExpression::create_value_variable(funcVar, context, token.pos);
+}
+
+//
+// mangle_types
+//
 static void mangle_types(VariableType::Vector const &types, std::string &name)
 {
    name += "$";
@@ -80,66 +227,11 @@ static void mangle_types(VariableType::Vector const &types, std::string &name)
 //
 
 //
-// SourceExpressionDS::make_expression_single_extern_function
+// SourceExpressionDS::make_expression_extern_function
 //
-SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
+SRCEXPDS_EXPREXTERN_DEFN(function)
 {
-   // functionArgClass
-   SourceVariable::StorageClass functionArgClass;
-
-   if (option_function_autoargs || target_type != TARGET_ZDoom)
-      functionArgClass = SourceVariable::SC_AUTO;
-   else
-      functionArgClass = SourceVariable::SC_REGISTER;
-
-   // functionName
-   std::string functionName = in->get(SourceTokenC::TT_IDENTIFIER).data;
-
-   // functionArgTypes/Count functionReturn
-   VariableType::Vector functionArgTypes;
-   int functionArgCount;
-   VariableType::Pointer functionReturn;
-   make_expression_arglist
-   (in, blocks, context, &functionArgTypes, NULL, &functionArgCount, NULL,
-    &functionReturn, functionArgClass);
-   // Don't count automatic variable args.
-   if (option_function_autoargs) functionArgCount = 0;
-
-   // functionLabel
-   std::string functionLabel = "::" + functionName;
-   if (option_function_mangle_types)
-      mangle_types(functionArgTypes, functionLabel);
-
-   // functionNameObject
-   std::string functionNameObject = functionLabel + "_id";
-
-   // functionVarType
-   VariableType::Reference functionVarType =
-      VariableType::get_bt_function(functionArgTypes, functionReturn);
-
-   // functionVariable
-   SourceVariable::Pointer functionVariable;
-   if (target_type != TARGET_ZDoom)
-   {
-      functionVariable =
-         SourceVariable::create_constant
-         (functionName, functionVarType, functionLabel, token.pos);
-   }
-   else
-   {
-      functionVariable =
-         SourceVariable::create_constant
-         (functionName, functionVarType, functionNameObject, token.pos);
-   }
-
-   bool added = ObjectData_Function::add
-   (functionNameObject, functionLabel, functionArgCount,
-    functionReturn->getSize(token.pos), NULL);
-
-   if (added)
-      context->addFunction(functionVariable);
-
-   return create_value_variable(functionVariable, context, token.pos);
+   return make_func(in, token, blocks, context, linkSpec, true);
 }
 
 //
@@ -147,122 +239,19 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern_function)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(function)
 {
-   // functionArgClass
-   SourceVariable::StorageClass functionArgClass;
+   LinkageSpecifier linkSpec;
 
-   if (option_function_autoargs || target_type != TARGET_ZDoom)
-      functionArgClass = SourceVariable::SC_AUTO;
-   else
-      functionArgClass = SourceVariable::SC_REGISTER;
-
-   // functionContext
-   SourceContext::Reference functionContext =
-      SourceContext::create(context, SourceContext::CT_FUNCTION);
-
-   // functionName
-   SourceTokenC functionNameToken = in->get(SourceTokenC::TT_IDENTIFIER);
-   std::string functionName = functionNameToken.data;
-
-   // functionArgTypes/Names/Count functionReturn
-   VariableType::Vector functionArgTypes;
-   VariableType::VecStr functionArgNames;
-   int functionArgCount;
-   VariableType::Pointer functionReturn;
-   make_expression_arglist
-   (in, blocks, context, &functionArgTypes, &functionArgNames,
-    &functionArgCount, functionContext, &functionReturn, functionArgClass);
-   // Don't count automatic variable args.
-   if (option_function_autoargs) functionArgCount = 0;
-
-   // functionLabel
-   std::string functionLabel = "::";
-   if (token.data != "__extfunc")
-      functionLabel += context->makeLabel();
-   functionLabel += functionName;
-   if (option_function_mangle_types)
-      mangle_types(functionArgTypes, functionLabel);
-
-   // functionNameObject
-   std::string functionNameObject = functionLabel + "_id";
-
-   // __func__
-   if (option_string_func)
+   if (token.data == "__extfunc")
    {
-      std::string funcVarData = functionName;
-
-      if (option_function_mangle_types)
-      {
-         if (!functionArgTypes.empty())
-         {
-            funcVarData += '(';
-
-            VariableType::Vector::iterator it = functionArgTypes.begin();
-            funcVarData += make_string(*it);
-            for (++it; it != functionArgTypes.end(); ++it)
-            {
-               funcVarData += ", ";
-               funcVarData += make_string(*it);
-            }
-
-            funcVarData += ')';
-         }
-         else
-            funcVarData += "(void)";
-
-         funcVarData += " -> ";
-         funcVarData += make_string(functionReturn);
-      }
-
-      funcVarData = ObjectData_String::add(funcVarData);
-
-      SourceVariable::Pointer funcVar =
-         SourceVariable::create_constant
-         ("__func__", VariableType::get_bt_string(), funcVarData,
-          functionNameToken.pos);
-
-      functionContext->addVariable(funcVar);
-   }
-
-   // functionVarType
-   VariableType::Reference functionVarType =
-      VariableType::get_bt_function(functionArgTypes, functionReturn);
-
-   // functionVariable
-   // Before functionExpression to enable recursion.
-   SourceVariable::Pointer functionVariable;
-   if (target_type != TARGET_ZDoom)
-   {
-      functionVariable =
-         SourceVariable::create_constant
-         (functionName, functionVarType, functionLabel, token.pos);
+      if (in->peekType(SourceTokenC::TT_STRING))
+         linkSpec = make_linkage_specifier(in);
+      else
+         linkSpec = LS_DS;
    }
    else
-   {
-      functionVariable =
-         SourceVariable::create_constant
-         (functionName, functionVarType, functionNameObject, token.pos);
-   }
+      linkSpec = LS_INTERN;
 
-   bool added = ObjectData_Function::add
-   (functionNameObject, functionLabel, functionArgCount,
-    functionReturn->getSize(token.pos), functionContext);
-
-   if (added)
-      context->addFunction(functionVariable);
-
-   // functionExpression
-   SourceExpression::Pointer functionExpression =
-      make_expression_single(in, blocks, functionContext);
-   functionExpression->addLabel(functionLabel);
-   blocks->push_back(functionExpression);
-
-   SourceExpression::Pointer functionExprData =
-      create_value_data_garbage(functionReturn, functionContext, token.pos);
-   SourceExpression::Pointer functionExprRetn =
-      create_branch_return(functionExprData, functionContext, token.pos);
-   blocks->push_back(functionExprRetn);
-
-   return create_value_variable(functionVariable, context, token.pos);
+   return make_func(in, token, blocks, context, linkSpec, false);
 }
 
 // EOF

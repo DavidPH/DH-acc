@@ -34,8 +34,8 @@
 // Global Variables                                                           |
 //
 
-SourceExpressionDS::expr_single_handler_map SourceExpressionDS::expr_single;
-SourceExpressionDS::expr_single_handler_map SourceExpressionDS::expr_single_extern;
+SourceExpressionDS::ExternMap SourceExpressionDS::expr_extern;
+SourceExpressionDS::SingleMap SourceExpressionDS::expr_single;
 
 
 //----------------------------------------------------------------------------|
@@ -323,6 +323,10 @@ SourceExpressionDS::SourceExpressionDS(SRCEXP_EXPR_PARM)
 //
 void SourceExpressionDS::init()
 {
+   expr_extern["__function"] = make_expression_extern_function;
+   expr_extern["__script"]   = make_expression_extern_script;
+   expr_extern["__variable"] = make_expression_extern_variable;
+
    expr_single["__asmfunc"]  = make_expression_single_asmfunc;
    expr_single[  "break"]    = make_expression_single_break;
    expr_single[  "case"]     = make_expression_single_case;
@@ -333,8 +337,8 @@ void SourceExpressionDS::init()
    expr_single["__delay"]    = make_expression_single_delay;
    expr_single[  "do"]       = make_expression_single_do;
    expr_single[  "enum"]     = make_expression_single_type;
-   expr_single["__extfunc"]  = make_expression_single_function;
    expr_single[  "extern"]   = make_expression_single_extern;
+   expr_single["__extfunc"]  = make_expression_single_function;
    expr_single["__extscript"]= make_expression_single_script;
    expr_single["__extvar"]   = make_expression_single_variable;
    expr_single[  "for"]      = make_expression_single_for;
@@ -342,6 +346,10 @@ void SourceExpressionDS::init()
    expr_single[  "goto"]     = make_expression_single_goto;
    expr_single["__goto_dyn"] = make_expression_single_goto_dyn;
    expr_single[  "if"]       = make_expression_single_if;
+   expr_single["__intern"]   = make_expression_single_extern;
+   expr_single["__intfunc"]  = make_expression_single_function;
+   expr_single["__intscript"]= make_expression_single_script;
+   expr_single["__intvar"]   = make_expression_single_variable;
    expr_single["__library"]  = make_expression_single_library;
    expr_single["__linespec"] = make_expression_single_linespec;
    expr_single["__native"]   = make_expression_single_native;
@@ -366,10 +374,6 @@ void SourceExpressionDS::init()
    expr_single[  "reinterpret_cast"] = make_expression_single_cast;
    expr_single[  "static_cast"]      = make_expression_single_cast;
    expr_single["__force_cast"]       = make_expression_single_cast;
-
-   expr_single_extern["__function"] = make_expression_single_extern_function;
-   expr_single_extern["__script"]   = make_expression_single_extern_script;
-   expr_single_extern["__variable"] = make_expression_single_extern_variable;
 }
 
 //
@@ -576,6 +580,25 @@ void SourceExpressionDS::make_expressions
       exprs->push_back(make_expression(in, blocks, context));
       in->get(SourceTokenC::TT_OP_SEMICOLON);
    }
+}
+
+//
+// SourceExpressionDS::make_linkage_specifier
+//
+SourceExpressionDS::LinkageSpecifier SourceExpressionDS::make_linkage_specifier
+(SourceTokenizerDS *in)
+{
+   SourceTokenC const &linkSpecTok = in->get(SourceTokenC::TT_STRING);
+
+   if (linkSpecTok.data == "internal")
+      return LS_INTERN;
+   else if (linkSpecTok.data == "ACS")
+      return LS_ACS;
+   else if (linkSpecTok.data == "DS")
+      return LS_DS;
+   else
+      ERROR(linkSpecTok.pos, "unknown linkage specifier '%s'",
+            linkSpecTok.data.c_str());
 }
 
 // EOF
