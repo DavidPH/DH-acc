@@ -90,10 +90,16 @@ VariableType::Reference SourceExpression::
 get_promoted_type(VariableType *type1, VariableType *type2,
                   SourcePosition const &)
 {
-   if (type1 == type2) return static_cast<VariableType::Reference>(type1);
-
    VariableType::BasicType bt1 = type1->getBasicType();
    VariableType::BasicType bt2 = type2->getBasicType();
+
+   if (type1 == type2)
+   {
+      // Some types promote even if they're already the same.
+      if (bt1 == VariableType::BT_ENUM) return VariableType::get_bt_int();
+
+      return static_cast<VariableType::Reference>(type1);
+   }
 
    if (bt1 == VariableType::BT_VOID) return type1->getUnqualified();
    if (bt2 == VariableType::BT_VOID) return type2->getUnqualified();
