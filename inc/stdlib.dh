@@ -24,10 +24,12 @@
 #ifndef __HEADER__STDLIB_DH__
 #define __HEADER__STDLIB_DH__ #
 
-#ifdef __LIBDS_PARTS
+#ifndef __LIBDS_NOLIB
+# ifdef __LIBDS_PARTS
 __library("stdlib");
-#else
+# else
 __library("libDS");
+# endif
 #endif
 
 
