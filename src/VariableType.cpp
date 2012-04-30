@@ -1279,6 +1279,7 @@ bool VariableType::is_bt_integer(BasicType type)
    case BT_BOOLHARD:
    case BT_BOOLSOFT:
    case BT_CHAR:
+   case BT_ENUM:
    case BT_INT:
    case BT_LLONG:
    case BT_LONG:
