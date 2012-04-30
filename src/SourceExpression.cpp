@@ -152,6 +152,9 @@ get_promoted_type(VariableType *type1, VariableType *type2,
    if (bt1 == VariableType::BT_CHAR) return type1->getUnqualified();
    if (bt2 == VariableType::BT_CHAR) return type2->getUnqualified();
 
+   if (bt1 == VariableType::BT_ENUM) return VariableType::get_bt_int();
+   if (bt2 == VariableType::BT_ENUM) return VariableType::get_bt_int();
+
    if (bt1 == VariableType::BT_STRING) return type1->getUnqualified();
    if (bt2 == VariableType::BT_STRING) return type2->getUnqualified();
 
