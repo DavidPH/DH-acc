@@ -724,15 +724,13 @@ std::string SourceContext::makeNameObject
 (NameType nameType, SourceVariable::StorageClass sc, VariableType *type,
  std::string const &nameSource, SourcePosition const &pos) const
 {
-   #define PARM nameObject, type, nameType == NT_EXTERN, \
-                nameType != NT_LOCAL
+   #define PARM \
+   nameObject, type, nameType == NT_EXTERN, nameType != NT_LOCAL
 
    std::string nameObject;
    if (nameType == NT_LOCAL)
       nameObject += getLabel();
    nameObject += nameSource;
-
-   bigsint typeSize = type->getSize(pos);
 
    switch (sc)
    {
@@ -740,7 +738,7 @@ std::string SourceContext::makeNameObject
    case SourceVariable::SC_REGISTER:
       // TODO: Need a separate list for register at some point eventually, but
       // it's not that important.
-      ObjectExpression::add_auto(nameObject, typeSize, getCount(sc));
+      ObjectData_Auto::add(PARM, getCount(sc));
       break;
 
    case SourceVariable::SC_CONSTANT:
@@ -771,7 +769,7 @@ std::string SourceContext::makeNameObject
       break;
 
    case SourceVariable::SC_STATIC:
-      ObjectExpression::add_static(nameObject, typeSize);
+      ObjectData_Static::add(PARM);
       break;
    }
 
@@ -788,15 +786,13 @@ std::string SourceContext::makeNameObject
  std::string const &nameSource, bigsint address,
  SourcePosition const &pos) const
 {
-   #define PARM nameObject, type, address, nameType == NT_EXTERN, \
-                nameType != NT_LOCAL
+   #define PARM \
+   nameObject, type, nameType == NT_EXTERN, nameType != NT_LOCAL, address
 
    std::string nameObject;
    if (nameType == NT_LOCAL)
       nameObject += getLabel();
    nameObject += nameSource;
-
-   bigsint typeSize = type->getSize(pos);
 
    switch (sc)
    {
@@ -804,7 +800,7 @@ std::string SourceContext::makeNameObject
    case SourceVariable::SC_REGISTER:
       // TODO: Need a separate list for register at some point eventually, but
       // it's not that important.
-      ObjectExpression::add_auto(nameObject, typeSize, address);
+      ObjectData_Auto::add(PARM);
       break;
 
    case SourceVariable::SC_CONSTANT:
@@ -835,7 +831,7 @@ std::string SourceContext::makeNameObject
       break;
 
    case SourceVariable::SC_STATIC:
-      ObjectExpression::add_static(nameObject, typeSize, address);
+      ObjectData_Static::add(PARM);
       break;
    }
 

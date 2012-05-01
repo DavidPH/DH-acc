@@ -297,11 +297,11 @@ static inline int _main()
    if (option_static_list_debug.handled)
    {
       if (option_static_list_debug.data == "-")
-         ObjectExpression::iter_static(dump_static_debug, &std::cout);
+         ObjectData_Static::iterate(dump_static_debug, &std::cout);
       else
       {
          std::ofstream ofs(option_static_list_debug.data.c_str());
-         ObjectExpression::iter_static(dump_static_debug, &ofs);
+         ObjectData_Static::iterate(dump_static_debug, &ofs);
       }
    }
 

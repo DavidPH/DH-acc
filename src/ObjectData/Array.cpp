@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../object_io.hpp"
+#include "../option.hpp"
 #include "../VariableType.hpp"
 
 #include <map>
@@ -50,6 +51,11 @@ static void set_strings(std::vector<int> &strings, VariableType const *type);
 // Static Variables                                                           |
 //
 
+static option::option_dptr<int> option_addr_array_handler
+('\0', "addr-array", "features",
+ "Selects which global array to use for addressable variables. 0 by default.",
+ NULL, &option_addr_array);
+
 static ArrayTable map_table;
 static ArrayTable world_table;
 static ArrayTable global_table;
@@ -61,6 +67,7 @@ static std::set<bigsint> used;
 // Global Variables                                                           |
 //
 
+int option_addr_array = 0;
 extern bool option_named_scripts;
 
 

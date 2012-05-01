@@ -27,7 +27,7 @@
 #include "BinaryTokenACS.hpp"
 #include "ObjectCode.hpp"
 #include "ObjectData.hpp"
-#include "option.hpp"
+#include "ost_type.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 
@@ -38,95 +38,118 @@
 // Static Variables                                                           |
 //
 
-static option::option_dptr<bool> option_string_fold_handle
-('\0', "string-fold", "optimization", "Removes duplicate strings.", NULL,
- &option_string_fold);
-
 
 //----------------------------------------------------------------------------|
 // Global Variables                                                           |
 //
 
-bigsint ObjectExpression::_address_count;
+bigsint ObjectExpression::address_count;
 
-std::string ObjectExpression::_filename;
+std::string ObjectExpression::filename, ObjectExpression::filename_raw;
 
-std::set<std::string> ObjectExpression::_library_table;
+std::set<std::string> ObjectExpression::library_table;
 
-std::map<std::string, ObjectData_Auto> ObjectExpression::_auto_table;
-
-std::map<std::string, ObjectData_Static> ObjectExpression::_static_table;
-
-std::map<std::string, ObjectExpression::Pointer>        ObjectExpression::_symbol_table;
-std::map<std::string, ObjectExpression::ExpressionType> ObjectExpression::_symbol_type_table;
-
-bool option_string_fold = false;
+std::map<std::string, ObjectExpression::Pointer>
+ObjectExpression::symbol_table;
+std::map<std::string, ObjectExpression::ExpressionType>
+ObjectExpression::symbol_type_table;
 
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
-ObjectExpression::ObjectExpression(SourcePosition const & position_) : position(position_)
+//
+// ObjectExpression::ObjectExpression
+//
+ObjectExpression::ObjectExpression(SourcePosition const &_pos) : position(_pos)
 {
-
-}
-ObjectExpression::ObjectExpression(std::istream * in)
-{
-	read_object(in, &position);
 }
 
+//
+// ObjectExpression::ObjectExpression
+//
+ObjectExpression::ObjectExpression(std::istream *in)
+{
+   read_object(in, &position);
+}
+
+//
+// ObjectExpression::add_address_count
+//
 void ObjectExpression::add_address_count(bigsint const addressCount)
 {
-	_address_count += addressCount;
+   address_count += addressCount;
 }
 
-void ObjectExpression::add_auto(std::string const & name, bigsint size, bigsint number)
-{
-	ObjectData_Auto s = {name, number, size};
-	_auto_table[name] = s;
-
-	add_symbol(name, create_value_int(number, SourcePosition::none()));
-}
-
+//
+// ObjectExpression::add_label
+//
 void ObjectExpression::add_label(std::string const & symbol)
 {
-	add_symbol(symbol, create_value_int(_address_count, SourcePosition::none()));
+   add_symbol(symbol, create_value_int(address_count, SourcePosition::none()));
 }
 
-void ObjectExpression::add_static(std::string const & name, bigsint size)
+//
+// ObjectExpression::add_symbol
+//
+void ObjectExpression::add_symbol
+(std::string const &symbol, ObjectExpression *value)
 {
-	ObjectData_Static s = {name, -1, size};
-	_static_table[name] = s;
-
-	add_symbol(name, ET_INT);
+   add_symbol(symbol, value->getType());
+   symbol_table[symbol] = value;
 }
-void ObjectExpression::add_static(std::string const & name, bigsint size, bigsint number)
+
+//
+// ObjectExpression::add_symbol
+//
+void ObjectExpression::add_symbol
+(std::string const &symbol, ExpressionType type)
 {
-	ObjectData_Static s = {name, number, size};
-	_static_table[name] = s;
-
-	add_symbol(name, create_value_int(number, SourcePosition::none()));
+   symbol_type_table[symbol] = type;
 }
 
-void ObjectExpression::add_symbol(std::string const & symbol, ObjectExpression * value)
+//
+// ObjectExpression::do_deferred_allocation
+//
+void ObjectExpression::do_deferred_allocation()
 {
-	add_symbol(symbol, value->getType());
-	_symbol_table[symbol] = value;
-}
-void ObjectExpression::add_symbol(std::string const & symbol, ExpressionType type)
-{
-	_symbol_type_table[symbol] = type;
+   ObjectData_Auto::generate_symbols();
+   ObjectData_Register::generate_symbols();
+   // Array must be after Register.
+   ObjectData_Array::generate_symbols();
+
+   // For ACS+, all the following allocation is done by the linker.
+   if (output_type == OUTPUT_ACSP) return;
+
+   ObjectData_Function::generate_symbols();
+   ObjectData_Script::generate_symbols();
+   ObjectData_Static::generate_symbols();
+   ObjectData_String::generate_symbols();
 }
 
+//
+// ObjectExpression::get_address_count
+//
 bigsint ObjectExpression::get_address_count()
 {
-	return _address_count;
+   return address_count;
 }
 
-std::string const & ObjectExpression::get_filename()
+//
+// ObjectExpression::get_filename
+//
+std::string const &ObjectExpression::get_filename()
 {
-	return _filename;
+   return filename;
+}
+
+//
+// ObjectExpression::get_filename_raw
+//
+std::string const &ObjectExpression::get_filename_raw()
+{
+   return filename_raw;
 }
 
 //
@@ -150,9 +173,9 @@ ObjectExpression::Pointer ObjectExpression::
 get_symbol_null(std::string const &symbol)
 {
    std::map<std::string, ObjectExpression::Pointer>::iterator valueIt =
-      _symbol_table.find(symbol);
+      symbol_table.find(symbol);
 
-   return valueIt == _symbol_table.end() ? NULL : valueIt->second;
+   return valueIt == symbol_table.end() ? NULL : valueIt->second;
 }
 
 //
@@ -162,17 +185,29 @@ ObjectExpression::ExpressionType ObjectExpression::get_symbol_type
 (std::string const &symbol, SourcePosition const &pos)
 {
    std::map<std::string, ExpressionType>::iterator typeIt =
-      _symbol_type_table.find(symbol);
+      symbol_type_table.find(symbol);
 
-   if (typeIt == _symbol_type_table.end())
+   if (typeIt == symbol_type_table.end())
       ERROR_P("unknown symbol: %s", symbol.c_str());
 
    return typeIt->second;
 }
 
-SourcePosition const & ObjectExpression::getPosition() const
+SourcePosition const &ObjectExpression::getPosition() const
 {
-	return position;
+   return position;
+}
+
+//
+// ObjectExpression::iter_library
+//
+void ObjectExpression::iter_library
+(void (*iterFunc)(std::ostream *, std::string const &), std::ostream *out)
+{
+   std::set<std::string>::iterator itr, end = library_table.end();
+
+   for (itr = library_table.begin(); itr != end; ++itr)
+      iterFunc(out, *itr);
 }
 
 //
@@ -224,19 +259,28 @@ std::string ObjectExpression::resolveSymbol() const
    ERROR_N(position, "cannot resolve symbol");
 }
 
+//
+// ObjectExpression::set_address_count
+//
 void ObjectExpression::set_address_count(bigsint addressCount)
 {
-	_address_count = addressCount;
+   address_count = addressCount;
 }
 
-void ObjectExpression::set_filename(std::string const & filename)
+//
+// ObjectExpression::set_filename
+//
+void ObjectExpression::set_filename(std::string const &name)
 {
-	_filename = filename;
+   filename = filename_raw = name;
 }
 
-void ObjectExpression::set_library(std::string const & library)
+//
+// ObjectExpression::set_library
+//
+void ObjectExpression::set_library(std::string const &library)
 {
-	_library_table.insert(library);
+   library_table.insert(library);
 }
 
 //

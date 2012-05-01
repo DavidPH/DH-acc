@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../object_io.hpp"
+#include "../option.hpp"
 #include "../VariableType.hpp"
 
 #include <map>
@@ -50,6 +51,11 @@ static void set_strings(std::vector<int> &strings, VariableType const *type);
 // Static Variables                                                           |
 //
 
+static option::option_dptr<int> option_addr_stack_handler
+('\0', "addr-stack", "features",
+ "Selects which world register to use for the addressable stack. 0 by default.",
+ NULL, &option_addr_stack);
+
 static RegisterTable map_table;
 static RegisterTable world_table;
 static RegisterTable global_table;
@@ -59,6 +65,7 @@ static RegisterTable global_table;
 // Global Variables                                                           |
 //
 
+int option_addr_stack = 0;
 extern bool option_named_scripts;
 
 

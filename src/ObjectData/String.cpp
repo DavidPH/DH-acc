@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../object_io.hpp"
+#include "../option.hpp"
 
 #include <map>
 #include <sstream>
@@ -42,7 +43,18 @@ typedef StringTable::iterator StringIter;
 // Static Variables                                                           |
 //
 
+static option::option_dptr<bool> option_string_fold_handle
+('\0', "string-fold", "optimization", "Removes duplicate strings.", NULL,
+ &option_string_fold);
+
 static StringTable string_table;
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+bool option_string_fold = false;
 
 
 //----------------------------------------------------------------------------|

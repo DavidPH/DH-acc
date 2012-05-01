@@ -15,11 +15,12 @@ add_executable(DH-acc
 	BinaryTokenZDACS/output.cpp
 	BinaryTokenZDACS/write_ACSE.cpp
 	ObjectCode.cpp
-	ObjectData.cpp
+   ObjectData/Auto.cpp
    ObjectData/Array.cpp
    ObjectData/Function.cpp
    ObjectData/Register.cpp
    ObjectData/Script.cpp
+   ObjectData/Static.cpp
 	ObjectData/String.cpp
 	ObjectExpression.cpp
 	ObjectExpression/Binary.cpp
@@ -36,8 +37,6 @@ add_executable(DH-acc
    ObjectExpression/BranchNot.cpp
    ObjectExpression/BranchXOr.cpp
    ObjectExpression/Cast.cpp
-	ObjectExpression/do_deferred_allocation.cpp
-	ObjectExpression/iter.cpp
 	ObjectExpression/objects_io.cpp
 	ObjectExpression/Unary.cpp
 	ObjectExpression/UnaryAdd.cpp

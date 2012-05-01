@@ -96,11 +96,37 @@ struct ObjectData_Array
    static void write_objects(std::ostream *out);
 };
 
+//
+// ObjectData_Auto
+//
 struct ObjectData_Auto
 {
-	std::string name;
-	bigsint number;
-	bigsint size;
+   typedef void (*IterFunc)(std::ostream *, ObjectData_Auto const &);
+
+
+   std::string name;
+   bigsint number;
+   bigsint size;
+   CounterPointer<ObjectExpression> init;
+   bool externDef;
+   bool externVis;
+
+
+   static void add
+   (std::string const &name, VariableType const *type, bool externDef,
+    bool externVis);
+
+   static void add
+   (std::string const &name, VariableType const *type, bool externDef,
+    bool externVis, bigsint number);
+
+   static void generate_symbols();
+
+   static void iterate(IterFunc iterFunc, std::ostream *out);
+
+   static void read_objects(std::istream *in);
+
+   static void write_objects(std::ostream *out);
 };
 
 //
@@ -258,9 +284,34 @@ struct ObjectData_Script
 //
 struct ObjectData_Static
 {
-	std::string name;
-	bigsint number;
-	bigsint size;
+   typedef void (*IterFunc)(std::ostream *, ObjectData_Static const &);
+
+
+   std::string name;
+   bigsint number;
+   bigsint size;
+   CounterPointer<ObjectExpression> init;
+   bool externDef;
+   bool externVis;
+
+
+   static void add
+   (std::string const &name, VariableType const *type, bool externDef,
+    bool externVis);
+
+   static void add
+   (std::string const &name, VariableType const *type, bool externDef,
+    bool externVis, bigsint number);
+
+   static void generate_symbols();
+
+   static void ini(std::string const &name, ObjectExpression *ini);
+
+   static void iterate(IterFunc iterFunc, std::ostream *out);
+
+   static void read_objects(std::istream *in);
+
+   static void write_objects(std::ostream *out);
 };
 
 //

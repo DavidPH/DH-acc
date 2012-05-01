@@ -36,8 +36,6 @@
 #include <vector>
 
 struct ObjectCodeSet;
-struct ObjectData_Auto;
-struct ObjectData_Static;
 class ObjectVector;
 class SourceTokenC;
 
@@ -97,13 +95,8 @@ public:
 
 	static void add_address_count(bigsint const addressCount);
 
-	static void add_auto(std::string const & name, bigsint size, bigsint number);
-
 	// Adds a label for the current address count.
 	static void add_label(std::string const & symbol);
-
-	static void add_static(std::string const & name, bigsint size);
-	static void add_static(std::string const & name, bigsint size, bigsint number);
 
 	static void add_symbol(std::string const & symbol, ObjectExpression * value);
 	static void add_symbol(std::string const & symbol, ExpressionType type);
@@ -139,17 +132,14 @@ public:
 
 	static bigsint get_address_count();
 
-	static std::string const & get_filename();
+   static std::string const &get_filename();
+   static std::string const &get_filename_raw();
 
 	static ObjectExpression::Pointer get_symbol(std::string const & symbol, SourcePosition const & position);
    static ObjectExpression::Pointer get_symbol_null(std::string const &symbol);
 	static ExpressionType get_symbol_type(std::string const & symbol, SourcePosition const & position);
 
-	static void iter_auto(void (*iter)(std::ostream *, ObjectData_Auto const &), std::ostream * out);
-
 	static void iter_library(void (*iter)(std::ostream *, std::string const &), std::ostream * out);
-
-	static void iter_static(void (*iter)(std::ostream *, ObjectData_Static const &), std::ostream * out);
 
 	static void read_objects(std::istream * in, ObjectVector * objects);
 
@@ -236,18 +226,14 @@ private:
    virtual void writeACSPLong(std::ostream *out) const;
 
 
-	static bigsint _address_count;
+   static bigsint address_count;
 
-	static std::string _filename;
+   static std::string filename, filename_raw;
 
-	static std::set<std::string> _library_table;
+   static std::set<std::string> library_table;
 
-	static std::map<std::string, ObjectData_Auto> _auto_table;
-
-	static std::map<std::string, ObjectData_Static> _static_table;
-
-	static std::map<std::string, ObjectExpression::Pointer> _symbol_table;
-	static std::map<std::string, ExpressionType>            _symbol_type_table;
+   static std::map<std::string, Pointer>        symbol_table;
+   static std::map<std::string, ExpressionType> symbol_type_table;
 };
 
 
@@ -257,9 +243,8 @@ private:
 
 extern int option_addr_array;
 extern int option_addr_stack;
-extern int option_static_temp;
 
 extern bool option_string_fold;
 
-#endif /* HPP_ObjectExpression_ */
+#endif//HPP_ObjectExpression_
 
