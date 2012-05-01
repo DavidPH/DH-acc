@@ -567,7 +567,6 @@ VariableType::Reference SourceContext::getReturnType() const
 //
 ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
 {
-   static NameType const nt = NT_LOCAL;
    static SourcePosition const &pos = SourcePosition::builtin();
    static SourceVariable::StorageClass const sc =
       SourceVariable::get_sc_autoreg();
@@ -587,7 +586,7 @@ ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
          tempVars.resize(i+1);
 
       std::string nameSrc = name[i];
-      std::string nameObj = makeNameObject(nt, sc, type, nameSrc, pos);
+      std::string nameObj = makeNameObject(sc, type, nameSrc, false, false, pos);
 
       var = SourceVariable::create_variable(nameSrc, type, nameObj, sc, pos);
 
@@ -721,16 +720,16 @@ std::string SourceContext::makeLabelShort()
 // SourceContext::makeNameObject
 //
 std::string SourceContext::makeNameObject
-(NameType nameType, SourceVariable::StorageClass sc, VariableType *type,
- std::string const &nameSource, SourcePosition const &pos) const
+(SourceVariable::StorageClass sc, VariableType *type,
+ std::string const &nameSrc, bool externDef, bool externVis,
+ SourcePosition const &pos) const
 {
-   #define PARM \
-   nameObject, type, nameType == NT_EXTERN, nameType != NT_LOCAL
+   #define PARM nameObj, type, externDef, externVis
 
-   std::string nameObject;
-   if (nameType == NT_LOCAL)
-      nameObject += getLabel();
-   nameObject += nameSource;
+   std::string nameObj;
+   if (!externVis)
+      nameObj = getLabel();
+   nameObj += nameSrc;
 
    switch (sc)
    {
@@ -773,7 +772,7 @@ std::string SourceContext::makeNameObject
       break;
    }
 
-   return nameObject;
+   return nameObj;
 
    #undef PARM
 }
@@ -782,17 +781,16 @@ std::string SourceContext::makeNameObject
 // SourceContext::makeNameObject
 //
 std::string SourceContext::makeNameObject
-(NameType nameType, SourceVariable::StorageClass sc, VariableType *type,
- std::string const &nameSource, bigsint address,
- SourcePosition const &pos) const
+(SourceVariable::StorageClass sc, VariableType *type,
+ std::string const &nameSrc, bool externDef, bool externVis,
+ SourcePosition const &pos, bigsint address) const
 {
-   #define PARM \
-   nameObject, type, nameType == NT_EXTERN, nameType != NT_LOCAL, address
+   #define PARM nameObj, type, externDef, externVis, address
 
-   std::string nameObject;
-   if (nameType == NT_LOCAL)
-      nameObject += getLabel();
-   nameObject += nameSource;
+   std::string nameObj;
+   if (!externVis)
+      nameObj = getLabel();
+   nameObj += nameSrc;
 
    switch (sc)
    {
@@ -835,7 +833,7 @@ std::string SourceContext::makeNameObject
       break;
    }
 
-   return nameObject;
+   return nameObj;
 
    #undef PARM
 }

@@ -246,7 +246,7 @@ operator do
     "do" expression_single "while" "(" expression ")"
 
 operator extern
-  Performs forward-declaration. Yields the thing declared. The string is a
+  Performs forward-declaration. Yields the thing(s) declared. The string is a
   linkage-specifier and must be one of the following (defaults to "DS"):
    "ACS" Performs name mangling compatible with acc's codegen.
    "DS" Default.
@@ -290,6 +290,18 @@ operator if
   current context, and new contexts for remaining expressions based on condition
   context.
     "if" "(" expression ")" expression_single [ "else" expression_single ]
+
+operator intern
+  Performs forward-declaration. Yields the thing(s) declared. Note that the
+  thing must be defined in the exact same context for this to refer to it.
+    "__intern" "__function" name arglist_return
+    "__intern" "__script" name arglist_return
+    "__intern" "__variable" storage_class type name
+    "__intern" "{" [
+      "__function" name arglist_return |
+      "__script" name arglist_return |
+      "__variable" storage_class type name
+      ]... "}"
 
 operator library
   Sets the current ACSE library. Yields void.

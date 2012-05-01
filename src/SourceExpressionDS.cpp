@@ -495,7 +495,8 @@ void SourceExpressionDS::make_expression_arglist
 
 		if (argContext)
 		{
-			std::string argNameObject(argContext->makeNameObject(SourceContext::NT_LOCAL, argClass, argType, argName, SourcePosition::none()));
+         std::string argNameObject = argContext->makeNameObject
+            (argClass, argType, argName, false, false, SourcePosition::none());
 			SourceVariable::Pointer argVariable(SourceVariable::create_variable(argName, argType, argNameObject, argClass, SourcePosition::none()));
 			argContext->addVariable(argVariable);
 		}

@@ -189,7 +189,7 @@ static SourceExpression::Pointer make_script
    switch (linkSpec)
    {
    case SourceExpressionDS::LS_INTERN:
-      scriptLabel  = context->makeLabel();
+      scriptLabel  = context->getLabel();
       scriptLabel += scriptNameSrc;
       mangle_types(scriptArgTypes, scriptLabel);
       break;

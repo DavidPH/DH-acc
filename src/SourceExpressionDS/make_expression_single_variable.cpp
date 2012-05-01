@@ -52,27 +52,24 @@ static SourceExpression::Pointer make_var
  SourcePosition const &pos, std::string const &nameSrc, VariableType *type,
  StorageClass sc, bool externDef)
 {
-   // Determine "name type".
-   SourceContext::NameType nt;
-   if (externDef)
-      nt = SourceContext::NT_EXTERN;
-   else if (linkSpec != SourceExpressionDS::LS_INTERN)
-      nt = SourceContext::NT_EXTLOCAL;
-   else
-      nt = SourceContext::NT_LOCAL;
+   bool externVis = linkSpec != SourceExpressionDS::LS_INTERN;
 
    // Generate object name.
    std::string nameObj;
    if (in->peekType(SourceTokenC::TT_OP_AT))
    {
       in->get(SourceTokenC::TT_OP_AT);
+
       bigsint addr =
          SourceExpressionDS::make_expression_single(in, blocks, context)
          ->makeObject()->resolveInt();
-      nameObj = context->makeNameObject(nt, sc, type, nameSrc, addr, pos);
+
+      nameObj = context->makeNameObject
+         (sc, type, nameSrc, externDef, externVis, pos, addr);
    }
    else
-      nameObj = context->makeNameObject(nt, sc, type, nameSrc, pos);
+      nameObj = context->makeNameObject
+         (sc, type, nameSrc, externDef, externVis, pos);
 
    // Generate variable.
    SourceVariable::Pointer var =
@@ -88,7 +85,6 @@ static SourceExpression::Pointer make_var
    // Variable initialization. (But not for external declaration.)
    if (!externDef && in->peekType(SourceTokenC::TT_OP_EQUALS))
    {
-      static SourceContext::NameType const initNT = SourceContext::NT_LOCAL;
       static VariableType::Reference const initType =
          VariableType::get_bt_boolhard();
 
@@ -130,8 +126,8 @@ static SourceExpression::Pointer make_var
       {
          // Generate source/object name
          std::string initNameSrc = nameSrc + "$init";
-         std::string initNameObj =
-            context->makeNameObject(initNT, sc, initType, initNameSrc, pos);
+         std::string initNameObj = context->makeNameObject
+            (sc, initType, initNameSrc, false, false, pos);
 
          // Generate variable.
          SourceVariable::Pointer initVar = SourceVariable::

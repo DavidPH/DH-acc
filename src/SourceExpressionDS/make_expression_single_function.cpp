@@ -113,7 +113,7 @@ static SourceExpression::Pointer make_func
    switch (linkSpec)
    {
    case SourceExpressionDS::LS_INTERN:
-      funcLabel  = context->makeLabel();
+      funcLabel  = context->getLabel();
       funcLabel += funcNameSrc;
       mangle_types(funcArgTypes, funcLabel);
       break;
