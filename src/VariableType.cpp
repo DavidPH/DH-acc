@@ -603,7 +603,7 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
    switch (basic)
    {
    case BT_ARRAY:
-      return typeRet->getSize(pos) * width;
+      return width ? typeRet->getSize(pos) * width : 0;
 
    case BT_ASMFUNC:
    case BT_VOID:
