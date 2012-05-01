@@ -317,13 +317,17 @@ operator printf
   number of arguments based on the msgtype. Consequently, that field must be a
   compile-time constant. Yield depends on operation.
   Supported conversion specifiers:
+   %F (__real)
    %K (int) keybind (ACS k:)
    %L (__string) LANGUAGE-lump entry (ACS l:)
    %N (int) name (ACS n:)
    %S (__string)
-   %f (__real)
+   %X (__fixed)
+   %c (char)
    %i (int)
    %p (void const *)
+   %s (char *) accepts extended-pointers
+   %u (unsigned)
   Supported operations:
    __printf_bold -> void
    __printf_error -> void

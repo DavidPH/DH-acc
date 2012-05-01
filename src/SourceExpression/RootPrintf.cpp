@@ -126,8 +126,7 @@ private:
       VariableData::Pointer tmp =
          VariableData::create_stack(type->getSize(position));
 
-      create_value_char(c, context, position)
-         ->makeObjects(objects, tmp);
+      create_value_char(c, context, position)->makeObjects(objects, tmp);
    }
 
    //
@@ -140,8 +139,22 @@ private:
       VariableData::Pointer tmp =
          VariableData::create_stack(type->getSize(position));
 
-      create_value_cast_implicit(nextExpr(type), type, context, position)
-         ->makeObjects(objects, tmp);
+      nextExpr(type)->makeObjects(objects, tmp);
+   }
+
+   //
+   // ::makeInt
+   //
+   // Generates an int literal and pushes it.
+   //
+   void makeInt(ObjectVector *objects, bigsint i)
+   {
+      VariableType::Reference type = VariableType::get_bt_int();
+
+      VariableData::Pointer tmp =
+         VariableData::create_stack(type->getSize(position));
+
+      create_value_int(i, context, position)->makeObjects(objects, tmp);
    }
 
    //
@@ -149,15 +162,24 @@ private:
    //
    // Generates a string literal and pushes its index.
    //
-   void makeString(ObjectVector *objects, std::string const &string)
+   void makeString(ObjectVector *objects, std::string const &s)
    {
       VariableType::Reference type = VariableType::get_bt_string();
 
       VariableData::Pointer tmp =
          VariableData::create_stack(type->getSize(position));
 
-      create_value_string(string, context, position)
-         ->makeObjects(objects, tmp);
+      create_value_string(s, context, position)->makeObjects(objects, tmp);
+   }
+
+   //
+   // ::nextExpr
+   //
+   SourceExpression::Pointer nextExpr()
+   {
+      if (!*expr) ERROR_N(position, "insufficient arguments");
+
+      return *expr++;
    }
 
    //
@@ -165,9 +187,73 @@ private:
    //
    SourceExpression::Pointer nextExpr(VariableType *type)
    {
-      if (!*expr) ERROR_N(position, "insufficient arguments");
+      return create_value_cast_implicit(nextExpr(), type, context, position);
+   }
 
-      return create_value_cast_implicit(*expr++, type, context, position);
+   //
+   // ::makeFormat_s
+   //
+   void makeFormat_s(ObjectVector *objects)
+   {
+      SourceExpression::Pointer argExpr = nextExpr();
+      VariableType::Reference   argType = argExpr->getType();
+      VariableType::BasicType   argBT   = argType->getBasicType();
+
+      VariableData::Pointer tmp =
+         VariableData::create_stack(argType->getSize(position));
+
+      if (argBT == VariableType::BT_ARRAY)
+      {
+         argBT = VariableType::BT_POINTER;
+         argType = argType->getReturn()->getPointer();
+         argExpr = create_value_cast_implicit
+            (argExpr, argType, context, position);
+      }
+
+      if (argBT != VariableType::BT_POINTER)
+         ERROR_N(position, "expected pointer got %s",
+                 make_string(argType).c_str());
+
+      argType = argType->getReturn();
+      argType = VariableType::get_bt_char()
+                ->setQualifier(argType->getQualifiers())
+                ->setStorage(argType->getStoreType(), argType->getStoreArea())
+                ->getPointer();
+      argExpr = create_value_cast_implicit(argExpr, argType, context, position);
+
+      argExpr->makeObjects(objects, tmp);
+
+      switch (argType->getReturn()->getStoreType())
+      {
+      case VariableType::ST_ADDR:
+         makeInt(objects, option_addr_array);
+         objects->addToken(OCODE_ACSP_STRING_GLOBALARRAY);
+         break;
+
+      case VariableType::ST_REGISTER:
+      case VariableType::ST_MAPREGISTER:
+      case VariableType::ST_WORLDREGISTER:
+      case VariableType::ST_GLOBALREGISTER:
+         ERROR_N(position, "cannot %%s register-pointer");
+
+      case VariableType::ST_MAPARRAY:
+         objects->addToken(OCODE_GET_LITERAL32I,
+            objects->getValue(argType->getReturn()->getStoreArea()));
+         objects->addToken(OCODE_ACSP_STRING_MAPARRAY);
+         break;
+
+      case VariableType::ST_WORLDARRAY:
+         objects->addToken(OCODE_GET_LITERAL32I,
+            objects->getValue(argType->getReturn()->getStoreArea()));
+         objects->addToken(OCODE_ACSP_STRING_WORLDARRAY);
+         break;
+
+      case VariableType::ST_GLOBALARRAY:
+         objects->addToken(OCODE_GET_LITERAL32I,
+            objects->getValue(argType->getReturn()->getStoreArea()));
+         objects->addToken(OCODE_ACSP_STRING_GLOBALARRAY);
+         break;
+      }
    }
 
    //
@@ -201,6 +287,11 @@ private:
 
             switch (*c)
             {
+            case 'F':
+               makeExpr(objects, VariableType::get_bt_real());
+               objects->addToken(OCODE_ACSP_NUM_DEC32F);
+               continue;
+
             case 'K':
                makeExpr(objects, VariableType::get_bt_int());
                objects->addToken(OCODE_ACSP_KEYBIND);
@@ -221,14 +312,14 @@ private:
                objects->addToken(OCODE_ACSP_STRING);
                continue;
 
+            case 'X':
+               makeExpr(objects, VariableType::get_bt_fixed());
+               objects->addToken(OCODE_ACSP_NUM_DEC32F);
+               continue;
+
             case 'c':
                makeExpr(objects, VariableType::get_bt_char());
                objects->addToken(OCODE_ACSP_CHARACTER);
-               continue;
-
-            case 'f':
-               makeExpr(objects, VariableType::get_bt_real());
-               objects->addToken(OCODE_ACSP_NUM_DEC32F);
                continue;
 
             case 'i':
@@ -241,6 +332,10 @@ private:
                                  ->addQualifier(VariableType::QUAL_CONST)
                                  ->getPointer());
                objects->addToken(OCODE_ACSP_NUM_HEX32U);
+               continue;
+
+            case 's':
+               makeFormat_s(objects);
                continue;
 
             case 'u':
