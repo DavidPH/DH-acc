@@ -30,6 +30,7 @@
 #include "SourceStream.hpp"
 
 #include <cstring>
+#include <sstream>
 
 
 //----------------------------------------------------------------------------|
@@ -804,10 +805,31 @@ void SourceTokenizerDS::prep()
          continue;
       }
 
-      if (canExpand && hasDefine() && definesUsed.insert(token.data).second)
+      // Macro expansion.
+      if (canExpand && token.type == SourceTokenC::TT_IDENTIFIER)
       {
-         prepDefine();
-         continue;
+         if (hasDefine(token.data) && definesUsed.insert(token.data).second)
+         {
+            prepDefine();
+            continue;
+         }
+
+         if (token.data == "__FILE__" && definesUsed.insert(token.data).second)
+         {
+            token.type = SourceTokenC::TT_STRING;
+            token.data = token.pos.filename;
+            break;
+         }
+
+         if (token.data == "__LINE__" && definesUsed.insert(token.data).second)
+         {
+            std::ostringstream oss; oss << token.pos.line;
+
+            token.type = SourceTokenC::TT_INTEGER;
+            token.data = oss.str();
+
+            break;
+         }
       }
 
       if (canSkip && isSkip())
