@@ -31,6 +31,72 @@
 // Static Variables                                                           |
 //
 
+static std::string const tt_datas[SourceTokenC::TT_NONE+1] =
+{
+   "",
+   "",
+   "",
+   "",
+   "",
+
+   "&",
+   "&=",
+   "&&",
+   "&&=",
+   "@",
+   "*",
+   "*=",
+   "}",
+   "{",
+   "]",
+   "[",
+   "^",
+   "^=",
+   "^^",
+   "^^=",
+   "==",
+   ">=",
+   ">",
+   ">>",
+   ">>=",
+   "<=",
+   "<",
+   "<<",
+   "<<=",
+   "!=",
+   ":",
+   ",",
+   "...",
+   "=",
+   "!",
+   "#",
+   "##",
+   "###",
+   "-",
+   "-=",
+   "->",
+   "--",
+   ")",
+   "(",
+   "%",
+   "%=",
+   ".",
+   "|",
+   "|=",
+   "||",
+   "||=",
+   "+",
+   "+=",
+   "++",
+   "?",
+   ";",
+   "/",
+   "/=",
+   "~",
+
+   ""
+};
+
 static std::string const tt_names[SourceTokenC::TT_NONE+1] =
 {
    "TT_CHARACTER",
@@ -101,6 +167,31 @@ static std::string const tt_names[SourceTokenC::TT_NONE+1] =
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
+
+//
+// SourceTokenC::getDataString
+//
+std::string SourceTokenC::getDataString() const
+{
+   if (type > TT_NONE) return tt_datas[TT_NONE];
+
+   switch (type)
+   {
+   case TT_CHARACTER:
+      return "'" + data + "'"; // WARNING!
+
+   case TT_FLOAT:
+   case TT_IDENTIFIER:
+   case TT_INTEGER:
+      return data;
+
+   case TT_STRING:
+      return "\"" + data + "\""; // WARNING!
+
+   default:
+      return tt_datas[type];
+   }
+}
 
 //
 // SourceTokenC::read_token

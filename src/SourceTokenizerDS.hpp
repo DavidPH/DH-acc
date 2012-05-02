@@ -46,6 +46,11 @@ public:
    typedef std::vector<SourceTokenC> DefVec;
    typedef std::map<std::string, DefVec> DefMap;
 
+   typedef std::vector<std::string> MacroArg;
+   typedef std::vector<SourceTokenC> MacroVec;
+   typedef std::pair<MacroArg, MacroVec> MacroDat;
+   typedef std::map<std::string, MacroDat> MacroMap;
+
 
    explicit SourceTokenizerDS(SourceStream *in);
    ~SourceTokenizerDS();
@@ -75,6 +80,9 @@ private:
    (std::string const &name, SourcePosition const &position,
     std::vector<SourceTokenC> const &tokens);
 
+   void addMacro(std::string const &name, SourcePosition const &pos,
+                 MacroDat const &dat);
+
    void addSkip(bool skip);
 
    void doAssert(SourceTokenC::TokenType type);
@@ -90,14 +98,15 @@ private:
    void doCommand_ifdef();
    void doCommand_ifndef();
    void doCommand_include();
+   void doCommand_macro();
    void doCommand_undef();
 
    bool getIf();
    CounterPointer<ObjectExpression> getIfMultiple();
    CounterPointer<ObjectExpression> getIfSingle();
 
-   bool hasDefine();
-   bool hasDefine(std::string const & name);
+   bool hasDefine(std::string const &name);
+   bool hasMacro(std::string const &name);
 
    bool isSkip();
 
@@ -105,11 +114,13 @@ private:
 
    void prep();
    void prepDefine();
+   void prepMacro();
 
    void remDefine();
    void remSkip();
 
    DefMap defines;
+   MacroMap macros;
 
    std::stack<SourceStream *> in;
    std::vector<bool> skipStack;

@@ -114,6 +114,8 @@ public:
 
    SourceTokenC() : type(TT_NONE) {}
 
+   std::string getDataString() const;
+
    void readToken(SourceStream *in) {read_token(in, this);}
 
    SourcePosition pos;
