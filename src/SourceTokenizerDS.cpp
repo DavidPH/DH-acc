@@ -831,14 +831,15 @@ bool SourceTokenizerDS::peekType
 //
 void SourceTokenizerDS::prep()
 {
-   std::set<std::string> definesUsed;
-
    while (true)
    {
       if (!ungetStack.empty())
       {
          token = ungetStack.top();
          ungetStack.pop();
+
+         // Clear whenever the unget stack is emptied.
+         if (ungetStack.empty()) definesUsed.clear();
       }
       else try
       {

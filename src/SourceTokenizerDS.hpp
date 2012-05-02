@@ -28,6 +28,7 @@
 #include "SourceTokenC.hpp"
 
 #include <map>
+#include <set>
 #include <stack>
 #include <string>
 #include <vector>
@@ -121,6 +122,8 @@ private:
 
    DefMap defines;
    MacroMap macros;
+
+   std::set<std::string> definesUsed;
 
    std::stack<SourceStream *> in;
    std::vector<bool> skipStack;
