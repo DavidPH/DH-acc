@@ -774,6 +774,8 @@ bool SourceTokenizerDS::peekType
 //
 void SourceTokenizerDS::prep()
 {
+   std::set<std::string> definesUsed;
+
    while (true)
    {
       if (!ungetStack.empty())
@@ -802,7 +804,7 @@ void SourceTokenizerDS::prep()
          continue;
       }
 
-      if (canExpand && hasDefine())
+      if (canExpand && hasDefine() && definesUsed.insert(token.data).second)
       {
          prepDefine();
          continue;
@@ -838,7 +840,13 @@ void SourceTokenizerDS::prepDefine()
    std::vector<SourceTokenC> const &tokens(defines[token.data]);
 
    for (size_t i(tokens.size()); i--;)
-      ungetStack.push(tokens[i]);
+   {
+      // Copy the invoker's position, to enable better error reporting.
+      // (Some day this will be additive, to keep both positions.)
+      SourceTokenC tok = tokens[i];
+      tok.pos = token.pos;
+      ungetStack.push(tok);
+   }
 }
 
 //
