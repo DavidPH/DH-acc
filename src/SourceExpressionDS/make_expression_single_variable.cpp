@@ -189,10 +189,33 @@ static SourceExpression::Pointer make_var
  SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
  SourcePosition const &pos, VariableType *type, StorageClass sc, bool externDef)
 {
+   // If not followed by an identifier, then don't try to read any names.
+   // (This is needed for standalone struct definitions.)
+   if (!in->peekType(SourceTokenC::TT_IDENTIFIER))
+      return SourceExpression::create_value_data
+         (VariableType::get_bt_void(), context, pos);
+
+   SourceExpression::Vector vars;
+
    // Read source name.
    std::string nameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
+   vars.push_back(make_var
+      (in, blocks, context, linkSpec, pos, nameSrc, type, sc, externDef));
 
-   return make_var(in, blocks, context, linkSpec, pos, nameSrc, type, sc, externDef);
+   // Read in any additional variables.
+   while (in->peekType(SourceTokenC::TT_OP_COMMA))
+   {
+      in->get(SourceTokenC::TT_OP_COMMA);
+
+      nameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
+      vars.push_back(make_var
+         (in, blocks, context, linkSpec, pos, nameSrc, type, sc, externDef));
+   }
+
+   if (vars.size() == 1)
+      return vars[0];
+   else
+      return SourceExpression::create_value_block(vars, context, pos);
 }
 
 //
@@ -272,6 +295,30 @@ SRCEXPDS_EXPRSINGLE_DEFN(variable)
       linkSpec = LS_INTERN;
 
    return make_var(in, blocks, context, linkSpec, linkCheck, token.pos, false);
+}
+
+//
+// SourceExpressionDS::make_expression_single_variable_type
+//
+SRCEXPDS_EXPRSINGLE_DEFN(variable_type)
+{
+   LinkageSpecifier linkSpec;
+   StorageClass sc;
+
+   in->unget(token);
+
+   if (context == SourceContext::global_context)
+   {
+      linkSpec = LS_DS;
+      sc = SourceVariable::get_sc_staticreg();
+   }
+   else
+   {
+      linkSpec = LS_INTERN;
+      sc = SourceVariable::get_sc_autoreg();
+   }
+
+   return make_var(in, blocks, context, linkSpec, token.pos, sc, false);
 }
 
 // EOF

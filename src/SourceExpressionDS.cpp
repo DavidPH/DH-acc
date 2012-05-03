@@ -336,7 +336,6 @@ void SourceExpressionDS::init()
    expr_single[  "default"]  = make_expression_single_default;
    expr_single["__delay"]    = make_expression_single_delay;
    expr_single[  "do"]       = make_expression_single_do;
-   expr_single[  "enum"]     = make_expression_single_type;
    expr_single[  "extern"]   = make_expression_single_extern;
    expr_single["__extfunc"]  = make_expression_single_function;
    expr_single["__extscript"]= make_expression_single_script;
@@ -358,12 +357,10 @@ void SourceExpressionDS::init()
    expr_single[  "return"]   = make_expression_single_return;
    expr_single["__script"]   = make_expression_single_script;
    expr_single[  "sizeof"]   = make_expression_single_sizeof;
-   expr_single[  "struct"]   = make_expression_single_type;
    expr_single[  "switch"]   = make_expression_single_switch;
    expr_single["__symbol"]   = make_expression_single_symbol;
    expr_single[  "typedef"]  = make_expression_single_typedef;
    expr_single["__typestr"]  = make_expression_single_typestr;
-   expr_single[  "union"]    = make_expression_single_type;
    expr_single["__variable"] = make_expression_single_variable;
    expr_single[  "void"]     = make_expression_single_void;
    expr_single[  "while"]    = make_expression_single_while;

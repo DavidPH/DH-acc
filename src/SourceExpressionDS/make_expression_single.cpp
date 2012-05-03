@@ -67,6 +67,13 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
       }
    }
 
+      // Check for type.
+      if (is_expression_type(token.data, context))
+      {
+         expr = make_expression_single_variable_type(in, token, blocks, context);
+         break;
+      }
+
       // Check for label.
       if (in->peekType(SourceTokenC::TT_OP_COLON) && context->getAllowLabel())
       {
@@ -439,17 +446,6 @@ SRCEXPDS_EXPRSINGLE_DEFN(output)
 SRCEXPDS_EXPRSINGLE_DEFN(return)
 {
    return create_branch_return(make_expression(in, blocks, context), context, token.pos);
-}
-
-//
-// SourceExpressionDS::make_expression_single_type
-//
-SRCEXPDS_EXPRSINGLE_DEFN(type)
-{
-   in->unget(token);
-   make_expression_type(in, blocks, context);
-
-   return create_value_data(VariableType::get_bt_void(), context, token.pos);
 }
 
 //
