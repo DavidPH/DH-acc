@@ -286,7 +286,7 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis)
       break;
 
    case SourceVariable::SC_REGISTER:
-      ObjectData_Auto::add(PARM, getCount(sc));
+      ObjectData_Register::add(PARM, getCount(sc));
       addCount(type->getSize(SourcePosition::none()), sc);
       break;
 
@@ -348,7 +348,7 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis,
       break;
 
    case SourceVariable::SC_REGISTER:
-      ObjectData_Auto::add(PARM);
+      ObjectData_Register::add(PARM);
       addCount(type->getSize(SourcePosition::none()), sc);
       break;
 

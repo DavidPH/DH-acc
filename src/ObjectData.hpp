@@ -177,6 +177,10 @@ struct ObjectData_Register
    bool externVis;
 
 
+   static void add
+   (std::string const &name, VariableType const *type, bool externDef,
+    bool externVis, bigsint number);
+
    static void add_map
    (std::string const &name, VariableType const *type, bool externDef,
     bool externVis);
@@ -205,6 +209,7 @@ struct ObjectData_Register
 
    static void ini_map(std::string const &name, ObjectExpression *ini);
 
+   static void iterate(IterFunc iterFunc, std::ostream *out);
    static void iterate_map(IterFunc iterFunc, std::ostream *out);
    static void iterate_world(IterFunc iterFunc, std::ostream *out);
    static void iterate_global(IterFunc iterFunc, std::ostream *out);

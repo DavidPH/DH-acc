@@ -56,6 +56,7 @@ static option::option_dptr<int> option_addr_stack_handler
  "Selects which world register to use for the addressable stack. 0 by default.",
  NULL, &option_addr_stack);
 
+static RegisterTable register_table;
 static RegisterTable map_table;
 static RegisterTable world_table;
 static RegisterTable global_table;
@@ -256,13 +257,23 @@ static void set_strings(std::vector<int> &strings, VariableType const *type)
 //
 
 //
+// ObjectData_Register::add
+//
+void ObjectData_Register::add
+(std::string const &name, VariableType const *type, bool externDef,
+ bool externVis, bigsint number)
+{
+   ::add(register_table, name, type, externDef, externVis, number);
+}
+
+//
 // ObjectData_Register::add_map
 //
 void ObjectData_Register::add_map
 (std::string const &name, VariableType const *type, bool externDef,
  bool externVis)
 {
-   add(map_table, name, type, externDef, externVis, -1);
+   ::add(map_table, name, type, externDef, externVis, -1);
 }
 
 //
@@ -272,7 +283,7 @@ void ObjectData_Register::add_map
 (std::string const &name, VariableType const *type, bool externDef,
  bool externVis, bigsint number)
 {
-   add(map_table, name, type, externDef, externVis, number);
+   ::add(map_table, name, type, externDef, externVis, number);
 }
 
 //
@@ -282,7 +293,7 @@ void ObjectData_Register::add_world
 (std::string const &name, VariableType const *type, bool externDef,
  bool externVis)
 {
-   add(world_table, name, type, externDef, externVis, -1);
+   ::add(world_table, name, type, externDef, externVis, -1);
 }
 
 //
@@ -292,7 +303,7 @@ void ObjectData_Register::add_world
 (std::string const &name, VariableType const *type, bool externDef,
  bool externVis, bigsint number)
 {
-   add(world_table, name, type, externDef, externVis, number);
+   ::add(world_table, name, type, externDef, externVis, number);
 }
 
 //
@@ -302,7 +313,7 @@ void ObjectData_Register::add_global
 (std::string const &name, VariableType const *type, bool externDef,
  bool externVis)
 {
-   add(global_table, name, type, externDef, externVis, -1);
+   ::add(global_table, name, type, externDef, externVis, -1);
 }
 
 //
@@ -312,7 +323,7 @@ void ObjectData_Register::add_global
 (std::string const &name, VariableType const *type, bool externDef,
  bool externVis, bigsint number)
 {
-   add(global_table, name, type, externDef, externVis, number);
+   ::add(global_table, name, type, externDef, externVis, number);
 }
 
 //
@@ -320,6 +331,7 @@ void ObjectData_Register::add_global
 //
 void ObjectData_Register::generate_symbols()
 {
+   ::generate_symbols(register_table);
    ::generate_symbols(map_table);
    ::generate_symbols(world_table);
    ::generate_symbols(global_table);
@@ -337,11 +349,19 @@ void ObjectData_Register::ini_map
 }
 
 //
+// ObjectData_Register::iterate
+//
+void ObjectData_Register::iterate(IterFunc iterFunc, std::ostream *out)
+{
+   ::iterate(register_table, iterFunc, out);
+}
+
+//
 // ObjectData_Register::iterate_map
 //
 void ObjectData_Register::iterate_map(IterFunc iterFunc, std::ostream *out)
 {
-   iterate(map_table, iterFunc, out);
+   ::iterate(map_table, iterFunc, out);
 }
 
 //
@@ -349,7 +369,7 @@ void ObjectData_Register::iterate_map(IterFunc iterFunc, std::ostream *out)
 //
 void ObjectData_Register::iterate_world(IterFunc iterFunc, std::ostream *out)
 {
-   iterate(world_table, iterFunc, out);
+   ::iterate(world_table, iterFunc, out);
 }
 
 //
@@ -357,7 +377,7 @@ void ObjectData_Register::iterate_world(IterFunc iterFunc, std::ostream *out)
 //
 void ObjectData_Register::iterate_global(IterFunc iterFunc, std::ostream *out)
 {
-   iterate(global_table, iterFunc, out);
+   ::iterate(global_table, iterFunc, out);
 }
 
 //
@@ -365,6 +385,7 @@ void ObjectData_Register::iterate_global(IterFunc iterFunc, std::ostream *out)
 //
 void ObjectData_Register::read_objects(std::istream *in)
 {
+   read_object(in, &register_table);
    read_object(in, &map_table);
    read_object(in, &world_table);
    read_object(in, &global_table);
@@ -375,6 +396,7 @@ void ObjectData_Register::read_objects(std::istream *in)
 //
 void ObjectData_Register::write_objects(std::ostream *out)
 {
+   write_object(out, &register_table);
    write_object(out, &map_table);
    write_object(out, &world_table);
    write_object(out, &global_table);
