@@ -286,7 +286,14 @@ SRCEXPDS_EXPRSINGLE_DEFN(script)
 {
    LinkageSpecifier linkSpec;
 
-   if (token.data == "__extscript")
+   if (token.data == "__script")
+   {
+      if (context == SourceContext::global_context)
+         linkSpec = LS_DS;
+      else
+         linkSpec = LS_INTERN;
+   }
+   else if (token.data == "__extscript")
    {
       if (in->peekType(SourceTokenC::TT_STRING))
          linkSpec = make_linkage_specifier(in);

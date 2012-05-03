@@ -243,7 +243,14 @@ SRCEXPDS_EXPRSINGLE_DEFN(function)
 {
    LinkageSpecifier linkSpec;
 
-   if (token.data == "__extfunc")
+   if (token.data == "__function")
+   {
+      if (context == SourceContext::global_context)
+         linkSpec = LS_DS;
+      else
+         linkSpec = LS_INTERN;
+   }
+   else if (token.data == "__extfunc")
    {
       if (in->peekType(SourceTokenC::TT_STRING))
          linkSpec = make_linkage_specifier(in);

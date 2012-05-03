@@ -216,12 +216,16 @@ static SourceExpression::Pointer make_var
 static SourceExpression::Pointer make_var
 (SourceTokenizerDS *in, SourceExpression::Vector *blocks,
  SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
- SourcePosition const &pos, bool externDef)
+ bool linkCheck, SourcePosition const &pos, bool externDef)
 {
    // Read storage class.
    SourceTokenC const &scTok = in->get(SourceTokenC::TT_IDENTIFIER);
    SourceVariable::StorageClass sc =
       SourceVariable::get_StorageClass(scTok.data, scTok.pos);
+
+   if (linkCheck && (sc == SourceVariable::SC_AUTO ||
+                     sc == SourceVariable::SC_REGISTER))
+      linkSpec = SourceExpressionDS::LS_INTERN;
 
    return make_var(in, blocks, context, linkSpec, pos, sc, externDef);
 }
@@ -236,7 +240,7 @@ static SourceExpression::Pointer make_var
 //
 SRCEXPDS_EXPREXTERN_DEFN(variable)
 {
-   return make_var(in, blocks, context, linkSpec, token.pos, true);
+   return make_var(in, blocks, context, linkSpec, false, token.pos, true);
 }
 
 //
@@ -244,9 +248,20 @@ SRCEXPDS_EXPREXTERN_DEFN(variable)
 //
 SRCEXPDS_EXPRSINGLE_DEFN(variable)
 {
+   bool linkCheck = false;
    LinkageSpecifier linkSpec;
 
-   if (token.data == "__extvar")
+   if (token.data == "__variable")
+   {
+      if (context == SourceContext::global_context)
+      {
+         linkCheck = true;
+         linkSpec = LS_DS;
+      }
+      else
+         linkSpec = LS_INTERN;
+   }
+   else if (token.data == "__extvar")
    {
       if (in->peekType(SourceTokenC::TT_STRING))
          linkSpec = make_linkage_specifier(in);
@@ -256,7 +271,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(variable)
    else
       linkSpec = LS_INTERN;
 
-   return make_var(in, blocks, context, linkSpec, token.pos, false);
+   return make_var(in, blocks, context, linkSpec, linkCheck, token.pos, false);
 }
 
 // EOF
