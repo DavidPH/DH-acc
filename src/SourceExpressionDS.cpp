@@ -495,10 +495,9 @@ void SourceExpressionDS::make_expression_arglist
 
 		if (argContext)
 		{
-         std::string argNameObject = argContext->makeNameObject
-            (argClass, argType, argName, false, false, SourcePosition::none());
+         std::string argNameObject = argContext->getLabel() + argName;
 			SourceVariable::Pointer argVariable(SourceVariable::create_variable(argName, argType, argNameObject, argClass, SourcePosition::none()));
-			argContext->addVariable(argVariable);
+         argContext->addVar(argVariable, false, false);
 		}
 
 		if (!in->peekType(SourceTokenC::TT_OP_COMMA))

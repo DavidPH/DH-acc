@@ -180,8 +180,10 @@ static SourceExpression::Pointer make_script
 
       scriptFunc = ObjectData_String::add(scriptFunc);
 
-      scriptContext->addVariable(SourceVariable::create_constant
-         ("__func__", VariableType::get_bt_string(), scriptFunc, token.pos));
+      SourceVariable::Pointer scriptFuncVar = SourceVariable::create_constant
+         ("__func__", VariableType::get_bt_string(), scriptFunc, token.pos);
+
+      scriptContext->addVar(scriptFuncVar, false, false);
    }
 
    // scriptLabel

@@ -525,9 +525,8 @@ VariableType::Reference SourceExpressionDS::make_expression_type
             ObjectExpression::Pointer enumObj =
                ObjectExpression::create_value_int(enumVal++, enumTok.pos);
 
-            context->addVariable
-            (SourceVariable::create_constant
-             (enumTok.data, type, enumObj, enumTok.pos));
+            context->addVar(SourceVariable::create_constant
+               (enumTok.data, type, enumObj, enumTok.pos), false, true);
 
             if (!in->peekType(SourceTokenC::TT_OP_COMMA))
                break;

@@ -63,7 +63,9 @@ public:
    std::string addLabelCaseDefault(SourcePosition const & position);
    std::string addLabelGoto(std::string const &name, SourcePosition const &position);
 
-   void addVariable(SourceVariable * var);
+   void addVar(SourceVariable *var, bool externDef, bool externVis);
+   void addVar(SourceVariable *var, bool externDef, bool externVis,
+               bigsint address);
 
    bool getAllowLabel() const;
 
@@ -132,16 +134,6 @@ public:
    int isFunction(std::string const &name) const;
 
    std::string makeLabel();
-
-   std::string makeNameObject
-   (SourceVariable::StorageClass sc, VariableType *type,
-    std::string const &nameSrc, bool externDef, bool externVis,
-    SourcePosition const &pos) const;
-
-   std::string makeNameObject
-   (SourceVariable::StorageClass sc, VariableType *type,
-    std::string const &nameSrc, bool externDef, bool externVis,
-    SourcePosition const &pos, bigsint address) const;
 
    void setAllowLabel(bool allow);
 

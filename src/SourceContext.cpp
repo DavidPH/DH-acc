@@ -78,8 +78,8 @@ SourceContext::SourceContext() :
    caseDefault(false),
    inheritLocals(false)
 {
-   addVariable(var_false);
-   addVariable(var_true);
+   addVar(var_false, false, true);
+   addVar(var_true, false, true);
 }
 
 //
@@ -262,33 +262,126 @@ void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
 }
 
 //
-// SourceContext::addVariable
+// SourceContext::addVar
 //
-void SourceContext::addVariable(SourceVariable *var)
+void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis)
 {
+   #define PARM nameObj, type, externDef, externVis
+
+   SourceVariable::StorageClass sc = var->getClass();
+   std::string const &nameObj = var->getNameObject();
+   VariableType::Reference type = var->getType();
+
    varVars.push_back(var);
    varNames.push_back(var->getNameSource());
 
-   SourceVariable::StorageClass sc = var->getClass();
    switch (sc)
    {
    case SourceVariable::SC_AUTO:
+      ObjectData_Auto::add(PARM, getCount(sc));
+      addCount(type->getSize(SourcePosition::none()), sc);
+      break;
+
    case SourceVariable::SC_CONSTANT:
+      break;
+
    case SourceVariable::SC_REGISTER:
+      ObjectData_Auto::add(PARM, getCount(sc));
+      addCount(type->getSize(SourcePosition::none()), sc);
+      break;
+
    case SourceVariable::SC_REGISTER_GLOBAL:
+      ObjectData_Register::add_global(PARM);
+      break;
+
    case SourceVariable::SC_REGISTER_MAP:
+      ObjectData_Register::add_map(PARM);
+      break;
+
    case SourceVariable::SC_REGISTER_WORLD:
-   case SourceVariable::SC_STATIC:
-      addCount(var->getType()->getSize(SourcePosition::none()), sc);
+      ObjectData_Register::add_world(PARM);
+      break;
+
+   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+      ObjectData_Array::add_global(PARM);
       break;
 
    case SourceVariable::SC_REGISTERARRAY_MAP:
-   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+      ObjectData_Array::add_map(PARM);
+      break;
+
    case SourceVariable::SC_REGISTERARRAY_WORLD:
-      // Register arrays only require a single allocation regardless of size.
-      addCount(1, sc);
+      ObjectData_Array::add_world(PARM);
+      break;
+
+   case SourceVariable::SC_STATIC:
+      ObjectData_Static::add(PARM);
       break;
    }
+
+   #undef PARM
+}
+
+//
+// SourceContext::addVar
+//
+void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis,
+                           bigsint address)
+{
+   #define PARM nameObj, type, externDef, externVis, address
+
+   SourceVariable::StorageClass sc = var->getClass();
+   std::string const &nameObj = var->getNameObject();
+   VariableType::Reference type = var->getType();
+
+   varVars.push_back(var);
+   varNames.push_back(var->getNameSource());
+
+   switch (sc)
+   {
+   case SourceVariable::SC_AUTO:
+      ObjectData_Auto::add(PARM);
+      addCount(type->getSize(SourcePosition::none()), sc);
+      break;
+
+   case SourceVariable::SC_CONSTANT:
+      break;
+
+   case SourceVariable::SC_REGISTER:
+      ObjectData_Auto::add(PARM);
+      addCount(type->getSize(SourcePosition::none()), sc);
+      break;
+
+   case SourceVariable::SC_REGISTER_GLOBAL:
+      ObjectData_Register::add_global(PARM);
+      break;
+
+   case SourceVariable::SC_REGISTER_MAP:
+      ObjectData_Register::add_map(PARM);
+      break;
+
+   case SourceVariable::SC_REGISTER_WORLD:
+      ObjectData_Register::add_world(PARM);
+      break;
+
+   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+      ObjectData_Array::add_global(PARM);
+      break;
+
+   case SourceVariable::SC_REGISTERARRAY_MAP:
+      ObjectData_Array::add_map(PARM);
+      break;
+
+   case SourceVariable::SC_REGISTERARRAY_WORLD:
+      ObjectData_Array::add_world(PARM);
+      break;
+
+   case SourceVariable::SC_STATIC:
+      ObjectData_Static::add(PARM);
+      break;
+   }
+
+   #undef PARM
 }
 
 //
@@ -586,12 +679,12 @@ ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
          tempVars.resize(i+1);
 
       std::string nameSrc = name[i];
-      std::string nameObj = makeNameObject(sc, type, nameSrc, false, false, pos);
+      std::string nameObj = getLabel() + nameSrc;
 
       var = SourceVariable::create_variable(nameSrc, type, nameObj, sc, pos);
 
       tempVars[i] = var;
-      addVariable(var);
+      addVar(var, false, false);
    }
 
    return var->getData()->address;
@@ -714,128 +807,6 @@ std::string SourceContext::makeLabelShort()
    oss << ++labelCount << "::";
 
    return oss.str();
-}
-
-//
-// SourceContext::makeNameObject
-//
-std::string SourceContext::makeNameObject
-(SourceVariable::StorageClass sc, VariableType *type,
- std::string const &nameSrc, bool externDef, bool externVis,
- SourcePosition const &pos) const
-{
-   #define PARM nameObj, type, externDef, externVis
-
-   std::string nameObj;
-   if (!externVis)
-      nameObj = getLabel();
-   nameObj += nameSrc;
-
-   switch (sc)
-   {
-   case SourceVariable::SC_AUTO:
-   case SourceVariable::SC_REGISTER:
-      // TODO: Need a separate list for register at some point eventually, but
-      // it's not that important.
-      ObjectData_Auto::add(PARM, getCount(sc));
-      break;
-
-   case SourceVariable::SC_CONSTANT:
-      ERROR_NP("SC_CONSTANT");
-
-   case SourceVariable::SC_REGISTER_GLOBAL:
-      ObjectData_Register::add_global(PARM);
-      break;
-
-   case SourceVariable::SC_REGISTER_MAP:
-      ObjectData_Register::add_map(PARM);
-      break;
-
-   case SourceVariable::SC_REGISTER_WORLD:
-      ObjectData_Register::add_world(PARM);
-      break;
-
-   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-      ObjectData_Array::add_global(PARM);
-      break;
-
-   case SourceVariable::SC_REGISTERARRAY_MAP:
-      ObjectData_Array::add_map(PARM);
-      break;
-
-   case SourceVariable::SC_REGISTERARRAY_WORLD:
-      ObjectData_Array::add_world(PARM);
-      break;
-
-   case SourceVariable::SC_STATIC:
-      ObjectData_Static::add(PARM);
-      break;
-   }
-
-   return nameObj;
-
-   #undef PARM
-}
-
-//
-// SourceContext::makeNameObject
-//
-std::string SourceContext::makeNameObject
-(SourceVariable::StorageClass sc, VariableType *type,
- std::string const &nameSrc, bool externDef, bool externVis,
- SourcePosition const &pos, bigsint address) const
-{
-   #define PARM nameObj, type, externDef, externVis, address
-
-   std::string nameObj;
-   if (!externVis)
-      nameObj = getLabel();
-   nameObj += nameSrc;
-
-   switch (sc)
-   {
-   case SourceVariable::SC_AUTO:
-   case SourceVariable::SC_REGISTER:
-      // TODO: Need a separate list for register at some point eventually, but
-      // it's not that important.
-      ObjectData_Auto::add(PARM);
-      break;
-
-   case SourceVariable::SC_CONSTANT:
-      ERROR_NP("makeNameObject on SC_CONSTANT");
-
-   case SourceVariable::SC_REGISTER_GLOBAL:
-      ObjectData_Register::add_global(PARM);
-      break;
-
-   case SourceVariable::SC_REGISTER_MAP:
-      ObjectData_Register::add_map(PARM);
-      break;
-
-   case SourceVariable::SC_REGISTER_WORLD:
-      ObjectData_Register::add_world(PARM);
-      break;
-
-   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-      ObjectData_Array::add_global(PARM);
-      break;
-
-   case SourceVariable::SC_REGISTERARRAY_MAP:
-      ObjectData_Array::add_map(PARM);
-      break;
-
-   case SourceVariable::SC_REGISTERARRAY_WORLD:
-      ObjectData_Array::add_world(PARM);
-      break;
-
-   case SourceVariable::SC_STATIC:
-      ObjectData_Static::add(PARM);
-      break;
-   }
-
-   return nameObj;
-
-   #undef PARM
 }
 
 //

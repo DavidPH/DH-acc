@@ -56,27 +56,35 @@ static SourceExpression::Pointer make_var
 
    // Generate object name.
    std::string nameObj;
-   if (in->peekType(SourceTokenC::TT_OP_AT))
+   switch (linkSpec)
    {
-      in->get(SourceTokenC::TT_OP_AT);
+   case SourceExpressionDS::LS_INTERN:
+      nameObj  = context->getLabel();
+      nameObj += nameSrc;
+      break;
 
-      bigsint addr =
-         SourceExpressionDS::make_expression_single(in, blocks, context)
-         ->makeObject()->resolveInt();
-
-      nameObj = context->makeNameObject
-         (sc, type, nameSrc, externDef, externVis, pos, addr);
+   case SourceExpressionDS::LS_ACS:
+   case SourceExpressionDS::LS_DS:
+      nameObj  = nameSrc;
+      break;
    }
-   else
-      nameObj = context->makeNameObject
-         (sc, type, nameSrc, externDef, externVis, pos);
 
    // Generate variable.
    SourceVariable::Pointer var =
       SourceVariable::create_variable(nameSrc, type, nameObj, sc, pos);
 
    // Add variable to context.
-   context->addVariable(var);
+   if (in->peekType(SourceTokenC::TT_OP_AT))
+   {
+      in->get(SourceTokenC::TT_OP_AT);
+
+      bigsint addr = SourceExpressionDS::make_expression_single
+         (in, blocks, context)->makeObject()->resolveInt();
+
+      context->addVar(var, externDef, externVis, addr);
+   }
+   else
+      context->addVar(var, externDef, externVis);
 
    // Generate expression.
    SourceExpression::Pointer expr =
@@ -126,13 +134,12 @@ static SourceExpression::Pointer make_var
       {
          // Generate source/object name
          std::string initNameSrc = nameSrc + "$init";
-         std::string initNameObj = context->makeNameObject
-            (sc, initType, initNameSrc, false, false, pos);
+         std::string initNameObj = context->getLabel() + initNameSrc;
 
          // Generate variable.
          SourceVariable::Pointer initVar = SourceVariable::
             create_variable(initNameSrc, initType, initNameObj, sc, pos);
-         context->addVariable(initVar);
+         context->addVar(initVar, false, false);
 
          // Generate expression.
          SourceExpression::Pointer initExpr = SourceExpression::

@@ -376,7 +376,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(constexpr)
       SourceVariable::create_constant
       (name, type, data->makeObject(), token.pos);
 
-   context->addVariable(var);
+   context->addVar(var, false, false);
 
    return create_value_variable(var, context, token.pos);
 }

@@ -162,8 +162,10 @@ static SourceExpression::Pointer make_func
 
       funcFunc = ObjectData_String::add(funcFunc);
 
-      funcContext->addVariable(SourceVariable::create_constant
-         ("__func__", VariableType::get_bt_string(), funcFunc, token.pos));
+      SourceVariable::Pointer funcFuncVar = SourceVariable::create_constant
+         ("__func__", VariableType::get_bt_string(), funcFunc, token.pos);
+
+      funcContext->addVar(funcFuncVar, false, false);
    }
 
    // funcVarType
