@@ -54,6 +54,7 @@ static option::option_call option_define_handler
 //
 
 SourceTokenizerDS::DefMap SourceTokenizerDS::defines_base;
+SourceTokenizerDS::MacroMap SourceTokenizerDS::macros_base;
 extern bool option_function_autoargs;
 extern bool option_script_autoargs;
 
@@ -70,16 +71,52 @@ static int add_define_base
 {
    if (!argc) option::exception::error(opt, optf, "requires argument");
 
-   char const *eq = std::strchr(argv[0], '=');
+   char const *base = argv[0], *arg = 0, *eq;
 
-   if (eq)
+   // Search for '(' and '='.
+   for (eq = base; *eq && *eq != '='; ++eq)
+      if (*eq == '(') {arg = eq; break;}
+
+   for (; *eq && *eq != '='; ++eq);
+
+   if (arg)
    {
-      std::string name(argv[0], eq-argv[0]);
-      SourceTokenizerDS::add_define_base(name, eq);
+      std::string name(base, arg);
+      std::vector<std::string> args;
+
+      if (*++arg != ')') for (char const *itr = arg;;)
+      {
+         if (*itr == ',')
+         {
+            args.push_back(std::string(arg, itr)); arg = ++itr;
+         }
+         else if (*itr == ')')
+         {
+            args.push_back(std::string(arg, itr)); break;
+         }
+         else if (itr++ == eq)
+            option::exception::error(opt, optf, "missing ')'");
+      }
+
+      if (*eq)
+      {
+         std::string data(eq+1); data += ' ';
+         SourceTokenizerDS::add_macro_base(name, args, data);
+      }
+      else
+         SourceTokenizerDS::add_macro_base(name, args);
    }
    else
    {
-      SourceTokenizerDS::add_define_base(argv[0]);
+      std::string name(base, eq);
+
+      if (*eq)
+      {
+         std::string data(eq+1); data += ' ';
+         SourceTokenizerDS::add_define_base(name, data);
+      }
+      else
+         SourceTokenizerDS::add_define_base(name);
    }
 
    return 1;
@@ -255,7 +292,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
 // SourceTokenizerDS::SourceTokenizerDS
 //
 SourceTokenizerDS::SourceTokenizerDS(SourceStream *_in)
- : defines(defines_base),
+ : defines(defines_base), macros(macros_base),
    canCommand(true), canExpand(true), canSkip(true), canString(true)
 {
    switch (target_type)
@@ -313,21 +350,68 @@ void SourceTokenizerDS::add_define_base
 void SourceTokenizerDS::add_define_base
 (std::string const &name, std::string const &source)
 {
-   DefVec tokens;
-   SourceStream in(source, SourceStream::ST_C);
+   DefVec vec;
 
+   // Keep reading until end-of-stream.
    try
    {
-      tokens.resize(tokens.size()+1);
-      tokens.back().readToken(&in);
-   }
-   catch (SourceStream::EndOfStream &)
-   {
-      // Keep reading until end-of-stream.
-      // (I sure hope there aren't any incomplete tokens.)
-   }
+      SourceStream in(source, SourceStream::ST_C|SourceStream::STF_STRING);
+      SourceTokenC tok;
 
-   add_define_base(name, tokens);
+      while (true)
+      {
+         tok.readToken(&in);
+         vec.push_back(tok);
+      }
+   }
+   catch (SourceStream::EndOfStream &) {}
+
+   add_define_base(name, vec);
+}
+
+//
+// SourceTokenizerDS::add_macro_base
+//
+void SourceTokenizerDS::add_macro_base
+(std::string const &name, MacroArg const &arg)
+{
+   MacroDat dat; dat.first = arg;
+
+   add_macro_base(name, dat);
+}
+
+//
+// SourceTokenizerDS::add_macro_base
+//
+void SourceTokenizerDS::add_macro_base
+(std::string const &name, MacroArg const &arg, std::string const &data)
+{
+   MacroDat dat; dat.first = arg;
+
+   // Keep reading until end-of-stream.
+   try
+   {
+      SourceStream in(data, SourceStream::ST_C|SourceStream::STF_STRING);
+      SourceTokenC tok;
+
+      while (true)
+      {
+         tok.readToken(&in);
+         dat.second.push_back(tok);
+      }
+   }
+   catch (SourceStream::EndOfStream &) {}
+
+   add_macro_base(name, dat);
+}
+
+//
+// SourceTokenizerDS::add_macro_base
+//
+void SourceTokenizerDS::add_macro_base
+(std::string const &name, MacroDat const &dat)
+{
+   macros_base[name] = dat;
 }
 
 //
@@ -508,7 +592,7 @@ void SourceTokenizerDS::doCommand_ifdef()
 {
    prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
 
-   addSkip(!hasDefine(token.data));
+   addSkip(!hasDefine(token.data) && !hasMacro(token.data));
 }
 
 //
@@ -518,7 +602,7 @@ void SourceTokenizerDS::doCommand_ifndef()
 {
    prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
 
-   addSkip(hasDefine(token.data));
+   addSkip(hasDefine(token.data) || hasMacro(token.data));
 }
 
 //
@@ -710,8 +794,10 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
 
          doAssert(SourceTokenC::TT_IDENTIFIER);
 
+         bool isdef = hasDefine(token.data) || hasMacro(token.data);
+
          ObjectExpression::Pointer expr =
-            ObjectExpression::create_value_int(hasDefine(token.data), token.pos);
+            ObjectExpression::create_value_int(isdef, token.pos);
 
          if (hasParentheses)
             {prep(); doAssert(SourceTokenC::TT_OP_PARENTHESIS_C);}

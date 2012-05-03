@@ -73,6 +73,11 @@ public:
    static void add_define_base(std::string const &name, DefVec const &tokens);
    static void add_define_base(std::string const &name, std::string const &source);
 
+   static void add_macro_base(std::string const &name, MacroArg const &arg);
+   static void add_macro_base(std::string const &name, MacroArg const &arg,
+                              std::string const &data);
+   static void add_macro_base(std::string const &name, MacroDat const &dat);
+
 private:
    SourceTokenizerDS(SourceTokenizerDS const &tokenizer)/* = delete*/;
 
@@ -139,6 +144,7 @@ private:
 
 
    static DefMap defines_base;
+   static MacroMap macros_base;
 };
 
 #endif /* HPP_SourceTokenizerDS_ */
