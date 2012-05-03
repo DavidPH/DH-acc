@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -71,8 +72,8 @@ private:
 //
 SRCEXP_EXPRBRA_DEFN(2, if)
 {
-   return new SourceExpression_BranchIf(exprCond, exprBody, NULL, context,
-                                        position);
+   return new SourceExpression_BranchIf
+      (exprCond, exprBody, NULL, context, pos);
 }
 
 //
@@ -80,8 +81,8 @@ SRCEXP_EXPRBRA_DEFN(2, if)
 //
 SRCEXP_EXPRBRA_DEFN(3, if)
 {
-   return new SourceExpression_BranchIf(exprCond, exprBody, exprElse, context,
-                                        position);
+   return new SourceExpression_BranchIf
+      (exprCond, exprBody, exprElse, context, pos);
 }
 
 //
@@ -97,22 +98,22 @@ SourceExpression_BranchIf
    {
       VariableType::Reference type = VariableType::get_bt_boolsoft();
 
-      exprCond = create_value_cast_implicit(exprCond, type, context, position);
+      exprCond = create_value_cast_implicit(exprCond, type, context, pos);
    }
 
    if (exprElse)
    {
       VariableType::Reference type =
-         get_promoted_type(exprBody->getType(), exprElse->getType(), position);
+         get_promoted_type(exprBody->getType(), exprElse->getType(), pos);
 
-      exprBody = create_value_cast_implicit(exprBody, type, context, position);
-      exprElse = create_value_cast_implicit(exprElse, type, context, position);
+      exprBody = create_value_cast_implicit(exprBody, type, context, pos);
+      exprElse = create_value_cast_implicit(exprElse, type, context, pos);
    }
    else
    {
       VariableType::Reference type = VariableType::get_bt_void();
 
-      exprBody = create_value_cast_implicit(exprBody, type, context, position);
+      exprBody = create_value_cast_implicit(exprBody, type, context, pos);
    }
 }
 
@@ -132,15 +133,16 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   bigsint               sizeCond = exprCond->getType()->getSize(position);
+   bigsint               sizeCond = exprCond->getType()->getSize(pos);
    VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
 
+   std::string label = context->makeLabel();
    std::string labelBody = label + "_body";
    std::string labelElse = label + "_else";
    std::string labelDone = label + "_done";
 
    exprCond->makeObjects(objects, destCond);
-   objects->setPosition(position);
+   objects->setPosition(pos);
    objects->addToken(OCODE_BRANCH_ZERO,
                      objects->getValue(exprElse ? labelElse : labelDone));
 
@@ -149,7 +151,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    if (exprElse)
    {
-      objects->setPosition(position);
+      objects->setPosition(pos);
       objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelDone));
       objects->addLabel(labelElse);
       exprElse->makeObjects(objects, dst);

@@ -89,10 +89,10 @@ public:
          objR = NULL;
 
       VariableType::Reference inType = Super::getType();
-      bigsint                 inSize = inType->getSize(position);
+      bigsint                 inSize = inType->getSize(pos);
       VariableType::BasicType inBT = inType->getBasicType();
       VariableType::Reference type = getType();
-      bigsint                 size = type->getSize(position);
+      bigsint                 size = type->getSize(pos);
       VariableData::Pointer   src  = VariableData::create_stack(size);
       VariableData::Pointer   tmp  = VariableData::create_stack(inSize);
 
@@ -107,7 +107,7 @@ public:
       case CMP_NE: ocode = OCODE_CMP_NE32F; break;
       }
 
-      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_prep(objects, dst, src, pos);
 
       // long long < 0 and long long >= 0 can be optimized by only checking the
       // high byte.
@@ -125,7 +125,7 @@ public:
          objects->addToken(OCODE_GET_LITERAL32I, objR);
          objects->addToken(ocode);
 
-         make_objects_memcpy_post(objects, dst, src, type, context, position);
+         make_objects_memcpy_post(objects, dst, src, type, context, pos);
          return;
       }
 
@@ -147,7 +147,7 @@ public:
 
       objects->addToken(ocode);
 
-      make_objects_memcpy_post(objects, dst, src, type, context, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, pos);
    }
 
 private:
@@ -195,7 +195,7 @@ private:
       }
       else
       {
-         label = context->makeLabel();
+         std::string label = context->makeLabel();
          std::string labelEnd = label + "_end";
          std::string labelLow = label + "_low";
 
@@ -227,7 +227,7 @@ private:
          objects->addLabel(labelEnd);
       }
 
-      make_objects_memcpy_post(objects, dst, src, type, context, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, pos);
    }
 
    //
@@ -238,7 +238,7 @@ private:
     VariableData *src, VariableType *type, ObjectExpression::Pointer tmpJ,
     ObjectExpression::Pointer tmpK)
    {
-      label = context->makeLabel();
+      std::string label = context->makeLabel();
       std::string labelCmp = label + "_cmp";
       std::string labelEnd = label + "_end";
       std::string labelPos = label + "_pos";
@@ -293,7 +293,7 @@ private:
 
       objects->addLabel(labelEnd);
 
-      make_objects_memcpy_post(objects, dst, src, type, context, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, pos);
    }
 
    CmpType ct;
@@ -310,7 +310,7 @@ private:
 SRCEXP_EXPRBIN_DEFN(cmp_ge)
 {
    return new SourceExpression_BinaryCmp
-   (SourceExpression_BinaryCmp::CMP_GE, exprL, exprR, context, position);
+   (SourceExpression_BinaryCmp::CMP_GE, exprL, exprR, context, pos);
 }
 
 //
@@ -319,7 +319,7 @@ SRCEXP_EXPRBIN_DEFN(cmp_ge)
 SRCEXP_EXPRBIN_DEFN(cmp_gt)
 {
    return new SourceExpression_BinaryCmp
-   (SourceExpression_BinaryCmp::CMP_GT, exprL, exprR, context, position);
+   (SourceExpression_BinaryCmp::CMP_GT, exprL, exprR, context, pos);
 }
 
 //
@@ -328,7 +328,7 @@ SRCEXP_EXPRBIN_DEFN(cmp_gt)
 SRCEXP_EXPRBIN_DEFN(cmp_le)
 {
    return new SourceExpression_BinaryCmp
-   (SourceExpression_BinaryCmp::CMP_LE, exprL, exprR, context, position);
+   (SourceExpression_BinaryCmp::CMP_LE, exprL, exprR, context, pos);
 }
 
 //
@@ -337,7 +337,7 @@ SRCEXP_EXPRBIN_DEFN(cmp_le)
 SRCEXP_EXPRBIN_DEFN(cmp_lt)
 {
    return new SourceExpression_BinaryCmp
-   (SourceExpression_BinaryCmp::CMP_LT, exprL, exprR, context, position);
+   (SourceExpression_BinaryCmp::CMP_LT, exprL, exprR, context, pos);
 }
 
 //
@@ -346,7 +346,7 @@ SRCEXP_EXPRBIN_DEFN(cmp_lt)
 SRCEXP_EXPRBIN_DEFN(cmp_eq)
 {
    return new SourceExpression_BinaryCmp
-   (SourceExpression_BinaryCmp::CMP_EQ, exprL, exprR, context, position);
+   (SourceExpression_BinaryCmp::CMP_EQ, exprL, exprR, context, pos);
 }
 
 //
@@ -355,7 +355,7 @@ SRCEXP_EXPRBIN_DEFN(cmp_eq)
 SRCEXP_EXPRBIN_DEFN(cmp_ne)
 {
    return new SourceExpression_BinaryCmp
-   (SourceExpression_BinaryCmp::CMP_NE, exprL, exprR, context, position);
+   (SourceExpression_BinaryCmp::CMP_NE, exprL, exprR, context, pos);
 }
 
 // EOF

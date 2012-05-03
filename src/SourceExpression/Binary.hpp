@@ -47,20 +47,20 @@ VariableType::BasicType btR = typeR->getBasicType();
 //
 // CONSTRUCTOR_ARRAY_DECAY
 //
-#define CONSTRUCTOR_ARRAY_DECAY                                         \
-/* Array types decay to pointer types. */                               \
-if (btL == VariableType::BT_ARRAY)                                      \
-{                                                                       \
-   btL = VariableType::BT_POINTER;                                      \
-   typeL = typeL->getReturn()->getPointer();                            \
-   exprL = create_value_cast_implicit(exprL, typeL, context, position); \
-}                                                                       \
-                                                                        \
-if (btR == VariableType::BT_ARRAY)                                      \
-{                                                                       \
-   btR = VariableType::BT_POINTER;                                      \
-   typeR = typeR->getReturn()->getPointer();                            \
-   exprR = create_value_cast_implicit(exprR, typeR, context, position); \
+#define CONSTRUCTOR_ARRAY_DECAY                                    \
+/* Array types decay to pointer types. */                          \
+if (btL == VariableType::BT_ARRAY)                                 \
+{                                                                  \
+   btL = VariableType::BT_POINTER;                                 \
+   typeL = typeL->getReturn()->getPointer();                       \
+   exprL = create_value_cast_implicit(exprL, typeL, context, pos); \
+}                                                                  \
+                                                                   \
+if (btR == VariableType::BT_ARRAY)                                 \
+{                                                                  \
+   btR = VariableType::BT_POINTER;                                 \
+   typeR = typeR->getReturn()->getPointer();                       \
+   exprR = create_value_cast_implicit(exprR, typeR, context, pos); \
 }
 
 //
@@ -71,32 +71,32 @@ VariableType::Reference type = getType();                     \
                                                               \
 if (type->getBasicType() != VariableType::BT_POINTER) return; \
                                                               \
-bigsint retnSize = type->getReturn()->getSize(position);      \
+bigsint retnSize = type->getReturn()->getSize(pos);           \
                                                               \
 if (retnSize == 1) return;                                    \
                                                               \
 SourceExpression::Pointer exprSize =                          \
-   create_value_uint(retnSize, context, position);
+   create_value_uint(retnSize, context, pos);
 
 //
 // CONSTRAINT_ARITHMETIC
 //
-#define CONSTRAINT_ARITHMETIC(OPER)                \
-if (!VariableType::is_bt_arithmetic(btL))          \
-   ERROR_N(position, "non-arithmetic " OPER " X"); \
-                                                   \
-if (!VariableType::is_bt_arithmetic(btR))          \
-   ERROR_N(position, "X " OPER " non-arithmetic");
+#define CONSTRAINT_ARITHMETIC(OPER)           \
+if (!VariableType::is_bt_arithmetic(btL))     \
+   ERROR_N(pos, "non-arithmetic " OPER " X"); \
+                                              \
+if (!VariableType::is_bt_arithmetic(btR))     \
+   ERROR_N(pos, "X " OPER " non-arithmetic");
 
 //
 // CONSTRAINT_INTEGER
 //
-#define CONSTRAINT_INTEGER(OPER)                \
-if (!VariableType::is_bt_integer(btL))          \
-   ERROR_N(position, "non-integer " OPER " X"); \
-                                                \
-if (!VariableType::is_bt_integer(btR))          \
-   ERROR_N(position, "X " OPER " non-integer");
+#define CONSTRAINT_INTEGER(OPER)           \
+if (!VariableType::is_bt_integer(btL))     \
+   ERROR_N(pos, "non-integer " OPER " X"); \
+                                           \
+if (!VariableType::is_bt_integer(btR))     \
+   ERROR_N(pos, "X " OPER " non-integer");
 
 //
 // ASSIGN_ARITHMETIC_VARS
@@ -200,7 +200,7 @@ case VariableData::MT_LITERAL:                                  \
 case VariableData::MT_STACK:                                    \
 case VariableData::MT_VOID:                                     \
 case VariableData::MT_NONE:                                     \
-   ERROR_N(position, "invalid MT");                             \
+   ERROR_NP("invalid MT");                                      \
 }                                                               \
                                                                 \
 if (ocodeTyped)                                                 \
@@ -287,7 +287,7 @@ case VariableData::MT_LITERAL:                                    \
 case VariableData::MT_STACK:                                      \
 case VariableData::MT_VOID:                                       \
 case VariableData::MT_NONE:                                       \
-   ERROR_N(position, "invalid MT");                               \
+   ERROR_NP("invalid MT");                                        \
 }                                                                 \
                                                                   \
 ASSIGN_GET_OCODE_GET
@@ -364,7 +364,7 @@ case VariableData::MT_LITERAL:                \
 case VariableData::MT_STACK:                  \
 case VariableData::MT_VOID:                   \
 case VariableData::MT_NONE:                   \
-   ERROR_N(position, "invalid MT");           \
+   ERROR_NP("invalid MT");                    \
 }                                             \
                                               \
 ASSIGN_GET_OCODE_GET
@@ -372,36 +372,36 @@ ASSIGN_GET_OCODE_GET
 //
 // EVALUATE_ARITHMETIC_VARS
 //
-#define EVALUATE_ARITHMETIC_VARS(OPER)                  \
-VariableType::Reference type = getType();               \
-VariableType::BasicType bt   = type->getBasicType();    \
-bigsint                 size = type->getSize(position); \
-                                                        \
-ObjectCode ocode = OCODE_##OPER##32F;                   \
-                                                        \
+#define EVALUATE_ARITHMETIC_VARS(OPER)               \
+VariableType::Reference type = getType();            \
+VariableType::BasicType bt   = type->getBasicType(); \
+bigsint                 size = type->getSize(pos);   \
+                                                     \
+ObjectCode ocode = OCODE_##OPER##32F;                \
+                                                     \
 VariableData::Pointer src = VariableData::create_stack(size);
 
 //
 // EVALUATE_BITWISE_VARS
 //
-#define EVALUATE_BITWISE_VARS(OPER)                     \
-VariableType::Reference type = getType();               \
-VariableType::BasicType bt   = type->getBasicType();    \
-bigsint                 size = type->getSize(position); \
-                                                        \
-ObjectCode ocode = OCODE_##OPER##32;                    \
-                                                        \
+#define EVALUATE_BITWISE_VARS(OPER)                  \
+VariableType::Reference type = getType();            \
+VariableType::BasicType bt   = type->getBasicType(); \
+bigsint                 size = type->getSize(pos);   \
+                                                     \
+ObjectCode ocode = OCODE_##OPER##32;                 \
+                                                     \
 VariableData::Pointer src = VariableData::create_stack(size);
 
 //
 // EVALUATE_OBJECTS
 //
-#define EVALUATE_OBJECTS()                                                   \
-VariableType::Reference type = getType();                                    \
-ObjectExpression::Pointer objL =                                             \
-   create_value_cast_implicit(exprL, type, context, position)->makeObject(); \
-ObjectExpression::Pointer objR =                                             \
-   create_value_cast_implicit(exprR, type, context, position)->makeObject();
+#define EVALUATE_OBJECTS()                                              \
+VariableType::Reference type = getType();                               \
+ObjectExpression::Pointer objL =                                        \
+   create_value_cast_implicit(exprL, type, context, pos)->makeObject(); \
+ObjectExpression::Pointer objR =                                        \
+   create_value_cast_implicit(exprR, type, context, pos)->makeObject();
 
 
 //----------------------------------------------------------------------------|

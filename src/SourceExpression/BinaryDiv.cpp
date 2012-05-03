@@ -90,8 +90,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(div)
 {
-   return new SourceExpression_BinaryDiv
-              (false, exprL, exprR, context, position);
+   return new SourceExpression_BinaryDiv(false, exprL, exprR, context, pos);
 }
 
 //
@@ -99,8 +98,7 @@ SRCEXP_EXPRBIN_DEFN(div)
 //
 SRCEXP_EXPRBIN_DEFN(div_eq)
 {
-   return new SourceExpression_BinaryDiv
-              (true, exprL, exprR, context, position);
+   return new SourceExpression_BinaryDiv(true, exprL, exprR, context, pos);
 }
 
 //
@@ -122,7 +120,7 @@ SourceExpression_BinaryDiv::SourceExpression_BinaryDiv
 ObjectExpression::Pointer SourceExpression_BinaryDiv::makeObject() const
 {
    EVALUATE_OBJECTS();
-   return ObjectExpression::create_binary_div(objL, objR, position);
+   return ObjectExpression::create_binary_div(objL, objR, pos);
 }
 
 //

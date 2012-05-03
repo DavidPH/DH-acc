@@ -68,7 +68,7 @@ private:
 //
 SRCEXP_EXPRVAL_DEFN(es, member)
 {
-   return new SourceExpression_ValueMember(expr, value, context, position);
+   return new SourceExpression_ValueMember(expr, value, context, pos);
 }
 
 //
@@ -101,21 +101,20 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
    VariableType::Reference srcType = expr->getType();
 
    if (!src->address)
-      ERROR_N(position, "cannot getData");
+      ERROR_NP("cannot getData");
 
    // Member data.
-   bigsint                 memberOffset = srcType->getOffset(name, position);
-   VariableType::Reference memberType   = srcType->getType(name, position);
-   bigsint                 memberSize   = memberType->getSize(position);
+   bigsint                 memberOffset = srcType->getOffset(name, pos);
+   VariableType::Reference memberType   = srcType->getType(name, pos);
+   bigsint                 memberSize   = memberType->getSize(pos);
 
    if (src->type == VariableData::MT_REGISTERARRAY)
    {
       SourceExpression::Pointer memberOffsetExpr =
-         create_value_int(memberOffset, context, position);
+         create_value_int(memberOffset, context, pos);
 
       SourceExpression::Pointer offset =
-         create_binary_add(src->offsetExpr, memberOffsetExpr, context,
-                           position);
+         create_binary_add(src->offsetExpr, memberOffsetExpr, context, pos);
 
       return VariableData::create_registerarray(memberSize, src->sectionRA,
                                                 src->address, offset);
@@ -129,11 +128,10 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
    }
 
    ObjectExpression::Pointer memberOffsetObj =
-      ObjectExpression::create_value_int(memberOffset, position);
+      ObjectExpression::create_value_int(memberOffset, pos);
 
    ObjectExpression::Pointer address =
-      ObjectExpression::create_binary_add(src->address, memberOffsetObj,
-                                          position);
+      ObjectExpression::create_binary_add(src->address, memberOffsetObj, pos);
 
    switch (src->type)
    {
@@ -150,7 +148,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
       return VariableData::create_static(memberSize, address);
 
    default:
-      ERROR_N(position, "cannot getData");
+      ERROR_NP("cannot getData");
    }
 
    return data;
@@ -161,7 +159,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
 //
 VariableType::Reference SourceExpression_ValueMember::getType() const
 {
-   return expr->getType()->getType(name, position);
+   return expr->getType()->getType(name, pos);
 }
 
 // EOF

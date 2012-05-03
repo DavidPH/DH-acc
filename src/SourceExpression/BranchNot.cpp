@@ -66,7 +66,7 @@ private:
 //
 SRCEXP_EXPRBRA_DEFN(u, not)
 {
-   return new SourceExpression_BranchNot(expr, context, position);
+   return new SourceExpression_BranchNot(expr, context, pos);
 }
 
 //
@@ -83,12 +83,12 @@ void SourceExpression_BranchNot::virtual_makeObjects
    Super::recurse_makeObjects(objects, dst);
 
    VariableType::Reference type = getType();
-   bigsint                 size = type->getSize(position);
+   bigsint                 size = type->getSize(pos);
    VariableData::Pointer   src  = VariableData::create_stack(size);
 
    objects->addToken(OCODE_LOGICAL_NOT32I);
 
-   make_objects_memcpy_post(objects, dst, src, type, context, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }
 
 // EOF

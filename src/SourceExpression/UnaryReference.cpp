@@ -108,7 +108,7 @@ public:
             return data->address;
 
          return ObjectExpression::create_binary_add
-                (data->address, data->offsetExpr->makeObject(), position);
+                (data->address, data->offsetExpr->makeObject(), pos);
 
       case VariableData::MT_REGISTER:
       case VariableData::MT_STATIC:
@@ -116,7 +116,7 @@ public:
 
       case VariableData::MT_REGISTERARRAY:
          if (!data->offsetExpr)
-            return ObjectExpression::create_value_int(0, position);
+            return ObjectExpression::create_value_int(0, pos);
 
          return data->offsetExpr->makeObject();
       }
@@ -144,7 +144,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_N(position, "invalid MT");
+         ERROR_NP("invalid MT");
 
       case VariableData::MT_POINTER:
          if (data->offsetExpr)
@@ -187,7 +187,7 @@ private:
 //
 SRCEXP_EXPRUNA_DEFN(reference)
 {
-   return new SourceExpression_UnaryReference(expr, context, position);
+   return new SourceExpression_UnaryReference(expr, context, pos);
 }
 
 // EOF

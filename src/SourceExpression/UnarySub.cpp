@@ -64,7 +64,7 @@ private:
 //
 SRCEXP_EXPRUNA_DEFN(sub)
 {
-   return new SourceExpression_UnarySub(expr, context, position);
+   return new SourceExpression_UnarySub(expr, context, pos);
 }
 
 //
@@ -89,7 +89,7 @@ bool SourceExpression_UnarySub::canMakeObject() const
 //
 CounterPointer<ObjectExpression> SourceExpression_UnarySub::makeObject() const
 {
-   return ObjectExpression::create_unary_sub(expr->makeObject(), position);
+   return ObjectExpression::create_unary_sub(expr->makeObject(), pos);
 }
 
 //
@@ -102,7 +102,7 @@ void SourceExpression_UnarySub::virtual_makeObjects
 
    VariableType::Reference type = getType();
    VariableType::BasicType bt   = type->getBasicType();
-   bigsint                 size = type->getSize(position);
+   bigsint                 size = type->getSize(pos);
    VariableData::Pointer   src  = VariableData::create_stack(size);
 
    switch (bt)
@@ -127,6 +127,7 @@ void SourceExpression_UnarySub::virtual_makeObjects
    case VariableType::BT_LLONG:
    case VariableType::BT_ULLONG:
    {
+      std::string label = context->makeLabel();
       std::string labelEnd = label + "_end";
 
       ObjectExpression::Pointer tmpL = context->getTempVar(0);
@@ -149,10 +150,10 @@ void SourceExpression_UnarySub::virtual_makeObjects
       break;
 
    default:
-      ERROR_N(position, "invalid BT");
+      ERROR_NP("invalid BT");
    }
 
-   make_objects_memcpy_post(objects, dst, src, type, context, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }
 
 // EOF

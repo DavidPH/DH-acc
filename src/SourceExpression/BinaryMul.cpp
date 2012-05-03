@@ -91,8 +91,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(mul)
 {
-   return new SourceExpression_BinaryMul
-              (false, exprL, exprR, context, position);
+   return new SourceExpression_BinaryMul(false, exprL, exprR, context, pos);
 }
 
 //
@@ -100,8 +99,7 @@ SRCEXP_EXPRBIN_DEFN(mul)
 //
 SRCEXP_EXPRBIN_DEFN(mul_eq)
 {
-   return new SourceExpression_BinaryMul
-              (true, exprL, exprR, context, position);
+   return new SourceExpression_BinaryMul(true, exprL, exprR, context, pos);
 }
 
 //
@@ -123,7 +121,7 @@ SourceExpression_BinaryMul::SourceExpression_BinaryMul
 ObjectExpression::Pointer SourceExpression_BinaryMul::makeObject() const
 {
    EVALUATE_OBJECTS();
-   return ObjectExpression::create_binary_mul(objL, objR, position);
+   return ObjectExpression::create_binary_mul(objL, objR, pos);
 }
 
 //

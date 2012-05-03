@@ -62,8 +62,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(assign)
 {
-   return new SourceExpression_BinaryAssign
-              (false, exprL, exprR, context, position);
+   return new SourceExpression_BinaryAssign(false, exprL, exprR, context, pos);
 }
 
 //
@@ -71,8 +70,7 @@ SRCEXP_EXPRBIN_DEFN(assign)
 //
 SRCEXP_EXPRBIN_DEFN(assign_const)
 {
-   return new SourceExpression_BinaryAssign
-              (true, exprL, exprR, context, position);
+   return new SourceExpression_BinaryAssign(true, exprL, exprR, context, pos);
 }
 
 //
@@ -106,7 +104,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    Super::recurse_makeObjects(objects, dst);
 
    if (!allowConst && exprL->getType()->getQualifier(VariableType::QUAL_CONST))
-      ERROR_N(position, "assignment to const");
+      ERROR_NP("assignment to const");
 
    if (dst->type == VariableData::MT_VOID)
    {
@@ -118,9 +116,9 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       VariableData::Pointer   dup  = exprL->getData();
       VariableData::Pointer   src  = VariableData::create_stack(dup->size);
 
-      make_objects_memcpy_prep(objects, dst, dup, src, position);
+      make_objects_memcpy_prep(objects, dst, dup, src, pos);
       exprR->makeObjects(objects, src);
-      make_objects_memcpy_post(objects, dst, dup, src, type, context, position);
+      make_objects_memcpy_post(objects, dst, dup, src, type, context, pos);
    }
 }
 

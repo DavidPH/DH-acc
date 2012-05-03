@@ -39,13 +39,13 @@
 //
 
 #define SRCEXP_EXPR_ARGS \
-   SourceContext *context, SourcePosition const &position
+   SourceContext *context, SourcePosition const &pos
 
 #define SRCEXP_EXPR_PARM \
-   SourceContext *_context, SourcePosition const &_position
+   SourceContext *_context, SourcePosition const &_pos
 
 #define SRCEXP_EXPR_PASS \
-   _context, _position
+   _context, _pos
 
 
 #define SRCEXP_EXPRUNA_ARGS \
@@ -387,10 +387,8 @@ protected:
    void recurse_makeObjectsCast
    (ObjectVector *objects, VariableData *dst, VariableType *dstType);
 
-   SourcePosition position;
-   std::string label;
+   SourcePosition pos;
    CounterReference<SourceContext> context;
-
 
 
    static void make_objects_call
@@ -437,7 +435,6 @@ private:
 
    std::vector<std::string> labels;
    bool evaluated;
-
 
 
    static void make_objects_call_asmfunc

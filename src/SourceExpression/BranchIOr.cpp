@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../SourceContext.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
@@ -58,7 +59,7 @@ private:
 //
 SRCEXP_EXPRBRA_DEFN(b, ior)
 {
-	return new SourceExpression_BranchIOr(exprL, exprR, context, position);
+	return new SourceExpression_BranchIOr(exprL, exprR, context, pos);
 }
 
 //
@@ -67,9 +68,7 @@ SRCEXP_EXPRBRA_DEFN(b, ior)
 SRCEXP_EXPRBRA_DEFN(b, ior_eq)
 {
    return create_binary_assign
-          (exprL, create_branch_ior
-                  (exprL, exprR, context, position),
-           context, position);
+      (exprL, create_branch_ior(exprL, exprR, context, pos), context, pos);
 }
 
 //
@@ -90,35 +89,36 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    Super::recurse_makeObjects(objects, dst);
 
    VariableType::Reference srcType = VariableType::get_bt_boolhard();
-   bigsint                 srcSize = srcType->getSize(position);
+   bigsint                 srcSize = srcType->getSize(pos);
 
    VariableData::Pointer src = VariableData::create_stack(srcSize);
    VariableData::Pointer tmp = VariableData::create_stack(srcSize);
 
+   std::string label = context->makeLabel();
    std::string label1   = label + "_1";
    std::string labelEnd = label + "_end";
 
    if (dst->type == VariableData::MT_VOID)
    {
       exprL->makeObjects(objects, tmp);
-      objects->setPosition(position);
+      objects->setPosition(pos);
       objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelEnd));
 
       exprR->makeObjects(objects, dst);
-      objects->setPosition(position);
+      objects->setPosition(pos);
 
       objects->addLabel(labelEnd);
    }
    else
    {
-      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_prep(objects, dst, src, pos);
 
       exprL->makeObjects(objects, tmp);
-      objects->setPosition(position);
+      objects->setPosition(pos);
       objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(label1));
 
       exprR->makeObjects(objects, tmp);
-      objects->setPosition(position);
+      objects->setPosition(pos);
       objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(label1));
 
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0));
@@ -129,7 +129,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
       objects->addLabel(labelEnd);
 
-      make_objects_memcpy_post(objects, dst, src, srcType, context, position);
+      make_objects_memcpy_post(objects, dst, src, srcType, context, pos);
    }
 }
 

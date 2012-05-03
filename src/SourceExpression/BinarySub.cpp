@@ -99,26 +99,26 @@ SourceExpression::Pointer SourceExpression::create_binary_sub
    SourceExpression::Pointer exprR = _exprR;
 
    SourceContext *&context = _context;
-   SourcePosition const &position = _position;
+   SourcePosition const &pos = _pos;
 
    CONSTRUCTOR_TYPE_VARS
    CONSTRUCTOR_ARRAY_DECAY
 
    SourceExpression::Pointer expr =
-      new SourceExpression_BinarySub(false, exprL, exprR, context, position);
+      new SourceExpression_BinarySub(false, exprL, exprR, context, pos);
 
    // Slight hack for pointer arithmetic.
    if (btL == VariableType::BT_POINTER && btR == VariableType::BT_POINTER)
    {
       expr = create_value_cast_implicit
-             (expr, VariableType::get_bt_int(), context, position);
+         (expr, VariableType::get_bt_int(), context, pos);
 
-      bigsint retnSize = typeL->getReturn()->getSize(position);
+      bigsint retnSize = typeL->getReturn()->getSize(pos);
       SourceExpression::Pointer retnExpr =
-         create_value_int(retnSize, context, position);
+         create_value_int(retnSize, context, pos);
 
       if (retnSize != 1)
-         expr = create_binary_div(expr, retnExpr, context, position);
+         expr = create_binary_div(expr, retnExpr, context, pos);
    }
 
    return expr;
@@ -129,8 +129,7 @@ SourceExpression::Pointer SourceExpression::create_binary_sub
 //
 SRCEXP_EXPRBIN_DEFN(sub_eq)
 {
-   return new SourceExpression_BinarySub
-              (true, exprL, exprR, context, position);
+   return new SourceExpression_BinarySub(true, exprL, exprR, context, pos);
 }
 
 //
@@ -148,10 +147,10 @@ SourceExpression_BinarySub::SourceExpression_BinarySub
    {
       // Pointer constraints.
       if (btR != VariableType::BT_POINTER && !VariableType::is_bt_integer(btR))
-         ERROR_N(position, "pointer - non-integer");
+         ERROR_NP("pointer - non-integer");
 
       if (btL != VariableType::BT_POINTER)
-         ERROR_N(position, "non-pointer - pointer");
+         ERROR_NP("non-pointer - pointer");
    }
    else
    {
@@ -159,12 +158,12 @@ SourceExpression_BinarySub::SourceExpression_BinarySub
    }
 
    if (assign && !VariableType::is_bt_arithmetic(btR))
-      ERROR_N(position, "X -= non-arithmetic");
+      ERROR_NP("X -= non-arithmetic");
 
    CONSTRUCTOR_POINTER_PREAMBLE
 
    if (btL == VariableType::BT_POINTER && btR != VariableType::BT_POINTER)
-      exprR = create_binary_mul(exprR, exprSize, context, position);
+      exprR = create_binary_mul(exprR, exprSize, context, pos);
 }
 
 //
@@ -173,7 +172,7 @@ SourceExpression_BinarySub::SourceExpression_BinarySub
 ObjectExpression::Pointer SourceExpression_BinarySub::makeObject() const
 {
    EVALUATE_OBJECTS();
-   return ObjectExpression::create_binary_sub(objL, objR, position);
+   return ObjectExpression::create_binary_sub(objL, objR, pos);
 }
 
 //

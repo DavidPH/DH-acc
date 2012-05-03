@@ -64,8 +64,7 @@ private:
 //
 SRCEXP_EXPRBRA_DEFN(2, switch)
 {
-   return new SourceExpression_BranchSwitch(exprCond, exprBody, context,
-                                            position);
+   return new SourceExpression_BranchSwitch(exprCond, exprBody, context, pos);
 }
 
 //
@@ -81,13 +80,13 @@ SourceExpression_BranchSwitch
    {
       VariableType::Reference type = VariableType::get_bt_int();
 
-      exprCond = create_value_cast_implicit(exprCond, type, context, position);
+      exprCond = create_value_cast_implicit(exprCond, type, context, pos);
    }
 
    {
       VariableType::Reference type = VariableType::get_bt_void();
 
-      exprBody = create_value_cast_implicit(exprBody, type, context, position);
+      exprBody = create_value_cast_implicit(exprBody, type, context, pos);
    }
 }
 
@@ -100,8 +99,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    Super::recurse_makeObjects(objects, dst);
 
    // Build case data.
-   std::vector<bigsint> cases = context->getCases(position);
-   std::string caseDefault = context->getLabelCaseDefault(position);
+   std::vector<bigsint> cases = context->getCases(pos);
+   std::string caseDefault = context->getLabelCaseDefault(pos);
 
    std::vector<ObjectExpression::Pointer> args;
    args.reserve(cases.size() * 2);
@@ -109,19 +108,19 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    for (size_t i(0); i < cases.size(); ++i)
    {
       bigsint     caseNum = cases[i];
-      std::string caseLab = context->getLabelCase(caseNum, position);
+      std::string caseLab = context->getLabelCase(caseNum, pos);
 
       args.push_back(objects->getValue(caseNum));
       args.push_back(objects->getValue(caseLab));
    }
 
    // Generate condition.
-   bigsint               sizeCond = exprCond->getType()->getSize(position);
+   bigsint               sizeCond = exprCond->getType()->getSize(pos);
    VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
 
    exprCond->makeObjects(objects, destCond);
 
-   objects->setPosition(position);
+   objects->setPosition(pos);
 
    // Generate jump table.
    objects->addToken(OCODE_BRANCH_TABLE, args);
@@ -136,7 +135,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       objects->addLabel(caseDefault);
 
    // Add break target.
-   objects->addLabel(context->getLabelBreak(position));
+   objects->addLabel(context->getLabelBreak(pos));
 }
 
 // EOF

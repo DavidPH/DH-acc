@@ -65,7 +65,7 @@
          VariableData::create_stack(argSize);           \
                                                         \
       if (argType != callTypes[i])                      \
-         ERROR(args[i]->position, "bad type");          \
+         ERROR(args[i]->pos, "bad type");               \
                                                         \
       arg->makeObjects(objects, argDst);                \
    }                                                    \

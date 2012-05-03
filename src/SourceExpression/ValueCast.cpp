@@ -54,7 +54,7 @@ public:
 
       if (ct && !(VariableType::get_cast(type, exprType) & ct))
       {
-         ERROR_N(position, "invalid cast: %s to %s",
+         ERROR_NP("invalid cast: %s to %s",
                  make_string(exprType).c_str(), make_string(type).c_str());
       }
    }
@@ -83,7 +83,7 @@ private:
 SRCEXP_EXPRVAL_DEFN(et, cast_explicit)
 {
    return new SourceExpression_ValueCast
-   (VariableType::CAST_EXPLICIT, expr, type, context, position);
+   (VariableType::CAST_EXPLICIT, expr, type, context, pos);
 }
 
 //
@@ -92,7 +92,7 @@ SRCEXP_EXPRVAL_DEFN(et, cast_explicit)
 SRCEXP_EXPRVAL_DEFN(et, cast_force)
 {
    return new SourceExpression_ValueCast
-   (VariableType::CAST_FORCE, expr, type, context, position);
+   (VariableType::CAST_FORCE, expr, type, context, pos);
 }
 
 //
@@ -101,7 +101,7 @@ SRCEXP_EXPRVAL_DEFN(et, cast_force)
 SRCEXP_EXPRVAL_DEFN(et, cast_implicit)
 {
    return new SourceExpression_ValueCast
-   (VariableType::CAST_EXPLICIT, expr, type, context, position);
+   (VariableType::CAST_EXPLICIT, expr, type, context, pos);
 }
 
 //
@@ -110,7 +110,7 @@ SRCEXP_EXPRVAL_DEFN(et, cast_implicit)
 SRCEXP_EXPRVAL_DEFN(et, cast_qualifier)
 {
    return new SourceExpression_ValueCast
-   (VariableType::CAST_QUALIFIER, expr, type, context, position);
+   (VariableType::CAST_QUALIFIER, expr, type, context, pos);
 }
 
 //
@@ -119,7 +119,7 @@ SRCEXP_EXPRVAL_DEFN(et, cast_qualifier)
 SRCEXP_EXPRVAL_DEFN(et, cast_reinterpret)
 {
    return new SourceExpression_ValueCast
-   (VariableType::CAST_REINTERPRET, expr, type, context, position);
+   (VariableType::CAST_REINTERPRET, expr, type, context, pos);
 }
 
 //
@@ -128,7 +128,7 @@ SRCEXP_EXPRVAL_DEFN(et, cast_reinterpret)
 SRCEXP_EXPRVAL_DEFN(et, cast_static)
 {
    return new SourceExpression_ValueCast
-   (VariableType::CAST_STATIC, expr, type, context, position);
+   (VariableType::CAST_STATIC, expr, type, context, pos);
 }
 
 //
@@ -144,7 +144,7 @@ bool SourceExpression_ValueCast::canMakeObject() const
        thisBT == VariableType::BT_POINTER)
    {
       // Not the most efficient solution, no.
-      return create_unary_reference(expr, context, position)->canMakeObject();
+      return create_unary_reference(expr, context, pos)->canMakeObject();
    }
 
    return expr->canMakeObject();
@@ -173,10 +173,10 @@ ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
    if (exprBT == VariableType::BT_ARRAY &&
        thisBT == VariableType::BT_POINTER)
    {
-      return create_unary_reference(expr, context, position)->makeObject();
+      return create_unary_reference(expr, context, pos)->makeObject();
    }
 
-   return make_object_cast(expr->makeObject(), thisType, exprType, position);
+   return make_object_cast(expr->makeObject(), thisType, exprType, pos);
 }
 
 //
@@ -191,8 +191,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    if (expr->getType()->getBasicType() == VariableType::BT_ARRAY &&
       type->getBasicType() == VariableType::BT_POINTER)
    {
-      return create_unary_reference(expr, context, position)
-      ->makeObjectsCast(objects, dst, type);
+      return create_unary_reference(expr, context, pos)
+         ->makeObjectsCast(objects, dst, type);
    }
    else
       expr->makeObjectsCast(objects, dst, type);

@@ -94,8 +94,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(add)
 {
-   return new SourceExpression_BinaryAdd
-              (false, exprL, exprR, context, position);
+   return new SourceExpression_BinaryAdd(false, exprL, exprR, context, pos);
 }
 
 //
@@ -103,8 +102,7 @@ SRCEXP_EXPRBIN_DEFN(add)
 //
 SRCEXP_EXPRBIN_DEFN(add_eq)
 {
-   return new SourceExpression_BinaryAdd
-              (true, exprL, exprR, context, position);
+   return new SourceExpression_BinaryAdd(true, exprL, exprR, context, pos);
 }
 
 //
@@ -122,13 +120,13 @@ SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
    {
       // Pointer constraints.
       if (btL == VariableType::BT_POINTER && btR == VariableType::BT_POINTER)
-         ERROR_N(position, "pointer + pointer");
+         ERROR_NP("pointer + pointer");
 
       if (btL == VariableType::BT_POINTER && !VariableType::is_bt_integer(btR))
-         ERROR_N(position, "pointer + non-integer");
+         ERROR_NP("pointer + non-integer");
 
       if (!VariableType::is_bt_integer(btL) && btR == VariableType::BT_POINTER)
-         ERROR_N(position, "non-integer + pointer");
+         ERROR_NP("non-integer + pointer");
    }
    else
    {
@@ -136,15 +134,15 @@ SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
    }
 
    if (assign && !VariableType::is_bt_arithmetic(btR))
-      ERROR_N(position, "X -= non-arithmetic");
+      ERROR_NP("X -= non-arithmetic");
 
    CONSTRUCTOR_POINTER_PREAMBLE
 
    if (btL == VariableType::BT_POINTER)
-      exprR = create_binary_mul(exprR, exprSize, context, position);
+      exprR = create_binary_mul(exprR, exprSize, context, pos);
 
    if (btR == VariableType::BT_POINTER)
-      exprL = create_binary_mul(exprL, exprSize, context, position);
+      exprL = create_binary_mul(exprL, exprSize, context, pos);
 }
 
 //
@@ -153,7 +151,7 @@ SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
 ObjectExpression::Pointer SourceExpression_BinaryAdd::makeObject() const
 {
    EVALUATE_OBJECTS();
-   return ObjectExpression::create_binary_add(objL, objR, position);
+   return ObjectExpression::create_binary_add(objL, objR, pos);
 }
 
 //

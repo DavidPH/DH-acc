@@ -65,7 +65,7 @@ private:
 SourceExpression::Pointer SourceExpression::
 create_root_output(SRCEXP_EXPRUNA_ARGS)
 {
-   return new SourceExpression_RootOutput(expr, context, position);
+   return new SourceExpression_RootOutput(expr, context, pos);
 }
 
 //
@@ -342,7 +342,7 @@ void SourceExpression_RootOutput::doOut
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('{'));
       objects->addToken(OCODE_ACSP_CHARACTER);
 
-      for (bigsint i = type->getSize(position); i--;)
+      for (bigsint i = type->getSize(pos); i--;)
       {
          objects->addToken(OCODE_ACSP_NUM_HEX32U);
 
@@ -376,7 +376,7 @@ void SourceExpression_RootOutput::doOut
    case VariableType::BT_FLOAT:
    case VariableType::BT_LFLOAT:
    case VariableType::BT_LLFLOAT:
-      ERROR_N(position, "unsupported BT: %s", make_string(bt).c_str());
+      ERROR_NP("unsupported BT: %s", make_string(bt).c_str());
    }
 
    objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(';'));
@@ -392,9 +392,9 @@ void SourceExpression_RootOutput::virtual_makeObjects
    Super::recurse_makeObjects(objects, dst);
 
    expr->makeObjects
-   (objects, VariableData::create_stack(expr->getType()->getSize(position)));
+      (objects, VariableData::create_stack(expr->getType()->getSize(pos)));
 
-   objects->setPosition(position);
+   objects->setPosition(pos);
 
    objects->addToken(OCODE_ACSP_START);
 

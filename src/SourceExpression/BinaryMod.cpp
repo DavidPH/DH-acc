@@ -89,8 +89,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(mod)
 {
-   return new SourceExpression_BinaryMod
-              (false, exprL, exprR, context, position);
+   return new SourceExpression_BinaryMod(false, exprL, exprR, context, pos);
 }
 
 //
@@ -98,8 +97,7 @@ SRCEXP_EXPRBIN_DEFN(mod)
 //
 SRCEXP_EXPRBIN_DEFN(mod_eq)
 {
-   return new SourceExpression_BinaryMod
-              (true, exprL, exprR, context, position);
+   return new SourceExpression_BinaryMod(true, exprL, exprR, context, pos);
 }
 
 //
@@ -121,7 +119,7 @@ SourceExpression_BinaryMod::SourceExpression_BinaryMod
 ObjectExpression::Pointer SourceExpression_BinaryMod::makeObject() const
 {
    EVALUATE_OBJECTS();
-   return ObjectExpression::create_binary_mod(objL, objR, position);
+   return ObjectExpression::create_binary_mod(objL, objR, pos);
 }
 
 //

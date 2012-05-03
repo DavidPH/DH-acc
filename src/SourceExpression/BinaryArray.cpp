@@ -59,7 +59,7 @@ public:
    virtual VariableData::Pointer getData() const
    {
       VariableType::Reference type = getType();
-      bigsint                 size = type->getSize(position);
+      bigsint                 size = type->getSize(pos);
 
       ObjectExpression::Pointer obj = exprL->makeObject();
       obj = obj->resolveElement(exprR->makeObject()->resolveInt());
@@ -96,10 +96,10 @@ SRCEXP_EXPRBIN_DEFN(array)
       (btR == VariableType::BT_ARRAY && !exprR->canMakeObject()))
    {
       return create_unary_dereference
-      (create_binary_add(exprL, exprR, context, position), context, position);
+      (create_binary_add(exprL, exprR, context, pos), context, pos);
    }
 
-   return new SourceExpression_BinaryArray(exprL, exprR, context, position);
+   return new SourceExpression_BinaryArray(exprL, exprR, context, pos);
 }
 
 //
@@ -113,7 +113,7 @@ SourceExpression_BinaryArray::SourceExpression_BinaryArray
 
    // Can only be done for BT_ARRAY or BT_STRING.
    if (btL != VariableType::BT_ARRAY && btL != VariableType::BT_STRING)
-      ERROR_N(position, "expected BT_ARRAY or BT_STRING, got: %s", make_string(btL).c_str());
+      ERROR_NP("expected BT_ARRAY or BT_STRING, got: %s", make_string(btL).c_str());
 }
 
 //
@@ -135,27 +135,27 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    if (exprL->getType()->getBasicType() == VariableType::BT_STRING)
    {
       VariableType::Reference type = getType();
-      bigsint typeSize = type->getSize(position);
-      bigsint sizeL = exprL->getType()->getSize(position);
-      bigsint sizeR = exprR->getType()->getSize(position);
+      bigsint typeSize = type->getSize(pos);
+      bigsint sizeL = exprL->getType()->getSize(pos);
+      bigsint sizeR = exprR->getType()->getSize(pos);
 
       VariableData::Pointer src = VariableData::create_stack(typeSize);
 
-      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_prep(objects, dst, src, pos);
 
       exprL->makeObjects(objects, VariableData::create_stack(sizeL));
       exprR->makeObjects(objects, VariableData::create_stack(sizeR));
 
-      objects->setPosition(position);
+      objects->setPosition(pos);
 
       // 2 = arg count, 15 = native get_char
       objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2),
                         objects->getValue(15));
 
-      make_objects_memcpy_post(objects, dst, src, type, context, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, pos);
    }
    else
-      ERROR_N(position, "invalid BT");
+      ERROR_NP("invalid BT");
 }
 
 // EOF

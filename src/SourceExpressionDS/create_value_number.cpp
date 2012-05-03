@@ -99,7 +99,7 @@ SourceExpression::Pointer SourceExpressionDS::create_value_integer
       int i = char_to_int(c);
 
       if (i > base)
-         ERROR(position, "character out of range");
+         ERROR_P("character out of range");
 
       if (i < 0)
       {
@@ -108,7 +108,7 @@ SourceExpression::Pointer SourceExpressionDS::create_value_integer
              c == 'H' || c == 'h')   // short
             break;
 
-         ERROR(position, "character out of range");
+         ERROR_P("character out of range");
       }
 
       val *= base;
@@ -156,7 +156,7 @@ SourceExpression::Pointer SourceExpressionDS::create_value_integer
          break;
 
       default:
-         ERROR(position, "character out of range");
+         ERROR_P("character out of range");
       }
    }
 
@@ -168,40 +168,40 @@ SourceExpression::Pointer SourceExpressionDS::create_value_integer
 
 dointHH:
    if (!isU && val <= maxs_HH)
-      return create_value_schar(val, context, position);
+      return create_value_schar(val, context, pos);
 
    if ((isU || isUU) && val <= maxu_HH)
-      return create_value_uchar(val, context, position);
+      return create_value_uchar(val, context, pos);
 
 dointH:
    if (!isU && val <= maxs_H)
-      return create_value_short(val, context, position);
+      return create_value_short(val, context, pos);
 
    if ((isU || isUU) && val <= maxu_H)
-      return create_value_ushort(val, context, position);
+      return create_value_ushort(val, context, pos);
 
 doint:
    if (!isU && val <= maxs)
-      return create_value_int(val, context, position);
+      return create_value_int(val, context, pos);
 
    if ((isU || isUU) && val <= maxu)
-      return create_value_uint(val, context, position);
+      return create_value_uint(val, context, pos);
 
 dointL:
    if (!isU && val <= maxs_L)
-      return create_value_long(val, context, position);
+      return create_value_long(val, context, pos);
 
    if ((isU || isUU) && val <= maxu_L)
-      return create_value_ulong(val, context, position);
+      return create_value_ulong(val, context, pos);
 
 dointLL:
    if (!isU && val <= maxs_LL)
-      return create_value_llong(val, context, position);
+      return create_value_llong(val, context, pos);
 
    if ((isU || isUU) && val <= maxu_LL)
-      return create_value_ullong(val, context, position);
+      return create_value_ullong(val, context, pos);
 
-   ERROR(position, "integer literal out of range");
+   ERROR_P("integer literal out of range");
 }
 
 // EOF

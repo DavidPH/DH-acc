@@ -65,12 +65,12 @@ static SourceExpression::Pointer create_int
 (bigsint data, VariableType *varType, SRCEXP_EXPR_ARGS)
 {
    ObjectExpression::Pointer varData =
-      ObjectExpression::create_value_int(data, position);
+      ObjectExpression::create_value_int(data, pos);
 
    SourceVariable::Pointer var =
-      SourceVariable::create_literal(varType, varData, position);
+      SourceVariable::create_literal(varType, varData, pos);
 
-   return SourceExpression::create_value_variable(var, context, position);
+   return SourceExpression::create_value_variable(var, context, pos);
 }
 
 
@@ -84,14 +84,14 @@ static SourceExpression::Pointer create_int
 SRCEXP_EXPRVAL_DEFN(c, char)
 {
    ObjectExpression::Pointer charVarData =
-      ObjectExpression::create_value_int(value, position);
+      ObjectExpression::create_value_int(value, pos);
 
    VariableType::Reference charVarType = VariableType::get_bt_char();
 
    SourceVariable::Pointer charVariable =
-      SourceVariable::create_literal(charVarType, charVarData, position);
+      SourceVariable::create_literal(charVarType, charVarData, pos);
 
-   return create_value_variable(charVariable, context, position);
+   return create_value_variable(charVariable, context, pos);
 }
 
 //
@@ -100,9 +100,9 @@ SRCEXP_EXPRVAL_DEFN(c, char)
 SRCEXP_EXPRVAL_DEFN(s, char)
 {
    if (value.size() != 1)
-      ERROR(position, "invalid length for character literal");
+      ERROR_P("invalid length for character literal");
 
-   return create_value_char(value[0], context, position);
+   return create_value_char(value[0], context, pos);
 }
 
 //
@@ -110,7 +110,7 @@ SRCEXP_EXPRVAL_DEFN(s, char)
 //
 SRCEXP_EXPRVAL_DEFN(i, int)
 {
-   return create_int(value, VariableType::get_bt_int(), context,position);
+   return create_int(value, VariableType::get_bt_int(), context, pos);
 }
 
 //
@@ -118,7 +118,7 @@ SRCEXP_EXPRVAL_DEFN(i, int)
 //
 SRCEXP_EXPRVAL_DEFN(i, llong)
 {
-   return create_int(value, VariableType::get_bt_llong(), context,position);
+   return create_int(value, VariableType::get_bt_llong(), context, pos);
 }
 
 //
@@ -126,7 +126,7 @@ SRCEXP_EXPRVAL_DEFN(i, llong)
 //
 SRCEXP_EXPRVAL_DEFN(i, long)
 {
-   return create_int(value, VariableType::get_bt_long(), context,position);
+   return create_int(value, VariableType::get_bt_long(), context, pos);
 }
 
 //
@@ -135,14 +135,14 @@ SRCEXP_EXPRVAL_DEFN(i, long)
 SRCEXP_EXPRVAL_DEFN(r, real)
 {
    ObjectExpression::Pointer realVarData =
-      ObjectExpression::create_value_float(value, position);
+      ObjectExpression::create_value_float(value, pos);
 
    VariableType::Reference realVarType = VariableType::get_bt_real();
 
    SourceVariable::Pointer realVariable =
-      SourceVariable::create_literal(realVarType, realVarData, position);
+      SourceVariable::create_literal(realVarType, realVarData, pos);
 
-   return create_value_variable(realVariable, context, position);
+   return create_value_variable(realVariable, context, pos);
 }
 
 //
@@ -150,7 +150,7 @@ SRCEXP_EXPRVAL_DEFN(r, real)
 //
 SRCEXP_EXPRVAL_DEFN(s, real)
 {
-   return create_value_real(get_bigreal(value, position), context, position);
+   return create_value_real(get_bigreal(value, pos), context, pos);
 }
 
 //
@@ -158,7 +158,7 @@ SRCEXP_EXPRVAL_DEFN(s, real)
 //
 SRCEXP_EXPRVAL_DEFN(i, schar)
 {
-   return create_int(value, VariableType::get_bt_schar(), context,position);
+   return create_int(value, VariableType::get_bt_schar(), context, pos);
 }
 
 //
@@ -166,7 +166,7 @@ SRCEXP_EXPRVAL_DEFN(i, schar)
 //
 SRCEXP_EXPRVAL_DEFN(i, short)
 {
-   return create_int(value, VariableType::get_bt_short(), context,position);
+   return create_int(value, VariableType::get_bt_short(), context, pos);
 }
 
 //
@@ -179,9 +179,9 @@ SRCEXP_EXPRVAL_DEFN(s, string)
    VariableType::Reference stringVarType = VariableType::get_bt_string();
 
    SourceVariable::Pointer stringVariable
-      = SourceVariable::create_literal(stringVarType, stringVarData, position);
+      = SourceVariable::create_literal(stringVarType, stringVarData, pos);
 
-   return create_value_variable(stringVariable, context, position);
+   return create_value_variable(stringVariable, context, pos);
 }
 
 //
@@ -189,7 +189,7 @@ SRCEXP_EXPRVAL_DEFN(s, string)
 //
 SRCEXP_EXPRVAL_DEFN(i, uchar)
 {
-   return create_int(value, VariableType::get_bt_uchar(), context,position);
+   return create_int(value, VariableType::get_bt_uchar(), context, pos);
 }
 
 //
@@ -197,7 +197,7 @@ SRCEXP_EXPRVAL_DEFN(i, uchar)
 //
 SRCEXP_EXPRVAL_DEFN(i, uint)
 {
-   return create_int(value, VariableType::get_bt_uint(), context,position);
+   return create_int(value, VariableType::get_bt_uint(), context, pos);
 }
 
 //
@@ -205,7 +205,7 @@ SRCEXP_EXPRVAL_DEFN(i, uint)
 //
 SRCEXP_EXPRVAL_DEFN(i, ullong)
 {
-   return create_int(value, VariableType::get_bt_ullong(), context,position);
+   return create_int(value, VariableType::get_bt_ullong(), context, pos);
 }
 
 //
@@ -213,7 +213,7 @@ SRCEXP_EXPRVAL_DEFN(i, ullong)
 //
 SRCEXP_EXPRVAL_DEFN(i, ulong)
 {
-   return create_int(value, VariableType::get_bt_ulong(), context,position);
+   return create_int(value, VariableType::get_bt_ulong(), context, pos);
 }
 
 //
@@ -221,7 +221,7 @@ SRCEXP_EXPRVAL_DEFN(i, ulong)
 //
 SRCEXP_EXPRVAL_DEFN(i, ushort)
 {
-   return create_int(value, VariableType::get_bt_ushort(), context,position);
+   return create_int(value, VariableType::get_bt_ushort(), context, pos);
 }
 
 //
@@ -229,7 +229,7 @@ SRCEXP_EXPRVAL_DEFN(i, ushort)
 //
 SRCEXP_EXPRVAL_DEFN(v, variable)
 {
-   return new SourceExpression_ValueVariable(var, context, position);
+   return new SourceExpression_ValueVariable(var, context, pos);
 }
 
 //
@@ -241,7 +241,7 @@ SourceExpression_ValueVariable(SourceVariable *_var, SRCEXP_EXPR_PARM)
                                  var(_var)
 {
    if (!_var->getType()->getComplete())
-      ERROR_N(position, "incomplete type");
+      ERROR_NP("incomplete type");
 }
 
 //

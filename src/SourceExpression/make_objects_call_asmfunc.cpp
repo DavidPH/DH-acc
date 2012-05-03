@@ -61,7 +61,7 @@ void SourceExpression::make_objects_call_asmfunc
          ERROR_P("bad count");
 
       if (args[i]->getType() != callTypes[i])
-         ERROR(args[i]->position, "bad type");
+         ERROR(args[i]->pos, "bad type");
 
       immediate = immediate && args[i]->canMakeObject();
    }

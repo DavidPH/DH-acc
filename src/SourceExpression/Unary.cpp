@@ -49,7 +49,7 @@ SourceExpression_Unary::SourceExpression_Unary
  : Super(SRCEXP_EXPR_PASS), expr(_expr), make(true)
 {
    if (cast)
-      expr = create_value_cast_implicit(expr, cast, context, position);
+      expr = create_value_cast_implicit(expr, cast, context, pos);
 }
 
 //
@@ -72,12 +72,12 @@ void SourceExpression_Unary::recurse_makeObjects
    if (!make) return;
 
    VariableData::Pointer src =
-      VariableData::create_stack(getType()->getSize(position));
+      VariableData::create_stack(getType()->getSize(pos));
 
-   make_objects_memcpy_prep(objects, dst, src, position);
+   make_objects_memcpy_prep(objects, dst, src, pos);
    expr->makeObjects(objects, src);
 
-   objects->setPosition(position);
+   objects->setPosition(pos);
 }
 
 // EOF

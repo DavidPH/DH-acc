@@ -53,7 +53,7 @@ public:
    //
    virtual CounterReference<VariableType> getType() const
    {
-      ERROR_N(position, "designator has no type");
+      ERROR_NP("designator has no type");
    }
 
    //
@@ -62,9 +62,8 @@ public:
    virtual SourceExpression::Pointer makeExpressionFunction
    (std::vector<CounterPointer<VariableType> > const &types)
    {
-      SourceVariable::Pointer func =
-         context->getFunction(name, position, types);
-      return create_value_variable(func, context, position);
+      SourceVariable::Pointer func = context->getFunction(name, pos, types);
+      return create_value_variable(func, context, pos);
    }
 
 private:
@@ -81,7 +80,7 @@ private:
 //
 SRCEXP_EXPRVAL_DEFN(s, function)
 {
-   return new SourceExpression_ValueFunction(value, context, position);
+   return new SourceExpression_ValueFunction(value, context, pos);
 }
 
 // EOF

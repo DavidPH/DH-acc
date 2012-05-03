@@ -64,7 +64,7 @@ private:
 //
 SRCEXP_EXPRVAL_DEFN(t, data)
 {
-   return new SourceExpression_ValueData(false, type, context, position);
+   return new SourceExpression_ValueData(false, type, context, pos);
 }
 
 //
@@ -72,7 +72,7 @@ SRCEXP_EXPRVAL_DEFN(t, data)
 //
 SRCEXP_EXPRVAL_DEFN(t, data_garbage)
 {
-   return new SourceExpression_ValueData(true, type, context, position);
+   return new SourceExpression_ValueData(true, type, context, pos);
 }
 
 //
@@ -102,11 +102,11 @@ void SourceExpression_ValueData::virtual_makeObjects
 
    if (dst->type == VariableData::MT_VOID) return;
 
-   bigsint srcSize = type->getSize(position);
+   bigsint srcSize = type->getSize(pos);
 
    VariableData::Pointer src = VariableData::create_stack(srcSize);
 
-   make_objects_memcpy_prep(objects, dst, src, position);
+   make_objects_memcpy_prep(objects, dst, src, pos);
 
    for (bigsint i = srcSize; i--;)
    {
@@ -117,7 +117,7 @@ void SourceExpression_ValueData::virtual_makeObjects
          objects->addTokenPushZero();
    }
 
-   make_objects_memcpy_post(objects, dst, src, type, context, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }
 
 // EOF

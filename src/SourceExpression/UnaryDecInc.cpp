@@ -392,7 +392,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_N(position, "invalid MT");
+         ERROR_NP("invalid MT");
       }
    }
 
@@ -477,7 +477,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_N(position, "invalid MT");
+         ERROR_NP("invalid MT");
       }
    }
 
@@ -494,6 +494,7 @@ private:
       ObjectExpression::Pointer wrapv = objects->getValue(inc ? 0 : 0xFFFFFFFF);
       ObjectCode ocode;
 
+      std::string label = context->makeLabel();
       std::string labelEnd = label + "_end";
       ObjectExpression::Pointer objEnd = objects->getValue(labelEnd);
 
@@ -567,7 +568,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_N(position, "invalid MT");
+         ERROR_NP("invalid MT");
       }
    }
 
@@ -652,7 +653,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_N(position, "invalid MT");
+         ERROR_NP("invalid MT");
       }
    }
 
@@ -662,14 +663,14 @@ private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    {
       VariableType::Reference type = getType();
-      bigsint                 size = type->getSize(position);
+      bigsint                 size = type->getSize(pos);
       VariableType::BasicType bt   = type->getBasicType();
       VariableData::Pointer   src  = expr->getData();
       VariableData::Pointer   data = VariableData::create_stack(size);
       VariableData::Pointer   tmp  = VariableData::create_stack(1);
 
       if (dst->type != VariableData::MT_VOID)
-         make_objects_memcpy_prep(objects, dst, data, position);
+         make_objects_memcpy_prep(objects, dst, data, pos);
 
       if (bt == VariableType::BT_LLONG || bt == VariableType::BT_ULLONG)
          doLL(objects, dst, src, tmp);
@@ -677,7 +678,7 @@ private:
          doI(objects, dst, src, tmp);
       else if (bt == VariableType::BT_POINTER)
       {
-         bigsint value = type->getReturn()->getSize(position);
+         bigsint value = type->getReturn()->getSize(pos);
          if (value == 1)
             doI(objects, dst, src, tmp);
          else
@@ -686,10 +687,10 @@ private:
       else if (bt == VariableType::BT_FIXED || bt == VariableType::BT_REAL)
          doF(objects, dst, src, tmp);
       else
-         ERROR_N(position, "invalid BT");
+         ERROR_NP("invalid BT");
 
       if (dst->type != VariableData::MT_VOID)
-         make_objects_memcpy_post(objects, dst, data, type, context, position);
+         make_objects_memcpy_post(objects, dst, data, type, context, pos);
    }
 
    bool inc;
@@ -706,8 +707,7 @@ private:
 //
 SRCEXP_EXPRUNA_DEFN(dec_pre)
 {
-   return new SourceExpression_UnaryDecInc(false, false, expr, context,
-                                           position);
+   return new SourceExpression_UnaryDecInc(false, false, expr, context, pos);
 }
 
 //
@@ -715,8 +715,7 @@ SRCEXP_EXPRUNA_DEFN(dec_pre)
 //
 SRCEXP_EXPRUNA_DEFN(dec_suf)
 {
-   return new SourceExpression_UnaryDecInc(false, true, expr, context,
-                                           position);
+   return new SourceExpression_UnaryDecInc(false, true, expr, context, pos);
 }
 
 //
@@ -724,8 +723,7 @@ SRCEXP_EXPRUNA_DEFN(dec_suf)
 //
 SRCEXP_EXPRUNA_DEFN(inc_pre)
 {
-   return new SourceExpression_UnaryDecInc(true, false, expr, context,
-                                           position);
+   return new SourceExpression_UnaryDecInc(true, false, expr, context, pos);
 }
 
 //
@@ -733,8 +731,7 @@ SRCEXP_EXPRUNA_DEFN(inc_pre)
 //
 SRCEXP_EXPRUNA_DEFN(inc_suf)
 {
-   return new SourceExpression_UnaryDecInc(true, true, expr, context,
-                                           position);
+   return new SourceExpression_UnaryDecInc(true, true, expr, context, pos);
 }
 
 // EOF

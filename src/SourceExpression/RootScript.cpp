@@ -26,6 +26,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../ost_type.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableType.hpp"
 
@@ -70,7 +71,7 @@ extern int option_script_regargs;
 SourceExpression::Pointer SourceExpression::
 create_root_script(VariableType *type, SRCEXP_EXPR_ARGS)
 {
-   return new SourceExpression_RootScript(type, context, position);
+   return new SourceExpression_RootScript(type, context, pos);
 }
 
 //
@@ -93,7 +94,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    if (target_type == TARGET_ZDoom)
    {
-      objects->setPosition(position);
+      std::string label = context->makeLabel();
+      objects->setPosition(pos);
       objects->addToken(OCODE_ADDR_AUTO, objects->getValue(0));
       objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(label));
       objects->addToken(OCODE_ADDR_STACK_ADD_IMM, objects->getValue(1));
@@ -106,9 +108,9 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    for (size_t i = 0; i < callTypes.size(); ++i)
    {
       if (!callTypes[i])
-         ERROR_N(position, "variadic script");
+         ERROR_NP("variadic script");
 
-      callSize += callTypes[i]->getSize(position);
+      callSize += callTypes[i]->getSize(pos);
    }
 
    if (option_script_autoargs)

@@ -64,7 +64,7 @@ private:
 SourceExpression::Pointer SourceExpression::
 create_root_delay(SRCEXP_EXPRUNA_ARGS)
 {
-   return new SourceExpression_RootDelay(expr, context, position);
+   return new SourceExpression_RootDelay(expr, context, pos);
 }
 
 //
@@ -76,7 +76,7 @@ SourceExpression_RootDelay::SourceExpression_RootDelay(SRCEXP_EXPRUNA_PARM)
 {
    VariableType::Reference type = VariableType::get_bt_uint();
 
-   expr = create_value_cast_implicit(expr, type, context, position);
+   expr = create_value_cast_implicit(expr, type, context, pos);
 }
 
 //
@@ -88,9 +88,9 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    Super::recurse_makeObjects(objects, dst);
 
    expr->makeObjects
-   (objects, VariableData::create_stack(expr->getType()->getSize(position)));
+      (objects, VariableData::create_stack(expr->getType()->getSize(pos)));
 
-   objects->setPosition(position);
+   objects->setPosition(pos);
 
    ObjectExpression::Pointer stackObj;
 

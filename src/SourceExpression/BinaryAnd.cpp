@@ -61,7 +61,7 @@ public:
    virtual ObjectExpression::Pointer makeObject() const
    {
       EVALUATE_OBJECTS();
-      return ObjectExpression::create_binary_and(objL, objR, position);
+      return ObjectExpression::create_binary_and(objL, objR, pos);
    }
 
 private:
@@ -116,8 +116,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(and)
 {
-   return new SourceExpression_BinaryAnd
-              (false, exprL, exprR, context, position);
+   return new SourceExpression_BinaryAnd(false, exprL, exprR, context, pos);
 }
 
 //
@@ -125,8 +124,7 @@ SRCEXP_EXPRBIN_DEFN(and)
 //
 SRCEXP_EXPRBIN_DEFN(and_eq)
 {
-   return new SourceExpression_BinaryAnd
-              (true, exprL, exprR, context, position);
+   return new SourceExpression_BinaryAnd(true, exprL, exprR, context, pos);
 }
 
 // EOF

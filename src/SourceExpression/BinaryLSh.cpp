@@ -112,8 +112,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(lsh)
 {
-   return new SourceExpression_BinaryLSh
-              (false, exprL, exprR, context, position);
+   return new SourceExpression_BinaryLSh(false, exprL, exprR, context, pos);
 }
 
 //
@@ -121,8 +120,7 @@ SRCEXP_EXPRBIN_DEFN(lsh)
 //
 SRCEXP_EXPRBIN_DEFN(lsh_eq)
 {
-   return new SourceExpression_BinaryLSh
-              (true, exprL, exprR, context, position);
+   return new SourceExpression_BinaryLSh(true, exprL, exprR, context, pos);
 }
 
 // EOF

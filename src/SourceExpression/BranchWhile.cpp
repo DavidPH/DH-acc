@@ -65,8 +65,8 @@ private:
 //
 SRCEXP_EXPRBRA_DEFN(2, do)
 {
-   return new SourceExpression_BranchWhile(true, exprCond, exprBody, context,
-                                           position);
+   return new SourceExpression_BranchWhile
+      (true, exprCond, exprBody, context, pos);
 }
 
 //
@@ -74,8 +74,8 @@ SRCEXP_EXPRBRA_DEFN(2, do)
 //
 SRCEXP_EXPRBRA_DEFN(2, while)
 {
-   return new SourceExpression_BranchWhile(false, exprCond, exprBody, context,
-                                           position);
+   return new SourceExpression_BranchWhile
+      (false, exprCond, exprBody, context, pos);
 }
 
 //
@@ -91,25 +91,27 @@ SourceExpression_BranchWhile
    {
       VariableType::Reference type = VariableType::get_bt_boolsoft();
 
-      exprCond = create_value_cast_implicit(exprCond, type, context, position);
+      exprCond = create_value_cast_implicit(exprCond, type, context, pos);
    }
 
    {
       VariableType::Reference type = VariableType::get_bt_void();
 
-      exprBody = create_value_cast_implicit(exprBody, type, context, position);
+      exprBody = create_value_cast_implicit(exprBody, type, context, pos);
    }
 }
 
-void SourceExpression_BranchWhile::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+void SourceExpression_BranchWhile::virtual_makeObjects
+(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   bigsint               sizeCond = exprCond->getType()->getSize(position);
+   bigsint               sizeCond = exprCond->getType()->getSize(pos);
    VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
 
+   std::string label = context->makeLabel();
    std::string labelBody     = label + "_body";
-   std::string labelContinue = context->getLabelContinue(position);
+   std::string labelContinue = context->getLabelContinue(pos);
 
    if (!postCond)
       objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelContinue));
@@ -119,10 +121,10 @@ void SourceExpression_BranchWhile::virtual_makeObjects(ObjectVector *objects, Va
 
    objects->addLabel(labelContinue);
    exprCond->makeObjects(objects, destCond);
-   objects->setPosition(position);
+   objects->setPosition(pos);
    objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelBody));
 
-   objects->addLabel(context->getLabelBreak(position));
+   objects->addLabel(context->getLabelBreak(pos));
 }
 
 // EOF

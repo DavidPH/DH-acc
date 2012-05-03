@@ -64,7 +64,7 @@ private:
 //
 SRCEXP_EXPRBRA_DEFN(u, return)
 {
-   return new SourceExpression_BranchReturn(expr, context, position);
+   return new SourceExpression_BranchReturn(expr, context, pos);
 }
 
 //
@@ -78,7 +78,7 @@ SourceExpression_BranchReturn(SRCEXP_EXPRUNA_PARM)
    VariableType::Reference type = context->getReturnType();
 
    if (expr->getType() != type)
-      expr = create_value_cast_implicit(expr, type, context, position);
+      expr = create_value_cast_implicit(expr, type, context, pos);
 }
 
 //
@@ -89,16 +89,16 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   bigsint srcSize = expr->getType()->getSize(position);
+   bigsint srcSize = expr->getType()->getSize(pos);
    if (srcSize && target_type == TARGET_ZDoom)
       --srcSize;
    VariableData::Pointer src = VariableData::create_stack(srcSize);
 
    expr->makeObjects(objects, src);
 
-   objects->setPosition(position);
+   objects->setPosition(pos);
 
-   bigsint retnSize(expr->getType()->getSize(position));
+   bigsint retnSize(expr->getType()->getSize(pos));
 
    if (target_type != TARGET_ZDoom)
    {
@@ -137,7 +137,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       break;
 
    default:
-      ERROR_N(position, "invalid CT");
+      ERROR_NP("invalid CT");
    }
 }
 

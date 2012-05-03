@@ -38,10 +38,8 @@
 //
 // SourceExpression::SourceExpression
 //
-SourceExpression::
-SourceExpression(SourceContext *_context, SourcePosition const &_position)
-                 : position(_position), label(_context->makeLabel()),
-                   context(_context), evaluated(false)
+SourceExpression::SourceExpression(SRCEXP_EXPR_PARM)
+ : pos(_pos), context(_context), evaluated(false)
 {
 }
 
@@ -178,7 +176,7 @@ get_promoted_type(VariableType *type1, VariableType *type2,
 //
 VariableData::Pointer SourceExpression::getData() const
 {
-   ERROR_N(position, "getData on invalid expression");
+   ERROR_NP("getData on invalid expression");
 }
 
 //
@@ -200,7 +198,7 @@ SourceExpression::Pointer SourceExpression::makeExpressionFunction
    if (VariableType::is_bt_function(type->getBasicType()))
       return this;
 
-   ERROR_N(position, "makeExpressionFunction on invalid expression");
+   ERROR_NP("makeExpressionFunction on invalid expression");
 }
 
 //
@@ -211,7 +209,7 @@ CounterPointer<ObjectExpression> SourceExpression::makeObject() const
    VariableData::Pointer src = getData();
 
    if (src->type != VariableData::MT_LITERAL)
-      ERROR_N(position, "makeObject on invalid expression");
+      ERROR_NP("makeObject on invalid expression");
 
    return src->address;
 }
@@ -231,10 +229,10 @@ makeObjects(ObjectVector *objects, VariableData *dst)
       VariableType::Reference type = getType();
 
       VariableData::Pointer src =
-         VariableData::create_literal(type->getSize(position), makeObject());
+         VariableData::create_literal(type->getSize(pos), makeObject());
 
-      make_objects_memcpy_prep(objects, dst, src, position);
-      make_objects_memcpy_post(objects, dst, src, type, context, position);
+      make_objects_memcpy_prep(objects, dst, src, pos);
+      make_objects_memcpy_post(objects, dst, src, type, context, pos);
    }
    else
       virtual_makeObjects(objects, dst);
@@ -246,12 +244,15 @@ makeObjects(ObjectVector *objects, VariableData *dst)
 void SourceExpression::
 makeObjectsBase(ObjectVector *objects, VariableData *)
 {
-   //if (evaluated)
-   //   throw SourceException("multiple-evaluation", position, getName());
+   if (!labels.empty())
+   {
+      if (evaluated)
+         ERROR_NP("multiple-evaluation of labelled expression");
+
+      objects->addLabel(labels);
+   }
 
    evaluated = true;
-
-   objects->addLabel(labels);
 }
 
 //
@@ -268,7 +269,7 @@ void SourceExpression::makeObjectsCast
       // If there's an offset temp, it needs to be dealt with. (Well, only if
       // it's on the stack, but this ensures anything is handled.)
       if (dst->offsetTemp)
-         make_objects_memcpy_void(objects, dst->offsetTemp, position);
+         make_objects_memcpy_void(objects, dst->offsetTemp, pos);
    }
    else
    {
@@ -293,7 +294,7 @@ recurse_makeObjects(ObjectVector *objects, VariableData *dst)
 void SourceExpression::
 recurse_makeObjectsBase(ObjectVector *objects, VariableData *)
 {
-   objects->setPosition(position);
+   objects->setPosition(pos);
 }
 
 //
@@ -316,8 +317,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    VariableData::Pointer   src  = getData();
    VariableType::Reference type = getType();
 
-   make_objects_memcpy_prep(objects, dst, src, position);
-   make_objects_memcpy_post(objects, dst, src, type, context, position);
+   make_objects_memcpy_prep(objects, dst, src, pos);
+   make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }
 
 //
@@ -332,19 +333,19 @@ void SourceExpression::virtual_makeObjectsCast
    {
       VariableData::Pointer src = getData();
 
-      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_prep(objects, dst, src, pos);
       make_objects_memcpy_cast
-      (objects, dst, src, dstType, srcType, context, position);
+         (objects, dst, src, dstType, srcType, context, pos);
    }
    else
    {
       VariableData::Pointer src =
-         VariableData::create_stack(srcType->getSize(position));
+         VariableData::create_stack(srcType->getSize(pos));
 
-      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_prep(objects, dst, src, pos);
       virtual_makeObjects(objects, src);
       make_objects_memcpy_cast
-      (objects, dst, src, dstType, srcType, context, position);
+         (objects, dst, src, dstType, srcType, context, pos);
    }
 }
 

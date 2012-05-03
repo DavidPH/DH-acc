@@ -63,8 +63,8 @@ private:
 //
 SRCEXP_EXPRBRA_DEFN(0, break)
 {
-   return new SourceExpression_BranchGoto(context->getLabelBreak(position),
-                                          context, position);
+   return new SourceExpression_BranchGoto
+      (context->getLabelBreak(pos), context, pos);
 }
 
 //
@@ -72,8 +72,8 @@ SRCEXP_EXPRBRA_DEFN(0, break)
 //
 SRCEXP_EXPRBRA_DEFN(0, continue)
 {
-   return new SourceExpression_BranchGoto(context->getLabelContinue(position),
-                                          context, position);
+   return new SourceExpression_BranchGoto
+      (context->getLabelContinue(pos), context, pos);
 }
 
 //
@@ -81,7 +81,7 @@ SRCEXP_EXPRBRA_DEFN(0, continue)
 //
 SRCEXP_EXPRBRA_DEFN(s, goto)
 {
-   return new SourceExpression_BranchGoto(value, context, position);
+   return new SourceExpression_BranchGoto(value, context, pos);
 }
 
 
@@ -90,7 +90,7 @@ SRCEXP_EXPRBRA_DEFN(s, goto)
 //
 SRCEXP_EXPRBRA_DEFN(u, goto)
 {
-   return new SourceExpression_BranchGoto(expr, context, position);
+   return new SourceExpression_BranchGoto(expr, context, pos);
 }
 
 //
@@ -111,7 +111,7 @@ SourceExpression_BranchGoto(SRCEXP_EXPRUNA_PARM)
                             : Super(SRCEXP_EXPR_PASS), expr(_expr)
 {
    expr = create_value_cast_implicit
-          (expr, VariableType::get_bt_label(), context, position);
+          (expr, VariableType::get_bt_label(), context, pos);
 }
 
 //
@@ -130,10 +130,10 @@ void SourceExpression_BranchGoto::virtual_makeObjects(ObjectVector *objects, Var
       else
       {
          VariableData::Pointer src =
-            VariableData::create_stack(expr->getType()->getSize(position));
+            VariableData::create_stack(expr->getType()->getSize(pos));
 
          expr->makeObjects(objects, src);
-         objects->setPosition(position);
+         objects->setPosition(pos);
          objects->addToken(OCODE_BRANCH_GOTO);
       }
    }

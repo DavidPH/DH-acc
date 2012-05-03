@@ -82,7 +82,7 @@ public:
       else if (type == "__printf_string")
          printfType = PT_STRING;
       else
-         ERROR_N(position, "unrecognized printfType: %s", type.c_str());
+         ERROR_NP("unrecognized printfType: %s", type.c_str());
    }
 
    //
@@ -104,7 +104,7 @@ public:
          return VariableType::get_bt_string();
       }
 
-      ERROR_N(position, "unrecognized printfType");
+      ERROR_NP("unrecognized printfType");
    }
 
 private:
@@ -124,9 +124,9 @@ private:
       VariableType::Reference type = VariableType::get_bt_char();
 
       VariableData::Pointer tmp =
-         VariableData::create_stack(type->getSize(position));
+         VariableData::create_stack(type->getSize(pos));
 
-      create_value_char(c, context, position)->makeObjects(objects, tmp);
+      create_value_char(c, context, pos)->makeObjects(objects, tmp);
    }
 
    //
@@ -137,7 +137,7 @@ private:
    void makeExpr(ObjectVector *objects, VariableType *type)
    {
       VariableData::Pointer tmp =
-         VariableData::create_stack(type->getSize(position));
+         VariableData::create_stack(type->getSize(pos));
 
       nextExpr(type)->makeObjects(objects, tmp);
    }
@@ -152,9 +152,9 @@ private:
       VariableType::Reference type = VariableType::get_bt_int();
 
       VariableData::Pointer tmp =
-         VariableData::create_stack(type->getSize(position));
+         VariableData::create_stack(type->getSize(pos));
 
-      create_value_int(i, context, position)->makeObjects(objects, tmp);
+      create_value_int(i, context, pos)->makeObjects(objects, tmp);
    }
 
    //
@@ -167,9 +167,9 @@ private:
       VariableType::Reference type = VariableType::get_bt_string();
 
       VariableData::Pointer tmp =
-         VariableData::create_stack(type->getSize(position));
+         VariableData::create_stack(type->getSize(pos));
 
-      create_value_string(s, context, position)->makeObjects(objects, tmp);
+      create_value_string(s, context, pos)->makeObjects(objects, tmp);
    }
 
    //
@@ -177,7 +177,7 @@ private:
    //
    SourceExpression::Pointer nextExpr()
    {
-      if (!*expr) ERROR_N(position, "insufficient arguments");
+      if (!*expr) ERROR_NP("insufficient arguments");
 
       return *expr++;
    }
@@ -187,7 +187,7 @@ private:
    //
    SourceExpression::Pointer nextExpr(VariableType *type)
    {
-      return create_value_cast_implicit(nextExpr(), type, context, position);
+      return create_value_cast_implicit(nextExpr(), type, context, pos);
    }
 
    //
@@ -200,18 +200,17 @@ private:
       VariableType::BasicType   argBT   = argType->getBasicType();
 
       VariableData::Pointer tmp =
-         VariableData::create_stack(argType->getSize(position));
+         VariableData::create_stack(argType->getSize(pos));
 
       if (argBT == VariableType::BT_ARRAY)
       {
          argBT = VariableType::BT_POINTER;
          argType = argType->getReturn()->getPointer();
-         argExpr = create_value_cast_implicit
-            (argExpr, argType, context, position);
+         argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
       }
 
       if (argBT != VariableType::BT_POINTER)
-         ERROR_N(position, "expected pointer got %s",
+         ERROR_NP("expected pointer got %s",
                  make_string(argType).c_str());
 
       argType = argType->getReturn();
@@ -219,7 +218,7 @@ private:
                 ->setQualifier(argType->getQualifiers())
                 ->setStorage(argType->getStoreType(), argType->getStoreArea())
                 ->getPointer();
-      argExpr = create_value_cast_implicit(argExpr, argType, context, position);
+      argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
 
       argExpr->makeObjects(objects, tmp);
 
@@ -234,7 +233,7 @@ private:
       case VariableType::ST_MAPREGISTER:
       case VariableType::ST_WORLDREGISTER:
       case VariableType::ST_GLOBALREGISTER:
-         ERROR_N(position, "cannot %%s register-pointer");
+         ERROR_NP("cannot %%s register-pointer");
 
       case VariableType::ST_MAPARRAY:
          objects->addToken(OCODE_GET_LITERAL32I,
@@ -265,11 +264,11 @@ private:
 
       VariableType::Reference type = getType();
       VariableData::Pointer   src  =
-         VariableData::create_stack(type->getSize(position));
+         VariableData::create_stack(type->getSize(pos));
 
       std::string string;
 
-      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_prep(objects, dst, src, pos);
 
       init();
 
@@ -344,7 +343,7 @@ private:
                continue;
 
             default:
-               ERROR_N(position, "unrecognized format char: %c", *c);
+               ERROR_NP("unrecognized format char: %c", *c);
             }
          }
 
@@ -410,7 +409,7 @@ private:
             break;
 
          default:
-            ERROR_N(position, "unrecognized hud msgtype");
+            ERROR_NP("unrecognized hud msgtype");
          }
       }
          break;
@@ -448,7 +447,7 @@ private:
          break;
       }
 
-      make_objects_memcpy_post(objects, dst, src, type, context, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, pos);
    }
 
    SourceExpression::Vector expressions;
@@ -471,7 +470,7 @@ create_root_printf
  SourceExpression::Vector const &expressions, SRCEXP_EXPR_ARGS)
 {
    return new SourceExpression_RootPrintf
-              (type, format, expressions, context, position);
+      (type, format, expressions, context, pos);
 }
 
 // EOF

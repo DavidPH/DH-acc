@@ -70,7 +70,7 @@ public:
            iter != expressions.end(); ++iter)
          elems.push_back((*iter)->makeObject());
 
-      return ObjectExpression::create_value_array(elems, position);
+      return ObjectExpression::create_value_array(elems, pos);
    }
 
 private:
@@ -81,7 +81,7 @@ private:
    //
    void makeZero(ObjectVector *objects, VariableType *dstPartType) const
    {
-      for (bigsint i = dstPartType->getSize(position); i--;)
+      for (bigsint i = dstPartType->getSize(pos); i--;)
          objects->addTokenPushZero();
    }
 
@@ -104,7 +104,7 @@ private:
 //
 SRCEXP_EXPRVAL_DEFN(a, block)
 {
-   return new SourceExpression_ValueBlock(args, context, position);
+   return new SourceExpression_ValueBlock(args, context, pos);
 }
 
 //
@@ -142,7 +142,7 @@ void SourceExpression_ValueBlock::makeVoid(ObjectVector *objects) const
    for (size_t i = 0; i < expressions.size(); ++i)
    {
       dstPartType = expressions[i]->getType();
-      dstPartSize = dstPartType->getSize(position);
+      dstPartSize = dstPartType->getSize(pos);
       dstPart = VariableData::create_void(dstPartSize);
       expressions[i]->makeObjects(objects, dstPart);
    }
@@ -162,24 +162,24 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       return;
    }
 
-   bigsint               tmpSize = type->getSize(position);
+   bigsint               tmpSize = type->getSize(pos);
    VariableData::Pointer tmp     = VariableData::create_stack(tmpSize);
 
    VariableData::Pointer dstPart;
    bigsint               dstPartSize;
    VariableType::Pointer dstPartType;
 
-   make_objects_memcpy_prep(objects, dst, tmp, position);
+   make_objects_memcpy_prep(objects, dst, tmp, pos);
 
    for (size_t i = 0; i < expressions.size(); ++i)
    {
       dstPartType = expressions[i]->getType();
-      dstPartSize = dstPartType->getSize(position);
+      dstPartSize = dstPartType->getSize(pos);
       dstPart = VariableData::create_stack(dstPartSize);
       expressions[i]->makeObjects(objects, dstPart);
    }
 
-   make_objects_memcpy_post(objects, dst, tmp, type, context, position);
+   make_objects_memcpy_post(objects, dst, tmp, type, context, pos);
 }
 
 //
@@ -197,17 +197,17 @@ void SourceExpression_ValueBlock::virtual_makeObjectsCast
       return;
    }
 
-   bigsint               tmpSize = type->getSize(position);
+   bigsint               tmpSize = type->getSize(pos);
    VariableData::Pointer tmp     = VariableData::create_stack(tmpSize);
 
-   make_objects_memcpy_prep(objects, dst, tmp, position);
+   make_objects_memcpy_prep(objects, dst, tmp, pos);
 
    if (dstType->getBasicType() == VariableType::BT_ARRAY)
    {
       bigsint dstTypes = dstType->getWidth();
 
       VariableType::Reference dstPartType = dstType->getReturn();
-      bigsint                 dstPartSize = dstPartType->getSize(position);
+      bigsint                 dstPartSize = dstPartType->getSize(pos);
       VariableData::Pointer   dstPart = VariableData::create_stack(dstPartSize);
 
       for (bigsint i = 0; i < dstTypes; ++i)
@@ -229,7 +229,7 @@ void SourceExpression_ValueBlock::virtual_makeObjectsCast
       for (size_t i = 0; i < dstTypes.size(); ++i)
       {
          dstPartType = dstTypes[i];
-         dstPartSize = dstPartType->getSize(position);
+         dstPartSize = dstPartType->getSize(pos);
          dstPart = VariableData::create_stack(dstPartSize);
 
          if (i < expressions.size())
@@ -239,7 +239,7 @@ void SourceExpression_ValueBlock::virtual_makeObjectsCast
       }
    }
 
-   make_objects_memcpy_post(objects, dst, tmp, dstType, context, position);
+   make_objects_memcpy_post(objects, dst, tmp, dstType, context, pos);
 }
 
 // EOF

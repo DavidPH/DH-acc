@@ -64,7 +64,7 @@ private:
 //
 SRCEXP_EXPRBRA_DEFN(a, call)
 {
-   return new SourceExpression_BranchCall(expr, args, context, position);
+   return new SourceExpression_BranchCall(expr, args, context, pos);
 }
 
 //
@@ -80,13 +80,12 @@ SourceExpression_BranchCall::SourceExpression_BranchCall
    for (size_t i = 0; i < types.size(); ++i)
    {
       if (!types[i])
-         ERROR_N(position, "variadic call");
+         ERROR_NP("variadic call");
 
       if (i >= args.size())
-         ERROR_N(position, "incorrect arg count");
+         ERROR_NP("incorrect arg count");
 
-      args[i] = create_value_cast_implicit
-                (args[i], types[i], context, position);
+      args[i] = create_value_cast_implicit(args[i], types[i], context, pos);
    }
 }
 
@@ -106,7 +105,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   make_objects_call(objects, dst, expr, args, context, position);
+   make_objects_call(objects, dst, expr, args, context, pos);
 }
 
 // EOF

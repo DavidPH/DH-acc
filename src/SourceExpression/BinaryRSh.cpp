@@ -56,7 +56,7 @@ public:
       CONSTRAINT_INTEGER(">>")
 
       exprR = create_value_cast_implicit
-      (exprR, VariableType::get_bt_uint(), context, position);
+      (exprR, VariableType::get_bt_uint(), context, pos);
    }
 
    //
@@ -104,6 +104,7 @@ private:
 
       VariableData::Pointer tmp = VariableData::create_stack(src->size);
 
+      std::string label = context->makeLabel();
       std::string labelEnd = label + "_end";
 
       if (src->type == VariableData::MT_POINTER ||
@@ -111,10 +112,10 @@ private:
          tempA = context->getTempVar(1);
 
       if (dst->type != VariableData::MT_VOID)
-         make_objects_memcpy_prep(objects, dst, tmp, position);
+         make_objects_memcpy_prep(objects, dst, tmp, pos);
 
-      create_value_cast_implicit(exprR, type, context, position)
-      ->makeObjects(objects, tmp);
+      create_value_cast_implicit(exprR, type, context, pos)
+         ->makeObjects(objects, tmp);
       if (tempA)
       {
          if (src->offsetExpr)
@@ -188,7 +189,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_N(position, "invalid MT");
+         ERROR_NP("invalid MT");
       }
 
       // Calculate value.
@@ -297,11 +298,11 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_N(position, "invalid MT");
+         ERROR_NP("invalid MT");
       }
 
       if (dst->type != VariableData::MT_VOID)
-         make_objects_memcpy_post(objects, dst, tmp, type, context, position);
+         make_objects_memcpy_post(objects, dst, tmp, type, context, pos);
    }
 
    //
@@ -326,15 +327,16 @@ private:
    {
       ObjectExpression::Pointer tempS = context->getTempVar(0);
 
+      std::string label = context->makeLabel();
       std::string labelEnd = label + "_end";
 
-      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_prep(objects, dst, src, pos);
 
-      create_value_cast_implicit(exprL, type, context, position)
-      ->makeObjects(objects, src);
+      create_value_cast_implicit(exprL, type, context, pos)
+         ->makeObjects(objects, src);
 
-      create_value_cast_implicit(exprR, type, context, position)
-      ->makeObjects(objects, src);
+      create_value_cast_implicit(exprR, type, context, pos)
+         ->makeObjects(objects, src);
 
       objects->addToken(OCODE_SET_TEMP, tempS);
       objects->addToken(OCODE_GET_TEMP, tempS);
@@ -349,7 +351,7 @@ private:
       objects->addToken(OCODE_BITWISE_AND32);
 
       objects->addLabel(labelEnd);
-      make_objects_memcpy_post(objects, dst, src, type, context, position);
+      make_objects_memcpy_post(objects, dst, src, type, context, pos);
    }
 
    //
@@ -378,8 +380,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(rsh)
 {
-   return new SourceExpression_BinaryRSh
-              (false, exprL, exprR, context, position);
+   return new SourceExpression_BinaryRSh(false, exprL, exprR, context, pos);
 }
 
 //
@@ -387,8 +388,7 @@ SRCEXP_EXPRBIN_DEFN(rsh)
 //
 SRCEXP_EXPRBIN_DEFN(rsh_eq)
 {
-   return new SourceExpression_BinaryRSh
-              (true, exprL, exprR, context, position);
+   return new SourceExpression_BinaryRSh(true, exprL, exprR, context, pos);
 }
 
 // EOF

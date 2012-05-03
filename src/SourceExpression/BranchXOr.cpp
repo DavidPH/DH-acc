@@ -59,7 +59,7 @@ private:
 //
 SRCEXP_EXPRBRA_DEFN(b, xor)
 {
-   return new SourceExpression_BranchXOr(exprL, exprR, context, position);
+   return new SourceExpression_BranchXOr(exprL, exprR, context, pos);
 }
 
 //
@@ -68,9 +68,7 @@ SRCEXP_EXPRBRA_DEFN(b, xor)
 SRCEXP_EXPRBRA_DEFN(b, xor_eq)
 {
    return create_binary_assign
-          (exprL, create_branch_xor
-                  (exprL, exprR, context, position),
-           context, position);
+      (exprL, create_branch_xor(exprL, exprR, context, pos), context, pos);
 }
 
 //
@@ -91,7 +89,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    Super::recurse_makeObjects(objects, dst);
 
    VariableType::Reference srcType = VariableType::get_bt_boolhard();
-   bigsint                 srcSize = srcType->getSize(position);
+   bigsint                 srcSize = srcType->getSize(pos);
 
    VariableData::Pointer src = VariableData::create_stack(srcSize);
    VariableData::Pointer tmp = VariableData::create_stack(srcSize);
@@ -103,17 +101,18 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    }
    else
    {
+      std::string label = context->makeLabel();
       std::string labelL0  = label + "_L0";
       std::string label0   = label + "_0";
       std::string label1   = label + "_1";
       std::string labelEnd = label + "_end";
 
-      make_objects_memcpy_prep(objects, dst, src, position);
+      make_objects_memcpy_prep(objects, dst, src, pos);
 
       exprL->makeObjects(objects, tmp);
       exprR->makeObjects(objects, tmp);
 
-      objects->setPosition(position);
+      objects->setPosition(pos);
       objects->addToken(OCODE_BRANCH_ZERO,     objects->getValue(labelL0));
 
       objects->addToken(OCODE_BRANCH_ZERO,     objects->getValue(label1));
@@ -131,7 +130,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
       objects->addLabel(labelEnd);
 
-      make_objects_memcpy_post(objects, dst, src, srcType, context, position);
+      make_objects_memcpy_post(objects, dst, src, srcType, context, pos);
    }
 }
 

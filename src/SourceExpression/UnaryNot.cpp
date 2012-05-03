@@ -60,7 +60,7 @@ private:
 //
 SRCEXP_EXPRUNA_DEFN(not)
 {
-   return new SourceExpression_UnaryNot(expr, context, position);
+   return new SourceExpression_UnaryNot(expr, context, pos);
 }
 
 //
@@ -82,7 +82,7 @@ void SourceExpression_UnaryNot::virtual_makeObjects
 
    VariableType::Reference type = getType();
    VariableData::Pointer   src  =
-      VariableData::create_stack(type->getSize(position));
+      VariableData::create_stack(type->getSize(pos));
 
    switch (type->getBasicType())
    {
@@ -111,10 +111,10 @@ void SourceExpression_UnaryNot::virtual_makeObjects
       break;
 
    default:
-      ERROR_N(position, "invalid BT");
+      ERROR_NP("invalid BT");
    }
 
-   make_objects_memcpy_post(objects, dst, src, type, context, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }
 
 // EOF

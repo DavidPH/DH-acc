@@ -102,13 +102,13 @@ void SourceExpression_Binary::doAssignBase
    VariableData::Pointer tmp = VariableData::create_stack(src->size);
 
    if (dst->type != VariableData::MT_VOID)
-      make_objects_memcpy_prep(objects, dst, tmp, position);
+      make_objects_memcpy_prep(objects, dst, tmp, pos);
 
    // MT_REGISTERARRAY addressing.
    if (src->type == VariableData::MT_REGISTERARRAY)
    {
       src->offsetTemp = VariableData::create_stack
-                        (src->offsetExpr->getType()->getSize(position));
+                        (src->offsetExpr->getType()->getSize(pos));
       src->offsetExpr->makeObjects(objects, src->offsetTemp);
 
       // Extra address for get.
@@ -116,14 +116,14 @@ void SourceExpression_Binary::doAssignBase
          objects->addToken(OCODE_STACK_DUP32);
    }
 
-   create_value_cast_implicit(exprR, typeL, context, position)
+   create_value_cast_implicit(exprR, typeL, context, pos)
    ->makeObjects(objects, tmp);
 
    // MT_POINTER addressing.
    if (src->type == VariableData::MT_POINTER)
    {
       src->offsetTemp = VariableData::create_stack
-                        (src->offsetExpr->getType()->getSize(position));
+                        (src->offsetExpr->getType()->getSize(pos));
       src->offsetExpr->makeObjects(objects, src->offsetTemp);
 
       // Extra address for get.
@@ -144,7 +144,7 @@ void SourceExpression_Binary::doAssignBase
 
       objects->addToken(ocodeGet, src->address);
 
-      make_objects_memcpy_post(objects, dst, tmp, typeL, context, position);
+      make_objects_memcpy_post(objects, dst, tmp, typeL, context, pos);
    }
 }
 
@@ -156,17 +156,17 @@ void SourceExpression_Binary::doEvaluateBase
 {
    VariableType::Reference type = getType();
 
-   make_objects_memcpy_prep(objects, dst, src, position);
+   make_objects_memcpy_prep(objects, dst, src, pos);
 
-   create_value_cast_implicit(exprL, type, context, position)
+   create_value_cast_implicit(exprL, type, context, pos)
    ->makeObjects(objects, src);
 
-   create_value_cast_implicit(exprR, type, context, position)
+   create_value_cast_implicit(exprR, type, context, pos)
    ->makeObjects(objects, src);
 
    objects->addToken(ocode);
 
-   make_objects_memcpy_post(objects, dst, src, type, context, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }
 
 //
@@ -177,6 +177,7 @@ void SourceExpression_Binary::doEvaluateBaseLLAS
 {
    VariableType::Reference type = getType();
 
+   std::string label = context->makeLabel();
    std::string labelCmp = label + "_cmp";
    std::string labelEnd = label + "_end";
    std::string labelOvr = label + "_ovr";
@@ -186,12 +187,12 @@ void SourceExpression_Binary::doEvaluateBaseLLAS
    ObjectExpression::Pointer tmpH = context->getTempVar(1);
    ObjectExpression::Pointer tmpI = context->getTempVar(2);
 
-   make_objects_memcpy_prep(objects, dst, src, position);
+   make_objects_memcpy_prep(objects, dst, src, pos);
 
-   create_value_cast_implicit(exprR, type, context, position)
+   create_value_cast_implicit(exprR, type, context, pos)
    ->makeObjects(objects, src);
 
-   create_value_cast_implicit(exprL, type, context, position)
+   create_value_cast_implicit(exprL, type, context, pos)
    ->makeObjects(objects, src);
 
    objects->addToken(OCODE_SET_TEMP, tmpH);
@@ -244,7 +245,7 @@ void SourceExpression_Binary::doEvaluateBaseLLAS
    objects->addToken(OCODE_GET_TEMP, tmpL);
    objects->addToken(OCODE_GET_TEMP, tmpH);
 
-   make_objects_memcpy_post(objects, dst, src, type, context, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }
 
 //
@@ -255,12 +256,12 @@ void SourceExpression_Binary::doEvaluateBaseLLB
 {
    VariableType::Reference type = getType();
 
-   make_objects_memcpy_prep(objects, dst, src, position);
+   make_objects_memcpy_prep(objects, dst, src, pos);
 
-   create_value_cast_implicit(exprL, type, context, position)
+   create_value_cast_implicit(exprL, type, context, pos)
    ->makeObjects(objects, src);
 
-   create_value_cast_implicit(exprR, type, context, position)
+   create_value_cast_implicit(exprR, type, context, pos)
    ->makeObjects(objects, src);
 
    ObjectExpression::Pointer tmpL = context->getTempVar(0);
@@ -275,7 +276,7 @@ void SourceExpression_Binary::doEvaluateBaseLLB
    objects->addToken(OCODE_GET_TEMP, tmpL);
    objects->addToken(OCODE_GET_TEMP, tmpH);
 
-   make_objects_memcpy_post(objects, dst, src, type, context, position);
+   make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }
 
 //
@@ -285,8 +286,8 @@ void SourceExpression_Binary::doCast()
 {
    VariableType::Reference type = getType();
 
-   exprL = create_value_cast_implicit(exprL, type, context, position);
-   exprR = create_value_cast_implicit(exprR, type, context, position);
+   exprL = create_value_cast_implicit(exprL, type, context, pos);
+   exprR = create_value_cast_implicit(exprR, type, context, pos);
 }
 
 //
@@ -296,10 +297,10 @@ void SourceExpression_Binary::
 doCast(VariableType *castL, VariableType *castR)
 {
    if (castL)
-      exprL = create_value_cast_implicit(exprL, castL, context, position);
+      exprL = create_value_cast_implicit(exprL, castL, context, pos);
 
    if (castR)
-      exprR = create_value_cast_implicit(exprR, castR, context, position);
+      exprR = create_value_cast_implicit(exprR, castR, context, pos);
 }
 
 //
@@ -336,7 +337,7 @@ int SourceExpression_Binary::getOcodeType
       break;
 
    default:
-      ERROR_N(position, "invalid BT: %s", make_string(bt).c_str());
+      ERROR_NP("invalid BT: %s", make_string(bt).c_str());
    }
 
    return ocodeOpType;
@@ -347,7 +348,7 @@ int SourceExpression_Binary::getOcodeType
 //
 VariableType::Reference SourceExpression_Binary::getType() const
 {
-   return get_promoted_type(exprL->getType(), exprR->getType(), position);
+   return get_promoted_type(exprL->getType(), exprR->getType(), pos);
 }
 
 //
@@ -362,13 +363,13 @@ recurse_makeObjects(ObjectVector *objects, VariableData *dst)
    if (arithmetic == 2) return;
 
    VariableData::Pointer   src =
-      VariableData::create_stack(getType()->getSize(position));
+      VariableData::create_stack(getType()->getSize(pos));
 
-   make_objects_memcpy_prep(objects, dst, src, position);
+   make_objects_memcpy_prep(objects, dst, src, pos);
    exprL->makeObjects(objects, src);
    exprR->makeObjects(objects, src);
 
-   objects->setPosition(position);
+   objects->setPosition(pos);
 }
 
 // EOF

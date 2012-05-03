@@ -51,7 +51,7 @@ public:
    virtual ObjectExpression::Pointer makeObject() const
    {
       EVALUATE_OBJECTS();
-      return ObjectExpression::create_binary_ior(objL, objR, position);
+      return ObjectExpression::create_binary_ior(objL, objR, pos);
    }
 
 private:
@@ -95,8 +95,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(ior)
 {
-   return new SourceExpression_BinaryIOr
-              (false, exprL, exprR, context, position);
+   return new SourceExpression_BinaryIOr(false, exprL, exprR, context, pos);
 }
 
 //
@@ -104,8 +103,7 @@ SRCEXP_EXPRBIN_DEFN(ior)
 //
 SRCEXP_EXPRBIN_DEFN(ior_eq)
 {
-   return new SourceExpression_BinaryIOr
-              (true, exprL, exprR, context, position);
+   return new SourceExpression_BinaryIOr(true, exprL, exprR, context, pos);
 }
 
 //
