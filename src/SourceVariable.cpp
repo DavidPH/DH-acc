@@ -23,9 +23,12 @@
 
 #include "SourceVariable.hpp"
 
+#include "ObjectData.hpp"
 #include "ObjectExpression.hpp"
 #include "ost_type.hpp"
+#include "SourceContext.hpp"
 #include "SourceException.hpp"
+#include "SourceExpression.hpp"
 #include "VariableData.hpp"
 #include "VariableType.hpp"
 
@@ -244,6 +247,7 @@ SourceVariable::StorageClass SourceVariable::getClass() const
 VariableData::Pointer SourceVariable::getData() const
 {
    ObjectExpression::Pointer address;
+   SourceExpression::Pointer arrbase;
    bigsint                   size = type->getSize(position);
 
    if (expr)
@@ -276,16 +280,28 @@ VariableData::Pointer SourceVariable::getData() const
              (size, VariableData::SR_WORLD, address);
 
    case SC_REGISTERARRAY_GLOBAL:
+      if (ObjectData_Array::meta_global(nameObject))
+         arrbase = SourceExpression::create_value_int
+            (1, SourceContext::global_context, position);
+
       return VariableData::create_registerarray
-             (size, VariableData::SRA_GLOBAL, address, NULL);
+         (size, VariableData::SRA_GLOBAL, address, arrbase);
 
    case SC_REGISTERARRAY_MAP:
+      if (ObjectData_Array::meta_map(nameObject))
+         arrbase = SourceExpression::create_value_int
+            (1, SourceContext::global_context, position);
+
       return VariableData::create_registerarray
-             (size, VariableData::SRA_MAP, address, NULL);
+         (size, VariableData::SRA_MAP, address, arrbase);
 
    case SC_REGISTERARRAY_WORLD:
+      if (ObjectData_Array::meta_world(nameObject))
+         arrbase = SourceExpression::create_value_int
+            (1, SourceContext::global_context, position);
+
       return VariableData::create_registerarray
-             (size, VariableData::SRA_WORLD, address, NULL);
+         (size, VariableData::SRA_WORLD, address, arrbase);
 
    case SC_STATIC:
       return VariableData::create_static(size, address);

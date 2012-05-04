@@ -93,6 +93,7 @@ static void add
       data.init      = NULL;
       data.externDef = externDef;
       data.externVis = externVis;
+      data.meta      = true;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
    }
@@ -149,10 +150,12 @@ static void set_number(ArrayTable &table, ObjectData_Array &data)
    ArrayIter iter;
    bigsint index = 0;
 
-   for (iter = table.begin(); iter != table.end(); ++iter)
+   for (iter = table.begin(); iter != table.end();)
    {
       if (used.count(index) || index == iter->second.number)
          {++index; iter = table.begin(); continue;}
+      else
+         ++iter;
    }
 
    data.number = index;
@@ -363,6 +366,66 @@ void ObjectData_Array::iterate_global(IterFunc iterFunc, std::ostream *out)
 }
 
 //
+// ObjectData_Array::meta_map
+//
+bool ObjectData_Array::meta_map(std::string const &name)
+{
+   ArrayIter a = map_table.find(name);
+   return (a == map_table.end()) ? false : a->second.meta;
+}
+
+//
+// ObjectData_Array::meta_map
+//
+void ObjectData_Array::meta_map(std::string const &name, bool meta)
+{
+   ArrayIter a = map_table.find(name);
+   if (a == map_table.end()) return;
+
+   a->second.meta = meta;
+}
+
+//
+// ObjectData_Array::meta_world
+//
+bool ObjectData_Array::meta_world(std::string const &name)
+{
+   ArrayIter a = world_table.find(name);
+   return (a == world_table.end()) ? false : a->second.meta;
+}
+
+//
+// ObjectData_Array::meta_world
+//
+void ObjectData_Array::meta_world(std::string const &name, bool meta)
+{
+   ArrayIter a = world_table.find(name);
+   if (a == world_table.end()) return;
+
+   a->second.meta = meta;
+}
+
+//
+// ObjectData_Array::meta_global
+//
+bool ObjectData_Array::meta_global(std::string const &name)
+{
+   ArrayIter a = global_table.find(name);
+   return (a == global_table.end()) ? false : a->second.meta;
+}
+
+//
+// ObjectData_Array::meta_global
+//
+void ObjectData_Array::meta_global(std::string const &name, bool meta)
+{
+   ArrayIter a = global_table.find(name);
+   if (a == global_table.end()) return;
+
+   a->second.meta = meta;
+}
+
+//
 // ObjectData_Array::read_objects
 //
 void ObjectData_Array::read_objects(std::istream *in)
@@ -406,6 +469,7 @@ void read_object(std::istream *in, ObjectData_Array *out)
    read_object(in, &out->init);
    read_object(in, &out->externDef);
    read_object(in, &out->externVis);
+   read_object(in, &out->meta);
 }
 
 //
@@ -420,6 +484,7 @@ void write_object(std::ostream *out, ObjectData_Array const *in)
    write_object(out, &in->init);
    write_object(out, &in->externDef);
    write_object(out, &in->externVis);
+   write_object(out, &in->meta);
 }
 
 // EOF

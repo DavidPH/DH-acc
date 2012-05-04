@@ -90,13 +90,36 @@ static SourceExpression::Pointer make_var
    SourceExpression::Pointer expr =
       SourceExpression::create_value_variable(var, context, pos);
 
+   // Determine if metadata can be used.
+   bool meta = true;
+   switch (sc)
+   {
+   case SourceVariable::SC_REGISTERARRAY_MAP:
+      if (linkSpec == SourceExpressionDS::LS_ACS)
+         ObjectData_Array::meta_map(nameObj, meta=false);
+      break;
+
+   case SourceVariable::SC_REGISTERARRAY_WORLD:
+      if (linkSpec == SourceExpressionDS::LS_ACS)
+         ObjectData_Array::meta_world(nameObj, meta=false);
+      break;
+
+   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+      if (linkSpec == SourceExpressionDS::LS_ACS)
+         ObjectData_Array::meta_global(nameObj, meta=false);
+      break;
+
+   default:
+      break;
+   }
+
    // Variable initialization. (But not for external declaration.)
    if (!externDef && in->peekType(SourceTokenC::TT_OP_EQUALS))
    {
       static VariableType::Reference const initType =
          VariableType::get_bt_boolhard();
 
-      SourceExpression::Pointer initSrc;
+      SourceExpression::Pointer initSrc, initExpr;
       ObjectExpression::Pointer initObj;
 
       in->get(SourceTokenC::TT_OP_EQUALS);
@@ -107,7 +130,9 @@ static SourceExpression::Pointer make_var
 
       // Generate expression to set variable.
       SourceExpression::Pointer exprSet = SourceExpression::
-            create_binary_assign_const(expr, initSrc, context, pos);
+         create_binary_assign_const(expr, initSrc, context, pos);
+
+      VariableType::StoreType store; // For case_array.
 
       switch (sc)
       {
@@ -120,13 +145,37 @@ static SourceExpression::Pointer make_var
          break;
 
       case SourceVariable::SC_REGISTERARRAY_MAP:
+         store = VariableType::ST_MAPARRAY;
+
          if (!initObj || target_type != TARGET_ZDoom)
+            goto case_array;
+
+         if (ObjectData_Array::ini_map(nameObj, initObj))
+            break;
+
+         goto case_array;
+
+      case SourceVariable::SC_REGISTERARRAY_WORLD:
+         store = VariableType::ST_WORLDARRAY;
+         goto case_array;
+
+      case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+         store = VariableType::ST_GLOBALARRAY;
+         goto case_array;
+
+      case_array:
+         if (!meta)
             goto case_set;
 
-         if (!ObjectData_Array::ini_map(nameObj, initObj))
-            goto case_set;
+         // Generate expression. *(bool __maparray(...) *)0
+         initExpr = SourceExpression::create_value_int(0, context, pos);
+         initExpr = SourceExpression::create_value_cast_explicit
+            (initExpr, initType->setStorage(store, nameObj)->getPointer(),
+             context, pos);
+         initExpr = SourceExpression::create_unary_dereference
+            (initExpr, context, pos);
 
-         break;
+         goto case_init;
 
          // Only initialize static-duration storage-classes once.
       case SourceVariable::SC_STATIC:
@@ -142,9 +191,13 @@ static SourceExpression::Pointer make_var
          context->addVar(initVar, false, false);
 
          // Generate expression.
-         SourceExpression::Pointer initExpr = SourceExpression::
+         initExpr = SourceExpression::
             create_value_variable(initVar, context, pos);
+      }
+         goto case_init;
 
+      case_init:
+      {
          // Generate expression of value if initialized.
          SourceExpression::Pointer initVal = SourceExpression::
             create_value_int(1, context, pos);
@@ -168,7 +221,6 @@ static SourceExpression::Pointer make_var
          expr = SourceExpression::
             create_branch_if(initChk, initBoth, context, pos);
       }
-
          break;
 
       default:

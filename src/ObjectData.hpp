@@ -57,6 +57,7 @@ struct ObjectData_Array
    CounterPointer<ObjectExpression> init;
    bool externDef;
    bool externVis;
+   bool meta;
 
 
    static void add_map
@@ -90,6 +91,15 @@ struct ObjectData_Array
    static void iterate_map(IterFunc iterFunc, std::ostream *out);
    static void iterate_world(IterFunc iterFunc, std::ostream *out);
    static void iterate_global(IterFunc iterFunc, std::ostream *out);
+
+   static bool meta_map(std::string const &name);
+   static void meta_map(std::string const &name, bool meta);
+
+   static bool meta_world(std::string const &name);
+   static void meta_world(std::string const &name, bool meta);
+
+   static bool meta_global(std::string const &name);
+   static void meta_global(std::string const &name, bool meta);
 
    static void read_objects(std::istream *in);
 

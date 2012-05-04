@@ -67,7 +67,7 @@ void BinaryTokenZDACS::write_ACSE_array_ARAY
    if (a.externDef) return;
 
    BinaryTokenACS::write_ACS0_32(out, a.number);
-   BinaryTokenACS::write_ACS0_32(out, a.size);
+   BinaryTokenACS::write_ACS0_32(out, a.size + a.meta);
 }
 
 //
@@ -79,7 +79,7 @@ void BinaryTokenZDACS::write_ACSE_array_AIMP
    if (!a.externDef) return;
 
    BinaryTokenACS::write_ACS0_32(out, a.number);
-   BinaryTokenACS::write_ACS0_32(out, a.size);
+   BinaryTokenACS::write_ACS0_32(out, a.size + a.meta);
    *out << a.name << '\0';
 }
 
@@ -104,12 +104,13 @@ void BinaryTokenZDACS::write_ACSE_array_AINI
    if (!a.init) return;
 
    *out << 'A' << 'I' << 'N' << 'I';
-   BinaryTokenACS::write_ACS0_32(out, a.size*4+4);
+   BinaryTokenACS::write_ACS0_32(out, (a.size + a.meta + 1) * 4);
    BinaryTokenACS::write_ACS0_32(out, a.number);
 
    ObjectExpression::Vector init;
    a.init->expand(&init);
 
+   if (a.meta) BinaryTokenACS::write_ACS0_32(out, 1);
    for (size_t i = 0, end = a.size; i != end; ++i)
    {
       if (i < init.size())
