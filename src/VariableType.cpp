@@ -1084,29 +1084,25 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       if (srcBT == BT_BLOCK && (dstBT == BT_ARRAY || dstBT == BT_STRUCT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
+      // enum->int
+      if (srcBT == BT_ENUM && (is_bt_integer(dstBT) && dstBT != BT_ENUM))
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
       // enum->arithmetic
       if (srcBT == BT_ENUM && is_bt_arithmetic(dstBT))
          return CAST_EXPLICIT|CAST_REINTERPRET;
 
-      // enum->int
-      if (srcBT == BT_ENUM && is_bt_integer(dstBT))
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
-
       // function<->function
       if (is_bt_function(srcBT) && is_bt_function(dstBT))
          return CAST_EXPLICIT;
-
-      // int->enum
-      if (is_bt_integer(srcBT) && dstBT == BT_ENUM)
-         return CAST_EXPLICIT|CAST_REINTERPRET;
 
       // int->pointer
       if (is_bt_integer(srcBT) && dstBT == BT_POINTER)
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
       // pointer->int
-      if (srcBT == BT_POINTER && is_bt_integer(dstBT))
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+      if (srcBT == BT_POINTER && (is_bt_integer(dstBT) && dstBT != BT_ENUM))
+         return CAST_EXPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
 
       // *->void
@@ -1190,7 +1186,7 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       if (!dstR->getQualifier(srcR->getQualifiers()))
          return CAST_EXPLICIT;
 
-      // Cast to/from void* is acceptable.
+      // Cast to/from void* is acceptable. (If not losing qualifiers.)
       if (srcRBT == BT_VOID || dstRBT == BT_VOID)
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
