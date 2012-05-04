@@ -96,6 +96,7 @@ public:
 
       // Reference types.
       BT_ARRAY,
+      BT_NULLPTR,
       BT_POINTER,
 
       // Named types.
@@ -198,6 +199,9 @@ public:
    static Reference get_bt_ulong();
    static Reference get_bt_ushort();
    static Reference get_bt_void();
+
+   // Reference types.
+   static Reference get_bt_nullptr();
 
    // Named types.
    static Reference get_bt_enum(std::string const &name);

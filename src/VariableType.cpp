@@ -71,6 +71,7 @@ static std::string const basic_names[] =
    "BT_VOID",
 
    "BT_ARRAY",
+   "BT_NULLPTR",
    "BT_POINTER",
 
    "BT_ENUM",
@@ -127,6 +128,7 @@ static std::ostream &operator <<
    case VariableType::BT_LLFLOAT:
    case VariableType::BT_LLONG:
    case VariableType::BT_LONG:
+   case VariableType::BT_NULLPTR:
    case VariableType::BT_REAL:
    case VariableType::BT_SCHAR:
    case VariableType::BT_SHORT:
@@ -293,6 +295,7 @@ VariableType::VariableType(BasicType _basic)
 
    // Reference types.
    case BT_ARRAY:
+   case BT_NULLPTR:
    case BT_POINTER:
       break;
 
@@ -357,6 +360,9 @@ VariableType::~VariableType()
    case BT_ARRAY:
       if (typeRet->typeArr == this)
          typeRet->typeArr = specnext == this ? NULL : specnext;
+      break;
+
+   case BT_NULLPTR:
       break;
 
    case BT_POINTER:
@@ -558,6 +564,7 @@ void VariableType::getNameMangled(std::string &out) const
    case BT_LLONG:    out += "ILL"; break;
    case BT_LABEL:    out += "LABEL"; break;
    case BT_POINTER:  out += "P{"; RETRN; out += '}'; break;
+   case BT_NULLPTR:  out += "PN"; break;
    case BT_REAL:     out += 'R'; break;
    case BT_STRING:   out += 'S'; break;
    case BT_STRUCT:   out += "S("; out += name; out += ')'; break;
@@ -631,6 +638,7 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
    case BT_LINESPEC:
    case BT_LONG:
    case BT_NATIVE:
+   case BT_NULLPTR:
    case BT_POINTER:
    case BT_REAL:
    case BT_SCHAR:
@@ -904,6 +912,18 @@ VariableType::Reference VariableType::get_bt_void()
 }
 
 //===================================================================
+// Reference types
+//
+
+//
+// VariableType::get_bt_nullptr
+//
+VariableType::Reference VariableType::get_bt_nullptr()
+{
+   static Reference type(new VariableType(BT_NULLPTR)); return type;
+}
+
+//===================================================================
 // Named types
 //
 
@@ -1072,6 +1092,10 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
 
    if (dstBT != srcBT)
    {
+      // nullptr->pointer
+      if (srcBT == BT_NULLPTR && dstBT == BT_POINTER)
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
       // arithmetic<->arithmetic
       if (is_bt_arithmetic(srcBT) && is_bt_arithmetic(dstBT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
@@ -1098,7 +1122,7 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
 
       // int->pointer
       if (is_bt_integer(srcBT) && dstBT == BT_POINTER)
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
       // pointer->int
       if (srcBT == BT_POINTER && (is_bt_integer(dstBT) && dstBT != BT_ENUM))
@@ -1139,6 +1163,7 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
    case BT_LLFLOAT:
    case BT_LLONG:
    case BT_LONG:
+   case BT_NULLPTR:
    case BT_REAL:
    case BT_SCHAR:
    case BT_STRING:
@@ -1158,9 +1183,6 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
    case BT_POINTER:
       Reference dstR = dst->getReturn();
       Reference srcR = src->getReturn();
-
-      BasicType dstRBT = dstR->getBasicType();
-      BasicType srcRBT = srcR->getBasicType();
 
       // Should have been handled by the previous equality test...
       if (srcR == dstR)
@@ -1185,10 +1207,6 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       // Losing qualifiers with differing types, it's time for explicit!
       if (!dstR->getQualifier(srcR->getQualifiers()))
          return CAST_EXPLICIT;
-
-      // Cast to/from void* is acceptable. (If not losing qualifiers.)
-      if (srcRBT == BT_VOID || dstRBT == BT_VOID)
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
       // Not losing qualifiers, but still differing types.
       return CAST_EXPLICIT|CAST_REINTERPRET;

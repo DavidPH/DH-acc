@@ -51,6 +51,9 @@ static SourceVariable::Pointer var_true =
    SourceVariable::create_constant("true", VariableType::get_bt_boolhard(),
                                    obj_1, SourcePosition::builtin());
 
+static SourceVariable::Pointer var_nullptr = SourceVariable::create_constant
+("nullptr", VariableType::get_bt_nullptr(), obj_0, SourcePosition::builtin());
+
 
 //----------------------------------------------------------------------------|
 // Global Variables                                                           |
@@ -80,6 +83,7 @@ SourceContext::SourceContext() :
 {
    addVar(var_false, false, true);
    addVar(var_true, false, true);
+   addVar(var_nullptr, false, true);
 }
 
 //

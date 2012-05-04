@@ -115,6 +115,7 @@ static void make_objects_literal
    case VariableType::BT_LINESPEC:
    case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
+   case VariableType::BT_NULLPTR:
    case VariableType::BT_POINTER:
    case VariableType::BT_SCHAR:
    case VariableType::BT_SHORT:

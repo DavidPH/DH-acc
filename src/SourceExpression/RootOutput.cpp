@@ -232,6 +232,14 @@ void SourceExpression_RootOutput::doOut
       objects->addToken(OCODE_ACSP_CHARACTER);
       break;
 
+   case VariableType::BT_NULLPTR:
+      objects->addToken(OCODE_ACSP_NUM_HEX32U);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('N'));
+      objects->addToken(OCODE_ACSP_CHARACTER);
+      break;
+
    case VariableType::BT_POINTER:
       objects->addToken(OCODE_ACSP_NUM_HEX32U);
       objects->addToken(OCODE_GET_LITERAL32I, objects->getValue('P'));

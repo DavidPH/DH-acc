@@ -70,6 +70,7 @@ static ObjectExpression::Pointer make_object
    case VariableType::BT_LLONG:
    case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
+   case VariableType::BT_NULLPTR:
    case VariableType::BT_POINTER:
    case VariableType::BT_SCHAR:
    case VariableType::BT_SCRIPT:
@@ -191,6 +192,7 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
    case VariableType::BT_LLONG:
    case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
+   case VariableType::BT_NULLPTR:
    case VariableType::BT_POINTER:
    case VariableType::BT_SCHAR:
    case VariableType::BT_SCRIPT:
@@ -227,6 +229,7 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_LLONG:
       case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
+      case VariableType::BT_NULLPTR:
       case VariableType::BT_POINTER:
       case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
@@ -271,6 +274,7 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_LLONG:
       case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
+      case VariableType::BT_NULLPTR:
       case VariableType::BT_POINTER:
       case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
@@ -338,6 +342,7 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_LLONG:
       case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
+      case VariableType::BT_NULLPTR:
       case VariableType::BT_POINTER:
       case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
@@ -417,6 +422,7 @@ void SourceExpression::make_objects_memcpy_cast
    case VariableType::BT_LINESPEC:
    case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
+   case VariableType::BT_NULLPTR:
    case VariableType::BT_POINTER:
    case VariableType::BT_SCHAR:
    case VariableType::BT_SCRIPT:
@@ -454,6 +460,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_LINESPEC:
       case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
+      case VariableType::BT_NULLPTR:
       case VariableType::BT_POINTER:
       case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
@@ -523,6 +530,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_LINESPEC:
       case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
+      case VariableType::BT_NULLPTR:
       case VariableType::BT_POINTER:
       case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
@@ -589,6 +597,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_LINESPEC:
       case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
+      case VariableType::BT_NULLPTR:
       case VariableType::BT_POINTER:
       case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
@@ -656,6 +665,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_LINESPEC:
       case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
+      case VariableType::BT_NULLPTR:
       case VariableType::BT_POINTER:
       case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:

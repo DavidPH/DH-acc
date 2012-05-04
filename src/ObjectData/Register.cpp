@@ -203,6 +203,7 @@ static void set_strings(std::vector<int> &strings, VariableType const *type)
    case VariableType::BT_LINESPEC:
    case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
+   case VariableType::BT_NULLPTR:
    case VariableType::BT_POINTER:
    case VariableType::BT_REAL:
    case VariableType::BT_SCHAR:
