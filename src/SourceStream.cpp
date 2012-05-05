@@ -24,6 +24,8 @@
 #include "SourceStream.hpp"
 
 #include "option.hpp"
+#include "SourceException.hpp"
+#include "SourcePosition.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -201,9 +203,14 @@ char SourceStream::get()
 
          switch (_newC)
          {
+         case 'a': curC = '\a'; break;
+         case 'b': curC = '\b'; break;
+         case 'c': curC = 0x1C; break;
+         case 'f': curC = '\f'; break;
          case 'r': curC = '\r'; break;
          case 'n': curC = '\n'; break;
          case 't': curC = '\t'; break;
+         case 'v': curC = '\v'; break;
 
          case '\n':
             countColumn = 0;
@@ -217,14 +224,67 @@ char SourceStream::get()
          case '\'':
          case '"':
          case ' ':
+         case '?':
             curC = _newC;
             break;
 
-         // TODO: \xXX
+            #define IORDIGIT() switch (in->get()) {  \
+            case '0': curC <<= 4; curC |= 00; break; \
+            case '1': curC <<= 4; curC |= 01; break; \
+            case '2': curC <<= 4; curC |= 02; break; \
+            case '3': curC <<= 4; curC |= 03; break; \
+            case '4': curC <<= 4; curC |= 04; break; \
+            case '5': curC <<= 4; curC |= 05; break; \
+            case '6': curC <<= 4; curC |= 06; break; \
+            case '7': curC <<= 4; curC |= 07; break; \
+            default: in->unget();             break; }
+
+         case '0': case '1': case '2': case '3':
+         case '4': case '5': case '6': case '7':
+            curC = 0; in->unget();
+            IORDIGIT();
+            IORDIGIT();
+            IORDIGIT();
+            break;
+
+            #undef IORDIGIT
+
+            #define IORDIGIT() switch (in->get()) {   \
+            case '0': curC <<= 4; curC |= 0x0; break; \
+            case '1': curC <<= 4; curC |= 0x1; break; \
+            case '2': curC <<= 4; curC |= 0x2; break; \
+            case '3': curC <<= 4; curC |= 0x3; break; \
+            case '4': curC <<= 4; curC |= 0x4; break; \
+            case '5': curC <<= 4; curC |= 0x5; break; \
+            case '6': curC <<= 4; curC |= 0x6; break; \
+            case '7': curC <<= 4; curC |= 0x7; break; \
+            case '8': curC <<= 4; curC |= 0x8; break; \
+            case '9': curC <<= 4; curC |= 0x9; break; \
+            case 'A': curC <<= 4; curC |= 0xA; break; \
+            case 'B': curC <<= 4; curC |= 0xB; break; \
+            case 'C': curC <<= 4; curC |= 0xC; break; \
+            case 'D': curC <<= 4; curC |= 0xD; break; \
+            case 'E': curC <<= 4; curC |= 0xE; break; \
+            case 'F': curC <<= 4; curC |= 0xF; break; \
+            case 'a': curC <<= 4; curC |= 0xa; break; \
+            case 'b': curC <<= 4; curC |= 0xb; break; \
+            case 'c': curC <<= 4; curC |= 0xc; break; \
+            case 'd': curC <<= 4; curC |= 0xd; break; \
+            case 'e': curC <<= 4; curC |= 0xe; break; \
+            case 'f': curC <<= 4; curC |= 0xf; break; \
+            default: in->unget();              break; }
+
+         case 'x':
+            curC = 0;
+            IORDIGIT();
+            IORDIGIT();
+            break;
+
+            #undef IORDIGIT
 
          default:
-            newC = _newC;
-            break;
+            ERROR(SourcePosition(filename, countLine, countColumn),
+                  "unknown escape character '\\%c'", _newC);
          }
       }
 
