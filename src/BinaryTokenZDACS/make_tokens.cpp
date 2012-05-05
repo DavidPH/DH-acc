@@ -473,6 +473,30 @@ void BinaryTokenZDACS::make_tokens
       PUSH_TOKEN(BCODE_SETOP_ADD_GLOBALARRAY);
       break;
 
+      // AND
+   case OCODE_SETOP_AND_AUTO32:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      PUSH_TOKEN_ADD_ARG0();
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_AND_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_AND_POINTER32:
+      PUSH_TOKEN_ADD_ARG0();
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_AND_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_AND_STATIC32:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_AND_GLOBALARRAY);
+      break;
+
       // DEC
    case OCODE_SETOP_DEC_AUTO32I:
    case OCODE_SETOP_DEC_AUTO32U:
@@ -521,6 +545,30 @@ void BinaryTokenZDACS::make_tokens
       PUSH_TOKEN(BCODE_SETOP_INC_GLOBALARRAY);
       break;
 
+      // IOR
+   case OCODE_SETOP_IOR_AUTO32:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      PUSH_TOKEN_ADD_ARG0();
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_IOR_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_IOR_POINTER32:
+      PUSH_TOKEN_ADD_ARG0();
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_IOR_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_IOR_STATIC32:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_IOR_GLOBALARRAY);
+      break;
+
       // MUL
    case OCODE_SETOP_MUL_AUTO32I:
    case OCODE_SETOP_MUL_AUTO32U:
@@ -546,6 +594,30 @@ void BinaryTokenZDACS::make_tokens
       PUSH_TOKEN(BCODE_STACK_SWAP);
       args.push_back(indexAddr);
       PUSH_TOKEN(BCODE_SETOP_MUL_GLOBALARRAY);
+      break;
+
+      // IOR
+   case OCODE_SETOP_XOR_AUTO32:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
+      PUSH_TOKEN_ADD_ARG0();
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_XOR_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_XOR_POINTER32:
+      PUSH_TOKEN_ADD_ARG0();
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_XOR_GLOBALARRAY);
+      break;
+
+   case OCODE_SETOP_XOR_STATIC32:
+      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
+      PUSH_TOKEN(BCODE_STACK_SWAP);
+      args.push_back(indexAddr);
+      PUSH_TOKEN(BCODE_SETOP_XOR_GLOBALARRAY);
       break;
 
    case OCODE_NONE:
