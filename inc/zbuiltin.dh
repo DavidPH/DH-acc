@@ -131,6 +131,7 @@ __asmfunc SetResultValue(int) @ __ocode(ACSE_SCRIPT_SETRETURN);
 __asmfunc CheckPlayerCamera(int) -> int @ __ocode(ACSE_PLAYER_GET_CAMERA);
 __asmfunc GetPlayerInfo(int, int) -> int @ __ocode(ACSE_PLAYER_GET_INFO);
 __asmfunc GetPlayerInput(int, int) -> int @ __ocode(ACSE_PLAYER_GET_INPUT);
+__asmfunc GetPlayerInputFixed(int, int) -> __fixed @ __ocode(ACSE_PLAYER_GET_INPUT);
 __asmfunc PlayerClass(int) -> int @ __ocode(ACSE_PLAYER_GET_CLASS);
 __asmfunc PlayerFrags() -> int @ __ocode(ACSE_THING_GET_FRAGS);
 __asmfunc PlayerInGame(int) -> bool @ __ocode(ACSE_PLAYER_GET_INGAME);
