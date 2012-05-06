@@ -28,6 +28,7 @@
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../SourceVariable.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
@@ -66,6 +67,13 @@ SourceExpression::Pointer SourceExpressionDS::make_expression_single(SourceToken
          break;
       }
    }
+
+      // Check for store.
+      if (is_expression_store(token.data))
+      {
+         expr = make_expression_single_variable_store(in, token, blocks, context);
+         break;
+      }
 
       // Check for type.
       if (is_expression_type(token.data, context))

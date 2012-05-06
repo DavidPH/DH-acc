@@ -224,30 +224,34 @@ private:
 
       switch (argType->getReturn()->getStoreType())
       {
-      case VariableType::ST_ADDR:
+      case STORE_STATIC:
          makeInt(objects, option_addr_array);
          objects->addToken(OCODE_ACSP_STRING_GLOBALARRAY);
          break;
 
-      case VariableType::ST_REGISTER:
-      case VariableType::ST_MAPREGISTER:
-      case VariableType::ST_WORLDREGISTER:
-      case VariableType::ST_GLOBALREGISTER:
+      case STORE_AUTO:
+      case STORE_CONST:
+         ERROR_NP("cannot %%s pointer");
+
+      case STORE_REGISTER:
+      case STORE_MAPREGISTER:
+      case STORE_WORLDREGISTER:
+      case STORE_GLOBALREGISTER:
          ERROR_NP("cannot %%s register-pointer");
 
-      case VariableType::ST_MAPARRAY:
+      case STORE_MAPARRAY:
          objects->addToken(OCODE_GET_LITERAL32I,
             objects->getValue(argType->getReturn()->getStoreArea()));
          objects->addToken(OCODE_ACSP_STRING_MAPARRAY);
          break;
 
-      case VariableType::ST_WORLDARRAY:
+      case STORE_WORLDARRAY:
          objects->addToken(OCODE_GET_LITERAL32I,
             objects->getValue(argType->getReturn()->getStoreArea()));
          objects->addToken(OCODE_ACSP_STRING_WORLDARRAY);
          break;
 
-      case VariableType::ST_GLOBALARRAY:
+      case STORE_GLOBALARRAY:
          objects->addToken(OCODE_GET_LITERAL32I,
             objects->getValue(argType->getReturn()->getStoreArea()));
          objects->addToken(OCODE_ACSP_STRING_GLOBALARRAY);

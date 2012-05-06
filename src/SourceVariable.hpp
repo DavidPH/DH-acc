@@ -26,6 +26,7 @@
 
 #include "Counter.hpp"
 #include "SourcePosition.hpp"
+#include "StoreType.hpp"
 
 #include <ostream>
 #include <string>
@@ -50,81 +51,72 @@ class SourceVariable : Counter
    MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceVariable, Counter);
 
 public:
-   enum StorageClass
-   {
-      SC_AUTO,
-      SC_CONSTANT,
-      SC_REGISTER,
-      SC_REGISTER_GLOBAL,
-      SC_REGISTER_MAP,
-      SC_REGISTER_WORLD,
-      SC_REGISTERARRAY_GLOBAL,
-      SC_REGISTERARRAY_MAP,
-      SC_REGISTERARRAY_WORLD,
-      SC_STATIC
-   };
+   StoreType getStoreType() const {return store;}
 
-
-
-   StorageClass getClass() const;
-
-   std::string const &getNameObject() const;
-   std::string const &getNameSource() const;
+   std::string const &getNameObject() const {return nameObj;}
+   std::string const &getNameSource() const {return nameSrc;}
 
    CounterPointer<VariableData> getData() const;
 
-   CounterReference<VariableType> getType() const;
+   SourcePosition const &getPosition() const {return pos;}
+
+   CounterReference<VariableType> const &getType() const {return type;}
 
 
+   static Pointer create_constant(std::string const &nameSrc,
+      VariableType *type, ObjectExpression *expr, SourcePosition const &pos)
+   {
+      return new SourceVariable(nameSrc, type, "", expr, pos);
+   }
 
-   static Pointer create_constant
-   (std::string const &nameSource, VariableType *type, ObjectExpression *expr,
-    SourcePosition const &position);
+   static Pointer create_constant(std::string const &nameSrc,
+      VariableType *type, std::string const &nameObj, SourcePosition const &pos)
+   {
+      return new SourceVariable(nameSrc, type, nameObj, NULL, pos);
+   }
 
-   static Pointer create_constant
-   (std::string const &nameSource, VariableType *type,
-    std::string const &nameObject, SourcePosition const &position);
+   static Pointer create_literal(VariableType *type, ObjectExpression *expr,
+      SourcePosition const &pos)
+   {
+      return new SourceVariable("", type, "", expr, pos);
+   }
 
-   static Pointer create_literal
-   (VariableType *type, ObjectExpression *expr, SourcePosition const &position);
+   static Pointer create_literal(VariableType *type,
+      std::string const &nameObj, SourcePosition const &pos)
+   {
+      return new SourceVariable("", type, nameObj, NULL, pos);
+   }
 
-   static Pointer create_literal
-   (VariableType *type, std::string const &nameObject,
-    SourcePosition const &position);
+   static Pointer create_variable(std::string const &nameSrc,
+      VariableType *type, std::string const &nameObj, StoreType store,
+      SourcePosition const &pos)
+   {
+      return new SourceVariable(nameSrc, type, nameObj, NULL, store, pos);
+   }
 
-   static Pointer create_variable
-   (std::string const &nameSource, VariableType *type,
-    std::string const &nameObject, StorageClass sc,
-    SourcePosition const &position);
-
-   static StorageClass get_StorageClass
-   (std::string const &data, SourcePosition const &position);
-
-   static StorageClass get_sc_autoreg();
-   static StorageClass get_sc_staticreg();
+   static Pointer create_variable(VariableType *type, ObjectExpression *expr,
+      StoreType store, SourcePosition const &pos)
+   {
+      return new SourceVariable("", type, "", expr, store, pos);
+   }
 
 private:
-   SourceVariable
-   (std::string const &nameSource, VariableType *type, ObjectExpression *expr,
-    SourcePosition const &position);
+   SourceVariable(std::string const &nameSrc, VariableType *type,
+      std::string const &nameObj, ObjectExpression *expr,
+      SourcePosition const &pos);
 
-   SourceVariable
-   (std::string const &nameSource, VariableType *type,
-    std::string const &nameObject, SourcePosition const &position);
-
-   SourceVariable
-   (std::string const &nameSource, VariableType *type,
-    std::string const &nameObject, StorageClass sc,
-    SourcePosition const &position);
+   SourceVariable(std::string const &nameSrc, VariableType *type,
+      std::string const &nameObj, ObjectExpression *expr, StoreType store,
+      SourcePosition const &pos);
 
    ~SourceVariable();
 
-   SourcePosition position;
-   std::string nameObject;
-   std::string nameSource;
+   SourcePosition pos;
+   std::string nameObj;
+   std::string nameSrc;
    CounterPointer<ObjectExpression> expr;
    CounterReference<VariableType> type;
-   StorageClass sc;
+   StoreType store;
 };
 
 #endif//HPP_SourceVariable_

@@ -25,6 +25,7 @@
 #define HPP_SourceExpressionDS_
 
 #include "SourceExpression.hpp"
+#include "StoreType.hpp"
 
 #include <map>
 
@@ -84,6 +85,11 @@ public:
    static SourceExpression::Pointer create_value_integer
    (std::string const &value, SRCEXP_EXPR_ARGS);
 
+   static bool is_expression_store(std::string const &data);
+
+   static bool is_expression_type(std::string const &data,
+      SourceContext *context);
+
    static SourceExpression::Pointer make_expression
    (SourceTokenizerDS *in, Vector *blocks, SourceContext *context);
 
@@ -91,17 +97,20 @@ public:
    (SourceTokenizerDS *in, Vector *blocks, SourceContext *context,
     std::vector<CounterPointer<VariableType> > *argTypes,
     CounterPointer<VariableType> *returnType,
-    SourceVariable::StorageClass argClass = SourceVariable::SC_REGISTER);
+    StoreType argStore = STORE_REGISTER);
 
    static void make_expression_arglist
    (SourceTokenizerDS *in, Vector *blocks, SourceContext *context,
     std::vector<CounterPointer<VariableType> > *argTypes,
     std::vector<std::string> *argNames, int *argCount,
     SourceContext *argContext, CounterPointer<VariableType> *returnType,
-    SourceVariable::StorageClass argClass = SourceVariable::SC_REGISTER);
+    StoreType argStore = STORE_REGISTER);
 
    static SourceExpression::Pointer make_expression_single
    (SourceTokenizerDS *in, Vector *blocks, SourceContext *context);
+
+   static StoreType make_expression_store(SourceTokenizerDS *in, Vector *blocks,
+      SourceContext *context, CounterPointer<ObjectExpression> *area);
 
    static CounterReference<VariableType> make_expression_type
    (SourceTokenizerDS *in, Vector *blocks, SourceContext *context);
@@ -120,9 +129,6 @@ private:
    typedef SourceExpression::Pointer (*SingleHandler)(SRCEXPDS_EXPRSINGLE_ARGS);
    typedef std::map<std::string, SingleHandler> SingleMap;
 
-
-   static bool is_expression_type
-   (std::string const &data, SourceContext *context);
 
    static void make_expressions
    (SourceTokenizerDS *in, Vector *expressions, Vector *blocks,
@@ -160,6 +166,7 @@ private:
    SRCEXPDS_EXPRSINGLE_DECL(typedef);
    SRCEXPDS_EXPRSINGLE_DECL(typestr);
    SRCEXPDS_EXPRSINGLE_DECL(variable);
+   SRCEXPDS_EXPRSINGLE_DECL(variable_store);
    SRCEXPDS_EXPRSINGLE_DECL(variable_type);
    SRCEXPDS_EXPRSINGLE_DECL(void);
    SRCEXPDS_EXPRSINGLE_DECL(while);

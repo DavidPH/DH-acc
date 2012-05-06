@@ -56,13 +56,13 @@ struct llbits_t
 
 constexpr size_t heapsize = 16*1024*1024;
 
-__variable static char[heapsize] heap;
-__variable static heapdata *heapptr;
+__intvar static char[heapsize] heap;
+__intvar __staticregister heapdata *heapptr;
 
 constexpr heapdata *heapbegin = (heapdata *)&heap[0];
 constexpr heapdata *heapend = (heapdata *)&heap[heapsize];
 
-__variable __staticreg unsigned randval = 1;
+__intvar __staticregister unsigned randval = 1;
 
 
 //----------------------------------------------------------------------------|
@@ -166,8 +166,8 @@ __extfunc calloc(size_t nmemb, size_t size) -> void *
 
    if (!nmemb) return NULL;
 
-   __variable __autoreg char *ptr = (char *)nmemb;
-   __variable __autoreg char *end = ptr + size;
+   char *ptr = (char *)nmemb;
+   char *end = ptr + size;
 
    while (ptr != end) {*ptr++ = 0;};
 
@@ -181,7 +181,7 @@ __extfunc free(void *ptr) -> void
 {
    if (!ptr) return;
 
-   __variable __autoreg heapdata *block = (heapdata *)ptr - 1;
+   heapdata *block = (heapdata *)ptr - 1;
 
    block->used = 0;
 
@@ -230,7 +230,7 @@ __extfunc malloc(size_t size) -> void *
       heapptr->used = size;
       heapptr->size = size;
 
-      __variable __autoreg void *ptr = (void *)&heapptr->data;
+      __autoregister void *ptr = (void *)&heapptr->data;
 
       heapptr = (heapdata *)&heapptr->data[heapptr->size];
 
@@ -254,7 +254,7 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 
    if (!size) {free(ptr); return NULL;};
 
-   __variable __autoreg heapdata *block = (heapdata *)ptr - 1;
+   heapdata *block = (heapdata *)ptr - 1;
 
    // Enough size in current block.
    if (block->size >= size)
@@ -264,7 +264,7 @@ __extfunc realloc(void *ptr, size_t size) -> void *
       return ptr;
    };
 
-   __variable __autoreg heapdata *nextblock =
+   heapdata *nextblock =
       (heapdata *)&block->data[block->size];
 
    // No next block, just resize current block. (If enough space.)
@@ -281,13 +281,13 @@ __extfunc realloc(void *ptr, size_t size) -> void *
       return ptr;
    };
 
-   __variable __autoreg void *newptr = malloc(size);
+   __autoregister void *newptr = malloc(size);
 
    if (!newptr) return NULL;
 
-   __variable __autoreg char *it1 = ptr;
-   __variable __autoreg char *it2 = newptr;
-   __variable __autoreg char *end = it1 + block->used;
+   char *it1 = ptr;
+   char *it2 = newptr;
+   char *end = it1 + block->used;
 
    while (it1 != end) {*it1++ = *it2++;};
 
@@ -354,8 +354,8 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 __extfunc qsort(void *base, size_t nmemb, size_t size,
  __script_t(void const *, void const *) -> int compar) -> void
 {
-   __variable __autoreg char const *iter = (char const *)base;
-   __variable __autoreg char const *end = (char const *)base + nmemb*size;
+   char const *iter = (char const *)base;
+   char const *end = (char const *)base + nmemb*size;
 
    while (iter != end)
    {
@@ -410,7 +410,7 @@ __extfunc llabs(long long int j) -> long long int
 //
 __extfunc div(int numer, int denom) -> div_t
 {
-   __variable __autoreg div_t d;
+   div_t d;
    d.quot = numer / denom;
    d.rem  = numer % denom;
    return d;
@@ -423,7 +423,7 @@ __extfunc div(int numer, int denom) -> div_t
 //
 __extfunc ldiv(long int numer, long int denom) -> ldiv_t
 {
-   __variable __autoreg ldiv_t d;
+   ldiv_t d;
    d.quot = numer / denom;
    d.rem  = numer % denom;
    return d;
@@ -437,7 +437,7 @@ __extfunc ldiv(long int numer, long int denom) -> ldiv_t
 #if 0 #
 __extfunc lldiv(long long int numer, long long int denom) -> lldiv_t
 {
-   __variable __autoreg lldiv_t d;
+   lldiv_t d;
    d.quot = numer / denom;
    d.rem  = numer % denom;
    return d;

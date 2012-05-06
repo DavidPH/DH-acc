@@ -27,7 +27,6 @@
 #include "bignum.hpp"
 #include "Counter.hpp"
 #include "SourcePosition.hpp"
-#include "SourceVariable.hpp"
 
 #include <ostream>
 #include <string>
@@ -159,6 +158,9 @@
    create_branch_##NAME(SRCEXP_EXPRBRA##TYPE##_ARGS)
 
 
+#define SRCEXP_EXPRVAL_ARGS \
+   SRCEXP_EXPR_ARGS
+
 #define SRCEXP_EXPRVALa_ARGS             \
    SourceExpression::Vector const &args, \
    SRCEXP_EXPR_ARGS
@@ -239,6 +241,7 @@
 class ObjectExpression;
 class ObjectVector;
 class SourceContext;
+class SourceVariable;
 class VariableData;
 class VariableType;
 
@@ -359,6 +362,7 @@ public:
    SRCEXP_EXPRVAL_DECL( s, real);
    SRCEXP_EXPRVAL_DECL( i, schar);
    SRCEXP_EXPRVAL_DECL( i, short);
+   SRCEXP_EXPRVAL_DECL(  , stackptr);
    SRCEXP_EXPRVAL_DECL( s, string);
    SRCEXP_EXPRVAL_DECL( i, uchar);
    SRCEXP_EXPRVAL_DECL( i, uint);

@@ -24,10 +24,10 @@
 #include "../SourceExpressionDS.hpp"
 
 #include "../ObjectExpression.hpp"
-#include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../SourceVariable.hpp"
 #include "../VariableType.hpp"
 
 
@@ -74,49 +74,17 @@ static void do_qualifier
 //
 // do_storage
 //
-static void do_storage
-(VariableType::Pointer *type, VariableType::StoreType store,
- SourceTokenizerDS *in)
+static void do_storage(VariableType::Pointer *type, SourceTokenizerDS *in,
+   SourceExpression::Vector *blocks, SourceContext *context)
 {
-   SourceTokenC tokenStore = in->get(SourceTokenC::TT_IDENTIFIER);
+   ObjectExpression::Pointer storeArea;
+   StoreType storeType = SourceExpressionDS::make_expression_store
+      (in, blocks, context, &storeArea);
 
-   if ((*type)->getStoreType() != VariableType::ST_ADDR)
-      ERROR(tokenStore.pos, "redundant storage");
-
-   *type = (*type)->setStorage(store);
-}
-
-//
-// do_storage
-//
-static void do_storage
-(VariableType::Pointer *type, VariableType::StoreType store,
- SourceTokenizerDS *in, SourceExpression::Vector *blocks,
- SourceContext *context, expr_make_t maker)
-{
-   SourceTokenC tokenStore = in->get(SourceTokenC::TT_IDENTIFIER);
-
-   if ((*type)->getStoreType() != VariableType::ST_ADDR)
-      ERROR(tokenStore.pos, "redundant storage");
-
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
-
-   std::string storeArea =
-      maker(in, blocks, context)->makeObject()->resolveSymbol();
-
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-   *type = (*type)->setStorage(store, storeArea);
-}
-
-//
-// do_storage_autoreg
-//
-static void do_storage_autoreg
-(VariableType::Pointer *type, SourceTokenizerDS *in)
-{
-   if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
-      do_storage(type, VariableType::ST_REGISTER, in);
+   if (storeArea)
+      *type = (*type)->setStorage(storeType, storeArea->resolveSymbol());
+   else
+      *type = (*type)->setStorage(storeType);
 }
 
 //
@@ -594,29 +562,8 @@ VariableType::Reference SourceExpressionDS::make_expression_type
       else if (in->peek().data == "restrict")
          do_qualifier(&type, VariableType::QUAL_RESTRICT, in);
 
-      else if (in->peek().data == "register")
-         do_storage(&type, VariableType::ST_REGISTER, in);
-
-      else if (in->peek().data == "__autoreg")
-         do_storage_autoreg(&type, in);
-
-      else if (in->peek().data == "__mapregister")
-         do_storage(&type, VariableType::ST_MAPREGISTER, in);
-
-      else if (in->peek().data == "__worldregister")
-         do_storage(&type, VariableType::ST_WORLDREGISTER, in);
-
-      else if (in->peek().data == "__globalregister")
-         do_storage(&type, VariableType::ST_GLOBALREGISTER, in);
-
-      else if (in->peek().data == "__maparray")
-         do_storage(&type, VariableType::ST_MAPARRAY, in, blocks, context, make_expression);
-
-      else if (in->peek().data == "__worldarray")
-         do_storage(&type, VariableType::ST_WORLDARRAY, in, blocks, context, make_expression);
-
-      else if (in->peek().data == "__globalarray")
-         do_storage(&type, VariableType::ST_GLOBALARRAY, in, blocks, context, make_expression);
+      else if (is_expression_store(in->peek().data))
+         do_storage(&type, in, blocks, context);
 
       else
          return type.ref();

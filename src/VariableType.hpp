@@ -26,6 +26,7 @@
 
 #include "bignum.hpp"
 #include "Counter.hpp"
+#include "StoreType.hpp"
 
 #include <string>
 #include <vector>
@@ -121,24 +122,6 @@ public:
       QUAL_CONST    = 1,
       QUAL_VOLATILE = 2,
       QUAL_RESTRICT = 4
-   };
-
-   //
-   // StoreType
-   //
-   // This is loosely related to SourceVariable::StorageClass.
-   // The low bits are used to store the array number for ARRAY types.
-   //
-   enum StoreType
-   {
-      ST_ADDR,
-      ST_REGISTER,
-      ST_MAPREGISTER,
-      ST_WORLDREGISTER,
-      ST_GLOBALREGISTER,
-      ST_MAPARRAY,
-      ST_WORLDARRAY,
-      ST_GLOBALARRAY
    };
 
 

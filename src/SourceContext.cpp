@@ -140,28 +140,28 @@ SourceContext::~SourceContext()
 //
 // SourceContext::addCount
 //
-void SourceContext::addCount(int count, SourceVariable::StorageClass sc)
+void SourceContext::addCount(int count, StoreType store)
 {
-   switch (sc)
+   switch (store)
    {
-   case SourceVariable::SC_AUTO:
+   case STORE_STATIC:
+   case STORE_CONST:
+   case STORE_MAPREGISTER:
+   case STORE_WORLDREGISTER:
+   case STORE_GLOBALREGISTER:
+   case STORE_MAPARRAY:
+   case STORE_WORLDARRAY:
+   case STORE_GLOBALARRAY:
+      break;
+
+   case STORE_AUTO:
       countAuto += count;
-      addLimit(getCount(sc), sc);
+      addLimit(getCount(store), store);
       break;
 
-   case SourceVariable::SC_REGISTER:
+   case STORE_REGISTER:
       countRegister += count;
-      addLimit(getCount(sc), sc);
-      break;
-
-   case SourceVariable::SC_CONSTANT:
-   case SourceVariable::SC_REGISTER_GLOBAL:
-   case SourceVariable::SC_REGISTER_MAP:
-   case SourceVariable::SC_REGISTER_WORLD:
-   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-   case SourceVariable::SC_REGISTERARRAY_MAP:
-   case SourceVariable::SC_REGISTERARRAY_WORLD:
-   case SourceVariable::SC_STATIC:
+      addLimit(getCount(store), store);
       break;
    }
 }
@@ -231,36 +231,36 @@ addLabelGoto(std::string const &name, SourcePosition const &position)
 //
 // SourceContext::addLimit
 //
-void SourceContext::addLimit(int limit, SourceVariable::StorageClass sc)
+void SourceContext::addLimit(int limit, StoreType store)
 {
-   switch (sc)
+   switch (store)
    {
-   case SourceVariable::SC_AUTO:
+   case STORE_STATIC:
+   case STORE_CONST:
+   case STORE_MAPREGISTER:
+   case STORE_WORLDREGISTER:
+   case STORE_GLOBALREGISTER:
+   case STORE_MAPARRAY:
+   case STORE_WORLDARRAY:
+   case STORE_GLOBALARRAY:
+      break;
+
+   case STORE_AUTO:
       if (limit > limitAuto)
          limitAuto = limit;
 
       if (inheritLocals && parent)
-         parent->addLimit(limit, sc);
+         parent->addLimit(limit, store);
 
       break;
 
-   case SourceVariable::SC_REGISTER:
+   case STORE_REGISTER:
       if (limit > limitRegister)
          limitRegister = limit;
 
       if (inheritLocals && parent)
-         parent->addLimit(limit, sc);
+         parent->addLimit(limit, store);
 
-      break;
-
-   case SourceVariable::SC_CONSTANT:
-   case SourceVariable::SC_REGISTER_GLOBAL:
-   case SourceVariable::SC_REGISTER_MAP:
-   case SourceVariable::SC_REGISTER_WORLD:
-   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-   case SourceVariable::SC_REGISTERARRAY_MAP:
-   case SourceVariable::SC_REGISTERARRAY_WORLD:
-   case SourceVariable::SC_STATIC:
       break;
    }
 }
@@ -272,54 +272,55 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis)
 {
    #define PARM nameObj, type, externDef, externVis
 
-   SourceVariable::StorageClass sc = var->getClass();
    std::string const &nameObj = var->getNameObject();
+   SourcePosition const &pos = var->getPosition();
+   StoreType store = var->getStoreType();
    VariableType::Reference type = var->getType();
 
    varVars.push_back(var);
    varNames.push_back(var->getNameSource());
 
-   switch (sc)
+   switch (store)
    {
-   case SourceVariable::SC_AUTO:
-      ObjectData_Auto::add(PARM, getCount(sc));
-      addCount(type->getSize(SourcePosition::none()), sc);
+   case STORE_STATIC:
+      ObjectData_Static::add(PARM);
       break;
 
-   case SourceVariable::SC_CONSTANT:
+   case STORE_AUTO:
+      ObjectData_Auto::add(PARM, getCount(store));
+      addCount(type->getSize(pos), store);
       break;
 
-   case SourceVariable::SC_REGISTER:
-      ObjectData_Register::add(PARM, getCount(sc));
-      addCount(type->getSize(SourcePosition::none()), sc);
+   case STORE_CONST:
       break;
 
-   case SourceVariable::SC_REGISTER_GLOBAL:
-      ObjectData_Register::add_global(PARM);
+   case STORE_REGISTER:
+      ObjectData_Register::add(PARM, getCount(store));
+      addCount(type->getSize(pos), store);
       break;
 
-   case SourceVariable::SC_REGISTER_MAP:
+   case STORE_MAPREGISTER:
       ObjectData_Register::add_map(PARM);
       break;
 
-   case SourceVariable::SC_REGISTER_WORLD:
+   case STORE_WORLDREGISTER:
       ObjectData_Register::add_world(PARM);
       break;
 
-   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-      ObjectData_Array::add_global(PARM);
+   case STORE_GLOBALREGISTER:
+      ObjectData_Register::add_global(PARM);
       break;
 
-   case SourceVariable::SC_REGISTERARRAY_MAP:
+   case STORE_MAPARRAY:
       ObjectData_Array::add_map(PARM);
       break;
 
-   case SourceVariable::SC_REGISTERARRAY_WORLD:
+   case STORE_WORLDARRAY:
       ObjectData_Array::add_world(PARM);
       break;
 
-   case SourceVariable::SC_STATIC:
-      ObjectData_Static::add(PARM);
+   case STORE_GLOBALARRAY:
+      ObjectData_Array::add_global(PARM);
       break;
    }
 
@@ -334,54 +335,55 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis,
 {
    #define PARM nameObj, type, externDef, externVis, address
 
-   SourceVariable::StorageClass sc = var->getClass();
    std::string const &nameObj = var->getNameObject();
+   SourcePosition const &pos = var->getPosition();
+   StoreType store = var->getStoreType();
    VariableType::Reference type = var->getType();
 
    varVars.push_back(var);
    varNames.push_back(var->getNameSource());
 
-   switch (sc)
+   switch (store)
    {
-   case SourceVariable::SC_AUTO:
+   case STORE_STATIC:
+      ObjectData_Static::add(PARM);
+      break;
+
+   case STORE_AUTO:
       ObjectData_Auto::add(PARM);
-      addCount(type->getSize(SourcePosition::none()), sc);
+      addCount(type->getSize(pos), store);
       break;
 
-   case SourceVariable::SC_CONSTANT:
+   case STORE_CONST:
       break;
 
-   case SourceVariable::SC_REGISTER:
+   case STORE_REGISTER:
       ObjectData_Register::add(PARM);
-      addCount(type->getSize(SourcePosition::none()), sc);
+      addCount(type->getSize(pos), store);
       break;
 
-   case SourceVariable::SC_REGISTER_GLOBAL:
-      ObjectData_Register::add_global(PARM);
-      break;
-
-   case SourceVariable::SC_REGISTER_MAP:
+   case STORE_MAPREGISTER:
       ObjectData_Register::add_map(PARM);
       break;
 
-   case SourceVariable::SC_REGISTER_WORLD:
+   case STORE_WORLDREGISTER:
       ObjectData_Register::add_world(PARM);
       break;
 
-   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-      ObjectData_Array::add_global(PARM);
+   case STORE_GLOBALREGISTER:
+      ObjectData_Register::add_global(PARM);
       break;
 
-   case SourceVariable::SC_REGISTERARRAY_MAP:
+   case STORE_MAPARRAY:
       ObjectData_Array::add_map(PARM);
       break;
 
-   case SourceVariable::SC_REGISTERARRAY_WORLD:
+   case STORE_WORLDARRAY:
       ObjectData_Array::add_world(PARM);
       break;
 
-   case SourceVariable::SC_STATIC:
-      ObjectData_Static::add(PARM);
+   case STORE_GLOBALARRAY:
+      ObjectData_Array::add_global(PARM);
       break;
    }
 
@@ -455,34 +457,34 @@ std::vector<bigsint> SourceContext::getCases(SourcePosition const &pos) const
 //
 // SourceContext::getCount
 //
-int SourceContext::getCount(SourceVariable::StorageClass sc) const
+int SourceContext::getCount(StoreType store) const
 {
-   switch (sc)
+   switch (store)
    {
-   case SourceVariable::SC_AUTO:
+   case STORE_STATIC:
+   case STORE_CONST:
+   case STORE_MAPREGISTER:
+   case STORE_WORLDREGISTER:
+   case STORE_GLOBALREGISTER:
+   case STORE_MAPARRAY:
+   case STORE_WORLDARRAY:
+   case STORE_GLOBALARRAY:
+      return 0;
+
+   case STORE_AUTO:
       if (inheritLocals && parent)
-         return parent->getCount(sc) + countAuto;
+         return parent->getCount(store) + countAuto;
       else
          return countAuto;
 
-   case SourceVariable::SC_REGISTER:
+   case STORE_REGISTER:
       if (inheritLocals && parent)
-         return parent->getCount(sc) + countRegister;
+         return parent->getCount(store) + countRegister;
       else
          return countRegister;
-
-   case SourceVariable::SC_CONSTANT:
-   case SourceVariable::SC_REGISTER_GLOBAL:
-   case SourceVariable::SC_REGISTER_MAP:
-   case SourceVariable::SC_REGISTER_WORLD:
-   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-   case SourceVariable::SC_REGISTERARRAY_MAP:
-   case SourceVariable::SC_REGISTERARRAY_WORLD:
-   case SourceVariable::SC_STATIC:
-      return 0;
    }
 
-   ERROR_Np("invalid SC");
+   ERROR_Np("invalid store");
 }
 
 //
@@ -626,28 +628,28 @@ getLabelGoto(std::string const &name, SourcePosition const &pos) const
 //
 // SourceContext::getLimit
 //
-int SourceContext::getLimit(SourceVariable::StorageClass sc) const
+int SourceContext::getLimit(StoreType store) const
 {
-   switch (sc)
+   switch (store)
    {
-   case SourceVariable::SC_AUTO:
+   case STORE_STATIC:
+   case STORE_CONST:
+   case STORE_MAPREGISTER:
+   case STORE_WORLDREGISTER:
+   case STORE_GLOBALREGISTER:
+   case STORE_MAPARRAY:
+   case STORE_WORLDARRAY:
+   case STORE_GLOBALARRAY:
+      return 0;
+
+   case STORE_AUTO:
       return limitAuto;
 
-   case SourceVariable::SC_REGISTER:
+   case STORE_REGISTER:
       return limitRegister;
-
-   case SourceVariable::SC_CONSTANT:
-   case SourceVariable::SC_REGISTER_GLOBAL:
-   case SourceVariable::SC_REGISTER_MAP:
-   case SourceVariable::SC_REGISTER_WORLD:
-   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-   case SourceVariable::SC_REGISTERARRAY_MAP:
-   case SourceVariable::SC_REGISTERARRAY_WORLD:
-   case SourceVariable::SC_STATIC:
-      return 0;
    }
 
-   ERROR_Np("invalid SC");
+   ERROR_Np("invalid store");
 }
 
 //
@@ -665,8 +667,7 @@ VariableType::Reference SourceContext::getReturnType() const
 ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
 {
    static SourcePosition const &pos = SourcePosition::builtin();
-   static SourceVariable::StorageClass const sc =
-      SourceVariable::get_sc_autoreg();
+   static StoreType const store = store_autoregister();
    static VariableType::Reference const type = VariableType::get_bt_int();
 
    static char const *const name[] =
@@ -685,7 +686,7 @@ ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
       std::string nameSrc = name[i];
       std::string nameObj = getLabel() + nameSrc;
 
-      var = SourceVariable::create_variable(nameSrc, type, nameObj, sc, pos);
+      var = SourceVariable::create_variable(nameSrc, type, nameObj, store, pos);
 
       tempVars[i] = var;
       addVar(var, false, false);
@@ -735,24 +736,24 @@ SourceVariable::Pointer SourceContext::getVariable
    {
       if (varNames[i] == name)
       {
-         switch (varVars[i]->getClass())
+         switch (varVars[i]->getStoreType())
          {
-         case SourceVariable::SC_AUTO:
-         case SourceVariable::SC_REGISTER:
+         case STORE_STATIC:
+         case STORE_CONST:
+         case STORE_MAPREGISTER:
+         case STORE_WORLDREGISTER:
+         case STORE_GLOBALREGISTER:
+         case STORE_MAPARRAY:
+         case STORE_WORLDARRAY:
+         case STORE_GLOBALARRAY:
+            return varVars[i];
+
+         case STORE_AUTO:
+         case STORE_REGISTER:
             if (canLocal)
                return varVars[i];
 
             break;
-
-         case SourceVariable::SC_CONSTANT:
-         case SourceVariable::SC_REGISTER_GLOBAL:
-         case SourceVariable::SC_REGISTER_MAP:
-         case SourceVariable::SC_REGISTER_WORLD:
-         case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-         case SourceVariable::SC_REGISTERARRAY_MAP:
-         case SourceVariable::SC_REGISTERARRAY_WORLD:
-         case SourceVariable::SC_STATIC:
-            return varVars[i];
          }
       }
    }

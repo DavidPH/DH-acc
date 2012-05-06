@@ -27,6 +27,7 @@
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
 #include "SourceTokenizerDS.hpp"
+#include "SourceVariable.hpp"
 #include "VariableType.hpp"
 
 
@@ -458,31 +459,29 @@ make_expression(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
 //
 // SourceExpressionDS::make_expression_arglist
 //
-void SourceExpressionDS::make_expression_arglist
-(SourceTokenizerDS *in, Vector *blocks, SourceContext *context,
- VariableType::Vector *argTypes, VariableType::Pointer *returnType,
- SourceVariable::StorageClass argClass)
+void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS *in,
+   Vector *blocks, SourceContext *context, VariableType::Vector *argTypes,
+   VariableType::Pointer *returnType, StoreType argStore)
 {
-   make_expression_arglist
-   (in, blocks, context, argTypes, NULL, NULL, NULL, returnType, argClass);
+   make_expression_arglist(in, blocks, context, argTypes, NULL, NULL, NULL,
+      returnType, argStore);
 }
 
 //
 // SourceExpressionDS::make_expression_arglist
 //
-void SourceExpressionDS::make_expression_arglist
-(SourceTokenizerDS *in, Vector *blocks, SourceContext *context,
- VariableType::Vector *argTypes, VariableType::VecStr *argNames, int *argCount,
- SourceContext *argContext, VariableType::Pointer *returnType,
- SourceVariable::StorageClass argClass)
+void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS *in,
+   Vector *blocks, SourceContext *context, VariableType::Vector *argTypes,
+   VariableType::VecStr *argNames, int *argCount, SourceContext *argContext,
+   VariableType::Pointer *returnType, StoreType argStore)
 {
 	if (argCount) *argCount = 0;
 
-	in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   SourcePosition const pos = in->get(SourceTokenC::TT_OP_PARENTHESIS_O).pos;
    if (!in->peekType(SourceTokenC::TT_OP_PARENTHESIS_C)) while (true)
 	{
       VariableType::Reference argType = make_expression_type(in, blocks, context);
-      if (argCount) *argCount += argType->getSize(SourcePosition::none());
+      if (argCount) *argCount += argType->getSize(pos);
 		if (argTypes) argTypes->push_back(argType);
 
 		std::string argName;
@@ -493,8 +492,9 @@ void SourceExpressionDS::make_expression_arglist
 		if (argContext)
 		{
          std::string argNameObject = argContext->getLabel() + argName;
-			SourceVariable::Pointer argVariable(SourceVariable::create_variable(argName, argType, argNameObject, argClass, SourcePosition::none()));
-         argContext->addVar(argVariable, false, false);
+         SourceVariable::Pointer argVar = SourceVariable::create_variable
+            (argName, argType, argNameObject, argStore, pos);
+         argContext->addVar(argVar, false, false);
 		}
 
 		if (!in->peekType(SourceTokenC::TT_OP_COMMA))

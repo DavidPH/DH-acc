@@ -25,7 +25,8 @@
 #define HPP_SourceContext_
 
 #include "bignum.hpp"
-#include "SourceVariable.hpp"
+#include "Counter.hpp"
+#include "StoreType.hpp"
 
 #include <map>
 #include <string>
@@ -37,6 +38,8 @@
 //
 
 class ObjectExpression;
+class SourcePosition;
+class SourceVariable;
 class VariableType;
 
 //
@@ -84,7 +87,7 @@ public:
    std::string getLabelContinue(SourcePosition const & position) const;
    std::string getLabelGoto(std::string const &name, SourcePosition const &position) const;
 
-   int getLimit(SourceVariable::StorageClass sc) const;
+   int getLimit(StoreType store) const;
 
    CounterReference<VariableType> getReturnType() const;
 
@@ -151,12 +154,12 @@ private:
    SourceContext();
    ~SourceContext();
 
-   void addCount(int count, SourceVariable::StorageClass sc);
-   void addLimit(int limit, SourceVariable::StorageClass sc);
+   void addCount(int count, StoreType store);
+   void addLimit(int limit, StoreType store);
 
    CounterPointer<SourceVariable> findTempVar(unsigned i);
 
-   int getCount(SourceVariable::StorageClass sc) const;
+   int getCount(StoreType store) const;
 
    CounterPointer<SourceVariable> getVariable(std::string const & name, SourcePosition const & position, bool canLocal) const;
 

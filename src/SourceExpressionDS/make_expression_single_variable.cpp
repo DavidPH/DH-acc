@@ -29,6 +29,7 @@
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../SourceVariable.hpp"
 #include "../VariableType.hpp"
 
 
@@ -36,7 +37,11 @@
 // Types                                                                      |
 //
 
-typedef SourceVariable::StorageClass StorageClass;
+struct StoreData
+{
+   StoreType type;
+   ObjectExpression::Pointer area;
+};
 
 
 //----------------------------------------------------------------------------|
@@ -50,7 +55,7 @@ static SourceExpression::Pointer make_var
 (SourceTokenizerDS *in, SourceExpression::Vector *blocks,
  SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
  SourcePosition const &pos, std::string const &nameSrc, VariableType *type,
- StorageClass sc, bool externDef)
+ StoreData store, bool externDef)
 {
    bool externVis = linkSpec != SourceExpressionDS::LS_INTERN;
 
@@ -71,18 +76,11 @@ static SourceExpression::Pointer make_var
 
    // Generate variable.
    SourceVariable::Pointer var =
-      SourceVariable::create_variable(nameSrc, type, nameObj, sc, pos);
+      SourceVariable::create_variable(nameSrc, type, nameObj, store.type, pos);
 
    // Add variable to context.
-   if (in->peekType(SourceTokenC::TT_OP_AT))
-   {
-      in->get(SourceTokenC::TT_OP_AT);
-
-      bigsint addr = SourceExpressionDS::make_expression_single
-         (in, blocks, context)->makeObject()->resolveInt();
-
-      context->addVar(var, externDef, externVis, addr);
-   }
+   if (store.area)
+      context->addVar(var, externDef, externVis, store.area->resolveInt());
    else
       context->addVar(var, externDef, externVis);
 
@@ -92,19 +90,19 @@ static SourceExpression::Pointer make_var
 
    // Determine if metadata can be used.
    bool meta = true;
-   switch (sc)
+   switch (store.type)
    {
-   case SourceVariable::SC_REGISTERARRAY_MAP:
+   case STORE_MAPARRAY:
       if (linkSpec == SourceExpressionDS::LS_ACS)
          ObjectData_Array::meta_map(nameObj, meta=false);
       break;
 
-   case SourceVariable::SC_REGISTERARRAY_WORLD:
+   case STORE_WORLDARRAY:
       if (linkSpec == SourceExpressionDS::LS_ACS)
          ObjectData_Array::meta_world(nameObj, meta=false);
       break;
 
-   case SourceVariable::SC_REGISTERARRAY_GLOBAL:
+   case STORE_GLOBALARRAY:
       if (linkSpec == SourceExpressionDS::LS_ACS)
          ObjectData_Array::meta_global(nameObj, meta=false);
       break;
@@ -132,37 +130,24 @@ static SourceExpression::Pointer make_var
       SourceExpression::Pointer exprSet = SourceExpression::
          create_binary_assign_const(expr, initSrc, context, pos);
 
-      VariableType::StoreType store; // For case_array.
-
-      switch (sc)
+      switch (store.type)
       {
-      case SourceVariable::SC_REGISTER_MAP:
+      case STORE_MAPREGISTER:
          if (!initObj || target_type != TARGET_ZDoom)
             goto case_static;
 
          ObjectData_Register::ini_map(nameObj, initObj);
-
          break;
 
-      case SourceVariable::SC_REGISTERARRAY_MAP:
-         store = VariableType::ST_MAPARRAY;
-
+      case STORE_MAPARRAY:
          if (!initObj || target_type != TARGET_ZDoom)
             goto case_array;
 
          if (ObjectData_Array::ini_map(nameObj, initObj))
             break;
 
-         goto case_array;
-
-      case SourceVariable::SC_REGISTERARRAY_WORLD:
-         store = VariableType::ST_WORLDARRAY;
-         goto case_array;
-
-      case SourceVariable::SC_REGISTERARRAY_GLOBAL:
-         store = VariableType::ST_GLOBALARRAY;
-         goto case_array;
-
+      case STORE_WORLDARRAY:
+      case STORE_GLOBALARRAY:
       case_array:
          if (!meta)
             goto case_set;
@@ -170,7 +155,7 @@ static SourceExpression::Pointer make_var
          // Generate expression. *(bool __maparray(...) *)0
          initExpr = SourceExpression::create_value_int(0, context, pos);
          initExpr = SourceExpression::create_value_cast_explicit
-            (initExpr, initType->setStorage(store, nameObj)->getPointer(),
+            (initExpr, initType->setStorage(store.type, nameObj)->getPointer(),
              context, pos);
          initExpr = SourceExpression::create_unary_dereference
             (initExpr, context, pos);
@@ -178,7 +163,7 @@ static SourceExpression::Pointer make_var
          goto case_init;
 
          // Only initialize static-duration storage-classes once.
-      case SourceVariable::SC_STATIC:
+      case STORE_STATIC:
       case_static:
       {
          // Generate source/object name
@@ -186,8 +171,8 @@ static SourceExpression::Pointer make_var
          std::string initNameObj = context->getLabel() + initNameSrc;
 
          // Generate variable.
-         SourceVariable::Pointer initVar = SourceVariable::
-            create_variable(initNameSrc, initType, initNameObj, sc, pos);
+         SourceVariable::Pointer initVar = SourceVariable::create_variable
+            (initNameSrc, initType, initNameObj, store.type, pos);
          context->addVar(initVar, false, false);
 
          // Generate expression.
@@ -239,7 +224,8 @@ static SourceExpression::Pointer make_var
 static SourceExpression::Pointer make_var
 (SourceTokenizerDS *in, SourceExpression::Vector *blocks,
  SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
- SourcePosition const &pos, VariableType *type, StorageClass sc, bool externDef)
+ SourcePosition const &pos, VariableType *type, StoreData store,
+ bool externDef)
 {
    // If not followed by an identifier, then don't try to read any names.
    // (This is needed for standalone struct definitions.)
@@ -252,7 +238,7 @@ static SourceExpression::Pointer make_var
    // Read source name.
    std::string nameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
    vars.push_back(make_var
-      (in, blocks, context, linkSpec, pos, nameSrc, type, sc, externDef));
+      (in, blocks, context, linkSpec, pos, nameSrc, type, store, externDef));
 
    // Read in any additional variables.
    while (in->peekType(SourceTokenC::TT_OP_COMMA))
@@ -261,7 +247,7 @@ static SourceExpression::Pointer make_var
 
       nameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
       vars.push_back(make_var
-         (in, blocks, context, linkSpec, pos, nameSrc, type, sc, externDef));
+         (in, blocks, context, linkSpec, pos, nameSrc, type, store, externDef));
    }
 
    if (vars.size() == 1)
@@ -276,13 +262,32 @@ static SourceExpression::Pointer make_var
 static SourceExpression::Pointer make_var
 (SourceTokenizerDS *in, SourceExpression::Vector *blocks,
  SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
- SourcePosition const &pos, StorageClass sc, bool externDef)
+ SourcePosition const &pos, StoreData store, bool externDef)
 {
    // Read variable type.
    VariableType::Reference type =
       SourceExpressionDS::make_expression_type(in, blocks, context);
 
-   return make_var(in, blocks, context, linkSpec, pos, type, sc, externDef);
+   // STORE_CONST is used to signal automatic storetype selection.
+   if (store.type == STORE_CONST)
+   {
+      if (context == SourceContext::global_context)
+      {
+         if (type->getBasicType() == VariableType::BT_ARRAY)
+            store.type = store_staticarray();
+         else
+            store.type = store_staticregister();
+      }
+      else
+      {
+         if (type->getBasicType() == VariableType::BT_ARRAY)
+            store.type = store_autoarray();
+         else
+            store.type = store_autoregister();
+      }
+   }
+
+   return make_var(in, blocks, context, linkSpec, pos, type, store, externDef);
 }
 
 //
@@ -294,15 +299,14 @@ static SourceExpression::Pointer make_var
  bool linkCheck, SourcePosition const &pos, bool externDef)
 {
    // Read storage class.
-   SourceTokenC const &scTok = in->get(SourceTokenC::TT_IDENTIFIER);
-   SourceVariable::StorageClass sc =
-      SourceVariable::get_StorageClass(scTok.data, scTok.pos);
+   StoreData store;
+   store.type = SourceExpressionDS::make_expression_store
+      (in, blocks, context, &store.area);
 
-   if (linkCheck && (sc == SourceVariable::SC_AUTO ||
-                     sc == SourceVariable::SC_REGISTER))
+   if (linkCheck && (store.type == STORE_AUTO || store.type == STORE_REGISTER))
       linkSpec = SourceExpressionDS::LS_INTERN;
 
-   return make_var(in, blocks, context, linkSpec, pos, sc, externDef);
+   return make_var(in, blocks, context, linkSpec, pos, store, externDef);
 }
 
 
@@ -350,27 +354,42 @@ SRCEXPDS_EXPRSINGLE_DEFN(variable)
 }
 
 //
-// SourceExpressionDS::make_expression_single_variable_type
+// SourceExpressionDS::make_expression_single_variable_store
 //
-SRCEXPDS_EXPRSINGLE_DEFN(variable_type)
+SRCEXPDS_EXPRSINGLE_DEFN(variable_store)
 {
+   bool linkCheck = false;
    LinkageSpecifier linkSpec;
-   StorageClass sc;
 
    in->unget(token);
 
    if (context == SourceContext::global_context)
    {
+      linkCheck = true;
       linkSpec = LS_DS;
-      sc = SourceVariable::get_sc_staticreg();
    }
    else
-   {
       linkSpec = LS_INTERN;
-      sc = SourceVariable::get_sc_autoreg();
-   }
 
-   return make_var(in, blocks, context, linkSpec, token.pos, sc, false);
+   return make_var(in, blocks, context, linkSpec, linkCheck, token.pos, false);
+}
+
+//
+// SourceExpressionDS::make_expression_single_variable_type
+//
+SRCEXPDS_EXPRSINGLE_DEFN(variable_type)
+{
+   LinkageSpecifier linkSpec;
+   StoreData store = {STORE_CONST, NULL};
+
+   in->unget(token);
+
+   if (context == SourceContext::global_context)
+      linkSpec = LS_DS;
+   else
+      linkSpec = LS_INTERN;
+
+   return make_var(in, blocks, context, linkSpec, token.pos, store, false);
 }
 
 // EOF

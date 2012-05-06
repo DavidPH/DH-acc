@@ -17,15 +17,14 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of function-designators.
+// Storage-type/class handling.
 //
 //-----------------------------------------------------------------------------
 
-#include "../SourceExpression.hpp"
+#ifndef HPP_StoreType_
+#define HPP_StoreType_
 
-#include "../SourceContext.hpp"
-#include "../SourceException.hpp"
-#include "../SourceVariable.hpp"
+#include <string>
 
 
 //----------------------------------------------------------------------------|
@@ -33,42 +32,20 @@
 //
 
 //
-// SourceExpression_ValueFunction
+// StoreType
 //
-class SourceExpression_ValueFunction : public SourceExpression
+enum StoreType
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE
-   (SourceExpression_ValueFunction, SourceExpression);
-
-public:
-   //
-   // ::SourceExpression_ValueFunction
-   //
-   SourceExpression_ValueFunction(std::string const &_name, SRCEXP_EXPR_PARM)
-    : Super(SRCEXP_EXPR_PASS), name(_name)
-   {
-   }
-
-   //
-   // ::getType
-   //
-   virtual CounterReference<VariableType> getType() const
-   {
-      ERROR_NP("designator has no type");
-   }
-
-   //
-   // ::makeExpressionFunction
-   //
-   virtual SourceExpression::Pointer makeExpressionFunction
-   (std::vector<CounterPointer<VariableType> > const &types)
-   {
-      SourceVariable::Pointer func = context->getFunction(name, pos, types);
-      return create_value_variable(func, context, pos);
-   }
-
-private:
-   std::string name;
+   STORE_STATIC,
+   STORE_AUTO,
+   STORE_CONST,
+   STORE_REGISTER,
+   STORE_MAPREGISTER,
+   STORE_WORLDREGISTER,
+   STORE_GLOBALREGISTER,
+   STORE_MAPARRAY,
+   STORE_WORLDARRAY,
+   STORE_GLOBALARRAY,
 };
 
 
@@ -76,13 +53,13 @@ private:
 // Global Functions                                                           |
 //
 
-//
-// SourceExpression::create_value_function
-//
-SRCEXP_EXPRVAL_DEFN(s, function)
-{
-   return new SourceExpression_ValueFunction(value, context, pos);
-}
+std::string const &make_string(StoreType store);
 
-// EOF
+StoreType store_staticregister();
+StoreType store_staticarray();
+
+StoreType store_autoregister();
+StoreType store_autoarray();
+
+#endif//HPP_StoreType_
 

@@ -30,6 +30,7 @@
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../SourceVariable.hpp"
 #include "../VariableType.hpp"
 
 #include <sstream>
@@ -79,13 +80,13 @@ static SourceExpression::Pointer make_script
 {
    bool externVis = linkSpec != SourceExpressionDS::LS_INTERN;
 
-   // scriptArgClass
-   SourceVariable::StorageClass scriptArgClass;
+   // scriptArgStore
+   StoreType scriptArgStore;
 
    if (option_script_autoargs)
-      scriptArgClass = SourceVariable::SC_AUTO;
+      scriptArgStore = STORE_AUTO;
    else
-      scriptArgClass = SourceVariable::SC_REGISTER;
+      scriptArgStore = STORE_REGISTER;
 
    // scriptContext
    SourceContext::Pointer scriptContext;
@@ -122,7 +123,7 @@ static SourceExpression::Pointer make_script
    VariableType::Pointer scriptReturn;
    SourceExpressionDS::make_expression_arglist
       (in, blocks, context, &scriptArgTypes, &scriptArgNames, &scriptArgCount,
-       scriptContext, &scriptReturn, scriptArgClass);
+       scriptContext, &scriptReturn, scriptArgStore);
 
    // scriptNumber
    bigsint scriptNumber;

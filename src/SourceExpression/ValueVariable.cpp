@@ -27,6 +27,7 @@
 #include "../ObjectExpression.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
+#include "../SourceVariable.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
@@ -167,6 +168,22 @@ SRCEXP_EXPRVAL_DEFN(i, schar)
 SRCEXP_EXPRVAL_DEFN(i, short)
 {
    return create_int(value, VariableType::get_bt_short(), context, pos);
+}
+
+//
+// SourceExpression::create_value_stackptr
+//
+SRCEXP_EXPRVAL_DEFN(, stackptr)
+{
+   ObjectExpression::Pointer stackptrVarData = ObjectExpression::
+      create_value_int(option_addr_stack, pos);
+
+   VariableType::Reference stackptrVarType = VariableType::get_bt_uint();
+
+   SourceVariable::Pointer stackptrVar = SourceVariable::create_variable
+      (stackptrVarType, stackptrVarData, STORE_WORLDREGISTER, pos);
+
+   return create_value_variable(stackptrVar, context, pos);
 }
 
 //

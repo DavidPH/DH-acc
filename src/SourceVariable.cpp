@@ -25,19 +25,11 @@
 
 #include "ObjectData.hpp"
 #include "ObjectExpression.hpp"
-#include "ost_type.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "SourceExpression.hpp"
 #include "VariableData.hpp"
 #include "VariableType.hpp"
-
-
-//----------------------------------------------------------------------------|
-// Global Variables                                                           |
-//
-
-extern bool option_string_tag;
 
 
 //----------------------------------------------------------------------------|
@@ -47,68 +39,42 @@ extern bool option_string_tag;
 //
 // SourceVariable::SourceVariable
 //
-SourceVariable::SourceVariable
-(std::string const &_nameSource, VariableType *_type, ObjectExpression *_expr,
- SourcePosition const &_position)
- : position(_position), nameSource(_nameSource), expr(_expr), type(_type),
-   sc(SC_CONSTANT)
+SourceVariable::SourceVariable(std::string const &_nameSrc, VariableType *_type,
+   std::string const &_nameObj, ObjectExpression *_expr,
+   SourcePosition const &_pos)
+ : pos(_pos), nameObj(_nameObj), nameSrc(_nameSrc), expr(_expr), type(_type),
+   store(STORE_CONST)
 {
 }
 
 //
 // SourceVariable::SourceVariable
 //
-SourceVariable::SourceVariable
-(std::string const &_nameSource, VariableType *_type,
- std::string const &_nameObject, SourcePosition const &_position)
- : position(_position), nameObject(_nameObject), nameSource(_nameSource),
-   type(_type), sc(SC_CONSTANT)
+SourceVariable::SourceVariable(std::string const &_nameSrc, VariableType *_type,
+   std::string const &_nameObj, ObjectExpression *_expr, StoreType _store,
+   SourcePosition const &_pos)
+ : pos(_pos), nameObj(_nameObj), nameSrc(_nameSrc), expr(_expr), type(_type),
+   store(_store)
 {
-}
-
-//
-// ourceVariable::SourceVariable
-//
-SourceVariable::SourceVariable
-(std::string const &_nameSource, VariableType *_type,
- std::string const &_nameObject, StorageClass _sc,
- SourcePosition const &_position)
- : position(_position), nameObject(_nameObject), nameSource(_nameSource),
-   type(_type), sc(_sc)
-{
-   switch (sc)
+   switch (store)
    {
-   case SC_AUTO:
-   case SC_CONSTANT:
-   case SC_STATIC:
+   case STORE_STATIC:
+   case STORE_AUTO:
+   case STORE_CONST:
+      type = type->setStorage(STORE_STATIC);
       break;
 
-   case SC_REGISTER:
-      type = type->setStorage(VariableType::ST_REGISTER);
+   case STORE_REGISTER:
+   case STORE_MAPREGISTER:
+   case STORE_WORLDREGISTER:
+   case STORE_GLOBALREGISTER:
+      type = type->setStorage(store);
       break;
 
-   case SC_REGISTER_GLOBAL:
-      type = type->setStorage(VariableType::ST_GLOBALREGISTER);
-      break;
-
-   case SC_REGISTER_MAP:
-      type = type->setStorage(VariableType::ST_MAPREGISTER);
-      break;
-
-   case SC_REGISTER_WORLD:
-      type = type->setStorage(VariableType::ST_WORLDREGISTER);
-      break;
-
-   case SC_REGISTERARRAY_GLOBAL:
-      type = type->setStorage(VariableType::ST_GLOBALARRAY, nameObject);
-      break;
-
-   case SC_REGISTERARRAY_MAP:
-      type = type->setStorage(VariableType::ST_MAPARRAY, nameObject);
-      break;
-
-   case SC_REGISTERARRAY_WORLD:
-      type = type->setStorage(VariableType::ST_WORLDARRAY, nameObject);
+   case STORE_MAPARRAY:
+   case STORE_WORLDARRAY:
+   case STORE_GLOBALARRAY:
+      type = type->setStorage(store, nameObj);
       break;
    }
 }
@@ -121,217 +87,72 @@ SourceVariable::~SourceVariable()
 }
 
 //
-// SourceVariable::create_constant
-//
-SourceVariable::Pointer SourceVariable::create_constant
-(std::string const &nameSource, VariableType *type, ObjectExpression *expr,
- SourcePosition const &position)
-{
-   return new SourceVariable(nameSource, type, expr, position);
-}
-
-//
-// SourceVariable::create_constant
-//
-SourceVariable::Pointer SourceVariable::create_constant
-(std::string const &nameSource, VariableType *type,
- std::string const &nameObject, SourcePosition const &position)
-{
-   return new SourceVariable(nameSource, type, nameObject, position);
-}
-
-//
-// SourceVariable::create_literal
-//
-SourceVariable::Pointer SourceVariable::create_literal
-(VariableType *type, ObjectExpression *expr, SourcePosition const &position)
-{
-   return new SourceVariable("", type, expr, position);
-}
-
-//
-// SourceVariable::create_literal
-//
-SourceVariable::Pointer SourceVariable::create_literal
-(VariableType *type, std::string const &nameObject,
- SourcePosition const &position)
-{
-   return new SourceVariable("", type, nameObject, position);
-}
-
-//
-// SourceVariable::create_variable
-//
-SourceVariable::Pointer SourceVariable::create_variable
-(std::string const &nameSource, VariableType *type,
- std::string const &nameObject, StorageClass sc, SourcePosition const &position)
-{
-   return new SourceVariable(nameSource, type, nameObject, sc, position);
-}
-
-//
-// SourceVariable::get_StorageClass
-//
-SourceVariable::StorageClass SourceVariable::get_StorageClass
-(std::string const &data, SourcePosition const &pos)
-{
-   if (data == "auto")
-      return SC_AUTO;
-
-   if (data == "register")
-      return SC_REGISTER;
-
-   if (data == "static")
-      return SC_STATIC;
-
-   if (data == "__autoreg")
-      return get_sc_autoreg();
-
-   if (data == "__staticreg")
-      return get_sc_staticreg();
-
-   if (data == "__mapregister")
-      return SC_REGISTER_MAP;
-
-   if (data == "__worldregister")
-      return SC_REGISTER_WORLD;
-
-   if (data == "__globalregister")
-      return SC_REGISTER_GLOBAL;
-
-   if (data == "__maparray")
-      return SC_REGISTERARRAY_MAP;
-
-   if (data == "__worldarray")
-      return SC_REGISTERARRAY_WORLD;
-
-   if (data == "__globalarray")
-      return SC_REGISTERARRAY_GLOBAL;
-
-   ERROR_P("invalid storage-class: %s", data.c_str());
-}
-
-//
-// SourceVariable::get_sc_autoreg
-//
-SourceVariable::StorageClass SourceVariable::get_sc_autoreg()
-{
-   if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
-      return SC_REGISTER;
-
-   return SC_AUTO;
-}
-
-//
-// SourceVariable::get_sc_staticreg
-//
-SourceVariable::StorageClass SourceVariable::get_sc_staticreg()
-{
-   if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
-      return SC_REGISTER_MAP;
-
-   return SC_STATIC;
-}
-
-//
-// SourceVariable::getClass
-//
-SourceVariable::StorageClass SourceVariable::getClass() const
-{
-   return sc;
-}
-
-//
 // SourceVariable::getData
 //
 VariableData::Pointer SourceVariable::getData() const
 {
    ObjectExpression::Pointer address;
    SourceExpression::Pointer arrbase;
-   bigsint                   size = type->getSize(position);
+   bigsint                   size = type->getSize(pos);
 
    if (expr)
       address = expr;
    else
-      address = ObjectExpression::create_value_symbol(nameObject, position);
+      address = ObjectExpression::create_value_symbol(nameObj, pos);
 
-   switch (sc)
+   switch (store)
    {
-   case SC_AUTO:
+   case STORE_STATIC:
+      return VariableData::create_static(size, address);
+
+   case STORE_AUTO:
       return VariableData::create_auto(size, address);
 
-   case SC_CONSTANT:
+   case STORE_CONST:
       return VariableData::create_literal(size, address);
 
-   case SC_REGISTER:
+   case STORE_REGISTER:
       return VariableData::create_register
-             (size, VariableData::SR_LOCAL, address);
+         (size, VariableData::SR_LOCAL, address);
 
-   case SC_REGISTER_GLOBAL:
+   case STORE_MAPREGISTER:
       return VariableData::create_register
-             (size, VariableData::SR_GLOBAL, address);
+         (size, VariableData::SR_MAP, address);
 
-   case SC_REGISTER_MAP:
+   case STORE_WORLDREGISTER:
       return VariableData::create_register
-             (size, VariableData::SR_MAP, address);
+         (size, VariableData::SR_WORLD, address);
 
-   case SC_REGISTER_WORLD:
+   case STORE_GLOBALREGISTER:
       return VariableData::create_register
-             (size, VariableData::SR_WORLD, address);
+         (size, VariableData::SR_GLOBAL, address);
 
-   case SC_REGISTERARRAY_GLOBAL:
-      if (ObjectData_Array::meta_global(nameObject))
+   case STORE_MAPARRAY:
+      if (ObjectData_Array::meta_map(nameObj))
          arrbase = SourceExpression::create_value_int
-            (1, SourceContext::global_context, position);
-
-      return VariableData::create_registerarray
-         (size, VariableData::SRA_GLOBAL, address, arrbase);
-
-   case SC_REGISTERARRAY_MAP:
-      if (ObjectData_Array::meta_map(nameObject))
-         arrbase = SourceExpression::create_value_int
-            (1, SourceContext::global_context, position);
+            (1, SourceContext::global_context, pos);
 
       return VariableData::create_registerarray
          (size, VariableData::SRA_MAP, address, arrbase);
 
-   case SC_REGISTERARRAY_WORLD:
-      if (ObjectData_Array::meta_world(nameObject))
+   case STORE_WORLDARRAY:
+      if (ObjectData_Array::meta_world(nameObj))
          arrbase = SourceExpression::create_value_int
-            (1, SourceContext::global_context, position);
+            (1, SourceContext::global_context, pos);
 
       return VariableData::create_registerarray
          (size, VariableData::SRA_WORLD, address, arrbase);
 
-   case SC_STATIC:
-      return VariableData::create_static(size, address);
+   case STORE_GLOBALARRAY:
+      if (ObjectData_Array::meta_global(nameObj))
+         arrbase = SourceExpression::create_value_int
+            (1, SourceContext::global_context, pos);
+
+      return VariableData::create_registerarray
+         (size, VariableData::SRA_GLOBAL, address, arrbase);
    }
 
-   ERROR(position, "invalid SC");
-}
-
-//
-// SourceVariable::getNameObject
-//
-std::string const & SourceVariable::getNameObject() const
-{
-   return nameObject;
-}
-
-//
-// SourceVariable::getNameSource
-//
-std::string const & SourceVariable::getNameSource() const
-{
-   return nameSource;
-}
-
-//
-// SourceVariable::getType
-//
-VariableType::Reference SourceVariable::getType() const
-{
-   return type;
+   ERROR_NP("invalid store");
 }
 
 // EOF

@@ -84,7 +84,7 @@ void SourceExpression::make_objects_call_function
 
    // Calculate total stack offset.
    ObjectExpression::Pointer ostack =
-      objects->getValueAdd(context->getLimit(SourceVariable::SC_AUTO), retnSize);
+      objects->getValueAdd(context->getLimit(STORE_AUTO), retnSize);
 
    // Advance the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
@@ -148,7 +148,7 @@ void SourceExpression::make_objects_call_function
 
    // Calculate total stack offset.
    ObjectExpression::Pointer ostack =
-      objects->getValueAdd(context->getLimit(SourceVariable::SC_AUTO), retnSize);
+      objects->getValueAdd(context->getLimit(STORE_AUTO), retnSize);
 
    // Advance the stack-pointer.
    objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);

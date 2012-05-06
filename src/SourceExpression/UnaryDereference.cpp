@@ -26,6 +26,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
 #include "../ost_type.hpp"
+#include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
@@ -57,12 +58,13 @@ public:
       std::string const      &area = type->getStoreArea();
 
       ObjectExpression::Pointer address;
+      SourceExpression::Pointer offset;
       VariableData::SectionR sectionR;
       VariableData::SectionRA sectionRA;
 
       switch (type->getStoreType())
       {
-      case VariableType::ST_ADDR:
+      case STORE_STATIC:
          if (expr->canMakeObject())
          {
             address = expr->makeObject();
@@ -74,36 +76,53 @@ public:
             return VariableData::create_pointer(size, address, expr);
          }
 
-      case VariableType::ST_REGISTER:
+      case STORE_AUTO:
+         if (expr->canMakeObject())
+         {
+            address = expr->makeObject();
+            return VariableData::create_auto(size, address);
+         }
+         else
+         {
+            address = ObjectExpression::create_value_int(0, pos);
+            offset = SourceExpression::create_value_stackptr(context, pos);
+            offset = SourceExpression::create_binary_add(expr, offset, context, pos);
+            return VariableData::create_pointer(size, address, offset);
+         }
+
+      case STORE_CONST:
+         ERROR_NP("STORE_CONST");
+
+      case STORE_REGISTER:
          sectionR = VariableData::SR_LOCAL;
       case_register:
          address = expr->makeObject();
          return VariableData::create_register(size, sectionR, address);
 
-      case VariableType::ST_MAPREGISTER:
+      case STORE_MAPREGISTER:
          sectionR = VariableData::SR_MAP;
          goto case_register;
 
-      case VariableType::ST_WORLDREGISTER:
+      case STORE_WORLDREGISTER:
          sectionR = VariableData::SR_WORLD;
          goto case_register;
 
-      case VariableType::ST_GLOBALREGISTER:
+      case STORE_GLOBALREGISTER:
          sectionR = VariableData::SR_GLOBAL;
          goto case_register;
 
-      case VariableType::ST_MAPARRAY:
+      case STORE_MAPARRAY:
          sectionRA = VariableData::SRA_MAP;
       case_array:
          address = ObjectExpression::create_value_symbol(area, pos);
          return VariableData::create_registerarray
                 (size, sectionRA, address, expr);
 
-      case VariableType::ST_WORLDARRAY:
+      case STORE_WORLDARRAY:
          sectionRA = VariableData::SRA_WORLD;
          goto case_array;
 
-      case VariableType::ST_GLOBALARRAY:
+      case STORE_GLOBALARRAY:
          sectionRA = VariableData::SRA_GLOBAL;
          goto case_array;
       }

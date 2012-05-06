@@ -30,6 +30,7 @@
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
+#include "../SourceVariable.hpp"
 #include "../VariableType.hpp"
 
 
@@ -81,13 +82,13 @@ static SourceExpression::Pointer make_func
  SourceExpression::Vector *blocks, SourceContext *context,
  SourceExpressionDS::LinkageSpecifier linkSpec, bool externDef)
 {
-   // funcArgClass
-   SourceVariable::StorageClass funcArgClass;
+   // funcArgStore
+   StoreType funcArgStore;
 
    if (option_function_autoargs || target_type != TARGET_ZDoom)
-      funcArgClass = SourceVariable::SC_AUTO;
+      funcArgStore = STORE_AUTO;
    else
-      funcArgClass = SourceVariable::SC_REGISTER;
+      funcArgStore = STORE_REGISTER;
 
    // funcContext
    SourceContext::Pointer funcContext;
@@ -104,7 +105,7 @@ static SourceExpression::Pointer make_func
    VariableType::Pointer funcReturn;
    SourceExpressionDS::make_expression_arglist
    (in, blocks, context, &funcArgTypes, &funcArgNames, &funcArgCount,
-    funcContext, &funcReturn, funcArgClass);
+    funcContext, &funcReturn, funcArgStore);
    // Don't count automatic variable args.
    if (option_function_autoargs) funcArgCount = 0;
 

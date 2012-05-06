@@ -111,8 +111,7 @@ void ObjectData_Function::iterate(IterFunc iterFunc, std::ostream *out)
    for (iter = function_table.begin(); iter != function_table.end(); ++iter)
    {
       if (iter->second.context)
-         iter->second.varCount =
-            iter->second.context->getLimit(SourceVariable::SC_REGISTER);
+         iter->second.varCount = iter->second.context->getLimit(STORE_REGISTER);
 
       iterFunc(out, iter->second);
    }
@@ -170,7 +169,7 @@ void write_object(std::ostream *out, ObjectData_Function const *in)
    if (in->context)
    {
       const_cast<ObjectData_Function *>(in)->varCount =
-         in->context->getLimit(SourceVariable::SC_REGISTER);
+         in->context->getLimit(STORE_REGISTER);
    }
 
    write_object(out, &in->label);

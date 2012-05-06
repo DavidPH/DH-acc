@@ -128,6 +128,7 @@ add_executable(DH-acc
 	SourceExpressionDS/make_expression_single_switch.cpp
 	SourceExpressionDS/make_expression_single_symbol.cpp
 	SourceExpressionDS/make_expression_single_variable.cpp
+   SourceExpressionDS/make_expression_store.cpp
 	SourceExpressionDS/make_expression_type.cpp
 	SourcePosition.cpp
 	SourceStream.cpp
@@ -136,6 +137,7 @@ add_executable(DH-acc
 #  SourceTokenizerC.cpp
 	SourceTokenizerDS.cpp
 	SourceVariable.cpp
+   StoreType.cpp
 	VariableData.cpp
 	VariableType.cpp
 )
