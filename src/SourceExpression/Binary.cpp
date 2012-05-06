@@ -116,7 +116,7 @@ void SourceExpression_Binary::doAssignBase
          objects->addToken(OCODE_STACK_DUP32);
    }
 
-   create_value_cast_implicit(exprR, typeL, context, pos)
+   create_value_cast_explicit(exprR, typeL, context, pos)
    ->makeObjects(objects, tmp);
 
    // MT_POINTER addressing.
@@ -158,10 +158,10 @@ void SourceExpression_Binary::doEvaluateBase
 
    make_objects_memcpy_prep(objects, dst, src, pos);
 
-   create_value_cast_implicit(exprL, type, context, pos)
+   create_value_cast_explicit(exprL, type, context, pos)
    ->makeObjects(objects, src);
 
-   create_value_cast_implicit(exprR, type, context, pos)
+   create_value_cast_explicit(exprR, type, context, pos)
    ->makeObjects(objects, src);
 
    objects->addToken(ocode);

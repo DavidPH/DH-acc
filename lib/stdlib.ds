@@ -285,8 +285,8 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 
    if (!newptr) return NULL;
 
-   char *it1 = ptr;
-   char *it2 = newptr;
+   char *it1 = (char *)ptr;
+   char *it2 = (char *)newptr;
    char *end = it1 + block->used;
 
    while (it1 != end) {*it1++ = *it2++;};
@@ -354,8 +354,8 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 __extfunc qsort(void *base, size_t nmemb, size_t size,
  __script_t(void const *, void const *) -> int compar) -> void
 {
-   char const *iter = (char const *)base;
-   char const *end = (char const *)base + nmemb*size;
+   char *iter = (char *)base;
+   char *end = (char *)base + nmemb*size;
 
    while (iter != end)
    {
@@ -366,7 +366,7 @@ __extfunc qsort(void *base, size_t nmemb, size_t size,
          __memswp(iter, iter+size, size);
 
          // Reset the iterator.
-         if (iter != (char const *)base) (iter -= size);
+         if (iter != base) (iter -= size);
 
          continue;
       };

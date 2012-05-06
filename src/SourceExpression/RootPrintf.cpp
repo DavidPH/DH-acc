@@ -191,6 +191,23 @@ private:
    }
 
    //
+   // ::makeFormat_p
+   //
+   void makeFormat_p(ObjectVector *objects)
+   {
+      SourceExpression::Pointer argExpr = nextExpr();
+      VariableType::Reference   argType = argExpr->getType();
+      VariableType::BasicType   argBT   = argType->getBasicType();
+      bigsint                   argSize = argType->getSize(pos);
+
+      if (argBT != VariableType::BT_POINTER)
+         ERROR_NP("expected pointer got %s", make_string(argType).c_str());
+
+      argExpr->makeObjects(objects, VariableData::create_stack(argSize));
+      objects->addToken(OCODE_ACSP_NUM_HEX32U);
+   }
+
+   //
    // ::makeFormat_s
    //
    void makeFormat_s(ObjectVector *objects)
@@ -201,6 +218,13 @@ private:
 
       VariableData::Pointer tmp =
          VariableData::create_stack(argType->getSize(pos));
+
+      if (argBT == VariableType::BT_STRING)
+      {
+         argExpr->makeObjects(objects, tmp);
+         objects->addToken(OCODE_ACSP_STRING);
+         return;
+      }
 
       if (argBT == VariableType::BT_ARRAY)
       {
@@ -314,11 +338,6 @@ private:
                objects->addToken(OCODE_ACSP_PLAYER_NAME);
                continue;
 
-            case 'S':
-               makeExpr(objects, VariableType::get_bt_string());
-               objects->addToken(OCODE_ACSP_STRING);
-               continue;
-
             case 'X':
                makeExpr(objects, VariableType::get_bt_fixed());
                objects->addToken(OCODE_ACSP_NUM_DEC32F);
@@ -335,10 +354,7 @@ private:
                continue;
 
             case 'p':
-               makeExpr(objects, VariableType::get_bt_void()
-                                 ->addQualifier(VariableType::QUAL_CONST)
-                                 ->getPointer());
-               objects->addToken(OCODE_ACSP_NUM_HEX32U);
+               makeFormat_p(objects);
                continue;
 
             case 's':

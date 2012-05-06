@@ -85,88 +85,139 @@ bool SourceExpression::canMakeObject() const
 // SourceExpression::get_promoted_type
 //
 VariableType::Reference SourceExpression::
-get_promoted_type(VariableType *type1, VariableType *type2,
+get_promoted_type(VariableType *_type1, VariableType *_type2,
                   SourcePosition const &)
 {
+   VariableType::Reference type1(_type1);
+   VariableType::Reference type2(_type2);
+
    VariableType::BasicType bt1 = type1->getBasicType();
    VariableType::BasicType bt2 = type2->getBasicType();
 
-   if (type1 == type2)
+   // Arrays have special promotion.
+   if (bt1 == VariableType::BT_ARRAY && bt2 == VariableType::BT_ARRAY)
    {
-      // Some types promote even if they're already the same.
-      if (bt1 == VariableType::BT_ENUM) return VariableType::get_bt_int();
+      if (type1 == type2) return type1;
 
-      return static_cast<VariableType::Reference>(type1);
+      return VariableType::get_bt_void();
    }
 
-   if (bt1 == VariableType::BT_VOID) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_VOID) return type2->getUnqualified();
+   // Decay arrays to pointers and de-qualify everything else.
+   if (bt1 == VariableType::BT_ARRAY)
+   {
+      type1 = type1->getReturn()->getPointer();
+      bt1 = VariableType::BT_POINTER;
+   }
+   else
+      type1 = type1->getUnqualified();
 
-   if (bt1 == VariableType::BT_POINTER) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_POINTER) return type2->getUnqualified();
+   if (bt2 == VariableType::BT_ARRAY)
+   {
+      type2 = type2->getReturn()->getPointer();
+      bt2 = VariableType::BT_POINTER;
+   }
+   else
+      type2 = type2->getUnqualified();
 
-   if (bt1 == VariableType::BT_ARRAY) return type1->getReturn()->getPointer();
-   if (bt2 == VariableType::BT_ARRAY) return type2->getReturn()->getPointer();
+   // Pointers have special promotion.
+   if (bt1 == VariableType::BT_POINTER && bt2 == VariableType::BT_POINTER)
+   {
+      if (type1 == type2) return type1;
 
-   if (bt1 == VariableType::BT_LLFLOAT) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_LLFLOAT) return type2->getUnqualified();
+      VariableType::Reference retn1 = type1->getReturn();
+      VariableType::Reference retn2 = type2->getReturn();
 
-   if (bt1 == VariableType::BT_LFLOAT) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_LFLOAT) return type2->getUnqualified();
+      // If one is more qualified than the other, use it.
+      if (retn1->getQualifiers())
+      {
+         if (!retn2->getQualifiers())
+            return type1->getPointer();
 
-   if (bt1 == VariableType::BT_FLOAT) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_FLOAT) return type2->getUnqualified();
+         if (!retn2->getQualifier(retn1->getQualifiers()))
+            return type1;
 
-   if (bt1 == VariableType::BT_FIXED) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_FIXED) return type2->getUnqualified();
+         return type2;
+      }
+      else if (retn2->getQualifiers())
+         return type2;
 
-   if (bt1 == VariableType::BT_REAL) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_REAL) return type2->getUnqualified();
+      // Neither has qualifiers, so go by the basic types.
+      bt1 = retn1->getBasicType();
+      bt2 = retn2->getBasicType();
 
-   if (bt1 == VariableType::BT_LLONG) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_LLONG) return type2->getUnqualified();
+      // Promote to void.
+      if (bt1 == VariableType::BT_VOID) return type1;
+      if (bt2 == VariableType::BT_VOID) return type2;
 
-   if (bt1 == VariableType::BT_ULLONG) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_ULLONG) return type2->getUnqualified();
+      // Nothing seems better, so just return the left-hand type.
+      return type1;
+   }
 
-   if (bt1 == VariableType::BT_LONG) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_LONG) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_VOID) return type1;
+   if (bt2 == VariableType::BT_VOID) return type2;
 
-   if (bt1 == VariableType::BT_ULONG) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_ULONG) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_POINTER) return type1;
+   if (bt2 == VariableType::BT_POINTER) return type2;
 
-   if (bt1 == VariableType::BT_INT) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_INT) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_LLFLOAT) return type1;
+   if (bt2 == VariableType::BT_LLFLOAT) return type2;
 
-   if (bt1 == VariableType::BT_UINT) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_UINT) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_LFLOAT) return type1;
+   if (bt2 == VariableType::BT_LFLOAT) return type2;
 
-   if (bt1 == VariableType::BT_SHORT) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_SHORT) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_FLOAT) return type1;
+   if (bt2 == VariableType::BT_FLOAT) return type2;
 
-   if (bt1 == VariableType::BT_USHORT) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_USHORT) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_FIXED) return type1;
+   if (bt2 == VariableType::BT_FIXED) return type2;
 
-   if (bt1 == VariableType::BT_SCHAR) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_SCHAR) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_REAL) return type1;
+   if (bt2 == VariableType::BT_REAL) return type2;
 
-   if (bt1 == VariableType::BT_UCHAR) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_UCHAR) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_LLONG) return type1;
+   if (bt2 == VariableType::BT_LLONG) return type2;
 
-   if (bt1 == VariableType::BT_CHAR) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_CHAR) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_ULLONG) return type1;
+   if (bt2 == VariableType::BT_ULLONG) return type2;
+
+   if (bt1 == VariableType::BT_LONG) return type1;
+   if (bt2 == VariableType::BT_LONG) return type2;
+
+   if (bt1 == VariableType::BT_ULONG) return type1;
+   if (bt2 == VariableType::BT_ULONG) return type2;
+
+   if (bt1 == VariableType::BT_INT) return type1;
+   if (bt2 == VariableType::BT_INT) return type2;
+
+   if (bt1 == VariableType::BT_UINT) return type1;
+   if (bt2 == VariableType::BT_UINT) return type2;
+
+   if (bt1 == VariableType::BT_SHORT) return type1;
+   if (bt2 == VariableType::BT_SHORT) return type2;
+
+   if (bt1 == VariableType::BT_USHORT) return type1;
+   if (bt2 == VariableType::BT_USHORT) return type2;
+
+   if (bt1 == VariableType::BT_SCHAR) return type1;
+   if (bt2 == VariableType::BT_SCHAR) return type2;
+
+   if (bt1 == VariableType::BT_UCHAR) return type1;
+   if (bt2 == VariableType::BT_UCHAR) return type2;
+
+   if (bt1 == VariableType::BT_CHAR) return type1;
+   if (bt2 == VariableType::BT_CHAR) return type2;
 
    if (bt1 == VariableType::BT_ENUM) return VariableType::get_bt_int();
    if (bt2 == VariableType::BT_ENUM) return VariableType::get_bt_int();
 
-   if (bt1 == VariableType::BT_STRING) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_STRING) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_STRING) return type1;
+   if (bt2 == VariableType::BT_STRING) return type2;
 
-   if (bt1 == VariableType::BT_BOOLHARD) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_BOOLHARD) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_BOOLHARD) return type1;
+   if (bt2 == VariableType::BT_BOOLHARD) return type2;
 
-   if (bt1 == VariableType::BT_BOOLSOFT) return type1->getUnqualified();
-   if (bt2 == VariableType::BT_BOOLSOFT) return type2->getUnqualified();
+   if (bt1 == VariableType::BT_BOOLSOFT) return type1;
+   if (bt2 == VariableType::BT_BOOLSOFT) return type2;
 
    return VariableType::get_bt_void();
 }

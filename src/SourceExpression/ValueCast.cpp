@@ -108,7 +108,7 @@ SRCEXP_EXPRVAL_DEFN(et, cast_force)
 SRCEXP_EXPRVAL_DEFN(et, cast_implicit)
 {
    return new SourceExpression_ValueCast
-   (VariableType::CAST_EXPLICIT, expr, type, context, pos);
+   (VariableType::CAST_IMPLICIT, expr, type, context, pos);
 }
 
 //

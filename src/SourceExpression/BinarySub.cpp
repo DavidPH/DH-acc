@@ -110,7 +110,7 @@ SourceExpression::Pointer SourceExpression::create_binary_sub
    // Slight hack for pointer arithmetic.
    if (btL == VariableType::BT_POINTER && btR == VariableType::BT_POINTER)
    {
-      expr = create_value_cast_implicit
+      expr = create_value_cast_explicit
          (expr, VariableType::get_bt_int(), context, pos);
 
       bigsint retnSize = typeL->getReturn()->getSize(pos);

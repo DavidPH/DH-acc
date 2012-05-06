@@ -399,9 +399,9 @@ VariableData::Pointer src = VariableData::create_stack(size);
 #define EVALUATE_OBJECTS()                                              \
 VariableType::Reference type = getType();                               \
 ObjectExpression::Pointer objL =                                        \
-   create_value_cast_implicit(exprL, type, context, pos)->makeObject(); \
+   create_value_cast_explicit(exprL, type, context, pos)->makeObject(); \
 ObjectExpression::Pointer objR =                                        \
-   create_value_cast_implicit(exprR, type, context, pos)->makeObject();
+   create_value_cast_explicit(exprR, type, context, pos)->makeObject();
 
 
 //----------------------------------------------------------------------------|

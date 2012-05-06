@@ -1101,6 +1101,10 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       if (srcBT == BT_NULLPTR && dstBT == BT_POINTER)
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
+      // pointer->boolean
+      if (srcBT == BT_POINTER && (dstBT == BT_BOOLHARD || dstBT == BT_BOOLSOFT))
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
       // arithmetic<->arithmetic
       if (is_bt_arithmetic(srcBT) && is_bt_arithmetic(dstBT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
@@ -1223,6 +1227,14 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       // Losing qualifiers with differing types, it's time for explicit!
       if (!dstR->getQualifier(srcR->getQualifiers()))
          return CAST_EXPLICIT;
+
+      // Can go to void* implicitly.
+      if (dstR->getBasicType() == BT_VOID)
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
+      // Can come from void* via static.
+      if (dstR->getBasicType() == BT_VOID)
+         return CAST_EXPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
       // Not losing qualifiers, but still differing types.
       return CAST_EXPLICIT|CAST_REINTERPRET;

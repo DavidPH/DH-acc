@@ -333,12 +333,11 @@ operator printf
    %K (int) keybind (ACS k:)
    %L (__string) LANGUAGE-lump entry (ACS l:)
    %N (int) name (ACS n:)
-   %S (__string)
    %X (__fixed)
    %c (char)
    %i (int)
-   %p (void const *)
-   %s (char *) accepts extended-pointers
+   %p (void *) accepts extended-pointers
+   %s (char *) accepts extended-pointers and __string
    %u (unsigned)
   Supported operations:
    __printf_bold -> void
