@@ -171,22 +171,6 @@ SRCEXP_EXPRVAL_DEFN(i, short)
 }
 
 //
-// SourceExpression::create_value_stackptr
-//
-SRCEXP_EXPRVAL_DEFN(, stackptr)
-{
-   ObjectExpression::Pointer stackptrVarData = ObjectExpression::
-      create_value_int(option_addr_stack, pos);
-
-   VariableType::Reference stackptrVarType = VariableType::get_bt_uint();
-
-   SourceVariable::Pointer stackptrVar = SourceVariable::create_variable
-      (stackptrVarType, stackptrVarData, STORE_WORLDREGISTER, pos);
-
-   return create_value_variable(stackptrVar, context, pos);
-}
-
-//
 // SourceExpression::create_value_string
 //
 SRCEXP_EXPRVAL_DEFN(s, string)

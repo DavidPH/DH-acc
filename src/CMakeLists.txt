@@ -105,6 +105,7 @@ add_executable(DH-acc
 	SourceExpression/ValueData.cpp
    SourceExpression/ValueFunction.cpp
 	SourceExpression/ValueMember.cpp
+   SourceExpression/ValueStackptr.cpp
 	SourceExpression/ValueVariable.cpp
 #	SourceExpressionACS.cpp
 #	SourceExpressionACS/Base.cpp
