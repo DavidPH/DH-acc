@@ -27,6 +27,7 @@
 #include "../ObjectExpression.hpp"
 #include "../ost_type.hpp"
 #include "../SourceContext.hpp"
+#include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerDS.hpp"
 #include "../SourceVariable.hpp"
@@ -79,10 +80,42 @@ static SourceExpression::Pointer make_var
       SourceVariable::create_variable(nameSrc, type, nameObj, store.type, pos);
 
    // Add variable to context.
-   if (store.area)
-      context->addVar(var, externDef, externVis, store.area->resolveInt());
-   else
-      context->addVar(var, externDef, externVis);
+   switch (store.type)
+   {
+   case STORE_MAPARRAY:
+   case STORE_WORLDARRAY:
+   case STORE_GLOBALARRAY:
+      if (store.area)
+         context->addVar(var, externDef, externVis, store.area->resolveInt());
+      else
+         context->addVar(var, externDef, externVis);
+
+      if (in->peekType(SourceTokenC::TT_OP_AT))
+         ERROR_P("cannot have offset for store-type %s",
+            make_string(store.type).c_str());
+
+      break;
+
+
+   default:
+      if (store.area)
+         ERROR_P("cannot have store-area for store-type %s",
+            make_string(store.type).c_str());
+
+      if (in->peekType(SourceTokenC::TT_OP_AT))
+      {
+         in->get(SourceTokenC::TT_OP_AT);
+
+         bigsint addr = SourceExpressionDS::make_expression_single
+            (in, blocks, context)->makeObject()->resolveInt();
+
+         context->addVar(var, externDef, externVis, addr);
+      }
+      else
+         context->addVar(var, externDef, externVis);
+
+      break;
+   }
 
    // Generate expression.
    SourceExpression::Pointer expr =
