@@ -190,6 +190,9 @@ static std::ostream &operator <<
    if (type->getQualifier(VariableType::QUAL_RESTRICT))
       out << " restrict";
 
+   if (type->getStoreType() != STORE_STATIC)
+      out << ' ' << make_string(type->getStoreType());
+
    return out;
 }
 
@@ -1183,6 +1186,7 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       return CAST_EXPLICIT|CAST_REINTERPRET;
 
    case BT_POINTER:
+   {
       Reference dstR = dst->getReturn();
       Reference srcR = src->getReturn();
 
@@ -1193,7 +1197,17 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       // Altering storage qualifiers must be explicit. (Not even const_cast.)
       if (srcR->getStoreType() != dstR->getStoreType() ||
           srcR->getStoreArea() != dstR->getStoreArea())
-         return CAST_EXPLICIT;
+      {
+         // ... Unless going from auto* to static* which is safe!
+         if (srcR->getStoreType() != STORE_AUTO ||
+             dstR->getStoreType() != STORE_STATIC)
+            return CAST_EXPLICIT;
+
+         // If only going from auto* to static*, consider it no change.
+         // (It requires translation, but this make overloading sane.)
+         if (srcR->setStorage(STORE_STATIC) == dstR)
+            return CAST_ANY;
+      }
 
       // If they differ only in qualifiers, it's time for const_cast!
       if (srcR->getUnqualified() == dstR->getUnqualified())
@@ -1212,6 +1226,7 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
 
       // Not losing qualifiers, but still differing types.
       return CAST_EXPLICIT|CAST_REINTERPRET;
+   }
    }
 
    return 0;

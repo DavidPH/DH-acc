@@ -58,23 +58,14 @@ SourceVariable::SourceVariable(std::string const &_nameSrc, VariableType *_type,
 {
    switch (store)
    {
-   case STORE_STATIC:
-   case STORE_AUTO:
-   case STORE_CONST:
-      type = type->setStorage(STORE_STATIC);
-      break;
-
-   case STORE_REGISTER:
-   case STORE_MAPREGISTER:
-   case STORE_WORLDREGISTER:
-   case STORE_GLOBALREGISTER:
-      type = type->setStorage(store);
-      break;
-
    case STORE_MAPARRAY:
    case STORE_WORLDARRAY:
    case STORE_GLOBALARRAY:
       type = type->setStorage(store, nameObj);
+      break;
+
+   default:
+      type = type->setStorage(store);
       break;
    }
 }

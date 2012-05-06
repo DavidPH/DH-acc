@@ -61,6 +61,11 @@ public:
       switch (data->type)
       {
       case VariableData::MT_AUTO:
+         if (type->getReturn()->getStoreType() == STORE_AUTO)
+            return true;
+         else
+            return false;
+
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
@@ -97,6 +102,11 @@ public:
       switch (data->type)
       {
       case VariableData::MT_AUTO:
+         if (type->getReturn()->getStoreType() == STORE_AUTO)
+            return data->address;
+         else
+            return Super::makeObject();
+
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
@@ -137,7 +147,10 @@ private:
       switch (data->type)
       {
       case VariableData::MT_AUTO:
-         objects->addToken(OCODE_ADDR_AUTO, data->address);
+         if (type->getReturn()->getStoreType() == STORE_AUTO)
+            objects->addToken(OCODE_GET_LITERAL32I, data->address);
+         else
+            objects->addToken(OCODE_ADDR_AUTO, data->address);
          break;
 
       case VariableData::MT_LITERAL:

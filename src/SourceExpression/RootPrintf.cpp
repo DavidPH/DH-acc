@@ -213,10 +213,14 @@ private:
          ERROR_NP("expected pointer got %s",
                  make_string(argType).c_str());
 
+      // Convert auto* to static*.
+      StoreType argStore = argType->getReturn()->getStoreType();
+      if (argStore == STORE_AUTO) argStore = STORE_STATIC;
+
       argType = argType->getReturn();
       argType = VariableType::get_bt_char()
                 ->setQualifier(argType->getQualifiers())
-                ->setStorage(argType->getStoreType(), argType->getStoreArea())
+                ->setStorage(argStore, argType->getStoreArea())
                 ->getPointer();
       argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
 

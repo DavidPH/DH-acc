@@ -193,7 +193,6 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
    case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
    case VariableType::BT_NULLPTR:
-   case VariableType::BT_POINTER:
    case VariableType::BT_SCHAR:
    case VariableType::BT_SCRIPT:
    case VariableType::BT_SHORT:
@@ -203,6 +202,7 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
    case VariableType::BT_ULLONG:
    case VariableType::BT_ULONG:
    case VariableType::BT_USHORT:
+   case_src_int:
       switch (dstBT)
       {
       case VariableType::BT_ARRAY:
@@ -357,6 +357,18 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
          break;
       }
       break;
+
+   case VariableType::BT_POINTER:
+      if (dstBT != VariableType::BT_POINTER)
+         goto case_src_int;
+
+      if (srcType->getReturn()->getStoreType() != STORE_AUTO ||
+          dstType->getReturn()->getStoreType() != STORE_STATIC)
+         goto case_src_int;
+
+      // Special handling for auto*->static*.
+      ERROR_P("bad compile-time cast: %s to %s", make_string(srcType).c_str(),
+         make_string(dstType).c_str());
    }
 
    return obj;
@@ -423,7 +435,6 @@ void SourceExpression::make_objects_memcpy_cast
    case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
    case VariableType::BT_NULLPTR:
-   case VariableType::BT_POINTER:
    case VariableType::BT_SCHAR:
    case VariableType::BT_SCRIPT:
    case VariableType::BT_SHORT:
@@ -432,6 +443,7 @@ void SourceExpression::make_objects_memcpy_cast
    case VariableType::BT_UINT:
    case VariableType::BT_ULONG:
    case VariableType::BT_USHORT:
+   case_src_int:
       switch (dstBT)
       {
       case VariableType::BT_ARRAY:
@@ -690,6 +702,19 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_ULLONG:
          break;
       }
+      break;
+
+   case VariableType::BT_POINTER:
+      if (dstBT != VariableType::BT_POINTER)
+         goto case_src_int;
+
+      if (srcType->getReturn()->getStoreType() != STORE_AUTO ||
+          dstType->getReturn()->getStoreType() != STORE_STATIC)
+         goto case_src_int;
+
+      // Special handling for auto*->static*.
+      objects->addToken(OCODE_ADDR_AUTO, objects->getValue(0));
+      objects->addToken(OCODE_ADD32U);
       break;
    }
 

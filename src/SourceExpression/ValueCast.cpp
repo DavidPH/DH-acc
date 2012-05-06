@@ -57,6 +57,13 @@ public:
          ERROR_NP("invalid cast: %s to %s",
                  make_string(exprType).c_str(), make_string(type).c_str());
       }
+
+      // Special case for casting an array to a pointer.
+      if (exprType->getBasicType() == VariableType::BT_ARRAY &&
+              type->getBasicType() == VariableType::BT_POINTER)
+      {
+         exprRef = create_unary_reference(expr, context, pos);
+      }
    }
 
    virtual bool canMakeObject() const;
@@ -68,7 +75,7 @@ public:
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-   SourceExpression::Pointer expr;
+   SourceExpression::Pointer expr, exprRef;
    VariableType::Reference type;
 };
 
@@ -136,15 +143,26 @@ SRCEXP_EXPRVAL_DEFN(et, cast_static)
 //
 bool SourceExpression_ValueCast::canMakeObject() const
 {
-   VariableType::BasicType exprBT = expr->getType()->getBasicType();
-   VariableType::BasicType thisBT = type->getBasicType();
+   VariableType::Reference exprType = expr->getType();
+   VariableType::Reference thisType = type;
+
+   VariableType::BasicType exprBT = exprType->getBasicType();
+   VariableType::BasicType thisBT = thisType->getBasicType();
+
+   // Can't do compile-time auto*->static*.
+   if (thisBT == VariableType::BT_POINTER &&
+       thisType->getReturn()->getStoreType() == STORE_STATIC &&
+       (exprBT == VariableType::BT_ARRAY || exprBT == VariableType::BT_POINTER) &&
+       exprType->getReturn()->getStoreType() == STORE_AUTO)
+   {
+      return false;
+   }
 
    // Special case for casting an array to a pointer.
    if (exprBT == VariableType::BT_ARRAY &&
        thisBT == VariableType::BT_POINTER)
    {
-      // Not the most efficient solution, no.
-      return create_unary_reference(expr, context, pos)->canMakeObject();
+      return exprRef->canMakeObject();
    }
 
    return expr->canMakeObject();
@@ -173,7 +191,7 @@ ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
    if (exprBT == VariableType::BT_ARRAY &&
        thisBT == VariableType::BT_POINTER)
    {
-      return create_unary_reference(expr, context, pos)->makeObject();
+      return exprRef->makeObject();
    }
 
    return make_object_cast(expr->makeObject(), thisType, exprType, pos);
@@ -191,8 +209,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    if (expr->getType()->getBasicType() == VariableType::BT_ARRAY &&
       type->getBasicType() == VariableType::BT_POINTER)
    {
-      return create_unary_reference(expr, context, pos)
-         ->makeObjectsCast(objects, dst, type);
+      exprRef->makeObjectsCast(objects, dst, type);
    }
    else
       expr->makeObjectsCast(objects, dst, type);
