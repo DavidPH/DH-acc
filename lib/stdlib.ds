@@ -342,17 +342,15 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 //
 // qsort
 //
-//__extfunc qsort
-//(void *base, size_t nmemb, size_t size,
-// __func_t(void const *, void const *) -> int compar) -> void
-
+// Probably not the best algorithm, but it can serve as a base for a customized
+// version. (Which is highly likely to be needed. Even if it took __script_t,
+// it would still require static* inputs.)
 //
-// qsort
+// Don't compile for ZDoom, due to lack of function-pointers.
 //
-// Definitely need a better algorithm than this.
-//
+#if !defined(__TARGET_ZDoom__) #
 __extfunc qsort(void *base, size_t nmemb, size_t size,
- __script_t(void const *, void const *) -> int compar) -> void
+ __func_t(void const *, void const *) -> int compar) -> void
 {
    char *iter = (char *)base;
    char *end = (char *)base + nmemb*size;
@@ -374,6 +372,7 @@ __extfunc qsort(void *base, size_t nmemb, size_t size,
       iter += size;
    };
 };
+#endif
 
 //===================================================================
 // Integer arithmetic functions.
