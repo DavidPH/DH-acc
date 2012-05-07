@@ -148,16 +148,7 @@ static std::ostream &operator <<
 
    case VariableType::BT_STRUCT:
    case VariableType::BT_UNION:
-      out << type->getBasicType();
-      out << '{';
-   {
-      VariableType::VecStr const &names = type->getNames();
-      VariableType::Vector const &types = type->getTypes();
-
-      for (size_t i = 0; i < types.size(); ++i)
-         out << types[i] << ' ' << names[i] << ';';
-   }
-      out << '}';
+      out << type->getBasicType() << '{' << type->getName() << '}';
       break;
 
    case VariableType::BT_ASMFUNC:
