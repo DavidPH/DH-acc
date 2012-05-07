@@ -200,6 +200,14 @@ private:
       VariableType::BasicType   argBT   = argType->getBasicType();
       bigsint                   argSize = argType->getSize(pos);
 
+      if (argBT == VariableType::BT_ARRAY)
+      {
+         argBT = VariableType::BT_POINTER;
+         argType = argType->getReturn()->getPointer();
+         argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
+         argSize = argType->getSize(pos);
+      }
+
       if (argBT != VariableType::BT_POINTER)
          ERROR_NP("expected pointer got %s", make_string(argType).c_str());
 
