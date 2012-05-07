@@ -197,18 +197,22 @@ void SourceExpression_ValueBlock::virtual_makeObjectsCast
       return;
    }
 
+   VariableData::Pointer dstPart;
+   bigsint               dstPartSize;
+   VariableType::Pointer dstPartType;
+
    bigsint               tmpSize = type->getSize(pos);
    VariableData::Pointer tmp     = VariableData::create_stack(tmpSize);
 
-   make_objects_memcpy_prep(objects, dst, tmp, pos);
-
    if (dstType->getBasicType() == VariableType::BT_ARRAY)
    {
+      make_objects_memcpy_prep(objects, dst, tmp, pos);
+
       bigsint dstTypes = dstType->getWidth();
 
-      VariableType::Reference dstPartType = dstType->getReturn();
-      bigsint                 dstPartSize = dstPartType->getSize(pos);
-      VariableData::Pointer   dstPart = VariableData::create_stack(dstPartSize);
+      dstPartType = dstType->getReturn();
+      dstPartSize = dstPartType->getSize(pos);
+      dstPart = VariableData::create_stack(dstPartSize);
 
       for (bigsint i = 0; i < dstTypes; ++i)
       {
@@ -217,14 +221,14 @@ void SourceExpression_ValueBlock::virtual_makeObjectsCast
          else
             makeZero(objects, dstPartType);
       }
-   }
-   else
-   {
-      VariableType::Vector const &dstTypes = dstType->getTypes();
 
-      VariableType::Pointer dstPartType;
-      bigsint               dstPartSize;
-      VariableData::Pointer dstPart;
+      make_objects_memcpy_post(objects, dst, tmp, dstType, context, pos);
+   }
+   else if (dstType->getBasicType() == VariableType::BT_STRUCT)
+   {
+      make_objects_memcpy_prep(objects, dst, tmp, pos);
+
+      VariableType::Vector const &dstTypes = dstType->getTypes();
 
       for (size_t i = 0; i < dstTypes.size(); ++i)
       {
@@ -237,9 +241,31 @@ void SourceExpression_ValueBlock::virtual_makeObjectsCast
          else
             makeZero(objects, dstPartType);
       }
-   }
 
-   make_objects_memcpy_post(objects, dst, tmp, dstType, context, pos);
+      make_objects_memcpy_post(objects, dst, tmp, dstType, context, pos);
+   }
+   else if (!expressions.empty())
+   {
+      Vector::iterator itr, end = expressions.end()-1;
+
+      for (itr = expressions.begin(); itr != end; ++itr)
+      {
+         dstPartType = (*itr)->getType();
+         dstPartSize = dstPartType->getSize(pos);
+         dstPart = VariableData::create_void(dstPartSize);
+         (*itr)->makeObjects(objects, dstPart);
+      }
+
+      (*itr)->makeObjectsCast(objects, dst, dstType);
+   }
+   else
+   {
+      make_objects_memcpy_prep(objects, dst, tmp, pos);
+
+      makeZero(objects, dstType);
+
+      make_objects_memcpy_post(objects, dst, tmp, dstType, context, pos);
+   }
 }
 
 // EOF

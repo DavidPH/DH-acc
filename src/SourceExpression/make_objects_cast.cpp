@@ -155,6 +155,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
             else
                elems.push_back(make_object(dstTypes, pos));
          }
+
+         obj = ObjectExpression::create_value_array(elems, pos);
       }
       else if (dstBT == VariableType::BT_STRUCT ||
                dstBT == VariableType::BT_BLOCK)
@@ -169,16 +171,15 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
             else
                elems.push_back(make_object(dstTypes[i], pos));
          }
-      }
-      else
-         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
-                 make_string(dstType).c_str());
 
-      if (dstBT == VariableType::BT_STRUCT)
-         obj = ObjectExpression::create_value_struct
-         (elems, dstType->getNames(), pos);
+         if (dstBT == VariableType::BT_STRUCT)
+            obj = ObjectExpression::create_value_struct
+               (elems, dstType->getNames(), pos);
+      }
+      else if (!elems.empty())
+         obj = make_object_cast(elems.back(), dstType, srcTypes.back(), pos);
       else
-         obj = ObjectExpression::create_value_array(elems, pos);
+         obj = make_object(dstType, pos);
    }
       break;
 
