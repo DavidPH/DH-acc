@@ -110,11 +110,12 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
 
    if (src->type == VariableData::MT_REGISTERARRAY)
    {
-      SourceExpression::Pointer memberOffsetExpr =
-         create_value_int(memberOffset, context, pos);
+      SourceExpression::Pointer offset;
 
-      SourceExpression::Pointer offset =
-         create_binary_add(src->offsetExpr, memberOffsetExpr, context, pos);
+      if (memberOffset) offset = create_value_int(memberOffset, context, pos);
+
+      if (src->offsetExpr) offset = offset ? create_binary_add
+         (src->offsetExpr, offset, context, pos) : src->offsetExpr;
 
       return VariableData::create_registerarray(memberSize, src->sectionRA,
                                                 src->address, offset);

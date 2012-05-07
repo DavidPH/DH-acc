@@ -44,7 +44,13 @@ class SourceExpression_UnaryDereference : public SourceExpression_Unary
                                    SourceExpression_Unary);
 
 public:
-   SourceExpression_UnaryDereference(SRCEXP_EXPRUNA_ARGS);
+   //
+   // ::SourceExpression_UnaryDereference
+   //
+   SourceExpression_UnaryDereference(SRCEXP_EXPRUNA_PARM)
+    : Super(_expr->getType()->getReturn()->getPointer(), SRCEXP_EXPRUNA_PASS)
+   {
+   }
 
    virtual bool canGetData() const;
 
@@ -115,8 +121,9 @@ public:
          sectionRA = VariableData::SRA_MAP;
       case_array:
          address = ObjectExpression::create_value_symbol(area, pos);
-         return VariableData::create_registerarray
-                (size, sectionRA, address, expr);
+         return VariableData::create_registerarray(size, sectionRA, address,
+            create_value_cast_explicit(expr, VariableType::get_bt_uint(),
+               context, pos));
 
       case STORE_WORLDARRAY:
          sectionRA = VariableData::SRA_WORLD;
@@ -147,15 +154,6 @@ private:
 SRCEXP_EXPRUNA_DEFN(dereference)
 {
    return new SourceExpression_UnaryDereference(expr, context, pos);
-}
-
-//
-// SourceExpression_UnaryDereference::SourceExpression_UnaryDereference
-//
-SourceExpression_UnaryDereference::
-SourceExpression_UnaryDereference(SRCEXP_EXPRUNA_PARM)
-                                  : Super(SRCEXP_EXPRUNA_PASS)
-{
 }
 
 //
