@@ -47,61 +47,6 @@ bool SourceExpressionDS::is_keyword(std::string const &data)
 }
 
 //
-// SourceExpressionDS::make_keyword_asmfunc
-//
-SRCEXPDS_KEYWORD_DEFN(asmfunc)
-{
-   ArgList args;
-
-   // prefix-return
-   if (in->peekType(SourceTokenC::TT_NAM) &&
-       is_type(in->peek().data, context))
-      args.retn = make_type(in, blocks, context);
-
-   std::string nameSrc;
-   if (in->peekType(SourceTokenC::TT_NAM))
-      nameSrc = in->get(SourceTokenC::TT_NAM).data;
-
-   // arglist/suffix-return
-   make_arglist(in, blocks, context, &args);
-
-   // HACK __ocode should be a keyword!
-   SourceTokenC asmfuncOCodeToken;
-   ObjectCodeSet asmfuncOCode;
-
-   in->get(SourceTokenC::TT_AT);
-   in->get(SourceTokenC::TT_NAM, "__ocode");
-   in->get(SourceTokenC::TT_PAREN_O);
-
-   asmfuncOCodeToken = in->get(SourceTokenC::TT_NAM);
-   asmfuncOCode.ocode =
-      ocode_get_code(asmfuncOCodeToken.data, asmfuncOCodeToken.pos);
-
-   if (!in->peekType(SourceTokenC::TT_PAREN_C))
-   {
-      in->get(SourceTokenC::TT_COMMA);
-
-      asmfuncOCodeToken = in->get(SourceTokenC::TT_NAM);
-      asmfuncOCode.ocode_imm = ocode_get_code
-         (asmfuncOCodeToken.data, asmfuncOCodeToken.pos);
-   }
-   in->get(SourceTokenC::TT_PAREN_C);
-
-   ObjectExpression::Pointer asmfuncObj =
-      ObjectExpression::create_value_ocode(asmfuncOCode, tok.pos);
-
-   VariableType::Reference asmfuncVarType =
-      VariableType::get_bt_asmfunc(args.types, args.retn);
-
-   SourceVariable::Pointer asmfuncVariable = SourceVariable::create_constant
-      (nameSrc, asmfuncVarType, asmfuncObj, tok.pos);
-
-   if (!nameSrc.empty())
-      context->addFunction(asmfuncVariable);
-   return create_value_variable(asmfuncVariable, context, tok.pos);
-}
-
-//
 // SourceExpressionDS::make_keyword_break
 //
 SRCEXPDS_KEYWORD_DEFN(break)
@@ -359,13 +304,49 @@ SRCEXPDS_KEYWORD_DEFN(linespec)
 
    VariableType::Reference varType = tok.data == "__linespec"
       ? VariableType::get_bt_linespec(args.types, args.retn)
-      : VariableType::get_bt_native  (args.types, args.retn);
+      : tok.data == "__native"
+      ? VariableType::get_bt_native  (args.types, args.retn)
+      : VariableType::get_bt_asmfunc (args.types, args.retn);
 
    SourceVariable::Pointer var = SourceVariable::create_constant
       (nameSrc, varType, obj, tok.pos);
 
    context->addFunction(var);
    return create_value_variable(var, context, tok.pos);
+}
+
+//
+// SourceExpressionDS::make_keyword_ocode
+//
+SRCEXPDS_KEYWORD_DEFN(ocode)
+{
+   (void)blocks;
+
+   ObjectExpression::Pointer ocodeObj;
+   SourceVariable::Pointer ocodeVar;
+   VariableType::Reference ocodeTyp = VariableType::get_bt_void();
+   SourceTokenC ocodeTok;
+   ObjectCodeSet ocode;
+
+   in->get(SourceTokenC::TT_PAREN_O);
+
+   ocodeTok = in->get(SourceTokenC::TT_NAM);
+   ocode.ocode = ocode_get_code(ocodeTok.data, ocodeTok.pos);
+
+   if (!in->peekType(SourceTokenC::TT_PAREN_C))
+   {
+      in->get(SourceTokenC::TT_COMMA);
+
+      ocodeTok = in->get(SourceTokenC::TT_NAM);
+      ocode.ocode_imm = ocode_get_code(ocodeTok.data, ocodeTok.pos);
+   }
+
+   in->get(SourceTokenC::TT_PAREN_C);
+
+   ocodeObj = ObjectExpression::create_value_ocode(ocode, tok.pos);
+   ocodeVar = SourceVariable::create_literal(ocodeTyp, ocodeObj, tok.pos);
+
+   return create_value_variable(ocodeVar, context, tok.pos);
 }
 
 //

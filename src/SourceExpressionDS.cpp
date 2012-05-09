@@ -101,7 +101,7 @@ void SourceExpressionDS::init()
    expr_extern["__script"]   = make_extern_script;
    expr_extern["__variable"] = make_extern_variable;
 
-   expr_keyword["__asmfunc"]  = make_keyword_asmfunc;
+   expr_keyword["__asmfunc"]  = make_keyword_linespec;
    expr_keyword[  "break"]    = make_keyword_break;
    expr_keyword[  "case"]     = make_keyword_case;
    expr_keyword[  "const"]    = make_keyword_constexpr;
@@ -125,6 +125,7 @@ void SourceExpressionDS::init()
    expr_keyword["__library"]  = make_keyword_library;
    expr_keyword["__linespec"] = make_keyword_linespec;
    expr_keyword["__native"]   = make_keyword_linespec;
+   expr_keyword["__ocode"]    = make_keyword_ocode;
    expr_keyword["__output"]   = make_keyword_output;
    expr_keyword["__printf"]   = make_keyword_printf;
    expr_keyword[  "return"]   = make_keyword_return;
