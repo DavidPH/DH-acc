@@ -172,57 +172,6 @@ void ObjectData_Script::generate_symbols()
 }
 
 //
-// ObjectData_Script::get_flag
-//
-ObjectData_Script::ScriptFlag ObjectData_Script::get_flag
-(std::string const &data, SourcePosition const &pos)
-{
-   if (data == "__net")
-      return ObjectData_Script::SF_NET;
-
-   if (data == "__clientside")
-      return ObjectData_Script::SF_CLIENTSIDE;
-
-   ERROR_P("invalid script-flag: %s", data.c_str());
-}
-
-//
-// ObjectData_Script::get_type
-//
-ObjectData_Script::ScriptType ObjectData_Script::get_type
-(std::string const &data, SourcePosition const &pos)
-{
-   if (data == "__closed")
-      return ObjectData_Script::ST_CLOSED;
-
-   if (data == "__open")
-      return ObjectData_Script::ST_OPEN;
-
-   if (data == "__respawn")
-      return ObjectData_Script::ST_RESPAWN;
-
-   if (data == "__death")
-      return ObjectData_Script::ST_DEATH;
-
-   if (data == "__enter")
-      return ObjectData_Script::ST_ENTER;
-
-   if (data == "__lightning")
-      return ObjectData_Script::ST_LIGHTNING;
-
-   if (data == "__unloading")
-      return ObjectData_Script::ST_UNLOADING;
-
-   if (data == "__disconnect")
-      return ObjectData_Script::ST_DISCONNECT;
-
-   if (data == "__return")
-      return ObjectData_Script::ST_RETURN;
-
-   ERROR_P("invalid script-type: %s", data.c_str());
-}
-
-//
 // ObjectData_Script::iterate
 //
 void ObjectData_Script::iterate(IterFunc iterFunc, std::ostream *out)

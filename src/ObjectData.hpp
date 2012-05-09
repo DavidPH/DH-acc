@@ -39,7 +39,6 @@
 
 class ObjectExpression;
 class SourceContext;
-class SourcePosition;
 class VariableType;
 
 //
@@ -280,12 +279,6 @@ struct ObjectData_Script
     bigsint number);
 
    static void generate_symbols();
-
-   static ScriptFlag get_flag
-   (std::string const &data, SourcePosition const &position);
-
-   static ScriptType get_type
-   (std::string const &data, SourcePosition const &position);
 
    static void iterate(IterFunc iterFunc, std::ostream *out);
 
