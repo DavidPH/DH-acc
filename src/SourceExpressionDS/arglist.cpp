@@ -46,6 +46,14 @@ void SourceExpressionDS::make_arglist(SourceTokenizerDS *in, Vector *blocks,
 {
    args->count = 0;
 
+   // Read prefix return. (If one.)
+   if (in->peekType(SourceTokenC::TT_NAM) && is_type(in->peek().data, context))
+      args->retn = make_type(in, blocks, context);
+
+   // Read name. (If one.)
+   if (in->peekType(SourceTokenC::TT_NAM))
+      args->name = in->get(SourceTokenC::TT_NAM).data;
+
    // Read arguments.
    SourcePosition const pos = in->get(SourceTokenC::TT_PAREN_O).pos;
    if (!in->peekType(SourceTokenC::TT_PAREN_C)) while (true)
@@ -73,7 +81,7 @@ void SourceExpressionDS::make_arglist(SourceTokenizerDS *in, Vector *blocks,
       args->names.clear();
    }
 
-   // Read return (if it's not already set).
+   // Read suffix return. (If one.)
    if (!args->retn)
    {
       if (in->peekType(SourceTokenC::TT_MEM))

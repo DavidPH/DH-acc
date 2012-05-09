@@ -148,6 +148,7 @@ public:
 
       std::vector<std::string> names;
       std::vector<CounterPointer<VariableType> > types;
+      std::string name;
       CounterPointer<SourceContext> context;
       CounterPointer<VariableType> retn;
       StoreType store;

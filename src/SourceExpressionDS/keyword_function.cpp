@@ -92,15 +92,6 @@ static SourceExpression::Pointer make_func
    if (!externDef)
       args.context = SourceContext::create(context, SourceContext::CT_FUNCTION);
 
-   // prefix-return
-   if (in->peekType(SourceTokenC::TT_NAM) &&
-       SourceExpressionDS::is_type(in->peek().data, context))
-      args.retn = SourceExpressionDS::make_type(in, blocks, context);
-
-   // funcNameSrc
-   std::string funcNameSrc = in->get(SourceTokenC::TT_NAM).data;
-
-   // arglist/suffix-return
    SourceExpressionDS::make_arglist(in, blocks, context, &args);
    // Don't count automatic variable args.
    if (args.store == STORE_AUTO) args.count = 0;
@@ -110,19 +101,35 @@ static SourceExpression::Pointer make_func
    switch (linkSpec)
    {
    case SourceExpressionDS::LS_INTERN:
-      funcLabel  = context->getLabel();
-      funcLabel += funcNameSrc;
+      if (!args.name.empty())
+      {
+         funcLabel  = context->getLabel();
+         funcLabel += args.name;
+      }
+      else
+         funcLabel = context->makeLabel();
+
       mangle_types(args.types, funcLabel);
+
       break;
 
    case SourceExpressionDS::LS_ACS:
-      funcLabel  = funcNameSrc;
+      if (!args.name.empty())
+         funcLabel = args.name;
+      else
+         funcLabel = context->makeLabel();
+
       break;
 
    case SourceExpressionDS::LS_DS:
-      funcLabel  = funcNameSrc;
+      if (!args.name.empty())
+         funcLabel = args.name;
+      else
+         funcLabel = context->makeLabel();
+
       if (option_function_mangle_types)
          mangle_types(args.types, funcLabel);
+
       break;
    }
 
@@ -132,7 +139,7 @@ static SourceExpression::Pointer make_func
    // __func__
    if (!externDef && option_string_func)
    {
-      std::string funcFunc = funcNameSrc;
+      std::string funcFunc = args.name;
 
       if (option_function_mangle_types)
       {
@@ -174,12 +181,12 @@ static SourceExpression::Pointer make_func
    if (target_type != TARGET_ZDoom)
    {
       funcVar = SourceVariable::create_constant
-         (funcNameSrc, funcVarType, funcLabel, tok.pos);
+         (args.name, funcVarType, funcLabel, tok.pos);
    }
    else
    {
       funcVar = SourceVariable::create_constant
-         (funcNameSrc, funcVarType, funcNameObj, tok.pos);
+         (args.name, funcVarType, funcNameObj, tok.pos);
    }
 
    // funcAdded

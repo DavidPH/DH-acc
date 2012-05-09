@@ -284,34 +284,20 @@ SRCEXPDS_KEYWORD_DEFN(library)
 //
 SRCEXPDS_KEYWORD_DEFN(linespec)
 {
-   ArgList args;
+   ArgList args; make_arglist(in, blocks, context, &args);
 
-   // prefix-return
-   if (in->peekType(SourceTokenC::TT_NAM) &&
-       is_type(in->peek().data, context))
-      args.retn = make_type(in, blocks, context);
-
-   std::string nameSrc;
-   if (in->peekType(SourceTokenC::TT_NAM))
-      nameSrc = in->get(SourceTokenC::TT_NAM).data;
-
-   // arglist/suffix-return
-   make_arglist(in, blocks, context, &args);
-
-   in->get(SourceTokenC::TT_AT);
-   ObjectExpression::Pointer obj =
+   in->get(SourceTokenC::TT_AT); ObjectExpression::Pointer obj =
       make_prefix(in, blocks, context)->makeObject();
 
    VariableType::Reference varType = tok.data == "__linespec"
-      ? VariableType::get_bt_linespec(args.types, args.retn)
-      : tok.data == "__native"
+      ? VariableType::get_bt_linespec(args.types, args.retn) : tok.data == "__native"
       ? VariableType::get_bt_native  (args.types, args.retn)
       : VariableType::get_bt_asmfunc (args.types, args.retn);
 
    SourceVariable::Pointer var = SourceVariable::create_constant
-      (nameSrc, varType, obj, tok.pos);
+      (args.name, varType, obj, tok.pos);
 
-   context->addFunction(var);
+   if (!args.name.empty()) context->addFunction(var);
    return create_value_variable(var, context, tok.pos);
 }
 

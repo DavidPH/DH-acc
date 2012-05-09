@@ -90,13 +90,7 @@ static SourceExpression::Pointer make_script
    if (!externDef)
       args.context = SourceContext::create(context, SourceContext::CT_SCRIPT);
 
-   // prefix-return
-   if (in->peekType(SourceTokenC::TT_NAM) &&
-       SourceExpressionDS::is_type(in->peek().data, context))
-      args.retn = SourceExpressionDS::make_type(in, blocks, context);
-
-   // scriptNameSrc
-   std::string scriptNameSrc = in->get(SourceTokenC::TT_NAM).data;
+   SourceExpressionDS::make_arglist(in, blocks, context, &args);
 
    // scriptType
    ObjectData_Script::ScriptType scriptType;
@@ -118,9 +112,6 @@ static SourceExpression::Pointer make_script
          get_flag(scriptFlagTok.data, scriptFlagTok.pos);
    }
 
-   // arglist/suffix-return
-   SourceExpressionDS::make_arglist(in, blocks, context, &args);
-
    // scriptNumber
    ObjectExpression::Pointer scriptNumber;
    if (in->peekType(SourceTokenC::TT_AT))
@@ -130,23 +121,10 @@ static SourceExpression::Pointer make_script
          ->makeObject();
    }
 
-   // scriptNameSrc special-cases
-   if (scriptNameSrc == "auto")
-   {
-      if (!scriptNumber)
-         ERROR(tok.pos, "name auto requires explicit allocation");
-
-      std::ostringstream oss;
-      oss << "script" << scriptNumber->resolveInt();
-      scriptNameSrc = oss.str();
-   }
-   else if (scriptNameSrc == "void")
-      scriptNameSrc = "";
-
    // __func__
    if (!externDef && option_string_func)
    {
-      std::string scriptFunc = scriptNameSrc.empty() ? "void" : scriptNameSrc;
+      std::string scriptFunc = args.name;
 
       if (option_script_mangle_types)
       {
@@ -184,19 +162,35 @@ static SourceExpression::Pointer make_script
    switch (linkSpec)
    {
    case SourceExpressionDS::LS_INTERN:
-      scriptLabel  = context->getLabel();
-      scriptLabel += scriptNameSrc;
+      if (!args.name.empty())
+      {
+         scriptLabel  = context->getLabel();
+         scriptLabel += args.name;
+      }
+      else
+         scriptLabel = context->makeLabel();
+
       mangle_types(args.types, scriptLabel);
+
       break;
 
    case SourceExpressionDS::LS_ACS:
-      scriptLabel  = scriptNameSrc;
+      if (!args.name.empty())
+         scriptLabel = args.name;
+      else
+         scriptLabel = context->makeLabel();
+
       break;
 
    case SourceExpressionDS::LS_DS:
-      scriptLabel  = scriptNameSrc;
+      if (!args.name.empty())
+         scriptLabel = args.name;
+      else
+         scriptLabel = context->makeLabel();
+
       if (option_script_mangle_types)
          mangle_types(args.types, scriptLabel);
+
       break;
    }
 
@@ -209,7 +203,7 @@ static SourceExpression::Pointer make_script
 
    // scriptVar
    SourceVariable::Pointer scriptVar = SourceVariable::create_constant
-      (scriptNameSrc, scriptVarType, scriptNameObj, tok.pos);
+      (args.name, scriptVarType, scriptNameObj, tok.pos);
 
    // scriptAdded
    bool scriptAdded;

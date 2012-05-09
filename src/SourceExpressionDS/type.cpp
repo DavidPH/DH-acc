@@ -418,9 +418,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
    SourceTokenC tok;
 
    ArgList args;
-
    bigsint width;
-   std::string name;
    VariableType::Pointer type;
 
    if (in->peekType(SourceTokenC::TT_PAREN_O))
@@ -440,6 +438,9 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
       make_arglist(in, blocks, context, &args);
 
       type = VariableType::get_bt_asmfunc(args.types, args.retn);
+
+      if (!args.name.empty())
+         type = context->getVariableType_typedef(args.name, type, tok.pos);
    }
    else if (tok.data == "__block")
    {
@@ -462,13 +463,13 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
    else if (tok.data == "enum")
    {
       if (in->peekType(SourceTokenC::TT_NAM))
-         name = in->get(SourceTokenC::TT_NAM).data;
+         args.name = in->get(SourceTokenC::TT_NAM).data;
 
       if (in->peekType(SourceTokenC::TT_BRACE_O))
       {
          bigsint enumVal = 0;
 
-         type = context->getVariableType_enum(name, true, tok.pos);
+         type = context->getVariableType_enum(args.name, true, tok.pos);
 
          in->get(SourceTokenC::TT_BRACE_O);
 
@@ -502,31 +503,43 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
          in->get(SourceTokenC::TT_BRACE_C);
       }
       else
-         type = context->getVariableType_enum(name, false, tok.pos);
+         type = context->getVariableType_enum(args.name, false, tok.pos);
    }
    else if (tok.data == "__func_t")
    {
       make_arglist(in, blocks, context, &args);
 
       type = VariableType::get_bt_function(args.types, args.retn);
+
+      if (!args.name.empty())
+         type = context->getVariableType_typedef(args.name, type, tok.pos);
    }
    else if (tok.data == "__lnspec_t")
    {
       make_arglist(in, blocks, context, &args);
 
       type = VariableType::get_bt_linespec(args.types, args.retn);
+
+      if (!args.name.empty())
+         type = context->getVariableType_typedef(args.name, type, tok.pos);
    }
    else if (tok.data == "__native_t")
    {
       make_arglist(in, blocks, context, &args);
 
       type = VariableType::get_bt_native(args.types, args.retn);
+
+      if (!args.name.empty())
+         type = context->getVariableType_typedef(args.name, type, tok.pos);
    }
    else if (tok.data == "__script_t")
    {
       make_arglist(in, blocks, context, &args);
 
       type = VariableType::get_bt_script(args.types, args.retn);
+
+      if (!args.name.empty())
+         type = context->getVariableType_typedef(args.name, type, tok.pos);
    }
    else if (tok.data == "struct" || tok.data == "union")
       type = make_struct(tok.data == "union", in, blocks, context);
