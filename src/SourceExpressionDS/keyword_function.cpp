@@ -78,36 +78,32 @@ bool option_string_func = true;
 // make_func
 //
 static SourceExpression::Pointer make_func
-(SourceTokenizerDS *in, SourceTokenC const &token,
+(SourceTokenizerDS *in, SourceTokenC const &tok,
  SourceExpression::Vector *blocks, SourceContext *context,
  SourceExpressionDS::LinkageSpecifier linkSpec, bool externDef)
 {
-   // funcArgStore
-   StoreType funcArgStore;
+   SourceExpressionDS::ArgList args;
 
    if (option_function_autoargs || target_type != TARGET_ZDoom)
-      funcArgStore = STORE_AUTO;
+      args.store = STORE_AUTO;
    else
-      funcArgStore = STORE_REGISTER;
+      args.store = STORE_REGISTER;
 
-   // funcContext
-   SourceContext::Pointer funcContext;
    if (!externDef)
-      funcContext = SourceContext::create(context, SourceContext::CT_FUNCTION);
+      args.context = SourceContext::create(context, SourceContext::CT_FUNCTION);
+
+   // prefix-return
+   if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+       SourceExpressionDS::is_type(in->peek().data, context))
+      args.retn = SourceExpressionDS::make_type(in, blocks, context);
 
    // funcNameSrc
    std::string funcNameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
 
-   // funcArgTypes/Names/Count funcReturn
-   VariableType::Vector funcArgTypes;
-   VariableType::VecStr funcArgNames;
-   int funcArgCount;
-   VariableType::Pointer funcReturn;
-   SourceExpressionDS::make_expression_arglist
-   (in, blocks, context, &funcArgTypes, &funcArgNames, &funcArgCount,
-    funcContext, &funcReturn, funcArgStore);
+   // arglist/suffix-return
+   SourceExpressionDS::make_arglist(in, blocks, context, &args);
    // Don't count automatic variable args.
-   if (option_function_autoargs) funcArgCount = 0;
+   if (args.store == STORE_AUTO) args.count = 0;
 
    // funcLabel
    std::string funcLabel;
@@ -116,7 +112,7 @@ static SourceExpression::Pointer make_func
    case SourceExpressionDS::LS_INTERN:
       funcLabel  = context->getLabel();
       funcLabel += funcNameSrc;
-      mangle_types(funcArgTypes, funcLabel);
+      mangle_types(args.types, funcLabel);
       break;
 
    case SourceExpressionDS::LS_ACS:
@@ -126,7 +122,7 @@ static SourceExpression::Pointer make_func
    case SourceExpressionDS::LS_DS:
       funcLabel  = funcNameSrc;
       if (option_function_mangle_types)
-         mangle_types(funcArgTypes, funcLabel);
+         mangle_types(args.types, funcLabel);
       break;
    }
 
@@ -140,13 +136,13 @@ static SourceExpression::Pointer make_func
 
       if (option_function_mangle_types)
       {
-         if (!funcArgTypes.empty())
+         if (!args.types.empty())
          {
             funcFunc += '(';
 
-            VariableType::Vector::iterator it = funcArgTypes.begin();
+            VariableType::Vector::iterator it = args.types.begin();
             funcFunc += make_string(*it);
-            for (++it; it != funcArgTypes.end(); ++it)
+            for (++it; it != args.types.end(); ++it)
             {
                funcFunc += ", ";
                funcFunc += make_string(*it);
@@ -158,38 +154,38 @@ static SourceExpression::Pointer make_func
             funcFunc += "(void)";
 
          funcFunc += " -> ";
-         funcFunc += make_string(funcReturn);
+         funcFunc += make_string(args.retn);
       }
 
       funcFunc = ObjectData_String::add(funcFunc);
 
       SourceVariable::Pointer funcFuncVar = SourceVariable::create_constant
-         ("__func__", VariableType::get_bt_string(), funcFunc, token.pos);
+         ("__func__", VariableType::get_bt_string(), funcFunc, tok.pos);
 
-      funcContext->addVar(funcFuncVar, false, false);
+      args.context->addVar(funcFuncVar, false, false);
    }
 
    // funcVarType
    VariableType::Reference funcVarType =
-      VariableType::get_bt_function(funcArgTypes, funcReturn);
+      VariableType::get_bt_function(args.types, args.retn);
 
    // funcVar
    SourceVariable::Pointer funcVar;
    if (target_type != TARGET_ZDoom)
    {
       funcVar = SourceVariable::create_constant
-         (funcNameSrc, funcVarType, funcLabel, token.pos);
+         (funcNameSrc, funcVarType, funcLabel, tok.pos);
    }
    else
    {
       funcVar = SourceVariable::create_constant
-         (funcNameSrc, funcVarType, funcNameObj, token.pos);
+         (funcNameSrc, funcVarType, funcNameObj, tok.pos);
    }
 
    // funcAdded
    bool funcAdded = ObjectData_Function::add
-      (funcNameObj, funcLabel, funcArgCount, funcReturn->getSize(token.pos),
-       funcContext);
+      (funcNameObj, funcLabel, args.count, args.retn->getSize(tok.pos),
+       args.context);
 
    if (funcAdded)
       context->addFunction(funcVar);
@@ -198,19 +194,19 @@ static SourceExpression::Pointer make_func
    if (!externDef)
    {
       SourceExpression::Pointer funcExpr = SourceExpressionDS::
-         make_expression_single(in, blocks, funcContext);
+         make_prefix(in, blocks, args.context);
 
       SourceExpression::Pointer funcExprData = SourceExpression::
-         create_value_data_garbage(funcReturn, funcContext, token.pos);
+         create_value_data_garbage(args.retn, args.context, tok.pos);
       SourceExpression::Pointer funcExprRetn = SourceExpression::
-         create_branch_return(funcExprData, funcContext, token.pos);
+         create_branch_return(funcExprData, args.context, tok.pos);
 
       funcExpr->addLabel(funcLabel);
       blocks->push_back(funcExpr);
       blocks->push_back(funcExprRetn);
    }
 
-   return SourceExpression::create_value_variable(funcVar, context, token.pos);
+   return SourceExpression::create_value_variable(funcVar, context, tok.pos);
 }
 
 //
@@ -230,38 +226,38 @@ static void mangle_types(VariableType::Vector const &types, std::string &name)
 //
 
 //
-// SourceExpressionDS::make_expression_extern_function
+// SourceExpressionDS::make_extern_function
 //
-SRCEXPDS_EXPREXTERN_DEFN(function)
+SRCEXPDS_EXTERN_DEFN(function)
 {
-   return make_func(in, token, blocks, context, linkSpec, true);
+   return make_func(in, tok, blocks, context, linkSpec, true);
 }
 
 //
-// SourceExpressionDS::make_expression_single_function
+// SourceExpressionDS::make_keyword_function
 //
-SRCEXPDS_EXPRSINGLE_DEFN(function)
+SRCEXPDS_KEYWORD_DEFN(function)
 {
    LinkageSpecifier linkSpec;
 
-   if (token.data == "__function")
+   if (tok.data == "__function")
    {
       if (context == SourceContext::global_context)
          linkSpec = LS_DS;
       else
          linkSpec = LS_INTERN;
    }
-   else if (token.data == "__extfunc")
+   else if (tok.data == "__extfunc")
    {
       if (in->peekType(SourceTokenC::TT_STRING))
-         linkSpec = make_linkage_specifier(in);
+         linkSpec = make_linkspec(in);
       else
          linkSpec = LS_DS;
    }
    else
       linkSpec = LS_INTERN;
 
-   return make_func(in, token, blocks, context, linkSpec, false);
+   return make_func(in, tok, blocks, context, linkSpec, false);
 }
 
 // EOF

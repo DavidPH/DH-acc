@@ -62,6 +62,15 @@ private:
 //
 // SourceExpression::create_value_data
 //
+SRCEXP_EXPRVAL_DEFN(, data)
+{
+   return new SourceExpression_ValueData(false,
+      VariableType::get_bt_void(), context, pos);
+}
+
+//
+// SourceExpression::create_value_data
+//
 SRCEXP_EXPRVAL_DEFN(t, data)
 {
    return new SourceExpression_ValueData(false, type, context, pos);

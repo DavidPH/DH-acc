@@ -23,12 +23,53 @@
 
 #include "SourceExpressionDS.hpp"
 
+#include "ObjectExpression.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
 #include "SourceTokenizerDS.hpp"
 #include "SourceVariable.hpp"
+#include "VariableData.hpp"
 #include "VariableType.hpp"
+
+
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+//
+// SRCEXPDS_EXPR_DEFN_MULTI
+//
+#define SRCEXPDS_EXPR_DEFN_MULTI(NAME1,NAME2)               \
+SRCEXPDS_EXPR_DEFN(NAME1, NAME2) { for (SourceTokenC tok;;) \
+switch ((tok = in->get()).type) { default: in->unget(tok); return expr;
+
+//
+// SRCEXPDS_EXPR_DEFN_MULTI_END
+//
+#define SRCEXPDS_EXPR_DEFN_MULTI_END() }}
+
+//
+// SRCEXPDS_EXPR_DEFN_PART
+//
+#define SRCEXPDS_EXPR_DEFN_PART(NAME,TOKN,EXPR)             \
+case SourceTokenC::TT_OP_##TOKN: expr = create_##EXPR(expr, \
+   make_##NAME(in, blocks, context), context, tok.pos); break
+
+//
+// SRCEXPDS_EXPR_DEFN_PART_SUF
+//
+#define SRCEXPDS_EXPR_DEFN_PART_SUF(TOKN,EXPR)              \
+case SourceTokenC::TT_OP_##TOKN: expr = create_##EXPR(expr, \
+   context, tok.pos); break \
+
+//
+// SRCEXPDS_EXPR_DEFN_SINGLE
+//
+#define SRCEXPDS_EXPR_DEFN_SINGLE(NAME1,NAME2,TOKN,EXPR) \
+SRCEXPDS_EXPR_DEFN_MULTI(NAME1, NAME2)                   \
+SRCEXPDS_EXPR_DEFN_PART(NAME2, TOKN, EXPR);              \
+SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 
 //----------------------------------------------------------------------------|
@@ -36,275 +77,7 @@
 //
 
 SourceExpressionDS::ExternMap SourceExpressionDS::expr_extern;
-SourceExpressionDS::SingleMap SourceExpressionDS::expr_single;
-
-
-//----------------------------------------------------------------------------|
-// Static Functions                                                           |
-//
-
-//
-// make_expression
-//
-// Recursively splits a vector of expressions.
-//
-// start and stop are indexes into operators.
-//
-static SourceExpression::Pointer
-make_expression(SourceExpression::Vector const &expressions,
-                std::vector<SourceTokenC> const &operators, size_t start,
-                size_t stop, SourceContext *context)
-{
-   #define EXPRL make_expression(expressions, operators, start, iter, context)
-   #define EXPRR make_expression(expressions, operators, iter+1, stop, context)
-
-   #define CARGS context, operators[iter].pos
-
-   // Terminating case. Only one expression, so just return it.
-   if (start == stop) return expressions[start];
-
-   // Some temporaries.
-   SourceExpression::Pointer expr, exprl, exprr;
-
-   size_t iter;
-
-   // &= &&= *= ^= ^^= >>= <<= = -= |= ||= += /=
-   for (iter = start; iter < stop; ++iter)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_AND_EQUALS:
-         return SourceExpression::create_binary_and_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_AND2_EQUALS:
-         return SourceExpression::create_branch_and_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_ASTERISK_EQUALS:
-         return SourceExpression::create_binary_mul_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_CARET_EQUALS:
-         return SourceExpression::create_binary_xor_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_CARET2_EQUALS:
-         return SourceExpression::create_branch_xor_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_CMP_GT2_EQUALS:
-         return SourceExpression::create_binary_rsh_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_CMP_LT2_EQUALS:
-         return SourceExpression::create_binary_lsh_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_EQUALS:
-         return SourceExpression::create_binary_assign(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_MINUS_EQUALS:
-         return SourceExpression::create_binary_sub_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_PERCENT_EQUALS:
-         return SourceExpression::create_binary_mod_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_PIPE_EQUALS:
-         return SourceExpression::create_binary_ior_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_PIPE2_EQUALS:
-         return SourceExpression::create_branch_ior_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_PLUS_EQUALS:
-         return SourceExpression::create_binary_add_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_SLASH_EQUALS:
-         return SourceExpression::create_binary_div_eq(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // ?:
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_QUERY:
-      {
-         exprl = EXPRL; expr = expressions[++iter]; exprr = EXPRR;
-         return SourceExpression::create_branch_if(exprl, expr, exprr, CARGS);
-      }
-
-      default:
-         break;
-      }
-   }
-
-   // ||
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_PIPE2:
-         return SourceExpression::create_branch_ior(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // ^^
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_CARET2:
-         return SourceExpression::create_branch_xor(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // &&
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_AND2:
-         return SourceExpression::create_branch_and(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // |
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_PIPE:
-         return SourceExpression::create_binary_ior(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // ^
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_CARET:
-         return SourceExpression::create_binary_xor(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // &
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_AND:
-         return SourceExpression::create_binary_and(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // == !=
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_CMP_EQ:
-         return SourceExpression::create_binary_cmp_eq(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_CMP_NE:
-         return SourceExpression::create_binary_cmp_ne(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // >= > <= <
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_CMP_GE:
-         return SourceExpression::create_binary_cmp_ge(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_CMP_GT:
-         return SourceExpression::create_binary_cmp_gt(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_CMP_LE:
-         return SourceExpression::create_binary_cmp_le(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_CMP_LT:
-         return SourceExpression::create_binary_cmp_lt(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // >> <<
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_CMP_GT2:
-         return SourceExpression::create_binary_rsh(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_CMP_LT2:
-         return SourceExpression::create_binary_lsh(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // - +
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_MINUS:
-         return SourceExpression::create_binary_sub(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_PLUS:
-         return SourceExpression::create_binary_add(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // * % /
-   for (iter = stop; iter-- > start;)
-   {
-      switch (operators[iter].type)
-      {
-      case SourceTokenC::TT_OP_ASTERISK:
-         return SourceExpression::create_binary_mul(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_PERCENT:
-         return SourceExpression::create_binary_mod(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_OP_SLASH:
-         return SourceExpression::create_binary_div(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   ERROR(operators[start].pos, "unexpected operator");
-}
+SourceExpressionDS::KeywordMap SourceExpressionDS::expr_keyword;
 
 
 //----------------------------------------------------------------------------|
@@ -324,200 +97,434 @@ SourceExpressionDS::SourceExpressionDS(SRCEXP_EXPR_PARM)
 //
 void SourceExpressionDS::init()
 {
-   expr_extern["__function"] = make_expression_extern_function;
-   expr_extern["__script"]   = make_expression_extern_script;
-   expr_extern["__variable"] = make_expression_extern_variable;
+   expr_extern["__function"] = make_extern_function;
+   expr_extern["__script"]   = make_extern_script;
+   expr_extern["__variable"] = make_extern_variable;
 
-   expr_single["__asmfunc"]  = make_expression_single_asmfunc;
-   expr_single[  "break"]    = make_expression_single_break;
-   expr_single[  "case"]     = make_expression_single_case;
-   expr_single[  "const"]    = make_expression_single_constexpr;
-   expr_single[  "constexpr"]= make_expression_single_constexpr;
-   expr_single[  "continue"] = make_expression_single_continue;
-   expr_single[  "default"]  = make_expression_single_default;
-   expr_single["__delay"]    = make_expression_single_delay;
-   expr_single[  "do"]       = make_expression_single_do;
-   expr_single[  "extern"]   = make_expression_single_extern;
-   expr_single["__extfunc"]  = make_expression_single_function;
-   expr_single["__extscript"]= make_expression_single_script;
-   expr_single["__extvar"]   = make_expression_single_variable;
-   expr_single[  "for"]      = make_expression_single_for;
-   expr_single["__function"] = make_expression_single_function;
-   expr_single[  "goto"]     = make_expression_single_goto;
-   expr_single["__goto_dyn"] = make_expression_single_goto_dyn;
-   expr_single[  "if"]       = make_expression_single_if;
-   expr_single["__intern"]   = make_expression_single_extern;
-   expr_single["__intfunc"]  = make_expression_single_function;
-   expr_single["__intscript"]= make_expression_single_script;
-   expr_single["__intvar"]   = make_expression_single_variable;
-   expr_single["__library"]  = make_expression_single_library;
-   expr_single["__linespec"] = make_expression_single_linespec;
-   expr_single["__native"]   = make_expression_single_native;
-   expr_single["__output"]   = make_expression_single_output;
-   expr_single["__printf"]   = make_expression_single_printf;
-   expr_single[  "return"]   = make_expression_single_return;
-   expr_single["__script"]   = make_expression_single_script;
-   expr_single[  "sizeof"]   = make_expression_single_sizeof;
-   expr_single[  "switch"]   = make_expression_single_switch;
-   expr_single["__symbol"]   = make_expression_single_symbol;
-   expr_single[  "typedef"]  = make_expression_single_typedef;
-   expr_single["__typestr"]  = make_expression_single_typestr;
-   expr_single["__variable"] = make_expression_single_variable;
-   expr_single[  "void"]     = make_expression_single_void;
-   expr_single[  "while"]    = make_expression_single_while;
+   expr_keyword["__asmfunc"]  = make_keyword_asmfunc;
+   expr_keyword[  "break"]    = make_keyword_break;
+   expr_keyword[  "case"]     = make_keyword_case;
+   expr_keyword[  "const"]    = make_keyword_constexpr;
+   expr_keyword[  "constexpr"]= make_keyword_constexpr;
+   expr_keyword[  "continue"] = make_keyword_continue;
+   expr_keyword[  "default"]  = make_keyword_default;
+   expr_keyword[  "do"]       = make_keyword_do;
+   expr_keyword[  "extern"]   = make_keyword_extern;
+   expr_keyword["__extfunc"]  = make_keyword_function;
+   expr_keyword["__extscript"]= make_keyword_script;
+   expr_keyword["__extvar"]   = make_keyword_variable;
+   expr_keyword[  "for"]      = make_keyword_for;
+   expr_keyword["__function"] = make_keyword_function;
+   expr_keyword[  "goto"]     = make_keyword_goto;
+   expr_keyword["__goto_dyn"] = make_keyword_goto_dyn;
+   expr_keyword[  "if"]       = make_keyword_if;
+   expr_keyword["__intern"]   = make_keyword_extern;
+   expr_keyword["__intfunc"]  = make_keyword_function;
+   expr_keyword["__intscript"]= make_keyword_script;
+   expr_keyword["__intvar"]   = make_keyword_variable;
+   expr_keyword["__library"]  = make_keyword_library;
+   expr_keyword["__linespec"] = make_keyword_linespec;
+   expr_keyword["__native"]   = make_keyword_linespec;
+   expr_keyword["__output"]   = make_keyword_output;
+   expr_keyword["__printf"]   = make_keyword_printf;
+   expr_keyword[  "return"]   = make_keyword_return;
+   expr_keyword["__script"]   = make_keyword_script;
+   expr_keyword[  "sizeof"]   = make_keyword_sizeof;
+   expr_keyword[  "switch"]   = make_keyword_switch;
+   expr_keyword["__symbol"]   = make_keyword_symbol;
+   expr_keyword["__typestr"]  = make_keyword_typestr;
+   expr_keyword["__variable"] = make_keyword_variable;
+   expr_keyword[  "while"]    = make_keyword_while;
 
    // Template casts.
-   expr_single[  "const_cast"]       = make_expression_single_cast;
-   expr_single[  "dynamic_cast"]     = make_expression_single_cast;
-   expr_single[  "reinterpret_cast"] = make_expression_single_cast;
-   expr_single[  "static_cast"]      = make_expression_single_cast;
-   expr_single["__force_cast"]       = make_expression_single_cast;
+   expr_keyword[  "const_cast"]       = make_keyword_cast;
+   expr_keyword[  "dynamic_cast"]     = make_keyword_cast;
+   expr_keyword[  "reinterpret_cast"] = make_keyword_cast;
+   expr_keyword[  "static_cast"]      = make_keyword_cast;
+   expr_keyword["__force_cast"]       = make_keyword_cast;
 }
+
+//
+// SourceExpression::make_primary
+//
+SRCEXPDS_EXPR_DEF1(primary)
+{
+   SourceTokenC tok = in->get(); switch (tok.type)
+   {
+   default: in->unget(tok); return create_value_data(context, tok.pos);
+
+   case SourceTokenC::TT_IDENTIFIER:
+      if (is_keyword(tok.data))
+         return expr_keyword[tok.data](in, tok, blocks, context);
+
+      if (is_store(tok.data))
+         return make_keyword_variable_store(in, tok, blocks, context);
+
+      if (is_type(tok.data, context))
+         return make_keyword_variable_type(in, tok, blocks, context);
+
+      if (in->peekType(SourceTokenC::TT_OP_COLON) && context->getAllowLabel())
+      {
+         in->get();
+         SourceExpression::Pointer expr = make_expression(in, blocks, context);
+         expr->addLabel(context->getLabelGoto(tok.data, tok.pos));
+         return expr;
+      }
+
+   {  // Check for function designator.
+      int count = context->isFunction(tok.data);
+      if (count == 1)
+         return create_value_variable(context->getFunction(tok.data, tok.pos),
+                                      context, tok.pos);
+      else if (count)
+         return create_value_function(tok.data, context, tok.pos);
+   }
+
+      return create_value_variable(context->getVariable(tok.data, tok.pos),
+                                   context, tok.pos);
+
+   case SourceTokenC::TT_CHARACTER:
+      return create_value_char(tok.data, context, tok.pos);
+
+   case SourceTokenC::TT_FLOAT:
+      return create_value_real(tok.data, context, tok.pos);
+
+   case SourceTokenC::TT_INTEGER:
+      return create_value_integer(tok.data, context, tok.pos);
+
+   case SourceTokenC::TT_STRING:
+      return create_value_string(tok.data, context, tok.pos);
+
+   case SourceTokenC::TT_OP_PARENTHESIS_O:
+   {
+      SourceExpression::Pointer expr = make_expression(in, blocks, context);
+      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+      return expr;
+   }
+
+   case SourceTokenC::TT_OP_BRACE_O:
+   {
+      SourceContext::Reference blockContext =
+         SourceContext::create(context, SourceContext::CT_BLOCK);
+      Vector expressions;
+      make_expressions(in, &expressions, blocks, blockContext);
+      in->get(SourceTokenC::TT_OP_BRACE_C);
+      return create_value_block(expressions, blockContext, tok.pos);
+   }
+
+   case SourceTokenC::TT_OP_BRACKET_O:
+   {
+      Vector expressions;
+      make_expressions(in, &expressions, blocks, context);
+      in->get(SourceTokenC::TT_OP_BRACKET_C);
+      return create_value_block(expressions, context, tok.pos);
+   }
+   }
+}
+
+//
+// SourceExpression::make_primary
+//
+SRCEXPDS_EXPR_DEF2(primary)
+{
+   (void)in; (void)blocks; (void)context; (void)expr;
+   ERROR_p("stub");
+}
+
+//
+// SourceExpression::make_suffix
+//
+SRCEXPDS_EXPR_DEFN_MULTI(suffix, primary)
+case SourceTokenC::TT_OP_BRACKET_O: expr = create_binary_array(expr,
+   make_expression(in, blocks, context), context, tok.pos);
+   in->get(SourceTokenC::TT_OP_BRACKET_C); break;
+
+case SourceTokenC::TT_OP_PARENTHESIS_O:
+   if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+       is_type(in->peek().data, context))
+   {
+      VariableType::Vector types;
+
+      if (!in->peekType(SourceTokenC::TT_OP_PARENTHESIS_C)) while (true)
+      {
+         types.push_back(make_type(in, blocks, context));
+
+         if (!in->peekType(SourceTokenC::TT_OP_COMMA)) break; in->get();
+      }
+      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+      if (types.size() == 1 && types[0]->getBasicType() == VariableType::BT_VOID)
+         types.clear();
+
+      expr = expr->makeExpressionFunction(types);
+   }
+   else
+   {
+      SourceContext::Reference contextCall =
+         SourceContext::create(context, SourceContext::CT_BLOCK);
+
+      Vector args;
+      VariableType::Vector types;
+
+      if (!in->peekType(SourceTokenC::TT_OP_PARENTHESIS_C)) while (true)
+      {
+         args.push_back(make_assignment(in, blocks, contextCall));
+         types.push_back(args.back()->getType()->getUnqualified());
+
+         if (!in->peekType(SourceTokenC::TT_OP_COMMA)) break; in->get();
+      }
+      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+
+      expr = expr->makeExpressionFunction(types);
+      expr = create_branch_call(expr, args, contextCall, tok.pos);
+   }
+   break;
+
+case SourceTokenC::TT_OP_MINUS_GT: expr = create_unary_dereference(expr,
+   context, tok.pos);
+case SourceTokenC::TT_OP_PERIOD: expr = create_value_member(expr,
+   in->get(SourceTokenC::TT_IDENTIFIER).data, context, tok.pos); break;
+
+SRCEXPDS_EXPR_DEFN_PART_SUF(PLUS2,  unary_inc_suf);
+SRCEXPDS_EXPR_DEFN_PART_SUF(MINUS2, unary_dec_suf);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
+
+//
+// SourceExpression::make_prefix
+//
+SRCEXPDS_EXPR_DEF1(prefix)
+{
+   #define CASE(TOK,EXP) case SourceTokenC::TT_OP_##TOK: return \
+      create_##EXP(make_prefix(in, blocks, context), context, tok.pos)
+
+   SourceTokenC tok = in->get(); switch (tok.type)
+   {
+   default: def: in->unget(tok); return make_suffix(in, blocks, context);
+
+   CASE(PLUS2, unary_inc_pre);   CASE(MINUS2,      unary_dec_pre);
+   CASE(AND,   unary_reference); CASE(ASTERISK,    unary_dereference);
+   CASE(PLUS,  unary_add);       CASE(MINUS,       unary_sub);
+   CASE(TILDE, unary_not);       CASE(EXCLAMATION, branch_not);
+
+   case SourceTokenC::TT_OP_AT:
+   {
+      VariableData::Pointer data = make_prefix(in, blocks, context)->getData();
+
+      ObjectExpression::Pointer addr;
+
+      switch (data->type)
+      {
+      case VariableData::MT_AUTO:
+      case VariableData::MT_POINTER:
+      case VariableData::MT_STATIC:
+         addr = ObjectExpression::create_value_int(option_addr_array, tok.pos);
+         break;
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_NONE:
+      case VariableData::MT_REGISTER:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+         ERROR(tok.pos, "invalid MT for @");
+
+      case VariableData::MT_REGISTERARRAY:
+         addr = data->address;
+         break;
+      }
+
+      VariableType::Reference type = VariableType::get_bt_uint();
+      SourceVariable::Pointer var  =
+         SourceVariable::create_literal(type, addr, tok.pos);
+
+      return create_value_variable(var, context, tok.pos);
+   }
+
+   case SourceTokenC::TT_OP_PARENTHESIS_O:
+      if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+          is_type(in->peek().data, context))
+      {
+         VariableType::Reference type = make_type(in, blocks, context);
+         in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+         return create_value_cast_explicit(make_prefix(in, blocks, context),
+            type, context, tok.pos);
+      }
+      else goto def;
+   }
+
+   #undef CASE
+}
+
+//
+// SourceExpression::make_prefix
+//
+SRCEXPDS_EXPR_DEF2(prefix)
+{
+   (void)in; (void)blocks; (void)context; (void)expr;
+   ERROR_p("stub");
+}
+
+//
+// SourceExpressionDS::make_multiplicative
+//
+SRCEXPDS_EXPR_DEFN_MULTI(multiplicative, prefix)
+SRCEXPDS_EXPR_DEFN_PART(multiplicative, ASTERISK, binary_mul);
+SRCEXPDS_EXPR_DEFN_PART(multiplicative, SLASH,    binary_div);
+SRCEXPDS_EXPR_DEFN_PART(multiplicative, PERCENT,  binary_mod);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
+
+//
+// SourceExpressionDS::make_additive
+//
+SRCEXPDS_EXPR_DEFN_MULTI(additive, multiplicative)
+SRCEXPDS_EXPR_DEFN_PART(multiplicative, PLUS,  binary_add);
+SRCEXPDS_EXPR_DEFN_PART(multiplicative, MINUS, binary_sub);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
+
+//
+// SourceExpressionDS::make_shift
+//
+SRCEXPDS_EXPR_DEFN_MULTI(shift, additive)
+SRCEXPDS_EXPR_DEFN_PART(additive, CMP_LT2, binary_lsh);
+SRCEXPDS_EXPR_DEFN_PART(additive, CMP_GT2, binary_rsh);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
+
+//
+// SourceExpressionDS::make_relational
+//
+SRCEXPDS_EXPR_DEFN_MULTI(relational, shift)
+SRCEXPDS_EXPR_DEFN_PART(shift, CMP_LT, binary_cmp_lt);
+SRCEXPDS_EXPR_DEFN_PART(shift, CMP_GT, binary_cmp_gt);
+SRCEXPDS_EXPR_DEFN_PART(shift, CMP_LE, binary_cmp_le);
+SRCEXPDS_EXPR_DEFN_PART(shift, CMP_GE, binary_cmp_ge);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
+
+//
+// SourceExpressionDS::make_equality
+//
+SRCEXPDS_EXPR_DEFN_MULTI(equality, relational)
+SRCEXPDS_EXPR_DEFN_PART(relational, CMP_EQ, binary_cmp_eq);
+SRCEXPDS_EXPR_DEFN_PART(relational, CMP_NE, binary_cmp_ne);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
+
+//
+// SourceExpressionDS::make_bitwise_and
+//
+SRCEXPDS_EXPR_DEFN_SINGLE(bitwise_and, equality, AND, binary_and)
+
+//
+// SourceExpressionDS::make_bitwise_xor
+//
+SRCEXPDS_EXPR_DEFN_SINGLE(bitwise_xor, bitwise_and, CARET, binary_xor)
+
+//
+// SourceExpressionDS::make_bitwise_ior
+//
+SRCEXPDS_EXPR_DEFN_SINGLE(bitwise_ior, bitwise_xor, PIPE, binary_ior)
+
+//
+// SourceExpressionDS::make_logical_and
+//
+SRCEXPDS_EXPR_DEFN_SINGLE(logical_and, bitwise_ior, AND2, branch_and)
+
+//
+// SourceExpressionDS::make_logical_xor
+//
+SRCEXPDS_EXPR_DEFN_SINGLE(logical_xor, logical_and, CARET2, branch_xor)
+
+//
+// SourceExpressionDS::make_logical_ior
+//
+SRCEXPDS_EXPR_DEFN_SINGLE(logical_ior, logical_xor, PIPE2, branch_ior)
+
+//
+// SourceExpressionDS::make_conditional
+//
+SRCEXPDS_EXPR_DEFN(conditional, logical_ior)
+{
+   if (!in->peekType(SourceTokenC::TT_OP_QUERY)) return expr;
+
+   SourceTokenC tok = in->get(SourceTokenC::TT_OP_QUERY);
+
+   bool allowLabel = context->getAllowLabel();
+   context->setAllowLabel(false);
+   SourceExpression::Pointer exprBody = make_expression(in, blocks, context);
+   context->setAllowLabel(allowLabel);
+   in->get(SourceTokenC::TT_OP_COLON);
+   SourceExpression::Pointer exprElse = make_conditional(in, blocks, context);
+
+   return create_branch_if(expr, exprBody, exprElse, context, tok.pos);
+}
+
+#define CASE_ALL()      CAS0(         assign);                        \
+CASE(ASTERISK, mul_eq); CASE(SLASH,   div_eq); CASE(PERCENT, mod_eq); \
+CASE(PLUS,     add_eq); CASE(MINUS,   sub_eq);                        \
+CASE(CMP_LT2,  lsh_eq); CASE(CMP_GT2, rsh_eq);                        \
+CASE(AND,      and_eq); CASE(CARET,   xor_eq); CASE(PIPE,    ior_eq); \
+CASB(AND2,     and_eq); CASB(CARET2,  xor_eq); CASB(PIPE2,   ior_eq)
+
+//
+// SourceExpressionDS::make_assignment
+//
+SRCEXPDS_EXPR_DEF1(assignment)
+{
+   #define CAS0(EXP) case SourceTokenC::TT_OP_EQUALS:
+   #define CASB(TOK,EXP) case SourceTokenC::TT_OP_##TOK##_EQUALS:
+   #define CASE(TOK,EXP) case SourceTokenC::TT_OP_##TOK##_EQUALS:
+
+   SourceExpression::Pointer expr = make_prefix(in, blocks, context);
+
+   switch (in->peek().type)
+   {
+   default: return
+      make_conditional(in, blocks, context,
+      make_logical_ior(in, blocks, context,
+      make_logical_xor(in, blocks, context,
+      make_logical_and(in, blocks, context,
+      make_bitwise_ior(in, blocks, context,
+      make_bitwise_xor(in, blocks, context,
+      make_bitwise_and(in, blocks, context,
+      make_equality   (in, blocks, context,
+      make_relational (in, blocks, context,
+      make_shift      (in, blocks, context,
+      make_additive   (in, blocks, context,
+      make_multiplicative(in, blocks, context,
+         expr))))))))))));
+
+   CASE_ALL();
+      return make_assignment(in, blocks, context, expr);
+   }
+
+   #undef CASE
+   #undef CASB
+   #undef CAS0
+}
+
+//
+// SourceExpressionDS::make_assignment
+//
+SRCEXPDS_EXPR_DEF2(assignment)
+{
+   #define CAS0(EXP) case SourceTokenC::TT_OP_EQUALS: return \
+      create_binary_##EXP(expr, make_assignment(in, blocks, context), context, tok.pos)
+   #define CASB(TOK,EXP) case SourceTokenC::TT_OP_##TOK##_EQUALS: return \
+      create_branch_##EXP(expr, make_assignment(in, blocks, context), context, tok.pos)
+   #define CASE(TOK,EXP) case SourceTokenC::TT_OP_##TOK##_EQUALS: return \
+      create_binary_##EXP(expr, make_assignment(in, blocks, context), context, tok.pos)
+
+   SourceTokenC tok = in->get(); switch (tok.type)
+   {default: in->unget(tok); return expr; CASE_ALL();}
+
+   #undef CASE
+   #undef CASB
+   #undef CAS0
+}
+
+#undef CASE_ALL
 
 //
 // SourceExpressionDS::make_expression
 //
-SourceExpression::Pointer SourceExpressionDS::
-make_expression(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
-                SourceContext *context)
-{
-   SourceExpression::Vector expressions;
-   std::vector<SourceTokenC> operators;
-
-   SourceTokenC token;
-
-   bool looping = true;
-
-   expressions.push_back(make_expression_single(in, blocks, context));
-
-   while (looping) switch ((token = in->get()).type)
-   {
-   case SourceTokenC::TT_OP_AND:
-   case SourceTokenC::TT_OP_AND_EQUALS:
-   case SourceTokenC::TT_OP_AND2:
-   case SourceTokenC::TT_OP_AND2_EQUALS:
-   case SourceTokenC::TT_OP_ASTERISK:
-   case SourceTokenC::TT_OP_ASTERISK_EQUALS:
-   case SourceTokenC::TT_OP_CARET:
-   case SourceTokenC::TT_OP_CARET_EQUALS:
-   case SourceTokenC::TT_OP_CARET2:
-   case SourceTokenC::TT_OP_CARET2_EQUALS:
-   case SourceTokenC::TT_OP_CMP_EQ:
-   case SourceTokenC::TT_OP_CMP_GE:
-   case SourceTokenC::TT_OP_CMP_GT:
-   case SourceTokenC::TT_OP_CMP_GT2:
-   case SourceTokenC::TT_OP_CMP_GT2_EQUALS:
-   case SourceTokenC::TT_OP_CMP_LE:
-   case SourceTokenC::TT_OP_CMP_LT:
-   case SourceTokenC::TT_OP_CMP_LT2:
-   case SourceTokenC::TT_OP_CMP_LT2_EQUALS:
-   case SourceTokenC::TT_OP_CMP_NE:
-   case SourceTokenC::TT_OP_EQUALS:
-   case SourceTokenC::TT_OP_MINUS:
-   case SourceTokenC::TT_OP_MINUS_EQUALS:
-   case SourceTokenC::TT_OP_PERCENT:
-   case SourceTokenC::TT_OP_PERCENT_EQUALS:
-   case SourceTokenC::TT_OP_PIPE:
-   case SourceTokenC::TT_OP_PIPE_EQUALS:
-   case SourceTokenC::TT_OP_PIPE2:
-   case SourceTokenC::TT_OP_PIPE2_EQUALS:
-   case SourceTokenC::TT_OP_PLUS:
-   case SourceTokenC::TT_OP_PLUS_EQUALS:
-   case SourceTokenC::TT_OP_SLASH:
-   case SourceTokenC::TT_OP_SLASH_EQUALS:
-   case_expr:
-      operators.push_back(token);
-      expressions.push_back(make_expression_single(in, blocks, context));
-      break;
-
-   case SourceTokenC::TT_OP_BRACE_C:
-   case SourceTokenC::TT_OP_BRACKET_C:
-   case SourceTokenC::TT_OP_COLON:
-   case SourceTokenC::TT_OP_COMMA:
-   case SourceTokenC::TT_OP_PARENTHESIS_C:
-   case SourceTokenC::TT_OP_SEMICOLON:
-      in->unget(token);
-      looping = false;
-      break;
-
-   case SourceTokenC::TT_OP_QUERY:
-      operators.push_back(token);
-      context->setAllowLabel(false);
-      expressions.push_back(make_expression(in, blocks, context));
-      context->setAllowLabel(true);
-      token = in->get(SourceTokenC::TT_OP_COLON);
-      goto case_expr;
-
-   default:
-      in->unget(token);
-      ERROR(token.pos, "unexpected token type: %s", make_string(token.type).c_str());
-   }
-
-   return ::make_expression(expressions, operators, 0, operators.size(), context);
-}
-
-//
-// SourceExpressionDS::make_expression_arglist
-//
-void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS *in,
-   Vector *blocks, SourceContext *context, VariableType::Vector *argTypes,
-   VariableType::Pointer *returnType, StoreType argStore)
-{
-   make_expression_arglist(in, blocks, context, argTypes, NULL, NULL, NULL,
-      returnType, argStore);
-}
-
-//
-// SourceExpressionDS::make_expression_arglist
-//
-void SourceExpressionDS::make_expression_arglist(SourceTokenizerDS *in,
-   Vector *blocks, SourceContext *context, VariableType::Vector *argTypes,
-   VariableType::VecStr *argNames, int *argCount, SourceContext *argContext,
-   VariableType::Pointer *returnType, StoreType argStore)
-{
-	if (argCount) *argCount = 0;
-
-   SourcePosition const pos = in->get(SourceTokenC::TT_OP_PARENTHESIS_O).pos;
-   if (!in->peekType(SourceTokenC::TT_OP_PARENTHESIS_C)) while (true)
-	{
-      VariableType::Reference argType = make_expression_type(in, blocks, context);
-      if (argCount) *argCount += argType->getSize(pos);
-		if (argTypes) argTypes->push_back(argType);
-
-		std::string argName;
-      if (in->peekType(SourceTokenC::TT_IDENTIFIER))
-         argName = in->get(SourceTokenC::TT_IDENTIFIER).data;
-		if (argNames) argNames->push_back(argName);
-
-		if (argContext)
-		{
-         std::string argNameObject = argContext->getLabel() + argName;
-         SourceVariable::Pointer argVar = SourceVariable::create_variable
-            (argName, argType, argNameObject, argStore, pos);
-         argContext->addVar(argVar, false, false);
-		}
-
-		if (!in->peekType(SourceTokenC::TT_OP_COMMA))
-			break;
-
-		in->get(SourceTokenC::TT_OP_COMMA);
-	}
-	in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
-
-	if (returnType)
-	{
-      if (in->peekType(SourceTokenC::TT_OP_MINUS_GT))
-      {
-         in->get(SourceTokenC::TT_OP_MINUS_GT);
-
-         *returnType = make_expression_type(in, blocks, context);
-      }
-      else
-         *returnType = VariableType::get_bt_void();
-
-		if (argContext) argContext->setReturnType(*returnType);
-	}
-}
+SRCEXPDS_EXPR_DEFN_SINGLE(expression, assignment, COMMA, binary_pair)
 
 //
 // SourceExpressionDS::make_expressions
@@ -580,9 +587,9 @@ void SourceExpressionDS::make_expressions
 }
 
 //
-// SourceExpressionDS::make_linkage_specifier
+// SourceExpressionDS::make_linkspec
 //
-SourceExpressionDS::LinkageSpecifier SourceExpressionDS::make_linkage_specifier
+SourceExpressionDS::LinkageSpecifier SourceExpressionDS::make_linkspec
 (SourceTokenizerDS *in)
 {
    SourceTokenC const &linkSpecTok = in->get(SourceTokenC::TT_STRING);

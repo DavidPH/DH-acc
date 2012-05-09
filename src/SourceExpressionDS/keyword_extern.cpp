@@ -36,17 +36,17 @@
 //
 
 //
-// SourceExpressionDS::make_expression_single_extern
+// SourceExpressionDS::make_keyword_extern
 //
-SRCEXPDS_EXPRSINGLE_DEFN(extern)
+SRCEXPDS_KEYWORD_DEFN(extern)
 {
    ExternMap::iterator externFunc;
    LinkageSpecifier linkSpec;
 
-   if (token.data != "extern")
+   if (tok.data != "extern")
       linkSpec = LS_INTERN;
    else if (in->peekType(SourceTokenC::TT_STRING))
-      linkSpec = make_linkage_specifier(in);
+      linkSpec = make_linkspec(in);
    else
       linkSpec = LS_DS;
 
@@ -73,7 +73,7 @@ SRCEXPDS_EXPRSINGLE_DEFN(extern)
 
       in->get(SourceTokenC::TT_OP_BRACE_C);
 
-      return create_value_block(exprs, context, token.pos);
+      return create_value_block(exprs, context, tok.pos);
    }
    else
    {

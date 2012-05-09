@@ -106,8 +106,8 @@ static SourceExpression::Pointer make_var
       {
          in->get(SourceTokenC::TT_OP_AT);
 
-         bigsint addr = SourceExpressionDS::make_expression_single
-            (in, blocks, context)->makeObject()->resolveInt();
+         bigsint addr = SourceExpressionDS::make_prefix(in, blocks, context)
+            ->makeObject()->resolveInt();
 
          context->addVar(var, externDef, externVis, addr);
       }
@@ -154,7 +154,7 @@ static SourceExpression::Pointer make_var
       ObjectExpression::Pointer initObj;
 
       in->get(SourceTokenC::TT_OP_EQUALS);
-      initSrc = SourceExpressionDS::make_expression(in, blocks, context);
+      initSrc = SourceExpressionDS::make_assignment(in, blocks, context);
 
       if (initSrc->canMakeObject())
          initObj = initSrc->makeObject();
@@ -298,8 +298,8 @@ static SourceExpression::Pointer make_var
  SourcePosition const &pos, StoreData store, bool externDef)
 {
    // Read variable type.
-   VariableType::Reference type =
-      SourceExpressionDS::make_expression_type(in, blocks, context);
+   VariableType::Reference type = SourceExpressionDS::
+      make_type(in, blocks, context);
 
    // STORE_CONST is used to signal automatic storetype selection.
    if (store.type == STORE_CONST)
@@ -333,8 +333,7 @@ static SourceExpression::Pointer make_var
 {
    // Read storage class.
    StoreData store;
-   store.type = SourceExpressionDS::make_expression_store
-      (in, blocks, context, &store.area);
+   store.type = SourceExpressionDS::make_store(in, blocks, context, &store.area);
 
    if (linkCheck && (store.type == STORE_AUTO || store.type == STORE_REGISTER))
       linkSpec = SourceExpressionDS::LS_INTERN;
@@ -348,22 +347,22 @@ static SourceExpression::Pointer make_var
 //
 
 //
-// SourceExpressionDS::make_expression_extern_variable
+// SourceExpressionDS::make_extern_variable
 //
-SRCEXPDS_EXPREXTERN_DEFN(variable)
+SRCEXPDS_EXTERN_DEFN(variable)
 {
-   return make_var(in, blocks, context, linkSpec, false, token.pos, true);
+   return make_var(in, blocks, context, linkSpec, false, tok.pos, true);
 }
 
 //
-// SourceExpressionDS::make_expression_single_variable
+// SourceExpressionDS::make_keyword_variable
 //
-SRCEXPDS_EXPRSINGLE_DEFN(variable)
+SRCEXPDS_KEYWORD_DEFN(variable)
 {
    bool linkCheck = false;
    LinkageSpecifier linkSpec;
 
-   if (token.data == "__variable")
+   if (tok.data == "__variable")
    {
       if (context == SourceContext::global_context)
       {
@@ -373,28 +372,28 @@ SRCEXPDS_EXPRSINGLE_DEFN(variable)
       else
          linkSpec = LS_INTERN;
    }
-   else if (token.data == "__extvar")
+   else if (tok.data == "__extvar")
    {
       if (in->peekType(SourceTokenC::TT_STRING))
-         linkSpec = make_linkage_specifier(in);
+         linkSpec = make_linkspec(in);
       else
          linkSpec = LS_DS;
    }
    else
       linkSpec = LS_INTERN;
 
-   return make_var(in, blocks, context, linkSpec, linkCheck, token.pos, false);
+   return make_var(in, blocks, context, linkSpec, linkCheck, tok.pos, false);
 }
 
 //
-// SourceExpressionDS::make_expression_single_variable_store
+// SourceExpressionDS::make_keyword_variable_store
 //
-SRCEXPDS_EXPRSINGLE_DEFN(variable_store)
+SRCEXPDS_KEYWORD_DEFN(variable_store)
 {
    bool linkCheck = false;
    LinkageSpecifier linkSpec;
 
-   in->unget(token);
+   in->unget(tok);
 
    if (context == SourceContext::global_context)
    {
@@ -404,25 +403,25 @@ SRCEXPDS_EXPRSINGLE_DEFN(variable_store)
    else
       linkSpec = LS_INTERN;
 
-   return make_var(in, blocks, context, linkSpec, linkCheck, token.pos, false);
+   return make_var(in, blocks, context, linkSpec, linkCheck, tok.pos, false);
 }
 
 //
-// SourceExpressionDS::make_expression_single_variable_type
+// SourceExpressionDS::make_keyword_variable_type
 //
-SRCEXPDS_EXPRSINGLE_DEFN(variable_type)
+SRCEXPDS_KEYWORD_DEFN(variable_type)
 {
    LinkageSpecifier linkSpec;
    StoreData store = {STORE_CONST, NULL};
 
-   in->unget(token);
+   in->unget(tok);
 
    if (context == SourceContext::global_context)
       linkSpec = LS_DS;
    else
       linkSpec = LS_INTERN;
 
-   return make_var(in, blocks, context, linkSpec, token.pos, store, false);
+   return make_var(in, blocks, context, linkSpec, tok.pos, store, false);
 }
 
 // EOF

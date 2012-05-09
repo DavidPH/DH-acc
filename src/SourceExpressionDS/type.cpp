@@ -78,8 +78,8 @@ static void do_storage(VariableType::Pointer *type, SourceTokenizerDS *in,
    SourceExpression::Vector *blocks, SourceContext *context)
 {
    ObjectExpression::Pointer storeArea;
-   StoreType storeType = SourceExpressionDS::make_expression_store
-      (in, blocks, context, &storeArea);
+   StoreType storeType = SourceExpressionDS::
+      make_store(in, blocks, context, &storeArea);
 
    if (storeArea)
       *type = (*type)->setStorage(storeType, storeArea->resolveSymbol());
@@ -297,7 +297,7 @@ bool make_struct_lists
 
    while (!in->peekType(SourceTokenC::TT_OP_BRACE_C))
    {
-      type = SourceExpressionDS::make_expression_type(in, blocks, context);
+      type = SourceExpressionDS::make_type(in, blocks, context);
 
       types->push_back(type);
       names->push_back(in->get(SourceTokenC::TT_IDENTIFIER).data);
@@ -366,10 +366,10 @@ VariableType::Reference make_struct
 //
 
 //
-// SourceExpressionDS::is_expression_type
+// SourceExpressionDS::is_type
 //
-bool SourceExpressionDS::
-is_expression_type(std::string const &data, SourceContext *context)
+bool SourceExpressionDS::is_type(std::string const &data,
+   SourceContext *context)
 {
    if (data == "void")
       return true;
@@ -402,6 +402,7 @@ is_expression_type(std::string const &data, SourceContext *context)
    if (data == "__native_t") return true;
    if (data == "__script_t") return true;
    if (data ==   "struct")   return true;
+   if (data ==   "typedef")  return true;
    if (data ==   "typename") return true;
    if (data ==   "union")    return true;
 
@@ -409,41 +410,40 @@ is_expression_type(std::string const &data, SourceContext *context)
 }
 
 //
-// SourceExpressionDS::make_expression_type
+// SourceExpressionDS::make_type
 //
-VariableType::Reference SourceExpressionDS::make_expression_type
-(SourceTokenizerDS *in, Vector *blocks, SourceContext *context)
+VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
+   Vector *blocks, SourceContext *context)
 {
-   SourceTokenC token;
+   SourceTokenC tok;
+
+   ArgList args;
 
    bigsint width;
    std::string name;
-   VariableType::VecStr names;
-   VariableType::Pointer retn;
    VariableType::Pointer type;
-   VariableType::Vector types;
 
    if (in->peekType(SourceTokenC::TT_OP_PARENTHESIS_O))
    {
       in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
-      type = make_expression_type(in,blocks, context);
+      type = make_type(in,blocks, context);
       in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
    }
    else
    {
-      token = in->get(SourceTokenC::TT_IDENTIFIER);
+      tok = in->get(SourceTokenC::TT_IDENTIFIER);
    }
 
-   if (type || (type = make_basic(token, in)) != NULL)
+   if (type || (type = make_basic(tok, in)) != NULL)
    {
    }
-   else if (token.data == "__asmfunc_t")
+   else if (tok.data == "__asmfunc_t")
    {
-      make_expression_arglist(in, blocks, context, &types, &retn);
+      make_arglist(in, blocks, context, &args);
 
-      type = VariableType::get_bt_asmfunc(types, retn);
+      type = VariableType::get_bt_asmfunc(args.types, args.retn);
    }
-   else if (token.data == "__block")
+   else if (tok.data == "__block")
    {
       in->get(SourceTokenC::TT_OP_BRACE_O);
 
@@ -452,20 +452,20 @@ VariableType::Reference SourceExpressionDS::make_expression_type
          if (in->peekType(SourceTokenC::TT_OP_BRACE_C))
          break;
 
-         types.push_back(make_expression_type(in, blocks, context));
+         args.types.push_back(make_type(in, blocks, context));
 
          in->get(SourceTokenC::TT_OP_SEMICOLON);
       }
 
       in->get(SourceTokenC::TT_OP_BRACE_C);
 
-      type = VariableType::get_bt_block(types);
+      type = VariableType::get_bt_block(args.types);
    }
-   else if (token.data == "decltype")
+   else if (tok.data == "decltype")
    {
-      type = make_expression_single(in, blocks, context)->getType();
+      type = make_prefix(in, blocks, context)->getType();
    }
-   else if (token.data == "enum")
+   else if (tok.data == "enum")
    {
       if (in->peekType(SourceTokenC::TT_IDENTIFIER))
          name = in->get(SourceTokenC::TT_IDENTIFIER).data;
@@ -474,7 +474,7 @@ VariableType::Reference SourceExpressionDS::make_expression_type
       {
          bigsint enumVal = 0;
 
-         type = context->getVariableType_enum(name, true, token.pos);
+         type = context->getVariableType_enum(name, true, tok.pos);
 
          in->get(SourceTokenC::TT_OP_BRACE_O);
 
@@ -486,8 +486,8 @@ VariableType::Reference SourceExpressionDS::make_expression_type
             {
                in->get(SourceTokenC::TT_OP_EQUALS);
 
-               enumVal = make_expression
-                         (in, blocks, context)->makeObject()->resolveInt();
+               enumVal = make_assignment(in, blocks, context)
+                  ->makeObject()->resolveInt();
             }
 
             ObjectExpression::Pointer enumObj =
@@ -508,46 +508,48 @@ VariableType::Reference SourceExpressionDS::make_expression_type
          in->get(SourceTokenC::TT_OP_BRACE_C);
       }
       else
-      {
-         type = context->getVariableType_enum(name, false, token.pos);
-      }
+         type = context->getVariableType_enum(name, false, tok.pos);
    }
-   else if (token.data == "__func_t")
+   else if (tok.data == "__func_t")
    {
-      make_expression_arglist(in, blocks, context, &types, &retn);
+      make_arglist(in, blocks, context, &args);
 
-      type = VariableType::get_bt_function(types, retn);
+      type = VariableType::get_bt_function(args.types, args.retn);
    }
-   else if (token.data == "__lnspec_t")
+   else if (tok.data == "__lnspec_t")
    {
-      make_expression_arglist(in, blocks, context, &types, &retn);
+      make_arglist(in, blocks, context, &args);
 
-      type = VariableType::get_bt_linespec(types, retn);
+      type = VariableType::get_bt_linespec(args.types, args.retn);
    }
-   else if (token.data == "__native_t")
+   else if (tok.data == "__native_t")
    {
-      make_expression_arglist(in, blocks, context, &types, &retn);
+      make_arglist(in, blocks, context, &args);
 
-      type = VariableType::get_bt_native(types, retn);
+      type = VariableType::get_bt_native(args.types, args.retn);
    }
-   else if (token.data == "__script_t")
+   else if (tok.data == "__script_t")
    {
-      make_expression_arglist(in, blocks, context, &types, &retn);
+      make_arglist(in, blocks, context, &args);
 
-      type = VariableType::get_bt_script(types, retn);
+      type = VariableType::get_bt_script(args.types, args.retn);
    }
-   else if (token.data == "struct" || token.data == "union")
-      type = make_struct(token.data == "union", in, blocks, context);
+   else if (tok.data == "struct" || tok.data == "union")
+      type = make_struct(tok.data == "union", in, blocks, context);
 
-   else if (token.data == "typename")
+   else if (tok.data == "typedef")
    {
-      token = in->get(SourceTokenC::TT_IDENTIFIER);
-      type = context->getVariableType(token.data, token.pos);
+      type = make_type(in, blocks, context);
+      tok = in->get(SourceTokenC::TT_IDENTIFIER);
+      type = context->getVariableType_typedef(tok.data, type, tok.pos);
+   }
+   else if (tok.data == "typename")
+   {
+      tok = in->get(SourceTokenC::TT_IDENTIFIER);
+      type = context->getVariableType(tok.data, tok.pos);
    }
    else
-   {
-      type = context->getVariableType(token.data, token.pos);
-   }
+      type = context->getVariableType(tok.data, tok.pos);
 
    // Suffix modifiers.
    while (true) switch (in->peek().type)
@@ -562,7 +564,7 @@ VariableType::Reference SourceExpressionDS::make_expression_type
       else if (in->peek().data == "restrict")
          do_qualifier(&type, VariableType::QUAL_RESTRICT, in);
 
-      else if (is_expression_store(in->peek().data))
+      else if (is_store(in->peek().data))
          do_storage(&type, in, blocks, context);
 
       else

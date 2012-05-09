@@ -68,6 +68,7 @@ add_executable(DH-acc
    SourceExpression/BinaryLSh.cpp
 	SourceExpression/BinaryMod.cpp
 	SourceExpression/BinaryMul.cpp
+   SourceExpression/BinaryPair.cpp
    SourceExpression/BinaryRSh.cpp
 	SourceExpression/BinarySub.cpp
 	SourceExpression/BinaryXOr.cpp
@@ -111,26 +112,15 @@ add_executable(DH-acc
 #	SourceExpressionACS/Base.cpp
 #	SourceExpressionACS/BinaryAdd.cpp
 	SourceExpressionDS.cpp
+   SourceExpressionDS/arglist.cpp
    SourceExpressionDS/create_value_number.cpp
-	SourceExpressionDS/make_expression_single.cpp
-	SourceExpressionDS/make_expression_single_asmfunc.cpp
-   SourceExpressionDS/make_expression_single_cast.cpp
-	SourceExpressionDS/make_expression_single_do.cpp
-	SourceExpressionDS/make_expression_single_extern.cpp
-	SourceExpressionDS/make_expression_single_for.cpp
-	SourceExpressionDS/make_expression_single_function.cpp
-	SourceExpressionDS/make_expression_single_goto.cpp
-	SourceExpressionDS/make_expression_single_if.cpp
-	SourceExpressionDS/make_expression_single_linespec.cpp
-	SourceExpressionDS/make_expression_single_native.cpp
-   SourceExpressionDS/make_expression_single_printf.cpp
-	SourceExpressionDS/make_expression_single_script.cpp
-   SourceExpressionDS/make_expression_single_sizeof.cpp
-	SourceExpressionDS/make_expression_single_switch.cpp
-	SourceExpressionDS/make_expression_single_symbol.cpp
-	SourceExpressionDS/make_expression_single_variable.cpp
-   SourceExpressionDS/make_expression_store.cpp
-	SourceExpressionDS/make_expression_type.cpp
+   SourceExpressionDS/keyword.cpp
+   SourceExpressionDS/keyword_extern.cpp
+   SourceExpressionDS/keyword_function.cpp
+   SourceExpressionDS/keyword_script.cpp
+   SourceExpressionDS/keyword_variable.cpp
+   SourceExpressionDS/store.cpp
+   SourceExpressionDS/type.cpp
 	SourcePosition.cpp
 	SourceStream.cpp
 	SourceTokenASMPLX.cpp

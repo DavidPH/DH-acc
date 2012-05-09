@@ -60,6 +60,15 @@ private:
 //
 
 //
+// SourceExpression::create_unary_add
+//
+SRCEXP_EXPRUNA_DEFN(add)
+{
+   (void)context; (void)pos;
+   return expr;
+}
+
+//
 // SourceExpression::create_unary_sub
 //
 SRCEXP_EXPRUNA_DEFN(sub)

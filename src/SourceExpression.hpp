@@ -280,6 +280,7 @@ public:
    friend class SourceVariable;
 
    // Unary operators.
+   SRCEXP_EXPRUNA_DECL(add);
    SRCEXP_EXPRUNA_DECL(dec_pre);
    SRCEXP_EXPRUNA_DECL(dec_suf);
    SRCEXP_EXPRUNA_DECL(dereference);
@@ -313,6 +314,7 @@ public:
    SRCEXP_EXPRBIN_DECL(mod_eq);
    SRCEXP_EXPRBIN_DECL(mul);
    SRCEXP_EXPRBIN_DECL(mul_eq);
+   SRCEXP_EXPRBIN_DECL(pair);
    SRCEXP_EXPRBIN_DECL(rsh);
    SRCEXP_EXPRBIN_DECL(rsh_eq);
    SRCEXP_EXPRBIN_DECL(sub);
@@ -351,6 +353,7 @@ public:
    SRCEXP_EXPRVAL_DECL(et, cast_static);
    SRCEXP_EXPRVAL_DECL( c, char);
    SRCEXP_EXPRVAL_DECL( s, char);
+   SRCEXP_EXPRVAL_DECL(  , data);
    SRCEXP_EXPRVAL_DECL( t, data);
    SRCEXP_EXPRVAL_DECL( t, data_garbage);
    SRCEXP_EXPRVAL_DECL( s, function);

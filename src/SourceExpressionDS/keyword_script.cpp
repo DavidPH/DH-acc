@@ -74,24 +74,26 @@ extern bool option_string_func;
 // make_script
 //
 static SourceExpression::Pointer make_script
-(SourceTokenizerDS *in, SourceTokenC const &token,
+(SourceTokenizerDS *in, SourceTokenC const &tok,
  SourceExpression::Vector *blocks, SourceContext *context,
  SourceExpressionDS::LinkageSpecifier linkSpec, bool externDef)
 {
    bool externVis = linkSpec != SourceExpressionDS::LS_INTERN;
 
-   // scriptArgStore
-   StoreType scriptArgStore;
+   SourceExpressionDS::ArgList args;
 
    if (option_script_autoargs)
-      scriptArgStore = STORE_AUTO;
+      args.store = STORE_AUTO;
    else
-      scriptArgStore = STORE_REGISTER;
+      args.store = STORE_REGISTER;
 
-   // scriptContext
-   SourceContext::Pointer scriptContext;
    if (!externDef)
-      scriptContext = SourceContext::create(context, SourceContext::CT_SCRIPT);
+      args.context = SourceContext::create(context, SourceContext::CT_SCRIPT);
+
+   // prefix-return
+   if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+       SourceExpressionDS::is_type(in->peek().data, context))
+      args.retn = SourceExpressionDS::make_type(in, blocks, context);
 
    // scriptNameSrc
    std::string scriptNameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
@@ -116,36 +118,26 @@ static SourceExpression::Pointer make_script
          get_flag(scriptFlagTok.data, scriptFlagTok.pos);
    }
 
-   // scriptArgTypes/Names/Count scriptReturn
-   VariableType::Vector scriptArgTypes;
-   VariableType::VecStr scriptArgNames;
-   int scriptArgCount;
-   VariableType::Pointer scriptReturn;
-   SourceExpressionDS::make_expression_arglist
-      (in, blocks, context, &scriptArgTypes, &scriptArgNames, &scriptArgCount,
-       scriptContext, &scriptReturn, scriptArgStore);
+   // arglist/suffix-return
+   SourceExpressionDS::make_arglist(in, blocks, context, &args);
 
    // scriptNumber
-   bigsint scriptNumber;
+   ObjectExpression::Pointer scriptNumber;
    if (in->peekType(SourceTokenC::TT_OP_AT))
    {
       in->get(SourceTokenC::TT_OP_AT);
-      scriptNumber = SourceExpressionDS::
-         make_expression_single(in, blocks, context)->makeObject()->resolveInt();
-   }
-   else
-   {
-      scriptNumber = -1;
+      scriptNumber = SourceExpressionDS::make_prefix(in, blocks, context)
+         ->makeObject();
    }
 
    // scriptNameSrc special-cases
    if (scriptNameSrc == "auto")
    {
-      if (scriptNumber < 0)
-         ERROR(token.pos, "name auto requires explicit number");
+      if (!scriptNumber)
+         ERROR(tok.pos, "name auto requires explicit allocation");
 
       std::ostringstream oss;
-      oss << "script" << scriptNumber;
+      oss << "script" << scriptNumber->resolveInt();
       scriptNameSrc = oss.str();
    }
    else if (scriptNameSrc == "void")
@@ -158,13 +150,13 @@ static SourceExpression::Pointer make_script
 
       if (option_script_mangle_types)
       {
-         if (!scriptArgTypes.empty())
+         if (!args.types.empty())
          {
             scriptFunc += '(';
 
-            VariableType::Vector::iterator it = scriptArgTypes.begin();
+            VariableType::Vector::iterator it = args.types.begin();
             scriptFunc += make_string(*it);
-            for (++it; it != scriptArgTypes.end(); ++it)
+            for (++it; it != args.types.end(); ++it)
             {
                scriptFunc += ", ";
                scriptFunc += make_string(*it);
@@ -176,15 +168,15 @@ static SourceExpression::Pointer make_script
             scriptFunc += "(void)";
 
          scriptFunc += " -> ";
-         scriptFunc += make_string(scriptReturn);
+         scriptFunc += make_string(args.retn);
       }
 
       scriptFunc = ObjectData_String::add(scriptFunc);
 
       SourceVariable::Pointer scriptFuncVar = SourceVariable::create_constant
-         ("__func__", VariableType::get_bt_string(), scriptFunc, token.pos);
+         ("__func__", VariableType::get_bt_string(), scriptFunc, tok.pos);
 
-      scriptContext->addVar(scriptFuncVar, false, false);
+      args.context->addVar(scriptFuncVar, false, false);
    }
 
    // scriptLabel
@@ -194,7 +186,7 @@ static SourceExpression::Pointer make_script
    case SourceExpressionDS::LS_INTERN:
       scriptLabel  = context->getLabel();
       scriptLabel += scriptNameSrc;
-      mangle_types(scriptArgTypes, scriptLabel);
+      mangle_types(args.types, scriptLabel);
       break;
 
    case SourceExpressionDS::LS_ACS:
@@ -204,7 +196,7 @@ static SourceExpression::Pointer make_script
    case SourceExpressionDS::LS_DS:
       scriptLabel  = scriptNameSrc;
       if (option_script_mangle_types)
-         mangle_types(scriptArgTypes, scriptLabel);
+         mangle_types(args.types, scriptLabel);
       break;
    }
 
@@ -213,22 +205,22 @@ static SourceExpression::Pointer make_script
 
    // scriptVarType
    VariableType::Reference scriptVarType =
-      VariableType::get_bt_script(scriptArgTypes, scriptReturn);
+      VariableType::get_bt_script(args.types, args.retn);
 
    // scriptVar
    SourceVariable::Pointer scriptVar = SourceVariable::create_constant
-      (scriptNameSrc, scriptVarType, scriptNameObj, token.pos);
+      (scriptNameSrc, scriptVarType, scriptNameObj, tok.pos);
 
    // scriptAdded
    bool scriptAdded;
-   if (scriptNumber < 0)
+   if (scriptNumber)
       scriptAdded = ObjectData_Script::add
-      (scriptNameObj, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-       scriptContext, externVis);
+      (scriptNameObj, scriptLabel, scriptType, scriptFlags, args.count,
+       args.context, externVis, scriptNumber->resolveInt());
    else
       scriptAdded = ObjectData_Script::add
-      (scriptNameObj, scriptLabel, scriptType, scriptFlags, scriptArgCount,
-       scriptContext, externVis, scriptNumber);
+      (scriptNameObj, scriptLabel, scriptType, scriptFlags, args.count,
+       args.context, externVis);
 
    if (scriptAdded)
       context->addFunction(scriptVar);
@@ -237,15 +229,15 @@ static SourceExpression::Pointer make_script
    if (!externDef)
    {
       SourceExpression::Pointer scriptExprRoot = SourceExpression::
-         create_root_script(scriptVarType, scriptContext, token.pos);
+         create_root_script(scriptVarType, args.context, tok.pos);
 
       SourceExpression::Pointer scriptExpr = SourceExpressionDS::
-         make_expression_single(in, blocks, scriptContext);
+         make_prefix(in, blocks, args.context);
 
       SourceExpression::Pointer scriptExprData = SourceExpression::
-         create_value_data_garbage(scriptReturn, scriptContext, token.pos);
+         create_value_data_garbage(args.retn, args.context, tok.pos);
       SourceExpression::Pointer scriptExprRetn = SourceExpression::
-         create_branch_return(scriptExprData, scriptContext, token.pos);
+         create_branch_return(scriptExprData, args.context, tok.pos);
 
       scriptExprRoot->addLabel(scriptLabel);
       blocks->push_back(scriptExprRoot);
@@ -253,7 +245,7 @@ static SourceExpression::Pointer make_script
       blocks->push_back(scriptExprRetn);
    }
 
-   return SourceExpression::create_value_variable(scriptVar, context, token.pos);
+   return SourceExpression::create_value_variable(scriptVar, context, tok.pos);
 }
 
 //
@@ -273,38 +265,38 @@ static void mangle_types(VariableType::Vector const &types, std::string &name)
 //
 
 //
-// SourceExpressionDS::make_expression_extern_script
+// SourceExpressionDS::make_extern_script
 //
-SRCEXPDS_EXPREXTERN_DEFN(script)
+SRCEXPDS_EXTERN_DEFN(script)
 {
-   return make_script(in, token, blocks, context, linkSpec, true);
+   return make_script(in, tok, blocks, context, linkSpec, true);
 }
 
 //
-// SourceExpressionDS::make_expression_single_script
+// SourceExpressionDS::make_keyword_script
 //
-SRCEXPDS_EXPRSINGLE_DEFN(script)
+SRCEXPDS_KEYWORD_DEFN(script)
 {
    LinkageSpecifier linkSpec;
 
-   if (token.data == "__script")
+   if (tok.data == "__script")
    {
       if (context == SourceContext::global_context)
          linkSpec = LS_DS;
       else
          linkSpec = LS_INTERN;
    }
-   else if (token.data == "__extscript")
+   else if (tok.data == "__extscript")
    {
       if (in->peekType(SourceTokenC::TT_STRING))
-         linkSpec = make_linkage_specifier(in);
+         linkSpec = make_linkspec(in);
       else
          linkSpec = LS_DS;
    }
    else
       linkSpec = LS_INTERN;
 
-   return make_script(in, token, blocks, context, linkSpec, false);
+   return make_script(in, tok, blocks, context, linkSpec, false);
 }
 
 // EOF

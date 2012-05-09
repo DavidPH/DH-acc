@@ -33,9 +33,9 @@
 //
 
 //
-// SourceExpressionDS::is_expression_store
+// SourceExpressionDS::is_store
 //
-bool SourceExpressionDS::is_expression_store(std::string const &data)
+bool SourceExpressionDS::is_store(std::string const &data)
 {
    if (data == "static")
       return true;
@@ -80,10 +80,10 @@ bool SourceExpressionDS::is_expression_store(std::string const &data)
 }
 
 //
-// SourceExpressionDS::make_expression_store
+// SourceExpressionDS::make_store
 //
-StoreType SourceExpressionDS::make_expression_store(SourceTokenizerDS *in,
-   Vector *blocks, SourceContext *context, ObjectExpression::Pointer *area)
+StoreType SourceExpressionDS::make_store(SourceTokenizerDS *in, Vector *blocks,
+   SourceContext *context, ObjectExpression::Pointer *area)
 {
    SourceTokenC typeTok = in->get(SourceTokenC::TT_IDENTIFIER);
 
