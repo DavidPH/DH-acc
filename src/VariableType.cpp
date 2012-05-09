@@ -1092,8 +1092,16 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       if (srcBT == BT_NULLPTR && dstBT == BT_POINTER)
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
+      // nullptr->function
+      if (srcBT == BT_NULLPTR && is_bt_function(dstBT))
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
       // pointer->boolean
       if (srcBT == BT_POINTER && (dstBT == BT_BOOLHARD || dstBT == BT_BOOLSOFT))
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
+      // function->boolean
+      if (is_bt_function(srcBT) && (dstBT == BT_BOOLHARD || dstBT == BT_BOOLSOFT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
       // arithmetic<->arithmetic
