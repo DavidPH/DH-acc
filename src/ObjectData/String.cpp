@@ -90,7 +90,7 @@ void ObjectData_String::generate_symbols()
    ObjectExpression::Pointer expr;
    StringIter it;
    std::vector<std::string>::iterator name;
-   bigsint i = 0;
+   bigsint i = 1;
 
    for (it = string_table.begin(); it != string_table.end(); ++it)
    {
@@ -108,6 +108,8 @@ void ObjectData_String::generate_symbols()
 //
 void ObjectData_String::iterate(IterFunc iterFunc, std::ostream *out)
 {
+   static ObjectData_String nullstring; iterFunc(out, nullstring);
+
    StringIter it;
 
    for (it = string_table.begin(); it != string_table.end(); ++it)
