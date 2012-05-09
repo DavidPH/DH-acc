@@ -47,66 +47,69 @@ public:
    //
    enum TokenType
    {
-      TT_CHARACTER,
-      TT_FLOAT,
-      TT_IDENTIFIER,
-      TT_INTEGER,
-      TT_STRING,
+      TT_CHR,
+      TT_FLT,
+      TT_NAM,
+      TT_INT,
+      TT_STR,
 
-      TT_OP_AND,                // &
-      TT_OP_AND_EQUALS,         // &=
-      TT_OP_AND2,               // &&
-      TT_OP_AND2_EQUALS,        // &&=
-      TT_OP_AT,                 // @
-      TT_OP_ASTERISK,           // *
-      TT_OP_ASTERISK_EQUALS,    // *=
-      TT_OP_BRACE_C,            // }
-      TT_OP_BRACE_O,            // {
-      TT_OP_BRACKET_C,          // ]
-      TT_OP_BRACKET_O,          // [
-      TT_OP_CARET,              // ^
-      TT_OP_CARET_EQUALS,       // ^=
-      TT_OP_CARET2,             // ^^
-      TT_OP_CARET2_EQUALS,      // ^^=
-      TT_OP_CMP_EQ,             // ==
-      TT_OP_CMP_GE,             // >=
-      TT_OP_CMP_GT,             // >
-      TT_OP_CMP_GT2,            // >>
-      TT_OP_CMP_GT2_EQUALS,     // >>=
-      TT_OP_CMP_LE,             // <=
-      TT_OP_CMP_LT,             // <
-      TT_OP_CMP_LT2,            // <<
-      TT_OP_CMP_LT2_EQUALS,     // <<=
-      TT_OP_CMP_NE,             // !=
-      TT_OP_COLON,              // :
-      TT_OP_COMMA,              // ,
-      TT_OP_ELLIPSIS,           // ...
-      TT_OP_EQUALS,             // =
-      TT_OP_EXCLAMATION,        // !
-      TT_OP_HASH,               // #
-      TT_OP_HASH2,              // ##
-      TT_OP_HASH3,              // ###
-      TT_OP_MINUS,              // -
-      TT_OP_MINUS_EQUALS,       // -=
-      TT_OP_MINUS_GT,           // ->
-      TT_OP_MINUS2,             // --
-      TT_OP_PARENTHESIS_C,      // )
-      TT_OP_PARENTHESIS_O,      // (
-      TT_OP_PERCENT,            // %
-      TT_OP_PERCENT_EQUALS,     // %=
-      TT_OP_PERIOD,             // .
-      TT_OP_PIPE,               // |
-      TT_OP_PIPE_EQUALS,        // |=
-      TT_OP_PIPE2,              // ||
-      TT_OP_PIPE2_EQUALS,       // ||=
-      TT_OP_PLUS,               // +
-      TT_OP_PLUS_EQUALS,        // +=
-      TT_OP_PLUS2,              // ++
-      TT_OP_QUERY,              // ?
-      TT_OP_SEMICOLON,          // ;
-      TT_OP_SLASH,              // /
-      TT_OP_SLASH_EQUALS,       // /=
-      TT_OP_TILDE,              // ~
+      TT_HASH1, // #
+      TT_HASH2, // ##
+      TT_HASH3, // ###
+
+      TT_AD2,    // ++
+      TT_ADD,    // +
+      TT_ADD_EQ, // +=
+      TT_AN2,    // &&
+      TT_AN2_EQ, // &&=
+      TT_AND,    // &
+      TT_AND_EQ, // &=
+      TT_AT,     // @
+      TT_CMP_EQ, // ==
+      TT_CMP_GE, // >=
+      TT_CMP_GT, // >
+      TT_CMP_LE, // <=
+      TT_CMP_LT, // <
+      TT_CMP_NE, // !=
+      TT_COLON,  // :
+      TT_COMMA,  // ,
+      TT_DIV,    // /
+      TT_DIV_EQ, // /=
+      TT_DOT,    // .
+      TT_DOT3,   // ...
+      TT_EQUALS, // =
+      TT_IO2,    // ||
+      TT_IO2_EQ, // ||=
+      TT_IOR,    // |
+      TT_IOR_EQ, // |=
+      TT_LSH,    // <<
+      TT_LSH_EQ, // <<=
+      TT_MEM,    // ->
+      TT_MOD,    // %
+      TT_MOD_EQ, // %=
+      TT_MUL,    // *
+      TT_MUL_EQ, // *=
+      TT_NOTBIT, // ~
+      TT_NOTLOG, // !
+      TT_QUERY,  // ?
+      TT_RSH,    // >>
+      TT_RSH_EQ, // >>=
+      TT_SU2,    // --
+      TT_SUB,    // -
+      TT_SUB_EQ, // -=
+      TT_XO2,    // ^^
+      TT_XO2_EQ, // ^^=
+      TT_XOR,    // ^
+      TT_XOR_EQ, // ^=
+
+      TT_BRACE_O, // {
+      TT_BRACE_C, // }
+      TT_BRACK_O, // [
+      TT_BRACK_C, // ]
+      TT_PAREN_O, // (
+      TT_PAREN_C, // )
+
+      TT_SEMICOLON, // ;
 
       TT_NONE
    };

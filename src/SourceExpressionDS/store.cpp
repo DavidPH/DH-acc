@@ -85,13 +85,13 @@ bool SourceExpressionDS::is_store(std::string const &data)
 StoreType SourceExpressionDS::make_store(SourceTokenizerDS *in, Vector *blocks,
    SourceContext *context, ObjectExpression::Pointer *area)
 {
-   SourceTokenC typeTok = in->get(SourceTokenC::TT_IDENTIFIER);
+   SourceTokenC typeTok = in->get(SourceTokenC::TT_NAM);
 
-   if (in->peekType(SourceTokenC::TT_OP_PARENTHESIS_O))
+   if (in->peekType(SourceTokenC::TT_PAREN_O))
    {
-      in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+      in->get(SourceTokenC::TT_PAREN_O);
       *area = make_expression(in, blocks, context)->makeObject();
-      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+      in->get(SourceTokenC::TT_PAREN_C);
    }
 
    if (typeTok.data == "static")

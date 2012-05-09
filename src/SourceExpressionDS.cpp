@@ -52,15 +52,15 @@ switch ((tok = in->get()).type) { default: in->unget(tok); return expr;
 //
 // SRCEXPDS_EXPR_DEFN_PART
 //
-#define SRCEXPDS_EXPR_DEFN_PART(NAME,TOKN,EXPR)             \
-case SourceTokenC::TT_OP_##TOKN: expr = create_##EXPR(expr, \
+#define SRCEXPDS_EXPR_DEFN_PART(NAME,TOKN,EXPR)          \
+case SourceTokenC::TT_##TOKN: expr = create_##EXPR(expr, \
    make_##NAME(in, blocks, context), context, tok.pos); break
 
 //
 // SRCEXPDS_EXPR_DEFN_PART_SUF
 //
-#define SRCEXPDS_EXPR_DEFN_PART_SUF(TOKN,EXPR)              \
-case SourceTokenC::TT_OP_##TOKN: expr = create_##EXPR(expr, \
+#define SRCEXPDS_EXPR_DEFN_PART_SUF(TOKN,EXPR)           \
+case SourceTokenC::TT_##TOKN: expr = create_##EXPR(expr, \
    context, tok.pos); break \
 
 //
@@ -153,7 +153,7 @@ SRCEXPDS_EXPR_DEF1(primary)
    {
    default: in->unget(tok); return create_value_data(context, tok.pos);
 
-   case SourceTokenC::TT_IDENTIFIER:
+   case SourceTokenC::TT_NAM:
       if (is_keyword(tok.data))
          return expr_keyword[tok.data](in, tok, blocks, context);
 
@@ -163,7 +163,7 @@ SRCEXPDS_EXPR_DEF1(primary)
       if (is_type(tok.data, context))
          return make_keyword_variable_type(in, tok, blocks, context);
 
-      if (in->peekType(SourceTokenC::TT_OP_COLON) && context->getAllowLabel())
+      if (in->peekType(SourceTokenC::TT_COLON) && context->getAllowLabel())
       {
          in->get();
          SourceExpression::Pointer expr = make_expression(in, blocks, context);
@@ -183,40 +183,40 @@ SRCEXPDS_EXPR_DEF1(primary)
       return create_value_variable(context->getVariable(tok.data, tok.pos),
                                    context, tok.pos);
 
-   case SourceTokenC::TT_CHARACTER:
+   case SourceTokenC::TT_CHR:
       return create_value_char(tok.data, context, tok.pos);
 
-   case SourceTokenC::TT_FLOAT:
+   case SourceTokenC::TT_FLT:
       return create_value_real(tok.data, context, tok.pos);
 
-   case SourceTokenC::TT_INTEGER:
+   case SourceTokenC::TT_INT:
       return create_value_integer(tok.data, context, tok.pos);
 
-   case SourceTokenC::TT_STRING:
+   case SourceTokenC::TT_STR:
       return create_value_string(tok.data, context, tok.pos);
 
-   case SourceTokenC::TT_OP_PARENTHESIS_O:
+   case SourceTokenC::TT_PAREN_O:
    {
       SourceExpression::Pointer expr = make_expression(in, blocks, context);
-      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+      in->get(SourceTokenC::TT_PAREN_C);
       return expr;
    }
 
-   case SourceTokenC::TT_OP_BRACE_O:
+   case SourceTokenC::TT_BRACE_O:
    {
       SourceContext::Reference blockContext =
          SourceContext::create(context, SourceContext::CT_BLOCK);
       Vector expressions;
       make_expressions(in, &expressions, blocks, blockContext);
-      in->get(SourceTokenC::TT_OP_BRACE_C);
+      in->get(SourceTokenC::TT_BRACE_C);
       return create_value_block(expressions, blockContext, tok.pos);
    }
 
-   case SourceTokenC::TT_OP_BRACKET_O:
+   case SourceTokenC::TT_BRACK_O:
    {
       Vector expressions;
       make_expressions(in, &expressions, blocks, context);
-      in->get(SourceTokenC::TT_OP_BRACKET_C);
+      in->get(SourceTokenC::TT_BRACK_C);
       return create_value_block(expressions, context, tok.pos);
    }
    }
@@ -235,23 +235,23 @@ SRCEXPDS_EXPR_DEF2(primary)
 // SourceExpression::make_suffix
 //
 SRCEXPDS_EXPR_DEFN_MULTI(suffix, primary)
-case SourceTokenC::TT_OP_BRACKET_O: expr = create_binary_array(expr,
+case SourceTokenC::TT_BRACK_O: expr = create_binary_array(expr,
    make_expression(in, blocks, context), context, tok.pos);
-   in->get(SourceTokenC::TT_OP_BRACKET_C); break;
+   in->get(SourceTokenC::TT_BRACK_C); break;
 
-case SourceTokenC::TT_OP_PARENTHESIS_O:
-   if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+case SourceTokenC::TT_PAREN_O:
+   if (in->peekType(SourceTokenC::TT_NAM) &&
        is_type(in->peek().data, context))
    {
       VariableType::Vector types;
 
-      if (!in->peekType(SourceTokenC::TT_OP_PARENTHESIS_C)) while (true)
+      if (!in->peekType(SourceTokenC::TT_PAREN_C)) while (true)
       {
          types.push_back(make_type(in, blocks, context));
 
-         if (!in->peekType(SourceTokenC::TT_OP_COMMA)) break; in->get();
+         if (!in->peekType(SourceTokenC::TT_COMMA)) break; in->get();
       }
-      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+      in->get(SourceTokenC::TT_PAREN_C);
 
       if (types.size() == 1 && types[0]->getBasicType() == VariableType::BT_VOID)
          types.clear();
@@ -266,27 +266,27 @@ case SourceTokenC::TT_OP_PARENTHESIS_O:
       Vector args;
       VariableType::Vector types;
 
-      if (!in->peekType(SourceTokenC::TT_OP_PARENTHESIS_C)) while (true)
+      if (!in->peekType(SourceTokenC::TT_PAREN_C)) while (true)
       {
          args.push_back(make_assignment(in, blocks, contextCall));
          types.push_back(args.back()->getType()->getUnqualified());
 
-         if (!in->peekType(SourceTokenC::TT_OP_COMMA)) break; in->get();
+         if (!in->peekType(SourceTokenC::TT_COMMA)) break; in->get();
       }
-      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+      in->get(SourceTokenC::TT_PAREN_C);
 
       expr = expr->makeExpressionFunction(types);
       expr = create_branch_call(expr, args, contextCall, tok.pos);
    }
    break;
 
-case SourceTokenC::TT_OP_MINUS_GT: expr = create_unary_dereference(expr,
+case SourceTokenC::TT_MEM: expr = create_unary_dereference(expr,
    context, tok.pos);
-case SourceTokenC::TT_OP_PERIOD: expr = create_value_member(expr,
-   in->get(SourceTokenC::TT_IDENTIFIER).data, context, tok.pos); break;
+case SourceTokenC::TT_DOT: expr = create_value_member(expr,
+   in->get(SourceTokenC::TT_NAM).data, context, tok.pos); break;
 
-SRCEXPDS_EXPR_DEFN_PART_SUF(PLUS2,  unary_inc_suf);
-SRCEXPDS_EXPR_DEFN_PART_SUF(MINUS2, unary_dec_suf);
+SRCEXPDS_EXPR_DEFN_PART_SUF(AD2, unary_inc_suf);
+SRCEXPDS_EXPR_DEFN_PART_SUF(SU2, unary_dec_suf);
 SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
@@ -294,19 +294,19 @@ SRCEXPDS_EXPR_DEFN_MULTI_END()
 //
 SRCEXPDS_EXPR_DEF1(prefix)
 {
-   #define CASE(TOK,EXP) case SourceTokenC::TT_OP_##TOK: return \
+   #define CASE(TOK,EXP) case SourceTokenC::TT_##TOK: return \
       create_##EXP(make_prefix(in, blocks, context), context, tok.pos)
 
    SourceTokenC tok = in->get(); switch (tok.type)
    {
    default: def: in->unget(tok); return make_suffix(in, blocks, context);
 
-   CASE(PLUS2, unary_inc_pre);   CASE(MINUS2,      unary_dec_pre);
-   CASE(AND,   unary_reference); CASE(ASTERISK,    unary_dereference);
-   CASE(PLUS,  unary_add);       CASE(MINUS,       unary_sub);
-   CASE(TILDE, unary_not);       CASE(EXCLAMATION, branch_not);
+   CASE(AD2,    unary_inc_pre);   CASE(SU2,    unary_dec_pre);
+   CASE(AND,    unary_reference); CASE(MUL,    unary_dereference);
+   CASE(ADD,    unary_add);       CASE(SUB,    unary_sub);
+   CASE(NOTBIT, unary_not);       CASE(NOTLOG, branch_not);
 
-   case SourceTokenC::TT_OP_AT:
+   case SourceTokenC::TT_AT:
    {
       VariableData::Pointer data = make_prefix(in, blocks, context)->getData();
 
@@ -339,12 +339,12 @@ SRCEXPDS_EXPR_DEF1(prefix)
       return create_value_variable(var, context, tok.pos);
    }
 
-   case SourceTokenC::TT_OP_PARENTHESIS_O:
-      if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+   case SourceTokenC::TT_PAREN_O:
+      if (in->peekType(SourceTokenC::TT_NAM) &&
           is_type(in->peek().data, context))
       {
          VariableType::Reference type = make_type(in, blocks, context);
-         in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+         in->get(SourceTokenC::TT_PAREN_C);
          return create_value_cast_explicit(make_prefix(in, blocks, context),
             type, context, tok.pos);
       }
@@ -367,25 +367,25 @@ SRCEXPDS_EXPR_DEF2(prefix)
 // SourceExpressionDS::make_multiplicative
 //
 SRCEXPDS_EXPR_DEFN_MULTI(multiplicative, prefix)
-SRCEXPDS_EXPR_DEFN_PART(multiplicative, ASTERISK, binary_mul);
-SRCEXPDS_EXPR_DEFN_PART(multiplicative, SLASH,    binary_div);
-SRCEXPDS_EXPR_DEFN_PART(multiplicative, PERCENT,  binary_mod);
+SRCEXPDS_EXPR_DEFN_PART(multiplicative, MUL, binary_mul);
+SRCEXPDS_EXPR_DEFN_PART(multiplicative, DIV, binary_div);
+SRCEXPDS_EXPR_DEFN_PART(multiplicative, MOD, binary_mod);
 SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
 // SourceExpressionDS::make_additive
 //
 SRCEXPDS_EXPR_DEFN_MULTI(additive, multiplicative)
-SRCEXPDS_EXPR_DEFN_PART(multiplicative, PLUS,  binary_add);
-SRCEXPDS_EXPR_DEFN_PART(multiplicative, MINUS, binary_sub);
+SRCEXPDS_EXPR_DEFN_PART(multiplicative, ADD, binary_add);
+SRCEXPDS_EXPR_DEFN_PART(multiplicative, SUB, binary_sub);
 SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
 // SourceExpressionDS::make_shift
 //
 SRCEXPDS_EXPR_DEFN_MULTI(shift, additive)
-SRCEXPDS_EXPR_DEFN_PART(additive, CMP_LT2, binary_lsh);
-SRCEXPDS_EXPR_DEFN_PART(additive, CMP_GT2, binary_rsh);
+SRCEXPDS_EXPR_DEFN_PART(additive, LSH, binary_lsh);
+SRCEXPDS_EXPR_DEFN_PART(additive, RSH, binary_rsh);
 SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
@@ -414,62 +414,62 @@ SRCEXPDS_EXPR_DEFN_SINGLE(bitwise_and, equality, AND, binary_and)
 //
 // SourceExpressionDS::make_bitwise_xor
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(bitwise_xor, bitwise_and, CARET, binary_xor)
+SRCEXPDS_EXPR_DEFN_SINGLE(bitwise_xor, bitwise_and, XOR, binary_xor)
 
 //
 // SourceExpressionDS::make_bitwise_ior
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(bitwise_ior, bitwise_xor, PIPE, binary_ior)
+SRCEXPDS_EXPR_DEFN_SINGLE(bitwise_ior, bitwise_xor, IOR, binary_ior)
 
 //
 // SourceExpressionDS::make_logical_and
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(logical_and, bitwise_ior, AND2, branch_and)
+SRCEXPDS_EXPR_DEFN_SINGLE(logical_and, bitwise_ior, AN2, branch_and)
 
 //
 // SourceExpressionDS::make_logical_xor
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(logical_xor, logical_and, CARET2, branch_xor)
+SRCEXPDS_EXPR_DEFN_SINGLE(logical_xor, logical_and, XO2, branch_xor)
 
 //
 // SourceExpressionDS::make_logical_ior
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(logical_ior, logical_xor, PIPE2, branch_ior)
+SRCEXPDS_EXPR_DEFN_SINGLE(logical_ior, logical_xor, IO2, branch_ior)
 
 //
 // SourceExpressionDS::make_conditional
 //
 SRCEXPDS_EXPR_DEFN(conditional, logical_ior)
 {
-   if (!in->peekType(SourceTokenC::TT_OP_QUERY)) return expr;
+   if (!in->peekType(SourceTokenC::TT_QUERY)) return expr;
 
-   SourceTokenC tok = in->get(SourceTokenC::TT_OP_QUERY);
+   SourceTokenC tok = in->get(SourceTokenC::TT_QUERY);
 
    bool allowLabel = context->getAllowLabel();
    context->setAllowLabel(false);
    SourceExpression::Pointer exprBody = make_expression(in, blocks, context);
    context->setAllowLabel(allowLabel);
-   in->get(SourceTokenC::TT_OP_COLON);
+   in->get(SourceTokenC::TT_COLON);
    SourceExpression::Pointer exprElse = make_conditional(in, blocks, context);
 
    return create_branch_if(expr, exprBody, exprElse, context, tok.pos);
 }
 
-#define CASE_ALL()      CAS0(         assign);                        \
-CASE(ASTERISK, mul_eq); CASE(SLASH,   div_eq); CASE(PERCENT, mod_eq); \
-CASE(PLUS,     add_eq); CASE(MINUS,   sub_eq);                        \
-CASE(CMP_LT2,  lsh_eq); CASE(CMP_GT2, rsh_eq);                        \
-CASE(AND,      and_eq); CASE(CARET,   xor_eq); CASE(PIPE,    ior_eq); \
-CASB(AND2,     and_eq); CASB(CARET2,  xor_eq); CASB(PIPE2,   ior_eq)
+#define CASE_ALL() CAS0(     assign);                    \
+CASE(MUL, mul_eq); CASE(DIV, div_eq); CASE(MOD, mod_eq); \
+CASE(ADD, add_eq); CASE(SUB, sub_eq);                    \
+CASE(LSH, lsh_eq); CASE(RSH, rsh_eq);                    \
+CASE(AND, and_eq); CASE(XOR, xor_eq); CASE(IOR, ior_eq); \
+CASB(AN2, and_eq); CASB(XO2, xor_eq); CASB(IO2, ior_eq)
 
 //
 // SourceExpressionDS::make_assignment
 //
 SRCEXPDS_EXPR_DEF1(assignment)
 {
-   #define CAS0(EXP) case SourceTokenC::TT_OP_EQUALS:
-   #define CASB(TOK,EXP) case SourceTokenC::TT_OP_##TOK##_EQUALS:
-   #define CASE(TOK,EXP) case SourceTokenC::TT_OP_##TOK##_EQUALS:
+   #define CAS0(EXP) case SourceTokenC::TT_EQUALS:
+   #define CASB(TOK,EXP) case SourceTokenC::TT_##TOK##_EQ:
+   #define CASE(TOK,EXP) case SourceTokenC::TT_##TOK##_EQ:
 
    SourceExpression::Pointer expr = make_prefix(in, blocks, context);
 
@@ -504,11 +504,11 @@ SRCEXPDS_EXPR_DEF1(assignment)
 //
 SRCEXPDS_EXPR_DEF2(assignment)
 {
-   #define CAS0(EXP) case SourceTokenC::TT_OP_EQUALS: return \
+   #define CAS0(EXP) case SourceTokenC::TT_EQUALS: return \
       create_binary_##EXP(expr, make_assignment(in, blocks, context), context, tok.pos)
-   #define CASB(TOK,EXP) case SourceTokenC::TT_OP_##TOK##_EQUALS: return \
+   #define CASB(TOK,EXP) case SourceTokenC::TT_##TOK##_EQ: return \
       create_branch_##EXP(expr, make_assignment(in, blocks, context), context, tok.pos)
-   #define CASE(TOK,EXP) case SourceTokenC::TT_OP_##TOK##_EQUALS: return \
+   #define CASE(TOK,EXP) case SourceTokenC::TT_##TOK##_EQ: return \
       create_binary_##EXP(expr, make_assignment(in, blocks, context), context, tok.pos)
 
    SourceTokenC tok = in->get(); switch (tok.type)
@@ -573,8 +573,8 @@ void SourceExpressionDS::make_expressions
    {
       try
       {
-         if (in->peekType(SourceTokenC::TT_OP_BRACE_C)) return;
-         if (in->peekType(SourceTokenC::TT_OP_BRACKET_C)) return;
+         if (in->peekType(SourceTokenC::TT_BRACE_C)) return;
+         if (in->peekType(SourceTokenC::TT_BRACK_C)) return;
       }
       catch (SourceStream::EndOfStream const &)
       {
@@ -582,7 +582,7 @@ void SourceExpressionDS::make_expressions
       }
 
       exprs->push_back(make_expression(in, blocks, context));
-      in->get(SourceTokenC::TT_OP_SEMICOLON);
+      in->get(SourceTokenC::TT_SEMICOLON);
    }
 }
 
@@ -592,7 +592,7 @@ void SourceExpressionDS::make_expressions
 SourceExpressionDS::LinkageSpecifier SourceExpressionDS::make_linkspec
 (SourceTokenizerDS *in)
 {
-   SourceTokenC const &linkSpecTok = in->get(SourceTokenC::TT_STRING);
+   SourceTokenC const &linkSpecTok = in->get(SourceTokenC::TT_STR);
 
    if (linkSpecTok.data == "internal")
       return LS_INTERN;

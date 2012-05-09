@@ -161,7 +161,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    {
       switch (operators[iter].type)
       {
-      case SourceTokenC::TT_OP_PIPE2:
+      case SourceTokenC::TT_IO2:
          return ObjectExpression::create_branch_ior(EXPRL, EXPRR, CARGS);
 
       default:
@@ -174,7 +174,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    {
       switch (operators[iter].type)
       {
-      case SourceTokenC::TT_OP_CARET2:
+      case SourceTokenC::TT_XO2:
          return ObjectExpression::create_branch_xor(EXPRL, EXPRR, CARGS);
 
       default:
@@ -187,7 +187,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    {
       switch (operators[iter].type)
       {
-      case SourceTokenC::TT_OP_AND2:
+      case SourceTokenC::TT_AN2:
          return ObjectExpression::create_branch_and(EXPRL, EXPRR, CARGS);
 
       default:
@@ -200,7 +200,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    {
       switch (operators[iter].type)
       {
-      case SourceTokenC::TT_OP_PIPE:
+      case SourceTokenC::TT_IOR:
          return ObjectExpression::create_binary_ior(EXPRL, EXPRR, CARGS);
 
       default:
@@ -213,7 +213,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    {
       switch (operators[iter].type)
       {
-      case SourceTokenC::TT_OP_CARET:
+      case SourceTokenC::TT_XOR:
          return ObjectExpression::create_binary_xor(EXPRL, EXPRR, CARGS);
 
       default:
@@ -226,7 +226,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    {
       switch (operators[iter].type)
       {
-      case SourceTokenC::TT_OP_AND:
+      case SourceTokenC::TT_AND:
          return ObjectExpression::create_binary_and(EXPRL, EXPRR, CARGS);
 
       default:
@@ -245,10 +245,10 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    {
       switch (operators[iter].type)
       {
-      case SourceTokenC::TT_OP_MINUS:
+      case SourceTokenC::TT_SUB:
          return ObjectExpression::create_binary_sub(EXPRL, EXPRR, CARGS);
 
-      case SourceTokenC::TT_OP_PLUS:
+      case SourceTokenC::TT_ADD:
          return ObjectExpression::create_binary_add(EXPRL, EXPRR, CARGS);
 
       default:
@@ -261,13 +261,13 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    {
       switch (operators[iter].type)
       {
-      case SourceTokenC::TT_OP_ASTERISK:
+      case SourceTokenC::TT_MUL:
          return ObjectExpression::create_binary_mul(EXPRL, EXPRR, CARGS);
 
-      case SourceTokenC::TT_OP_PERCENT:
+      case SourceTokenC::TT_MOD:
          return ObjectExpression::create_binary_mod(EXPRL, EXPRR, CARGS);
 
-      case SourceTokenC::TT_OP_SLASH:
+      case SourceTokenC::TT_DIV:
          return ObjectExpression::create_binary_div(EXPRL, EXPRR, CARGS);
 
       default:
@@ -485,7 +485,7 @@ void SourceTokenizerDS::doCommand()
    canExpand  = false;
    canSkip    = false;
 
-   prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
+   prep(); doAssert(SourceTokenC::TT_NAM);
 
    std::string const &command = token.data;
 
@@ -513,14 +513,14 @@ void SourceTokenizerDS::doCommand()
 //
 void SourceTokenizerDS::doCommand_define()
 {
-   prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
+   prep(); doAssert(SourceTokenC::TT_NAM);
 
    std::string name = token.data;
    SourcePosition position = token.pos;
 
    std::vector<SourceTokenC> tokens;
 
-   for (prep(); token.type != SourceTokenC::TT_OP_HASH; prep())
+   for (prep(); token.type != SourceTokenC::TT_HASH1; prep())
       tokens.push_back(token);
 
    if (isSkip()) return;
@@ -570,7 +570,7 @@ void SourceTokenizerDS::doCommand_endif()
 //
 void SourceTokenizerDS::doCommand_error()
 {
-   prep(); doAssert(SourceTokenC::TT_STRING);
+   prep(); doAssert(SourceTokenC::TT_STR);
 
    if (isSkip()) return;
 
@@ -590,7 +590,7 @@ void SourceTokenizerDS::doCommand_if()
 //
 void SourceTokenizerDS::doCommand_ifdef()
 {
-   prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
+   prep(); doAssert(SourceTokenC::TT_NAM);
 
    addSkip(!hasDefine(token.data) && !hasMacro(token.data));
 }
@@ -600,7 +600,7 @@ void SourceTokenizerDS::doCommand_ifdef()
 //
 void SourceTokenizerDS::doCommand_ifndef()
 {
-   prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
+   prep(); doAssert(SourceTokenC::TT_NAM);
 
    addSkip(hasDefine(token.data) || hasMacro(token.data));
 }
@@ -611,7 +611,7 @@ void SourceTokenizerDS::doCommand_ifndef()
 void SourceTokenizerDS::doCommand_include()
 {
    canString = false;
-   prep(); doAssert(SourceTokenC::TT_STRING);
+   prep(); doAssert(SourceTokenC::TT_STR);
    canString = true;
 
    if (isSkip()) return;
@@ -631,26 +631,26 @@ void SourceTokenizerDS::doCommand_include()
 //
 void SourceTokenizerDS::doCommand_macro()
 {
-   prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
+   prep(); doAssert(SourceTokenC::TT_NAM);
 
    std::string    name = token.data;
    SourcePosition pos  = token.pos;
    MacroDat       dat;
 
-   prep(); doAssert(SourceTokenC::TT_OP_PARENTHESIS_O); prep();
+   prep(); doAssert(SourceTokenC::TT_PAREN_O); prep();
 
-   if (token.type != SourceTokenC::TT_OP_PARENTHESIS_C) for (;;)
+   if (token.type != SourceTokenC::TT_PAREN_C) for (;;)
    {
-      doAssert(SourceTokenC::TT_IDENTIFIER);
+      doAssert(SourceTokenC::TT_NAM);
       dat.first.push_back(token.data);
 
       prep();
-      if (token.type == SourceTokenC::TT_OP_COMMA) {prep(); continue;}
-      doAssert(SourceTokenC::TT_OP_PARENTHESIS_C);
+      if (token.type == SourceTokenC::TT_COMMA) {prep(); continue;}
+      doAssert(SourceTokenC::TT_PAREN_C);
       break;
    }
 
-   for (prep(); token.type != SourceTokenC::TT_OP_HASH3; prep())
+   for (prep(); token.type != SourceTokenC::TT_HASH3; prep())
       dat.second.push_back(token);
 
    if (isSkip()) return;
@@ -663,7 +663,7 @@ void SourceTokenizerDS::doCommand_macro()
 //
 void SourceTokenizerDS::doCommand_undef()
 {
-   prep(); doAssert(SourceTokenC::TT_IDENTIFIER);
+   prep(); doAssert(SourceTokenC::TT_NAM);
 
    if (isSkip()) return;
 
@@ -725,42 +725,42 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
 
    expressions.push_back(getIfSingle());
 
-   for (prep(); token.type != SourceTokenC::TT_OP_HASH; prep())
+   for (prep(); token.type != SourceTokenC::TT_HASH1; prep())
    {
       switch (token.type)
       {
-      case SourceTokenC::TT_OP_AND:
-      case SourceTokenC::TT_OP_AND2:
-      case SourceTokenC::TT_OP_ASTERISK:
-      case SourceTokenC::TT_OP_CARET:
-      case SourceTokenC::TT_OP_CARET2:
-      case SourceTokenC::TT_OP_CMP_EQ:
-      case SourceTokenC::TT_OP_CMP_GE:
-      case SourceTokenC::TT_OP_CMP_GT:
-      case SourceTokenC::TT_OP_CMP_GT2:
-      case SourceTokenC::TT_OP_CMP_LE:
-      case SourceTokenC::TT_OP_CMP_LT:
-      case SourceTokenC::TT_OP_CMP_LT2:
-      case SourceTokenC::TT_OP_CMP_NE:
-      case SourceTokenC::TT_OP_MINUS:
-      case SourceTokenC::TT_OP_PERCENT:
-      case SourceTokenC::TT_OP_PIPE:
-      case SourceTokenC::TT_OP_PIPE2:
-      case SourceTokenC::TT_OP_PLUS:
-      case SourceTokenC::TT_OP_SLASH:
+      case SourceTokenC::TT_ADD:
+      case SourceTokenC::TT_AN2:
+      case SourceTokenC::TT_AND:
+      case SourceTokenC::TT_CMP_EQ:
+      case SourceTokenC::TT_CMP_GE:
+      case SourceTokenC::TT_CMP_GT:
+      case SourceTokenC::TT_CMP_LE:
+      case SourceTokenC::TT_CMP_LT:
+      case SourceTokenC::TT_CMP_NE:
+      case SourceTokenC::TT_DIV:
+      case SourceTokenC::TT_IO2:
+      case SourceTokenC::TT_IOR:
+      case SourceTokenC::TT_MOD:
+      case SourceTokenC::TT_MUL:
+      case SourceTokenC::TT_LSH:
+      case SourceTokenC::TT_RSH:
+      case SourceTokenC::TT_SUB:
+      case SourceTokenC::TT_XOR:
+      case SourceTokenC::TT_XO2:
       case_expr:
          operators.push_back(token);
          expressions.push_back(getIfSingle());
          break;
 
-      case SourceTokenC::TT_OP_COLON:
-      case SourceTokenC::TT_OP_PARENTHESIS_C:
+      case SourceTokenC::TT_COLON:
+      case SourceTokenC::TT_PAREN_C:
          goto done;
 
-      case SourceTokenC::TT_OP_QUERY:
+      case SourceTokenC::TT_QUERY:
          operators.push_back(token);
          expressions.push_back(getIfMultiple());
-         prep(); doAssert(SourceTokenC::TT_OP_COLON);
+         prep(); doAssert(SourceTokenC::TT_COLON);
          goto case_expr;
 
       default:
@@ -781,18 +781,18 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
 
    switch (token.type)
    {
-   case SourceTokenC::TT_IDENTIFIER:
+   case SourceTokenC::TT_NAM:
       if (token.data == "defined")
       {
          canExpand = false;
 
          prep();
 
-         bool hasParentheses = token.type == SourceTokenC::TT_OP_PARENTHESIS_O;
+         bool hasParentheses = token.type == SourceTokenC::TT_PAREN_O;
 
          if (hasParentheses) prep();
 
-         doAssert(SourceTokenC::TT_IDENTIFIER);
+         doAssert(SourceTokenC::TT_NAM);
 
          bool isdef = hasDefine(token.data) || hasMacro(token.data);
 
@@ -800,7 +800,7 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
             ObjectExpression::create_value_int(isdef, token.pos);
 
          if (hasParentheses)
-            {prep(); doAssert(SourceTokenC::TT_OP_PARENTHESIS_C);}
+            {prep(); doAssert(SourceTokenC::TT_PAREN_C);}
 
          canExpand = true;
 
@@ -813,18 +813,18 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
          return ObjectExpression::create_value_int(0, token.pos);
       }
 
-   case SourceTokenC::TT_INTEGER:
+   case SourceTokenC::TT_INT:
       return ObjectExpression::create_value_int
       (get_bigsint(token.data, token.pos), token.pos);
 
-   case SourceTokenC::TT_OP_EXCLAMATION:
+   case SourceTokenC::TT_NOTLOG:
       return ObjectExpression::create_branch_not(getIfSingle(), token.pos);
 
-   case SourceTokenC::TT_OP_PARENTHESIS_O:
+   case SourceTokenC::TT_PAREN_O:
    {
       ObjectExpression::Pointer expr = getIfMultiple();
 
-      doAssert(SourceTokenC::TT_OP_PARENTHESIS_C);
+      doAssert(SourceTokenC::TT_PAREN_C);
 
       return expr;
    }
@@ -942,14 +942,14 @@ void SourceTokenizerDS::prep()
       }
 
       // Preprocessor directive.
-      if (canCommand && token.type == SourceTokenC::TT_OP_HASH)
+      if (canCommand && token.type == SourceTokenC::TT_HASH1)
       {
          doCommand();
          continue;
       }
 
       // Macro expansion.
-      if (canExpand && token.type == SourceTokenC::TT_IDENTIFIER)
+      if (canExpand && token.type == SourceTokenC::TT_NAM)
       {
          // Check for macro.
          if (hasMacro(token.data) && definesUsed.insert(token.data).second)
@@ -959,7 +959,7 @@ void SourceTokenizerDS::prep()
             std::swap(token, oldTok);
 
             // Macro invocation!
-            if (oldTok.type == SourceTokenC::TT_OP_PARENTHESIS_O)
+            if (oldTok.type == SourceTokenC::TT_PAREN_O)
             {
                prepMacro();
                continue;
@@ -974,7 +974,7 @@ void SourceTokenizerDS::prep()
 
          if (token.data == "__FILE__" && definesUsed.insert(token.data).second)
          {
-            token.type = SourceTokenC::TT_STRING;
+            token.type = SourceTokenC::TT_STR;
             token.data = token.pos.filename;
             break;
          }
@@ -983,7 +983,7 @@ void SourceTokenizerDS::prep()
          {
             std::ostringstream oss; oss << token.pos.line;
 
-            token.type = SourceTokenC::TT_INTEGER;
+            token.type = SourceTokenC::TT_INT;
             token.data = oss.str();
 
             break;
@@ -997,13 +997,13 @@ void SourceTokenizerDS::prep()
    }
 
    // String literal concatenation.
-   if (canString && token.type == SourceTokenC::TT_STRING)
+   if (canString && token.type == SourceTokenC::TT_STR)
    {
       SourceTokenC tokenTemp = token;
 
       prep();
 
-      if (token.type == SourceTokenC::TT_STRING)
+      if (token.type == SourceTokenC::TT_STR)
          tokenTemp.data += token.data;
       else
          unget(token);
@@ -1051,16 +1051,16 @@ void SourceTokenizerDS::prepMacro()
 
    // Collect the macro arguments.
    prep();
-   doAssert(SourceTokenC::TT_OP_PARENTHESIS_O);
+   doAssert(SourceTokenC::TT_PAREN_O);
    tok.push_back(std::vector<SourceTokenC>());
    while (true)
    {
       prep();
 
-      if (token.type == SourceTokenC::TT_OP_PARENTHESIS_O) ++pdepth;
-      if (token.type == SourceTokenC::TT_OP_PARENTHESIS_C && !pdepth--) break;
+      if (token.type == SourceTokenC::TT_PAREN_O) ++pdepth;
+      if (token.type == SourceTokenC::TT_PAREN_C && !pdepth--) break;
 
-      if (token.type == SourceTokenC::TT_OP_COMMA && !pdepth)
+      if (token.type == SourceTokenC::TT_COMMA && !pdepth)
       {
          tok.push_back(std::vector<SourceTokenC>());
          continue;
@@ -1080,14 +1080,14 @@ void SourceTokenizerDS::prepMacro()
    // Process # tokens.
    for ((itr = vec.begin()), (end = vec.end()); itr != end; ++itr)
    {
-      if (itr->type == SourceTokenC::TT_OP_HASH)
+      if (itr->type == SourceTokenC::TT_HASH1)
       {
          if (++itr == end || !(tokVec = find_tok(tok, arg, itr->data)))
             ERROR_P("# must be used on arg");
 
          tmp.push_back(SourceTokenC());
 
-         tmp.back().type = SourceTokenC::TT_STRING;
+         tmp.back().type = SourceTokenC::TT_STR;
 
          MacroVec::iterator tokItr, tokEnd = tokVec->end();
          for (tokItr = tokVec->begin(); tokItr != tokEnd; ++tokItr)
@@ -1101,7 +1101,7 @@ void SourceTokenizerDS::prepMacro()
    // Perform argument substitution.
    for ((itr = vec.begin()), (end = vec.end()); itr != end; ++itr)
    {
-      if (itr->type == SourceTokenC::TT_IDENTIFIER &&
+      if (itr->type == SourceTokenC::TT_NAM &&
          (tokVec = find_tok(tok, arg, itr->data)))
       {
          MacroVec::iterator tokItr, tokEnd = tokVec->end();
@@ -1116,12 +1116,12 @@ void SourceTokenizerDS::prepMacro()
    // Process ## tokens.
    for ((itr = vec.begin()), (end = vec.end()); itr != end; ++itr)
    {
-      if (itr->type == SourceTokenC::TT_OP_HASH2)
+      if (itr->type == SourceTokenC::TT_HASH2)
       {
          if (itr == vec.begin() || ++itr == end)
             ERROR_P("## cannot be at start or end");
 
-         if (itr->type != SourceTokenC::TT_IDENTIFIER)
+         if (itr->type != SourceTokenC::TT_NAM)
             ERROR_P("## must have identifier on right");
 
          // tmp.back() is the last token already.

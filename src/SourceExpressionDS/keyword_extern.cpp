@@ -45,20 +45,20 @@ SRCEXPDS_KEYWORD_DEFN(extern)
 
    if (tok.data != "extern")
       linkSpec = LS_INTERN;
-   else if (in->peekType(SourceTokenC::TT_STRING))
+   else if (in->peekType(SourceTokenC::TT_STR))
       linkSpec = make_linkspec(in);
    else
       linkSpec = LS_DS;
 
-   if (in->peekType(SourceTokenC::TT_OP_BRACE_O))
+   if (in->peekType(SourceTokenC::TT_BRACE_O))
    {
       Vector exprs;
 
-      in->get(SourceTokenC::TT_OP_BRACE_O);
+      in->get(SourceTokenC::TT_BRACE_O);
 
-      while (!in->peekType(SourceTokenC::TT_OP_BRACE_C))
+      while (!in->peekType(SourceTokenC::TT_BRACE_C))
       {
-         SourceTokenC externToken = in->get(SourceTokenC::TT_IDENTIFIER);
+         SourceTokenC externToken = in->get(SourceTokenC::TT_NAM);
 
          externFunc = expr_extern.find(externToken.data);
 
@@ -66,18 +66,19 @@ SRCEXPDS_KEYWORD_DEFN(extern)
             ERROR(externToken.pos, "unknown extern type %s",
                   externToken.data.c_str());
 
-         exprs.push_back(externFunc->second(in, externToken, blocks, context, linkSpec));
+         exprs.push_back(externFunc->second(
+            in, externToken, blocks, context, linkSpec));
 
-         in->get(SourceTokenC::TT_OP_SEMICOLON);
+         in->get(SourceTokenC::TT_SEMICOLON);
       }
 
-      in->get(SourceTokenC::TT_OP_BRACE_C);
+      in->get(SourceTokenC::TT_BRACE_C);
 
       return create_value_block(exprs, context, tok.pos);
    }
    else
    {
-      SourceTokenC externToken = in->get(SourceTokenC::TT_IDENTIFIER);
+      SourceTokenC externToken = in->get(SourceTokenC::TT_NAM);
 
       externFunc = expr_extern.find(externToken.data);
 

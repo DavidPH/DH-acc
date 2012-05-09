@@ -90,7 +90,7 @@ static SourceExpression::Pointer make_var
       else
          context->addVar(var, externDef, externVis);
 
-      if (in->peekType(SourceTokenC::TT_OP_AT))
+      if (in->peekType(SourceTokenC::TT_AT))
          ERROR_P("cannot have offset for store-type %s",
             make_string(store.type).c_str());
 
@@ -102,9 +102,9 @@ static SourceExpression::Pointer make_var
          ERROR_P("cannot have store-area for store-type %s",
             make_string(store.type).c_str());
 
-      if (in->peekType(SourceTokenC::TT_OP_AT))
+      if (in->peekType(SourceTokenC::TT_AT))
       {
-         in->get(SourceTokenC::TT_OP_AT);
+         in->get(SourceTokenC::TT_AT);
 
          bigsint addr = SourceExpressionDS::make_prefix(in, blocks, context)
             ->makeObject()->resolveInt();
@@ -145,7 +145,7 @@ static SourceExpression::Pointer make_var
    }
 
    // Variable initialization. (But not for external declaration.)
-   if (!externDef && in->peekType(SourceTokenC::TT_OP_EQUALS))
+   if (!externDef && in->peekType(SourceTokenC::TT_EQUALS))
    {
       static VariableType::Reference const initType =
          VariableType::get_bt_boolhard();
@@ -153,7 +153,7 @@ static SourceExpression::Pointer make_var
       SourceExpression::Pointer initSrc, initExpr;
       ObjectExpression::Pointer initObj;
 
-      in->get(SourceTokenC::TT_OP_EQUALS);
+      in->get(SourceTokenC::TT_EQUALS);
       initSrc = SourceExpressionDS::make_assignment(in, blocks, context);
 
       if (initSrc->canMakeObject())
@@ -262,23 +262,23 @@ static SourceExpression::Pointer make_var
 {
    // If not followed by an identifier, then don't try to read any names.
    // (This is needed for standalone struct definitions.)
-   if (!in->peekType(SourceTokenC::TT_IDENTIFIER))
+   if (!in->peekType(SourceTokenC::TT_NAM))
       return SourceExpression::create_value_data
          (VariableType::get_bt_void(), context, pos);
 
    SourceExpression::Vector vars;
 
    // Read source name.
-   std::string nameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
+   std::string nameSrc = in->get(SourceTokenC::TT_NAM).data;
    vars.push_back(make_var
       (in, blocks, context, linkSpec, pos, nameSrc, type, store, externDef));
 
    // Read in any additional variables.
-   while (in->peekType(SourceTokenC::TT_OP_COMMA))
+   while (in->peekType(SourceTokenC::TT_COMMA))
    {
-      in->get(SourceTokenC::TT_OP_COMMA);
+      in->get(SourceTokenC::TT_COMMA);
 
-      nameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
+      nameSrc = in->get(SourceTokenC::TT_NAM).data;
       vars.push_back(make_var
          (in, blocks, context, linkSpec, pos, nameSrc, type, store, externDef));
    }
@@ -374,7 +374,7 @@ SRCEXPDS_KEYWORD_DEFN(variable)
    }
    else if (tok.data == "__extvar")
    {
-      if (in->peekType(SourceTokenC::TT_STRING))
+      if (in->peekType(SourceTokenC::TT_STR))
          linkSpec = make_linkspec(in);
       else
          linkSpec = LS_DS;

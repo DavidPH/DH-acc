@@ -47,23 +47,23 @@ void SourceExpressionDS::make_arglist(SourceTokenizerDS *in, Vector *blocks,
    args->count = 0;
 
    // Read arguments.
-   SourcePosition const pos = in->get(SourceTokenC::TT_OP_PARENTHESIS_O).pos;
-   if (!in->peekType(SourceTokenC::TT_OP_PARENTHESIS_C)) while (true)
+   SourcePosition const pos = in->get(SourceTokenC::TT_PAREN_O).pos;
+   if (!in->peekType(SourceTokenC::TT_PAREN_C)) while (true)
    {
       args->types.push_back(make_type(in, blocks, context));
       args->count += args->types.back()->getSize(pos);
 
-      if (in->peekType(SourceTokenC::TT_IDENTIFIER))
-         args->names.push_back(in->get(SourceTokenC::TT_IDENTIFIER).data);
+      if (in->peekType(SourceTokenC::TT_NAM))
+         args->names.push_back(in->get(SourceTokenC::TT_NAM).data);
       else
          args->names.push_back("");
 
-      if (!in->peekType(SourceTokenC::TT_OP_COMMA))
+      if (!in->peekType(SourceTokenC::TT_COMMA))
          break;
 
-      in->get(SourceTokenC::TT_OP_COMMA);
+      in->get(SourceTokenC::TT_COMMA);
    }
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_PAREN_C);
 
    // (void) should be read as (), unless the void is named.
    if (args->types.size() == 1 && args->names[0].empty() &&
@@ -76,10 +76,9 @@ void SourceExpressionDS::make_arglist(SourceTokenizerDS *in, Vector *blocks,
    // Read return (if it's not already set).
    if (!args->retn)
    {
-      if (in->peekType(SourceTokenC::TT_OP_MINUS_GT))
+      if (in->peekType(SourceTokenC::TT_MEM))
       {
-         in->get(SourceTokenC::TT_OP_MINUS_GT);
-
+         in->get(SourceTokenC::TT_MEM);
          args->retn = make_type(in, blocks, context);
       }
       else

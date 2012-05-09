@@ -93,12 +93,12 @@ static SourceExpression::Pointer make_func
       args.context = SourceContext::create(context, SourceContext::CT_FUNCTION);
 
    // prefix-return
-   if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+   if (in->peekType(SourceTokenC::TT_NAM) &&
        SourceExpressionDS::is_type(in->peek().data, context))
       args.retn = SourceExpressionDS::make_type(in, blocks, context);
 
    // funcNameSrc
-   std::string funcNameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
+   std::string funcNameSrc = in->get(SourceTokenC::TT_NAM).data;
 
    // arglist/suffix-return
    SourceExpressionDS::make_arglist(in, blocks, context, &args);
@@ -249,7 +249,7 @@ SRCEXPDS_KEYWORD_DEFN(function)
    }
    else if (tok.data == "__extfunc")
    {
-      if (in->peekType(SourceTokenC::TT_STRING))
+      if (in->peekType(SourceTokenC::TT_STR))
          linkSpec = make_linkspec(in);
       else
          linkSpec = LS_DS;

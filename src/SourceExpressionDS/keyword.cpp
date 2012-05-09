@@ -54,11 +54,11 @@ SRCEXPDS_KEYWORD_DEFN(asmfunc)
    ArgList args;
 
    // prefix-return
-   if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+   if (in->peekType(SourceTokenC::TT_NAM) &&
        is_type(in->peek().data, context))
       args.retn = make_type(in, blocks, context);
 
-   std::string asmfuncName = in->get(SourceTokenC::TT_IDENTIFIER).data;
+   std::string asmfuncName = in->get(SourceTokenC::TT_NAM).data;
 
    // arglist/suffix-return
    make_arglist(in, blocks, context, &args);
@@ -67,23 +67,23 @@ SRCEXPDS_KEYWORD_DEFN(asmfunc)
    SourceTokenC asmfuncOCodeToken;
    ObjectCodeSet asmfuncOCode;
 
-   in->get(SourceTokenC::TT_OP_AT);
-   in->get(SourceTokenC::TT_IDENTIFIER, "__ocode");
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   in->get(SourceTokenC::TT_AT);
+   in->get(SourceTokenC::TT_NAM, "__ocode");
+   in->get(SourceTokenC::TT_PAREN_O);
 
-   asmfuncOCodeToken = in->get(SourceTokenC::TT_IDENTIFIER);
+   asmfuncOCodeToken = in->get(SourceTokenC::TT_NAM);
    asmfuncOCode.ocode =
       ocode_get_code(asmfuncOCodeToken.data, asmfuncOCodeToken.pos);
 
-   if (!in->peekType(SourceTokenC::TT_OP_PARENTHESIS_C))
+   if (!in->peekType(SourceTokenC::TT_PAREN_C))
    {
-      in->get(SourceTokenC::TT_OP_COMMA);
+      in->get(SourceTokenC::TT_COMMA);
 
-      asmfuncOCodeToken = in->get(SourceTokenC::TT_IDENTIFIER);
+      asmfuncOCodeToken = in->get(SourceTokenC::TT_NAM);
       asmfuncOCode.ocode_imm = ocode_get_code
          (asmfuncOCodeToken.data, asmfuncOCodeToken.pos);
    }
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_PAREN_C);
 
    ObjectExpression::Pointer asmfuncObj =
       ObjectExpression::create_value_ocode(asmfuncOCode, tok.pos);
@@ -117,7 +117,7 @@ SRCEXPDS_KEYWORD_DEFN(case)
    bigsint value = make_expression(in, blocks, context)->makeObject()->resolveInt();
    context->setAllowLabel(true);
 
-   in->get(SourceTokenC::TT_OP_COLON);
+   in->get(SourceTokenC::TT_COLON);
 
    SourceExpression::Pointer expr = make_expression(in, blocks, context);
    expr->addLabel(context->addLabelCase(value, tok.pos));
@@ -129,13 +129,13 @@ SRCEXPDS_KEYWORD_DEFN(case)
 //
 SRCEXPDS_KEYWORD_DEFN(cast)
 {
-   in->get(SourceTokenC::TT_OP_CMP_LT);
+   in->get(SourceTokenC::TT_CMP_LT);
    VariableType::Reference type = make_type(in, blocks, context);
-   in->get(SourceTokenC::TT_OP_CMP_GT);
+   in->get(SourceTokenC::TT_CMP_GT);
 
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   in->get(SourceTokenC::TT_PAREN_O);
    SourceExpression::Pointer expr = make_expression(in, blocks, context);
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_PAREN_C);
 
    if (tok.data == "const_cast")
       return create_value_cast_qualifier(expr, type, context, tok.pos);
@@ -158,8 +158,8 @@ SRCEXPDS_KEYWORD_DEFN(cast)
 SRCEXPDS_KEYWORD_DEFN(constexpr)
 {
    VariableType::Reference type = make_type(in, blocks, context);
-   std::string name = in->get(SourceTokenC::TT_IDENTIFIER).data;
-   in->get(SourceTokenC::TT_OP_EQUALS);
+   std::string name = in->get(SourceTokenC::TT_NAM).data;
+   in->get(SourceTokenC::TT_EQUALS);
    SourceExpression::Pointer data = make_assignment(in, blocks, context);
    data = create_value_cast_implicit(data, type, context, tok.pos);
 
@@ -186,7 +186,7 @@ SRCEXPDS_KEYWORD_DEFN(continue)
 //
 SRCEXPDS_KEYWORD_DEFN(default)
 {
-   in->get(SourceTokenC::TT_OP_COLON);
+   in->get(SourceTokenC::TT_COLON);
 
    SourceExpression::Pointer expr = make_expression(in, blocks, context);
    expr->addLabel(context->addLabelCaseDefault(tok.pos));
@@ -203,14 +203,14 @@ SRCEXPDS_KEYWORD_DEFN(do)
    SourceExpression::Pointer exprBody =
       make_prefix(in, blocks, contextBody);
 
-   SourceTokenC tokenWhile = in->get(SourceTokenC::TT_IDENTIFIER, "while");
+   SourceTokenC tokenWhile = in->get(SourceTokenC::TT_NAM, "while");
 
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   in->get(SourceTokenC::TT_PAREN_O);
    SourceContext::Reference contextCond =
       SourceContext::create(contextBody, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprCond =
       make_expression(in, blocks, contextCond);
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_PAREN_C);
 
    return create_branch_do(exprCond, exprBody, contextCond, tok.pos);
 }
@@ -220,28 +220,28 @@ SRCEXPDS_KEYWORD_DEFN(do)
 //
 SRCEXPDS_KEYWORD_DEFN(for)
 {
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   in->get(SourceTokenC::TT_PAREN_O);
 
    SourceContext::Reference contextInit =
       SourceContext::create(context, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprInit =
       make_expression(in, blocks, contextInit);
 
-   in->get(SourceTokenC::TT_OP_SEMICOLON);
+   in->get(SourceTokenC::TT_SEMICOLON);
 
    SourceContext::Reference contextCond =
       SourceContext::create(contextInit, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprCond =
       make_expression(in, blocks, contextCond);
 
-   in->get(SourceTokenC::TT_OP_SEMICOLON);
+   in->get(SourceTokenC::TT_SEMICOLON);
 
    SourceContext::Reference contextIter =
       SourceContext::create(contextCond, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprIter =
       make_expression(in, blocks, contextIter);
 
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_PAREN_C);
 
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_LOOP);
@@ -256,15 +256,15 @@ SRCEXPDS_KEYWORD_DEFN(for)
 //
 SRCEXPDS_KEYWORD_DEFN(goto)
 {
-   SourceTokenC gotoToken = in->get(SourceTokenC::TT_IDENTIFIER);
+   SourceTokenC gotoToken = in->get(SourceTokenC::TT_NAM);
 
    std::string label;
 
    if (gotoToken.data == "case")
    {
-      if (in->peekType(SourceTokenC::TT_IDENTIFIER, "default"))
+      if (in->peekType(SourceTokenC::TT_NAM, "default"))
       {
-         in->get(SourceTokenC::TT_IDENTIFIER);
+         in->get(SourceTokenC::TT_NAM);
          label = context->getLabelCaseDefault(tok.pos);
       }
       else
@@ -290,19 +290,19 @@ SRCEXPDS_KEYWORD_DEFN(goto_dyn)
 //
 SRCEXPDS_KEYWORD_DEFN(if)
 {
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   in->get(SourceTokenC::TT_PAREN_O);
    SourceContext::Reference contextCond =
       SourceContext::create(context, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprCond =
      make_expression(in, blocks, contextCond);
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_PAREN_C);
 
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprBody =
       make_prefix(in, blocks, contextBody);
 
-   if (in->peekType(SourceTokenC::TT_IDENTIFIER, "else"))
+   if (in->peekType(SourceTokenC::TT_NAM, "else"))
    {
       in->get();
 
@@ -324,9 +324,9 @@ SRCEXPDS_KEYWORD_DEFN(library)
 {
    (void)blocks; (void)context;
 
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
-   ObjectExpression::set_library(in->get(SourceTokenC::TT_STRING).data);
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_PAREN_O);
+   ObjectExpression::set_library(in->get(SourceTokenC::TT_STR).data);
+   in->get(SourceTokenC::TT_PAREN_C);
 
    return create_value_data(context, tok.pos);
 }
@@ -339,16 +339,16 @@ SRCEXPDS_KEYWORD_DEFN(linespec)
    ArgList args;
 
    // prefix-return
-   if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+   if (in->peekType(SourceTokenC::TT_NAM) &&
        is_type(in->peek().data, context))
       args.retn = make_type(in, blocks, context);
 
-   std::string nameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
+   std::string nameSrc = in->get(SourceTokenC::TT_NAM).data;
 
    // arglist/suffix-return
    make_arglist(in, blocks, context, &args);
 
-   in->get(SourceTokenC::TT_OP_AT);
+   in->get(SourceTokenC::TT_AT);
    ObjectExpression::Pointer obj =
       make_prefix(in, blocks, context)->makeObject();
 
@@ -378,26 +378,26 @@ SRCEXPDS_KEYWORD_DEFN(printf)
 {
    std::string type;
 
-   if (in->peekType(SourceTokenC::TT_OP_CMP_LT))
+   if (in->peekType(SourceTokenC::TT_CMP_LT))
    {
-      in->get(SourceTokenC::TT_OP_CMP_LT);
-      type = in->get(SourceTokenC::TT_IDENTIFIER).data;
-      in->get(SourceTokenC::TT_OP_CMP_GT);
+      in->get(SourceTokenC::TT_CMP_LT);
+      type = in->get(SourceTokenC::TT_NAM).data;
+      in->get(SourceTokenC::TT_CMP_GT);
    }
 
    Vector exprs;
 
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   in->get(SourceTokenC::TT_PAREN_O);
 
-   std::string format = in->get(SourceTokenC::TT_STRING).data;
+   std::string format = in->get(SourceTokenC::TT_STR).data;
 
-   while (in->peekType(SourceTokenC::TT_OP_COMMA))
+   while (in->peekType(SourceTokenC::TT_COMMA))
    {
-      in->get(SourceTokenC::TT_OP_COMMA);
+      in->get(SourceTokenC::TT_COMMA);
       exprs.push_back(make_assignment(in, blocks, context));
    }
 
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_PAREN_C);
 
    return create_root_printf(type, format, exprs, context, tok.pos);
 }
@@ -417,17 +417,17 @@ SRCEXPDS_KEYWORD_DEFN(sizeof)
 {
    VariableType::Pointer type;
 
-   if (in->peekType(SourceTokenC::TT_OP_PARENTHESIS_O))
+   if (in->peekType(SourceTokenC::TT_PAREN_O))
    {
-      in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+      in->get(SourceTokenC::TT_PAREN_O);
 
-      if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+      if (in->peekType(SourceTokenC::TT_NAM) &&
           is_type(in->peek().data, context))
          type = make_type(in, blocks, context);
       else
          type = make_expression(in, blocks, context)->getType();
 
-      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+      in->get(SourceTokenC::TT_PAREN_C);
    }
    else
       type = make_prefix(in, blocks, context)->getType();
@@ -440,12 +440,12 @@ SRCEXPDS_KEYWORD_DEFN(sizeof)
 //
 SRCEXPDS_KEYWORD_DEFN(switch)
 {
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   in->get(SourceTokenC::TT_PAREN_O);
    SourceContext::Reference contextCond =
       SourceContext::create(context, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprCond =
       make_expression(in, blocks, contextCond);
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_PAREN_C);
 
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_SWITCH);
@@ -460,11 +460,11 @@ SRCEXPDS_KEYWORD_DEFN(switch)
 //
 SRCEXPDS_KEYWORD_DEFN(symbol)
 {
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   in->get(SourceTokenC::TT_PAREN_O);
    VariableType::Reference type = make_type(in, blocks, context);
-   in->get(SourceTokenC::TT_OP_COMMA);
-   std::string name = in->get(SourceTokenC::TT_STRING).data;
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_COMMA);
+   std::string name = in->get(SourceTokenC::TT_STR).data;
+   in->get(SourceTokenC::TT_PAREN_C);
 
    SourceVariable::Pointer var = SourceVariable::
       create_literal(type, name, tok.pos);
@@ -487,12 +487,12 @@ SRCEXPDS_KEYWORD_DEFN(typestr)
 //
 SRCEXPDS_KEYWORD_DEFN(while)
 {
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+   in->get(SourceTokenC::TT_PAREN_O);
    SourceContext::Reference contextCond =
       SourceContext::create(context, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprCond =
       make_expression(in, blocks, contextCond);
-   in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+   in->get(SourceTokenC::TT_PAREN_C);
 
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_LOOP);

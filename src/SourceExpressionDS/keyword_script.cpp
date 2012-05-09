@@ -91,18 +91,18 @@ static SourceExpression::Pointer make_script
       args.context = SourceContext::create(context, SourceContext::CT_SCRIPT);
 
    // prefix-return
-   if (in->peekType(SourceTokenC::TT_IDENTIFIER) &&
+   if (in->peekType(SourceTokenC::TT_NAM) &&
        SourceExpressionDS::is_type(in->peek().data, context))
       args.retn = SourceExpressionDS::make_type(in, blocks, context);
 
    // scriptNameSrc
-   std::string scriptNameSrc = in->get(SourceTokenC::TT_IDENTIFIER).data;
+   std::string scriptNameSrc = in->get(SourceTokenC::TT_NAM).data;
 
    // scriptType
    ObjectData_Script::ScriptType scriptType;
-   if (in->peekType(SourceTokenC::TT_IDENTIFIER))
+   if (in->peekType(SourceTokenC::TT_NAM))
    {
-      SourceTokenC scriptTypeTok = in->get(SourceTokenC::TT_IDENTIFIER);
+      SourceTokenC scriptTypeTok = in->get(SourceTokenC::TT_NAM);
       scriptType = ObjectData_Script::
          get_type(scriptTypeTok.data, scriptTypeTok.pos);
    }
@@ -111,9 +111,9 @@ static SourceExpression::Pointer make_script
 
    // scriptFlags
    bigsint scriptFlags = 0;
-   while (in->peekType(SourceTokenC::TT_IDENTIFIER))
+   while (in->peekType(SourceTokenC::TT_NAM))
    {
-      SourceTokenC scriptFlagTok = in->get(SourceTokenC::TT_IDENTIFIER);
+      SourceTokenC scriptFlagTok = in->get(SourceTokenC::TT_NAM);
       scriptFlags |= ObjectData_Script::
          get_flag(scriptFlagTok.data, scriptFlagTok.pos);
    }
@@ -123,9 +123,9 @@ static SourceExpression::Pointer make_script
 
    // scriptNumber
    ObjectExpression::Pointer scriptNumber;
-   if (in->peekType(SourceTokenC::TT_OP_AT))
+   if (in->peekType(SourceTokenC::TT_AT))
    {
-      in->get(SourceTokenC::TT_OP_AT);
+      in->get(SourceTokenC::TT_AT);
       scriptNumber = SourceExpressionDS::make_prefix(in, blocks, context)
          ->makeObject();
    }
@@ -288,7 +288,7 @@ SRCEXPDS_KEYWORD_DEFN(script)
    }
    else if (tok.data == "__extscript")
    {
-      if (in->peekType(SourceTokenC::TT_STRING))
+      if (in->peekType(SourceTokenC::TT_STR))
          linkSpec = make_linkspec(in);
       else
          linkSpec = LS_DS;

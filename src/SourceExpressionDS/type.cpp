@@ -63,7 +63,7 @@ static void do_qualifier
 (VariableType::Pointer *type, VariableType::Qualifier qual,
  SourceTokenizerDS *in)
 {
-   SourceTokenC tokenQual = in->get(SourceTokenC::TT_IDENTIFIER);
+   SourceTokenC tokenQual = in->get(SourceTokenC::TT_NAM);
 
    if ((*type)->getQualifier(qual))
       ERROR(tokenQual.pos, "redundant qualifier");
@@ -160,10 +160,10 @@ static VariableType::Pointer make_basic
          break;
       }
 
-      if (!in->peekType(SourceTokenC::TT_IDENTIFIER))
+      if (!in->peekType(SourceTokenC::TT_NAM))
          break;
 
-      token = in->get(SourceTokenC::TT_IDENTIFIER);
+      token = in->get(SourceTokenC::TT_NAM);
    }
 
    // Default to int.
@@ -289,30 +289,30 @@ bool make_struct_lists
  SourceTokenizerDS *in, SourceExpression::Vector *blocks,
  SourceContext *context)
 {
-   if (!in->peekType(SourceTokenC::TT_OP_BRACE_O)) return false;
+   if (!in->peekType(SourceTokenC::TT_BRACE_O)) return false;
 
    VariableType::Pointer type;
 
-   in->get(SourceTokenC::TT_OP_BRACE_O);
+   in->get(SourceTokenC::TT_BRACE_O);
 
-   while (!in->peekType(SourceTokenC::TT_OP_BRACE_C))
+   while (!in->peekType(SourceTokenC::TT_BRACE_C))
    {
       type = SourceExpressionDS::make_type(in, blocks, context);
 
       types->push_back(type);
-      names->push_back(in->get(SourceTokenC::TT_IDENTIFIER).data);
+      names->push_back(in->get(SourceTokenC::TT_NAM).data);
 
-      while (in->peekType(SourceTokenC::TT_OP_COMMA))
+      while (in->peekType(SourceTokenC::TT_COMMA))
       {
-         in->get(SourceTokenC::TT_OP_COMMA);
+         in->get(SourceTokenC::TT_COMMA);
          types->push_back(type);
-         names->push_back(in->get(SourceTokenC::TT_IDENTIFIER).data);
+         names->push_back(in->get(SourceTokenC::TT_NAM).data);
       }
 
-      in->get(SourceTokenC::TT_OP_SEMICOLON);
+      in->get(SourceTokenC::TT_SEMICOLON);
    }
 
-   in->get(SourceTokenC::TT_OP_BRACE_C);
+   in->get(SourceTokenC::TT_BRACE_C);
 
    return true;
 }
@@ -330,9 +330,9 @@ VariableType::Reference make_struct
    SourcePosition        pos;
 
    // The name must be declared for the body.
-   if (in->peekType(SourceTokenC::TT_IDENTIFIER))
+   if (in->peekType(SourceTokenC::TT_NAM))
    {
-      SourceTokenC const &token = in->get(SourceTokenC::TT_IDENTIFIER);
+      SourceTokenC const &token = in->get(SourceTokenC::TT_NAM);
       name = token.data;
       pos  = token.pos;
 
@@ -342,7 +342,7 @@ VariableType::Reference make_struct
          context->getVariableType_struct(name, token.pos);
    }
    else
-      pos = in->peek(SourceTokenC::TT_OP_BRACE_O).pos;
+      pos = in->peek(SourceTokenC::TT_BRACE_O).pos;
 
    if (isUnion)
    {
@@ -423,16 +423,14 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
    std::string name;
    VariableType::Pointer type;
 
-   if (in->peekType(SourceTokenC::TT_OP_PARENTHESIS_O))
+   if (in->peekType(SourceTokenC::TT_PAREN_O))
    {
-      in->get(SourceTokenC::TT_OP_PARENTHESIS_O);
+      in->get(SourceTokenC::TT_PAREN_O);
       type = make_type(in,blocks, context);
-      in->get(SourceTokenC::TT_OP_PARENTHESIS_C);
+      in->get(SourceTokenC::TT_PAREN_C);
    }
    else
-   {
-      tok = in->get(SourceTokenC::TT_IDENTIFIER);
-   }
+      tok = in->get(SourceTokenC::TT_NAM);
 
    if (type || (type = make_basic(tok, in)) != NULL)
    {
@@ -445,19 +443,15 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
    }
    else if (tok.data == "__block")
    {
-      in->get(SourceTokenC::TT_OP_BRACE_O);
+      in->get(SourceTokenC::TT_BRACE_O);
 
-      while (true)
+      while (!in->peekType(SourceTokenC::TT_BRACE_C))
       {
-         if (in->peekType(SourceTokenC::TT_OP_BRACE_C))
-         break;
-
          args.types.push_back(make_type(in, blocks, context));
-
-         in->get(SourceTokenC::TT_OP_SEMICOLON);
+         in->get(SourceTokenC::TT_SEMICOLON);
       }
 
-      in->get(SourceTokenC::TT_OP_BRACE_C);
+      in->get(SourceTokenC::TT_BRACE_C);
 
       type = VariableType::get_bt_block(args.types);
    }
@@ -467,24 +461,24 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
    }
    else if (tok.data == "enum")
    {
-      if (in->peekType(SourceTokenC::TT_IDENTIFIER))
-         name = in->get(SourceTokenC::TT_IDENTIFIER).data;
+      if (in->peekType(SourceTokenC::TT_NAM))
+         name = in->get(SourceTokenC::TT_NAM).data;
 
-      if (in->peekType(SourceTokenC::TT_OP_BRACE_O))
+      if (in->peekType(SourceTokenC::TT_BRACE_O))
       {
          bigsint enumVal = 0;
 
          type = context->getVariableType_enum(name, true, tok.pos);
 
-         in->get(SourceTokenC::TT_OP_BRACE_O);
+         in->get(SourceTokenC::TT_BRACE_O);
 
-         if (!in->peekType(SourceTokenC::TT_OP_BRACE_C)) while (true)
+         if (!in->peekType(SourceTokenC::TT_BRACE_C)) while (true)
          {
-            SourceTokenC enumTok = in->get(SourceTokenC::TT_IDENTIFIER);
+            SourceTokenC enumTok = in->get(SourceTokenC::TT_NAM);
 
-            if (in->peekType(SourceTokenC::TT_OP_EQUALS))
+            if (in->peekType(SourceTokenC::TT_EQUALS))
             {
-               in->get(SourceTokenC::TT_OP_EQUALS);
+               in->get(SourceTokenC::TT_EQUALS);
 
                enumVal = make_assignment(in, blocks, context)
                   ->makeObject()->resolveInt();
@@ -496,16 +490,16 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
             context->addVar(SourceVariable::create_constant
                (enumTok.data, type, enumObj, enumTok.pos), false, true);
 
-            if (!in->peekType(SourceTokenC::TT_OP_COMMA))
+            if (!in->peekType(SourceTokenC::TT_COMMA))
                break;
 
-            in->get(SourceTokenC::TT_OP_COMMA);
+            in->get(SourceTokenC::TT_COMMA);
 
-            if (in->peekType(SourceTokenC::TT_OP_BRACE_C))
+            if (in->peekType(SourceTokenC::TT_BRACE_C))
                break;
          }
 
-         in->get(SourceTokenC::TT_OP_BRACE_C);
+         in->get(SourceTokenC::TT_BRACE_C);
       }
       else
          type = context->getVariableType_enum(name, false, tok.pos);
@@ -540,12 +534,12 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
    else if (tok.data == "typedef")
    {
       type = make_type(in, blocks, context);
-      tok = in->get(SourceTokenC::TT_IDENTIFIER);
+      tok = in->get(SourceTokenC::TT_NAM);
       type = context->getVariableType_typedef(tok.data, type, tok.pos);
    }
    else if (tok.data == "typename")
    {
-      tok = in->get(SourceTokenC::TT_IDENTIFIER);
+      tok = in->get(SourceTokenC::TT_NAM);
       type = context->getVariableType(tok.data, tok.pos);
    }
    else
@@ -554,7 +548,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
    // Suffix modifiers.
    while (true) switch (in->peek().type)
    {
-   case SourceTokenC::TT_IDENTIFIER:
+   case SourceTokenC::TT_NAM:
       if (in->peek().data == "const")
          do_qualifier(&type, VariableType::QUAL_CONST, in);
 
@@ -572,12 +566,12 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
 
       break;
 
-   case SourceTokenC::TT_OP_ASTERISK:
-      in->get(SourceTokenC::TT_OP_ASTERISK);
+   case SourceTokenC::TT_MUL:
+      in->get(SourceTokenC::TT_MUL);
       type = type->getPointer();
       break;
 
-   case SourceTokenC::TT_OP_BRACKET_O:
+   case SourceTokenC::TT_BRACK_O:
       // Time for type-fucking. This should be an option, but who'd use it?
       //
       // I want to make it clear that I think this syntax is at best completely
@@ -631,20 +625,20 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
          std::vector<bigsint> widths;
          do
          {
-            in->get(SourceTokenC::TT_OP_BRACKET_O);
+            in->get(SourceTokenC::TT_BRACK_O);
             widths.push_back(make_expression(in, blocks, context)->makeObject()->resolveInt());
-            in->get(SourceTokenC::TT_OP_BRACKET_C);
+            in->get(SourceTokenC::TT_BRACK_C);
          }
-         while (in->peekType(SourceTokenC::TT_OP_BRACKET_O));
+         while (in->peekType(SourceTokenC::TT_BRACK_O));
 
          std::vector<bigsint>::size_type i = widths.size();
          while (i--) type = type->getArray(widths[i]);
       }
       else
       {
-         in->get(SourceTokenC::TT_OP_BRACKET_O);
+         in->get(SourceTokenC::TT_BRACK_O);
          width = make_expression(in, blocks, context)->makeObject()->resolveInt();
-         in->get(SourceTokenC::TT_OP_BRACKET_C);
+         in->get(SourceTokenC::TT_BRACK_C);
 
          type = type->getArray(width);
       }
