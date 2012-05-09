@@ -58,7 +58,9 @@ SRCEXPDS_KEYWORD_DEFN(asmfunc)
        is_type(in->peek().data, context))
       args.retn = make_type(in, blocks, context);
 
-   std::string asmfuncName = in->get(SourceTokenC::TT_NAM).data;
+   std::string nameSrc;
+   if (in->peekType(SourceTokenC::TT_NAM))
+      nameSrc = in->get(SourceTokenC::TT_NAM).data;
 
    // arglist/suffix-return
    make_arglist(in, blocks, context, &args);
@@ -92,9 +94,10 @@ SRCEXPDS_KEYWORD_DEFN(asmfunc)
       VariableType::get_bt_asmfunc(args.types, args.retn);
 
    SourceVariable::Pointer asmfuncVariable = SourceVariable::create_constant
-      (asmfuncName, asmfuncVarType, asmfuncObj, tok.pos);
+      (nameSrc, asmfuncVarType, asmfuncObj, tok.pos);
 
-   context->addFunction(asmfuncVariable);
+   if (!nameSrc.empty())
+      context->addFunction(asmfuncVariable);
    return create_value_variable(asmfuncVariable, context, tok.pos);
 }
 
@@ -343,7 +346,9 @@ SRCEXPDS_KEYWORD_DEFN(linespec)
        is_type(in->peek().data, context))
       args.retn = make_type(in, blocks, context);
 
-   std::string nameSrc = in->get(SourceTokenC::TT_NAM).data;
+   std::string nameSrc;
+   if (in->peekType(SourceTokenC::TT_NAM))
+      nameSrc = in->get(SourceTokenC::TT_NAM).data;
 
    // arglist/suffix-return
    make_arglist(in, blocks, context, &args);

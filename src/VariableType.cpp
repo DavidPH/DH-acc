@@ -239,7 +239,7 @@ VariableType::VariableType(VariableType &type)
    next(type.next), prev(&type), specnext(this), specprev(this),
    typeArr(NULL), typePtr(NULL), typeRet(type.typeRet),
    typeUnq(type.getUnqualified()),
-   storeArea(type.storeArea),
+   name(type.name), storeArea(type.storeArea),
    basic(type.basic), quals(type.quals), store(type.store), width(type.width),
    complete(type.complete)
 {

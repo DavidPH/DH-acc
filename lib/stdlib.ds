@@ -31,6 +31,19 @@
 //
 
 //
+// exitdata
+//
+struct exitdata
+{
+   bool isScript;
+   union
+   {
+      __func_t()   f;
+      __script_t() s;
+   } func;
+};
+
+//
 // heapdata
 //
 struct heapdata
@@ -40,27 +53,28 @@ struct heapdata
    char[0] data;
 };
 
-//
-// llbits_t
-//
-struct llbits_t
-{
-   unsigned int lo;
-     signed int hi;
-};
-
 
 //----------------------------------------------------------------------------|
 // Static Variables                                                           |
 //
 
+constexpr size_t exitsize = 256;
+
+__intvar __staticarray exitdata[exitsize] exitarr;
+__intvar __staticregister decltype(*exitarr) *exitptr = exitarr;
+
+constexpr decltype(*exitarr) *exitbegin = &exitarr[0];
+constexpr decltype(*exitarr) *exitend = &exitarr[exitsize];
+
+
 constexpr size_t heapsize = 16*1024*1024;
 
 __intvar static char[heapsize] heap;
-__intvar __staticregister heapdata *heapptr;
+__intvar __staticregister heapdata *heapptr = (heapdata *)heap;
 
 constexpr heapdata *heapbegin = (heapdata *)&heap[0];
 constexpr heapdata *heapend = (heapdata *)&heap[heapsize];
+
 
 __intvar __staticregister unsigned randval = 1;
 
@@ -230,7 +244,7 @@ __extfunc malloc(size_t size) -> void *
       heapptr->used = size;
       heapptr->size = size;
 
-      __autoregister void *ptr = (void *)&heapptr->data;
+      void *ptr = (void *)&heapptr->data;
 
       heapptr = (heapdata *)&heapptr->data[heapptr->size];
 
@@ -281,7 +295,7 @@ __extfunc realloc(void *ptr, size_t size) -> void *
       return ptr;
    };
 
-   __autoregister void *newptr = malloc(size);
+   void *newptr = malloc(size);
 
    if (!newptr) return NULL;
 
@@ -301,32 +315,106 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 //
 // abort
 //
-//__extfunc abort() -> void
+__extfunc void abort()
+{
+   #if defined(__TARGET_ZDoom__) #
+   *(int *)NULL = 0xDEADC0DE; // Flag abort.
+   __printf<__printf_log>("Aborted.");
+   (__linespec() @ 243)();
+   (__asmfunc() @ __ocode(ACS_SCRIPT_TERMINATE))();
+   #else
+   __printf<__printf_error>("Aborted.");
+   #endif
+};
 
 //
 // atexit
 //
-//__extfunc atexit(__func_t() -> void func) -> int
+__extfunc int atexit(__func_t() func)
+{
+   if (exitptr == exitend) return 1;
+
+   #if defined(__TAGET_ZDoom__) #
+   return 1;
+   #else
+   exitptr->isScript = false;
+   exitptr->func.f = func;
+   exitptr++;
+   return 0;
+   #endif
+};
+
+//
+// __atexit_script
+//
+__extfunc int __atexit_script(__script_t() func)
+{
+   if (exitptr == exitend) return 1;
+
+   exitptr->isScript = true;
+   exitptr->func.s = func;
+   exitptr++;
+   return 0;
+};
 
 //
 // exit
 //
-//__extfunc exit(int status) -> void
+__extfunc void exit(int status)
+{
+   while (exitptr != exitbegin)
+   {
+      if ((--exitptr)->isScript)
+      {
+         exitptr->func.s();
+      }
+      else
+      {
+         #if defined(__TARGET_ZDoom__) #
+         __printf<__printf_log>("Cannot call atexit function.");
+         #else
+         exitptr->func.f();
+         #endif
+      };
+   };
+
+   _Exit(status);
+};
 
 //
 // _Exit
 //
-//__extfunc _Exit(int status) -> void
+__extfunc void _Exit(int status)
+{
+   if (status & 1)
+   {
+      (__linespec(int) @ 244)(status >> 1);
+   }
+   else
+   {
+      (__linespec(int) @ 243)(status >> 1);
+   };
+
+   (__asmfunc() @ __ocode(ACS_SCRIPT_TERMINATE))();
+};
 
 //
 // getenv
 //
-//__extfunc getenv(char const *name) -> char *
+__extfunc char *getenv(char const *name)
+{
+   return NULL;
+};
 
 //
 // system
 //
-//__extfunc system(char const *string) -> int
+__extfunc int system(char const *string)
+{
+   if (!string) return 0;
+
+   return 0;
+};
 
 //===================================================================
 // Searching and sorting utilities.
@@ -335,9 +423,32 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 //
 // bsearch
 //
-//__extfunc bsearch
-//(void const *key, void const *base, size_t nmemb, size_t size,
-// __func_t(void const *, void const *) -> int compar) -> void *
+// Like qsort below, this is more for reference than anything.
+//
+// Don't compile for ZDoom, due to lack of function-pointers.
+//
+#if !defined(__TARGET_ZDoom__) #
+__extfunc bsearch void *(void const *key, void const *base, size_t nmemb,
+   size_t size, __func_t(void const *, void const *) -> int compar)
+{
+   int cmp;
+   char const *begin = static_cast<char const *>(base);
+   char const *end = begin + nmemb*size;
+   char const *itr;
+
+   while (begin != end)
+   {
+      // itr = begin + (end - begin) / 2
+      itr = begin + ((((end - begin) / size) / 2) * size);
+
+      if (!(cmp = compar(key, itr))) return (void *)itr;
+
+      if (cmp < 0) {end = itr;} else {begin = itr;};
+   };
+
+   return NULL;
+};
+#endif
 
 //
 // qsort
