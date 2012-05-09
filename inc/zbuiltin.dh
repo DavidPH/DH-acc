@@ -12,8 +12,8 @@
 // Macros                                                                     |
 //
 
-#define function __extfunc #
-#define script __extscript #
+#define function __function #
+#define script __script #
 
 
 //----------------------------------------------------------------------------|
