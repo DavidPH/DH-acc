@@ -51,8 +51,21 @@ void SourceExpressionDS::make_arglist(SourceTokenizerDS *in, Vector *blocks,
       args->retn = make_type(in, blocks, context);
 
    // Read name. (If one.)
-   if (in->peekType(SourceTokenC::TT_NAM))
-      args->name = in->get(SourceTokenC::TT_NAM).data;
+   {
+      std::vector<SourceTokenC> toks;
+
+      while (in->peekType(SourceTokenC::TT_PAREN_O)) toks.push_back(in->get());
+
+      if (in->peekType(SourceTokenC::TT_NAM) &&
+         !is_type(in->peek().data, context))
+      {
+         args->name = in->get().data;
+
+         for (size_t i = toks.size(); i--;) in->get(SourceTokenC::TT_PAREN_C);
+      }
+      else
+         for (size_t i = toks.size(); i--;) in->unget(toks[i]);
+   }
 
    // Read arguments.
    SourcePosition const pos = in->get(SourceTokenC::TT_PAREN_O).pos;

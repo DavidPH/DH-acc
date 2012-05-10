@@ -183,8 +183,8 @@ Function Definitions
     <__asmfunc> <__linespec> <__native>
 
   function-args:
-    bare-type(opt) identifier(opt) ( function-arg-list(opt) )
-    identifier(opt) ( function-arg-list(opt) ) -> type
+    bare-type(opt) function-name(opt) ( function-arg-list(opt) )
+    function-name(opt) ( function-arg-list(opt) ) -> type
 
   allocate-specifier:
     @ prefix-expression
@@ -197,6 +197,10 @@ Function Definitions
 
   script-type-list:
     script-type(opt) script-flag-list(opt)
+
+  function-name:
+    identifier
+    ( function-name )
 
   function-arg-list:
     type identifier(opt)
