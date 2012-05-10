@@ -179,7 +179,7 @@ static void read_source(std::string const &name, SourceType type,
       SourceTokenizerDS tokenizer(&in);
 
       SourceExpression::Pointer expressions =
-         SourceExpressionDS::make_expressions(&tokenizer);
+         SourceExpressionDS::make_statements(&tokenizer);
 
       bool mainGen;
       if (!option_init_code.handled)

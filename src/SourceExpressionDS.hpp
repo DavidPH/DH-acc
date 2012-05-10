@@ -172,9 +172,12 @@ public:
    static void make_arglist(SourceTokenizerDS *in, Vector *blocks,
       SourceContext *context, ArgList *args);
 
-   static SourceExpression::Pointer make_expressions(SourceTokenizerDS *in);
-
    static LinkageSpecifier make_linkspec(SourceTokenizerDS *in);
+
+   static SourceExpression::Pointer make_statement(SourceTokenizerDS *in,
+      Vector *blocks, SourceContext *context);
+
+   static SourceExpression::Pointer make_statements(SourceTokenizerDS *in);
 
    static StoreType make_store(SourceTokenizerDS *in, Vector *blocks,
       SourceContext *context, CounterPointer<ObjectExpression> *area);
@@ -211,20 +214,17 @@ private:
    typedef std::map<std::string, KeywordHandler> KeywordMap;
 
 
-   static void make_expressions
-   (SourceTokenizerDS *in, Vector *expressions, Vector *blocks,
-    SourceContext *context);
+   static void make_statements(SourceTokenizerDS *in, Vector *exprs,
+      Vector *blocks, SourceContext *context);
 
    SRCEXPDS_EXTERN_DECL(function);
    SRCEXPDS_EXTERN_DECL(script);
    SRCEXPDS_EXTERN_DECL(variable);
 
    SRCEXPDS_KEYWORD_DECL(break);
-   SRCEXPDS_KEYWORD_DECL(case);
    SRCEXPDS_KEYWORD_DECL(cast);
    SRCEXPDS_KEYWORD_DECL(constexpr);
    SRCEXPDS_KEYWORD_DECL(continue);
-   SRCEXPDS_KEYWORD_DECL(default);
    SRCEXPDS_KEYWORD_DECL(do);
    SRCEXPDS_KEYWORD_DECL(extern);
    SRCEXPDS_KEYWORD_DECL(for);

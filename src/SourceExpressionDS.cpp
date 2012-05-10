@@ -103,11 +103,9 @@ void SourceExpressionDS::init()
 
    expr_keyword["__asmfunc"]  = make_keyword_linespec;
    expr_keyword[  "break"]    = make_keyword_break;
-   expr_keyword[  "case"]     = make_keyword_case;
    expr_keyword[  "const"]    = make_keyword_constexpr;
    expr_keyword[  "constexpr"]= make_keyword_constexpr;
    expr_keyword[  "continue"] = make_keyword_continue;
-   expr_keyword[  "default"]  = make_keyword_default;
    expr_keyword[  "do"]       = make_keyword_do;
    expr_keyword[  "extern"]   = make_keyword_extern;
    expr_keyword["__extfunc"]  = make_keyword_function;
@@ -164,14 +162,6 @@ SRCEXPDS_EXPR_DEF1(primary)
       if (is_type(tok.data, context))
          return make_keyword_variable_type(in, tok, blocks, context);
 
-      if (in->peekType(SourceTokenC::TT_COLON) && context->getAllowLabel())
-      {
-         in->get();
-         SourceExpression::Pointer expr = make_expression(in, blocks, context);
-         expr->addLabel(context->getLabelGoto(tok.data, tok.pos));
-         return expr;
-      }
-
    {  // Check for function designator.
       int count = context->isFunction(tok.data);
       if (count == 1)
@@ -208,7 +198,7 @@ SRCEXPDS_EXPR_DEF1(primary)
       SourceContext::Reference blockContext =
          SourceContext::create(context, SourceContext::CT_BLOCK);
       Vector expressions;
-      make_expressions(in, &expressions, blocks, blockContext);
+      make_statements(in, &expressions, blocks, blockContext);
       in->get(SourceTokenC::TT_BRACE_C);
       return create_value_block(expressions, blockContext, tok.pos);
    }
@@ -216,7 +206,7 @@ SRCEXPDS_EXPR_DEF1(primary)
    case SourceTokenC::TT_BRACK_O:
    {
       Vector expressions;
-      make_expressions(in, &expressions, blocks, context);
+      make_statements(in, &expressions, blocks, context);
       in->get(SourceTokenC::TT_BRACK_C);
       return create_value_block(expressions, context, tok.pos);
    }
@@ -446,10 +436,7 @@ SRCEXPDS_EXPR_DEFN(conditional, logical_ior)
 
    SourceTokenC tok = in->get(SourceTokenC::TT_QUERY);
 
-   bool allowLabel = context->getAllowLabel();
-   context->setAllowLabel(false);
    SourceExpression::Pointer exprBody = make_expression(in, blocks, context);
-   context->setAllowLabel(allowLabel);
    in->get(SourceTokenC::TT_COLON);
    SourceExpression::Pointer exprElse = make_conditional(in, blocks, context);
 
@@ -528,9 +515,70 @@ SRCEXPDS_EXPR_DEF2(assignment)
 SRCEXPDS_EXPR_DEFN_SINGLE(expression, assignment, COMMA, binary_pair)
 
 //
-// SourceExpressionDS::make_expressions
+// SourceExpressionDS::make_linkspec
 //
-SourceExpression::Pointer SourceExpressionDS::make_expressions
+SourceExpressionDS::LinkageSpecifier SourceExpressionDS::make_linkspec
+(SourceTokenizerDS *in)
+{
+   SourceTokenC const &linkSpecTok = in->get(SourceTokenC::TT_STR);
+
+   if (linkSpecTok.data == "internal")
+      return LS_INTERN;
+   else if (linkSpecTok.data == "ACS")
+      return LS_ACS;
+   else if (linkSpecTok.data == "DS")
+      return LS_DS;
+   else
+      ERROR(linkSpecTok.pos, "unknown linkage specifier '%s'",
+            linkSpecTok.data.c_str());
+}
+
+//
+// SourceExpressionDS::make_statement
+//
+SourceExpression::Pointer SourceExpressionDS::make_statement(
+   SourceTokenizerDS *in, Vector *blocks, SourceContext *context)
+{
+   if (in->peekType(SourceTokenC::TT_NAM))
+   {
+      SourceExpression::Pointer expr;
+      SourceTokenC tok = in->get();
+
+      if (tok.data == "default")
+      {
+         in->get(SourceTokenC::TT_COLON);
+         expr = make_statement(in, blocks, context);
+         expr->addLabel(context->addLabelCaseDefault(tok.pos));
+         return expr;
+      }
+      else if (tok.data == "case")
+      {
+         expr = make_expression(in, blocks, context);
+         bigsint value = expr->makeObject()->resolveInt();
+
+         in->get(SourceTokenC::TT_COLON);
+         expr = make_statement(in, blocks, context);
+         expr->addLabel(context->addLabelCase(value, tok.pos));
+         return expr;
+      }
+      else if (in->peekType(SourceTokenC::TT_COLON))
+      {
+         in->get(SourceTokenC::TT_COLON);
+         expr = make_statement(in, blocks, context);
+         expr->addLabel(context->addLabelGoto(tok.data, tok.pos));
+         return expr;
+      }
+      else
+         in->unget(tok);
+   }
+
+   return make_expression(in, blocks, context);
+}
+
+//
+// SourceExpressionDS::make_statements
+//
+SourceExpression::Pointer SourceExpressionDS::make_statements
 (SourceTokenizerDS *in)
 {
    Vector::iterator block;
@@ -553,7 +601,7 @@ SourceExpression::Pointer SourceExpressionDS::make_expressions
    Vector exprs;
    Vector blocks;
 
-   make_expressions(in, &exprs, &blocks, context);
+   make_statements(in, &exprs, &blocks, context);
 
    exprs.push_back(create_branch_return
       (create_value_data(retnType, context, pos), context, pos));
@@ -565,10 +613,10 @@ SourceExpression::Pointer SourceExpressionDS::make_expressions
 }
 
 //
-// SourceExpressionDS::make_expressions
+// SourceExpressionDS::make_statements
 //
-void SourceExpressionDS::make_expressions
-(SourceTokenizerDS *in, Vector *exprs, Vector *blocks, SourceContext *context)
+void SourceExpressionDS::make_statements(SourceTokenizerDS *in, Vector *exprs,
+   Vector *blocks, SourceContext *context)
 {
    while (true)
    {
@@ -582,28 +630,9 @@ void SourceExpressionDS::make_expressions
          return;
       }
 
-      exprs->push_back(make_expression(in, blocks, context));
+      exprs->push_back(make_statement(in, blocks, context));
       in->get(SourceTokenC::TT_SEMICOLON);
    }
-}
-
-//
-// SourceExpressionDS::make_linkspec
-//
-SourceExpressionDS::LinkageSpecifier SourceExpressionDS::make_linkspec
-(SourceTokenizerDS *in)
-{
-   SourceTokenC const &linkSpecTok = in->get(SourceTokenC::TT_STR);
-
-   if (linkSpecTok.data == "internal")
-      return LS_INTERN;
-   else if (linkSpecTok.data == "ACS")
-      return LS_ACS;
-   else if (linkSpecTok.data == "DS")
-      return LS_DS;
-   else
-      ERROR(linkSpecTok.pos, "unknown linkage specifier '%s'",
-            linkSpecTok.data.c_str());
 }
 
 // EOF

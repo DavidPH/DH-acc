@@ -77,7 +77,6 @@ SourceContext::SourceContext() :
    limitAuto(0),
    limitRegister(0),
    typeContext(CT_BLOCK),
-   allowLabel(true),
    caseDefault(false),
    inheritLocals(false)
 {
@@ -98,7 +97,6 @@ SourceContext::SourceContext(SourceContext *_parent, ContextType _typeContext) :
    limitAuto(0),
    limitRegister(0),
    typeContext(_typeContext),
-   allowLabel(true),
    caseDefault(false),
    inheritLocals(false)
 {
@@ -410,18 +408,6 @@ SourceVariable::Pointer SourceContext::findTempVar(unsigned i)
    if (inheritLocals) return parent->findTempVar(i);
 
    return NULL;
-}
-
-//
-// SourceContext::getAllowLabel
-//
-bool SourceContext::getAllowLabel() const
-{
-   // Should this be inherited?
-   if (inheritLocals && parent)
-      return allowLabel && parent->getAllowLabel();
-   else
-      return allowLabel;
 }
 
 //
@@ -812,14 +798,6 @@ std::string SourceContext::makeLabelShort()
    oss << ++labelCount << "::";
 
    return oss.str();
-}
-
-//
-// SourceContext::setAllowLabel
-//
-void SourceContext::setAllowLabel(bool allow)
-{
-   allowLabel = allow;
 }
 
 //

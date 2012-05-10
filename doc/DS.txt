@@ -392,30 +392,25 @@ Operators
 ===============================================================================
 
 ===========================================================
-Primary Expressions
+Statements
 ===========================================================
 
-  primary-expression:
-    keyword-expression
-    identifier : expression
-    <case> expression : expression
-    <default> : expression
-    identifier
-    character-literal
-    numeric-literal
-    string-literal
-    ( expression )
-    { expression-block(opt) }
-    [ expression-block(opt) ]
+  statement:
+    expression(opt) ;
+    identifier : statement
+    <case> expression : statement
+    <default> : statement
 
-  expression-block:
-    expression ; expression-block(opt)
+  statement-list:
+    statement statement-list(opt)
+
+A DS source file is a statement-list.
 
 -----------------------------------------------------------
 Labels
 -----------------------------------------------------------
 
-Defines a jump target for goto or the unary &&. Labels defined in this manner
+Defines a jump target for goto and the unary &&. Labels defined in this manner
 are visible anywhere in the enclosing function, including prior to their
 definition.
 
@@ -425,6 +420,20 @@ Cases/Default
 
 Defines a jump target for the enclosing switch. For the default keyword, the
 default jump target is defined.
+
+===========================================================
+Primary Expressions
+===========================================================
+
+  primary-expression:
+    keyword-expression
+    identifier
+    character-literal
+    numeric-literal
+    string-literal
+    ( expression )
+    { statement-list(opt) }
+    [ statement-list(opt) ]
 
 -----------------------------------------------------------
 Identifiers
@@ -437,9 +446,6 @@ case it is a function designator).
 -----------------------------------------------------------
 Blocks
 -----------------------------------------------------------
-
-  { expression-block(opt) }
-  [ expression-block(opt) ]
 
 Groups a series of expressions. If braces are used, a new compilation context is
 created. Otherwise the enclosing context is used directly.

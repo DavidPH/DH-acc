@@ -57,22 +57,6 @@ SRCEXPDS_KEYWORD_DEFN(break)
 }
 
 //
-// SourceExpressionDS::make_keyword_case
-//
-SRCEXPDS_KEYWORD_DEFN(case)
-{
-   context->setAllowLabel(false);
-   bigsint value = make_expression(in, blocks, context)->makeObject()->resolveInt();
-   context->setAllowLabel(true);
-
-   in->get(SourceTokenC::TT_COLON);
-
-   SourceExpression::Pointer expr = make_expression(in, blocks, context);
-   expr->addLabel(context->addLabelCase(value, tok.pos));
-   return expr;
-}
-
-//
 // SourceExpressionDS::make_keyword_cast
 //
 SRCEXPDS_KEYWORD_DEFN(cast)
@@ -127,18 +111,6 @@ SRCEXPDS_KEYWORD_DEFN(continue)
    (void)in; (void)blocks;
 
    return create_branch_continue(context, tok.pos);
-}
-
-//
-// SourceExpressionDS::make_keyword_default
-//
-SRCEXPDS_KEYWORD_DEFN(default)
-{
-   in->get(SourceTokenC::TT_COLON);
-
-   SourceExpression::Pointer expr = make_expression(in, blocks, context);
-   expr->addLabel(context->addLabelCaseDefault(tok.pos));
-   return expr;
 }
 
 //

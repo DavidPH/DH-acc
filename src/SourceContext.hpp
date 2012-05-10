@@ -70,8 +70,6 @@ public:
    void addVar(SourceVariable *var, bool externDef, bool externVis,
                bigsint address);
 
-   bool getAllowLabel() const;
-
    std::vector<bigsint> getCases(SourcePosition const & position) const;
 
    CounterPointer<SourceVariable> getFunction
@@ -138,8 +136,6 @@ public:
 
    std::string makeLabel();
 
-   void setAllowLabel(bool allow);
-
    void setReturnType(VariableType *type);
 
 
@@ -205,7 +201,6 @@ private:
 
    ContextType typeContext;
 
-   bool allowLabel    : 1;
    bool caseDefault   : 1;
    bool inheritLocals : 1;
 };
