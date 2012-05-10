@@ -127,7 +127,7 @@ SourceExpression_ValueBlock::SourceExpression_ValueBlock
 //
 VariableType::Reference SourceExpression_ValueBlock::getType() const
 {
-   return type.ref();
+   return static_cast<VariableType::Reference>(type);
 }
 
 //

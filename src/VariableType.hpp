@@ -130,7 +130,8 @@ public:
    Reference getArray(bigsint width);
    Reference getPointer();
    Reference getReturn() const {return typeRet;}
-   Reference getUnqualified() {return Reference(typeUnq ? typeUnq.raw() : this);}
+   Reference getUnqualified() {return typeUnq ? static_cast<Reference>(typeUnq)
+                                              : static_cast<Reference>(this);}
    Reference setQualifier(unsigned quals);
    Reference setStorage(StoreType store);
    Reference setStorage(StoreType store, std::string const &storeArea);

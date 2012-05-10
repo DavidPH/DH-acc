@@ -575,7 +575,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
          do_storage(&type, in, blocks, context);
 
       else
-         return type.ref();
+         return static_cast<VariableType::Reference>(type);
 
       break;
 
@@ -658,7 +658,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
       break;
 
    default:
-      return type.ref();
+      return static_cast<VariableType::Reference>(type);
    }
 }
 

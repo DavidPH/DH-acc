@@ -44,7 +44,7 @@ VariableType::Reference SourceContext::getVariableType
    if (!type)
       ERROR_NP("no such type: %s", name.c_str());
 
-   return type.ref();
+   return static_cast<VariableType::Reference>(type);
 }
 
 //
@@ -90,10 +90,10 @@ VariableType::Reference SourceContext::getVariableType_enum
          type->makeComplete();
 
       enumNames.push_back(name);
-      enumTypes.push_back(type.ref());
+      enumTypes.push_back(static_cast<VariableType::Reference>(type));
    }
 
-   return type.ref();
+   return static_cast<VariableType::Reference>(type);
 }
 
 //
@@ -126,10 +126,10 @@ VariableType::Reference SourceContext::getVariableType_struct
       type = VariableType::get_bt_struct(name.empty() ? makeLabel() : name);
 
       structNames.push_back(name);
-      structTypes.push_back(type.ref());
+      structTypes.push_back(static_cast<VariableType::Reference>(type));
    }
 
-   return type.ref();
+   return static_cast<VariableType::Reference>(type);
 }
 
 //
@@ -195,10 +195,10 @@ VariableType::Reference SourceContext::getVariableType_union
       type = VariableType::get_bt_union(name.empty() ? makeLabel() : name);
 
       unionNames.push_back(name);
-      unionTypes.push_back(type.ref());
+      unionTypes.push_back(static_cast<VariableType::Reference>(type));
    }
 
-   return type.ref();
+   return static_cast<VariableType::Reference>(type);
 }
 
 //
