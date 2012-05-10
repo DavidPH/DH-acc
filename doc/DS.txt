@@ -1,536 +1,693 @@
-DS is a language for writing game logic for scripting engines. This logic is
-written as a series of expressions. The meaning of operators as well as their
-precedence generally follows C rules.
+###############################################################################
+DamnScript Language Overview
+###############################################################################
 
+===============================================================================
+Preprocessor
+===============================================================================
 
+DS uses a token-based preprocessor. All commands begin with a '#' character.
 
-arglist = "(" [ type [ identifier ] [ "," type [ identifier ] ]... ] ")"
-arglist_return = arglist [ "->" type ]
+===========================================================
+Conditional Compilation
+===========================================================
 
-ocode_set = "__ocode" "(" identifier [ "," identifier ] ")"
+-----------------------------------------------------------
+Else-If
+-----------------------------------------------------------
 
+  # <elif> expression #
 
+Equivalent to # else # if expression #.
 
-block {}
-  Groups a set of expressions with a new context. Yields contained expressions.
-  Can be cast to a struct or array.
-    "{" [ expression ";" ]... "}"
+-----------------------------------------------------------
+Else
+-----------------------------------------------------------
 
-block []
-  Groups a set of expressions without a new context. Yields contained
-  expressions. Can be cast to a struct or array.
-    "[" [ expression ";" ]... "]"
+  # <else>
 
+-----------------------------------------------------------
+End-If
+-----------------------------------------------------------
 
+  # <endif>
 
-operator ++
-  Increments the value at the address of expression. Yields the new value for
-  the first form and the old value for the second form.
-    "++" expression_single
-    expression_single "++"
+-----------------------------------------------------------
+If
+-----------------------------------------------------------
 
-operator --
-  Decrements the value at the address of expression. Yields the new value for
-  the first form and the old value for the second form.
-    "--" expression_single
-    expression_single "--"
+  # <if> expression #
 
-operator ()
-  Calls the expression with provided arguments, if any. Yields the result of the
-  call. Creates a new context for expressions based on current context.
-    expression_single "(" [ expression [ "," expression ]... ] ")"
+-----------------------------------------------------------
+If-Def
+-----------------------------------------------------------
 
-operator []
-  Yields an element of expression.
-    expression_single "[" expression "]"
+  # <ifdef> identifier
 
-operator .
-  Yields a member of expression.
-    expression_single "." identifier
+Equivalent to # if defined identifier #.
 
-operator ->
-  Yields a pointed-to member of expression.
-    expression_single "->" identifier
+-----------------------------------------------------------
+If-Not-Def
+-----------------------------------------------------------
 
-operator + (unary)
-  Yields the result of expression.
-    "+" expression_single
+  # <ifndef> identifier
 
-operator - (unary)
-  Yields the negative result of expression.
-    "-" expression_single
+Equivalent to # if ! defined identifier #.
 
-operator !
-  Yields the boolean inverse of expression.
-    "!" expression_single
+===========================================================
+Macros
+===========================================================
 
-operator ~
-  Yields the bitwise inverse of expression.
-    "~" expression_single
+Like C, DS macros come in both object-like and function-like flavors. Unlike C,
+DS uses two different commands to differentiate them.
 
-operator type
-  Yields the expression converted to type.
-    "(" type ")" expression_single
+-----------------------------------------------------------
+Define
+-----------------------------------------------------------
 
-operator * (unary)
-  Yields the value pointed-to by expression.
-    "*" expression_single
+  # <define> identifier tokens #
 
-operator @
-  Yields the "storage area" of expression. This is most useful for
-  registerarray variables as it returns the array number.
-    "@" expression_single
+Defines an object-like macro.
 
-operator & (unary)
-  Yields a pointer to expression.
-    "&" expression_single
+-----------------------------------------------------------
+Macro
+-----------------------------------------------------------
 
-operator && (unary)
-  Yields a pointer to label or case.
-    "&&" "case" "default"
-    "&&" "case" expression_single
-    "&&" identifier
+  # <macro> identifier ( argument-list ) tokens ###
 
-operator sizeof
-  Yields the size of a type or expression.
-    "sizeof" expression_single
-    "sizeof" "(" type ")"
+Defines a function-like macro.
 
-operator * (binary)
-    expression "*" expression_single
+During expansion, arguments prefixed with # are converted to string literals.
+After expansion, tokens prefixed or suffixed with ## are joined.
 
-operator /
-    expression "/" expression_single
+-----------------------------------------------------------
+Undefine
+-----------------------------------------------------------
 
-operator %
-    expression "%" expression_single
+  # <undef> identifier
 
-operator + (binary)
-    expression "+" expression_single
+Undefines a macro.
 
-operator - (binary)
-    expression "-" expression_single
+===========================================================
+Miscellaneous
+===========================================================
 
-operator >>
-    expression ">>" expression_single
+-----------------------------------------------------------
+Error
+-----------------------------------------------------------
 
-operator <<
-    expression "<<" expression_single
+  # <error> string-literal
 
-operator >
-    expression ">" expression_single
+Halts compilation with the given error message.
 
-operator >=
-    expression ">=" expression_single
+-----------------------------------------------------------
+Include
+-----------------------------------------------------------
 
-operator <
-    expression "<" expression_single
+  # <include> string-literal
 
-operator <=
-    expression "<=" expression_single
+Inserts an external file's tokens in place of the directive.
 
-operator ==
-    expression "==" expression_single
+===============================================================================
+Keywords
+===============================================================================
 
-operator !=
-    expression "!=" expression_single
+  keyword-expression:
+    cast-expression
+    extern-expression
+    function-expression
+    internal-expression
+    iteration-expression:
+    jump-expression
+    printf-expression
+    select-expression
+    sizeof-expression
+    typeinfo-expression
+    variable-expression
 
-operator & (binary)
-    expression "&" expression_single
+===========================================================
+Cast Expressions
+===========================================================
 
-operator ^ (binary)
-    expression "^" expression_single
+  cast-expression:
+    cast-specifier < type > ( expression )
 
-operator | (binary)
-    expression "|" expression_single
+  cast-specifier: one of
+    <const_cast> <dynamic_cast> <__force_cast> <reinterpret_cast> <static_cast>
 
-operator && (binary)
-    expression "&&" expression_single
+===========================================================
+External Declarations
+===========================================================
 
-operator ^^
-    expression "^^" expression_single
+  extern-expression:
+    <extern> extern-specifier(opt) extern-declaration
+    <__intern> extern-declaration
 
-operator ||
-    expression "||" expression_single
+  extern-declaration:
+    extern-declaration-single
+    { extern-declaration-list(opt) }
 
-operator ?:
-  Performs a conditional branch. Yields the result of if-branch or else-branch.
-  If else-branch is present, it must have the same type as if-branch. Otherwise,
-  if-branch must have type void. Creates a new context for if-branch and
-  else-branch based on current context.
-    expression "?" expression_single ":" expression_single
+  extern-declaration-single:
+    <__function> function-args
+    <__script> function-args allocate-specifier(opt)
+    <__variable> storage-class type extern-variable-list
 
-operator =
-  Assigns the result of the right expression to the address of the left
-  expression.
-    expression "=" expression
+  extern-declaration-list:
+    extern-declaration-single ; extern-declaration-list(opt)
 
-operator +=
-    expression "+=" expression
-
-operator -=
-    expression "-=" expression
-
-operator *=
-    expression "*=" expression
-
-operator /=
-    expression "/=" expression
-
-operator %=
-    expression "%=" expression
-
-operator <<=
-    expression "<<=" expression
-
-operator >>=
-    expression ">>=" expression
-
-operator &=
-    expression "&=" expression
-
-operator ^=
-    expression "^=" expression
-
-operator |=
-    expression "|=" expression
-
-operator &&=
-    expression "&&=" expression
-
-operator ^^=
-    expression "^^=" expression
-
-operator ||=
-    expression "||=" expression
-
-operator :
-  Defines a jump target for a goto. Yields the result of expression.
-    identifier ":" expression
-
-operator asmfunc
-  Defines a function executed as a single instruction. Yields a pointer to the
-  function, which is a void type.
-    "__asmfunc" type name arglist "@" ocode_set
-    "__asmfunc" name arglist_return "@" ocode_set
-
-operator break
-  Branches out of the current loop or switch. Yields void.
-    "break"
-
-operator case
-  Defines a jump target for a switch. Yields the result of expression. Must be
-  possible to resolve case statically.
-    "case" expression(case) ":" expression
-
-operator constexpr
-  Defines a named and typed constant. Yields the constant.
-    "constexpr" type name "=" expression
-
-operator continue
-  Branches to the end of the current iteration of the current loop. Yields void.
-    "continue"
-
-operator default
-  Defines the default jump target for a switch. Yields the result of expression.
-    "default" ":" expression
-
-operator delay
-  Delays execution for a specified number of clocks (sometimes referred to tics
-  or ticks). Yields void.
-    "__delay" expression
-
-operator do
-  Performs iteration. Yields void. Creates new contexts for condition and body
-  based on current context.
-    "do" expression_single "while" "(" expression ")"
-
-operator extern
-  Performs forward-declaration. Yields the thing(s) declared. The string is a
-  linkage-specifier and must be one of the following (defaults to "DS"):
-   "ACS" Performs name mangling compatible with acc's codegen.
-   "DS" Default.
-    "extern" [ string ] "__function" name arglist_return
-    "extern" [ string ] "__script" name arglist_return
-    "extern" [ string ] "__variable" storage_class type name
-    "extern" [ string ] "{" [
-      "__function" name arglist_return |
-      "__script" name arglist_return |
-      "__variable" storage_class type name
-      ]... "}"
-
-operator for
-  Performs iteration. Yields void. Creates a new context for initializer based
-  on current context, a new context for condition based on initializer context,
-  and a new context for remaining expressions based on condition context.
-    "for" "(" expression ";" expression ";" expression ")" expression_single
-
-operator function
-  Defines a function. Yields a pointer to the function. Creates a new context
-  for expression based on current context. The first form makes a function that
-  can be exposed globally using extern.
-    "__extfunc" [ string ] name arglist_return expression_single
-    "__intfunc" name arglist_return expression_single
-    "__function" name arglist_return expression_single
-
-operator goto
-  Branches to a label or case. Yields void.
-    "goto" "case" "default"
-    "goto" "case" expression_single
-    "goto" identifier
-
-operator goto_dyn
-  Branches to a label-pointer. Yields void.
-    "__goto_dyn" expression_single
-
-operator if
-  Performs a conditional branch. Yields the result of if-branch or else-branch.
-  Yields a value of the promoted type of the two expressions or void if there is
-  no such promotion possible. Creates a new context for condition based on
-  current context, and new contexts for remaining expressions based on condition
-  context.
-    "if" "(" expression ")" expression_single [ "else" expression_single ]
-
-operator intern
-  Performs forward-declaration. Yields the thing(s) declared. Note that the
-  thing must be defined in the exact same context for this to refer to it.
-    "__intern" "__function" name arglist_return
-    "__intern" "__script" name arglist_return
-    "__intern" "__variable" storage_class type name
-    "__intern" "{" [
-      "__function" name arglist_return |
-      "__script" name arglist_return |
-      "__variable" storage_class type name
-      ]... "}"
-
-operator library
-  Sets the current ACSE library. Yields void.
-    "__library" "(" string ")"
-
-operator linespec
-  Defines a function executed as a line special. Yields a pointer to the
-  function.
-    "__linespec" name arglist_return @ expression_single
-
-operator native
-  Defines a function executed as a native function. Yields a pointer to the
-  function.
-    "__native" name arglist_return @ expression_single
-
-operator output
-  Prints expression for debugging. Yields void.
-    "__output" expression
-
-operator printf
-  Prints a formatted string. Expressions are implicitly cast to the necessary
-  type. The identifier indicates the type of printing operation and defaults to
-  __printf_print. Some operations require additional expressions which must come
-  after conversion expressions. Additionally, hud operations have a differing
-  number of arguments based on the msgtype. Consequently, that field must be a
-  compile-time constant. Yield depends on operation.
+  extern-variable-list:
+    extern-variable-declaration
+    extern-variable-declaration , extern-variable-list
+
+  extern-variable-declaration:
+    identifier allocate-specifier(opt)
+
+  extern-specifier:
+    "ACS"
+    "DS"
+
+Forward-declares a function or variable. The extern-specifier is used to
+specify linkage for compatibility with other languages or compilers.
+
+===========================================================
+Function Definitions
+===========================================================
+
+  function-expression:
+    builtin-specifier function-args allocate-specifier
+    function-specifier function-args prefix-expression
+    script-specifier function-args script-type-list(opt)
+      allocate-specifier(opt) prefix-expression
+
+  builtin-specifier: one of
+    <__asmfunc> <__linespec> <__native>
+
+  function-args:
+    bare-type(opt) identifier(opt) ( function-arg-list(opt) )
+    identifier(opt) ( function-arg-list(opt) ) -> type
+
+  allocate-specifier:
+    @ prefix-expression
+
+  function-specifier: one of
+    <__function> <__extfunc> <__intfunc>
+
+  script-specifier: one of
+    <__script> <__extscript> <__intscript>
+
+  script-type-list:
+    script-type(opt) script-flag-list(opt)
+
+  function-arg-list:
+    type identifier(opt)
+    type identifier(opt) , function-arg-list
+
+  script-type: one of
+    <__closed> <__death> <__disconnect> <__enter> <__lightning>
+      <__open> <__respawn> <__return> <__unloading>
+
+  script-flag-list:
+    script-flag script-flag-list(opt)
+
+  script-flag: one of
+    <__clientside> <__net>
+
+-----------------------------------------------------------
+Builtin Definitions
+-----------------------------------------------------------
+
+These (__asmfunc, __linespec, __native) define functions which are internal to
+the target engine. Whether they can be invoked with a run-time value or require
+a compile-time value is determined by the target.
+
+These definitions always yield a pointer to the defined function, even if it
+cannot be used dynamically.
+
+===========================================================
+Internals
+===========================================================
+
+  internal-expression:
+    <__library> ( string-literal )
+    <__ocode> ( identifier )
+    <__ocode> ( identifier , identifier )
+    <__symbol> ( type , string-literal )
+
+===========================================================
+Iteration Expressions
+===========================================================
+
+  iteration-expression:
+    <do> loop-name(opt) prefix-expression <while> ( expression )
+    <for> loop-name(opt) ( expression(opt) ; expression(opt) ; expression(opt) )
+      prefix-expression
+    <while> loop-name(opt) ( expression ) prefix-expression
+
+  loop-name:
+    : identifier
+
+===========================================================
+Jump Expressions
+===========================================================
+
+  jump-expression:
+    <break> identifier(opt)
+    <continue> identifier(opt)
+    <goto> identifier
+    <goto> <case> <default>
+    <goto> <case> expression
+    <__goto_dyn> expression
+    <return> expression(opt)
+
+-----------------------------------------------------------
+Break
+-----------------------------------------------------------
+
+If an identifier is provided immediately after the keyword, this terminates
+the indicated named iteration or switch. Otherwise, it terminates the smallest
+enclosing iteration or switch.
+
+-----------------------------------------------------------
+Continue
+-----------------------------------------------------------
+
+If an identifier is provided immediately after the keyword, this jumps to the
+end of the indicated named iteration's body. Otherwise, it jumps to the end of
+the smallest enclosing iteration's body.
+
+===========================================================
+Print Expressions
+===========================================================
+
+  printf-expression:
+    <__output> prefix-expression
+    <__printf> ( printf-expression-list )
+    <__printf> < printf-specifier > ( printf-expression-list )
+
+  printf-expression-list:
+    string-literal
+    string-literal , expression-list
+
+  printf-specifier: one of
+    <__printf_bold> <__printf_error> <__printf_hud> <__printf_hud_bold>
+    <__printf_print> <__printf_string>
+
+-----------------------------------------------------------
+Output
+-----------------------------------------------------------
+
+Prints the expression for debugging. Shall accept any type.
+
+-----------------------------------------------------------
+Print Format
+-----------------------------------------------------------
+
+Prints a formatted string. Expressions are implicitly cast to the necessary
+type. The printf-specifier indicates the type of printing operation and
+defaults to __printf_print if omitted. Some operations require additional
+expressions which must come after conversion expressions. Additionally, hud
+operations have a differing number of arguments based on the msgtype.
+Consequently, that field must be a compile-time constant. Yield depends on
+operation.
   Supported conversion specifiers:
-   %F (__real)
-   %K (int) keybind (ACS k:)
-   %L (__string) LANGUAGE-lump entry (ACS l:)
-   %N (int) name (ACS n:)
-   %X (__fixed)
-   %c (char)
-   %i (int)
-   %p (void *) accepts extended-pointers
-   %s (char *) accepts extended-pointers and __string
-   %u (unsigned)
+    %F (__real)
+    %K (int) keybind (ACS k:)
+    %L (__string) LANGUAGE-lump entry (ACS l:)
+    %N (int) name (ACS n:)
+    %X (__fixed)
+    %c (char)
+    %i (int)
+    %p (void *) accepts extended-pointers
+    %s (char *) accepts extended-pointers and __string
+    %u (unsigned)
   Supported operations:
-   __printf_bold -> void
-   __printf_error -> void
-   __printf_hud (int, int, int, __real, __real, __real, ...) -> void
-   __printf_hud_bold (int, int, int, __real, __real, __real, ...) -> void
-   __printf_log -> void
-   __printf_print -> void
-   __printf_string -> __string
-    "__printf" [ "<" identifier ">" ] "(" string [ "," expression ]... ")"
+    __printf_bold -> void
+    __printf_error -> void
+    __printf_hud (int, int, int, __real, __real, __real, ...) -> void
+    __printf_hud_bold (int, int, int, __real, __real, __real, ...) -> void
+    __printf_log -> void
+    __printf_print -> void
+    __printf_string -> __string
 
-operator return
-  Returns a value. Yields void.
-    "return" expression.
+===========================================================
+Selection Expressions
+===========================================================
 
-operator script
-  Defines a script. Yields a pointer to the script. Creates a new context for
-  expression based on current context. The first form makes a script that can be
-  exposed globally using extern.
-    "__extscript" [ string ] name [ type [ flag... ] ] arglist_return
-      [ "@" expression_single ] expression_single
-    "__intscript" name [ type [ flag... ] ] arglist_return
-      [ "@" expression_single ] expression_single
-    "__script" name [ type [ flag... ] ] arglist_return
-      [ "@" expression_single ] expression_single
+  selection-expression:
+    <if> ( expression ) prefix-expression
+    <if> ( expression ) prefix-expression <else> prefix-expression
+    <switch> loop-name(opt) ( expression ) prefix-expression
 
-operator switch
-  Performs a jump into a jump table. Yields void. Creates a new context for
-  expression based on current context and a new context for block based on
-  expression context.
-    "switch" "(" expression ")" "{" [ expression ";" ]... "}"
+===========================================================
+Type Information Expressions
+===========================================================
 
-operator struct
-  Defines a struct. Yields void.
-    "struct" [ name ] [ "{" [ type name ";" ]... "}" ]
+  typeinfo-expression
+    <sizeof> prefix-expression
+    <sizeof> ( type )
+    <__typestr> type
 
-operator symbol
-  Creates a literal out of a low-level symbol. Yields that literal. This is
-  meant for "system" headers and is not normally useful in user code.
-    "__symbol" "(" type "," string ")"
+===========================================================
+Variable Declarations
+===========================================================
 
-operator typedef
-  Defines a type. Yields void.
-    "typedef" type name
+  variable-expression:
+    variable-specifier(opt) storage-class type variable-list
+    storage-class type variable-list
+    bare-type variable-list
+    <constexpr> type constexpr-list
 
-operator union
-  Defines a union. Yields void.
-    "union" [ name ] [ "{" [ type name ";" ]... "}" ]
+  variable-specifier: one of
+    <__variable> <__extvar> <__intvar>
 
-operator variable
-  Declares a variable. Yields the variable. The first form makes a variable that
-  can be exposed globally using extern.
-    "__extvar" [ string ] storage_class type name [ "@" expression_single ]
-    "__intvar" storage_class type name [ "@" expression_single ]
-    "__variable" storage_class type name [ "@" expression_single ]
+  variable-list:
+    variable-declaration
+    variable-declaration , variable-list
 
-operator void
-  Drops the result of expression. Yields void.
-    "void" expression
+  variable-declaration:
+    identifier allocate-specifier(opt) variable-initializer(opt)
 
-operator while
-  Performs iteration. Yields void. Creates a new context for condition based on
-  current context and a new context for remaining expression based on condition
-  context.
-    "while" "(" expression ")" expression_single
+  variable-initializer:
+    = assignment-expression
 
+  constexpr-list:
+    constexpr-declaration
+    constexpr-declaration , constexpr-list
 
+  constexpr-declaration:
+    identifier = assignment-expression
 
-storage-class auto
-  Allocates storage on the stack in addressable space.
-    "auto"
+-----------------------------------------------------------
+Constants
+-----------------------------------------------------------
 
-storage-class register
-  Allocates storage in registers. This is the storage class of ACS non-array
-  variables defined inside a script or function.
-    "register"
+Defines a named and typed constant.
 
-storage-class register-global
-  Allocates storage in global-scope registers. This is the storage class of ACS
-  non-array variables defined as global.
-    "__globalregister"
+===============================================================================
+Operators
+===============================================================================
 
-storage-class register-map
-  Allocates storage in map-scope registers. This is the storage class of ACS
-  non-array variables defined outside any script or function.
-    "__mapregister"
+===========================================================
+Primary Expressions
+===========================================================
 
-storage-class register-world
-  Allocates storage in world-scope registers. This is the storage class of ACS
-  non-array variables defined as world.
-    "__worldregister"
+  primary-expression:
+    keyword-expression
+    identifier : expression
+    <case> expression : expression
+    <default> : expression
+    identifier
+    character-literal
+    numeric-literal
+    string-literal
+    ( expression )
+    { expression-block(opt) }
+    [ expression-block(opt) ]
 
-storage-class registerarray-global
-  Allocates storage in global-scope registerarrays. This is the storage class of
-  ACS array variables defined as global.
-    "__globalarray"
+  expression-block:
+    expression ; expression-block(opt)
 
-storage-class registerarray-map
-  Allocates storage in map-scope registerarrays. This is the storage class of
-  ACS array variables defined outside any script or function.
-    "__maparray"
+-----------------------------------------------------------
+Labels
+-----------------------------------------------------------
 
-storage-class registerarray-world
-  Allocates storage in world-scope registerarrays. This is the storage class of
-  ACS array variables defined as world.
-    "__worldarray"
+Defines a jump target for goto or the unary &&. Labels defined in this manner
+are visible anywhere in the enclosing function, including prior to their
+definition.
 
-storage-class static
-  Allocates storage in addressable space.
-    "static"
+-----------------------------------------------------------
+Cases/Default
+-----------------------------------------------------------
 
+Defines a jump target for the enclosing switch. For the default keyword, the
+default jump target is defined.
 
+-----------------------------------------------------------
+Identifiers
+-----------------------------------------------------------
 
-These are the types in DS.
+An identifier is a primary expression only if it has been declared as a
+constant or a variable (in which case it is an lvalue) or a function (in which
+case it is a function designator).
 
-type array
-  An array of type. If multiple sizes are specified, they are applied to the
-  type in reverse order. A size of 0 is legal and makes a 0-length array.
-    type "[" expression "]" [ "[" expression "]" ]...
+-----------------------------------------------------------
+Blocks
+-----------------------------------------------------------
 
-type assembly function
-  A pointer type used for assembly functions. Can only be used at compile-time.
-    "__asmfunc_t" arglist_return
+  { expression-block(opt) }
+  [ expression-block(opt) ]
 
-type block
-    "__block" "{" [ type ]... "}"
+Groups a series of expressions. If braces are used, a new compilation context is
+created. Otherwise the enclosing context is used directly.
 
-type char
-    "char"
+The result is a __block_t object. If the result is cast to void, the contained
+expressions are evaluated in the order they are written in. Otherwise, order of
+evaluation is unspecified.
 
-type const
-    type "const"
+===========================================================
+Suffix Operators
+===========================================================
 
-type enum
-    "enum" identifier
-    "enum" [ identifier ]
-      "{" [ identifier [ "=" expression ] [ ","
-            identifier [ "=" expression ] ]... ] [ "," ] "}"
+  suffix-expression:
+    primary-expression
+    suffix-expression [ expression ]
+    suffix-expression ( expression-list(opt) )
+    suffix-expression . identifier
+    suffix-expression -> identifier
+    suffix-expression ++
+    suffix-expression --
 
-type function
-  A pointer type used for functions.
-    "__func_t" arglist_return
+  expression-list:
+    assignment-expression
+    expression-list , assignment-expression
 
-type hard bool
-  A boolean type that is guaranteed to always be 0 (false) or 1 (true).
-    "bool"
+===========================================================
+Prefix Operators
+===========================================================
 
-type int
-  An integer type.
-    "int"
+  prefix-expression:
+    suffix-expression
+    ++ prefix-expression
+    -- prefix-expression
+    prefix-operator prefix-expression
+    ( type ) prefix-expression
 
-type label
-  A pointer type used for labeled expressions.
-    "__label"
+  prefix-operator: one of
+    @ & * + - ~ !
 
-type line special
-  A pointer type used for line specials.
-    "__lnspec_t" arglist_return
+===========================================================
+Multiplicative Operators
+===========================================================
 
-type native
-  A pointer type used for native/builtin functions.
-    "__native_t" arglist_return
+  multiplicative-expression:
+    prefix-expression
+    multiplicative-expression * prefix-expression
+    multiplicative-expression / prefix-expression
+    multiplicative-expression % prefix-expression
 
-type pointer
-  A pointer type used for addressable memory.
-    type "*"
+===========================================================
+Additive Operators
+===========================================================
 
-type real
-  A real type that may be fixed-point or floating-point, based on the target.
-    "__real"
+  additive-expression:
+    multiplicative-expression
+    additive-expression + multiplicative-expression
+    additive-expression - multiplicative-expression
 
-type script
-  A pointer type used for scripts.
-    "__script_t" arglist_return
+===========================================================
+Shift Operators
+===========================================================
 
-type soft bool
-  A boolean type that has indeterminate representation. Proper casting, however,
-  will always yield 0 (false) or 1 (true).
-    "__softbool"
+  shift-expression:
+    additive-expression
+    shift-expression << additive-expression
+    shift-expression >> additive-expression
 
-type string
-  A pointer type used when the target needs special handling of strings.
-  Consequently, its semantics are highly dependent on the target and cannot be
-  relied upon portably. If the target does not require special handling, it may
-  be equivalent to char * or variant.
-    "__string"
+===========================================================
+Relational Operators
+===========================================================
 
-type struct
-    "struct" identifier [ "{" [ type identifier ";" ]... "}" ]
+  relational-expression:
+    shift-expression
+    relational-expression < shift-expression
+    relational-expression > shift-expression
+    relational-expression <= shift-expression
+    relational-expression >= shift-expression
 
-type union
-    "union" identifier [ "{" [ type identifier ";" ]... "}" ]
+===========================================================
+Equality Operators
+===========================================================
 
-type void
-    "void"
+  equality-expression:
+    relational-expression
+    equality-expression == relational-expression
+    equality-expression != relational-expression
+
+===========================================================
+Bitwise AND Operator
+===========================================================
+
+  bitwise-and-expression:
+    equality-expression
+    bitwise-and-expression & equality-expression
+
+===========================================================
+Bitwise Exclusive OR Operator
+===========================================================
+
+  bitwise-xor-expression:
+    bitwise-and-expression
+    bitwise-xor-expression ^ bitwise-and-expression
+
+===========================================================
+Bitwise Inclusive OR Operator
+===========================================================
+
+  bitwise-ior-expression:
+    bitwise-xor-expression
+    bitwise-ior-expression | bitwise-xor-expression
+
+===========================================================
+Logical AND Operator
+===========================================================
+
+  logical-and-expression:
+    bitwise-ior-expression
+    logical-and-expression && bitwise-ior-expression
+
+===========================================================
+Logical Exclusive OR Operator
+===========================================================
+
+  logical-xor-expression:
+    logical-and-expression
+    logical-xor-expression ^^ logical-and-expression
+
+===========================================================
+Logical Inclusive OR Operator
+===========================================================
+
+  logical-ior-expression:
+    logical-xor-expression
+    logical-ior-expression || logical-xor-expression
+
+===========================================================
+Conditional Operator
+===========================================================
+
+  conditional-expression:
+    logical-ior-expression
+    logical-ior-expression ? expression : conditional-expression
+
+===========================================================
+Assignment Operators
+===========================================================
+
+  assignment-expression:
+    conditional-expression
+    prefix-expression assignment-operator assignment-expression
+
+  assignment-operator: one of
+    = *= /= %= += -= <<= >>= &= ^= |= &&= ^^= ||=
+
+===========================================================
+Comma Operator
+===========================================================
+
+  expression:
+    assignment-expression
+    expression , assignment-expression
+
+===============================================================================
+Types
+===============================================================================
+
+  type:
+    bare-type
+    ( type )
+
+  bare-type:
+    <__block> { block-list(opt) }
+    boolean-specifier
+    <decltype> prefix-expression
+    <enum> identifier
+    <enum> identifier(opt) { enum-list }
+    function-type-specifier function-args
+    identifier
+    <__label>
+    numeric-specifier
+    <__string>
+    structure-specifier identifier
+    structure-specifier identifier(opt) { structure-list(opt) }
+    type storage-class
+    type type-qualifier
+    type *
+    type [ expression ]
+    <typename> identifier
+    <void>
+
+  block-list:
+    type ; block-list(opt)
+
+  boolean-specifier: one of
+    <bool> <_Bool> <__boolsoft>
+
+  enum-list:
+    enum-member
+    enum-member , enum-list(opt)
+
+  function-type-specifier: one of
+    <__asmfunc_t> <__func_t> <__lnspec_t> <__native_t> <__script_t>
+
+  numeric-specifier:
+    numeric-specifier-part numeric-specifier(opt)
+
+  structure-specifier: one of
+    <struct> <union>
+
+  structure-list:
+    type structure-name-list ; structure-list(opt)
+
+  type-qualifier: one of
+    <const> <restrict> <volatile>
+
+  enum-member:
+    identifier enum-initializer(opt)
+
+  numeric-specifier-part: one of
+    numeric-specifier-base numeric-specifier-sign numeric-specifier-size
+
+  structure-name-list:
+    identifier
+    identifier , structure-name-list
+
+  enum-initializer:
+    = assignment-expression
+
+  numeric-specifier-base: one of
+    <char> <double> <__fixed> <float> <int> <__real>
+
+  numeric-specifier-sign: one of
+    <signed> <unsigned>
+
+  numeric-specifier-size: one of
+    <long> <short>
+
+===============================================================================
+Storage Classes
+===============================================================================
+
+  storage-class:
+    store-type
+    store-type ( expression )
+
+  store-type: one of
+    <static> <__staticregister> <__staticarray>
+    <auto> <__autoregister> <__autoarray>
+    <register> <__mapregister> <__worldregister> <__globalregister>
+    <__maparray> <__worldarray> <__globalarray>
+
+###############################################################################
+EOF
+###############################################################################
 
