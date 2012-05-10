@@ -45,9 +45,9 @@ class VariableType;
 //
 // SourceContext
 //
-class SourceContext : public Counter
+class SourceContext : public PlainCounter
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceContext, Counter);
+   MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(SourceContext, PlainCounter);
 
 public:
    enum ContextType

@@ -43,9 +43,9 @@ class SourcePosition;
 //
 // Stores information about source-level types.
 //
-class VariableType : Counter
+class VariableType : PlainCounter
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(VariableType, Counter);
+   MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(VariableType, PlainCounter);
 
 public:
    typedef std::vector<std::string> VecStr;

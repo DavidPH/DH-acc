@@ -46,9 +46,9 @@ class VariableType;
 //
 // SourceVariable
 //
-class SourceVariable : Counter
+class SourceVariable : PlainCounter
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceVariable, Counter);
+   MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(SourceVariable, PlainCounter);
 
 public:
    StoreType getStoreType() const {return store;}

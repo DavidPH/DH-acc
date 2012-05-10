@@ -38,9 +38,9 @@ class SourceExpression;
 //
 // VariableData
 //
-class VariableData : public Counter
+class VariableData : public PlainCounter
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(VariableData, Counter);
+   MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(VariableData, PlainCounter);
 
 public:
    enum MemoryType

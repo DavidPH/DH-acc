@@ -80,13 +80,14 @@ MAKE_NOCLONE_COUNTER_CLASS(CLASS); typedef BASE Super
 //
 // For use in defining reference-counted classes without virtuals.
 //
-#define MAKE_NOVIRTUAL_COUNTER_CLASS(CLASS) \
+#define MAKE_NOVIRTUAL_COUNTER_CLASS(CLASS)       \
+char const *getClassName() const {return #CLASS;} \
 MAKE_COMMON_COUNTER_CLASS_TYPES(CLASS)
 
 //
 // MAKE_NOVIRTUAL_COUNTER_CLASS_BASE
 //
-#define MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(CLASS) \
+#define MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(CLASS,BASE) \
 MAKE_NOVIRTUAL_COUNTER_CLASS(CLASS); typedef BASE Super
 
 //
