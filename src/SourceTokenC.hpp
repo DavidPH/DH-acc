@@ -24,6 +24,7 @@
 #ifndef HPP_SourceTokenC_
 #define HPP_SourceTokenC_
 
+#include "Counter.hpp"
 #include "SourcePosition.hpp"
 
 #include <string>
@@ -39,8 +40,10 @@ class SourceStream;
 //
 // SourceTokenC
 //
-class SourceTokenC
+class SourceTokenC : public PlainCounter
 {
+   MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(SourceTokenC, PlainCounter);
+
 public:
    //
    // ::TokenType
@@ -116,6 +119,12 @@ public:
 
 
    SourceTokenC() : type(TT_NONE) {}
+
+   SourceTokenC(SourcePosition const &_pos, TokenType _type)
+    : pos(_pos), type(_type) {}
+
+   SourceTokenC(SourcePosition const &_pos, std::string const &_data,
+      TokenType _type) : pos(_pos), data(_data), type(_type) {}
 
    std::string getDataString() const;
 

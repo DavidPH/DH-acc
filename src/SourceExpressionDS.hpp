@@ -104,8 +104,8 @@ make_extern_##NAME(SRCEXPDS_EXTERN_ARGS)
 //
 // SRCEXPDS_KEYWORD_ARGS
 //
-#define SRCEXPDS_KEYWORD_ARGS                   \
-SourceTokenizerDS *in, SourceTokenC const &tok, \
+#define SRCEXPDS_KEYWORD_ARGS             \
+SourceTokenizerDS *in, SourceTokenC *tok, \
 SourceExpression::Vector *blocks, SourceContext *context
 
 //

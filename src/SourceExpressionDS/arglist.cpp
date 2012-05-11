@@ -47,19 +47,19 @@ void SourceExpressionDS::make_arglist(SourceTokenizerDS *in, Vector *blocks,
    args->count = 0;
 
    // Read prefix return. (If one.)
-   if (in->peekType(SourceTokenC::TT_NAM) && is_type(in->peek().data, context))
+   if (in->peekType(SourceTokenC::TT_NAM) && is_type(in->peek()->data, context))
       args->retn = make_type(in, blocks, context);
 
    // Read name. (If one.)
    {
-      std::vector<SourceTokenC> toks;
+      std::vector<SourceTokenC::Reference> toks;
 
       while (in->peekType(SourceTokenC::TT_PAREN_O)) toks.push_back(in->get());
 
       if (in->peekType(SourceTokenC::TT_NAM) &&
-         !is_type(in->peek().data, context))
+         !is_type(in->peek()->data, context))
       {
-         args->name = in->get().data;
+         args->name = in->get()->data;
 
          for (size_t i = toks.size(); i--;) in->get(SourceTokenC::TT_PAREN_C);
       }
@@ -68,19 +68,18 @@ void SourceExpressionDS::make_arglist(SourceTokenizerDS *in, Vector *blocks,
    }
 
    // Read arguments.
-   SourcePosition const pos = in->get(SourceTokenC::TT_PAREN_O).pos;
+   SourcePosition const pos = in->get(SourceTokenC::TT_PAREN_O)->pos;
    if (!in->peekType(SourceTokenC::TT_PAREN_C)) while (true)
    {
       args->types.push_back(make_type(in, blocks, context));
       args->count += args->types.back()->getSize(pos);
 
       if (in->peekType(SourceTokenC::TT_NAM))
-         args->names.push_back(in->get(SourceTokenC::TT_NAM).data);
+         args->names.push_back(in->get(SourceTokenC::TT_NAM)->data);
       else
-         args->names.push_back("");
+         args->names.push_back(std::string());
 
-      if (!in->peekType(SourceTokenC::TT_COMMA))
-         break;
+      if (!in->peekType(SourceTokenC::TT_COMMA)) break;
 
       in->get(SourceTokenC::TT_COMMA);
    }

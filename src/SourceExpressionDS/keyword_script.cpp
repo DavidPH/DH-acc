@@ -104,12 +104,12 @@ static bool is_script_type(std::string const &data)
 //
 static ObjectData_Script::ScriptFlag make_script_flag(SourceTokenizerDS *in)
 {
-   SourceTokenC tok = in->get(SourceTokenC::TT_NAM);
+   SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
 
-   if (tok.data == "__net")        return ObjectData_Script::SF_NET;
-   if (tok.data == "__clientside") return ObjectData_Script::SF_CLIENTSIDE;
+   if (tok->data == "__net")        return ObjectData_Script::SF_NET;
+   if (tok->data == "__clientside") return ObjectData_Script::SF_CLIENTSIDE;
 
-   ERROR(tok.pos, "invalid script-flag: %s", tok.data.c_str());
+   ERROR(tok->pos, "invalid script-flag: %s", tok->data.c_str());
 }
 
 //
@@ -117,28 +117,28 @@ static ObjectData_Script::ScriptFlag make_script_flag(SourceTokenizerDS *in)
 //
 static ObjectData_Script::ScriptType make_script_type(SourceTokenizerDS *in)
 {
-   SourceTokenC tok = in->get(SourceTokenC::TT_NAM);
+   SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
 
-   if (tok.data == "__closed")     return ObjectData_Script::ST_CLOSED;
-   if (tok.data == "__open")       return ObjectData_Script::ST_OPEN;
-   if (tok.data == "__respawn")    return ObjectData_Script::ST_RESPAWN;
-   if (tok.data == "__death")      return ObjectData_Script::ST_DEATH;
-   if (tok.data == "__enter")      return ObjectData_Script::ST_ENTER;
-   if (tok.data == "__lightning")  return ObjectData_Script::ST_LIGHTNING;
-   if (tok.data == "__unloading")  return ObjectData_Script::ST_UNLOADING;
-   if (tok.data == "__disconnect") return ObjectData_Script::ST_DISCONNECT;
-   if (tok.data == "__return")     return ObjectData_Script::ST_RETURN;
+   if (tok->data == "__closed")     return ObjectData_Script::ST_CLOSED;
+   if (tok->data == "__open")       return ObjectData_Script::ST_OPEN;
+   if (tok->data == "__respawn")    return ObjectData_Script::ST_RESPAWN;
+   if (tok->data == "__death")      return ObjectData_Script::ST_DEATH;
+   if (tok->data == "__enter")      return ObjectData_Script::ST_ENTER;
+   if (tok->data == "__lightning")  return ObjectData_Script::ST_LIGHTNING;
+   if (tok->data == "__unloading")  return ObjectData_Script::ST_UNLOADING;
+   if (tok->data == "__disconnect") return ObjectData_Script::ST_DISCONNECT;
+   if (tok->data == "__return")     return ObjectData_Script::ST_RETURN;
 
-   ERROR(tok.pos, "invalid script-type: %s", tok.data.c_str());
+   ERROR(tok->pos, "invalid script-type: %s", tok->data.c_str());
 }
 
 //
 // make_script
 //
 static SourceExpression::Pointer make_script
-(SourceTokenizerDS *in, SourceTokenC const &tok,
- SourceExpression::Vector *blocks, SourceContext *context,
- SourceExpressionDS::LinkageSpecifier linkSpec, bool externDef)
+(SourceTokenizerDS *in, SourceTokenC *tok, SourceExpression::Vector *blocks,
+ SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
+ bool externDef)
 {
    bool externVis = linkSpec != SourceExpressionDS::LS_INTERN;
 
@@ -156,14 +156,14 @@ static SourceExpression::Pointer make_script
 
    // script-type
    ObjectData_Script::ScriptType scriptType;
-   if (in->peekType(SourceTokenC::TT_NAM) && is_script_type(in->peek().data))
+   if (in->peekType(SourceTokenC::TT_NAM) && is_script_type(in->peek()->data))
       scriptType = make_script_type(in);
    else
       scriptType = ObjectData_Script::ST_CLOSED;
 
    // script-flag-list
    bigsint scriptFlags = 0;
-   while (in->peekType(SourceTokenC::TT_NAM) && is_script_flag(in->peek().data))
+   while (in->peekType(SourceTokenC::TT_NAM) && is_script_flag(in->peek()->data))
       scriptFlags |= make_script_flag(in);
 
    // scriptNumber
@@ -206,7 +206,7 @@ static SourceExpression::Pointer make_script
       scriptFunc = ObjectData_String::add(scriptFunc);
 
       SourceVariable::Pointer scriptFuncVar = SourceVariable::create_constant
-         ("__func__", VariableType::get_bt_string(), scriptFunc, tok.pos);
+         ("__func__", VariableType::get_bt_string(), scriptFunc, tok->pos);
 
       args.context->addVar(scriptFuncVar, false, false);
    }
@@ -257,7 +257,7 @@ static SourceExpression::Pointer make_script
 
    // scriptVar
    SourceVariable::Pointer scriptVar = SourceVariable::create_constant
-      (args.name, scriptVarType, scriptNameObj, tok.pos);
+      (args.name, scriptVarType, scriptNameObj, tok->pos);
 
    // scriptAdded
    bool scriptAdded;
@@ -277,15 +277,15 @@ static SourceExpression::Pointer make_script
    if (!externDef)
    {
       SourceExpression::Pointer scriptExprRoot = SourceExpression::
-         create_root_script(scriptVarType, args.context, tok.pos);
+         create_root_script(scriptVarType, args.context, tok->pos);
 
       SourceExpression::Pointer scriptExpr = SourceExpressionDS::
          make_prefix(in, blocks, args.context);
 
       SourceExpression::Pointer scriptExprData = SourceExpression::
-         create_value_data_garbage(args.retn, args.context, tok.pos);
+         create_value_data_garbage(args.retn, args.context, tok->pos);
       SourceExpression::Pointer scriptExprRetn = SourceExpression::
-         create_branch_return(scriptExprData, args.context, tok.pos);
+         create_branch_return(scriptExprData, args.context, tok->pos);
 
       scriptExprRoot->addLabel(scriptLabel);
       blocks->push_back(scriptExprRoot);
@@ -293,7 +293,7 @@ static SourceExpression::Pointer make_script
       blocks->push_back(scriptExprRetn);
    }
 
-   return SourceExpression::create_value_variable(scriptVar, context, tok.pos);
+   return SourceExpression::create_value_variable(scriptVar, context, tok->pos);
 }
 
 //
@@ -327,14 +327,14 @@ SRCEXPDS_KEYWORD_DEFN(script)
 {
    LinkageSpecifier linkSpec;
 
-   if (tok.data == "__script")
+   if (tok->data == "__script")
    {
       if (context == SourceContext::global_context)
          linkSpec = LS_DS;
       else
          linkSpec = LS_INTERN;
    }
-   else if (tok.data == "__extscript")
+   else if (tok->data == "__extscript")
    {
       if (in->peekType(SourceTokenC::TT_STR))
          linkSpec = make_linkspec(in);

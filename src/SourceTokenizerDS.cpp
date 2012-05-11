@@ -125,13 +125,13 @@ static int add_define_base
 //
 // find_tok
 //
-static SourceTokenizerDS::MacroVec *find_tok
-(std::vector<SourceTokenizerDS::MacroVec> &tok,
- SourceTokenizerDS::MacroArg const &arg, std::string const &name)
+static SourceTokenizerDS::MacroVec *find_arg
+(std::vector<SourceTokenizerDS::MacroVec> &args,
+ SourceTokenizerDS::MacroArg const &argNames, std::string const &name)
 {
-   for (size_t i = 0, e = arg.size(); i != e; ++i)
-      if (arg[i] == name)
-         return &tok[i];
+   for (size_t i = 0, e = argNames.size(); i != e; ++i)
+      if (argNames[i] == name)
+         return &args[i];
 
    return NULL;
 }
@@ -139,15 +139,15 @@ static SourceTokenizerDS::MacroVec *find_tok
 //
 // make_expression
 //
-static ObjectExpression::Pointer
-make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
-                std::vector<SourceTokenC> const &operators, size_t begin,
-                size_t end)
+static ObjectExpression::Pointer make_expression(
+   std::vector<ObjectExpression::Pointer> const &expressions,
+   std::vector<SourceTokenC::Reference> const &operators,
+   size_t begin, size_t end)
 {
    #define EXPRL make_expression(expressions, operators, begin, iter)
    #define EXPRR make_expression(expressions, operators, iter+1, end)
 
-   #define CARGS operators[iter].pos
+   #define CARGS operators[iter]->pos
 
    // Terminating case. Only one expression, so just return it.
    if (begin == end) return expressions[begin];
@@ -159,7 +159,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // ||
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].type)
+      switch (operators[iter]->type)
       {
       case SourceTokenC::TT_IO2:
          return ObjectExpression::create_branch_ior(EXPRL, EXPRR, CARGS);
@@ -172,7 +172,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // ^^
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].type)
+      switch (operators[iter]->type)
       {
       case SourceTokenC::TT_XO2:
          return ObjectExpression::create_branch_xor(EXPRL, EXPRR, CARGS);
@@ -185,7 +185,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // &&
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].type)
+      switch (operators[iter]->type)
       {
       case SourceTokenC::TT_AN2:
          return ObjectExpression::create_branch_and(EXPRL, EXPRR, CARGS);
@@ -198,7 +198,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // |
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].type)
+      switch (operators[iter]->type)
       {
       case SourceTokenC::TT_IOR:
          return ObjectExpression::create_binary_ior(EXPRL, EXPRR, CARGS);
@@ -211,7 +211,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // ^
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].type)
+      switch (operators[iter]->type)
       {
       case SourceTokenC::TT_XOR:
          return ObjectExpression::create_binary_xor(EXPRL, EXPRR, CARGS);
@@ -224,7 +224,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // &
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].type)
+      switch (operators[iter]->type)
       {
       case SourceTokenC::TT_AND:
          return ObjectExpression::create_binary_and(EXPRL, EXPRR, CARGS);
@@ -243,7 +243,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // - +
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].type)
+      switch (operators[iter]->type)
       {
       case SourceTokenC::TT_SUB:
          return ObjectExpression::create_binary_sub(EXPRL, EXPRR, CARGS);
@@ -259,7 +259,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
    // * % /
    for (iter = end; iter-- > begin;)
    {
-      switch (operators[iter].type)
+      switch (operators[iter]->type)
       {
       case SourceTokenC::TT_MUL:
          return ObjectExpression::create_binary_mul(EXPRL, EXPRR, CARGS);
@@ -275,7 +275,7 @@ make_expression(std::vector<ObjectExpression::Pointer> const &expressions,
       }
    }
 
-   ERROR(operators[begin].pos, "unexpected operator");
+   ERROR(operators[begin]->pos, "unexpected operator");
 
    #undef CARGS
 
@@ -310,7 +310,7 @@ SourceTokenizerDS::SourceTokenizerDS(SourceStream *_in)
    if (option_script_autoargs)
       addDefine("__SCRIPT_AUTOARGS__");
 
-   in.push(_in);
+   in.push_back(_in);
 }
 
 //
@@ -318,12 +318,11 @@ SourceTokenizerDS::SourceTokenizerDS(SourceStream *_in)
 //
 SourceTokenizerDS::~SourceTokenizerDS()
 {
-	// All but the first SourceStream was alloc'd by this.
-	while (in.size() > 1)
-	{
-		delete in.top();
-		in.pop();
-	}
+   // All but the first SourceStream was alloc'd by this.
+   while (in.size() > 1)
+   {
+      delete in.back(); in.pop_back();
+   }
 }
 
 //
@@ -356,11 +355,11 @@ void SourceTokenizerDS::add_define_base
    try
    {
       SourceStream in(source, SourceStream::ST_C|SourceStream::STF_STRING);
-      SourceTokenC tok;
 
       while (true)
       {
-         tok.readToken(&in);
+         SourceTokenC::Reference tok(new SourceTokenC);
+         tok->readToken(&in);
          vec.push_back(tok);
       }
    }
@@ -392,11 +391,11 @@ void SourceTokenizerDS::add_macro_base
    try
    {
       SourceStream in(data, SourceStream::ST_C|SourceStream::STF_STRING);
-      SourceTokenC tok;
 
       while (true)
       {
-         tok.readToken(&in);
+         SourceTokenC::Reference tok(new SourceTokenC);
+         tok->readToken(&in);
          dat.second.push_back(tok);
       }
    }
@@ -426,14 +425,13 @@ void SourceTokenizerDS::addDefine(std::string const &name)
 //
 // SourceTokenizerDS::addDefine
 //
-void SourceTokenizerDS::addDefine
-(std::string const &name, SourcePosition const &pos,
- std::vector<SourceTokenC> const &tokens)
+void SourceTokenizerDS::addDefine(std::string const &name,
+   SourcePosition const &pos, DefVec const &vec)
 {
    if (hasDefine(name))
-      ERROR_P("attempt to redefine define");
+      ERROR_P("attempt to redefine define %s", name.c_str());
 
-   defines[name] = tokens;
+   defines[name] = vec;
 }
 
 //
@@ -454,26 +452,26 @@ void SourceTokenizerDS::addMacro
 void SourceTokenizerDS::addSkip(bool skip)
 {
    skipStack.push_back(skip);
-   unskipStack.push(!skip);
+   unskipStack.push_back(!skip);
 }
 
 //
 // SourceTokenizerDS::doAssert
 //
-void SourceTokenizerDS::doAssert(SourceTokenC::TokenType type)
+void SourceTokenizerDS::doAssert(SourceTokenC *tok, SourceTokenC::TokenType type)
 {
-   if (token.type != type)
-      ERROR(token.pos, "expected %s got %s", make_string(type).c_str(),
-            make_string(token.type).c_str());
+   if (tok->type != type)
+      ERROR(tok->pos, "expected %s got %s", make_string(type).c_str(),
+            make_string(tok->type).c_str());
 }
 
 //
 // SourceTokenizerDS::doAssert
 //
-void SourceTokenizerDS::doAssert(std::string const &data)
+void SourceTokenizerDS::doAssert(SourceTokenC *tok, std::string const &data)
 {
-   if (token.data != data)
-      ERROR(token.pos, "expected %s got %s", data.c_str(), token.data.c_str());
+   if (tok->data != data)
+      ERROR(tok->pos, "expected %s got %s", data.c_str(), tok->data.c_str());
 }
 
 //
@@ -485,23 +483,21 @@ void SourceTokenizerDS::doCommand()
    canExpand  = false;
    canSkip    = false;
 
-   prep(); doAssert(SourceTokenC::TT_NAM);
+   SourceTokenC::Reference tok = prep(); doAssert(tok, SourceTokenC::TT_NAM);
 
-   std::string const &command = token.data;
+        if (tok->data == "define")  doCommand_define(tok);
+   else if (tok->data == "else")    doCommand_else(tok);
+   else if (tok->data == "elif")    doCommand_elif(tok);
+   else if (tok->data == "endif")   doCommand_endif(tok);
+   else if (tok->data == "error")   doCommand_error(tok);
+   else if (tok->data == "if")      doCommand_if(tok);
+   else if (tok->data == "ifdef")   doCommand_ifdef(tok);
+   else if (tok->data == "ifndef")  doCommand_ifndef(tok);
+   else if (tok->data == "include") doCommand_include(tok);
+   else if (tok->data == "macro")   doCommand_macro(tok);
+   else if (tok->data == "undef")   doCommand_undef(tok);
 
-        if (command == "define")  doCommand_define();
-   else if (command == "else")    doCommand_else();
-   else if (command == "elif")    doCommand_elif();
-   else if (command == "endif")   doCommand_endif();
-   else if (command == "error")   doCommand_error();
-   else if (command == "if")      doCommand_if();
-   else if (command == "ifdef")   doCommand_ifdef();
-   else if (command == "ifndef")  doCommand_ifndef();
-   else if (command == "include") doCommand_include();
-   else if (command == "macro")   doCommand_macro();
-   else if (command == "undef")   doCommand_undef();
-
-   else ERROR(token.pos, "unknown command: %s", command.c_str());
+   else ERROR(tok->pos, "unknown command: %s", tok->data.c_str());
 
    canCommand = true;
    canExpand  = true;
@@ -511,56 +507,54 @@ void SourceTokenizerDS::doCommand()
 //
 // SourceTokenizerDS::doCommand_define
 //
-void SourceTokenizerDS::doCommand_define()
+void SourceTokenizerDS::doCommand_define(SourceTokenC *tok)
 {
-   prep(); doAssert(SourceTokenC::TT_NAM);
+   SourceTokenC::Reference name = prep(); doAssert(tok, SourceTokenC::TT_NAM);
 
-   std::string name = token.data;
-   SourcePosition position = token.pos;
+   DefVec vec;
 
-   std::vector<SourceTokenC> tokens;
-
-   for (prep(); token.type != SourceTokenC::TT_HASH1; prep())
-      tokens.push_back(token);
+   for (SourceTokenC::Reference itr = prep();
+        itr->type != SourceTokenC::TT_HASH1; itr = prep())
+      vec.push_back(itr);
 
    if (isSkip()) return;
 
-   addDefine(name, position, tokens);
+   addDefine(name->data, name->pos, vec);
 }
 
 //
 // SourceTokenizerDS::doCommand_else
 //
-void SourceTokenizerDS::doCommand_else()
+void SourceTokenizerDS::doCommand_else(SourceTokenC *tok)
 {
    if (skipStack.empty())
-      ERROR(token.pos, "unmatched #else");
+      ERROR(tok->pos, "unmatched #else");
 
-   skipStack.back() = unskipStack.top();
-   unskipStack.top() = true; // If it wasn't, it is now.
+   skipStack.back() = unskipStack.back();
+   unskipStack.back() = true; // If it wasn't, it is now.
 }
 
 //
 // SourceTokenizerDS::doCommand_elif
 //
-void SourceTokenizerDS::doCommand_elif()
+void SourceTokenizerDS::doCommand_elif(SourceTokenC *tok)
 {
    if (skipStack.empty())
-      ERROR(token.pos, "unmatched #elif");
+      ERROR(tok->pos, "unmatched #elif");
 
    bool ifResult = getIf();
 
-   skipStack.back()  = unskipStack.top() || !ifResult;
-   unskipStack.top() = unskipStack.top() ||  ifResult;
+     skipStack.back() = unskipStack.back() || !ifResult;
+   unskipStack.back() = unskipStack.back() ||  ifResult;
 }
 
 //
 // SourceTokenizerDS::doCommand_endif
 //
-void SourceTokenizerDS::doCommand_endif()
+void SourceTokenizerDS::doCommand_endif(SourceTokenC *tok)
 {
    if (skipStack.empty())
-      ERROR(token.pos, "unmatched #endif");
+      ERROR(tok->pos, "unmatched #endif");
 
    remSkip();
 }
@@ -568,19 +562,19 @@ void SourceTokenizerDS::doCommand_endif()
 //
 // SourceTokenizerDS::doCommand_error
 //
-void SourceTokenizerDS::doCommand_error()
+void SourceTokenizerDS::doCommand_error(SourceTokenC *)
 {
-   prep(); doAssert(SourceTokenC::TT_STR);
+   SourceTokenC::Reference msg = prep(); doAssert(msg, SourceTokenC::TT_STR);
 
    if (isSkip()) return;
 
-   ERROR(token.pos, "#error %s", token.data.c_str());
+   ERROR(msg->pos, "#error %s", msg->data.c_str());
 }
 
 //
 // SourceTokenizerDS::doCommand_if
 //
-void SourceTokenizerDS::doCommand_if()
+void SourceTokenizerDS::doCommand_if(SourceTokenC *)
 {
    addSkip(!getIf());
 }
@@ -588,117 +582,113 @@ void SourceTokenizerDS::doCommand_if()
 //
 // SourceTokenizerDS::doCommand_ifdef
 //
-void SourceTokenizerDS::doCommand_ifdef()
+void SourceTokenizerDS::doCommand_ifdef(SourceTokenC *)
 {
-   prep(); doAssert(SourceTokenC::TT_NAM);
+   SourceTokenC::Reference name = prep(); doAssert(name, SourceTokenC::TT_NAM);
 
-   addSkip(!hasDefine(token.data) && !hasMacro(token.data));
+   addSkip(!hasDefine(name->data) && !hasMacro(name->data));
 }
 
 //
 // SourceTokenizerDS::doCommand_ifndef
 //
-void SourceTokenizerDS::doCommand_ifndef()
+void SourceTokenizerDS::doCommand_ifndef(SourceTokenC *)
 {
-   prep(); doAssert(SourceTokenC::TT_NAM);
+   SourceTokenC::Reference name = prep(); doAssert(name, SourceTokenC::TT_NAM);
 
-   addSkip(hasDefine(token.data) || hasMacro(token.data));
+   addSkip(hasDefine(name->data) || hasMacro(name->data));
 }
 
 //
 // SourceTokenizerDS::doCommand_include
 //
-void SourceTokenizerDS::doCommand_include()
+void SourceTokenizerDS::doCommand_include(SourceTokenC *)
 {
    canString = false;
-   prep(); doAssert(SourceTokenC::TT_STR);
+   SourceTokenC::Reference inc = prep(); doAssert(inc, SourceTokenC::TT_STR);
    canString = true;
 
    if (isSkip()) return;
 
    try
    {
-      in.push(new SourceStream(token.data, SourceStream::ST_C));
+      in.push_back(new SourceStream(inc->data, SourceStream::ST_C));
    }
-   catch (std::exception & e)
+   catch (std::exception const &)
    {
-      ERROR(token.pos, "file not found: %s", token.data.c_str());
+      ERROR(inc->pos, "file not found: %s", inc->data.c_str());
    }
 }
 
 //
 // SourceTokenizerDS::doCommand_macro
 //
-void SourceTokenizerDS::doCommand_macro()
+void SourceTokenizerDS::doCommand_macro(SourceTokenC *)
 {
-   prep(); doAssert(SourceTokenC::TT_NAM);
+   SourceTokenC::Reference name = prep(); doAssert(name, SourceTokenC::TT_NAM);
 
-   std::string    name = token.data;
-   SourcePosition pos  = token.pos;
-   MacroDat       dat;
+   MacroDat dat;
 
-   prep(); doAssert(SourceTokenC::TT_PAREN_O); prep();
-
-   if (token.type != SourceTokenC::TT_PAREN_C) for (;;)
+   doAssert(prep(), SourceTokenC::TT_PAREN_O);
+   SourceTokenC::Reference arg = prep();
+   if (arg->type != SourceTokenC::TT_PAREN_C) for (;;)
    {
-      doAssert(SourceTokenC::TT_NAM);
-      dat.first.push_back(token.data);
+      doAssert(arg, SourceTokenC::TT_NAM);
+      dat.first.push_back(arg->data);
 
-      prep();
-      if (token.type == SourceTokenC::TT_COMMA) {prep(); continue;}
-      doAssert(SourceTokenC::TT_PAREN_C);
-      break;
+      if ((arg = prep())->type == SourceTokenC::TT_PAREN_C) break;
+      doAssert(arg, SourceTokenC::TT_COMMA);
+      arg = prep();
    }
 
-   for (prep(); token.type != SourceTokenC::TT_HASH3; prep())
-      dat.second.push_back(token);
+   for (SourceTokenC::Reference itr = prep();
+        itr->type != SourceTokenC::TT_HASH3; itr = prep())
+      dat.second.push_back(itr);
 
    if (isSkip()) return;
 
-   addMacro(name, pos, dat);
+   addMacro(name->data, name->pos, dat);
 }
 
 //
 // SourceTokenizerDS::doCommand_undef
 //
-void SourceTokenizerDS::doCommand_undef()
+void SourceTokenizerDS::doCommand_undef(SourceTokenC *)
 {
-   prep(); doAssert(SourceTokenC::TT_NAM);
+   SourceTokenC::Reference name = prep(); doAssert(name, SourceTokenC::TT_NAM);
 
    if (isSkip()) return;
 
-   remDefine();
+   remDefine(name->data);
 }
 
 //
 // SourceTokenizerDS::get
 //
-SourceTokenC const &SourceTokenizerDS::get()
+SourceTokenC::Reference SourceTokenizerDS::get()
 {
-   prep();
-
-   return token;
+   return prep();
 }
 
 //
 // SourceTokenizerDS::get
 //
-SourceTokenC const &SourceTokenizerDS::get(SourceTokenC::TokenType type)
+SourceTokenC::Reference SourceTokenizerDS::get(SourceTokenC::TokenType type)
 {
-   prep(); doAssert(type);
-
-   return token;
+   SourceTokenC::Reference tok = prep();
+   doAssert(tok, type);
+   return tok;
 }
 
 //
 // SourceTokenizerDS::get
 //
-SourceTokenC const &SourceTokenizerDS::get
+SourceTokenC::Reference SourceTokenizerDS::get
 (SourceTokenC::TokenType type, std::string const &data)
 {
-   prep(); doAssert(type); doAssert(data);
-
-   return token;
+   SourceTokenC::Reference tok = prep();
+   doAssert(tok, type); doAssert(tok, data);
+   return tok;
 }
 
 //
@@ -721,13 +711,14 @@ bool SourceTokenizerDS::getIf()
 ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
 {
    std::vector<ObjectExpression::Pointer> expressions;
-   std::vector<SourceTokenC> operators;
+   std::vector<SourceTokenC::Reference> operators;
 
    expressions.push_back(getIfSingle());
 
-   for (prep(); token.type != SourceTokenC::TT_HASH1; prep())
+   for (SourceTokenC::Reference tok = prep();
+        tok->type != SourceTokenC::TT_HASH1; prep())
    {
-      switch (token.type)
+      switch (tok->type)
       {
       case SourceTokenC::TT_ADD:
       case SourceTokenC::TT_AN2:
@@ -749,22 +740,23 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
       case SourceTokenC::TT_XOR:
       case SourceTokenC::TT_XO2:
       case_expr:
-         operators.push_back(token);
+         operators.push_back(tok);
          expressions.push_back(getIfSingle());
          break;
 
       case SourceTokenC::TT_COLON:
       case SourceTokenC::TT_PAREN_C:
+         ungetStack.push_back(tok);
          goto done;
 
       case SourceTokenC::TT_QUERY:
-         operators.push_back(token);
+         operators.push_back(tok);
          expressions.push_back(getIfMultiple());
-         prep(); doAssert(SourceTokenC::TT_COLON);
+         tok = prep(); doAssert(tok, SourceTokenC::TT_COLON);
          goto case_expr;
 
       default:
-         ERROR(token.pos, "unexpected token type");
+         ERROR(tok->pos, "unexpected token type");
       }
    }
 
@@ -777,30 +769,25 @@ done:
 //
 ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
 {
-   prep();
+   SourceTokenC::Reference tok = prep();
 
-   switch (token.type)
+   switch (tok->type)
    {
    case SourceTokenC::TT_NAM:
-      if (token.data == "defined")
+      if (tok->data == "defined")
       {
          canExpand = false;
 
-         prep();
+         bool hasParen = (tok = prep())->type == SourceTokenC::TT_PAREN_O;
 
-         bool hasParentheses = token.type == SourceTokenC::TT_PAREN_O;
+         doAssert((hasParen ? (tok = prep()) : tok), SourceTokenC::TT_NAM);
 
-         if (hasParentheses) prep();
-
-         doAssert(SourceTokenC::TT_NAM);
-
-         bool isdef = hasDefine(token.data) || hasMacro(token.data);
+         bool isdef = hasDefine(tok->data) || hasMacro(tok->data);
 
          ObjectExpression::Pointer expr =
-            ObjectExpression::create_value_int(isdef, token.pos);
+            ObjectExpression::create_value_int(isdef, tok->pos);
 
-         if (hasParentheses)
-            {prep(); doAssert(SourceTokenC::TT_PAREN_C);}
+         if (hasParen) doAssert(prep(), SourceTokenC::TT_PAREN_C);
 
          canExpand = true;
 
@@ -810,27 +797,27 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
       {
          // If this function sees any other identifier, that means it's not a
          // define. C says that undefined identifiers evaluate to 0.
-         return ObjectExpression::create_value_int(0, token.pos);
+         return ObjectExpression::create_value_int(0, tok->pos);
       }
 
    case SourceTokenC::TT_INT:
-      return ObjectExpression::create_value_int
-      (get_bigsint(token.data, token.pos), token.pos);
+      return ObjectExpression::create_value_int(
+         get_bigsint(tok->data, tok->pos), tok->pos);
 
    case SourceTokenC::TT_NOTLOG:
-      return ObjectExpression::create_branch_not(getIfSingle(), token.pos);
+      return ObjectExpression::create_branch_not(getIfSingle(), tok->pos);
 
    case SourceTokenC::TT_PAREN_O:
    {
       ObjectExpression::Pointer expr = getIfMultiple();
 
-      doAssert(SourceTokenC::TT_PAREN_C);
+      doAssert(prep(), SourceTokenC::TT_PAREN_C);
 
       return expr;
    }
 
    default:
-      ERROR(token.pos, "unexpected token type");
+      ERROR(tok->pos, "unexpected token type");
    }
 }
 
@@ -866,25 +853,20 @@ bool SourceTokenizerDS::isSkip()
 //
 // SourceTokenizerDS::peek
 //
-SourceTokenC const &SourceTokenizerDS::peek()
+SourceTokenC::Reference SourceTokenizerDS::peek()
 {
-   prep();
-
-   ungetStack.push(token);
-
-   return token;
+   SourceTokenC::Reference tok = prep(); ungetStack.push_back(tok);
+   return tok;
 }
 
 //
 // SourceTokenizerDS::peek
 //
-SourceTokenC const &SourceTokenizerDS::peek(SourceTokenC::TokenType type)
+SourceTokenC::Reference SourceTokenizerDS::peek(SourceTokenC::TokenType type)
 {
-   prep(); doAssert(type);
-
-   ungetStack.push(token);
-
-   return token;
+   SourceTokenC::Reference tok = prep(); ungetStack.push_back(tok);
+   doAssert(tok, type);
+   return tok;
 }
 
 //
@@ -892,11 +874,8 @@ SourceTokenC const &SourceTokenizerDS::peek(SourceTokenC::TokenType type)
 //
 bool SourceTokenizerDS::peekType(SourceTokenC::TokenType type)
 {
-   prep();
-
-   ungetStack.push(token);
-
-   return token.type == type;
+   SourceTokenC::Reference tok = prep(); ungetStack.push_back(tok);
+   return tok->type == type;
 }
 
 //
@@ -905,87 +884,78 @@ bool SourceTokenizerDS::peekType(SourceTokenC::TokenType type)
 bool SourceTokenizerDS::peekType
 (SourceTokenC::TokenType type, std::string const &data)
 {
-   prep();
-
-   ungetStack.push(token);
-
-   return token.type == type && token.data == data;
+   SourceTokenC::Reference tok = prep(); ungetStack.push_back(tok);
+   return tok->type == type && tok->data == data;
 }
 
 //
 // SourceTokenizerDS::prep
 //
-void SourceTokenizerDS::prep()
+SourceTokenC::Reference SourceTokenizerDS::prep()
 {
+   SourceTokenC::Pointer tok;
+
    while (true)
    {
       if (!ungetStack.empty())
       {
-         token = ungetStack.top();
-         ungetStack.pop();
+         tok = ungetStack.back(); ungetStack.pop_back();
 
          // Clear whenever the unget stack is emptied.
          if (ungetStack.empty()) definesUsed.clear();
       }
       else try
       {
-         token.readToken(in.top());
+         (tok = new SourceTokenC)->readToken(in.back());
       }
       catch (SourceStream::EndOfStream &e)
       {
          if (in.size() == 1) throw;
-
-         delete in.top();
-         in.pop();
-
+         delete in.back(); in.pop_back();
          continue;
       }
 
       // Preprocessor directive.
-      if (canCommand && token.type == SourceTokenC::TT_HASH1)
+      if (canCommand && tok->type == SourceTokenC::TT_HASH1)
       {
-         doCommand();
-         continue;
+         doCommand(); continue;
       }
 
       // Macro expansion.
-      if (canExpand && token.type == SourceTokenC::TT_NAM)
+      if (canExpand && tok->type == SourceTokenC::TT_NAM)
       {
          // Check for macro.
-         if (hasMacro(token.data) && definesUsed.insert(token.data).second)
+         if (hasMacro(tok->data) && definesUsed.insert(tok->data).second)
          {
-            SourceTokenC oldTok = token;
-            prep(); unget(token);
-            std::swap(token, oldTok);
+            SourceTokenC::Reference oldTok(tok);
+            tok = prep(); unget(tok);
 
             // Macro invocation!
-            if (oldTok.type == SourceTokenC::TT_PAREN_O)
+            if (tok->type == SourceTokenC::TT_PAREN_O)
             {
-               prepMacro();
-               continue;
+               prepMacro(static_cast<SourceTokenC::Reference>(oldTok)); continue;
             }
+
+            tok = oldTok;
          }
 
-         if (hasDefine(token.data) && definesUsed.insert(token.data).second)
+         if (hasDefine(tok->data) && definesUsed.insert(tok->data).second)
          {
-            prepDefine();
-            continue;
+            prepDefine(tok); continue;
          }
 
-         if (token.data == "__FILE__" && definesUsed.insert(token.data).second)
+         if (tok->data == "__FILE__")
          {
-            token.type = SourceTokenC::TT_STR;
-            token.data = token.pos.filename;
+            tok->data = tok->pos.filename;
+            tok->type = SourceTokenC::TT_STR;
             break;
          }
 
-         if (token.data == "__LINE__" && definesUsed.insert(token.data).second)
+         if (tok->data == "__LINE__")
          {
-            std::ostringstream oss; oss << token.pos.line;
-
-            token.type = SourceTokenC::TT_INT;
-            token.data = oss.str();
-
+            std::ostringstream oss; oss << tok->pos.line;
+            tok->data = oss.str();
+            tok->type = SourceTokenC::TT_INT;
             break;
          }
       }
@@ -997,143 +967,142 @@ void SourceTokenizerDS::prep()
    }
 
    // String literal concatenation.
-   if (canString && token.type == SourceTokenC::TT_STR)
+   if (canString && tok->type == SourceTokenC::TT_STR)
    {
-      SourceTokenC tokenTemp = token;
+      SourceTokenC::Reference oldTok(tok);
+      tok = prep();
 
-      prep();
-
-      if (token.type == SourceTokenC::TT_STR)
-         tokenTemp.data += token.data;
+      if (tok->type == SourceTokenC::TT_STR)
+         oldTok->data += tok->data;
       else
-         unget(token);
+         unget(tok);
 
-      token = tokenTemp;
+      tok = oldTok;
    }
+
+   return static_cast<SourceTokenC::Reference>(tok);
 }
 
 //
 // SourceTokenizerDS::prepDefine
 //
-void SourceTokenizerDS::prepDefine()
+void SourceTokenizerDS::prepDefine(SourceTokenC *tok)
 {
-   std::vector<SourceTokenC> const &tokens(defines[token.data]);
+   DefVec const &tokens = defines[tok->data];
+   DefVec::const_iterator itr, end = tokens.begin();
 
-   for (size_t i(tokens.size()); i--;)
+   for (itr = tokens.end(); itr-- != end;)
    {
-      // Copy the invoker's position, to enable better error reporting.
-      // (Some day this will be additive, to keep both positions.)
-      SourceTokenC tok = tokens[i];
-      tok.pos = token.pos;
-      ungetStack.push(tok);
+      ungetStack.push_back(static_cast<SourceTokenC::Reference>(
+         new SourceTokenC(tok->pos, (*itr)->data, (*itr)->type)));
    }
 }
 
 //
 // SourceTokenizerDS::prepMacro
 //
-void SourceTokenizerDS::prepMacro()
+void SourceTokenizerDS::prepMacro(SourceTokenC::Reference tok)
 {
-   SourcePosition const pos = token.pos;
+   SourcePosition const &pos = tok->pos;
 
-   MacroDat const &dat = macros[token.data];
+   MacroDat const &dat = macros[tok->data];
 
-   MacroArg const &arg = dat.first;
-   MacroVec vec = dat.second, tmp, *tokVec;
+   MacroArg const &argNames = dat.first;
+   MacroVec argData = dat.second, tmpData, *arg;
+   tmpData.reserve(argData.size());
 
    MacroVec::iterator itr, end;
 
-   std::vector<MacroVec> tok;
+   std::vector<MacroVec> args;
    int pdepth = 0;
 
    canCommand = false;
    canExpand  = false;
 
    // Collect the macro arguments.
-   prep();
-   doAssert(SourceTokenC::TT_PAREN_O);
-   tok.push_back(std::vector<SourceTokenC>());
+   doAssert((tok = prep()), SourceTokenC::TT_PAREN_O);
+   args.push_back(MacroVec());
    while (true)
    {
-      prep();
+      tok = prep();
 
-      if (token.type == SourceTokenC::TT_PAREN_O) ++pdepth;
-      if (token.type == SourceTokenC::TT_PAREN_C && !pdepth--) break;
+      if (tok->type == SourceTokenC::TT_PAREN_O) ++pdepth;
+      if (tok->type == SourceTokenC::TT_PAREN_C && !pdepth--) break;
 
-      if (token.type == SourceTokenC::TT_COMMA && !pdepth)
+      if (tok->type == SourceTokenC::TT_COMMA && !pdepth)
       {
-         tok.push_back(std::vector<SourceTokenC>());
-         continue;
+         args.push_back(MacroVec()); continue;
       }
 
-      tok.back().push_back(token);
+      args.back().push_back(tok);
    }
 
-   if (tok.size() != arg.size())
-      ERROR_P("incorrect arg count for macro");
+   if (args.size() != argNames.size())
+      ERROR_P("incorrect arg count for macro, expected %i got %i",
+              (int)argNames.size(), (int)args.size());
 
    // Copy the invoker's position, to enable better error reporting.
    // (Some day this will be additive, to keep both positions.)
-   for ((itr = vec.begin()), (end = vec.end()); itr != end; ++itr)
-      itr->pos = pos;
+   for (itr = argData.begin(), end = argData.end(); itr != end; ++itr)
+      (*itr)->pos = pos;
 
    // Process # tokens.
-   for ((itr = vec.begin()), (end = vec.end()); itr != end; ++itr)
+   for (itr = argData.begin(), end = argData.end(); itr != end; ++itr)
    {
-      if (itr->type == SourceTokenC::TT_HASH1)
+      if ((*itr)->type == SourceTokenC::TT_HASH1)
       {
-         if (++itr == end || !(tokVec = find_tok(tok, arg, itr->data)))
+         if (++itr == end || !(arg = find_arg(args, argNames, (*itr)->data)))
             ERROR_P("# must be used on arg");
 
-         tmp.push_back(SourceTokenC());
+         tok = static_cast<SourceTokenC::Reference>(
+            new SourceTokenC((*itr)->pos, SourceTokenC::TT_STR));
 
-         tmp.back().type = SourceTokenC::TT_STR;
+         MacroVec::iterator tokItr, tokEnd = arg->end();
+         for (tokItr = arg->begin(); tokItr != tokEnd; ++tokItr)
+            tok->data += (*tokItr)->getDataString();
 
-         MacroVec::iterator tokItr, tokEnd = tokVec->end();
-         for (tokItr = tokVec->begin(); tokItr != tokEnd; ++tokItr)
-            tmp.back().data += tokItr->getDataString();
+         tmpData.push_back(tok);
       }
       else
-         tmp.push_back(*itr);
+         tmpData.push_back(*itr);
    }
-   vec = tmp; tmp.clear();
+   argData.clear(); argData.reserve(tmpData.size());
 
    // Perform argument substitution.
-   for ((itr = vec.begin()), (end = vec.end()); itr != end; ++itr)
+   for (itr = tmpData.begin(), end = tmpData.end(); itr != end; ++itr)
    {
-      if (itr->type == SourceTokenC::TT_NAM &&
-         (tokVec = find_tok(tok, arg, itr->data)))
+      if ((*itr)->type == SourceTokenC::TT_NAM &&
+         (arg = find_arg(args, argNames, (*itr)->data)))
       {
-         MacroVec::iterator tokItr, tokEnd = tokVec->end();
-         for (tokItr = tokVec->begin(); tokItr != tokEnd; ++tokItr)
-            tmp.push_back(*tokItr);
+         MacroVec::iterator tokItr, tokEnd = arg->end();
+         for (tokItr = arg->begin(); tokItr != tokEnd; ++tokItr)
+            argData.push_back(*tokItr);
       }
       else
-         tmp.push_back(*itr);
+         argData.push_back(*itr);
    }
-   vec = tmp; tmp.clear();
+   tmpData.clear(); tmpData.reserve(argData.size());
 
    // Process ## tokens.
-   for ((itr = vec.begin()), (end = vec.end()); itr != end; ++itr)
+   for (itr = argData.begin(), end = argData.end(); itr != end; ++itr)
    {
-      if (itr->type == SourceTokenC::TT_HASH2)
+      if ((*itr)->type == SourceTokenC::TT_HASH2)
       {
-         if (itr == vec.begin() || ++itr == end)
+         if (itr == argData.begin() || ++itr == end)
             ERROR_P("## cannot be at start or end");
 
-         if (itr->type != SourceTokenC::TT_NAM)
+         if ((*itr)->type != SourceTokenC::TT_NAM)
             ERROR_P("## must have identifier on right");
 
          // tmp.back() is the last token already.
-         tmp.back().data += itr->data;
+         tmpData.back()->data += (*itr)->data;
       }
       else
-         tmp.push_back(*itr);
+         tmpData.push_back(*itr);
    }
-   vec = tmp; tmp.clear();
 
-   for ((itr = vec.end()), (end = vec.begin()); itr-- != end;)
-      ungetStack.push(*itr);
+   for (itr = tmpData.end(), end = tmpData.begin(); itr-- != end;)
+      ungetStack.push_back(*itr);
 
    canCommand = true;
    canExpand  = true;
@@ -1142,10 +1111,10 @@ void SourceTokenizerDS::prepMacro()
 //
 // SourceTokenizerDS::remDefine
 //
-void SourceTokenizerDS::remDefine()
+void SourceTokenizerDS::remDefine(std::string const &name)
 {
-   defines.erase(token.data);
-   macros .erase(token.data);
+   defines.erase(name);
+   macros .erase(name);
 }
 
 //
@@ -1154,15 +1123,15 @@ void SourceTokenizerDS::remDefine()
 void SourceTokenizerDS::remSkip()
 {
    skipStack.pop_back();
-   unskipStack.pop();
+   unskipStack.pop_back();
 }
 
 //
 // SourceTokenizerDS::unget
 //
-void SourceTokenizerDS::unget(SourceTokenC const &_token)
+void SourceTokenizerDS::unget(SourceTokenC *tok)
 {
-   ungetStack.push(_token);
+   ungetStack.push_back(static_cast<SourceTokenC::Reference>(tok));
 }
 
 // EOF

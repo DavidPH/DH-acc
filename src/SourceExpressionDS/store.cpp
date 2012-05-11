@@ -85,7 +85,7 @@ bool SourceExpressionDS::is_store(std::string const &data)
 StoreType SourceExpressionDS::make_store(SourceTokenizerDS *in, Vector *blocks,
    SourceContext *context, ObjectExpression::Pointer *area)
 {
-   SourceTokenC typeTok = in->get(SourceTokenC::TT_NAM);
+   SourceTokenC::Reference typeTok = in->get(SourceTokenC::TT_NAM);
 
    if (in->peekType(SourceTokenC::TT_PAREN_O))
    {
@@ -94,46 +94,46 @@ StoreType SourceExpressionDS::make_store(SourceTokenizerDS *in, Vector *blocks,
       in->get(SourceTokenC::TT_PAREN_C);
    }
 
-   if (typeTok.data == "static")
+   if (typeTok->data == "static")
       return STORE_STATIC;
 
-   if (typeTok.data == "__staticregister")
+   if (typeTok->data == "__staticregister")
       return store_staticregister();
 
-   if (typeTok.data == "__staticarray")
+   if (typeTok->data == "__staticarray")
       return store_staticarray();
 
-   if (typeTok.data == "auto")
+   if (typeTok->data == "auto")
       return STORE_AUTO;
 
-   if (typeTok.data == "__autoregister")
+   if (typeTok->data == "__autoregister")
       return store_autoregister();
 
-   if (typeTok.data == "__autoarray")
+   if (typeTok->data == "__autoarray")
       return store_autoarray();
 
-   if (typeTok.data == "register")
+   if (typeTok->data == "register")
       return STORE_REGISTER;
 
-   if (typeTok.data == "__mapregister")
+   if (typeTok->data == "__mapregister")
       return STORE_MAPREGISTER;
 
-   if (typeTok.data == "__worldregister")
+   if (typeTok->data == "__worldregister")
       return STORE_WORLDREGISTER;
 
-   if (typeTok.data == "__globalregister")
+   if (typeTok->data == "__globalregister")
       return STORE_GLOBALREGISTER;
 
-   if (typeTok.data == "__maparray")
+   if (typeTok->data == "__maparray")
       return STORE_MAPARRAY;
 
-   if (typeTok.data == "__worldarray")
+   if (typeTok->data == "__worldarray")
       return STORE_WORLDARRAY;
 
-   if (typeTok.data == "__globalarray")
+   if (typeTok->data == "__globalarray")
       return STORE_GLOBALARRAY;
 
-   ERROR(typeTok.pos, "unknown storage class '%s'", typeTok.data.c_str());
+   ERROR(typeTok->pos, "unknown storage class '%s'", typeTok->data.c_str());
 }
 
 // EOF

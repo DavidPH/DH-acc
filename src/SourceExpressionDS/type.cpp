@@ -44,15 +44,6 @@
 
 
 //----------------------------------------------------------------------------|
-// Types                                                                      |
-//
-
-typedef SourceExpression::Pointer (*expr_make_t)
-(SourceTokenizerDS *, SourceExpression::Vector * blocks,
- SourceContext * context);
-
-
-//----------------------------------------------------------------------------|
 // Static Functions                                                           |
 //
 
@@ -63,10 +54,7 @@ static void do_qualifier
 (VariableType::Pointer *type, VariableType::Qualifier qual,
  SourceTokenizerDS *in)
 {
-   SourceTokenC tokenQual = in->get(SourceTokenC::TT_NAM);
-
-   if ((*type)->getQualifier(qual))
-      ERROR(tokenQual.pos, "redundant qualifier");
+   SourceTokenC::Reference tokenQual = in->get(SourceTokenC::TT_NAM);
 
    *type = (*type)->setQualifier(qual);
 }
@@ -93,28 +81,28 @@ static void do_storage(VariableType::Pointer *type, SourceTokenizerDS *in,
 // Tries to parse a basic type, returning NULL on failue.
 //
 static VariableType::Pointer make_basic
-(SourceTokenC token, SourceTokenizerDS *in)
+(SourceTokenC::Reference tok, SourceTokenizerDS *in)
 {
-   if (token.data == "void")
+   if (tok->data == "void")
       return VariableType::get_bt_void();
 
-   if (token.data == "bool" || token.data == "_Bool")
+   if (tok->data == "bool" || tok->data == "_Bool")
       return VariableType::get_bt_boolhard();
 
-   if (token.data == "__boolsoft")
+   if (tok->data == "__boolsoft")
       return VariableType::get_bt_boolsoft();
 
-   if (token.data == "__label")
+   if (tok->data == "__label")
       return VariableType::get_bt_label();
 
-   if (token.data == "__string")
+   if (tok->data == "__string")
       return VariableType::get_bt_string();
 
-   if (token.data != "char"   && token.data != "int"     &&
-       token.data != "float"  && token.data != "double"  &&
-       token.data != "__real" && token.data != "__fixed" &&
-       token.data != "short"  && token.data != "long"    &&
-       token.data != "signed" && token.data != "unsigned")
+   if (tok->data != "char"   && tok->data != "int"     &&
+       tok->data != "float"  && tok->data != "double"  &&
+       tok->data != "__real" && tok->data != "__fixed" &&
+       tok->data != "short"  && tok->data != "long"    &&
+       tok->data != "signed" && tok->data != "unsigned")
       return NULL;
 
    int typeBase  = 0;
@@ -124,46 +112,41 @@ static VariableType::Pointer make_basic
 
    while (true)
    {
-      if (token.data == "char" && !typeBase)
+      if (tok->data == "char" && !typeBase)
          typeBase = TYPE_BASE_CHAR;
 
-      else if (token.data == "int" && !typeBase)
+      else if (tok->data == "int" && !typeBase)
          typeBase = TYPE_BASE_INT;
 
-      else if (token.data == "float" && !typeBase)
+      else if (tok->data == "float" && !typeBase)
          typeBase = TYPE_BASE_FLOAT;
 
-      else if (token.data == "double" && !typeBase)
+      else if (tok->data == "double" && !typeBase)
          typeBase = TYPE_BASE_DOUBLE;
 
-      else if (token.data == "__fixed" && !typeBase)
+      else if (tok->data == "__fixed" && !typeBase)
          typeBase = TYPE_BASE_FIXED;
 
-      else if (token.data == "__real" && !typeBase)
+      else if (tok->data == "__real" && !typeBase)
          typeBase = TYPE_BASE_REAL;
 
-      else if (token.data == "short")
+      else if (tok->data == "short")
          ++typeShort;
 
-      else if (token.data == "long")
+      else if (tok->data == "long")
          ++typeLong;
 
-      else if (token.data == "signed" && !typeSign)
+      else if (tok->data == "signed" && !typeSign)
          typeSign = -1;
 
-      else if (token.data == "unsigned" && !typeSign)
+      else if (tok->data == "unsigned" && !typeSign)
          typeSign = +1;
 
-      else
-      {
-         in->unget(token);
-         break;
-      }
+      else {in->unget(tok); break;}
 
-      if (!in->peekType(SourceTokenC::TT_NAM))
-         break;
+      if (!in->peekType(SourceTokenC::TT_NAM)) break;
 
-      token = in->get(SourceTokenC::TT_NAM);
+      tok = in->get();
    }
 
    // Default to int.
@@ -173,10 +156,10 @@ static VariableType::Pointer make_basic
    {
    case TYPE_BASE_CHAR:
       if (typeLong)
-         ERROR(token.pos, "long char");
+         ERROR(tok->pos, "long char");
 
       if (typeShort)
-         ERROR(token.pos, "short char");
+         ERROR(tok->pos, "short char");
 
       if (typeSign < 0)
          return VariableType::get_bt_schar();
@@ -188,13 +171,13 @@ static VariableType::Pointer make_basic
 
    case TYPE_BASE_INT:
       if (typeShort && typeLong)
-         ERROR(token.pos, "short long int");
+         ERROR(tok->pos, "short long int");
 
       if (typeShort > 1)
-         ERROR(token.pos, "short short int");
+         ERROR(tok->pos, "short short int");
 
       if (typeLong > 2)
-         ERROR(token.pos, "long long long int");
+         ERROR(tok->pos, "long long long int");
 
       if (typeSign > 0)
       {
@@ -227,13 +210,13 @@ static VariableType::Pointer make_basic
       ++typeLong;
    case TYPE_BASE_FLOAT:
       if (typeShort)
-         ERROR(token.pos, "short float");
+         ERROR(tok->pos, "short float");
 
       if (typeSign > 0)
-         ERROR(token.pos, "unsigned float");
+         ERROR(tok->pos, "unsigned float");
 
       if (typeSign < 0)
-         ERROR(token.pos, "signed float");
+         ERROR(tok->pos, "signed float");
 
       if (typeLong == 0)
          return VariableType::get_bt_float();
@@ -244,35 +227,35 @@ static VariableType::Pointer make_basic
       if (typeLong == 2)
          return VariableType::get_bt_llfloat();
 
-      ERROR(token.pos, "long long long float");
+      ERROR(tok->pos, "long long long float");
 
    case TYPE_BASE_FIXED:
       if (typeShort)
-         ERROR(token.pos, "short fixed");
+         ERROR(tok->pos, "short fixed");
 
       if (typeLong)
-         ERROR(token.pos, "long fixed");
+         ERROR(tok->pos, "long fixed");
 
       if (typeSign > 0)
-         ERROR(token.pos, "unsigned fixed");
+         ERROR(tok->pos, "unsigned fixed");
 
       if (typeSign < 0)
-         ERROR(token.pos, "signed fixed");
+         ERROR(tok->pos, "signed fixed");
 
       return VariableType::get_bt_fixed();
 
    case TYPE_BASE_REAL:
       if (typeShort)
-         ERROR(token.pos, "short real");
+         ERROR(tok->pos, "short real");
 
       if (typeLong)
-         ERROR(token.pos, "long real");
+         ERROR(tok->pos, "long real");
 
       if (typeSign > 0)
-         ERROR(token.pos, "unsigned real");
+         ERROR(tok->pos, "unsigned real");
 
       if (typeSign < 0)
-         ERROR(token.pos, "signed real");
+         ERROR(tok->pos, "signed real");
 
       return VariableType::get_bt_real();
    }
@@ -284,10 +267,9 @@ static VariableType::Pointer make_basic
 //
 // make_struct_lists
 //
-bool make_struct_lists
-(VariableType::VecStr *names, VariableType::Vector *types,
- SourceTokenizerDS *in, SourceExpression::Vector *blocks,
- SourceContext *context)
+bool make_struct_lists(VariableType::VecStr *names,
+   VariableType::Vector *types, SourceTokenizerDS *in,
+   SourceExpression::Vector *blocks, SourceContext *context)
 {
    if (!in->peekType(SourceTokenC::TT_BRACE_O)) return false;
 
@@ -300,13 +282,13 @@ bool make_struct_lists
       type = SourceExpressionDS::make_type(in, blocks, context);
 
       types->push_back(type);
-      names->push_back(in->get(SourceTokenC::TT_NAM).data);
+      names->push_back(in->get(SourceTokenC::TT_NAM)->data);
 
       while (in->peekType(SourceTokenC::TT_COMMA))
       {
-         in->get(SourceTokenC::TT_COMMA);
+         in->get();
          types->push_back(type);
-         names->push_back(in->get(SourceTokenC::TT_NAM).data);
+         names->push_back(in->get(SourceTokenC::TT_NAM)->data);
       }
 
       in->get(SourceTokenC::TT_SEMICOLON);
@@ -320,9 +302,8 @@ bool make_struct_lists
 //
 // make_struct
 //
-VariableType::Reference make_struct
-(bool isUnion, SourceTokenizerDS *in, SourceExpression::Vector *blocks,
- SourceContext *context)
+VariableType::Reference make_struct(bool isUnion, SourceTokenizerDS *in,
+   SourceExpression::Vector *blocks, SourceContext *context)
 {
    std::string           name;
    VariableType::VecStr  names;
@@ -332,17 +313,17 @@ VariableType::Reference make_struct
    // The name must be declared for the body.
    if (in->peekType(SourceTokenC::TT_NAM))
    {
-      SourceTokenC const &token = in->get(SourceTokenC::TT_NAM);
-      name = token.data;
-      pos  = token.pos;
+      SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
+      name = tok->data;
+      pos  = tok->pos;
 
       if (isUnion)
-         context->getVariableType_union(name, token.pos);
+         context->getVariableType_union(name, pos);
       else
-         context->getVariableType_struct(name, token.pos);
+         context->getVariableType_struct(name, pos);
    }
    else
-      pos = in->peek(SourceTokenC::TT_BRACE_O).pos;
+      pos = in->peek(SourceTokenC::TT_BRACE_O)->pos;
 
    if (isUnion)
    {
@@ -415,34 +396,34 @@ bool SourceExpressionDS::is_type(std::string const &data,
 VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
    Vector *blocks, SourceContext *context)
 {
-   SourceTokenC tok;
+   SourceTokenC::Reference tok = in->peek();
 
    ArgList args;
    bigsint width;
    VariableType::Pointer type;
 
-   if (in->peekType(SourceTokenC::TT_PAREN_O))
+   if (tok->type == SourceTokenC::TT_PAREN_O)
    {
       in->get(SourceTokenC::TT_PAREN_O);
       type = make_type(in,blocks, context);
       in->get(SourceTokenC::TT_PAREN_C);
    }
    else
-      tok = in->get(SourceTokenC::TT_NAM);
+      in->get(SourceTokenC::TT_NAM);
 
    if (type || (type = make_basic(tok, in)) != NULL)
    {
    }
-   else if (tok.data == "__asmfunc_t")
+   else if (tok->data == "__asmfunc_t")
    {
       make_arglist(in, blocks, context, &args);
 
       type = VariableType::get_bt_asmfunc(args.types, args.retn);
 
       if (!args.name.empty())
-         type = context->getVariableType_typedef(args.name, type, tok.pos);
+         type = context->getVariableType_typedef(args.name, type, tok->pos);
    }
-   else if (tok.data == "__block")
+   else if (tok->data == "__block")
    {
       in->get(SourceTokenC::TT_BRACE_O);
 
@@ -456,40 +437,40 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
 
       type = VariableType::get_bt_block(args.types);
    }
-   else if (tok.data == "decltype")
+   else if (tok->data == "decltype")
    {
       type = make_prefix(in, blocks, context)->getType();
    }
-   else if (tok.data == "enum")
+   else if (tok->data == "enum")
    {
       if (in->peekType(SourceTokenC::TT_NAM))
-         args.name = in->get(SourceTokenC::TT_NAM).data;
+         args.name = in->get(SourceTokenC::TT_NAM)->data;
 
       if (in->peekType(SourceTokenC::TT_BRACE_O))
       {
          bigsint enumVal = 0;
 
-         type = context->getVariableType_enum(args.name, true, tok.pos);
+         type = context->getVariableType_enum(args.name, true, tok->pos);
 
          in->get(SourceTokenC::TT_BRACE_O);
 
          if (!in->peekType(SourceTokenC::TT_BRACE_C)) while (true)
          {
-            SourceTokenC enumTok = in->get(SourceTokenC::TT_NAM);
+            SourceTokenC::Reference enumTok = in->get(SourceTokenC::TT_NAM);
 
             if (in->peekType(SourceTokenC::TT_EQUALS))
             {
-               in->get(SourceTokenC::TT_EQUALS);
+               in->get();
 
                enumVal = make_assignment(in, blocks, context)
                   ->makeObject()->resolveInt();
             }
 
             ObjectExpression::Pointer enumObj =
-               ObjectExpression::create_value_int(enumVal++, enumTok.pos);
+               ObjectExpression::create_value_int(enumVal++, enumTok->pos);
 
             context->addVar(SourceVariable::create_constant
-               (enumTok.data, type, enumObj, enumTok.pos), false, true);
+               (enumTok->data, type, enumObj, enumTok->pos), false, true);
 
             if (!in->peekType(SourceTokenC::TT_COMMA))
                break;
@@ -503,75 +484,75 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
          in->get(SourceTokenC::TT_BRACE_C);
       }
       else
-         type = context->getVariableType_enum(args.name, false, tok.pos);
+         type = context->getVariableType_enum(args.name, false, tok->pos);
    }
-   else if (tok.data == "__func_t")
+   else if (tok->data == "__func_t")
    {
       make_arglist(in, blocks, context, &args);
 
       type = VariableType::get_bt_function(args.types, args.retn);
 
       if (!args.name.empty())
-         type = context->getVariableType_typedef(args.name, type, tok.pos);
+         type = context->getVariableType_typedef(args.name, type, tok->pos);
    }
-   else if (tok.data == "__lnspec_t")
+   else if (tok->data == "__lnspec_t")
    {
       make_arglist(in, blocks, context, &args);
 
       type = VariableType::get_bt_linespec(args.types, args.retn);
 
       if (!args.name.empty())
-         type = context->getVariableType_typedef(args.name, type, tok.pos);
+         type = context->getVariableType_typedef(args.name, type, tok->pos);
    }
-   else if (tok.data == "__native_t")
+   else if (tok->data == "__native_t")
    {
       make_arglist(in, blocks, context, &args);
 
       type = VariableType::get_bt_native(args.types, args.retn);
 
       if (!args.name.empty())
-         type = context->getVariableType_typedef(args.name, type, tok.pos);
+         type = context->getVariableType_typedef(args.name, type, tok->pos);
    }
-   else if (tok.data == "__script_t")
+   else if (tok->data == "__script_t")
    {
       make_arglist(in, blocks, context, &args);
 
       type = VariableType::get_bt_script(args.types, args.retn);
 
       if (!args.name.empty())
-         type = context->getVariableType_typedef(args.name, type, tok.pos);
+         type = context->getVariableType_typedef(args.name, type, tok->pos);
    }
-   else if (tok.data == "struct" || tok.data == "union")
-      type = make_struct(tok.data == "union", in, blocks, context);
+   else if (tok->data == "struct" || tok->data == "union")
+      type = make_struct(tok->data == "union", in, blocks, context);
 
-   else if (tok.data == "typedef")
+   else if (tok->data == "typedef")
    {
       type = make_type(in, blocks, context);
       tok = in->get(SourceTokenC::TT_NAM);
-      type = context->getVariableType_typedef(tok.data, type, tok.pos);
+      type = context->getVariableType_typedef(tok->data, type, tok->pos);
    }
-   else if (tok.data == "typename")
+   else if (tok->data == "typename")
    {
       tok = in->get(SourceTokenC::TT_NAM);
-      type = context->getVariableType(tok.data, tok.pos);
+      type = context->getVariableType(tok->data, tok->pos);
    }
    else
-      type = context->getVariableType(tok.data, tok.pos);
+      type = context->getVariableType(tok->data, tok->pos);
 
    // Suffix modifiers.
-   while (true) switch (in->peek().type)
+   while (true) switch (in->peek()->type)
    {
    case SourceTokenC::TT_NAM:
-      if (in->peek().data == "const")
+      if (in->peek()->data == "const")
          do_qualifier(&type, VariableType::QUAL_CONST, in);
 
-      else if (in->peek().data == "volatile")
+      else if (in->peek()->data == "volatile")
          do_qualifier(&type, VariableType::QUAL_VOLATILE, in);
 
-      else if (in->peek().data == "restrict")
+      else if (in->peek()->data == "restrict")
          do_qualifier(&type, VariableType::QUAL_RESTRICT, in);
 
-      else if (is_store(in->peek().data))
+      else if (is_store(in->peek()->data))
          do_storage(&type, in, blocks, context);
 
       else

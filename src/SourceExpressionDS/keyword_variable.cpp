@@ -269,7 +269,7 @@ static SourceExpression::Pointer make_var
    SourceExpression::Vector vars;
 
    // Read source name.
-   std::string nameSrc = in->get(SourceTokenC::TT_NAM).data;
+   std::string nameSrc = in->get(SourceTokenC::TT_NAM)->data;
    vars.push_back(make_var
       (in, blocks, context, linkSpec, pos, nameSrc, type, store, externDef));
 
@@ -278,7 +278,7 @@ static SourceExpression::Pointer make_var
    {
       in->get(SourceTokenC::TT_COMMA);
 
-      nameSrc = in->get(SourceTokenC::TT_NAM).data;
+      nameSrc = in->get(SourceTokenC::TT_NAM)->data;
       vars.push_back(make_var
          (in, blocks, context, linkSpec, pos, nameSrc, type, store, externDef));
    }
@@ -351,7 +351,7 @@ static SourceExpression::Pointer make_var
 //
 SRCEXPDS_EXTERN_DEFN(variable)
 {
-   return make_var(in, blocks, context, linkSpec, false, tok.pos, true);
+   return make_var(in, blocks, context, linkSpec, false, tok->pos, true);
 }
 
 //
@@ -362,7 +362,7 @@ SRCEXPDS_KEYWORD_DEFN(variable)
    bool linkCheck = false;
    LinkageSpecifier linkSpec;
 
-   if (tok.data == "__variable")
+   if (tok->data == "__variable")
    {
       if (context == SourceContext::global_context)
       {
@@ -372,7 +372,7 @@ SRCEXPDS_KEYWORD_DEFN(variable)
       else
          linkSpec = LS_INTERN;
    }
-   else if (tok.data == "__extvar")
+   else if (tok->data == "__extvar")
    {
       if (in->peekType(SourceTokenC::TT_STR))
          linkSpec = make_linkspec(in);
@@ -382,7 +382,7 @@ SRCEXPDS_KEYWORD_DEFN(variable)
    else
       linkSpec = LS_INTERN;
 
-   return make_var(in, blocks, context, linkSpec, linkCheck, tok.pos, false);
+   return make_var(in, blocks, context, linkSpec, linkCheck, tok->pos, false);
 }
 
 //
@@ -403,7 +403,7 @@ SRCEXPDS_KEYWORD_DEFN(variable_store)
    else
       linkSpec = LS_INTERN;
 
-   return make_var(in, blocks, context, linkSpec, linkCheck, tok.pos, false);
+   return make_var(in, blocks, context, linkSpec, linkCheck, tok->pos, false);
 }
 
 //
@@ -421,7 +421,7 @@ SRCEXPDS_KEYWORD_DEFN(variable_type)
    else
       linkSpec = LS_INTERN;
 
-   return make_var(in, blocks, context, linkSpec, tok.pos, store, false);
+   return make_var(in, blocks, context, linkSpec, tok->pos, store, false);
 }
 
 // EOF

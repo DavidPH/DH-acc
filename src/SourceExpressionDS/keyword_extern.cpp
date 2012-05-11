@@ -43,7 +43,7 @@ SRCEXPDS_KEYWORD_DEFN(extern)
    ExternMap::iterator externFunc;
    LinkageSpecifier linkSpec;
 
-   if (tok.data != "extern")
+   if (tok->data != "extern")
       linkSpec = LS_INTERN;
    else if (in->peekType(SourceTokenC::TT_STR))
       linkSpec = make_linkspec(in);
@@ -58,13 +58,13 @@ SRCEXPDS_KEYWORD_DEFN(extern)
 
       while (!in->peekType(SourceTokenC::TT_BRACE_C))
       {
-         SourceTokenC externToken = in->get(SourceTokenC::TT_NAM);
+         SourceTokenC::Reference externToken = in->get(SourceTokenC::TT_NAM);
 
-         externFunc = expr_extern.find(externToken.data);
+         externFunc = expr_extern.find(externToken->data);
 
          if (externFunc == expr_extern.end())
-            ERROR(externToken.pos, "unknown extern type %s",
-                  externToken.data.c_str());
+            ERROR(externToken->pos, "unknown extern type %s",
+                  externToken->data.c_str());
 
          exprs.push_back(externFunc->second(
             in, externToken, blocks, context, linkSpec));
@@ -74,17 +74,17 @@ SRCEXPDS_KEYWORD_DEFN(extern)
 
       in->get(SourceTokenC::TT_BRACE_C);
 
-      return create_value_block(exprs, context, tok.pos);
+      return create_value_block(exprs, context, tok->pos);
    }
    else
    {
-      SourceTokenC externToken = in->get(SourceTokenC::TT_NAM);
+      SourceTokenC::Reference externToken = in->get(SourceTokenC::TT_NAM);
 
-      externFunc = expr_extern.find(externToken.data);
+      externFunc = expr_extern.find(externToken->data);
 
       if (externFunc == expr_extern.end())
-         ERROR(externToken.pos, "unknown extern type %s",
-               externToken.data.c_str());
+         ERROR(externToken->pos, "unknown extern type %s",
+               externToken->data.c_str());
 
       return externFunc->second(in, externToken, blocks, context, linkSpec);
    }

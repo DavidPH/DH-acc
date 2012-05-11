@@ -29,7 +29,6 @@
 
 #include <map>
 #include <set>
-#include <stack>
 #include <string>
 #include <vector>
 
@@ -44,11 +43,11 @@ class SourceStream;
 class SourceTokenizerDS
 {
 public:
-   typedef std::vector<SourceTokenC> DefVec;
+   typedef std::vector<SourceTokenC::Reference> DefVec;
    typedef std::map<std::string, DefVec> DefMap;
 
    typedef std::vector<std::string> MacroArg;
-   typedef std::vector<SourceTokenC> MacroVec;
+   typedef std::vector<SourceTokenC::Reference> MacroVec;
    typedef std::pair<MacroArg, MacroVec> MacroDat;
    typedef std::map<std::string, MacroDat> MacroMap;
 
@@ -56,17 +55,18 @@ public:
    explicit SourceTokenizerDS(SourceStream *in);
    ~SourceTokenizerDS();
 
-   SourceTokenC const &get();
-   SourceTokenC const &get(SourceTokenC::TokenType type);
-   SourceTokenC const &get(SourceTokenC::TokenType type, std::string const &data);
+   SourceTokenC::Reference get();
+   SourceTokenC::Reference get(SourceTokenC::TokenType type);
+   SourceTokenC::Reference get(SourceTokenC::TokenType type,
+                               std::string const &data);
 
-   SourceTokenC const &peek();
-   SourceTokenC const &peek(SourceTokenC::TokenType type);
+   SourceTokenC::Reference peek();
+   SourceTokenC::Reference peek(SourceTokenC::TokenType type);
 
    bool peekType(SourceTokenC::TokenType type);
    bool peekType(SourceTokenC::TokenType type, std::string const &data);
 
-   void unget(SourceTokenC const & token);
+   void unget(SourceTokenC *token);
 
 
    static void add_define_base(std::string const &name);
@@ -82,30 +82,29 @@ private:
    SourceTokenizerDS(SourceTokenizerDS const &tokenizer)/* = delete*/;
 
    void addDefine(std::string const &name);
-   void addDefine
-   (std::string const &name, SourcePosition const &position,
-    std::vector<SourceTokenC> const &tokens);
+   void addDefine(std::string const &name, SourcePosition const &pos,
+                  DefVec const &vec);
 
    void addMacro(std::string const &name, SourcePosition const &pos,
                  MacroDat const &dat);
 
    void addSkip(bool skip);
 
-   void doAssert(SourceTokenC::TokenType type);
-   void doAssert(std::string const &data);
+   void doAssert(SourceTokenC *tok, SourceTokenC::TokenType type);
+   void doAssert(SourceTokenC *tok, std::string const &data);
 
    void doCommand();
-   void doCommand_define();
-   void doCommand_else();
-   void doCommand_elif();
-   void doCommand_endif();
-   void doCommand_error();
-   void doCommand_if();
-   void doCommand_ifdef();
-   void doCommand_ifndef();
-   void doCommand_include();
-   void doCommand_macro();
-   void doCommand_undef();
+   void doCommand_define(SourceTokenC *tok);
+   void doCommand_else(SourceTokenC *tok);
+   void doCommand_elif(SourceTokenC *tok);
+   void doCommand_endif(SourceTokenC *tok);
+   void doCommand_error(SourceTokenC *tok);
+   void doCommand_if(SourceTokenC *tok);
+   void doCommand_ifdef(SourceTokenC *tok);
+   void doCommand_ifndef(SourceTokenC *tok);
+   void doCommand_include(SourceTokenC *tok);
+   void doCommand_macro(SourceTokenC *tok);
+   void doCommand_undef(SourceTokenC *tok);
 
    bool getIf();
    CounterPointer<ObjectExpression> getIfMultiple();
@@ -118,11 +117,11 @@ private:
 
    SourceTokenizerDS & operator = (SourceTokenizerDS const &tokenizer)/* = delete*/;
 
-   void prep();
-   void prepDefine();
-   void prepMacro();
+   SourceTokenC::Reference prep();
+   void prepDefine(SourceTokenC *tok);
+   void prepMacro(SourceTokenC::Reference tok);
 
-   void remDefine();
+   void remDefine(std::string const &name);
    void remSkip();
 
    DefMap defines;
@@ -130,12 +129,10 @@ private:
 
    std::set<std::string> definesUsed;
 
-   std::stack<SourceStream *> in;
+   std::vector<SourceStream *> in;
    std::vector<bool> skipStack;
-   std::stack<SourceTokenC> ungetStack;
-   std::stack<bool> unskipStack;
-
-   SourceTokenC token;
+   std::vector<SourceTokenC::Reference> ungetStack;
+   std::vector<bool> unskipStack;
 
    bool canCommand : 1;
    bool canExpand  : 1;
@@ -147,5 +144,5 @@ private:
    static MacroMap macros_base;
 };
 
-#endif /* HPP_SourceTokenizerDS_ */
+#endif//HPP_SourceTokenizerDS_
 

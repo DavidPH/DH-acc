@@ -78,9 +78,9 @@ bool option_string_func = true;
 // make_func
 //
 static SourceExpression::Pointer make_func
-(SourceTokenizerDS *in, SourceTokenC const &tok,
- SourceExpression::Vector *blocks, SourceContext *context,
- SourceExpressionDS::LinkageSpecifier linkSpec, bool externDef)
+(SourceTokenizerDS *in, SourceTokenC *tok, SourceExpression::Vector *blocks,
+ SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
+ bool externDef)
 {
    SourceExpressionDS::ArgList args;
 
@@ -167,7 +167,7 @@ static SourceExpression::Pointer make_func
       funcFunc = ObjectData_String::add(funcFunc);
 
       SourceVariable::Pointer funcFuncVar = SourceVariable::create_constant
-         ("__func__", VariableType::get_bt_string(), funcFunc, tok.pos);
+         ("__func__", VariableType::get_bt_string(), funcFunc, tok->pos);
 
       args.context->addVar(funcFuncVar, false, false);
    }
@@ -181,17 +181,17 @@ static SourceExpression::Pointer make_func
    if (target_type != TARGET_ZDoom)
    {
       funcVar = SourceVariable::create_constant
-         (args.name, funcVarType, funcLabel, tok.pos);
+         (args.name, funcVarType, funcLabel, tok->pos);
    }
    else
    {
       funcVar = SourceVariable::create_constant
-         (args.name, funcVarType, funcNameObj, tok.pos);
+         (args.name, funcVarType, funcNameObj, tok->pos);
    }
 
    // funcAdded
    bool funcAdded = ObjectData_Function::add
-      (funcNameObj, funcLabel, args.count, args.retn->getSize(tok.pos),
+      (funcNameObj, funcLabel, args.count, args.retn->getSize(tok->pos),
        args.context);
 
    if (funcAdded)
@@ -204,16 +204,16 @@ static SourceExpression::Pointer make_func
          make_prefix(in, blocks, args.context);
 
       SourceExpression::Pointer funcExprData = SourceExpression::
-         create_value_data_garbage(args.retn, args.context, tok.pos);
+         create_value_data_garbage(args.retn, args.context, tok->pos);
       SourceExpression::Pointer funcExprRetn = SourceExpression::
-         create_branch_return(funcExprData, args.context, tok.pos);
+         create_branch_return(funcExprData, args.context, tok->pos);
 
       funcExpr->addLabel(funcLabel);
       blocks->push_back(funcExpr);
       blocks->push_back(funcExprRetn);
    }
 
-   return SourceExpression::create_value_variable(funcVar, context, tok.pos);
+   return SourceExpression::create_value_variable(funcVar, context, tok->pos);
 }
 
 //
@@ -247,14 +247,14 @@ SRCEXPDS_KEYWORD_DEFN(function)
 {
    LinkageSpecifier linkSpec;
 
-   if (tok.data == "__function")
+   if (tok->data == "__function")
    {
       if (context == SourceContext::global_context)
          linkSpec = LS_DS;
       else
          linkSpec = LS_INTERN;
    }
-   else if (tok.data == "__extfunc")
+   else if (tok->data == "__extfunc")
    {
       if (in->peekType(SourceTokenC::TT_STR))
          linkSpec = make_linkspec(in);
