@@ -71,34 +71,47 @@ public:
    //
    enum BasicType
    {
-      // Primitive types.
-      BT_BOOLHARD,
-      BT_BOOLSOFT,
-      BT_CHAR,
-      BT_FIXED,
-      BT_FLOAT,
-      BT_INT,
-      BT_LABEL,
-      BT_LFLOAT,
-      BT_LLFLOAT,
-      BT_LLONG,
-      BT_LONG,
-      BT_REAL,
-      BT_SCHAR,
-      BT_SHORT,
-      BT_STRING,
-      BT_UCHAR,
-      BT_UINT,
-      BT_ULLONG,
-      BT_ULONG,
-      BT_USHORT,
-
+      // Void type.
       BT_VOID,
 
+      // Arithmetic types.
+      BT_BIT_HRD,
+      BT_BIT_SFT,
+
+      BT_CHR,
+
+      BT_FIX_HH,
+      BT_FIX_H,
+      BT_FIX,
+      BT_FIX_L,
+      BT_FIX_LL,
+
+      BT_FLT_HH,
+      BT_FLT_H,
+      BT_FLT,
+      BT_FLT_L,
+      BT_FLT_LL,
+
+      BT_INT_HH,
+      BT_INT_H,
+      BT_INT,
+      BT_INT_L,
+      BT_INT_LL,
+
+      BT_UNS_HH,
+      BT_UNS_H,
+      BT_UNS,
+      BT_UNS_L,
+      BT_UNS_LL,
+
+      // Special types.
+      BT_LABEL,
+      BT_STR,
+
       // Reference types.
-      BT_ARRAY,
-      BT_NULLPTR,
-      BT_POINTER,
+      BT_ARR,
+      BT_PTR,
+      BT_PTR_NUL,
 
       // Named types.
       BT_ENUM,
@@ -106,8 +119,8 @@ public:
       BT_UNION,
 
       // Anonymous types.
-      BT_ASMFUNC,
       BT_BLOCK,
+      BT_ASMFUNC,
       BT_FUNCTION,
       BT_LINESPEC,
       BT_NATIVE,
@@ -161,31 +174,45 @@ public:
    Reference getType(std::string const &name, SourcePosition const &position);
 
 
-   // Basic types.
-   static Reference get_bt_boolhard();
-   static Reference get_bt_boolsoft();
-   static Reference get_bt_char();
-   static Reference get_bt_fixed();
-   static Reference get_bt_float();
-   static Reference get_bt_int();
-   static Reference get_bt_label();
-   static Reference get_bt_lfloat();
-   static Reference get_bt_llfloat();
-   static Reference get_bt_llong();
-   static Reference get_bt_long();
-   static Reference get_bt_real();
-   static Reference get_bt_schar();
-   static Reference get_bt_short();
-   static Reference get_bt_string();
-   static Reference get_bt_uchar();
-   static Reference get_bt_uint();
-   static Reference get_bt_ullong();
-   static Reference get_bt_ulong();
-   static Reference get_bt_ushort();
+   // Void type.
    static Reference get_bt_void();
 
+   // Arithmetic types.
+   static Reference get_bt_bit_hrd();
+   static Reference get_bt_bit_sft();
+
+   static Reference get_bt_chr();
+
+   static Reference get_bt_fix_hh();
+   static Reference get_bt_fix_h();
+   static Reference get_bt_fix();
+   static Reference get_bt_fix_l();
+   static Reference get_bt_fix_ll();
+
+   static Reference get_bt_flt_hh();
+   static Reference get_bt_flt_h();
+   static Reference get_bt_flt();
+   static Reference get_bt_flt_l();
+   static Reference get_bt_flt_ll();
+
+   static Reference get_bt_int_hh();
+   static Reference get_bt_int_h();
+   static Reference get_bt_int();
+   static Reference get_bt_int_l();
+   static Reference get_bt_int_ll();
+
+   static Reference get_bt_uns_hh();
+   static Reference get_bt_uns_h();
+   static Reference get_bt_uns();
+   static Reference get_bt_uns_l();
+   static Reference get_bt_uns_ll();
+
+   // Special types.
+   static Reference get_bt_label();
+   static Reference get_bt_str();
+
    // Reference types.
-   static Reference get_bt_nullptr();
+   static Reference get_bt_ptr_nul();
 
    // Named types.
    static Reference get_bt_enum(std::string const &name);
@@ -193,8 +220,8 @@ public:
    static Reference get_bt_union(std::string const &name);
 
    // Anonymous types.
-   static Reference get_bt_asmfunc(Vector const &types, VariableType *typeRet);
    static Reference get_bt_block(Vector const &types);
+   static Reference get_bt_asmfunc(Vector const &types, VariableType *typeRet);
    static Reference get_bt_function(Vector const &types, VariableType *typeRet);
    static Reference get_bt_linespec(Vector const &types, VariableType *typeRet);
    static Reference get_bt_native(Vector const &types, VariableType *typeRet);
@@ -205,6 +232,9 @@ public:
 
    // Returns true if the given type is an arithmetic type.
    static bool is_bt_arithmetic(BasicType type);
+
+   // Returns true if the given type is a BT_FIX* type.
+   static bool is_bt_fix(BasicType type);
 
    static bool is_bt_function(BasicType type);
 

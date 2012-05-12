@@ -70,7 +70,7 @@ private:
 
       // TODO: X - 0
 
-      if (bt == VariableType::BT_LLONG || bt == VariableType::BT_ULLONG)
+      if (bt == VariableType::BT_INT_LL || bt == VariableType::BT_UNS_LL)
          doEvaluateBaseLLAS(objects, dst, src, false);
       else
       {
@@ -108,7 +108,7 @@ SourceExpression::Pointer SourceExpression::create_binary_sub
       new SourceExpression_BinarySub(false, exprL, exprR, context, pos);
 
    // Slight hack for pointer arithmetic.
-   if (btL == VariableType::BT_POINTER && btR == VariableType::BT_POINTER)
+   if (btL == VariableType::BT_PTR && btR == VariableType::BT_PTR)
    {
       expr = create_value_cast_explicit
          (expr, VariableType::get_bt_int(), context, pos);
@@ -143,13 +143,13 @@ SourceExpression_BinarySub::SourceExpression_BinarySub
    CONSTRUCTOR_ARRAY_DECAY
 
    // Type constraints.
-   if (btL == VariableType::BT_POINTER || btR == VariableType::BT_POINTER)
+   if (btL == VariableType::BT_PTR || btR == VariableType::BT_PTR)
    {
       // Pointer constraints.
-      if (btR != VariableType::BT_POINTER && !VariableType::is_bt_integer(btR))
+      if (btR != VariableType::BT_PTR && !VariableType::is_bt_integer(btR))
          ERROR_NP("pointer - non-integer");
 
-      if (btL != VariableType::BT_POINTER)
+      if (btL != VariableType::BT_PTR)
          ERROR_NP("non-pointer - pointer");
    }
    else
@@ -162,7 +162,7 @@ SourceExpression_BinarySub::SourceExpression_BinarySub
 
    CONSTRUCTOR_POINTER_PREAMBLE
 
-   if (btL == VariableType::BT_POINTER && btR != VariableType::BT_POINTER)
+   if (btL == VariableType::BT_PTR && btR != VariableType::BT_PTR)
       exprR = create_binary_mul(exprR, exprSize, context, pos);
 }
 

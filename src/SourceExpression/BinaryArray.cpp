@@ -50,7 +50,7 @@ public:
    //
    virtual bool canGetData() const
    {
-      return exprL->getType()->getBasicType() == VariableType::BT_ARRAY;
+      return exprL->getType()->getBasicType() == VariableType::BT_ARR;
    }
 
    //
@@ -91,9 +91,9 @@ SRCEXP_EXPRBIN_DEFN(array)
 
    // This allows C semantics for array access. Specifically that x[y] be the
    // same as *(x+y).
-   if (btL == VariableType::BT_POINTER || btR == VariableType::BT_POINTER ||
-      (btL == VariableType::BT_ARRAY && !exprL->canMakeObject()) ||
-      (btR == VariableType::BT_ARRAY && !exprR->canMakeObject()))
+   if (btL == VariableType::BT_PTR || btR == VariableType::BT_PTR ||
+      (btL == VariableType::BT_ARR && !exprL->canMakeObject()) ||
+      (btR == VariableType::BT_ARR && !exprR->canMakeObject()))
    {
       return create_unary_dereference
       (create_binary_add(exprL, exprR, context, pos), context, pos);
@@ -107,12 +107,12 @@ SRCEXP_EXPRBIN_DEFN(array)
 //
 SourceExpression_BinaryArray::SourceExpression_BinaryArray
 (SRCEXP_EXPRBIN_PARM)
- : Super(NULL, VariableType::get_bt_uint(), SRCEXP_EXPRBIN_PASS)
+ : Super(NULL, VariableType::get_bt_uns(), SRCEXP_EXPRBIN_PASS)
 {
    VariableType::BasicType btL = exprL->getType()->getBasicType();
 
    // Can only be done for BT_ARRAY or BT_STRING.
-   if (btL != VariableType::BT_ARRAY && btL != VariableType::BT_STRING)
+   if (btL != VariableType::BT_ARR && btL != VariableType::BT_STR)
       ERROR_NP("expected BT_ARRAY or BT_STRING, got: %s", make_string(btL).c_str());
 }
 
@@ -132,7 +132,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   if (exprL->getType()->getBasicType() == VariableType::BT_STRING)
+   if (exprL->getType()->getBasicType() == VariableType::BT_STR)
    {
       VariableType::Reference type = getType();
       bigsint typeSize = type->getSize(pos);

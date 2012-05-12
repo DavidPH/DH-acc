@@ -74,7 +74,7 @@ public:
    //
    virtual VariableType::Reference getType() const
    {
-      return VariableType::get_bt_boolhard();
+      return VariableType::get_bt_bit_hrd();
    }
 
    //
@@ -111,7 +111,7 @@ public:
 
       // long long < 0 and long long >= 0 can be optimized by only checking the
       // high byte.
-      if (inBT == VariableType::BT_LLONG && (ct == CMP_LT || ct == CMP_GE) &&
+      if (inBT == VariableType::BT_INT_LL && (ct == CMP_LT || ct == CMP_GE) &&
           objR && !objR->resolveInt())
       {
          ObjectExpression::Pointer tmpH = context->getTempVar(0);
@@ -132,7 +132,7 @@ public:
       exprL->makeObjects(objects, tmp);
       exprR->makeObjects(objects, tmp);
 
-      if (inBT == VariableType::BT_LLONG || inBT == VariableType::BT_ULLONG)
+      if (inBT == VariableType::BT_INT_LL || inBT == VariableType::BT_UNS_LL)
       {
          ocode = static_cast<ObjectCode>(ocode + 1);
          return makeObjectsLL(objects, ocode, dst, src, type, inBT);
@@ -209,7 +209,7 @@ private:
          objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelLow));
 
          // The two high byes differ, so they determine the result.
-         if (inBT == VariableType::BT_LLONG)
+         if (inBT == VariableType::BT_INT_LL)
          {
             objects->addToken(OCODE_GET_REGISTER32I, tmpJh);
             objects->addToken(OCODE_GET_REGISTER32I, tmpKh);

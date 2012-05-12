@@ -87,16 +87,16 @@ static VariableType::Pointer make_basic
       return VariableType::get_bt_void();
 
    if (tok->data == "bool" || tok->data == "_Bool")
-      return VariableType::get_bt_boolhard();
+      return VariableType::get_bt_bit_hrd();
 
    if (tok->data == "__boolsoft")
-      return VariableType::get_bt_boolsoft();
+      return VariableType::get_bt_bit_sft();
 
    if (tok->data == "__label")
       return VariableType::get_bt_label();
 
    if (tok->data == "__string")
-      return VariableType::get_bt_string();
+      return VariableType::get_bt_str();
 
    if (tok->data != "char"   && tok->data != "int"     &&
        tok->data != "float"  && tok->data != "double"  &&
@@ -162,12 +162,12 @@ static VariableType::Pointer make_basic
          ERROR(tok->pos, "short char");
 
       if (typeSign < 0)
-         return VariableType::get_bt_schar();
+         return VariableType::get_bt_int_hh();
 
       if (typeSign > 0)
-         return VariableType::get_bt_uchar();
+         return VariableType::get_bt_uns_hh();
 
-      return VariableType::get_bt_char();
+      return VariableType::get_bt_chr();
 
    case TYPE_BASE_INT:
       if (typeShort && typeLong)
@@ -182,26 +182,26 @@ static VariableType::Pointer make_basic
       if (typeSign > 0)
       {
          if (typeShort)
-            return VariableType::get_bt_ushort();
+            return VariableType::get_bt_uns_h();
 
          if (typeLong == 1)
-            return VariableType::get_bt_ulong();
+            return VariableType::get_bt_uns_l();
 
          if (typeLong == 2)
-            return VariableType::get_bt_ullong();
+            return VariableType::get_bt_uns_ll();
 
-         return VariableType::get_bt_uint();
+         return VariableType::get_bt_uns();
       }
       else
       {
          if (typeShort)
-            return VariableType::get_bt_short();
+            return VariableType::get_bt_int_h();
 
          if (typeLong == 1)
-            return VariableType::get_bt_long();
+            return VariableType::get_bt_int_l();
 
          if (typeLong == 2)
-            return VariableType::get_bt_llong();
+            return VariableType::get_bt_int_ll();
 
          return VariableType::get_bt_int();
       }
@@ -219,13 +219,13 @@ static VariableType::Pointer make_basic
          ERROR(tok->pos, "signed float");
 
       if (typeLong == 0)
-         return VariableType::get_bt_float();
+         return VariableType::get_bt_flt();
 
       if (typeLong == 1)
-         return VariableType::get_bt_lfloat();
+         return VariableType::get_bt_flt_l();
 
       if (typeLong == 2)
-         return VariableType::get_bt_llfloat();
+         return VariableType::get_bt_flt_ll();
 
       ERROR(tok->pos, "long long long float");
 
@@ -242,7 +242,7 @@ static VariableType::Pointer make_basic
       if (typeSign < 0)
          ERROR(tok->pos, "signed fixed");
 
-      return VariableType::get_bt_fixed();
+      return VariableType::get_bt_fix();
 
    case TYPE_BASE_REAL:
       if (typeShort)
@@ -257,7 +257,7 @@ static VariableType::Pointer make_basic
       if (typeSign < 0)
          ERROR(tok->pos, "signed real");
 
-      return VariableType::get_bt_real();
+      return VariableType::get_bt_fix();
    }
 
    // Should be unreachable.

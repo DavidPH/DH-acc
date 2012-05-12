@@ -55,7 +55,7 @@ public:
    //
    virtual CounterReference<VariableType> getType() const
    {
-      return VariableType::get_bt_uint();
+      return VariableType::get_bt_uns();
    }
 
    //
@@ -67,7 +67,7 @@ public:
 
       if (dst->type == VariableData::MT_VOID) return;
 
-      VariableType::Reference srcType = VariableType::get_bt_uint();
+      VariableType::Reference srcType = VariableType::get_bt_uns();
       bigsint                 srcSize = srcType->getSize(pos);
       VariableData::Pointer   src     = VariableData::create_stack(srcSize);
 

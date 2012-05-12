@@ -44,15 +44,13 @@ static ObjectExpression::Pointer obj_0 =
 static ObjectExpression::Pointer obj_1 =
    ObjectExpression::create_value_int(1, SourcePosition::builtin());
 
-static SourceVariable::Pointer var_false =
-   SourceVariable::create_constant("false", VariableType::get_bt_boolhard(),
-                                   obj_0, SourcePosition::builtin());
-static SourceVariable::Pointer var_true =
-   SourceVariable::create_constant("true", VariableType::get_bt_boolhard(),
-                                   obj_1, SourcePosition::builtin());
+static SourceVariable::Pointer var_false = SourceVariable::create_constant(
+   "false", VariableType::get_bt_bit_hrd(), obj_0, SourcePosition::builtin());
+static SourceVariable::Pointer var_true = SourceVariable::create_constant(
+   "true", VariableType::get_bt_bit_hrd(), obj_1, SourcePosition::builtin());
 
-static SourceVariable::Pointer var_nullptr = SourceVariable::create_constant
-("nullptr", VariableType::get_bt_nullptr(), obj_0, SourcePosition::builtin());
+static SourceVariable::Pointer var_nullptr = SourceVariable::create_constant(
+   "nullptr", VariableType::get_bt_ptr_nul(), obj_0, SourcePosition::builtin());
 
 
 //----------------------------------------------------------------------------|

@@ -312,26 +312,29 @@ int SourceExpression_Binary::getOcodeType
    int ocodeOpType;
    switch (bt)
    {
-   case VariableType::BT_CHAR:
+   case VariableType::BT_CHR:
+   case VariableType::BT_INT_HH:
+   case VariableType::BT_INT_H:
    case VariableType::BT_INT:
-   case VariableType::BT_LONG:
-   case VariableType::BT_SCHAR:
-   case VariableType::BT_SHORT:
+   case VariableType::BT_INT_L:
       ocodeOpType = 1;
       if (ocodeGetType) *ocodeGetType = 1;
       break;
 
-   case VariableType::BT_FIXED:
-   case VariableType::BT_REAL:
+   case VariableType::BT_FIX_HH:
+   case VariableType::BT_FIX_H:
+   case VariableType::BT_FIX:
+   case VariableType::BT_FIX_L:
+   case VariableType::BT_FIX_LL:
       ocodeOpType = 0;
       if (ocodeGetType) *ocodeGetType = 0;
       break;
 
-   case VariableType::BT_POINTER:
-   case VariableType::BT_UCHAR:
-   case VariableType::BT_UINT:
-   case VariableType::BT_ULONG:
-   case VariableType::BT_USHORT:
+   case VariableType::BT_UNS_HH:
+   case VariableType::BT_UNS_H:
+   case VariableType::BT_UNS:
+   case VariableType::BT_UNS_L:
+   case VariableType::BT_PTR:
       ocodeOpType = 2;
       if (ocodeGetType) *ocodeGetType = 1;
       break;

@@ -101,7 +101,7 @@ public:
          return VariableType::get_bt_void();
 
       case PT_STRING:
-         return VariableType::get_bt_string();
+         return VariableType::get_bt_str();
       }
 
       ERROR_NP("unrecognized printfType");
@@ -121,7 +121,7 @@ private:
    //
    void makeChar(ObjectVector *objects, char c)
    {
-      VariableType::Reference type = VariableType::get_bt_char();
+      VariableType::Reference type = VariableType::get_bt_chr();
 
       VariableData::Pointer tmp =
          VariableData::create_stack(type->getSize(pos));
@@ -164,7 +164,7 @@ private:
    //
    void makeString(ObjectVector *objects, std::string const &s)
    {
-      VariableType::Reference type = VariableType::get_bt_string();
+      VariableType::Reference type = VariableType::get_bt_str();
 
       VariableData::Pointer tmp =
          VariableData::create_stack(type->getSize(pos));
@@ -200,15 +200,15 @@ private:
       VariableType::BasicType   argBT   = argType->getBasicType();
       bigsint                   argSize = argType->getSize(pos);
 
-      if (argBT == VariableType::BT_ARRAY)
+      if (argBT == VariableType::BT_ARR)
       {
-         argBT = VariableType::BT_POINTER;
+         argBT = VariableType::BT_PTR;
          argType = argType->getReturn()->getPointer();
          argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
          argSize = argType->getSize(pos);
       }
 
-      if (argBT != VariableType::BT_POINTER)
+      if (argBT != VariableType::BT_PTR)
          ERROR_NP("expected pointer got %s", make_string(argType).c_str());
 
       argExpr->makeObjects(objects, VariableData::create_stack(argSize));
@@ -227,30 +227,29 @@ private:
       VariableData::Pointer tmp =
          VariableData::create_stack(argType->getSize(pos));
 
-      if (argBT == VariableType::BT_STRING)
+      if (argBT == VariableType::BT_STR)
       {
          argExpr->makeObjects(objects, tmp);
          objects->addToken(OCODE_ACSP_STRING);
          return;
       }
 
-      if (argBT == VariableType::BT_ARRAY)
+      if (argBT == VariableType::BT_ARR)
       {
-         argBT = VariableType::BT_POINTER;
+         argBT = VariableType::BT_PTR;
          argType = argType->getReturn()->getPointer();
          argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
       }
 
-      if (argBT != VariableType::BT_POINTER)
-         ERROR_NP("expected pointer got %s",
-                 make_string(argType).c_str());
+      if (argBT != VariableType::BT_PTR)
+         ERROR_NP("expected pointer got %s", make_string(argType).c_str());
 
       // Convert auto* to static*.
       StoreType argStore = argType->getReturn()->getStoreType();
       if (argStore == STORE_AUTO) argStore = STORE_STATIC;
 
       argType = argType->getReturn();
-      argType = VariableType::get_bt_char()
+      argType = VariableType::get_bt_chr()
                 ->setQualifier(argType->getQualifiers())
                 ->setStorage(argStore, argType->getStoreArea())
                 ->getPointer();
@@ -326,11 +325,6 @@ private:
 
             switch (*c)
             {
-            case 'F':
-               makeExpr(objects, VariableType::get_bt_real());
-               objects->addToken(OCODE_ACSP_NUM_DEC32F);
-               continue;
-
             case 'K':
                makeExpr(objects, VariableType::get_bt_int());
                objects->addToken(OCODE_ACSP_KEYBIND);
@@ -347,12 +341,12 @@ private:
                continue;
 
             case 'X':
-               makeExpr(objects, VariableType::get_bt_fixed());
+               makeExpr(objects, VariableType::get_bt_fix());
                objects->addToken(OCODE_ACSP_NUM_DEC32F);
                continue;
 
             case 'c':
-               makeExpr(objects, VariableType::get_bt_char());
+               makeExpr(objects, VariableType::get_bt_chr());
                objects->addToken(OCODE_ACSP_CHARACTER);
                continue;
 
@@ -370,7 +364,7 @@ private:
                continue;
 
             case 'u':
-               makeExpr(objects, VariableType::get_bt_uint());
+               makeExpr(objects, VariableType::get_bt_uns());
                objects->addToken(OCODE_ACSP_NUM_DEC32U);
                continue;
 
@@ -415,9 +409,9 @@ private:
          objects->addToken(OCODE_GET_LITERAL32I, msgtypeObj);
          makeExpr(objects, VariableType::get_bt_int());
          makeExpr(objects, VariableType::get_bt_int());
-         makeExpr(objects, VariableType::get_bt_real());
-         makeExpr(objects, VariableType::get_bt_real());
-         makeExpr(objects, VariableType::get_bt_real());
+         makeExpr(objects, VariableType::get_bt_fix());
+         makeExpr(objects, VariableType::get_bt_fix());
+         makeExpr(objects, VariableType::get_bt_fix());
 
          objects->addToken(OCODE_ACSP_END_OPT);
 
@@ -427,17 +421,17 @@ private:
             break;
 
          case 1:
-            makeExpr(objects, VariableType::get_bt_real());
+            makeExpr(objects, VariableType::get_bt_fix());
             break;
 
          case 2:
-            makeExpr(objects, VariableType::get_bt_real());
-            makeExpr(objects, VariableType::get_bt_real());
+            makeExpr(objects, VariableType::get_bt_fix());
+            makeExpr(objects, VariableType::get_bt_fix());
             break;
 
          case 3:
-            makeExpr(objects, VariableType::get_bt_real());
-            makeExpr(objects, VariableType::get_bt_real());
+            makeExpr(objects, VariableType::get_bt_fix());
+            makeExpr(objects, VariableType::get_bt_fix());
             break;
 
          default:

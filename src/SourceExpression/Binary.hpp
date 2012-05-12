@@ -49,16 +49,16 @@ VariableType::BasicType btR = typeR->getBasicType();
 //
 #define CONSTRUCTOR_ARRAY_DECAY                                    \
 /* Array types decay to pointer types. */                          \
-if (btL == VariableType::BT_ARRAY)                                 \
+if (btL == VariableType::BT_ARR)                                   \
 {                                                                  \
-   btL = VariableType::BT_POINTER;                                 \
+   btL = VariableType::BT_PTR;                                     \
    typeL = typeL->getReturn()->getPointer();                       \
    exprL = create_value_cast_implicit(exprL, typeL, context, pos); \
 }                                                                  \
                                                                    \
-if (btR == VariableType::BT_ARRAY)                                 \
+if (btR == VariableType::BT_ARR)                                   \
 {                                                                  \
-   btR = VariableType::BT_POINTER;                                 \
+   btR = VariableType::BT_PTR;                                     \
    typeR = typeR->getReturn()->getPointer();                       \
    exprR = create_value_cast_implicit(exprR, typeR, context, pos); \
 }
@@ -66,16 +66,16 @@ if (btR == VariableType::BT_ARRAY)                                 \
 //
 // CONSTRUCTOR_POINTER_PREAMBLE
 //
-#define CONSTRUCTOR_POINTER_PREAMBLE                          \
-VariableType::Reference type = getType();                     \
-                                                              \
-if (type->getBasicType() != VariableType::BT_POINTER) return; \
-                                                              \
-bigsint retnSize = type->getReturn()->getSize(pos);           \
-                                                              \
-if (retnSize == 1) return;                                    \
-                                                              \
-SourceExpression::Pointer exprSize =                          \
+#define CONSTRUCTOR_POINTER_PREAMBLE                      \
+VariableType::Reference type = getType();                 \
+                                                          \
+if (type->getBasicType() != VariableType::BT_PTR) return; \
+                                                          \
+bigsint retnSize = type->getReturn()->getSize(pos);       \
+                                                          \
+if (retnSize == 1) return;                                \
+                                                          \
+SourceExpression::Pointer exprSize =                      \
    create_value_uint(retnSize, context, pos);
 
 //

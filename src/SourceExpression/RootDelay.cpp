@@ -73,7 +73,7 @@ create_root_delay(SRCEXP_EXPRUNA_ARGS)
 SourceExpression_RootDelay::SourceExpression_RootDelay(SRCEXP_EXPRUNA_PARM)
  : Super(SRCEXP_EXPR_PASS), expr(_expr), stack(context->getLimit(STORE_AUTO))
 {
-   VariableType::Reference type = VariableType::get_bt_uint();
+   VariableType::Reference type = VariableType::get_bt_uns();
 
    expr = create_value_cast_implicit(expr, type, context, pos);
 }

@@ -15,8 +15,9 @@ add_executable(DH-acc
 	BinaryTokenZDACS/output.cpp
 	BinaryTokenZDACS/write_ACSE.cpp
 	ObjectCode.cpp
-   ObjectData/Auto.cpp
+   ObjectData.cpp
    ObjectData/Array.cpp
+   ObjectData/Auto.cpp
    ObjectData/Function.cpp
    ObjectData/Register.cpp
    ObjectData/Script.cpp
@@ -61,8 +62,8 @@ add_executable(DH-acc
 	SourceExpression/BinaryAnd.cpp
 	SourceExpression/BinaryArray.cpp
 	SourceExpression/BinaryAssign.cpp
-	SourceExpression/BinaryCompare.cpp
    SourceExpression/BinaryCmp.cpp
+	SourceExpression/BinaryCompare.cpp
 	SourceExpression/BinaryDiv.cpp
 	SourceExpression/BinaryIOr.cpp
    SourceExpression/BinaryLSh.cpp

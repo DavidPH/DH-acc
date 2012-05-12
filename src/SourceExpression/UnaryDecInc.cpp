@@ -672,11 +672,11 @@ private:
       if (dst->type != VariableData::MT_VOID)
          make_objects_memcpy_prep(objects, dst, data, pos);
 
-      if (bt == VariableType::BT_LLONG || bt == VariableType::BT_ULLONG)
+      if (bt == VariableType::BT_INT_LL || bt == VariableType::BT_UNS_LL)
          doLL(objects, dst, src, tmp);
       else if (VariableType::is_bt_integer(bt))
          doI(objects, dst, src, tmp);
-      else if (bt == VariableType::BT_POINTER)
+      else if (bt == VariableType::BT_PTR)
       {
          bigsint value = type->getReturn()->getSize(pos);
          if (value == 1)
@@ -684,7 +684,7 @@ private:
          else
             doP(objects, dst, src, tmp, objects->getValue(value));
       }
-      else if (bt == VariableType::BT_FIXED || bt == VariableType::BT_REAL)
+      else if (VariableType::is_bt_fix(bt))
          doF(objects, dst, src, tmp);
       else
          ERROR_NP("invalid BT");

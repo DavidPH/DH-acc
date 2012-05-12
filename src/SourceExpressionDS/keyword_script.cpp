@@ -206,7 +206,7 @@ static SourceExpression::Pointer make_script
       scriptFunc = ObjectData_String::add(scriptFunc);
 
       SourceVariable::Pointer scriptFuncVar = SourceVariable::create_constant
-         ("__func__", VariableType::get_bt_string(), scriptFunc, tok->pos);
+         ("__func__", VariableType::get_bt_str(), scriptFunc, tok->pos);
 
       args.context->addVar(scriptFuncVar, false, false);
    }

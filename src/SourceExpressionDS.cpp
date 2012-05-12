@@ -324,7 +324,7 @@ SRCEXPDS_EXPR_DEF1(prefix)
          break;
       }
 
-      VariableType::Reference type = VariableType::get_bt_uint();
+      VariableType::Reference type = VariableType::get_bt_uns();
       SourceVariable::Pointer var  =
          SourceVariable::create_literal(type, addr, tok->pos);
 

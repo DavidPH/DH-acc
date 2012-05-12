@@ -44,7 +44,6 @@ typedef RegisterTable::iterator RegisterIter;
 //
 
 static void set_number(RegisterTable &table, ObjectData_Register &data);
-static void set_strings(std::vector<int> &strings, VariableType const *type);
 
 
 //----------------------------------------------------------------------------|
@@ -85,7 +84,7 @@ static void add
 
    if (data.name != name)
    {
-      set_strings(data.strings, type);
+      odata_set_strings(data.strings, type);
       data.name      = name;
       data.number    = number;
       data.size      = type->getSize(SourcePosition::none());
@@ -171,85 +170,6 @@ static void set_number(RegisterTable &table, ObjectData_Register &data)
    }
 
    data.number = index;
-}
-
-//
-// set_strings
-//
-static void set_strings(std::vector<int> &strings, VariableType const *type)
-{
-   switch (type->getBasicType())
-   {
-   case VariableType::BT_ARRAY:
-   {
-      VariableType::Reference types = type->getReturn();
-      bigsint width = type->getWidth();
-      while (width--)
-         set_strings(strings, types);
-   }
-      break;
-
-   case VariableType::BT_ASMFUNC:
-   case VariableType::BT_BLOCK:
-   case VariableType::BT_BOOLHARD:
-   case VariableType::BT_BOOLSOFT:
-   case VariableType::BT_CHAR:
-   case VariableType::BT_ENUM:
-   case VariableType::BT_FIXED:
-   case VariableType::BT_FLOAT:
-   case VariableType::BT_FUNCTION:
-   case VariableType::BT_INT:
-   case VariableType::BT_LABEL:
-   case VariableType::BT_LINESPEC:
-   case VariableType::BT_LONG:
-   case VariableType::BT_NATIVE:
-   case VariableType::BT_NULLPTR:
-   case VariableType::BT_POINTER:
-   case VariableType::BT_REAL:
-   case VariableType::BT_SCHAR:
-   case VariableType::BT_SHORT:
-   case VariableType::BT_UCHAR:
-   case VariableType::BT_UINT:
-   case VariableType::BT_ULLONG:
-   case VariableType::BT_ULONG:
-   case VariableType::BT_USHORT:
-      strings.push_back(false);
-      break;
-
-   case VariableType::BT_LFLOAT:
-   case VariableType::BT_LLFLOAT:
-   case VariableType::BT_LLONG:
-      strings.push_back(false);
-      strings.push_back(false);
-      break;
-
-   case VariableType::BT_SCRIPT:
-      strings.push_back(option_named_scripts);
-      break;
-
-   case VariableType::BT_STRING:
-      strings.push_back(true);
-      break;
-
-   case VariableType::BT_STRUCT:
-   {
-      VariableType::Vector const &types = type->getTypes();
-      VariableType::Vector::const_iterator iter;
-      for (iter = types.begin(); iter != types.end(); ++iter)
-         set_strings(strings, *iter);
-   }
-
-   case VariableType::BT_UNION:
-   {
-      bigsint types = type->getSize(SourcePosition::none());
-      while (types--)
-         strings.push_back(false);
-   }
-      break;
-
-   case VariableType::BT_VOID:
-      break;
-   }
 }
 
 

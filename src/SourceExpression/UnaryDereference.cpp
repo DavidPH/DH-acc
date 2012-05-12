@@ -122,7 +122,7 @@ public:
       case_array:
          address = ObjectExpression::create_value_symbol(area, pos);
          return VariableData::create_registerarray(size, sectionRA, address,
-            create_value_cast_explicit(expr, VariableType::get_bt_uint(),
+            create_value_cast_explicit(expr, VariableType::get_bt_uns(),
                context, pos));
 
       case STORE_WORLDARRAY:
@@ -161,7 +161,7 @@ SRCEXP_EXPRUNA_DEFN(dereference)
 //
 bool SourceExpression_UnaryDereference::canGetData() const
 {
-   return expr->getType()->getBasicType() != VariableType::BT_STRING;
+   return expr->getType()->getBasicType() != VariableType::BT_STR;
 }
 
 //
@@ -182,7 +182,7 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
 
    VariableType::Reference type = getType();
 
-   if (expr->getType()->getBasicType() == VariableType::BT_STRING)
+   if (expr->getType()->getBasicType() == VariableType::BT_STR)
    {
       VariableData::Pointer src =
          VariableData::create_stack(type->getSize(pos));

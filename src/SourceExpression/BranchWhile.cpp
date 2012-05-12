@@ -89,7 +89,7 @@ SourceExpression_BranchWhile
    exprCond(_exprCond), exprBody(_exprBody), postCond(_postCond)
 {
    {
-      VariableType::Reference type = VariableType::get_bt_boolsoft();
+      VariableType::Reference type = VariableType::get_bt_bit_sft();
 
       exprCond = create_value_cast_implicit(exprCond, type, context, pos);
    }

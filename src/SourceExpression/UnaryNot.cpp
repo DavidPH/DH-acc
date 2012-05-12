@@ -86,20 +86,20 @@ void SourceExpression_UnaryNot::virtual_makeObjects
 
    switch (type->getBasicType())
    {
-   case VariableType::BT_CHAR:
+   case VariableType::BT_CHR:
+   case VariableType::BT_INT_HH:
+   case VariableType::BT_INT_H:
    case VariableType::BT_INT:
-   case VariableType::BT_LONG:
-   case VariableType::BT_SCHAR:
-   case VariableType::BT_SHORT:
-   case VariableType::BT_UCHAR:
-   case VariableType::BT_UINT:
-   case VariableType::BT_ULONG:
-   case VariableType::BT_USHORT:
+   case VariableType::BT_INT_L:
+   case VariableType::BT_UNS_HH:
+   case VariableType::BT_UNS_H:
+   case VariableType::BT_UNS:
+   case VariableType::BT_UNS_L:
       objects->addToken(OCODE_BITWISE_NOT32);
       break;
 
-   case VariableType::BT_LLONG:
-   case VariableType::BT_ULLONG:
+   case VariableType::BT_INT_LL:
+   case VariableType::BT_UNS_LL:
    {
       ObjectExpression::Pointer tmpH = context->getTempVar(0);
 
@@ -111,7 +111,7 @@ void SourceExpression_UnaryNot::virtual_makeObjects
       break;
 
    default:
-      ERROR_NP("invalid BT");
+      ERROR_NP("invalid BT: %s", make_string(type->getBasicType()).c_str());
    }
 
    make_objects_memcpy_post(objects, dst, src, type, context, pos);

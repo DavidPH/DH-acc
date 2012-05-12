@@ -49,7 +49,7 @@ public:
    //
    VariableType::Reference getType() const
    {
-      return VariableType::get_bt_boolhard();
+      return VariableType::get_bt_bit_hrd();
    }
 
 private:
@@ -73,7 +73,7 @@ SRCEXP_EXPRBRA_DEFN(u, not)
 // SourceExpression_BranchNot::SourceExpression_BranchNot
 //
 SourceExpression_BranchNot::SourceExpression_BranchNot(SRCEXP_EXPRUNA_PARM)
- : Super(VariableType::get_bt_boolsoft(), SRCEXP_EXPRUNA_PASS)
+ : Super(VariableType::get_bt_bit_sft(), SRCEXP_EXPRUNA_PASS)
 {
 }
 

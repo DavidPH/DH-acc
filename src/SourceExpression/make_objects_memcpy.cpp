@@ -68,27 +68,15 @@ static void make_objects_literal
 {
    switch (type->getBasicType())
    {
-   case VariableType::BT_ARRAY:
-   {
-      ObjectExpression::Vector elems;
-      elem->expandOnce(&elems);
-      VariableType::Reference types = type->getReturn();
-
-      if (elems.size() != static_cast<size_t>(type->getWidth()))
-         ERROR_P("incorrect elem count");
-
-      for (size_t i = 0; i < elems.size(); ++i)
-         make_objects_literal(objects, elems[i], types, pos);
-   }
-      break;
-
-   case VariableType::BT_ASMFUNC:
-   case VariableType::BT_FLOAT:
-   case VariableType::BT_LFLOAT:
-   case VariableType::BT_LLFLOAT:
-   case VariableType::BT_UNION:
    case VariableType::BT_VOID:
-      ERROR_P("bad BT");
+   case VariableType::BT_FLT_HH:
+   case VariableType::BT_FLT_H:
+   case VariableType::BT_FLT:
+   case VariableType::BT_FLT_L:
+   case VariableType::BT_FLT_LL:
+   case VariableType::BT_UNION:
+   case VariableType::BT_ASMFUNC:
+      ERROR_P("bad BT: %s", make_string(type->getBasicType()).c_str());
 
    case VariableType::BT_BLOCK:
    case VariableType::BT_STRUCT:
@@ -105,33 +93,36 @@ static void make_objects_literal
    }
       break;
 
-   case VariableType::BT_BOOLHARD:
-   case VariableType::BT_BOOLSOFT:
-   case VariableType::BT_CHAR:
+   case VariableType::BT_BIT_HRD:
+   case VariableType::BT_BIT_SFT:
+   case VariableType::BT_CHR:
+   case VariableType::BT_INT_HH:
+   case VariableType::BT_INT_H:
+   case VariableType::BT_INT:
+   case VariableType::BT_INT_L:
+   case VariableType::BT_UNS_HH:
+   case VariableType::BT_UNS_H:
+   case VariableType::BT_UNS:
+   case VariableType::BT_UNS_L:
+   case VariableType::BT_LABEL:
+   case VariableType::BT_PTR:
+   case VariableType::BT_PTR_NUL:
    case VariableType::BT_ENUM:
    case VariableType::BT_FUNCTION:
-   case VariableType::BT_INT:
-   case VariableType::BT_LABEL:
    case VariableType::BT_LINESPEC:
-   case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
-   case VariableType::BT_NULLPTR:
-   case VariableType::BT_POINTER:
-   case VariableType::BT_SCHAR:
-   case VariableType::BT_SHORT:
-   case VariableType::BT_UCHAR:
-   case VariableType::BT_UINT:
-   case VariableType::BT_ULONG:
-   case VariableType::BT_USHORT:
       objects->addToken(OCODE_GET_LITERAL32I, elem);
       break;
 
-   case VariableType::BT_FIXED:
-   case VariableType::BT_REAL:
+   case VariableType::BT_FIX_HH:
+   case VariableType::BT_FIX_H:
+   case VariableType::BT_FIX:
+   case VariableType::BT_FIX_L:
+   case VariableType::BT_FIX_LL:
       objects->addToken(OCODE_GET_LITERAL32F, elem);
       break;
 
-   case VariableType::BT_LLONG:
+   case VariableType::BT_INT_LL:
    {
       objects->addToken(OCODE_GET_LITERAL32I, elem);
 
@@ -146,16 +137,14 @@ static void make_objects_literal
    }
       break;
 
-   case VariableType::BT_SCRIPT:
+   case VariableType::BT_UNS_LL:
       objects->addToken(OCODE_GET_LITERAL32I, elem);
-
-      if (target_type == TARGET_ZDoom && option_string_tag &&
-          option_named_scripts)
-         objects->addToken(OCODE_ACSE_STRING_TAG);
-
+      objects->addToken(OCODE_GET_LITERAL32I,
+         ObjectExpression::create_binary_div(elem,
+            objects->getValue(0x10000000), pos));
       break;
 
-   case VariableType::BT_STRING:
+   case VariableType::BT_STR:
       objects->addToken(OCODE_GET_LITERAL32I, elem);
 
       if (target_type == TARGET_ZDoom && option_string_tag)
@@ -163,9 +152,27 @@ static void make_objects_literal
 
       break;
 
-   case VariableType::BT_ULLONG:
+   case VariableType::BT_ARR:
+   {
+      ObjectExpression::Vector elems;
+      elem->expandOnce(&elems);
+      VariableType::Reference types = type->getReturn();
+
+      if (elems.size() != static_cast<size_t>(type->getWidth()))
+         ERROR_P("incorrect elem count");
+
+      for (size_t i = 0; i < elems.size(); ++i)
+         make_objects_literal(objects, elems[i], types, pos);
+   }
+      break;
+
+   case VariableType::BT_SCRIPT:
       objects->addToken(OCODE_GET_LITERAL32I, elem);
-      objects->addToken(OCODE_GET_LITERAL32I, ObjectExpression::create_binary_div(elem, objects->getValue(0x10000000), pos));
+
+      if (target_type == TARGET_ZDoom && option_string_tag &&
+          option_named_scripts)
+         objects->addToken(OCODE_ACSE_STRING_TAG);
+
       break;
    }
 }

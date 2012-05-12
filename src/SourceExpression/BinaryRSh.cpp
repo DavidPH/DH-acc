@@ -56,7 +56,7 @@ public:
       CONSTRAINT_INTEGER(">>")
 
       exprR = create_value_cast_implicit
-      (exprR, VariableType::get_bt_uint(), context, pos);
+         (exprR, VariableType::get_bt_uns(), context, pos);
    }
 
    //

@@ -88,7 +88,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   VariableType::Reference srcType = VariableType::get_bt_boolhard();
+   VariableType::Reference srcType = VariableType::get_bt_bit_hrd();
    bigsint                 srcSize = srcType->getSize(pos);
 
    VariableData::Pointer src = VariableData::create_stack(srcSize);

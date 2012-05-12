@@ -70,7 +70,7 @@ private:
 
       // TODO: X + 0
 
-      if (bt == VariableType::BT_LLONG || bt == VariableType::BT_ULLONG)
+      if (bt == VariableType::BT_INT_LL || bt == VariableType::BT_UNS_LL)
          doEvaluateBaseLLAS(objects, dst, src, true);
       else
       {
@@ -116,16 +116,16 @@ SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
    CONSTRUCTOR_ARRAY_DECAY
 
    // Type constraints.
-   if (btL == VariableType::BT_POINTER || btR == VariableType::BT_POINTER)
+   if (btL == VariableType::BT_PTR || btR == VariableType::BT_PTR)
    {
       // Pointer constraints.
-      if (btL == VariableType::BT_POINTER && btR == VariableType::BT_POINTER)
+      if (btL == VariableType::BT_PTR && btR == VariableType::BT_PTR)
          ERROR_NP("pointer + pointer");
 
-      if (btL == VariableType::BT_POINTER && !VariableType::is_bt_integer(btR))
+      if (btL == VariableType::BT_PTR && !VariableType::is_bt_integer(btR))
          ERROR_NP("pointer + non-integer");
 
-      if (!VariableType::is_bt_integer(btL) && btR == VariableType::BT_POINTER)
+      if (!VariableType::is_bt_integer(btL) && btR == VariableType::BT_PTR)
          ERROR_NP("non-integer + pointer");
    }
    else
@@ -138,10 +138,10 @@ SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
 
    CONSTRUCTOR_POINTER_PREAMBLE
 
-   if (btL == VariableType::BT_POINTER)
+   if (btL == VariableType::BT_PTR)
       exprR = create_binary_mul(exprR, exprSize, context, pos);
 
-   if (btR == VariableType::BT_POINTER)
+   if (btR == VariableType::BT_PTR)
       exprL = create_binary_mul(exprL, exprSize, context, pos);
 }
 

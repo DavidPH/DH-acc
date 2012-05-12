@@ -47,37 +47,54 @@ static std::ostream &operator <<
 
 static std::string const basic_names[] =
 {
-   "BT_BOOLHARD",
-   "BT_BOOLSOFT",
-   "BT_CHAR",
-   "BT_FIXED",
-   "BT_FLOAT",
-   "BT_INT",
-   "BT_LABEL",
-   "BT_LFLOAT",
-   "BT_LLFLOAT",
-   "BT_LLONG",
-   "BT_LONG",
-   "BT_REAL",
-   "BT_SCHAR",
-   "BT_SHORT",
-   "BT_STRING",
-   "BT_UCHAR",
-   "BT_UINT",
-   "BT_ULLONG",
-   "BT_ULONG",
-   "BT_USHORT",
-
+   // Void type.
    "BT_VOID",
 
-   "BT_ARRAY",
-   "BT_NULLPTR",
-   "BT_POINTER",
+   // Arithmetic types.
+   "BT_BIT_HRD",
+   "BT_BIT_SFT",
 
+   "BT_CHR",
+
+   "BT_FIX_HH",
+   "BT_FIX_H",
+   "BT_FIX",
+   "BT_FIX_L",
+   "BT_FIX_LL",
+
+   "BT_FLT_HH",
+   "BT_FLT_H",
+   "BT_FLT",
+   "BT_FLT_L",
+   "BT_FLT_LL",
+
+   "BT_INT_HH",
+   "BT_INT_H",
+   "BT_INT",
+   "BT_INT_L",
+   "BT_INT_LL",
+
+   "BT_UNS_HH",
+   "BT_UNS_H",
+   "BT_UNS",
+   "BT_UNS_L",
+   "BT_UNS_LL",
+
+   // Special types.
+   "BT_LABEL",
+   "BT_STR",
+
+   // Reference types.
+   "BT_ARR",
+   "BT_PTR",
+   "BT_PTR_NUL",
+
+   // Named types.
    "BT_ENUM",
    "BT_STRUCT",
    "BT_UNION",
 
+   // Anonymous types.
    "BT_ASMFUNC",
    "BT_BLOCK",
    "BT_FUNCTION",
@@ -99,11 +116,66 @@ static std::ostream &operator <<
 {
    switch (type->getBasicType())
    {
-   case VariableType::BT_ARRAY:
+      // Void type.
+   case VariableType::BT_VOID:
+      out << type->getBasicType();
+      break;
+
+      // Arithmetic types.
+   case VariableType::BT_BIT_HRD:
+   case VariableType::BT_BIT_SFT:
+   case VariableType::BT_CHR:
+   case VariableType::BT_FIX_HH:
+   case VariableType::BT_FIX_H:
+   case VariableType::BT_FIX:
+   case VariableType::BT_FIX_L:
+   case VariableType::BT_FIX_LL:
+   case VariableType::BT_FLT_HH:
+   case VariableType::BT_FLT_H:
+   case VariableType::BT_FLT:
+   case VariableType::BT_FLT_L:
+   case VariableType::BT_FLT_LL:
+   case VariableType::BT_INT_HH:
+   case VariableType::BT_INT_H:
+   case VariableType::BT_INT:
+   case VariableType::BT_INT_L:
+   case VariableType::BT_INT_LL:
+   case VariableType::BT_UNS_HH:
+   case VariableType::BT_UNS_H:
+   case VariableType::BT_UNS:
+   case VariableType::BT_UNS_L:
+   case VariableType::BT_UNS_LL:
+      out << type->getBasicType();
+      break;
+
+      // Special types.
+   case VariableType::BT_LABEL:
+   case VariableType::BT_STR:
+      out << type->getBasicType();
+      break;
+
+      // Reference types.
+   case VariableType::BT_ARR:
       out << type->getReturn();
       out << '[' << type->getWidth() << ']';
       return out; // Don't show qualifiers on array.
 
+   case VariableType::BT_PTR:
+      out << type->getReturn() << " *";
+      break;
+
+   case VariableType::BT_PTR_NUL:
+      out << type->getBasicType();
+      break;
+
+      // Named types.
+   case VariableType::BT_ENUM:
+   case VariableType::BT_STRUCT:
+   case VariableType::BT_UNION:
+      out << type->getBasicType() << '{' << type->getName() << '}';
+      break;
+
+      // Anonymous types.
    case VariableType::BT_BLOCK:
       out << make_string(type->getBasicType());
       out << '{';
@@ -114,41 +186,6 @@ static std::ostream &operator <<
          out << types[i] << ';';
    }
       out << '}';
-      break;
-
-   case VariableType::BT_BOOLHARD:
-   case VariableType::BT_BOOLSOFT:
-   case VariableType::BT_CHAR:
-   case VariableType::BT_ENUM:
-   case VariableType::BT_FIXED:
-   case VariableType::BT_FLOAT:
-   case VariableType::BT_INT:
-   case VariableType::BT_LABEL:
-   case VariableType::BT_LFLOAT:
-   case VariableType::BT_LLFLOAT:
-   case VariableType::BT_LLONG:
-   case VariableType::BT_LONG:
-   case VariableType::BT_NULLPTR:
-   case VariableType::BT_REAL:
-   case VariableType::BT_SCHAR:
-   case VariableType::BT_SHORT:
-   case VariableType::BT_UCHAR:
-   case VariableType::BT_UINT:
-   case VariableType::BT_ULLONG:
-   case VariableType::BT_ULONG:
-   case VariableType::BT_USHORT:
-   case VariableType::BT_STRING:
-   case VariableType::BT_VOID:
-      out << type->getBasicType();
-      break;
-
-   case VariableType::BT_POINTER:
-      out << type->getReturn() << " *";
-      break;
-
-   case VariableType::BT_STRUCT:
-   case VariableType::BT_UNION:
-      out << type->getBasicType() << '{' << type->getName() << '}';
       break;
 
    case VariableType::BT_ASMFUNC:
@@ -181,8 +218,27 @@ static std::ostream &operator <<
    if (type->getQualifier(VariableType::QUAL_RESTRICT))
       out << " restrict";
 
-   if (type->getStoreType() != STORE_STATIC)
+   switch (type->getStoreType())
+   {
+   case STORE_STATIC:
+      break;
+
+   case STORE_AUTO:
+   case STORE_CONST:
+   case STORE_REGISTER:
+   case STORE_MAPREGISTER:
+   case STORE_WORLDREGISTER:
+   case STORE_GLOBALREGISTER:
       out << ' ' << make_string(type->getStoreType());
+      break;
+
+   case STORE_MAPARRAY:
+   case STORE_WORLDARRAY:
+   case STORE_GLOBALARRAY:
+      out << ' ' << make_string(type->getStoreType());
+      out << '(' << type->getStoreArea() << ')';
+      break;
+   }
 
    return out;
 }
@@ -258,49 +314,58 @@ VariableType::VariableType(BasicType _basic)
 {
    switch (basic)
    {
-   // Primitive types.
-   case BT_BOOLHARD:
-   case BT_BOOLSOFT:
-   case BT_CHAR:
-   case BT_FIXED:
-   case BT_FLOAT:
-   case BT_INT:
-   case BT_LABEL:
-   case BT_LFLOAT:
-   case BT_LLFLOAT:
-   case BT_LLONG:
-   case BT_LONG:
-   case BT_REAL:
-   case BT_SCHAR:
-   case BT_SHORT:
-   case BT_UCHAR:
-   case BT_UINT:
-   case BT_ULLONG:
-   case BT_ULONG:
-   case BT_USHORT:
-      break;
-
-   case BT_STRING:
-      typeRet = get_bt_char()->addQualifier(QUAL_CONST);
-      break;
-
+      // Void type.
    case BT_VOID:
       break;
 
-   // Reference types.
-   case BT_ARRAY:
-   case BT_NULLPTR:
-   case BT_POINTER:
+      // Arithmetic types.
+   case BT_BIT_HRD:
+   case BT_BIT_SFT:
+   case BT_CHR:
+   case BT_FIX_HH:
+   case BT_FIX_H:
+   case BT_FIX:
+   case BT_FIX_L:
+   case BT_FIX_LL:
+   case BT_FLT_HH:
+   case BT_FLT_H:
+   case BT_FLT:
+   case BT_FLT_L:
+   case BT_FLT_LL:
+   case BT_INT_HH:
+   case BT_INT_H:
+   case BT_INT:
+   case BT_INT_L:
+   case BT_INT_LL:
+   case BT_UNS_HH:
+   case BT_UNS_H:
+   case BT_UNS:
+   case BT_UNS_L:
+   case BT_UNS_LL:
       break;
 
-   // Named types.
+      // Special types.
+   case BT_LABEL:
+      break;
+
+   case BT_STR:
+      typeRet = get_bt_chr()->addQualifier(QUAL_CONST);
+      break;
+
+      // Reference types.
+   case BT_ARR:
+   case BT_PTR:
+   case BT_PTR_NUL:
+      break;
+
+      // Named types.
    case BT_ENUM:
    case BT_STRUCT:
    case BT_UNION:
       complete = false;
       break;
 
-   // Anonymous types.
+      // Anonymous types.
    case BT_ASMFUNC:
    case BT_BLOCK:
    case BT_FUNCTION:
@@ -316,60 +381,71 @@ VariableType::VariableType(BasicType _basic)
 //
 VariableType::~VariableType()
 {
+   // Unlink from type list.
    next->prev = prev;
    prev->next = next;
 
+   // Unlink from special list.
    specnext->specprev = specprev;
    specprev->specnext = specnext;
 
    switch (basic)
    {
-   // Primitive types.
-   case BT_BOOLHARD:
-   case BT_BOOLSOFT:
-   case BT_CHAR:
-   case BT_FIXED:
-   case BT_FLOAT:
-   case BT_INT:
-   case BT_LABEL:
-   case BT_LFLOAT:
-   case BT_LLFLOAT:
-   case BT_LLONG:
-   case BT_LONG:
-   case BT_REAL:
-   case BT_SCHAR:
-   case BT_SHORT:
-   case BT_STRING:
-   case BT_UCHAR:
-   case BT_UINT:
-   case BT_ULLONG:
-   case BT_ULONG:
-   case BT_USHORT:
-      break;
-
+      // Void type.
    case BT_VOID:
       break;
 
-   // Reference types.
-   case BT_ARRAY:
+   // Arithmetic types.
+   case BT_BIT_HRD:
+   case BT_BIT_SFT:
+   case BT_CHR:
+   case BT_FIX_HH:
+   case BT_FIX_H:
+   case BT_FIX:
+   case BT_FIX_L:
+   case BT_FIX_LL:
+   case BT_FLT_HH:
+   case BT_FLT_H:
+   case BT_FLT:
+   case BT_FLT_L:
+   case BT_FLT_LL:
+   case BT_INT_HH:
+   case BT_INT_H:
+   case BT_INT:
+   case BT_INT_L:
+   case BT_INT_LL:
+   case BT_UNS_HH:
+   case BT_UNS_H:
+   case BT_UNS:
+   case BT_UNS_L:
+   case BT_UNS_LL:
+      break;
+
+      // Special types.
+   case BT_LABEL:
+   case BT_STR:
+      break;
+
+      // Reference types.
+   case BT_ARR:
       if (typeRet->typeArr == this)
          typeRet->typeArr = specnext == this ? NULL : specnext;
       break;
 
-   case BT_NULLPTR:
-      break;
-
-   case BT_POINTER:
+   case BT_PTR:
       typeRet->typePtr = NULL;
       break;
 
-   // Named types.
+   case BT_PTR_NUL:
+      break;
+
+      // Named types.
    case BT_ENUM:
    case BT_STRUCT:
    case BT_UNION:
       break;
 
-   // Anonymous types.
+      // Anonymous types.
    case BT_ASMFUNC:
    case BT_BLOCK:
    case BT_FUNCTION:
@@ -391,7 +467,7 @@ VariableType::Reference VariableType::getArray(bigsint _width)
 {
    if (!typeArr)
    {
-      typeArr = new VariableType(BT_ARRAY);
+      typeArr = new VariableType(BT_ARR);
 
       typeArr->typeRet = static_cast<Reference>(this);
       typeArr->storeArea = storeArea;
@@ -410,9 +486,9 @@ VariableType::Reference VariableType::getArray(bigsint _width)
       if (iter == typeArr) break;
    }
 
-   Reference type(new VariableType(BT_ARRAY));
+   Reference type(new VariableType(BT_ARR));
 
-   type->typeRet = Reference(this);
+   type->typeRet = static_cast<Reference>(this);
    type->storeArea = storeArea;
    type->quals = quals;
    type->store = store;
@@ -432,10 +508,9 @@ VariableType::Reference VariableType::getArray(bigsint _width)
 //
 VariableType::Reference VariableType::getPointer()
 {
-   if (typePtr)
-      return static_cast<Reference>(typePtr);
+   if (typePtr) return static_cast<Reference>(typePtr);
 
-   typePtr = new VariableType(BT_POINTER);
+   typePtr = new VariableType(BT_PTR);
 
    typePtr->typeRet = Reference(this);
 
@@ -450,7 +525,7 @@ VariableType::Reference VariableType::setQualifier(unsigned _quals)
    if (quals == _quals)
       return static_cast<Reference>(this);
 
-   if (basic == BT_ARRAY)
+   if (basic == BT_ARR)
       return typeRet->setQualifier(_quals)->getArray(width);
 
    for (VariableType *iter = next; iter != this; iter = iter->next)
@@ -478,7 +553,7 @@ VariableType::Reference VariableType::setQualifier(unsigned _quals)
 //
 VariableType::Reference VariableType::setStorage(StoreType _store)
 {
-   static std::string _storeArea;
+   static std::string const _storeArea;
    return setStorage(_store, _storeArea);
 }
 
@@ -491,7 +566,7 @@ VariableType::Reference VariableType::setStorage
    if (store == _store && storeArea == _storeArea)
       return static_cast<Reference>(this);
 
-   if (basic == BT_ARRAY)
+   if (basic == BT_ARR)
       return typeRet->setStorage(_store, _storeArea)->getArray(width);
 
    for (VariableType *iter = next; iter != this; iter = iter->next)
@@ -537,39 +612,44 @@ void VariableType::getNameMangled(std::string &out) const
 
    switch (basic)
    {
-   case BT_ARRAY:    out += "A{"; RETRN; out += "}:["; WIDTH; out += ']'; break;
+   case BT_ARR:      out += "A{"; RETRN; out += "}:["; WIDTH; out += ']'; break;
    case BT_BLOCK:    out += "B{"; TYPES; out += '}'; break;
-   case BT_BOOLHARD: out += 'B'; break;
-   case BT_BOOLSOFT: out += "BS"; break;
-   case BT_CHAR:     out += 'C'; break;
+   case BT_BIT_HRD:  out += 'B'; break;
+   case BT_BIT_SFT:  out += "BS"; break;
+   case BT_CHR:      out += 'C'; break;
    case BT_ENUM:     out += "E("; out += name; out += ')'; break;
-   case BT_FLOAT:    out += 'F'; break;
-   case BT_LFLOAT:   out += "FL"; break;
-   case BT_LLFLOAT:  out += "FLL"; break;
+   case BT_FLT_HH:   out += "FHH"; break;
+   case BT_FLT_H:    out += "FH"; break;
+   case BT_FLT:      out += 'F'; break;
+   case BT_FLT_L:    out += "FL"; break;
+   case BT_FLT_LL:   out += "FLL"; break;
    case BT_FUNCTION: out += "F{"; TYPES; out += '}'; break;
    case BT_ASMFUNC:  out += "FA{"; TYPES; out += '}'; break;
    case BT_LINESPEC: out += "FL{"; TYPES; out += '}'; break;
    case BT_NATIVE:   out += "FN{"; TYPES; out += '}'; break;
    case BT_SCRIPT:   out += "FS{"; TYPES; out += '}'; break;
-   case BT_SCHAR:    out += "IHH"; break;
-   case BT_SHORT:    out += "IH"; break;
+   case BT_INT_HH:   out += "IHH"; break;
+   case BT_INT_H:    out += "IH"; break;
    case BT_INT:      out += 'I'; break;
-   case BT_LONG:     out += "IL"; break;
-   case BT_LLONG:    out += "ILL"; break;
+   case BT_INT_L:    out += "IL"; break;
+   case BT_INT_LL:   out += "ILL"; break;
    case BT_LABEL:    out += "LABEL"; break;
-   case BT_POINTER:  out += "P{"; RETRN; out += '}'; break;
-   case BT_NULLPTR:  out += "PN"; break;
-   case BT_REAL:     out += 'R'; break;
-   case BT_STRING:   out += 'S'; break;
+   case BT_PTR:      out += "P{"; RETRN; out += '}'; break;
+   case BT_PTR_NUL:  out += "PN"; break;
+   case BT_STR:      out += 'S'; break;
    case BT_STRUCT:   out += "S("; out += name; out += ')'; break;
-   case BT_UCHAR:    out += "UHH"; break;
-   case BT_USHORT:   out += "UH"; break;
-   case BT_UINT:     out += 'U'; break;
-   case BT_ULONG:    out += "UL"; break;
-   case BT_ULLONG:   out += "ULL"; break;
+   case BT_UNS_HH:   out += "UHH"; break;
+   case BT_UNS_H:    out += "UH"; break;
+   case BT_UNS:      out += 'U'; break;
+   case BT_UNS_L:    out += "UL"; break;
+   case BT_UNS_LL:   out += "ULL"; break;
    case BT_UNION:    out += "U("; out += name; out += ')'; break;
    case BT_VOID:     out += 'V'; break;
-   case BT_FIXED:    out += 'X'; break;
+   case BT_FIX_HH:   out += "XHH"; break;
+   case BT_FIX_H:    out += "XH"; break;
+   case BT_FIX:      out += 'X'; break;
+   case BT_FIX_L:    out += "XL"; break;
+   case BT_FIX_LL:   out += "XLL"; break;
    }
 
    if (getQualifier(QUAL_CONST))    out += 'c';
@@ -605,15 +685,55 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
 
    switch (basic)
    {
-   case BT_ARRAY:
-      return width ? typeRet->getSize(pos) * width : 0;
-
-   case BT_ASMFUNC:
    case BT_VOID:
+   case BT_ASMFUNC:
       return 0;
 
-   case BT_BLOCK:
+   case BT_BIT_HRD:
+   case BT_BIT_SFT:
+   case BT_CHR:
+   case BT_FIX_HH:
+   case BT_FIX_H:
+   case BT_FIX:
+   case BT_FIX_L:
+   case BT_FIX_LL:
+   case BT_FLT_HH:
+   case BT_FLT_H:
+   case BT_FLT:
+   case BT_INT_HH:
+   case BT_INT_H:
+   case BT_INT:
+   case BT_INT_L:
+   case BT_UNS_HH:
+   case BT_UNS_H:
+   case BT_UNS:
+   case BT_UNS_L:
+
+   case BT_LABEL:
+   case BT_STR:
+
+   case BT_PTR_NUL:
+   case BT_PTR:
+
+   case BT_ENUM:
+
+   case BT_FUNCTION:
+   case BT_LINESPEC:
+   case BT_NATIVE:
+   case BT_SCRIPT:
+      return 1;
+
+   case BT_FLT_L:
+   case BT_FLT_LL:
+   case BT_INT_LL:
+   case BT_UNS_LL:
+      return 2;
+
+   case BT_ARR:
+      return width ? typeRet->getSize(pos) * width : 0;
+
    case BT_STRUCT:
+   case BT_BLOCK:
    {
       bigsint size = 0;
       for (Vector::const_iterator iter = types.begin(); iter != types.end();
@@ -621,37 +741,6 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
          size += (*iter)->getSize(pos);
       return size;
    }
-
-   case BT_BOOLHARD:
-   case BT_BOOLSOFT:
-   case BT_CHAR:
-   case BT_ENUM:
-   case BT_FIXED:
-   case BT_FLOAT:
-   case BT_FUNCTION:
-   case BT_INT:
-   case BT_LABEL:
-   case BT_LINESPEC:
-   case BT_LONG:
-   case BT_NATIVE:
-   case BT_NULLPTR:
-   case BT_POINTER:
-   case BT_REAL:
-   case BT_SCHAR:
-   case BT_SCRIPT:
-   case BT_SHORT:
-   case BT_STRING:
-   case BT_UCHAR:
-   case BT_UINT:
-   case BT_ULONG:
-   case BT_USHORT:
-      return 1;
-
-   case BT_LFLOAT:
-   case BT_LLFLOAT:
-   case BT_LLONG:
-   case BT_ULLONG:
-      return 2;
 
    case BT_UNION:
    {
@@ -736,47 +825,139 @@ VariableType::Reference VariableType::getType
 }
 
 //===================================================================
-// Basic types
+// Void type
 //
 
 //
-// VariableType::get_bt_boolhard
+// VariableType::get_bt_void
 //
-VariableType::Reference VariableType::get_bt_boolhard()
+VariableType::Reference VariableType::get_bt_void()
 {
-   static Reference type(new VariableType(BT_BOOLHARD)); return type;
+   static Reference type(new VariableType); return type;
+}
+
+//===================================================================
+// Arithmetic types
+//
+
+//
+// VariableType::get_bt_bit_hrd
+//
+VariableType::Reference VariableType::get_bt_bit_hrd()
+{
+   static Reference type(new VariableType(BT_BIT_HRD)); return type;
 }
 
 //
-// VariableType::get_bt_boolsoft
+// VariableType::get_bt_bit_sft
 //
-VariableType::Reference VariableType::get_bt_boolsoft()
+VariableType::Reference VariableType::get_bt_bit_sft()
 {
-   static Reference type(new VariableType(BT_BOOLSOFT)); return type;
+   static Reference type(new VariableType(BT_BIT_SFT)); return type;
 }
 
 //
-// VariableType::get_bt_char
+// VariableType::get_bt_chr
 //
-VariableType::Reference VariableType::get_bt_char()
+VariableType::Reference VariableType::get_bt_chr()
 {
-   static Reference type(new VariableType(BT_CHAR)); return type;
+   static Reference type(new VariableType(BT_CHR)); return type;
 }
 
 //
-// VariableType::get_bt_fixed
+// VariableType::get_bt_fix_hh
 //
-VariableType::Reference VariableType::get_bt_fixed()
+VariableType::Reference VariableType::get_bt_fix_hh()
 {
-   static Reference type(new VariableType(BT_FIXED)); return type;
+   static Reference type(new VariableType(BT_FIX_HH)); return type;
 }
 
 //
-// VariableType::get_bt_float
+// VariableType::get_bt_fix_h
 //
-VariableType::Reference VariableType::get_bt_float()
+VariableType::Reference VariableType::get_bt_fix_h()
 {
-   static Reference type(new VariableType(BT_FLOAT)); return type;
+   static Reference type(new VariableType(BT_FIX_H)); return type;
+}
+
+//
+// VariableType::get_bt_fix
+//
+VariableType::Reference VariableType::get_bt_fix()
+{
+   static Reference type(new VariableType(BT_FIX)); return type;
+}
+
+//
+// VariableType::get_bt_fix_l
+//
+VariableType::Reference VariableType::get_bt_fix_l()
+{
+   static Reference type(new VariableType(BT_FIX_L)); return type;
+}
+
+//
+// VariableType::get_bt_fix_ll
+//
+VariableType::Reference VariableType::get_bt_fix_ll()
+{
+   static Reference type(new VariableType(BT_FIX_LL)); return type;
+}
+
+//
+// VariableType::get_bt_flt_hh
+//
+VariableType::Reference VariableType::get_bt_flt_hh()
+{
+   static Reference type(new VariableType(BT_FLT_HH)); return type;
+}
+
+//
+// VariableType::get_bt_flt_h
+//
+VariableType::Reference VariableType::get_bt_flt_h()
+{
+   static Reference type(new VariableType(BT_FLT_H)); return type;
+}
+
+//
+// VariableType::get_bt_flt
+//
+VariableType::Reference VariableType::get_bt_flt()
+{
+   static Reference type(new VariableType(BT_FLT)); return type;
+}
+
+//
+// VariableType::get_bt_flt_l
+//
+VariableType::Reference VariableType::get_bt_flt_l()
+{
+   static Reference type(new VariableType(BT_FLT_L)); return type;
+}
+
+//
+// VariableType::get_bt_flt_ll
+//
+VariableType::Reference VariableType::get_bt_flt_ll()
+{
+   static Reference type(new VariableType(BT_FLT_LL)); return type;
+}
+
+//
+// VariableType::get_bt_int_hh
+//
+VariableType::Reference VariableType::get_bt_int_hh()
+{
+   static Reference type(new VariableType(BT_INT_HH)); return type;
+}
+
+//
+// VariableType::get_bt_int_h
+//
+VariableType::Reference VariableType::get_bt_int_h()
+{
+   static Reference type(new VariableType(BT_INT_H)); return type;
 }
 
 //
@@ -788,6 +969,66 @@ VariableType::Reference VariableType::get_bt_int()
 }
 
 //
+// VariableType::get_bt_int_l
+//
+VariableType::Reference VariableType::get_bt_int_l()
+{
+   static Reference type(new VariableType(BT_INT_L)); return type;
+}
+
+//
+// VariableType::get_bt_int_ll
+//
+VariableType::Reference VariableType::get_bt_int_ll()
+{
+   static Reference type(new VariableType(BT_INT_LL)); return type;
+}
+
+//
+// VariableType::get_bt_uns_hh
+//
+VariableType::Reference VariableType::get_bt_uns_hh()
+{
+   static Reference type(new VariableType(BT_UNS_HH)); return type;
+}
+
+//
+// VariableType::get_bt_uns_h
+//
+VariableType::Reference VariableType::get_bt_uns_h()
+{
+   static Reference type(new VariableType(BT_UNS_H)); return type;
+}
+
+//
+// VariableType::get_bt_uns
+//
+VariableType::Reference VariableType::get_bt_uns()
+{
+   static Reference type(new VariableType(BT_UNS)); return type;
+}
+
+//
+// VariableType::get_bt_uns_l
+//
+VariableType::Reference VariableType::get_bt_uns_l()
+{
+   static Reference type(new VariableType(BT_UNS_L)); return type;
+}
+
+//
+// VariableType::get_bt_uns_ll
+//
+VariableType::Reference VariableType::get_bt_uns_ll()
+{
+   static Reference type(new VariableType(BT_UNS_LL)); return type;
+}
+
+//===================================================================
+// Special types
+//
+
+//
 // VariableType::get_bt_label
 //
 VariableType::Reference VariableType::get_bt_label()
@@ -796,115 +1037,11 @@ VariableType::Reference VariableType::get_bt_label()
 }
 
 //
-// VariableType::get_bt_lfloat
+// VariableType::get_bt_str
 //
-VariableType::Reference VariableType::get_bt_lfloat()
+VariableType::Reference VariableType::get_bt_str()
 {
-   static Reference type(new VariableType(BT_LFLOAT)); return type;
-}
-
-//
-// VariableType::get_bt_llfloat
-//
-VariableType::Reference VariableType::get_bt_llfloat()
-{
-   static Reference type(new VariableType(BT_LLFLOAT)); return type;
-}
-
-//
-// VariableType::get_bt_llong
-//
-VariableType::Reference VariableType::get_bt_llong()
-{
-   static Reference type(new VariableType(BT_LLONG)); return type;
-}
-
-//
-// VariableType::get_bt_long
-//
-VariableType::Reference VariableType::get_bt_long()
-{
-   static Reference type(new VariableType(BT_LONG)); return type;
-}
-
-//
-// VariableType::get_bt_real
-//
-VariableType::Reference VariableType::get_bt_real()
-{
-   static Reference type(new VariableType(BT_REAL)); return type;
-}
-
-//
-// VariableType::get_bt_schar
-//
-VariableType::Reference VariableType::get_bt_schar()
-{
-   static Reference type(new VariableType(BT_SCHAR)); return type;
-}
-
-//
-// VariableType::get_bt_short
-//
-VariableType::Reference VariableType::get_bt_short()
-{
-   static Reference type(new VariableType(BT_SHORT)); return type;
-}
-
-//
-// VariableType::get_bt_string
-//
-VariableType::Reference VariableType::get_bt_string()
-{
-   static Reference type(new VariableType(BT_STRING)); return type;
-}
-
-//
-// VariableType::get_bt_uchar
-//
-VariableType::Reference VariableType::get_bt_uchar()
-{
-   static Reference type(new VariableType(BT_UCHAR)); return type;
-}
-
-//
-// VariableType::get_bt_uint
-//
-VariableType::Reference VariableType::get_bt_uint()
-{
-   static Reference type(new VariableType(BT_UINT)); return type;
-}
-
-//
-// VariableType::get_bt_ullong
-//
-VariableType::Reference VariableType::get_bt_ullong()
-{
-   static Reference type(new VariableType(BT_ULLONG)); return type;
-}
-
-//
-// VariableType::get_bt_ulong
-//
-VariableType::Reference VariableType::get_bt_ulong()
-{
-   static Reference type(new VariableType(BT_ULONG)); return type;
-}
-
-//
-// VariableType::get_bt_ushort
-//
-VariableType::Reference VariableType::get_bt_ushort()
-{
-   static Reference type(new VariableType(BT_USHORT)); return type;
-}
-
-//
-// VariableType::get_bt_void
-//
-VariableType::Reference VariableType::get_bt_void()
-{
-   static Reference type(new VariableType); return type;
+   static Reference type(new VariableType(BT_STR)); return type;
 }
 
 //===================================================================
@@ -912,11 +1049,11 @@ VariableType::Reference VariableType::get_bt_void()
 //
 
 //
-// VariableType::get_bt_nullptr
+// VariableType::get_bt_ptr_nul
 //
-VariableType::Reference VariableType::get_bt_nullptr()
+VariableType::Reference VariableType::get_bt_ptr_nul()
 {
-   static Reference type(new VariableType(BT_NULLPTR)); return type;
+   static Reference type(new VariableType(BT_PTR_NUL)); return type;
 }
 
 //===================================================================
@@ -991,6 +1128,18 @@ VariableType::Reference VariableType::get_bt_anonymous
 }
 
 //
+// VariableType::get_bt_block
+//
+VariableType::Reference VariableType::get_bt_block(Vector const &types)
+{
+   static Reference type(new VariableType(BT_BLOCK));
+
+   if (types.empty()) return type;
+
+   return get_bt_anonymous(types, get_bt_void(), type, BT_BLOCK);
+}
+
+//
 // VariableType::get_bt_asmfunc
 //
 VariableType::Reference VariableType::get_bt_asmfunc
@@ -1001,18 +1150,6 @@ VariableType::Reference VariableType::get_bt_asmfunc
    if (types.empty() && typeRet->basic == BT_VOID) return type;
 
    return get_bt_anonymous(types, typeRet, type, BT_ASMFUNC);
-}
-
-//
-// VariableType::get_bt_block
-//
-VariableType::Reference VariableType::get_bt_block(Vector const &types)
-{
-   static Reference type(new VariableType(BT_BLOCK));
-
-   if (types.empty()) return type;
-
-   return get_bt_anonymous(types, get_bt_void(), type, BT_BLOCK);
 }
 
 //
@@ -1083,25 +1220,25 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
    BasicType srcBT = src->getBasicType();
 
    // Just pretend it's a pointer.
-   if (dstBT == BT_POINTER && srcBT == BT_ARRAY)
-      srcBT = BT_POINTER;
+   if (dstBT == BT_PTR && srcBT == BT_ARR)
+      srcBT = BT_PTR;
 
    if (dstBT != srcBT)
    {
       // nullptr->pointer
-      if (srcBT == BT_NULLPTR && dstBT == BT_POINTER)
+      if (srcBT == BT_PTR_NUL && dstBT == BT_PTR)
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
       // nullptr->function
-      if (srcBT == BT_NULLPTR && is_bt_function(dstBT))
+      if (srcBT == BT_PTR_NUL && is_bt_function(dstBT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
       // pointer->boolean
-      if (srcBT == BT_POINTER && (dstBT == BT_BOOLHARD || dstBT == BT_BOOLSOFT))
+      if (srcBT == BT_PTR && (dstBT == BT_BIT_HRD || dstBT == BT_BIT_SFT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
       // function->boolean
-      if (is_bt_function(srcBT) && (dstBT == BT_BOOLHARD || dstBT == BT_BOOLSOFT))
+      if (is_bt_function(srcBT) && (dstBT == BT_BIT_HRD || dstBT == BT_BIT_SFT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
       // arithmetic<->arithmetic
@@ -1113,7 +1250,7 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
          return CAST_EXPLICIT|CAST_REINTERPRET;
 
       // block->array,struct
-      if (srcBT == BT_BLOCK && (dstBT == BT_ARRAY || dstBT == BT_STRUCT))
+      if (srcBT == BT_BLOCK && (dstBT == BT_ARR || dstBT == BT_STRUCT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
       // enum->int
@@ -1129,11 +1266,11 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
          return CAST_EXPLICIT;
 
       // int->pointer
-      if (is_bt_integer(srcBT) && dstBT == BT_POINTER)
+      if (is_bt_integer(srcBT) && dstBT == BT_PTR)
          return CAST_EXPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
       // pointer->int
-      if (srcBT == BT_POINTER && (is_bt_integer(dstBT) && dstBT != BT_ENUM))
+      if (srcBT == BT_PTR && (is_bt_integer(dstBT) && dstBT != BT_ENUM))
          return CAST_EXPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
 
@@ -1147,7 +1284,7 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
    }
    else switch (dstBT)
    {
-   case BT_ARRAY:
+   case BT_ARR:
    case BT_BLOCK:
    case BT_STRUCT:
    case BT_UNION:
@@ -1160,27 +1297,32 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
    case BT_SCRIPT:
       return CAST_EXPLICIT|CAST_REINTERPRET;
 
-   case BT_BOOLHARD:
-   case BT_BOOLSOFT:
-   case BT_CHAR:
-   case BT_FIXED:
-   case BT_FLOAT:
+   case BT_BIT_HRD:
+   case BT_BIT_SFT:
+   case BT_CHR:
+   case BT_FIX_HH:
+   case BT_FIX_H:
+   case BT_FIX:
+   case BT_FIX_L:
+   case BT_FIX_LL:
+   case BT_FLT_HH:
+   case BT_FLT_H:
+   case BT_FLT:
+   case BT_FLT_L:
+   case BT_FLT_LL:
+   case BT_INT_HH:
+   case BT_INT_H:
    case BT_INT:
+   case BT_INT_L:
+   case BT_INT_LL:
    case BT_LABEL:
-   case BT_LFLOAT:
-   case BT_LLFLOAT:
-   case BT_LLONG:
-   case BT_LONG:
-   case BT_NULLPTR:
-   case BT_REAL:
-   case BT_SCHAR:
-   case BT_STRING:
-   case BT_SHORT:
-   case BT_UCHAR:
-   case BT_UINT:
-   case BT_ULLONG:
-   case BT_ULONG:
-   case BT_USHORT:
+   case BT_PTR_NUL:
+   case BT_STR:
+   case BT_UNS_HH:
+   case BT_UNS_H:
+   case BT_UNS:
+   case BT_UNS_L:
+   case BT_UNS_LL:
    case BT_VOID:
       // Should have been handled by the previous equality test...
       return CAST_ANY;
@@ -1188,7 +1330,7 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
    case BT_ENUM:
       return CAST_EXPLICIT|CAST_REINTERPRET;
 
-   case BT_POINTER:
+   case BT_PTR:
    {
       Reference dstR = dst->getReturn();
       Reference srcR = src->getReturn();
@@ -1267,24 +1409,48 @@ bool VariableType::is_bt_arithmetic(BasicType type)
 {
    switch (type)
    {
-   case BT_BOOLHARD:
-   case BT_BOOLSOFT:
-   case BT_CHAR:
-   case BT_FIXED:
-   case BT_FLOAT:
+   case BT_BIT_HRD:
+   case BT_BIT_SFT:
+   case BT_CHR:
+   case BT_FIX_HH:
+   case BT_FIX_H:
+   case BT_FIX:
+   case BT_FIX_L:
+   case BT_FIX_LL:
+   case BT_FLT_HH:
+   case BT_FLT_H:
+   case BT_FLT:
+   case BT_FLT_L:
+   case BT_FLT_LL:
+   case BT_INT_HH:
+   case BT_INT_H:
    case BT_INT:
-   case BT_LFLOAT:
-   case BT_LLFLOAT:
-   case BT_LLONG:
-   case BT_LONG:
-   case BT_REAL:
-   case BT_SCHAR:
-   case BT_SHORT:
-   case BT_UCHAR:
-   case BT_UINT:
-   case BT_ULLONG:
-   case BT_ULONG:
-   case BT_USHORT:
+   case BT_INT_L:
+   case BT_INT_LL:
+   case BT_UNS_HH:
+   case BT_UNS_H:
+   case BT_UNS:
+   case BT_UNS_L:
+   case BT_UNS_LL:
+      return true;
+
+   default:
+      return false;
+   }
+}
+
+//
+// VariableType::is_bt_fix
+//
+bool VariableType::is_bt_fix(BasicType type)
+{
+   switch (type)
+   {
+   case BT_FIX_HH:
+   case BT_FIX_H:
+   case BT_FIX:
+   case BT_FIX_L:
+   case BT_FIX_LL:
       return true;
 
    default:
@@ -1318,20 +1484,21 @@ bool VariableType::is_bt_integer(BasicType type)
 {
    switch (type)
    {
-   case BT_BOOLHARD:
-   case BT_BOOLSOFT:
-   case BT_CHAR:
-   case BT_ENUM:
+   case BT_BIT_HRD:
+   case BT_BIT_SFT:
+   case BT_CHR:
+   case BT_INT_HH:
+   case BT_INT_H:
    case BT_INT:
-   case BT_LLONG:
-   case BT_LONG:
-   case BT_SCHAR:
-   case BT_SHORT:
-   case BT_UCHAR:
-   case BT_UINT:
-   case BT_ULLONG:
-   case BT_ULONG:
-   case BT_USHORT:
+   case BT_INT_L:
+   case BT_INT_LL:
+   case BT_UNS_HH:
+   case BT_UNS_H:
+   case BT_UNS:
+   case BT_UNS_L:
+   case BT_UNS_LL:
+
+   case BT_ENUM:
       return true;
 
    default:
@@ -1346,19 +1513,22 @@ bool VariableType::is_bt_unsigned(BasicType type)
 {
    switch (type)
    {
-   case BT_BOOLHARD:
-   case BT_BOOLSOFT:
+   case BT_BIT_HRD:
+   case BT_BIT_SFT:
+   case BT_UNS_HH:
+   case BT_UNS_H:
+   case BT_UNS:
+   case BT_UNS_L:
+   case BT_UNS_LL:
+
+   case BT_STR:
+
+   case BT_PTR:
+
    case BT_FUNCTION:
    case BT_LINESPEC:
    case BT_NATIVE:
-   case BT_POINTER:
    case BT_SCRIPT:
-   case BT_STRING:
-   case BT_UCHAR:
-   case BT_UINT:
-   case BT_ULLONG:
-   case BT_ULONG:
-   case BT_USHORT:
       return true;
 
    default:

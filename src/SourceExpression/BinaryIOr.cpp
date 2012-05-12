@@ -74,7 +74,7 @@ private:
    {
       EVALUATE_BITWISE_VARS(BITWISE_IOR)
 
-      if (bt == VariableType::BT_LLONG || bt == VariableType::BT_ULLONG)
+      if (bt == VariableType::BT_INT_LL || bt == VariableType::BT_UNS_LL)
          doEvaluateBaseLLB(objects, dst, src, OCODE_SETOP_IOR_TEMP);
       else
          doEvaluateBase(objects, dst, src, ocode);

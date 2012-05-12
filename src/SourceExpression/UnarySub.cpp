@@ -116,25 +116,28 @@ void SourceExpression_UnarySub::virtual_makeObjects
 
    switch (bt)
    {
-   case VariableType::BT_CHAR:
+   case VariableType::BT_CHR:
+   case VariableType::BT_INT_HH:
+   case VariableType::BT_INT_H:
    case VariableType::BT_INT:
-   case VariableType::BT_LONG:
-   case VariableType::BT_SCHAR:
-   case VariableType::BT_SHORT:
-   case VariableType::BT_UCHAR:
-   case VariableType::BT_UINT:
-   case VariableType::BT_ULONG:
-   case VariableType::BT_USHORT:
+   case VariableType::BT_INT_L:
+   case VariableType::BT_UNS_HH:
+   case VariableType::BT_UNS_H:
+   case VariableType::BT_UNS:
+   case VariableType::BT_UNS_L:
       objects->addToken(OCODE_MISC_NEGATE32I);
       break;
 
-   case VariableType::BT_FIXED:
-   case VariableType::BT_REAL:
+   case VariableType::BT_FIX_HH:
+   case VariableType::BT_FIX_H:
+   case VariableType::BT_FIX:
+   case VariableType::BT_FIX_L:
+   case VariableType::BT_FIX_LL:
       objects->addToken(OCODE_MISC_NEGATE32F);
       break;
 
-   case VariableType::BT_LLONG:
-   case VariableType::BT_ULLONG:
+   case VariableType::BT_INT_LL:
+   case VariableType::BT_UNS_LL:
    {
       std::string label = context->makeLabel();
       std::string labelEnd = label + "_end";

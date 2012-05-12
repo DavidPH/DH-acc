@@ -204,7 +204,7 @@ void SourceExpression_ValueBlock::virtual_makeObjectsCast
    bigsint               tmpSize = type->getSize(pos);
    VariableData::Pointer tmp     = VariableData::create_stack(tmpSize);
 
-   if (dstType->getBasicType() == VariableType::BT_ARRAY)
+   if (dstType->getBasicType() == VariableType::BT_ARR)
    {
       make_objects_memcpy_prep(objects, dst, tmp, pos);
 

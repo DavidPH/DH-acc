@@ -46,49 +46,51 @@ static ObjectExpression::Pointer make_object
 
    switch (type->getBasicType())
    {
-   case VariableType::BT_ARRAY:
+   case VariableType::BT_VOID:
+      ERROR_P("make_object BT_VOID");
+
+   case VariableType::BT_BIT_HRD:
+   case VariableType::BT_BIT_SFT:
+   case VariableType::BT_CHR:
+   case VariableType::BT_INT_HH:
+   case VariableType::BT_INT_H:
+   case VariableType::BT_INT:
+   case VariableType::BT_INT_L:
+   case VariableType::BT_INT_LL:
+   case VariableType::BT_UNS_HH:
+   case VariableType::BT_UNS_H:
+   case VariableType::BT_UNS:
+   case VariableType::BT_UNS_L:
+   case VariableType::BT_UNS_LL:
+      return ObjectExpression::create_value_int(0, pos);
+
+   case VariableType::BT_FIX_HH:
+   case VariableType::BT_FIX_H:
+   case VariableType::BT_FIX:
+   case VariableType::BT_FIX_L:
+   case VariableType::BT_FIX_LL:
+   case VariableType::BT_FLT_HH:
+   case VariableType::BT_FLT_H:
+   case VariableType::BT_FLT:
+   case VariableType::BT_FLT_L:
+   case VariableType::BT_FLT_LL:
+      return ObjectExpression::create_value_float(0, pos);
+
+   case VariableType::BT_LABEL:
+   case VariableType::BT_STR:
+      return ObjectExpression::create_value_int(0, pos);
+
+   case VariableType::BT_ARR:
       for (bigsint i = type->getWidth(); i--;)
          elems.push_back(make_object(type->getReturn(), pos));
       return ObjectExpression::create_value_array(elems, pos);
 
-   case VariableType::BT_ASMFUNC:
-      ERROR_P("make_object BT_ASMFUNC");
-
-   case VariableType::BT_BLOCK:
-      for (iter = types.begin(); iter != types.end(); ++iter)
-         elems.push_back(make_object(*iter, pos));
-      return ObjectExpression::create_value_array(elems, pos);
-
-   case VariableType::BT_BOOLHARD:
-   case VariableType::BT_BOOLSOFT:
-   case VariableType::BT_CHAR:
-   case VariableType::BT_ENUM:
-   case VariableType::BT_FUNCTION:
-   case VariableType::BT_INT:
-   case VariableType::BT_LABEL:
-   case VariableType::BT_LINESPEC:
-   case VariableType::BT_LLONG:
-   case VariableType::BT_LONG:
-   case VariableType::BT_NATIVE:
-   case VariableType::BT_NULLPTR:
-   case VariableType::BT_POINTER:
-   case VariableType::BT_SCHAR:
-   case VariableType::BT_SCRIPT:
-   case VariableType::BT_SHORT:
-   case VariableType::BT_STRING:
-   case VariableType::BT_UCHAR:
-   case VariableType::BT_UINT:
-   case VariableType::BT_ULLONG:
-   case VariableType::BT_ULONG:
-   case VariableType::BT_USHORT:
+   case VariableType::BT_PTR:
+   case VariableType::BT_PTR_NUL:
       return ObjectExpression::create_value_int(0, pos);
 
-   case VariableType::BT_FIXED:
-   case VariableType::BT_FLOAT:
-   case VariableType::BT_LFLOAT:
-   case VariableType::BT_LLFLOAT:
-   case VariableType::BT_REAL:
-      return ObjectExpression::create_value_float(0, pos);
+   case VariableType::BT_ENUM:
+      return ObjectExpression::create_value_int(0, pos);
 
    case VariableType::BT_STRUCT:
       for (iter = types.begin(); iter != types.end(); ++iter)
@@ -98,8 +100,19 @@ static ObjectExpression::Pointer make_object
    case VariableType::BT_UNION:
       ERROR_P("make_object BT_UNION");
 
-   case VariableType::BT_VOID:
-      ERROR_P("make_object BT_VOID");
+   case VariableType::BT_BLOCK:
+      for (iter = types.begin(); iter != types.end(); ++iter)
+         elems.push_back(make_object(*iter, pos));
+      return ObjectExpression::create_value_array(elems, pos);
+
+   case VariableType::BT_ASMFUNC:
+      ERROR_P("make_object BT_ASMFUNC");
+
+   case VariableType::BT_FUNCTION:
+   case VariableType::BT_LINESPEC:
+   case VariableType::BT_NATIVE:
+   case VariableType::BT_SCRIPT:
+      return ObjectExpression::create_value_int(0, pos);
    }
 
    ERROR_P("unknown BT");
@@ -128,13 +141,217 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
 
    switch (srcBT)
    {
-   case VariableType::BT_ARRAY:
-   case VariableType::BT_ASMFUNC:
+   case VariableType::BT_VOID:
+   case VariableType::BT_ARR:
    case VariableType::BT_STRUCT:
    case VariableType::BT_UNION:
-   case VariableType::BT_VOID:
+   case VariableType::BT_ASMFUNC:
+   case_src_bad:
       ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
               make_string(dstType).c_str());
+
+   case VariableType::BT_BIT_HRD:
+   case VariableType::BT_CHR:
+   case VariableType::BT_INT_HH:
+   case VariableType::BT_INT_H:
+   case VariableType::BT_INT:
+   case VariableType::BT_INT_L:
+   case VariableType::BT_INT_LL:
+   case VariableType::BT_UNS_HH:
+   case VariableType::BT_UNS_H:
+   case VariableType::BT_UNS:
+   case VariableType::BT_UNS_L:
+   case VariableType::BT_UNS_LL:
+   case VariableType::BT_LABEL:
+   case VariableType::BT_STR:
+   case VariableType::BT_PTR_NUL:
+   case VariableType::BT_ENUM:
+   case VariableType::BT_FUNCTION:
+   case VariableType::BT_LINESPEC:
+   case VariableType::BT_NATIVE:
+   case VariableType::BT_SCRIPT:
+   case_src_int:
+      switch (dstBT)
+      {
+      case VariableType::BT_VOID:
+      case VariableType::BT_ARR:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_ASMFUNC:
+         goto case_src_bad;
+
+      case VariableType::BT_BIT_HRD:
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         break;
+
+      case VariableType::BT_BIT_SFT:
+      case VariableType::BT_CHR:
+      case VariableType::BT_INT_HH:
+      case VariableType::BT_INT_H:
+      case VariableType::BT_INT:
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_UNS_HH:
+      case VariableType::BT_UNS_H:
+      case VariableType::BT_UNS:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_STR:
+      case VariableType::BT_PTR:
+      case VariableType::BT_PTR_NUL:
+      case VariableType::BT_ENUM:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_SCRIPT:
+         break;
+
+      case VariableType::BT_FIX_HH:
+      case VariableType::BT_FIX_H:
+      case VariableType::BT_FIX:
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
+      case VariableType::BT_FLT_HH:
+      case VariableType::BT_FLT_H:
+      case VariableType::BT_FLT:
+      case VariableType::BT_FLT_L:
+      case VariableType::BT_FLT_LL:
+         obj = ObjectExpression::create_cast_int_to_float(obj, pos);
+         break;
+      }
+      break;
+
+   case VariableType::BT_BIT_SFT:
+      switch (dstBT)
+      {
+      case VariableType::BT_VOID:
+      case VariableType::BT_ARR:
+      case VariableType::BT_ASMFUNC:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_BLOCK:
+         goto case_src_bad;
+
+      case VariableType::BT_BIT_HRD:
+      case VariableType::BT_CHR:
+      case VariableType::BT_INT_HH:
+      case VariableType::BT_INT_H:
+      case VariableType::BT_INT:
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_UNS_HH:
+      case VariableType::BT_UNS_H:
+      case VariableType::BT_UNS:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_STR:
+      case VariableType::BT_PTR:
+      case VariableType::BT_PTR_NUL:
+      case VariableType::BT_ENUM:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_SCRIPT:
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         break;
+
+      case VariableType::BT_BIT_SFT:
+         break;
+
+      case VariableType::BT_FIX_HH:
+      case VariableType::BT_FIX_H:
+      case VariableType::BT_FIX:
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
+      case VariableType::BT_FLT_HH:
+      case VariableType::BT_FLT_H:
+      case VariableType::BT_FLT:
+      case VariableType::BT_FLT_L:
+      case VariableType::BT_FLT_LL:
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_cast_int_to_float(obj, pos);
+         break;
+      }
+      break;
+
+   case VariableType::BT_FIX_HH:
+   case VariableType::BT_FIX_H:
+   case VariableType::BT_FIX:
+   case VariableType::BT_FIX_L:
+   case VariableType::BT_FIX_LL:
+   case VariableType::BT_FLT_HH:
+   case VariableType::BT_FLT_H:
+   case VariableType::BT_FLT:
+   case VariableType::BT_FLT_L:
+   case VariableType::BT_FLT_LL:
+      switch (dstBT)
+      {
+      case VariableType::BT_VOID:
+      case VariableType::BT_ARR:
+      case VariableType::BT_ASMFUNC:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_BLOCK:
+         goto case_src_bad;
+
+      case VariableType::BT_BIT_SFT:
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_branch_not(obj, pos);
+      case VariableType::BT_BIT_HRD:
+      case VariableType::BT_CHR:
+      case VariableType::BT_INT_HH:
+      case VariableType::BT_INT_H:
+      case VariableType::BT_INT:
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_UNS_HH:
+      case VariableType::BT_UNS_H:
+      case VariableType::BT_UNS:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_STR:
+      case VariableType::BT_PTR:
+      case VariableType::BT_PTR_NUL:
+      case VariableType::BT_ENUM:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_SCRIPT:
+         obj = ObjectExpression::create_cast_float_to_int(obj, pos);
+         break;
+
+      case VariableType::BT_FIX_HH:
+      case VariableType::BT_FIX_H:
+      case VariableType::BT_FIX:
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
+      case VariableType::BT_FLT_HH:
+      case VariableType::BT_FLT_H:
+      case VariableType::BT_FLT:
+      case VariableType::BT_FLT_L:
+      case VariableType::BT_FLT_LL:
+         break;
+      }
+      break;
+
+   case VariableType::BT_PTR:
+      if (dstBT != VariableType::BT_PTR)
+         goto case_src_int;
+
+      if (srcType->getReturn()->getStoreType() != STORE_AUTO ||
+          dstType->getReturn()->getStoreType() != STORE_STATIC)
+         goto case_src_int;
+
+      // Special handling for auto*->static*.
+      ERROR_P("bad compile-time cast: %s to %s", make_string(srcType).c_str(),
+         make_string(dstType).c_str());
 
    case VariableType::BT_BLOCK:
    {
@@ -142,7 +359,7 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       ObjectExpression::Vector elems;
       obj->expandOnce(&elems);
 
-      if (dstBT == VariableType::BT_ARRAY)
+      if (dstBT == VariableType::BT_ARR)
       {
          VariableType::Reference dstTypes = dstType->getReturn();
          bigsint                 dstWidth = dstType->getWidth();
@@ -182,194 +399,6 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
          obj = make_object(dstType, pos);
    }
       break;
-
-   case VariableType::BT_BOOLHARD:
-   case VariableType::BT_CHAR:
-   case VariableType::BT_ENUM:
-   case VariableType::BT_FUNCTION:
-   case VariableType::BT_INT:
-   case VariableType::BT_LABEL:
-   case VariableType::BT_LINESPEC:
-   case VariableType::BT_LLONG:
-   case VariableType::BT_LONG:
-   case VariableType::BT_NATIVE:
-   case VariableType::BT_NULLPTR:
-   case VariableType::BT_SCHAR:
-   case VariableType::BT_SCRIPT:
-   case VariableType::BT_SHORT:
-   case VariableType::BT_STRING:
-   case VariableType::BT_UCHAR:
-   case VariableType::BT_UINT:
-   case VariableType::BT_ULLONG:
-   case VariableType::BT_ULONG:
-   case VariableType::BT_USHORT:
-   case_src_int:
-      switch (dstBT)
-      {
-      case VariableType::BT_ARRAY:
-      case VariableType::BT_ASMFUNC:
-      case VariableType::BT_BLOCK:
-      case VariableType::BT_STRUCT:
-      case VariableType::BT_UNION:
-      case VariableType::BT_VOID:
-         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
-                 make_string(dstType).c_str());
-
-      case VariableType::BT_BOOLHARD:
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         break;
-
-      case VariableType::BT_BOOLSOFT:
-      case VariableType::BT_CHAR:
-      case VariableType::BT_ENUM:
-      case VariableType::BT_FUNCTION:
-      case VariableType::BT_INT:
-      case VariableType::BT_LABEL:
-      case VariableType::BT_LINESPEC:
-      case VariableType::BT_LLONG:
-      case VariableType::BT_LONG:
-      case VariableType::BT_NATIVE:
-      case VariableType::BT_NULLPTR:
-      case VariableType::BT_POINTER:
-      case VariableType::BT_SCHAR:
-      case VariableType::BT_SCRIPT:
-      case VariableType::BT_SHORT:
-      case VariableType::BT_STRING:
-      case VariableType::BT_UCHAR:
-      case VariableType::BT_UINT:
-      case VariableType::BT_ULLONG:
-      case VariableType::BT_ULONG:
-      case VariableType::BT_USHORT:
-         break;
-
-      case VariableType::BT_FIXED:
-      case VariableType::BT_FLOAT:
-      case VariableType::BT_LFLOAT:
-      case VariableType::BT_LLFLOAT:
-      case VariableType::BT_REAL:
-         obj = ObjectExpression::create_cast_int_to_float(obj, pos);
-         break;
-      }
-      break;
-
-   case VariableType::BT_BOOLSOFT:
-      switch (dstBT)
-      {
-      case VariableType::BT_ARRAY:
-      case VariableType::BT_ASMFUNC:
-      case VariableType::BT_BLOCK:
-      case VariableType::BT_STRUCT:
-      case VariableType::BT_UNION:
-      case VariableType::BT_VOID:
-         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
-                 make_string(dstType).c_str());
-
-      case VariableType::BT_BOOLHARD:
-      case VariableType::BT_CHAR:
-      case VariableType::BT_ENUM:
-      case VariableType::BT_FUNCTION:
-      case VariableType::BT_INT:
-      case VariableType::BT_LABEL:
-      case VariableType::BT_LINESPEC:
-      case VariableType::BT_LLONG:
-      case VariableType::BT_LONG:
-      case VariableType::BT_NATIVE:
-      case VariableType::BT_NULLPTR:
-      case VariableType::BT_POINTER:
-      case VariableType::BT_SCHAR:
-      case VariableType::BT_SCRIPT:
-      case VariableType::BT_SHORT:
-      case VariableType::BT_STRING:
-      case VariableType::BT_UCHAR:
-      case VariableType::BT_UINT:
-      case VariableType::BT_ULLONG:
-      case VariableType::BT_ULONG:
-      case VariableType::BT_USHORT:
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         break;
-
-      case VariableType::BT_BOOLSOFT:
-         break;
-
-      case VariableType::BT_FIXED:
-      case VariableType::BT_FLOAT:
-      case VariableType::BT_LFLOAT:
-      case VariableType::BT_LLFLOAT:
-      case VariableType::BT_REAL:
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         obj = ObjectExpression::create_cast_int_to_float(obj, pos);
-         break;
-      }
-      break;
-
-   case VariableType::BT_FIXED:
-   case VariableType::BT_FLOAT:
-   case VariableType::BT_LFLOAT:
-   case VariableType::BT_LLFLOAT:
-   case VariableType::BT_REAL:
-      switch (dstBT)
-      {
-      case VariableType::BT_ARRAY:
-      case VariableType::BT_ASMFUNC:
-      case VariableType::BT_BLOCK:
-      case VariableType::BT_STRUCT:
-      case VariableType::BT_UNION:
-      case VariableType::BT_VOID:
-         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
-                 make_string(dstType).c_str());
-
-      case VariableType::BT_BOOLHARD:
-      case VariableType::BT_BOOLSOFT:
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         break;
-
-      case VariableType::BT_FIXED:
-      case VariableType::BT_FLOAT:
-      case VariableType::BT_LFLOAT:
-      case VariableType::BT_LLFLOAT:
-      case VariableType::BT_REAL:
-         break;
-
-      case VariableType::BT_CHAR:
-      case VariableType::BT_ENUM:
-      case VariableType::BT_FUNCTION:
-      case VariableType::BT_INT:
-      case VariableType::BT_LABEL:
-      case VariableType::BT_LINESPEC:
-      case VariableType::BT_LLONG:
-      case VariableType::BT_LONG:
-      case VariableType::BT_NATIVE:
-      case VariableType::BT_NULLPTR:
-      case VariableType::BT_POINTER:
-      case VariableType::BT_SCHAR:
-      case VariableType::BT_SCRIPT:
-      case VariableType::BT_SHORT:
-      case VariableType::BT_STRING:
-      case VariableType::BT_UCHAR:
-      case VariableType::BT_UINT:
-      case VariableType::BT_ULLONG:
-      case VariableType::BT_ULONG:
-      case VariableType::BT_USHORT:
-         obj = ObjectExpression::create_cast_float_to_int(obj, pos);
-         break;
-      }
-      break;
-
-   case VariableType::BT_POINTER:
-      if (dstBT != VariableType::BT_POINTER)
-         goto case_src_int;
-
-      if (srcType->getReturn()->getStoreType() != STORE_AUTO ||
-          dstType->getReturn()->getStoreType() != STORE_STATIC)
-         goto case_src_int;
-
-      // Special handling for auto*->static*.
-      ERROR_P("bad compile-time cast: %s to %s", make_string(srcType).c_str(),
-         make_string(dstType).c_str());
    }
 
    return obj;
@@ -414,83 +443,90 @@ void SourceExpression::make_objects_memcpy_cast
 
    switch (srcBT)
    {
-   case VariableType::BT_ARRAY:
-   case VariableType::BT_ASMFUNC:
-   case VariableType::BT_BLOCK:
-   case VariableType::BT_FLOAT:
-   case VariableType::BT_LFLOAT:
-   case VariableType::BT_LLFLOAT:
+   case VariableType::BT_VOID:
+   case VariableType::BT_ARR:
+   case VariableType::BT_FLT_HH:
+   case VariableType::BT_FLT_H:
+   case VariableType::BT_FLT:
+   case VariableType::BT_FLT_L:
+   case VariableType::BT_FLT_LL:
    case VariableType::BT_STRUCT:
    case VariableType::BT_UNION:
-   case VariableType::BT_VOID:
+   case VariableType::BT_BLOCK:
+   case VariableType::BT_ASMFUNC:
+   case_src_bad:
       ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
               make_string(dstType).c_str());
 
-   case VariableType::BT_BOOLHARD:
-   case VariableType::BT_CHAR:
+   case VariableType::BT_BIT_HRD:
+   case VariableType::BT_CHR:
+   case VariableType::BT_INT_HH:
+   case VariableType::BT_INT_H:
+   case VariableType::BT_INT:
+   case VariableType::BT_INT_L:
+   case VariableType::BT_UNS_HH:
+   case VariableType::BT_UNS_H:
+   case VariableType::BT_UNS:
+   case VariableType::BT_UNS_L:
+   case VariableType::BT_LABEL:
+   case VariableType::BT_STR:
+   case VariableType::BT_PTR_NUL:
    case VariableType::BT_ENUM:
    case VariableType::BT_FUNCTION:
-   case VariableType::BT_INT:
-   case VariableType::BT_LABEL:
    case VariableType::BT_LINESPEC:
-   case VariableType::BT_LONG:
    case VariableType::BT_NATIVE:
-   case VariableType::BT_NULLPTR:
-   case VariableType::BT_SCHAR:
    case VariableType::BT_SCRIPT:
-   case VariableType::BT_SHORT:
-   case VariableType::BT_STRING:
-   case VariableType::BT_UCHAR:
-   case VariableType::BT_UINT:
-   case VariableType::BT_ULONG:
-   case VariableType::BT_USHORT:
    case_src_int:
       switch (dstBT)
       {
-      case VariableType::BT_ARRAY:
-      case VariableType::BT_ASMFUNC:
-      case VariableType::BT_BLOCK:
-      case VariableType::BT_FLOAT:
-      case VariableType::BT_LFLOAT:
-      case VariableType::BT_LLFLOAT:
+      case VariableType::BT_VOID:
+      case VariableType::BT_ARR:
+      case VariableType::BT_FLT_HH:
+      case VariableType::BT_FLT_H:
+      case VariableType::BT_FLT:
+      case VariableType::BT_FLT_L:
+      case VariableType::BT_FLT_LL:
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
-      case VariableType::BT_VOID:
-         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
-                 make_string(dstType).c_str());
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_ASMFUNC:
+         goto case_src_bad;
 
-      case VariableType::BT_BOOLHARD:
+      case VariableType::BT_BIT_HRD:
          objects->addToken(OCODE_LOGICAL_NOT32I);
          objects->addToken(OCODE_LOGICAL_NOT32I);
          break;
 
-      case VariableType::BT_BOOLSOFT:
-      case VariableType::BT_CHAR:
+      case VariableType::BT_BIT_SFT:
+      case VariableType::BT_CHR:
+      case VariableType::BT_INT_HH:
+      case VariableType::BT_INT_H:
+      case VariableType::BT_INT:
+      case VariableType::BT_INT_L:
+      case VariableType::BT_UNS_HH:
+      case VariableType::BT_UNS_H:
+      case VariableType::BT_UNS:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_STR:
+      case VariableType::BT_PTR:
+      case VariableType::BT_PTR_NUL:
       case VariableType::BT_ENUM:
       case VariableType::BT_FUNCTION:
-      case VariableType::BT_INT:
-      case VariableType::BT_LABEL:
       case VariableType::BT_LINESPEC:
-      case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
-      case VariableType::BT_NULLPTR:
-      case VariableType::BT_POINTER:
-      case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
-      case VariableType::BT_SHORT:
-      case VariableType::BT_STRING:
-      case VariableType::BT_UCHAR:
-      case VariableType::BT_UINT:
-      case VariableType::BT_ULONG:
-      case VariableType::BT_USHORT:
          break;
 
-      case VariableType::BT_FIXED:
-      case VariableType::BT_REAL:
+      case VariableType::BT_FIX_HH:
+      case VariableType::BT_FIX_H:
+      case VariableType::BT_FIX:
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
          objects->addToken(OCODE_CONVERT_32I_32F);
          break;
 
-      case VariableType::BT_LLONG:
+      case VariableType::BT_INT_LL:
          if (VariableType::is_bt_unsigned(srcBT))
          {
             objects->addTokenPushZero();
@@ -499,8 +535,9 @@ void SourceExpression::make_objects_memcpy_cast
 
       {
          // Must sign-extend. Which means... BRANCHING! AAAAAAAA!
-         std::string labelPos = context->makeLabel();
-         std::string labelEnd = context->makeLabel();
+         std::string label = context->makeLabel();
+         std::string labelPos = label + "_pos";
+         std::string labelEnd = label + "_end";
          objects->addToken(OCODE_STACK_DUP32);
          objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
          objects->addToken(OCODE_BITWISE_AND32);
@@ -513,62 +550,66 @@ void SourceExpression::make_objects_memcpy_cast
       }
          break;
 
-      case VariableType::BT_ULLONG:
+      case VariableType::BT_UNS_LL:
          objects->addTokenPushZero();
          break;
       }
       break;
 
-   case VariableType::BT_BOOLSOFT:
+   case VariableType::BT_BIT_SFT:
       switch (dstBT)
       {
-      case VariableType::BT_ARRAY:
-      case VariableType::BT_ASMFUNC:
-      case VariableType::BT_BLOCK:
-      case VariableType::BT_FLOAT:
-      case VariableType::BT_LFLOAT:
-      case VariableType::BT_LLFLOAT:
+      case VariableType::BT_VOID:
+      case VariableType::BT_ARR:
+      case VariableType::BT_FLT_HH:
+      case VariableType::BT_FLT_H:
+      case VariableType::BT_FLT:
+      case VariableType::BT_FLT_L:
+      case VariableType::BT_FLT_LL:
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
-      case VariableType::BT_VOID:
-         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
-                 make_string(dstType).c_str());
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_ASMFUNC:
+         goto case_src_bad;
 
-      case VariableType::BT_BOOLHARD:
-      case VariableType::BT_CHAR:
+      case VariableType::BT_BIT_HRD:
+      case VariableType::BT_CHR:
+      case VariableType::BT_INT_HH:
+      case VariableType::BT_INT_H:
+      case VariableType::BT_INT:
+      case VariableType::BT_INT_L:
+      case VariableType::BT_UNS_HH:
+      case VariableType::BT_UNS_H:
+      case VariableType::BT_UNS:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_STR:
+      case VariableType::BT_PTR:
+      case VariableType::BT_PTR_NUL:
       case VariableType::BT_ENUM:
       case VariableType::BT_FUNCTION:
-      case VariableType::BT_INT:
-      case VariableType::BT_LABEL:
       case VariableType::BT_LINESPEC:
-      case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
-      case VariableType::BT_NULLPTR:
-      case VariableType::BT_POINTER:
-      case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
-      case VariableType::BT_SHORT:
-      case VariableType::BT_STRING:
-      case VariableType::BT_UCHAR:
-      case VariableType::BT_UINT:
-      case VariableType::BT_ULONG:
-      case VariableType::BT_USHORT:
          objects->addToken(OCODE_LOGICAL_NOT32I);
          objects->addToken(OCODE_LOGICAL_NOT32I);
          break;
 
-      case VariableType::BT_BOOLSOFT:
+      case VariableType::BT_BIT_SFT:
          break;
 
-      case VariableType::BT_FIXED:
-      case VariableType::BT_REAL:
+      case VariableType::BT_FIX_HH:
+      case VariableType::BT_FIX_H:
+      case VariableType::BT_FIX:
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
          objects->addToken(OCODE_LOGICAL_NOT32F);
          objects->addToken(OCODE_LOGICAL_NOT32F);
          objects->addToken(OCODE_CONVERT_32I_32F);
          break;
 
-      case VariableType::BT_LLONG:
-      case VariableType::BT_ULLONG:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_UNS_LL:
          objects->addToken(OCODE_LOGICAL_NOT32I);
          objects->addToken(OCODE_LOGICAL_NOT32I);
          objects->addTokenPushZero();
@@ -576,58 +617,66 @@ void SourceExpression::make_objects_memcpy_cast
       }
       break;
 
-   case VariableType::BT_FIXED:
-   case VariableType::BT_REAL:
+   case VariableType::BT_FIX_HH:
+   case VariableType::BT_FIX_H:
+   case VariableType::BT_FIX:
+   case VariableType::BT_FIX_L:
+   case VariableType::BT_FIX_LL:
       switch (dstType->getBasicType())
       {
-      case VariableType::BT_ARRAY:
-      case VariableType::BT_ASMFUNC:
-      case VariableType::BT_BLOCK:
-      case VariableType::BT_FLOAT:
-      case VariableType::BT_LFLOAT:
-      case VariableType::BT_LLFLOAT:
+      case VariableType::BT_VOID:
+      case VariableType::BT_ARR:
+      case VariableType::BT_FLT_HH:
+      case VariableType::BT_FLT_H:
+      case VariableType::BT_FLT:
+      case VariableType::BT_FLT_L:
+      case VariableType::BT_FLT_LL:
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
-      case VariableType::BT_VOID:
-         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
-                 make_string(dstType).c_str());
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_ASMFUNC:
+         goto case_src_bad;
 
-      case VariableType::BT_BOOLHARD:
+      case VariableType::BT_BIT_HRD:
          objects->addToken(OCODE_LOGICAL_NOT32F);
          objects->addToken(OCODE_LOGICAL_NOT32F);
          break;
 
-      case VariableType::BT_BOOLSOFT:
-      case VariableType::BT_FIXED:
-      case VariableType::BT_REAL:
+      case VariableType::BT_BIT_SFT:
+      case VariableType::BT_FIX_HH:
+      case VariableType::BT_FIX_H:
+      case VariableType::BT_FIX:
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
          break;
 
-      case VariableType::BT_CHAR:
+      case VariableType::BT_CHR:
+      case VariableType::BT_INT_HH:
+      case VariableType::BT_INT_H:
+      case VariableType::BT_INT:
+      case VariableType::BT_INT_L:
+      case VariableType::BT_UNS_HH:
+      case VariableType::BT_UNS_H:
+      case VariableType::BT_UNS:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_STR:
+      case VariableType::BT_PTR:
+      case VariableType::BT_PTR_NUL:
       case VariableType::BT_ENUM:
       case VariableType::BT_FUNCTION:
-      case VariableType::BT_INT:
-      case VariableType::BT_LABEL:
       case VariableType::BT_LINESPEC:
-      case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
-      case VariableType::BT_NULLPTR:
-      case VariableType::BT_POINTER:
-      case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
-      case VariableType::BT_SHORT:
-      case VariableType::BT_STRING:
-      case VariableType::BT_UCHAR:
-      case VariableType::BT_UINT:
-      case VariableType::BT_ULONG:
-      case VariableType::BT_USHORT:
          objects->addToken(OCODE_CONVERT_32F_32I);
          break;
 
-      case VariableType::BT_LLONG:
+      case VariableType::BT_INT_LL:
       {
          // Must sign-extend. Which means... BRANCHING! AAAAAAAA!
-         std::string labelPos = context->makeLabel();
-         std::string labelEnd = context->makeLabel();
+         std::string label = context->makeLabel();
+         std::string labelPos = label + "_pos";
+         std::string labelEnd = label + "_end";
          objects->addToken(OCODE_STACK_DUP32);
          objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
          objects->addToken(OCODE_BITWISE_AND32);
@@ -640,73 +689,77 @@ void SourceExpression::make_objects_memcpy_cast
       }
          break;
 
-      case VariableType::BT_ULLONG:
+      case VariableType::BT_UNS_LL:
          objects->addTokenPushZero();
          break;
       }
       break;
 
-   case VariableType::BT_LLONG:
-   case VariableType::BT_ULLONG:
+   case VariableType::BT_INT_LL:
+   case VariableType::BT_UNS_LL:
       switch (dstType->getBasicType())
       {
-      case VariableType::BT_ARRAY:
-      case VariableType::BT_ASMFUNC:
-      case VariableType::BT_BLOCK:
-      case VariableType::BT_FLOAT:
-      case VariableType::BT_LFLOAT:
-      case VariableType::BT_LLFLOAT:
+      case VariableType::BT_VOID:
+      case VariableType::BT_ARR:
+      case VariableType::BT_FLT_HH:
+      case VariableType::BT_FLT_H:
+      case VariableType::BT_FLT:
+      case VariableType::BT_FLT_L:
+      case VariableType::BT_FLT_LL:
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
-      case VariableType::BT_VOID:
-         ERROR_P("bad cast: %s to %s", make_string(srcType).c_str(),
-                 make_string(dstType).c_str());
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_ASMFUNC:
+         goto case_src_bad;
 
-      case VariableType::BT_BOOLHARD:
+      case VariableType::BT_BIT_HRD:
          objects->addToken(OCODE_LOGICAL_IOR32I);
          break;
 
-      case VariableType::BT_BOOLSOFT:
+      case VariableType::BT_BIT_SFT:
          objects->addToken(OCODE_BITWISE_IOR32);
          break;
 
-      case VariableType::BT_CHAR:
+      case VariableType::BT_CHR:
+      case VariableType::BT_INT_HH:
+      case VariableType::BT_INT_H:
+      case VariableType::BT_INT:
+      case VariableType::BT_INT_L:
+      case VariableType::BT_UNS_HH:
+      case VariableType::BT_UNS_H:
+      case VariableType::BT_UNS:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_STR:
+      case VariableType::BT_PTR:
+      case VariableType::BT_PTR_NUL:
       case VariableType::BT_ENUM:
       case VariableType::BT_FUNCTION:
-      case VariableType::BT_INT:
-      case VariableType::BT_LABEL:
       case VariableType::BT_LINESPEC:
-      case VariableType::BT_LONG:
       case VariableType::BT_NATIVE:
-      case VariableType::BT_NULLPTR:
-      case VariableType::BT_POINTER:
-      case VariableType::BT_SCHAR:
       case VariableType::BT_SCRIPT:
-      case VariableType::BT_SHORT:
-      case VariableType::BT_STRING:
-      case VariableType::BT_UCHAR:
-      case VariableType::BT_UINT:
-      case VariableType::BT_ULONG:
-      case VariableType::BT_USHORT:
          objects->addToken(OCODE_STACK_DROP32);
          break;
 
-      case VariableType::BT_FIXED:
-      case VariableType::BT_REAL:
+      case VariableType::BT_FIX_HH:
+      case VariableType::BT_FIX_H:
+      case VariableType::BT_FIX:
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
          // What about the high byte, you ask? If the high byte is meaningful,
          // we've overflowed the fixed anyway. Therefore: Undefined behavior.
          objects->addToken(OCODE_STACK_DROP32);
          objects->addToken(OCODE_CONVERT_32I_32F);
          break;
 
-      case VariableType::BT_LLONG:
-      case VariableType::BT_ULLONG:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_UNS_LL:
          break;
       }
       break;
 
-   case VariableType::BT_POINTER:
-      if (dstBT != VariableType::BT_POINTER)
+   case VariableType::BT_PTR:
+      if (dstBT != VariableType::BT_PTR)
          goto case_src_int;
 
       if (srcType->getReturn()->getStoreType() != STORE_AUTO ||
@@ -720,8 +773,6 @@ void SourceExpression::make_objects_memcpy_cast
    }
 
    make_objects_memcpy_post(objects, dst, tmp, dstType, context, pos);
-
-   #undef TYPES_STRING
 }
 
 // EOF

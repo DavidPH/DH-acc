@@ -95,7 +95,7 @@ get_promoted_type(VariableType *_type1, VariableType *_type2,
    VariableType::BasicType bt2 = type2->getBasicType();
 
    // Arrays have special promotion.
-   if (bt1 == VariableType::BT_ARRAY && bt2 == VariableType::BT_ARRAY)
+   if (bt1 == VariableType::BT_ARR && bt2 == VariableType::BT_ARR)
    {
       if (type1 == type2) return type1;
 
@@ -103,24 +103,28 @@ get_promoted_type(VariableType *_type1, VariableType *_type2,
    }
 
    // Decay arrays to pointers and de-qualify everything else.
-   if (bt1 == VariableType::BT_ARRAY)
+   if (bt1 == VariableType::BT_ARR)
    {
       type1 = type1->getReturn()->getPointer();
-      bt1 = VariableType::BT_POINTER;
+      bt1 = VariableType::BT_PTR;
    }
    else
       type1 = type1->getUnqualified();
 
-   if (bt2 == VariableType::BT_ARRAY)
+   if (bt2 == VariableType::BT_ARR)
    {
       type2 = type2->getReturn()->getPointer();
-      bt2 = VariableType::BT_POINTER;
+      bt2 = VariableType::BT_PTR;
    }
    else
       type2 = type2->getUnqualified();
 
+   // nullptr should always try to promote to the other type.
+   if (bt1 == VariableType::BT_PTR_NUL) return type2;
+   if (bt2 == VariableType::BT_PTR_NUL) return type1;
+
    // Pointers have special promotion.
-   if (bt1 == VariableType::BT_POINTER && bt2 == VariableType::BT_POINTER)
+   if (bt1 == VariableType::BT_PTR && bt2 == VariableType::BT_PTR)
    {
       if (type1 == type2) return type1;
 
@@ -156,68 +160,83 @@ get_promoted_type(VariableType *_type1, VariableType *_type2,
    if (bt1 == VariableType::BT_VOID) return type1;
    if (bt2 == VariableType::BT_VOID) return type2;
 
-   if (bt1 == VariableType::BT_POINTER) return type1;
-   if (bt2 == VariableType::BT_POINTER) return type2;
+   if (bt1 == VariableType::BT_PTR) return type1;
+   if (bt2 == VariableType::BT_PTR) return type2;
 
-   if (bt1 == VariableType::BT_LLFLOAT) return type1;
-   if (bt2 == VariableType::BT_LLFLOAT) return type2;
+   if (bt1 == VariableType::BT_FLT_LL) return type1;
+   if (bt2 == VariableType::BT_FLT_LL) return type2;
 
-   if (bt1 == VariableType::BT_LFLOAT) return type1;
-   if (bt2 == VariableType::BT_LFLOAT) return type2;
+   if (bt1 == VariableType::BT_FLT_L) return type1;
+   if (bt2 == VariableType::BT_FLT_L) return type2;
 
-   if (bt1 == VariableType::BT_FLOAT) return type1;
-   if (bt2 == VariableType::BT_FLOAT) return type2;
+   if (bt1 == VariableType::BT_FLT) return type1;
+   if (bt2 == VariableType::BT_FLT) return type2;
 
-   if (bt1 == VariableType::BT_FIXED) return type1;
-   if (bt2 == VariableType::BT_FIXED) return type2;
+   if (bt1 == VariableType::BT_FLT_H) return type1;
+   if (bt2 == VariableType::BT_FLT_H) return type2;
 
-   if (bt1 == VariableType::BT_REAL) return type1;
-   if (bt2 == VariableType::BT_REAL) return type2;
+   if (bt1 == VariableType::BT_FLT_HH) return type1;
+   if (bt2 == VariableType::BT_FLT_HH) return type2;
 
-   if (bt1 == VariableType::BT_LLONG) return type1;
-   if (bt2 == VariableType::BT_LLONG) return type2;
+   if (bt1 == VariableType::BT_FIX_LL) return type1;
+   if (bt2 == VariableType::BT_FIX_LL) return type2;
 
-   if (bt1 == VariableType::BT_ULLONG) return type1;
-   if (bt2 == VariableType::BT_ULLONG) return type2;
+   if (bt1 == VariableType::BT_FIX_L) return type1;
+   if (bt2 == VariableType::BT_FIX_L) return type2;
 
-   if (bt1 == VariableType::BT_LONG) return type1;
-   if (bt2 == VariableType::BT_LONG) return type2;
+   if (bt1 == VariableType::BT_FIX) return type1;
+   if (bt2 == VariableType::BT_FIX) return type2;
 
-   if (bt1 == VariableType::BT_ULONG) return type1;
-   if (bt2 == VariableType::BT_ULONG) return type2;
+   if (bt1 == VariableType::BT_FIX_H) return type1;
+   if (bt2 == VariableType::BT_FIX_H) return type2;
+
+   if (bt1 == VariableType::BT_FIX_HH) return type1;
+   if (bt2 == VariableType::BT_FIX_HH) return type2;
+
+   if (bt1 == VariableType::BT_INT_LL) return type1;
+   if (bt2 == VariableType::BT_INT_LL) return type2;
+
+   if (bt1 == VariableType::BT_UNS_LL) return type1;
+   if (bt2 == VariableType::BT_UNS_LL) return type2;
+
+   if (bt1 == VariableType::BT_INT_L) return type1;
+   if (bt2 == VariableType::BT_INT_L) return type2;
+
+   if (bt1 == VariableType::BT_UNS_L) return type1;
+   if (bt2 == VariableType::BT_UNS_L) return type2;
 
    if (bt1 == VariableType::BT_INT) return type1;
    if (bt2 == VariableType::BT_INT) return type2;
 
-   if (bt1 == VariableType::BT_UINT) return type1;
-   if (bt2 == VariableType::BT_UINT) return type2;
+   if (bt1 == VariableType::BT_UNS) return type1;
+   if (bt2 == VariableType::BT_UNS) return type2;
 
-   if (bt1 == VariableType::BT_SHORT) return type1;
-   if (bt2 == VariableType::BT_SHORT) return type2;
+   if (bt1 == VariableType::BT_INT_H) return type1;
+   if (bt2 == VariableType::BT_INT_H) return type2;
 
-   if (bt1 == VariableType::BT_USHORT) return type1;
-   if (bt2 == VariableType::BT_USHORT) return type2;
+   if (bt1 == VariableType::BT_UNS_H) return type1;
+   if (bt2 == VariableType::BT_UNS_H) return type2;
 
-   if (bt1 == VariableType::BT_SCHAR) return type1;
-   if (bt2 == VariableType::BT_SCHAR) return type2;
+   if (bt1 == VariableType::BT_INT_HH) return type1;
+   if (bt2 == VariableType::BT_INT_HH) return type2;
 
-   if (bt1 == VariableType::BT_UCHAR) return type1;
-   if (bt2 == VariableType::BT_UCHAR) return type2;
+   if (bt1 == VariableType::BT_UNS_HH) return type1;
+   if (bt2 == VariableType::BT_UNS_HH) return type2;
 
-   if (bt1 == VariableType::BT_CHAR) return type1;
-   if (bt2 == VariableType::BT_CHAR) return type2;
+   if (bt1 == VariableType::BT_CHR) return type1;
+   if (bt2 == VariableType::BT_CHR) return type2;
 
    if (bt1 == VariableType::BT_ENUM) return VariableType::get_bt_int();
    if (bt2 == VariableType::BT_ENUM) return VariableType::get_bt_int();
 
-   if (bt1 == VariableType::BT_STRING) return type1;
-   if (bt2 == VariableType::BT_STRING) return type2;
+   if (bt1 == VariableType::BT_STR) return type1;
+   if (bt2 == VariableType::BT_STR) return type2;
 
-   if (bt1 == VariableType::BT_BOOLHARD) return type1;
-   if (bt2 == VariableType::BT_BOOLHARD) return type2;
+   if (bt1 == VariableType::BT_BIT_HRD) return type1;
+   if (bt2 == VariableType::BT_BIT_HRD) return type2;
 
-   if (bt1 == VariableType::BT_BOOLSOFT) return type1;
-   if (bt2 == VariableType::BT_BOOLSOFT) return type2;
+   if (bt1 == VariableType::BT_BIT_SFT) return type1;
+   if (bt2 == VariableType::BT_BIT_SFT) return type2;
 
    return VariableType::get_bt_void();
 }

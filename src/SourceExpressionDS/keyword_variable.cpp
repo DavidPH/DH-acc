@@ -148,7 +148,7 @@ static SourceExpression::Pointer make_var
    if (!externDef && in->peekType(SourceTokenC::TT_EQUALS))
    {
       static VariableType::Reference const initType =
-         VariableType::get_bt_boolhard();
+         VariableType::get_bt_bit_hrd();
 
       SourceExpression::Pointer initSrc, initExpr;
       ObjectExpression::Pointer initObj;
@@ -306,14 +306,14 @@ static SourceExpression::Pointer make_var
    {
       if (context == SourceContext::global_context)
       {
-         if (type->getBasicType() == VariableType::BT_ARRAY)
+         if (type->getBasicType() == VariableType::BT_ARR)
             store.type = store_staticarray();
          else
             store.type = store_staticregister();
       }
       else
       {
-         if (type->getBasicType() == VariableType::BT_ARRAY)
+         if (type->getBasicType() == VariableType::BT_ARR)
             store.type = store_autoarray();
          else
             store.type = store_autoregister();

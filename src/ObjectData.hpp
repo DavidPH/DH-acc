@@ -358,6 +358,8 @@ extern bool option_named_scripts;
 // Global Functions                                                           |
 //
 
+void odata_set_strings(std::vector<int> &strings, VariableType const *type);
+
 extern void override_object(ObjectData_Array    *out, ObjectData_Array    const *in);
 extern void override_object(ObjectData_Auto     *out, ObjectData_Auto     const *in);
 extern void override_object(ObjectData_Function *out, ObjectData_Function const *in);
