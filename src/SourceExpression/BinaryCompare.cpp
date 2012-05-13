@@ -34,19 +34,10 @@
 //
 // SourceExpression_BinaryCompare::SourceExpression_BinaryCompare
 //
-SourceExpression_BinaryCompare::
-SourceExpression_BinaryCompare(SRCEXP_EXPRBIN_PARM)
-                               : Super(false, SRCEXP_EXPRBIN_PASS)
-{
-}
-
-//
-// SourceExpression_BinaryCompare::SourceExpression_BinaryCompare
-//
-SourceExpression_BinaryCompare::
-SourceExpression_BinaryCompare(bool, SRCEXP_EXPRBIN_PARM)
- : Super(VariableType::get_bt_bit_sft(), VariableType::get_bt_bit_sft(),
-         SRCEXP_EXPRBIN_PASS)
+SourceExpression_BinaryCompare::SourceExpression_BinaryCompare(
+   SRCEXP_EXPRBIN_PARM)
+ : Super(SRCEXP_EXPRBIN_PASS, VariableType::get_bt_bit_sft(),
+         VariableType::get_bt_bit_sft(), false)
 {
 }
 

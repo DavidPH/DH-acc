@@ -74,9 +74,8 @@ SRCEXP_EXPRBRA_DEFN(b, xor_eq)
 //
 // SourceExpression_BranchXOr::SourceExpression_BranchXOr
 //
-SourceExpression_BranchXOr::
-SourceExpression_BranchXOr(SRCEXP_EXPRBIN_PARM)
-                           : Super(true, SRCEXP_EXPRBIN_PASS)
+SourceExpression_BranchXOr::SourceExpression_BranchXOr(SRCEXP_EXPRBIN_PARM)
+ : Super(SRCEXP_EXPRBIN_PASS)
 {
 }
 

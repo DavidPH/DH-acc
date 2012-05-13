@@ -43,41 +43,47 @@ class SourceExpression_BinaryDiv : public SourceExpression_Binary
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryDiv(bool assign, SRCEXP_EXPRBIN_ARGS);
-
-   virtual CounterPointer<ObjectExpression> makeObject() const;
-
-private:
    //
-   // ::doAssign
+   // ::SourceExpression_BinaryDiv
    //
-   void doAssign(ObjectVector *objects, VariableData *dst)
+   SourceExpression_BinaryDiv(SRCEXP_EXPRBIN_PARM, bool _assign)
+    : Super(SRCEXP_EXPRBIN_PASS, NULL, NULL, _assign)
    {
-      ASSIGN_ARITHMETIC_VARS
+      CONSTRUCTOR_TYPE_VARS();
+      CONSTRUCTOR_ARRAY_DECAY();
 
-      ASSIGN_GET_OCODE_ARITHMETIC(DIV)
-
-      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+      CONSTRAINT_ARITHMETIC("/");
    }
 
    //
-   // ::doEvaluate
+   // ::makeObject
    //
-   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   virtual ObjectExpression::Pointer makeObject() const
    {
-      EVALUATE_ARITHMETIC_VARS(DIV)
-
-      ocode = static_cast<ObjectCode>(ocode + getOcodeType(bt));
-
-      // TODO: X / 1
-      // TODO: X / PO2
-
-      doEvaluateBase(objects, dst, src, ocode);
+      EVALUATE_OBJECTS();
+      return ObjectExpression::create_binary_div(objL, objR, pos);
    }
 
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+protected:
+   //
+   // ::doGet
+   //
+   virtual void doGet(ObjectVector *objects, VariableType *type, int)
+   {
+      DO_GET_SWITCH(DIV, , 32F, 32I, 32U);
+   }
 
-   bool assign;
+   //
+   // ::doSet
+   //
+   virtual bool doSet(ObjectVector *objects, VariableData *data,
+                      VariableType *type, int)
+   {
+      if (VariableType::is_bt_fix(type->getBasicType())) return false;
+
+      DO_SET_SWITCHES(DIV, 32F, 32I, 32U, ACS);
+      return false;
+   }
 };
 
 
@@ -90,7 +96,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(div)
 {
-   return new SourceExpression_BinaryDiv(false, exprL, exprR, context, pos);
+   return new SourceExpression_BinaryDiv(exprL, exprR, context, pos, false);
 }
 
 //
@@ -98,43 +104,7 @@ SRCEXP_EXPRBIN_DEFN(div)
 //
 SRCEXP_EXPRBIN_DEFN(div_eq)
 {
-   return new SourceExpression_BinaryDiv(true, exprL, exprR, context, pos);
-}
-
-//
-// SourceExpression_BinaryDiv::SourceExpression_BinaryDiv
-//
-SourceExpression_BinaryDiv::SourceExpression_BinaryDiv
-(bool _assign, SRCEXP_EXPRBIN_PARM)
- : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
-{
-   CONSTRUCTOR_TYPE_VARS
-   CONSTRUCTOR_ARRAY_DECAY
-
-   CONSTRAINT_ARITHMETIC("/")
-}
-
-//
-// SourceExpression_BinaryDiv::makeObject
-//
-ObjectExpression::Pointer SourceExpression_BinaryDiv::makeObject() const
-{
-   EVALUATE_OBJECTS();
-   return ObjectExpression::create_binary_div(objL, objR, pos);
-}
-
-//
-// SourceExpression_BinaryDiv::virtual_makeObjects
-//
-void SourceExpression_BinaryDiv::virtual_makeObjects
-(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   if (assign)
-      doAssign(objects, dst);
-   else
-      doEvaluate(objects, dst);
+   return new SourceExpression_BinaryDiv(exprL, exprR, context, pos, true);
 }
 
 // EOF

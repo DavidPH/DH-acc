@@ -43,7 +43,17 @@ class SourceExpression_BinaryXOr : public SourceExpression_Binary
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryXOr(bool assign, SRCEXP_EXPRBIN_ARGS);
+   //
+   // ::SourceExpression_BinaryXOr
+   //
+   SourceExpression_BinaryXOr(SRCEXP_EXPRBIN_PARM, bool _assign)
+    : Super(SRCEXP_EXPRBIN_PASS, NULL, NULL, _assign)
+   {
+      CONSTRUCTOR_TYPE_VARS();
+      CONSTRUCTOR_ARRAY_DECAY();
+
+      CONSTRAINT_INTEGER("^");
+   }
 
    //
    // ::makeObject
@@ -54,35 +64,30 @@ public:
       return ObjectExpression::create_binary_xor(objL, objR, pos);
    }
 
-private:
+protected:
    //
-   // ::doAssign
+   // ::doGet
    //
-   void doAssign(ObjectVector *objects, VariableData *dst)
+   virtual void doGet(ObjectVector *objects, VariableType *type, int tmpBase)
    {
-      ASSIGN_BITWISE_VARS
+      switch (type->getBasicType())
+      {
+         DO_GET_CASES(XOR, BITWISE_, 32, 32, 32);
 
-      ASSIGN_GET_OCODE_BITWISE(XOR)
-
-      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+      case VariableType::BT_INT_LL: doGetBaseILLB(objects, type, tmpBase, OCODE_BITWISE_XOR32); break;
+      case VariableType::BT_UNS_LL: doGetBaseILLB(objects, type, tmpBase, OCODE_BITWISE_XOR32); break;
+      }
    }
 
    //
-   // ::doEvaluate
+   // ::doSet
    //
-   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   virtual bool doSet(ObjectVector *objects, VariableData *data,
+                      VariableType *type, int)
    {
-      EVALUATE_BITWISE_VARS(BITWISE_XOR)
-
-      if (bt == VariableType::BT_INT_LL || bt == VariableType::BT_UNS_LL)
-         doEvaluateBaseLLB(objects, dst, src, OCODE_SETOP_XOR_TEMP);
-      else
-         doEvaluateBase(objects, dst, src, ocode);
+      DO_SET_SWITCHES(XOR, 32, 32, 32, ACS);
+      return false;
    }
-
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
-
-   bool assign;
 };
 
 
@@ -95,7 +100,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(xor)
 {
-   return new SourceExpression_BinaryXOr(false, exprL, exprR, context, pos);
+   return new SourceExpression_BinaryXOr(exprL, exprR, context, pos, false);
 }
 
 //
@@ -103,33 +108,7 @@ SRCEXP_EXPRBIN_DEFN(xor)
 //
 SRCEXP_EXPRBIN_DEFN(xor_eq)
 {
-   return new SourceExpression_BinaryXOr(true, exprL, exprR, context, pos);
-}
-
-//
-// SourceExpression_BinaryXOr::SourceExpression_BinaryXOr
-//
-SourceExpression_BinaryXOr::SourceExpression_BinaryXOr
-(bool _assign, SRCEXP_EXPRBIN_PARM)
- : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
-{
-   CONSTRUCTOR_TYPE_VARS
-   CONSTRUCTOR_ARRAY_DECAY
-
-   CONSTRAINT_INTEGER("^")
-}
-
-//
-// SourceExpression_BinaryXOr::virtual_makeObjects
-//
-void SourceExpression_BinaryXOr::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   if (assign)
-      doAssign(objects, dst);
-   else
-      doEvaluate(objects, dst);
+   return new SourceExpression_BinaryXOr(exprL, exprR, context, pos, true);
 }
 
 // EOF

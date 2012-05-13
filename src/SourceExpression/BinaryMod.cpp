@@ -43,40 +43,45 @@ class SourceExpression_BinaryMod : public SourceExpression_Binary
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryMod(bool assign, SRCEXP_EXPRBIN_ARGS);
-
-   virtual CounterPointer<ObjectExpression> makeObject() const;
-
-private:
    //
-   // ::doAssign
+   // ::SourceExpression_BinaryMod
    //
-   void doAssign(ObjectVector *objects, VariableData *dst)
+   SourceExpression_BinaryMod(SRCEXP_EXPRBIN_PARM, bool _assign)
+    : Super(SRCEXP_EXPRBIN_PASS, NULL, NULL, _assign)
    {
-      ASSIGN_ARITHMETIC_VARS
+      CONSTRUCTOR_TYPE_VARS();
+      CONSTRUCTOR_ARRAY_DECAY();
 
-      ASSIGN_GET_OCODE_ARITHMETIC(MOD)
-
-      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+      CONSTRAINT_ARITHMETIC("%%");
    }
 
    //
-   // ::doEvaluate
+   // ::makeObject
    //
-   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   virtual ObjectExpression::Pointer makeObject() const
    {
-      EVALUATE_ARITHMETIC_VARS(MOD)
-
-      ocode = static_cast<ObjectCode>(ocode + getOcodeType(bt));
-
-      // TODO: X % PO2
-
-      doEvaluateBase(objects, dst, src, ocode);
+      EVALUATE_OBJECTS();
+      return ObjectExpression::create_binary_mod(objL, objR, pos);
    }
 
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+protected:
+   //
+   // ::doGet
+   //
+   virtual void doGet(ObjectVector *objects, VariableType *type, int)
+   {
+      DO_GET_SWITCH(MOD, , 32F, 32I, 32U);
+   }
 
-   bool assign;
+   //
+   // ::doSet
+   //
+   virtual bool doSet(ObjectVector *objects, VariableData *data,
+                      VariableType *type, int)
+   {
+      DO_SET_SWITCHES(MOD, 32F, 32I, 32U, ACS);
+      return false;
+   }
 };
 
 
@@ -89,7 +94,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(mod)
 {
-   return new SourceExpression_BinaryMod(false, exprL, exprR, context, pos);
+   return new SourceExpression_BinaryMod(exprL, exprR, context, pos, false);
 }
 
 //
@@ -97,43 +102,7 @@ SRCEXP_EXPRBIN_DEFN(mod)
 //
 SRCEXP_EXPRBIN_DEFN(mod_eq)
 {
-   return new SourceExpression_BinaryMod(true, exprL, exprR, context, pos);
-}
-
-//
-// SourceExpression_BinaryMod::SourceExpression_BinaryMod
-//
-SourceExpression_BinaryMod::SourceExpression_BinaryMod
-(bool _assign, SRCEXP_EXPRBIN_PARM)
- : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
-{
-   CONSTRUCTOR_TYPE_VARS
-   CONSTRUCTOR_ARRAY_DECAY
-
-   CONSTRAINT_ARITHMETIC("%%")
-}
-
-//
-// SourceExpression_BinaryMod::makeObject
-//
-ObjectExpression::Pointer SourceExpression_BinaryMod::makeObject() const
-{
-   EVALUATE_OBJECTS();
-   return ObjectExpression::create_binary_mod(objL, objR, pos);
-}
-
-//
-// SourceExpression_BinaryMod::virtual_makeObjects
-//
-void SourceExpression_BinaryMod::virtual_makeObjects
-(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   if (assign)
-      doAssign(objects, dst);
-   else
-      doEvaluate(objects, dst);
+   return new SourceExpression_BinaryMod(exprL, exprR, context, pos, true);
 }
 
 // EOF

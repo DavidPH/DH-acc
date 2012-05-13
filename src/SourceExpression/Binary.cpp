@@ -38,47 +38,24 @@
 //
 // SourceExpression_Binary::SourceExpression_Binary
 //
-SourceExpression_Binary::
-SourceExpression_Binary(SRCEXP_EXPRBIN_PARM)
-                        : Super(SRCEXP_EXPR_PASS),
-                          exprL(_exprL), exprR(_exprR), arithmetic(2)
+SourceExpression_Binary::SourceExpression_Binary(SRCEXP_EXPRBIN_PARM)
+ : Super(SRCEXP_EXPR_PASS), exprL(_exprL), exprR(_exprR), assign(false)
 {
-   doCast();
+   VariableType::Reference type = getType();
+
+   exprL = create_value_cast_implicit(exprL, type, context, pos);
+   exprR = create_value_cast_implicit(exprR, type, context, pos);
 }
 
 //
 // SourceExpression_Binary::SourceExpression_Binary
 //
-SourceExpression_Binary::
-SourceExpression_Binary(bool _arithmetic, SRCEXP_EXPRBIN_PARM)
-                        : Super(SRCEXP_EXPR_PASS),
-                          exprL(_exprL), exprR(_exprR), arithmetic(_arithmetic)
+SourceExpression_Binary::SourceExpression_Binary(SRCEXP_EXPRBIN_PARM,
+   VariableType *castL, VariableType *castR, bool _assign)
+ : Super(SRCEXP_EXPR_PASS), exprL(_exprL), exprR(_exprR), assign(_assign)
 {
-   doCast();
-}
-
-//
-// SourceExpression_Binary::SourceExpression_Binary
-//
-SourceExpression_Binary::
-SourceExpression_Binary(VariableType *castL, VariableType *castR,
-                        SRCEXP_EXPRBIN_PARM)
-                        : Super(SRCEXP_EXPR_PASS),
-                          exprL(_exprL), exprR(_exprR), arithmetic(2)
-{
-   doCast(castL, castR);
-}
-
-//
-// SourceExpression_Binary::SourceExpression_Binary
-//
-SourceExpression_Binary::
-SourceExpression_Binary(VariableType *castL, VariableType *castR,
-                        bool _arithmetic, SRCEXP_EXPRBIN_PARM)
-                        : Super(SRCEXP_EXPR_PASS),
-                          exprL(_exprL), exprR(_exprR), arithmetic(_arithmetic)
-{
-   doCast(castL, castR);
+   if (castL) exprL = create_value_cast_implicit(exprL, castL, context, pos);
+   if (castR) exprR = create_value_cast_implicit(exprR, castR, context, pos);
 }
 
 //
@@ -90,92 +67,43 @@ bool SourceExpression_Binary::canMakeObject() const
 }
 
 //
-// SourceExpression_Binary::doAssignBase
+// SourceExpression_Binary::doGet
 //
-void SourceExpression_Binary::doAssignBase
-(ObjectVector *objects, VariableData *dst, VariableData *src,
- ObjectCode ocodeOp, ObjectCode ocodeGet)
+void SourceExpression_Binary::doGet(ObjectVector *, VariableType *, int)
 {
-   ObjectExpression::Pointer tmpA = context->getTempVar(0);
-   VariableType::Reference typeL = exprL->getType();
-
-   VariableData::Pointer tmp = VariableData::create_stack(src->size);
-
-   if (dst->type != VariableData::MT_VOID)
-      make_objects_memcpy_prep(objects, dst, tmp, pos);
-
-   // MT_REGISTERARRAY addressing.
-   if (src->type == VariableData::MT_REGISTERARRAY)
-   {
-      src->offsetTemp = VariableData::create_stack
-                        (src->offsetExpr->getType()->getSize(pos));
-      src->offsetExpr->makeObjects(objects, src->offsetTemp);
-
-      // Extra address for get.
-      if (dst->type != VariableData::MT_VOID)
-         objects->addToken(OCODE_STACK_DUP32);
-   }
-
-   create_value_cast_explicit(exprR, typeL, context, pos)
-   ->makeObjects(objects, tmp);
-
-   // MT_POINTER addressing.
-   if (src->type == VariableData::MT_POINTER)
-   {
-      src->offsetTemp = VariableData::create_stack
-                        (src->offsetExpr->getType()->getSize(pos));
-      src->offsetExpr->makeObjects(objects, src->offsetTemp);
-
-      // Extra address for get.
-      if (dst->type != VariableData::MT_VOID)
-      {
-         objects->addToken(OCODE_SET_TEMP, tmpA);
-         objects->addToken(OCODE_GET_TEMP, tmpA);
-      }
-   }
-
-   objects->addToken(ocodeOp, src->address);
-
-   if (dst->type != VariableData::MT_VOID)
-   {
-      // MT_POINTER addressing.
-      if (src->type == VariableData::MT_POINTER)
-         objects->addToken(OCODE_GET_TEMP, tmpA);
-
-      objects->addToken(ocodeGet, src->address);
-
-      make_objects_memcpy_post(objects, dst, tmp, typeL, context, pos);
-   }
+   ERROR_NP("stub");
 }
 
 //
-// SourceExpression_Binary::doEvaluateBase
+// SourceExpression_Binary::doGetBase
 //
-void SourceExpression_Binary::doEvaluateBase
-(ObjectVector *objects, VariableData *dst, VariableData *src, ObjectCode ocode)
+void SourceExpression_Binary::doGetBase(ObjectVector *objects,
+                                        VariableData *dst)
 {
    VariableType::Reference type = getType();
+   VariableData::Pointer src = VariableData::
+      create_stack(type->getSize(pos));
 
    make_objects_memcpy_prep(objects, dst, src, pos);
 
    create_value_cast_explicit(exprL, type, context, pos)
-   ->makeObjects(objects, src);
+      ->makeObjects(objects, src);
 
    create_value_cast_explicit(exprR, type, context, pos)
-   ->makeObjects(objects, src);
+      ->makeObjects(objects, src);
 
-   objects->addToken(ocode);
+   doGet(objects, type, 0);
 
    make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }
 
 //
-// SourceExpression_Binary::doEvaluateBaseLLAS
+// SourceExpression_Binary::doGetBaseILLAS
 //
-void SourceExpression_Binary::doEvaluateBaseLLAS
-(ObjectVector *objects, VariableData *dst, VariableData *src, bool add)
+void SourceExpression_Binary::doGetBaseILLAS(ObjectVector *objects,
+   VariableType *type, int tmpBase, bool add)
 {
-   VariableType::Reference type = getType();
+   VariableData::Pointer tmp = VariableData::create_stack(type->getSize(pos));
 
    std::string label = context->makeLabel();
    std::string labelCmp = label + "_cmp";
@@ -183,17 +111,15 @@ void SourceExpression_Binary::doEvaluateBaseLLAS
    std::string labelOvr = label + "_ovr";
    std::string labelPos = label + "_pos";
 
-   ObjectExpression::Pointer tmpL = context->getTempVar(0);
-   ObjectExpression::Pointer tmpH = context->getTempVar(1);
-   ObjectExpression::Pointer tmpI = context->getTempVar(2);
-
-   make_objects_memcpy_prep(objects, dst, src, pos);
+   ObjectExpression::Pointer tmpL = context->getTempVar(tmpBase+0);
+   ObjectExpression::Pointer tmpH = context->getTempVar(tmpBase+1);
+   ObjectExpression::Pointer tmpI = context->getTempVar(tmpBase+2);
 
    create_value_cast_implicit(exprR, type, context, pos)
-   ->makeObjects(objects, src);
+   ->makeObjects(objects, tmp);
 
    create_value_cast_implicit(exprL, type, context, pos)
-   ->makeObjects(objects, src);
+   ->makeObjects(objects, tmp);
 
    objects->addToken(OCODE_SET_TEMP, tmpH);
    objects->addToken(OCODE_SET_TEMP, tmpL);
@@ -244,28 +170,16 @@ void SourceExpression_Binary::doEvaluateBaseLLAS
    objects->addLabel(labelEnd);
    objects->addToken(OCODE_GET_TEMP, tmpL);
    objects->addToken(OCODE_GET_TEMP, tmpH);
-
-   make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }
 
 //
-// SourceExpression_Binary::doEvaluateBaseLLB
+// SourceExpression_Binary::doGetBaseILLB
 //
-void SourceExpression_Binary::doEvaluateBaseLLB
-(ObjectVector *objects, VariableData *dst, VariableData *src, ObjectCode ocode)
+void SourceExpression_Binary::doGetBaseILLB(ObjectVector *objects,
+   VariableType *, int tmpBase, ObjectCode ocode)
 {
-   VariableType::Reference type = getType();
-
-   make_objects_memcpy_prep(objects, dst, src, pos);
-
-   create_value_cast_implicit(exprL, type, context, pos)
-   ->makeObjects(objects, src);
-
-   create_value_cast_implicit(exprR, type, context, pos)
-   ->makeObjects(objects, src);
-
-   ObjectExpression::Pointer tmpL = context->getTempVar(0);
-   ObjectExpression::Pointer tmpH = context->getTempVar(1);
+   ObjectExpression::Pointer tmpL = context->getTempVar(tmpBase+0);
+   ObjectExpression::Pointer tmpH = context->getTempVar(tmpBase+1);
 
    objects->addToken(OCODE_SET_TEMP, tmpH);
    objects->addToken(OCODE_SET_TEMP, tmpL);
@@ -275,75 +189,178 @@ void SourceExpression_Binary::doEvaluateBaseLLB
 
    objects->addToken(OCODE_GET_TEMP, tmpL);
    objects->addToken(OCODE_GET_TEMP, tmpH);
-
-   make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }
 
 //
-// SourceExpression_Binary::doCast
+// SourceExpression_Binary::doSet
 //
-void SourceExpression_Binary::doCast()
+bool SourceExpression_Binary::doSet(ObjectVector *, VariableData *,
+                                    VariableType *, int)
 {
-   VariableType::Reference type = getType();
-
-   exprL = create_value_cast_implicit(exprL, type, context, pos);
-   exprR = create_value_cast_implicit(exprR, type, context, pos);
+   return false;
 }
 
 //
-// SourceExpression_Binary::doCast
+// SourceExpression_Binary::doSetBase
 //
-void SourceExpression_Binary::
-doCast(VariableType *castL, VariableType *castR)
+void SourceExpression_Binary::doSetBase(ObjectVector *objects,
+                                        VariableData *dst)
 {
-   if (castL)
-      exprL = create_value_cast_implicit(exprL, castL, context, pos);
+   int tmpBase = 0;
+   ObjectExpression::Pointer tmpA;
+   VariableType::Reference typeL = exprL->getType();
 
-   if (castR)
-      exprR = create_value_cast_implicit(exprR, castR, context, pos);
-}
+   VariableData::Pointer src = exprL->getData();
+   VariableData::Pointer tmp = VariableData::create_stack(src->size);
 
-//
-// SourceExpression_Binary::getOcodeType
-//
-int SourceExpression_Binary::getOcodeType
-(VariableType::BasicType bt, int *ocodeGetType)
-{
-   int ocodeOpType;
-   switch (bt)
+   if (dst->type != VariableData::MT_VOID)
+      make_objects_memcpy_prep(objects, dst, tmp, pos);
+
+   // MT_REGISTERARRAY addressing.
+   if (src->type == VariableData::MT_REGISTERARRAY)
    {
-   case VariableType::BT_CHR:
-   case VariableType::BT_INT_HH:
-   case VariableType::BT_INT_H:
-   case VariableType::BT_INT:
-   case VariableType::BT_INT_L:
-      ocodeOpType = 1;
-      if (ocodeGetType) *ocodeGetType = 1;
-      break;
+      src->offsetTemp = VariableData::create_stack
+                        (src->offsetExpr->getType()->getSize(pos));
+      src->offsetExpr->makeObjects(objects, src->offsetTemp);
 
-   case VariableType::BT_FIX_HH:
-   case VariableType::BT_FIX_H:
-   case VariableType::BT_FIX:
-   case VariableType::BT_FIX_L:
-   case VariableType::BT_FIX_LL:
-      ocodeOpType = 0;
-      if (ocodeGetType) *ocodeGetType = 0;
-      break;
-
-   case VariableType::BT_UNS_HH:
-   case VariableType::BT_UNS_H:
-   case VariableType::BT_UNS:
-   case VariableType::BT_UNS_L:
-   case VariableType::BT_PTR:
-      ocodeOpType = 2;
-      if (ocodeGetType) *ocodeGetType = 1;
-      break;
-
-   default:
-      ERROR_NP("invalid BT: %s", make_string(bt).c_str());
+      // Extra address for get.
+      if (dst->type != VariableData::MT_VOID)
+         objects->addToken(OCODE_STACK_DUP32);
    }
 
-   return ocodeOpType;
+   create_value_cast_explicit(exprR, typeL, context, pos)
+      ->makeObjects(objects, tmp);
+
+   // MT_POINTER addressing.
+   if (src->type == VariableData::MT_POINTER)
+   {
+      src->offsetTemp = VariableData::create_stack
+                     (src->offsetExpr->getType()->getSize(pos));
+      src->offsetExpr->makeObjects(objects, src->offsetTemp);
+
+      // Extra address for get.
+      if (dst->type != VariableData::MT_VOID)
+      {
+         tmpA = context->getTempVar(tmpBase++);
+         objects->addToken(OCODE_SET_TEMP, tmpA);
+         objects->addToken(OCODE_GET_TEMP, tmpA);
+      }
+   }
+
+   // If doSet fails, need to emulate using doGet.
+   if (!doSet(objects, src, typeL, tmpBase))
+   {
+      if (src->type == VariableData::MT_POINTER)
+      {
+         if (!tmpA) tmpA = context->getTempVar(tmpBase++);
+
+         objects->addToken(OCODE_SET_TEMP, tmpA);
+      }
+
+      // However, need the operands in the right order.
+      // TODO: Only for certain operators.
+      ObjectExpression::Vector tmpV; tmpV.reserve(src->size);
+      for (bigsint i = src->size; i--;)
+         tmpV.push_back(context->getTempVar(tmpBase+i));
+
+      // Stash exprR.
+      for (bigsint i = src->size; i--;)
+         objects->addToken(OCODE_SET_TEMP, tmpV[i]);
+
+      // With exprR out of the way, RA address needs to be duplicated.
+      if (src->type == VariableData::MT_REGISTERARRAY)
+         objects->addToken(OCODE_STACK_SWAP32);
+
+      // Fetch exprL.
+      if (src->type == VariableData::MT_POINTER)
+         objects->addToken(OCODE_GET_TEMP, tmpA);
+      doSetBaseGet(objects, src);
+
+      // Fetch exprR.
+      for (bigsint i = 0; i < src->size; ++i)
+         objects->addToken(OCODE_GET_TEMP, tmpV[i]);
+
+      doGet(objects, typeL, tmpBase);
+
+      if (src->type == VariableData::MT_POINTER)
+         objects->addToken(OCODE_GET_TEMP, tmpA);
+      doSetBaseSet(objects, src);
+   }
+
+   if (dst->type != VariableData::MT_VOID)
+   {
+      // MT_POINTER addressing.
+      if (src->type == VariableData::MT_POINTER)
+         objects->addToken(OCODE_GET_TEMP, tmpA);
+
+      doSetBaseGet(objects, src);
+
+      make_objects_memcpy_post(objects, dst, tmp, typeL, context, pos);
+   }
+}
+
+//
+// SourceExpression_Binary::doSetBaseGet
+//
+void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
+                                           VariableData *src)
+{
+   switch (src->type)
+   {
+   case VariableData::MT_AUTO: objects->addToken(OCODE_GET_AUTO32I, src->address); break;
+   case VariableData::MT_POINTER: objects->addToken(OCODE_GET_POINTER32I, src->address); break;
+   case VariableData::MT_REGISTER:
+      switch (src->sectionR)
+      {
+      case VariableData::SR_LOCAL: objects->addToken(OCODE_GET_REGISTER32I, src->address); break;
+      case VariableData::SR_MAP: objects->addToken(OCODE_ACS_GET_MAPREGISTER, src->address); break;
+      case VariableData::SR_WORLD: objects->addToken(OCODE_ACS_GET_WORLDREGISTER, src->address); break;
+      case VariableData::SR_GLOBAL: objects->addToken(OCODE_ACSE_GET_GLOBALREGISTER, src->address); break;
+      }
+      break;
+   case VariableData::MT_REGISTERARRAY:
+      switch (src->sectionRA)
+      {
+      case VariableData::SRA_MAP: objects->addToken(OCODE_ACSE_GET_MAPARRAY, src->address); break;
+      case VariableData::SRA_WORLD: objects->addToken(OCODE_ACSE_GET_WORLDARRAY, src->address); break;
+      case VariableData::SRA_GLOBAL: objects->addToken(OCODE_ACSE_GET_GLOBALARRAY, src->address); break;
+      }
+      break;
+   case VariableData::MT_STATIC: objects->addToken(OCODE_GET_STATIC32I, src->address); break;
+   default: ERROR_NP("src->type");
+   }
+}
+
+//
+// SourceExpression_Binary::doSetBaseSet
+//
+void SourceExpression_Binary::doSetBaseSet(ObjectVector *objects,
+                                           VariableData *src)
+{
+   switch (src->type)
+   {
+   case VariableData::MT_AUTO: objects->addToken(OCODE_SET_AUTO32I, src->address); break;
+   case VariableData::MT_POINTER: objects->addToken(OCODE_SET_POINTER32I, src->address); break;
+   case VariableData::MT_REGISTER:
+      switch (src->sectionR)
+      {
+      case VariableData::SR_LOCAL: objects->addToken(OCODE_SET_REGISTER32I, src->address); break;
+      case VariableData::SR_MAP: objects->addToken(OCODE_ACS_SET_MAPREGISTER, src->address); break;
+      case VariableData::SR_WORLD: objects->addToken(OCODE_ACS_SET_WORLDREGISTER, src->address); break;
+      case VariableData::SR_GLOBAL: objects->addToken(OCODE_ACSE_SET_GLOBALREGISTER, src->address); break;
+      }
+      break;
+   case VariableData::MT_REGISTERARRAY:
+      switch (src->sectionRA)
+      {
+      case VariableData::SRA_MAP: objects->addToken(OCODE_ACSE_SET_MAPARRAY, src->address); break;
+      case VariableData::SRA_WORLD: objects->addToken(OCODE_ACSE_SET_WORLDARRAY, src->address); break;
+      case VariableData::SRA_GLOBAL: objects->addToken(OCODE_ACSE_SET_GLOBALARRAY, src->address); break;
+      }
+      break;
+   case VariableData::MT_STATIC: objects->addToken(OCODE_SET_STATIC32I, src->address); break;
+   default: ERROR_NP("src->type");
+   }
 }
 
 //
@@ -355,24 +372,17 @@ VariableType::Reference SourceExpression_Binary::getType() const
 }
 
 //
-// SourceExpression_Binary::recurse_makeObjects
+// SourceExpression_Binary::virtual_makeObjects
 //
-void SourceExpression_Binary::
-recurse_makeObjects(ObjectVector *objects, VariableData *dst)
+void SourceExpression_Binary::virtual_makeObjects(ObjectVector *objects,
+                                                  VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   // Special case, child handles expressions.
-   if (arithmetic == 2) return;
-
-   VariableData::Pointer   src =
-      VariableData::create_stack(getType()->getSize(pos));
-
-   make_objects_memcpy_prep(objects, dst, src, pos);
-   exprL->makeObjects(objects, src);
-   exprR->makeObjects(objects, src);
-
-   objects->setPosition(pos);
+   if (assign)
+      doSetBase(objects, dst);
+   else
+      doGetBase(objects, dst);
 }
 
 // EOF

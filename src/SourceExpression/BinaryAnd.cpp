@@ -46,13 +46,13 @@ public:
    //
    // ::SourceExpression_BinaryAnd
    //
-   SourceExpression_BinaryAnd(bool _assign, SRCEXP_EXPRBIN_PARM)
-    : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
+   SourceExpression_BinaryAnd(SRCEXP_EXPRBIN_PARM, bool _assign)
+    : Super(SRCEXP_EXPRBIN_PASS, NULL, NULL, _assign)
    {
-      CONSTRUCTOR_TYPE_VARS
-      CONSTRUCTOR_ARRAY_DECAY
+      CONSTRUCTOR_TYPE_VARS();
+      CONSTRUCTOR_ARRAY_DECAY();
 
-      CONSTRAINT_INTEGER("&")
+      CONSTRAINT_INTEGER("&");
    }
 
    //
@@ -64,46 +64,30 @@ public:
       return ObjectExpression::create_binary_and(objL, objR, pos);
    }
 
-private:
+protected:
    //
-   // ::doAssign
+   // ::doGet
    //
-   void doAssign(ObjectVector *objects, VariableData *dst)
+   virtual void doGet(ObjectVector *objects, VariableType *type, int tmpBase)
    {
-      ASSIGN_BITWISE_VARS
+      switch (type->getBasicType())
+      {
+         DO_GET_CASES(AND, BITWISE_, 32, 32, 32);
 
-      ASSIGN_GET_OCODE_BITWISE(AND)
-
-      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+      case VariableType::BT_INT_LL: doGetBaseILLB(objects, type, tmpBase, OCODE_BITWISE_AND32); break;
+      case VariableType::BT_UNS_LL: doGetBaseILLB(objects, type, tmpBase, OCODE_BITWISE_AND32); break;
+      }
    }
 
    //
-   // ::doEvaluate
+   // ::doSet
    //
-   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   virtual bool doSet(ObjectVector *objects, VariableData *data,
+                      VariableType *type, int)
    {
-      EVALUATE_BITWISE_VARS(BITWISE_AND)
-
-      if (bt == VariableType::BT_INT_LL || bt == VariableType::BT_UNS_LL)
-         doEvaluateBaseLLB(objects, dst, src, OCODE_SETOP_AND_TEMP);
-      else
-         doEvaluateBase(objects, dst, src, ocode);
+      DO_SET_SWITCHES(AND, 32, 32, 32, ACS);
+      return false;
    }
-
-   //
-   // ::virtual_makeObjects
-   //
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
-   {
-      Super::recurse_makeObjects(objects, dst);
-
-      if (assign)
-         doAssign(objects, dst);
-      else
-         doEvaluate(objects, dst);
-   }
-
-   bool assign;
 };
 
 
@@ -116,7 +100,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(and)
 {
-   return new SourceExpression_BinaryAnd(false, exprL, exprR, context, pos);
+   return new SourceExpression_BinaryAnd(exprL, exprR, context, pos, false);
 }
 
 //
@@ -124,7 +108,7 @@ SRCEXP_EXPRBIN_DEFN(and)
 //
 SRCEXP_EXPRBIN_DEFN(and_eq)
 {
-   return new SourceExpression_BinaryAnd(true, exprL, exprR, context, pos);
+   return new SourceExpression_BinaryAnd(exprL, exprR, context, pos, true);
 }
 
 // EOF

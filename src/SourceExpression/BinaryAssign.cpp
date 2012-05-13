@@ -42,14 +42,26 @@ class SourceExpression_BinaryAssign : public SourceExpression_Binary
                                    SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryAssign(bool allowConst, SRCEXP_EXPRBIN_ARGS);
+   //
+   // ::SourceExpression_BinaryAssign
+   //
+   SourceExpression_BinaryAssign(SRCEXP_EXPRBIN_PARM, bool _init)
+    : Super(SRCEXP_EXPRBIN_PASS, NULL, _exprL->getType(), false), init(_init)
+   {
+   }
 
-   virtual bool canMakeObject() const;
+   //
+   // ::canMakeObject
+   //
+   virtual bool canMakeObject() const
+   {
+      return false;
+   }
 
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 
-   bool allowConst;
+   bool init;
 };
 
 
@@ -62,7 +74,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(assign)
 {
-   return new SourceExpression_BinaryAssign(false, exprL, exprR, context, pos);
+   return new SourceExpression_BinaryAssign(exprL, exprR, context, pos, false);
 }
 
 //
@@ -70,29 +82,7 @@ SRCEXP_EXPRBIN_DEFN(assign)
 //
 SRCEXP_EXPRBIN_DEFN(assign_const)
 {
-   return new SourceExpression_BinaryAssign(true, exprL, exprR, context, pos);
-}
-
-//
-// SourceExpression_BinaryAssign::SourceExpression_BinaryAssign
-//
-SourceExpression_BinaryAssign::
-SourceExpression_BinaryAssign(bool _allowConst, SRCEXP_EXPRBIN_PARM)
-                              : Super(NULL, _exprL->getType(),
-                                      SRCEXP_EXPRBIN_PASS),
-                                allowConst(_allowConst)
-{
-}
-
-//
-// SourceExpression_BinaryAssign::canMakeObject
-//
-// Nothing with side-effects can be made into an object. More specifically,
-// code must be emitted even if the yielded value is unused.
-//
-bool SourceExpression_BinaryAssign::canMakeObject() const
-{
-   return false;
+   return new SourceExpression_BinaryAssign(exprL, exprR, context, pos, true);
 }
 
 //
@@ -103,7 +93,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   if (!allowConst && exprL->getType()->getQualifier(VariableType::QUAL_CONST))
+   if (!init && exprL->getType()->getQualifier(VariableType::QUAL_CONST))
       ERROR_NP("assignment to const");
 
    if (dst->type == VariableData::MT_VOID)

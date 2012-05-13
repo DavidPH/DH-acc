@@ -37,7 +37,7 @@
 //
 // CONSTRUCTOR_TYPE_VARS
 //
-#define CONSTRUCTOR_TYPE_VARS                        \
+#define CONSTRUCTOR_TYPE_VARS()                      \
 VariableType::Reference typeL = exprL->getType();    \
 VariableType::Reference typeR = exprR->getType();    \
                                                      \
@@ -47,7 +47,7 @@ VariableType::BasicType btR = typeR->getBasicType();
 //
 // CONSTRUCTOR_ARRAY_DECAY
 //
-#define CONSTRUCTOR_ARRAY_DECAY                                    \
+#define CONSTRUCTOR_ARRAY_DECAY()                                  \
 /* Array types decay to pointer types. */                          \
 if (btL == VariableType::BT_ARR)                                   \
 {                                                                  \
@@ -66,7 +66,7 @@ if (btR == VariableType::BT_ARR)                                   \
 //
 // CONSTRUCTOR_POINTER_PREAMBLE
 //
-#define CONSTRUCTOR_POINTER_PREAMBLE                      \
+#define CONSTRUCTOR_POINTER_PREAMBLE()                    \
 VariableType::Reference type = getType();                 \
                                                           \
 if (type->getBasicType() != VariableType::BT_PTR) return; \
@@ -99,299 +99,93 @@ if (!VariableType::is_bt_integer(btR))     \
    ERROR_N(pos, "X " OPER " non-integer");
 
 //
-// ASSIGN_ARITHMETIC_VARS
+// DO_GET_CASES
 //
-#define ASSIGN_ARITHMETIC_VARS                    \
-VariableType::Reference typeL = exprL->getType(); \
-VariableData::Pointer   src   = exprL->getData(); \
-ObjectCode ocodeOp  = OCODE_NONE;                 \
-ObjectCode ocodeGet = OCODE_NONE;                 \
-int ocodeOpType;                                  \
-int ocodeGetType;                                 \
-bool ocodeTyped = false;                          \
-ocodeOpType = getOcodeType(typeL->getBasicType(), &ocodeGetType);
+#define DO_GET_CASES(OP,PRE,SUFF,SUFI,SUFU)                                    \
+case VariableType::BT_CHR: objects->addToken(OCODE_##PRE##OP##SUFI); break;    \
+                                                                               \
+case VariableType::BT_FIX_HH: objects->addToken(OCODE_##PRE##OP##SUFF); break; \
+case VariableType::BT_FIX_H: objects->addToken(OCODE_##PRE##OP##SUFF); break;  \
+case VariableType::BT_FIX: objects->addToken(OCODE_##PRE##OP##SUFF); break;    \
+case VariableType::BT_FIX_L: objects->addToken(OCODE_##PRE##OP##SUFF); break;  \
+case VariableType::BT_FIX_LL: objects->addToken(OCODE_##PRE##OP##SUFF); break; \
+                                                                               \
+case VariableType::BT_INT_HH: objects->addToken(OCODE_##PRE##OP##SUFI); break; \
+case VariableType::BT_INT_H: objects->addToken(OCODE_##PRE##OP##SUFI); break;  \
+case VariableType::BT_INT: objects->addToken(OCODE_##PRE##OP##SUFI); break;    \
+case VariableType::BT_INT_L: objects->addToken(OCODE_##PRE##OP##SUFI); break;  \
+                                                                               \
+case VariableType::BT_UNS_HH: objects->addToken(OCODE_##PRE##OP##SUFU); break; \
+case VariableType::BT_UNS_H: objects->addToken(OCODE_##PRE##OP##SUFU); break;  \
+case VariableType::BT_UNS: objects->addToken(OCODE_##PRE##OP##SUFU); break;    \
+case VariableType::BT_UNS_L: objects->addToken(OCODE_##PRE##OP##SUFU); break;  \
+                                                                               \
+case VariableType::BT_PTR: objects->addToken(OCODE_##PRE##OP##SUFU); break;    \
+                                                                               \
+default: ERROR_NP("invalid BT: %s", make_string(type->getBasicType()).c_str())
 
 //
-// ASSIGN_BITWISE_VARS
+// DO_GET_SWITCH
 //
-#define ASSIGN_BITWISE_VARS                       \
-VariableType::Reference typeL = exprL->getType(); \
-VariableData::Pointer   src   = exprL->getData(); \
-ObjectCode ocodeOp  = OCODE_NONE;                 \
-ObjectCode ocodeGet = OCODE_NONE;                 \
-int ocodeOpType = 0;                              \
-int ocodeGetType;                                 \
-bool ocodeTyped = false;                          \
-getOcodeType(typeL->getBasicType(), &ocodeGetType);
+#define DO_GET_SWITCH(OP,PRE,SUFF,SUFI,SUFU) \
+switch (type->getBasicType()) {DO_GET_CASES(OP, PRE, SUFF, SUFI, SUFU);}
 
 //
-// ASSIGN_GET_OCODE_GET_REGISTER
+// DO_SET_CASES
 //
-#define ASSIGN_GET_OCODE_GET_REGISTER        \
-switch (src->sectionR)                       \
-{                                            \
-case VariableData::SR_LOCAL:                 \
-   ocodeGet = OCODE_GET_REGISTER32F;         \
-   ocodeTyped = true;                        \
-   break;                                    \
-                                             \
-case VariableData::SR_MAP:                   \
-   ocodeGet = OCODE_ACS_GET_MAPREGISTER;     \
-   break;                                    \
-                                             \
-case VariableData::SR_WORLD:                 \
-   ocodeGet = OCODE_ACS_GET_WORLDREGISTER;   \
-   break;                                    \
-                                             \
-case VariableData::SR_GLOBAL:                \
-   ocodeGet = OCODE_ACSE_GET_GLOBALREGISTER; \
-   break;                                    \
-}
+#define DO_SET_CASES(OP,MT,PRE,SUFF,SUFI,SUFU)                                                      \
+case VariableType::BT_CHR: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFI); return true;    \
+                                                                                                    \
+case VariableType::BT_FIX_HH: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFF); return true; \
+case VariableType::BT_FIX_H: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFF); return true;  \
+case VariableType::BT_FIX: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFF); return true;    \
+case VariableType::BT_FIX_L: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFF); return true;  \
+case VariableType::BT_FIX_LL: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFF); return true; \
+                                                                                                    \
+case VariableType::BT_INT_HH: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFI); return true; \
+case VariableType::BT_INT_H: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFI); return true;  \
+case VariableType::BT_INT: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFI); return true;    \
+case VariableType::BT_INT_L: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFI); return true;  \
+case VariableType::BT_INT_LL: return false;                                                         \
+                                                                                                    \
+case VariableType::BT_UNS_HH: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFU); return true; \
+case VariableType::BT_UNS_H: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFU); return true;  \
+case VariableType::BT_UNS: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFU); return true;    \
+case VariableType::BT_UNS_L: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFU); return true;  \
+case VariableType::BT_UNS_LL: return false;                                                         \
+                                                                                                    \
+case VariableType::BT_PTR: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFU); return true;    \
+                                                                                                    \
+default: ERROR_NP("invalid BT: %s", make_string(type->getBasicType()).c_str());
 
 //
-// ASSIGN_GET_OCODE_GET_ARRAY
+// DO_SET_SWITCH
 //
-#define ASSIGN_GET_OCODE_GET_ARRAY        \
-switch (src->sectionRA)                   \
-{                                         \
-case VariableData::SRA_MAP:               \
-   ocodeGet = OCODE_ACSE_GET_MAPARRAY;    \
-   break;                                 \
-                                          \
-case VariableData::SRA_WORLD:             \
-   ocodeGet = OCODE_ACSE_GET_WORLDARRAY;  \
-   break;                                 \
-                                          \
-case VariableData::SRA_GLOBAL:            \
-   ocodeGet = OCODE_ACSE_GET_GLOBALARRAY; \
-   break;                                 \
-}
+#define DO_SET_SWITCH(OP,MT,PRE,SUFF,SUFI,SUFU) \
+switch (type->getBasicType()) {DO_SET_CASES(OP, MT, PRE, SUFF, SUFI, SUFU);}
 
 //
-// ASSIGN_GET_OCODE_GET
+// DO_SET_SWITCHES
 //
-#define ASSIGN_GET_OCODE_GET                                    \
-switch (src->type)                                              \
-{                                                               \
-case VariableData::MT_AUTO:                                     \
-   ocodeGet = OCODE_GET_AUTO32F;                                \
-   ocodeTyped = true;                                           \
-   break;                                                       \
-                                                                \
-case VariableData::MT_POINTER:                                  \
-   ocodeGet = OCODE_GET_POINTER32F;                             \
-   ocodeTyped = true;                                           \
-   break;                                                       \
-                                                                \
-case VariableData::MT_REGISTER:                                 \
-   ASSIGN_GET_OCODE_GET_REGISTER                                \
-   break;                                                       \
-                                                                \
-case VariableData::MT_REGISTERARRAY:                            \
-   ASSIGN_GET_OCODE_GET_ARRAY                                   \
-   break;                                                       \
-                                                                \
-case VariableData::MT_STATIC:                                   \
-   ocodeGet = OCODE_GET_STATIC32F;                              \
-   ocodeTyped = true;                                           \
-   break;                                                       \
-                                                                \
-case VariableData::MT_LITERAL:                                  \
-case VariableData::MT_STACK:                                    \
-case VariableData::MT_VOID:                                     \
-case VariableData::MT_NONE:                                     \
-   ERROR_NP("invalid MT");                                      \
-}                                                               \
-                                                                \
-if (ocodeTyped)                                                 \
-{                                                               \
-   ocodeOp  = static_cast<ObjectCode>(ocodeOp  + ocodeOpType);  \
-   ocodeGet = static_cast<ObjectCode>(ocodeGet + ocodeGetType); \
-}
-
-//
-// ASSIGN_GET_OCODE_ARITHMETIC_REGISTER
-//
-#define ASSIGN_GET_OCODE_ARITHMETIC_REGISTER(OPER)      \
-switch (src->sectionR)                                  \
-{                                                       \
-case VariableData::SR_LOCAL:                            \
-   ocodeOp  = OCODE_SETOP_##OPER##_REGISTER32F;         \
-   ocodeTyped = true;                                   \
-   break;                                               \
-                                                        \
-case VariableData::SR_MAP:                              \
-   ocodeOp  = OCODE_ACS_SETOP_##OPER##_MAPREGISTER;     \
-   break;                                               \
-                                                        \
-case VariableData::SR_WORLD:                            \
-   ocodeOp  = OCODE_ACS_SETOP_##OPER##_WORLDREGISTER;   \
-   break;                                               \
-                                                        \
-case VariableData::SR_GLOBAL:                           \
-   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_GLOBALREGISTER; \
-   break;                                               \
-}
-
-//
-// ASSIGN_GET_OCODE_ARITHMETIC_ARRAY
-//
-#define ASSIGN_GET_OCODE_ARITHMETIC_ARRAY(OPER)      \
-switch (src->sectionRA)                              \
-{                                                    \
-case VariableData::SRA_MAP:                          \
-   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_MAPARRAY;    \
-   break;                                            \
-                                                     \
-case VariableData::SRA_WORLD:                        \
-   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_WORLDARRAY;  \
-   break;                                            \
-                                                     \
-case VariableData::SRA_GLOBAL:                       \
-   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_GLOBALARRAY; \
-   break;                                            \
-}
-
-//
-// ASSIGN_GET_OCODE_ARITHMETIC
-//
-#define ASSIGN_GET_OCODE_ARITHMETIC(OPER)                         \
-ocodeOpType = getOcodeType(typeL->getBasicType(), &ocodeGetType); \
-                                                                  \
-switch (src->type)                                                \
-{                                                                 \
-case VariableData::MT_AUTO:                                       \
-   ocodeOp  = OCODE_SETOP_##OPER##_AUTO32F;                       \
-   ocodeTyped = true;                                             \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_POINTER:                                    \
-   ocodeOp  = OCODE_SETOP_##OPER##_POINTER32F;                    \
-   ocodeTyped = true;                                             \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_REGISTER:                                   \
-   ASSIGN_GET_OCODE_ARITHMETIC_REGISTER(OPER)                     \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_REGISTERARRAY:                              \
-   ASSIGN_GET_OCODE_ARITHMETIC_ARRAY(OPER)                        \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_STATIC:                                     \
-   ocodeOp  = OCODE_SETOP_##OPER##_STATIC32F;                     \
-   ocodeTyped = true;                                             \
-   break;                                                         \
-                                                                  \
-case VariableData::MT_LITERAL:                                    \
-case VariableData::MT_STACK:                                      \
-case VariableData::MT_VOID:                                       \
-case VariableData::MT_NONE:                                       \
-   ERROR_NP("invalid MT");                                        \
-}                                                                 \
-                                                                  \
-ASSIGN_GET_OCODE_GET
-
-//
-// ASSIGN_GET_OCODE_BITWISE_REGISTER
-//
-#define ASSIGN_GET_OCODE_BITWISE_REGISTER(OPER)         \
-switch (src->sectionR)                                  \
-{                                                       \
-case VariableData::SR_LOCAL:                            \
-   ocodeOp  = OCODE_SETOP_##OPER##_REGISTER32;          \
-   break;                                               \
-                                                        \
-case VariableData::SR_MAP:                              \
-   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_MAPREGISTER;    \
-   break;                                               \
-                                                        \
-case VariableData::SR_WORLD:                            \
-   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_WORLDREGISTER;  \
-   break;                                               \
-                                                        \
-case VariableData::SR_GLOBAL:                           \
-   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_GLOBALREGISTER; \
-   break;                                               \
-}
-
-//
-// ASSIGN_GET_OCODE_BITWISE_ARRAY
-//
-#define ASSIGN_GET_OCODE_BITWISE_ARRAY(OPER)         \
-switch (src->sectionRA)                              \
-{                                                    \
-case VariableData::SRA_MAP:                          \
-   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_MAPARRAY;    \
-   break;                                            \
-                                                     \
-case VariableData::SRA_WORLD:                        \
-   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_WORLDARRAY;  \
-   break;                                            \
-                                                     \
-case VariableData::SRA_GLOBAL:                       \
-   ocodeOp  = OCODE_ACSE_SETOP_##OPER##_GLOBALARRAY; \
-   break;                                            \
-}
-
-//
-// ASSIGN_GET_OCODE_BITWISE
-//
-#define ASSIGN_GET_OCODE_BITWISE(OPER)        \
-switch (src->type)                            \
-{                                             \
-case VariableData::MT_AUTO:                   \
-   ocodeOp  = OCODE_SETOP_##OPER##_AUTO32;    \
-   break;                                     \
-                                              \
-case VariableData::MT_POINTER:                \
-   ocodeOp  = OCODE_SETOP_##OPER##_POINTER32; \
-   break;                                     \
-                                              \
-case VariableData::MT_REGISTER:               \
-   ASSIGN_GET_OCODE_BITWISE_REGISTER(OPER)    \
-   break;                                     \
-                                              \
-case VariableData::MT_REGISTERARRAY:          \
-   ASSIGN_GET_OCODE_BITWISE_ARRAY(OPER)       \
-   break;                                     \
-                                              \
-case VariableData::MT_STATIC:                 \
-   ocodeOp  = OCODE_SETOP_##OPER##_STATIC32;  \
-   break;                                     \
-                                              \
-case VariableData::MT_LITERAL:                \
-case VariableData::MT_STACK:                  \
-case VariableData::MT_VOID:                   \
-case VariableData::MT_NONE:                   \
-   ERROR_NP("invalid MT");                    \
-}                                             \
-                                              \
-ASSIGN_GET_OCODE_GET
-
-//
-// EVALUATE_ARITHMETIC_VARS
-//
-#define EVALUATE_ARITHMETIC_VARS(OPER)               \
-VariableType::Reference type = getType();            \
-VariableType::BasicType bt   = type->getBasicType(); \
-bigsint                 size = type->getSize(pos);   \
-                                                     \
-ObjectCode ocode = OCODE_##OPER##32F;                \
-                                                     \
-VariableData::Pointer src = VariableData::create_stack(size);
-
-//
-// EVALUATE_BITWISE_VARS
-//
-#define EVALUATE_BITWISE_VARS(OPER)                  \
-VariableType::Reference type = getType();            \
-VariableType::BasicType bt   = type->getBasicType(); \
-bigsint                 size = type->getSize(pos);   \
-                                                     \
-ObjectCode ocode = OCODE_##OPER##32;                 \
-                                                     \
-VariableData::Pointer src = VariableData::create_stack(size);
+#define DO_SET_SWITCHES(OP,SUFF,SUFI,SUFU,ACS)                                   \
+switch (data->type) {                                                            \
+case VariableData::MT_AUTO: DO_SET_SWITCH(OP, AUTO, , SUFF, SUFI, SUFU);         \
+case VariableData::MT_POINTER: DO_SET_SWITCH(OP, POINTER, , SUFF, SUFI, SUFU);   \
+case VariableData::MT_REGISTER:                                                  \
+   switch (data->sectionR) {                                                     \
+   case VariableData::SR_LOCAL: DO_SET_SWITCH(OP, REGISTER, , SUFF, SUFI, SUFU); \
+   case VariableData::SR_MAP: DO_SET_SWITCH(OP, MAPREGISTER, ACS##_, , , );      \
+   case VariableData::SR_WORLD: DO_SET_SWITCH(OP, WORLDREGISTER, ACS##_, , , );  \
+   case VariableData::SR_GLOBAL: DO_SET_SWITCH(OP, GLOBALREGISTER, ACSE_, , , ); \
+   } break;                                                                      \
+case VariableData::MT_REGISTERARRAY:                                             \
+   switch (data->sectionRA) {                                                    \
+   case VariableData::SRA_MAP: DO_SET_SWITCH(OP, MAPARRAY, ACSE_, , , );         \
+   case VariableData::SRA_WORLD: DO_SET_SWITCH(OP, WORLDARRAY, ACSE_, , , );     \
+   case VariableData::SRA_GLOBAL: DO_SET_SWITCH(OP, GLOBALARRAY, ACSE_, , , );   \
+   } break;                                                                      \
+case VariableData::MT_STATIC: DO_SET_SWITCH(OP, STATIC, , SUFF, SUFI, SUFU);     \
+default: ERROR_NP("invalid MT"); }
 
 //
 // EVALUATE_OBJECTS
@@ -423,43 +217,33 @@ public:
 protected:
    SourceExpression_Binary(SRCEXP_EXPRBIN_ARGS);
 
-   SourceExpression_Binary(bool arithmetic, SRCEXP_EXPRBIN_ARGS);
+   SourceExpression_Binary(SRCEXP_EXPRBIN_ARGS, VariableType *castL,
+                           VariableType *castR, bool assign);
 
-   SourceExpression_Binary(VariableType *castL, VariableType *castR,
-                           SRCEXP_EXPRBIN_ARGS);
+   virtual void doGet(ObjectVector *objects, VariableType *type, int tmpBase);
 
-   SourceExpression_Binary(VariableType *castL, VariableType *castR,
-                           bool arithmetic, SRCEXP_EXPRBIN_ARGS);
+   void doGetBaseILLAS(ObjectVector *objects, VariableType *type, int tmpBase,
+                       bool add);
 
-   void doAssignBase
-   (ObjectVector *objects, VariableData *dst, VariableData *src,
-    ObjectCode ocodeOp, ObjectCode ocodeGet);
+   void doGetBaseILLB(ObjectVector *objects, VariableType *type, int tmpBase,
+                      ObjectCode ocode);
 
-   void doEvaluateBase
-   (ObjectVector *objects, VariableData *dst, VariableData *src,
-    ObjectCode ocode);
-
-   void doEvaluateBaseLLAS
-   (ObjectVector *objects, VariableData *dst, VariableData *src, bool add);
-
-   void doEvaluateBaseLLB
-   (ObjectVector *objects, VariableData *dst, VariableData *src,
-    ObjectCode ocode);
-
-   int getOcodeType
-   (VariableType::BasicType bt, int *ocodeGetType = NULL);
-
-   void recurse_makeObjects(ObjectVector *objects, VariableData *dst);
+   virtual bool doSet(ObjectVector *objects, VariableData *data,
+                      VariableType *type, int tmpBase);
 
    SourceExpression::Pointer exprL;
    SourceExpression::Pointer exprR;
 
-private:
-   void doCast();
-   void doCast(VariableType *castL, VariableType *castR);
+   bool assign;
 
-   int arithmetic;
+private:
+   void doGetBase(ObjectVector *objects, VariableData *dst);
+   void doSetBase(ObjectVector *objects, VariableData *dst);
+   void doSetBaseGet(ObjectVector *objects, VariableData *src);
+   void doSetBaseSet(ObjectVector *objects, VariableData *src);
+
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
-#endif /* HPP_Binary__SourceExpression_ */
+#endif//HPP_Binary__SourceExpression_
 

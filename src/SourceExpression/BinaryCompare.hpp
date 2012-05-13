@@ -46,7 +46,6 @@ public:
 
 protected:
    SourceExpression_BinaryCompare(SRCEXP_EXPRBIN_ARGS);
-   SourceExpression_BinaryCompare(bool branchChecked, SRCEXP_EXPRBIN_ARGS);
 };
 
 #endif//HPP_BinaryCompare__SourceExpression_

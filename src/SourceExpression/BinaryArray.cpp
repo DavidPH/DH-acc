@@ -105,9 +105,8 @@ SRCEXP_EXPRBIN_DEFN(array)
 //
 // SourceExpression_BinaryArray::SourceExpression_BinaryArray
 //
-SourceExpression_BinaryArray::SourceExpression_BinaryArray
-(SRCEXP_EXPRBIN_PARM)
- : Super(NULL, VariableType::get_bt_uns(), SRCEXP_EXPRBIN_PASS)
+SourceExpression_BinaryArray::SourceExpression_BinaryArray(SRCEXP_EXPRBIN_PARM)
+ : Super(SRCEXP_EXPRBIN_PASS, NULL, VariableType::get_bt_uns(), false)
 {
    VariableType::BasicType btL = exprL->getType()->getBasicType();
 

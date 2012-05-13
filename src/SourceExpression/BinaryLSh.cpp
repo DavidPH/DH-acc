@@ -46,13 +46,13 @@ public:
    //
    // ::SourceExpression_BinaryLSh
    //
-   SourceExpression_BinaryLSh(bool _assign, SRCEXP_EXPRBIN_PARM)
-    : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
+   SourceExpression_BinaryLSh(SRCEXP_EXPRBIN_PARM, bool _assign)
+    : Super(SRCEXP_EXPRBIN_PASS, NULL, NULL, _assign)
    {
-      CONSTRUCTOR_TYPE_VARS
-      CONSTRUCTOR_ARRAY_DECAY
+      CONSTRUCTOR_TYPE_VARS();
+      CONSTRUCTOR_ARRAY_DECAY();
 
-      CONSTRAINT_INTEGER("<<")
+      CONSTRAINT_INTEGER("<<");
    }
 
    //
@@ -63,43 +63,24 @@ public:
       return false;
    }
 
-private:
+protected:
    //
-   // ::doAssign
+   // ::doGet
    //
-   void doAssign(ObjectVector *objects, VariableData *dst)
+   virtual void doGet(ObjectVector *objects, VariableType *type, int)
    {
-      ASSIGN_BITWISE_VARS
-
-      ASSIGN_GET_OCODE_BITWISE(LSH)
-
-      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+      DO_GET_SWITCH(LSH, BITWISE_, 32, 32, 32);
    }
 
    //
-   // ::doEvaluate
+   // ::doSet
    //
-   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   virtual bool doSet(ObjectVector *objects, VariableData *data,
+                      VariableType *type, int)
    {
-      EVALUATE_BITWISE_VARS(BITWISE_LSH)
-
-      doEvaluateBase(objects, dst, src, ocode);
+      DO_SET_SWITCHES(LSH, 32, 32, 32, ACSE);
+      return false;
    }
-
-   //
-   // ::virtual_makeObjects
-   //
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
-   {
-      Super::recurse_makeObjects(objects, dst);
-
-      if (assign)
-         doAssign(objects, dst);
-      else
-         doEvaluate(objects, dst);
-   }
-
-   bool assign;
 };
 
 
@@ -112,7 +93,7 @@ private:
 //
 SRCEXP_EXPRBIN_DEFN(lsh)
 {
-   return new SourceExpression_BinaryLSh(false, exprL, exprR, context, pos);
+   return new SourceExpression_BinaryLSh(exprL, exprR, context, pos, false);
 }
 
 //
@@ -120,7 +101,7 @@ SRCEXP_EXPRBIN_DEFN(lsh)
 //
 SRCEXP_EXPRBIN_DEFN(lsh_eq)
 {
-   return new SourceExpression_BinaryLSh(true, exprL, exprR, context, pos);
+   return new SourceExpression_BinaryLSh(exprL, exprR, context, pos, true);
 }
 
 // EOF

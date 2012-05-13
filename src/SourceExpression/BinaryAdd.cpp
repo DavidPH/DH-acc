@@ -44,44 +44,78 @@ class SourceExpression_BinaryAdd : public SourceExpression_Binary
                                      SourceExpression_Binary);
 
 public:
-   SourceExpression_BinaryAdd(bool assign, SRCEXP_EXPRBIN_ARGS);
-
-   virtual CounterPointer<ObjectExpression> makeObject() const;
-
-private:
    //
-   // ::doAssign
+   // ::SourceExpression_BinaryAdd
    //
-   void doAssign(ObjectVector *objects, VariableData *dst)
+   SourceExpression_BinaryAdd(bool _assign, SRCEXP_EXPRBIN_PARM)
+    : Super(SRCEXP_EXPRBIN_PASS, NULL, NULL, _assign)
    {
-      ASSIGN_ARITHMETIC_VARS
+      CONSTRUCTOR_TYPE_VARS();
+      CONSTRUCTOR_ARRAY_DECAY();
 
-      ASSIGN_GET_OCODE_ARITHMETIC(ADD)
+      // Type constraints.
+      if (btL == VariableType::BT_PTR || btR == VariableType::BT_PTR)
+      {
+         // Pointer constraints.
+         if (btL == VariableType::BT_PTR && btR == VariableType::BT_PTR)
+            ERROR_NP("pointer + pointer");
 
-      doAssignBase(objects, dst, src, ocodeOp, ocodeGet);
+         if (btL == VariableType::BT_PTR && !VariableType::is_bt_integer(btR))
+            ERROR_NP("pointer + non-integer");
+
+         if (!VariableType::is_bt_integer(btL) && btR == VariableType::BT_PTR)
+            ERROR_NP("non-integer + pointer");
+      }
+      else
+      {
+         CONSTRAINT_ARITHMETIC("+");
+      }
+
+      if (assign && !VariableType::is_bt_arithmetic(btR))
+         ERROR_NP("X -= non-arithmetic");
+
+      CONSTRUCTOR_POINTER_PREAMBLE();
+
+      if (btL == VariableType::BT_PTR)
+         exprR = create_binary_mul(exprR, exprSize, context, pos);
+
+      if (btR == VariableType::BT_PTR)
+         exprL = create_binary_mul(exprL, exprSize, context, pos);
    }
 
    //
-   // ::doEvaluate
+   // ::makeObject
    //
-   void doEvaluate(ObjectVector *objects, VariableData *dst)
+   virtual ObjectExpression::Pointer makeObject() const
    {
-      EVALUATE_ARITHMETIC_VARS(ADD)
+      EVALUATE_OBJECTS();
+      return ObjectExpression::create_binary_add(objL, objR, pos);
+   }
 
-      // TODO: X + 0
-
-      if (bt == VariableType::BT_INT_LL || bt == VariableType::BT_UNS_LL)
-         doEvaluateBaseLLAS(objects, dst, src, true);
-      else
+protected:
+   //
+   // ::doGet
+   //
+   virtual void doGet(ObjectVector *objects, VariableType *type, int tmpBase)
+   {
+      switch (type->getBasicType())
       {
-         ocode = static_cast<ObjectCode>(ocode + getOcodeType(bt));
-         doEvaluateBase(objects, dst, src, ocode);
+         DO_GET_CASES(ADD, , 32F, 32I, 32U);
+
+      case VariableType::BT_INT_LL: doGetBaseILLAS(objects, type, tmpBase, true); break;
+      case VariableType::BT_UNS_LL: doGetBaseILLAS(objects, type, tmpBase, true); break;
       }
    }
 
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
-
-   bool assign;
+   //
+   // ::doSet
+   //
+   virtual bool doSet(ObjectVector *objects, VariableData *data,
+                      VariableType *type, int)
+   {
+      DO_SET_SWITCHES(ADD, 32F, 32I, 32U, ACS);
+      return false;
+   }
 };
 
 
@@ -103,69 +137,6 @@ SRCEXP_EXPRBIN_DEFN(add)
 SRCEXP_EXPRBIN_DEFN(add_eq)
 {
    return new SourceExpression_BinaryAdd(true, exprL, exprR, context, pos);
-}
-
-//
-// SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
-//
-SourceExpression_BinaryAdd::SourceExpression_BinaryAdd
-(bool _assign, SRCEXP_EXPRBIN_PARM)
- : Super(NULL, NULL, SRCEXP_EXPRBIN_PASS), assign(_assign)
-{
-   CONSTRUCTOR_TYPE_VARS
-   CONSTRUCTOR_ARRAY_DECAY
-
-   // Type constraints.
-   if (btL == VariableType::BT_PTR || btR == VariableType::BT_PTR)
-   {
-      // Pointer constraints.
-      if (btL == VariableType::BT_PTR && btR == VariableType::BT_PTR)
-         ERROR_NP("pointer + pointer");
-
-      if (btL == VariableType::BT_PTR && !VariableType::is_bt_integer(btR))
-         ERROR_NP("pointer + non-integer");
-
-      if (!VariableType::is_bt_integer(btL) && btR == VariableType::BT_PTR)
-         ERROR_NP("non-integer + pointer");
-   }
-   else
-   {
-      CONSTRAINT_ARITHMETIC("+")
-   }
-
-   if (assign && !VariableType::is_bt_arithmetic(btR))
-      ERROR_NP("X -= non-arithmetic");
-
-   CONSTRUCTOR_POINTER_PREAMBLE
-
-   if (btL == VariableType::BT_PTR)
-      exprR = create_binary_mul(exprR, exprSize, context, pos);
-
-   if (btR == VariableType::BT_PTR)
-      exprL = create_binary_mul(exprL, exprSize, context, pos);
-}
-
-//
-// SourceExpression_BinaryAdd::makeObject
-//
-ObjectExpression::Pointer SourceExpression_BinaryAdd::makeObject() const
-{
-   EVALUATE_OBJECTS();
-   return ObjectExpression::create_binary_add(objL, objR, pos);
-}
-
-//
-// SourceExpression_BinaryAdd::virtual_makeObjects
-//
-void SourceExpression_BinaryAdd::virtual_makeObjects
-(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   if (assign)
-      doAssign(objects, dst);
-   else
-      doEvaluate(objects, dst);
 }
 
 // EOF

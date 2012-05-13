@@ -99,12 +99,12 @@ public:
       ObjectCode ocode = OCODE_NONE;
       switch (ct)
       {
-      case CMP_GE: ocode = OCODE_CMP_GE32F; break;
-      case CMP_GT: ocode = OCODE_CMP_GT32F; break;
-      case CMP_LE: ocode = OCODE_CMP_LE32F; break;
-      case CMP_LT: ocode = OCODE_CMP_LT32F; break;
-      case CMP_EQ: ocode = OCODE_CMP_EQ32F; break;
-      case CMP_NE: ocode = OCODE_CMP_NE32F; break;
+      case CMP_GE: ocode = OCODE_CMP_GE32I; break;
+      case CMP_GT: ocode = OCODE_CMP_GT32I; break;
+      case CMP_LE: ocode = OCODE_CMP_LE32I; break;
+      case CMP_LT: ocode = OCODE_CMP_LT32I; break;
+      case CMP_EQ: ocode = OCODE_CMP_EQ32I; break;
+      case CMP_NE: ocode = OCODE_CMP_NE32I; break;
       }
 
       make_objects_memcpy_prep(objects, dst, src, pos);
@@ -115,8 +115,6 @@ public:
           objR && !objR->resolveInt())
       {
          ObjectExpression::Pointer tmpH = context->getTempVar(0);
-
-         ocode = static_cast<ObjectCode>(ocode + 1);
 
          exprL->makeObjects(objects, tmp);
          objects->addToken(OCODE_SET_TEMP, tmpH);
@@ -133,14 +131,7 @@ public:
       exprR->makeObjects(objects, tmp);
 
       if (inBT == VariableType::BT_INT_LL || inBT == VariableType::BT_UNS_LL)
-      {
-         ocode = static_cast<ObjectCode>(ocode + 1);
          return makeObjectsLL(objects, ocode, dst, src, type, inBT);
-      }
-
-      int ocodeType; getOcodeType(inBT, &ocodeType);
-
-      ocode = static_cast<ObjectCode>(ocode + ocodeType);
 
       if (ct < CMP_EQ && VariableType::is_bt_unsigned(inBT))
          return makeObjectsU(objects, ocode, dst, src, type, NULL, NULL);
