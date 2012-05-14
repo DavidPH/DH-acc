@@ -137,7 +137,6 @@ private:
    bool canCommand : 1;
    bool canExpand  : 1;
    bool canSkip    : 1;
-   bool canString  : 1;
 
 
    static DefMap defines_base;

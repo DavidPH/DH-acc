@@ -293,7 +293,7 @@ static ObjectExpression::Pointer make_expression(
 //
 SourceTokenizerDS::SourceTokenizerDS(SourceStream *_in)
  : defines(defines_base), macros(macros_base),
-   canCommand(true), canExpand(true), canSkip(true), canString(true)
+   canCommand(true), canExpand(true), canSkip(true)
 {
    switch (target_type)
    {
@@ -643,9 +643,7 @@ void SourceTokenizerDS::doCommand_ifndef(SourceTokenC *)
 //
 void SourceTokenizerDS::doCommand_include(SourceTokenC *)
 {
-   canString = false;
    SourceTokenC::Reference inc = get(); doAssert(inc, SourceTokenC::TT_STR);
-   canString = true;
    doAssert(peek(), SourceTokenC::TT_ENDL);
 
    if (isSkip()) return;
@@ -747,7 +745,7 @@ SourceTokenC::Reference SourceTokenizerDS::get()
    }
 
    // String literal concatenation.
-   if (canString && tok->type == SourceTokenC::TT_STR)
+   if (tok->type == SourceTokenC::TT_STR)
    {
       SourceTokenC::Reference oldTok(tok);
       tok = get();
