@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------
 
 #ifndef __HEADER__STRING_DH__
-#define __HEADER__STRING_DH__ #
+#define __HEADER__STRING_DH__
 
 #ifndef __LIBDS_NOLIB
 # ifdef __LIBDS_PARTS
@@ -41,7 +41,7 @@ __library("libDS");
 // NULL
 //
 #ifndef NULL
-#define NULL nullptr #
+#define NULL nullptr
 #endif
 
 
@@ -53,7 +53,7 @@ __library("libDS");
 // size_t
 //
 #ifndef __HAVE_SIZE_T
-#define __HAVE_SIZE_T 1 #
+#define __HAVE_SIZE_T 1
 typedef unsigned size_t;
 #endif
 

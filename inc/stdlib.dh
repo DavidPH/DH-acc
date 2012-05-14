@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------
 
 #ifndef __HEADER__STDLIB_DH__
-#define __HEADER__STDLIB_DH__ #
+#define __HEADER__STDLIB_DH__
 
 #ifndef __LIBDS_NOLIB
 # ifdef __LIBDS_PARTS
@@ -40,29 +40,29 @@ __library("libDS");
 //
 // EXIT_FAILURE
 //
-#define EXIT_FAILURE 1 #
+#define EXIT_FAILURE 1
 
 //
 // EXIT_SUCCESS
 //
-#define EXIT_SUCCESS 0 #
+#define EXIT_SUCCESS 0
 
 //
 // MB_CUR_MAX
 //
-#define MB_CUR_MAX (size_t)1 #
+#define MB_CUR_MAX (size_t)1
 
 //
 // NULL
 //
 #ifndef NULL
-#define NULL nullptr #
+#define NULL nullptr
 #endif
 
 //
 // RAND_MAX
 //
-#define RAND_MAX 32767 #
+#define RAND_MAX 32767
 
 
 //----------------------------------------------------------------------------|
@@ -100,7 +100,7 @@ struct lldiv_t
 // size_t
 //
 #ifndef __HAVE_SIZE_T
-#define __HAVE_SIZE_T 1 #
+#define __HAVE_SIZE_T 1
 typedef unsigned int size_t;
 #endif
 
@@ -108,7 +108,7 @@ typedef unsigned int size_t;
 // wchar_t
 //
 #ifndef __HAVE_WCHAR_T
-#define __HAVE_WCHAR_T 1 #
+#define __HAVE_WCHAR_T 1
 typedef char wchar_t;
 #endif
 

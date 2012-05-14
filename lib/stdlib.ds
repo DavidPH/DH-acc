@@ -317,7 +317,7 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 //
 __extfunc void abort()
 {
-   #if defined(__TARGET_ZDoom__) #
+   #if defined(__TARGET_ZDoom__)
    *(int *)NULL = 0xDEADC0DE; // Flag abort.
    __printf<__printf_log>("Aborted.");
    (__linespec() @ 243)();
@@ -334,7 +334,7 @@ __extfunc int atexit(__func_t() func)
 {
    if (exitptr == exitend) return 1;
 
-   #if defined(__TAGET_ZDoom__) #
+   #if defined(__TAGET_ZDoom__)
    return 1;
    #else
    exitptr->isScript = false;
@@ -370,7 +370,7 @@ __extfunc void exit(int status)
       }
       else
       {
-         #if defined(__TARGET_ZDoom__) #
+         #if defined(__TARGET_ZDoom__)
          __printf<__printf_log>("Cannot call atexit function.");
          #else
          exitptr->func.f();
@@ -427,7 +427,7 @@ __extfunc int system(char const *string)
 //
 // Don't compile for ZDoom, due to lack of function-pointers.
 //
-#if !defined(__TARGET_ZDoom__) #
+#if !defined(__TARGET_ZDoom__)
 __extfunc bsearch void *(void const *key, void const *base, size_t nmemb,
    size_t size, __func_t(void const *, void const *) -> int compar)
 {
@@ -459,7 +459,7 @@ __extfunc bsearch void *(void const *key, void const *base, size_t nmemb,
 //
 // Don't compile for ZDoom, due to lack of function-pointers.
 //
-#if !defined(__TARGET_ZDoom__) #
+#if !defined(__TARGET_ZDoom__)
 __extfunc qsort(void *base, size_t nmemb, size_t size,
  __func_t(void const *, void const *) -> int compar) -> void
 {
@@ -544,7 +544,7 @@ __extfunc ldiv(long int numer, long int denom) -> ldiv_t
 //
 // "operator /"
 //
-#if 0 #
+#if 0
 __extfunc lldiv(long long int numer, long long int denom) -> lldiv_t
 {
    lldiv_t d;

@@ -16,9 +16,7 @@ Conditional Compilation
 Else-If
 -----------------------------------------------------------
 
-  # <elif> expression #
-
-Equivalent to # else # if expression #.
+  # <elif> expression
 
 -----------------------------------------------------------
 Else
@@ -36,7 +34,7 @@ End-If
 If
 -----------------------------------------------------------
 
-  # <if> expression #
+  # <if> expression
 
 -----------------------------------------------------------
 If-Def
@@ -44,7 +42,7 @@ If-Def
 
   # <ifdef> identifier
 
-Equivalent to # if defined identifier #.
+Equivalent to # if defined identifier.
 
 -----------------------------------------------------------
 If-Not-Def
@@ -52,20 +50,19 @@ If-Not-Def
 
   # <ifndef> identifier
 
-Equivalent to # if ! defined identifier #.
+Equivalent to # if ! defined identifier.
 
 ===========================================================
 Macros
 ===========================================================
 
-Like C, DS macros come in both object-like and function-like flavors. Unlike C,
-DS uses two different commands to differentiate them.
+Like C, DS macros come in both object-like and function-like flavors.
 
 -----------------------------------------------------------
 Define
 -----------------------------------------------------------
 
-  # <define> identifier tokens #
+  # <define> identifier tokens
 
 Defines an object-like macro.
 
@@ -73,7 +70,7 @@ Defines an object-like macro.
 Macro
 -----------------------------------------------------------
 
-  # <macro> identifier ( argument-list ) tokens ###
+  # <define> identifier( argument-list ) tokens
 
 Defines a function-like macro.
 

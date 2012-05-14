@@ -39,6 +39,7 @@ static std::string const tt_datas[SourceTokenC::TT_NONE+1] =
    "",
    "",
 
+   "\\n"
    "#",
    "##",
    "###",
@@ -108,6 +109,7 @@ static std::string const tt_names[SourceTokenC::TT_NONE+1] =
    "TT_INT",
    "TT_STR",
 
+   "TT_ENDL", // \n
    "TT_HASH1", // #
    "TT_HASH2", // ##
    "TT_HASH3", // ###
@@ -207,7 +209,7 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
    char c;
 
    // Discard any whitespace before token.
-   while (isspace(c = in->get()));
+   while (isspace(c = in->get())) if (c == '\n') break;
 
    token->pos.filename = in->getFilename();
    token->pos.line = in->getLineCount();
@@ -217,6 +219,7 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
 
    switch (c)
    {
+   case '\n': token->type = TT_ENDL; return;
    case '@': token->type = TT_AT;     return;
    case ':': token->type = TT_COLON;  return;
    case ',': token->type = TT_COMMA;  return;

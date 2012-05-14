@@ -56,6 +56,7 @@ public:
       TT_INT,
       TT_STR,
 
+      TT_ENDL,  // \n
       TT_HASH1, // #
       TT_HASH2, // ##
       TT_HASH3, // ###

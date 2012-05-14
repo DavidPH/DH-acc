@@ -75,6 +75,8 @@ public:
    bool isInComment() const;
    bool isInQuote() const;
 
+   char peek() {char c = get(); unget(c); return c;}
+
    // Skips horizontal whitespace, returning true if any found.
    bool skipHWS();
 

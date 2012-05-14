@@ -182,6 +182,17 @@ char SourceStream::get()
          inQuoteSingle = !inQuoteSingle;
       }
 
+      // \\n escaped newline
+      if (curC == '\\' && newC == '\n')
+      {
+         countColumn = 0;
+         ++countLine;
+
+         curC = -2;
+         newC = -2;
+         continue;
+      }
+
 
 
       // Comments are stripped.

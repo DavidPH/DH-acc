@@ -103,12 +103,13 @@ private:
    void doCommand_ifdef(SourceTokenC *tok);
    void doCommand_ifndef(SourceTokenC *tok);
    void doCommand_include(SourceTokenC *tok);
-   void doCommand_macro(SourceTokenC *tok);
    void doCommand_undef(SourceTokenC *tok);
 
    bool getIf();
    CounterPointer<ObjectExpression> getIfMultiple();
    CounterPointer<ObjectExpression> getIfSingle();
+
+   SourceTokenC::Reference getRaw();
 
    bool hasDefine(std::string const &name);
    bool hasMacro(std::string const &name);
@@ -117,7 +118,6 @@ private:
 
    SourceTokenizerDS & operator = (SourceTokenizerDS const &tokenizer)/* = delete*/;
 
-   SourceTokenC::Reference prep();
    void prepDefine(SourceTokenC *tok);
    void prepMacro(SourceTokenC::Reference tok);
 

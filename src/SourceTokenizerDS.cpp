@@ -311,6 +311,8 @@ SourceTokenizerDS::SourceTokenizerDS(SourceStream *_in)
       addDefine("__SCRIPT_AUTOARGS__");
 
    in.push_back(_in);
+   ungetStack.push_back(static_cast<SourceTokenC::Reference>(
+      new SourceTokenC(SourcePosition::builtin(), SourceTokenC::TT_ENDL)));
 }
 
 //
@@ -483,7 +485,7 @@ void SourceTokenizerDS::doCommand()
    canExpand  = false;
    canSkip    = false;
 
-   SourceTokenC::Reference tok = prep(); doAssert(tok, SourceTokenC::TT_NAM);
+   SourceTokenC::Reference tok = get(); doAssert(tok, SourceTokenC::TT_NAM);
 
         if (tok->data == "define")  doCommand_define(tok);
    else if (tok->data == "else")    doCommand_else(tok);
@@ -494,7 +496,6 @@ void SourceTokenizerDS::doCommand()
    else if (tok->data == "ifdef")   doCommand_ifdef(tok);
    else if (tok->data == "ifndef")  doCommand_ifndef(tok);
    else if (tok->data == "include") doCommand_include(tok);
-   else if (tok->data == "macro")   doCommand_macro(tok);
    else if (tok->data == "undef")   doCommand_undef(tok);
 
    else ERROR(tok->pos, "unknown command: %s", tok->data.c_str());
@@ -507,19 +508,48 @@ void SourceTokenizerDS::doCommand()
 //
 // SourceTokenizerDS::doCommand_define
 //
-void SourceTokenizerDS::doCommand_define(SourceTokenC *tok)
+void SourceTokenizerDS::doCommand_define(SourceTokenC *)
 {
-   SourceTokenC::Reference name = prep(); doAssert(tok, SourceTokenC::TT_NAM);
+   SourceTokenC::Reference name = get(); doAssert(name, SourceTokenC::TT_NAM);
 
-   DefVec vec;
+   if (in.back()->peek() == '(')
+   {
+      MacroDat dat;
 
-   for (SourceTokenC::Reference itr = prep();
-        itr->type != SourceTokenC::TT_HASH1; itr = prep())
-      vec.push_back(itr);
+      doAssert(get(), SourceTokenC::TT_PAREN_O);
+      SourceTokenC::Reference arg = get();
+      if (arg->type != SourceTokenC::TT_PAREN_C) for (;;)
+      {
+         doAssert(arg, SourceTokenC::TT_NAM);
+         dat.first.push_back(arg->data);
 
-   if (isSkip()) return;
+         if ((arg = get())->type == SourceTokenC::TT_PAREN_C) break;
+         doAssert(arg, SourceTokenC::TT_COMMA);
+         arg = get();
+      }
 
-   addDefine(name->data, name->pos, vec);
+      SourceTokenC::Reference itr = get();
+      for (; itr->type != SourceTokenC::TT_ENDL; itr = get())
+         dat.second.push_back(itr);
+      unget(itr);
+
+      if (isSkip()) return;
+
+      addMacro(name->data, name->pos, dat);
+   }
+   else
+   {
+      DefVec vec;
+
+      SourceTokenC::Reference itr = get();
+      for (; itr->type != SourceTokenC::TT_ENDL; itr = get())
+         vec.push_back(itr);
+      unget(itr);
+
+      if (isSkip()) return;
+
+      addDefine(name->data, name->pos, vec);
+   }
 }
 
 //
@@ -527,6 +557,8 @@ void SourceTokenizerDS::doCommand_define(SourceTokenC *tok)
 //
 void SourceTokenizerDS::doCommand_else(SourceTokenC *tok)
 {
+   doAssert(peek(), SourceTokenC::TT_ENDL);
+
    if (skipStack.empty())
       ERROR(tok->pos, "unmatched #else");
 
@@ -543,6 +575,7 @@ void SourceTokenizerDS::doCommand_elif(SourceTokenC *tok)
       ERROR(tok->pos, "unmatched #elif");
 
    bool ifResult = getIf();
+   doAssert(peek(), SourceTokenC::TT_ENDL);
 
      skipStack.back() = unskipStack.back() || !ifResult;
    unskipStack.back() = unskipStack.back() ||  ifResult;
@@ -553,6 +586,8 @@ void SourceTokenizerDS::doCommand_elif(SourceTokenC *tok)
 //
 void SourceTokenizerDS::doCommand_endif(SourceTokenC *tok)
 {
+   doAssert(peek(), SourceTokenC::TT_ENDL);
+
    if (skipStack.empty())
       ERROR(tok->pos, "unmatched #endif");
 
@@ -564,7 +599,8 @@ void SourceTokenizerDS::doCommand_endif(SourceTokenC *tok)
 //
 void SourceTokenizerDS::doCommand_error(SourceTokenC *)
 {
-   SourceTokenC::Reference msg = prep(); doAssert(msg, SourceTokenC::TT_STR);
+   SourceTokenC::Reference msg = get(); doAssert(msg, SourceTokenC::TT_STR);
+   doAssert(peek(), SourceTokenC::TT_ENDL);
 
    if (isSkip()) return;
 
@@ -577,6 +613,7 @@ void SourceTokenizerDS::doCommand_error(SourceTokenC *)
 void SourceTokenizerDS::doCommand_if(SourceTokenC *)
 {
    addSkip(!getIf());
+   doAssert(peek(), SourceTokenC::TT_ENDL);
 }
 
 //
@@ -584,7 +621,8 @@ void SourceTokenizerDS::doCommand_if(SourceTokenC *)
 //
 void SourceTokenizerDS::doCommand_ifdef(SourceTokenC *)
 {
-   SourceTokenC::Reference name = prep(); doAssert(name, SourceTokenC::TT_NAM);
+   SourceTokenC::Reference name = get(); doAssert(name, SourceTokenC::TT_NAM);
+   doAssert(peek(), SourceTokenC::TT_ENDL);
 
    addSkip(!hasDefine(name->data) && !hasMacro(name->data));
 }
@@ -594,7 +632,8 @@ void SourceTokenizerDS::doCommand_ifdef(SourceTokenC *)
 //
 void SourceTokenizerDS::doCommand_ifndef(SourceTokenC *)
 {
-   SourceTokenC::Reference name = prep(); doAssert(name, SourceTokenC::TT_NAM);
+   SourceTokenC::Reference name = get(); doAssert(name, SourceTokenC::TT_NAM);
+   doAssert(peek(), SourceTokenC::TT_ENDL);
 
    addSkip(hasDefine(name->data) || hasMacro(name->data));
 }
@@ -605,14 +644,17 @@ void SourceTokenizerDS::doCommand_ifndef(SourceTokenC *)
 void SourceTokenizerDS::doCommand_include(SourceTokenC *)
 {
    canString = false;
-   SourceTokenC::Reference inc = prep(); doAssert(inc, SourceTokenC::TT_STR);
+   SourceTokenC::Reference inc = get(); doAssert(inc, SourceTokenC::TT_STR);
    canString = true;
+   doAssert(peek(), SourceTokenC::TT_ENDL);
 
    if (isSkip()) return;
 
    try
    {
       in.push_back(new SourceStream(inc->data, SourceStream::ST_C));
+      ungetStack.push_back(static_cast<SourceTokenC::Reference>(
+         new SourceTokenC(SourcePosition::builtin(), SourceTokenC::TT_ENDL)));
    }
    catch (std::exception const &)
    {
@@ -621,41 +663,12 @@ void SourceTokenizerDS::doCommand_include(SourceTokenC *)
 }
 
 //
-// SourceTokenizerDS::doCommand_macro
-//
-void SourceTokenizerDS::doCommand_macro(SourceTokenC *)
-{
-   SourceTokenC::Reference name = prep(); doAssert(name, SourceTokenC::TT_NAM);
-
-   MacroDat dat;
-
-   doAssert(prep(), SourceTokenC::TT_PAREN_O);
-   SourceTokenC::Reference arg = prep();
-   if (arg->type != SourceTokenC::TT_PAREN_C) for (;;)
-   {
-      doAssert(arg, SourceTokenC::TT_NAM);
-      dat.first.push_back(arg->data);
-
-      if ((arg = prep())->type == SourceTokenC::TT_PAREN_C) break;
-      doAssert(arg, SourceTokenC::TT_COMMA);
-      arg = prep();
-   }
-
-   for (SourceTokenC::Reference itr = prep();
-        itr->type != SourceTokenC::TT_HASH3; itr = prep())
-      dat.second.push_back(itr);
-
-   if (isSkip()) return;
-
-   addMacro(name->data, name->pos, dat);
-}
-
-//
 // SourceTokenizerDS::doCommand_undef
 //
 void SourceTokenizerDS::doCommand_undef(SourceTokenC *)
 {
-   SourceTokenC::Reference name = prep(); doAssert(name, SourceTokenC::TT_NAM);
+   SourceTokenC::Reference name = get(); doAssert(name, SourceTokenC::TT_NAM);
+   doAssert(peek(), SourceTokenC::TT_ENDL);
 
    if (isSkip()) return;
 
@@ -667,7 +680,87 @@ void SourceTokenizerDS::doCommand_undef(SourceTokenC *)
 //
 SourceTokenC::Reference SourceTokenizerDS::get()
 {
-   return prep();
+   SourceTokenC::Pointer tok;
+
+   for (;;)
+   {
+      tok = getRaw();
+
+      // Preprocessor directive.
+      if (canCommand && tok->type == SourceTokenC::TT_ENDL)
+      {
+         while (tok->type == SourceTokenC::TT_ENDL)
+            tok = getRaw();
+
+         if (tok->type == SourceTokenC::TT_HASH1)
+         {
+            doCommand(); continue;
+         }
+      }
+
+      // Macro expansion.
+      if (canExpand && tok->type == SourceTokenC::TT_NAM)
+      {
+         // Check for macro.
+         if (hasMacro(tok->data) && definesUsed.insert(tok->data).second)
+         {
+            SourceTokenC::Reference oldTok(tok);
+            tok = get(); unget(tok);
+
+            // Macro invocation!
+            if (tok->type == SourceTokenC::TT_PAREN_O)
+            {
+               prepMacro(static_cast<SourceTokenC::Reference>(oldTok)); continue;
+            }
+
+            tok = oldTok;
+         }
+
+         if (hasDefine(tok->data) && definesUsed.insert(tok->data).second)
+         {
+            prepDefine(tok); continue;
+         }
+
+         if (tok->data == "__FILE__")
+         {
+            tok->data = tok->pos.filename;
+            tok->type = SourceTokenC::TT_STR;
+            break;
+         }
+
+         if (tok->data == "__LINE__")
+         {
+            std::ostringstream oss; oss << tok->pos.line;
+            tok->data = oss.str();
+            tok->type = SourceTokenC::TT_INT;
+            break;
+         }
+      }
+
+      if (canSkip && isSkip())
+         continue;
+
+      if (tok->type == SourceTokenC::TT_NONE)
+         continue;
+
+      break;
+   }
+
+   // String literal concatenation.
+   if (canString && tok->type == SourceTokenC::TT_STR)
+   {
+      SourceTokenC::Reference oldTok(tok);
+      tok = get();
+
+      if (tok->type == SourceTokenC::TT_STR)
+         oldTok->data += tok->data;
+      else
+         unget(tok);
+
+      tok = oldTok;
+   }
+
+   return static_cast<SourceTokenC::Reference>(tok);
 }
 
 //
@@ -675,7 +768,7 @@ SourceTokenC::Reference SourceTokenizerDS::get()
 //
 SourceTokenC::Reference SourceTokenizerDS::get(SourceTokenC::TokenType type)
 {
-   SourceTokenC::Reference tok = prep();
+   SourceTokenC::Reference tok = get();
    doAssert(tok, type);
    return tok;
 }
@@ -686,7 +779,7 @@ SourceTokenC::Reference SourceTokenizerDS::get(SourceTokenC::TokenType type)
 SourceTokenC::Reference SourceTokenizerDS::get
 (SourceTokenC::TokenType type, std::string const &data)
 {
-   SourceTokenC::Reference tok = prep();
+   SourceTokenC::Reference tok = get();
    doAssert(tok, type); doAssert(tok, data);
    return tok;
 }
@@ -715,8 +808,8 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
 
    expressions.push_back(getIfSingle());
 
-   for (SourceTokenC::Reference tok = prep();
-        tok->type != SourceTokenC::TT_HASH1; prep())
+   SourceTokenC::Reference tok = get();
+   for (; tok->type != SourceTokenC::TT_ENDL; tok = get())
    {
       switch (tok->type)
       {
@@ -752,13 +845,14 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfMultiple()
       case SourceTokenC::TT_QUERY:
          operators.push_back(tok);
          expressions.push_back(getIfMultiple());
-         tok = prep(); doAssert(tok, SourceTokenC::TT_COLON);
+         tok = get(); doAssert(tok, SourceTokenC::TT_COLON);
          goto case_expr;
 
       default:
          ERROR(tok->pos, "unexpected token type");
       }
    }
+   unget(tok);
 
 done:
    return make_expression(expressions, operators, 0, operators.size());
@@ -769,7 +863,7 @@ done:
 //
 ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
 {
-   SourceTokenC::Reference tok = prep();
+   SourceTokenC::Reference tok = get();
 
    switch (tok->type)
    {
@@ -778,16 +872,16 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
       {
          canExpand = false;
 
-         bool hasParen = (tok = prep())->type == SourceTokenC::TT_PAREN_O;
+         bool hasParen = (tok = get())->type == SourceTokenC::TT_PAREN_O;
 
-         doAssert((hasParen ? (tok = prep()) : tok), SourceTokenC::TT_NAM);
+         doAssert((hasParen ? (tok = get()) : tok), SourceTokenC::TT_NAM);
 
          bool isdef = hasDefine(tok->data) || hasMacro(tok->data);
 
          ObjectExpression::Pointer expr =
             ObjectExpression::create_value_int(isdef, tok->pos);
 
-         if (hasParen) doAssert(prep(), SourceTokenC::TT_PAREN_C);
+         if (hasParen) doAssert(get(), SourceTokenC::TT_PAREN_C);
 
          canExpand = true;
 
@@ -811,13 +905,42 @@ ObjectExpression::Pointer SourceTokenizerDS::getIfSingle()
    {
       ObjectExpression::Pointer expr = getIfMultiple();
 
-      doAssert(prep(), SourceTokenC::TT_PAREN_C);
+      doAssert(get(), SourceTokenC::TT_PAREN_C);
 
       return expr;
    }
 
    default:
       ERROR(tok->pos, "unexpected token type");
+   }
+}
+
+//
+// SourceTokenizerDS::getRaw
+//
+SourceTokenC::Reference SourceTokenizerDS::getRaw()
+{
+   if (!ungetStack.empty())
+   {
+      SourceTokenC::Reference tok = ungetStack.back();
+      ungetStack.pop_back();
+
+      // Clear whenever the unget stack is emptied.
+      if (ungetStack.empty()) definesUsed.clear();
+
+      return tok;
+   }
+   else try
+   {
+      SourceTokenC::Reference tok(new SourceTokenC);
+      tok->readToken(in.back());
+      return tok;
+   }
+   catch (SourceStream::EndOfStream &e)
+   {
+      if (in.size() == 1) throw;
+      delete in.back(); in.pop_back();
+      return getRaw();
    }
 }
 
@@ -855,7 +978,7 @@ bool SourceTokenizerDS::isSkip()
 //
 SourceTokenC::Reference SourceTokenizerDS::peek()
 {
-   SourceTokenC::Reference tok = prep(); ungetStack.push_back(tok);
+   SourceTokenC::Reference tok = get(); ungetStack.push_back(tok);
    return tok;
 }
 
@@ -864,7 +987,7 @@ SourceTokenC::Reference SourceTokenizerDS::peek()
 //
 SourceTokenC::Reference SourceTokenizerDS::peek(SourceTokenC::TokenType type)
 {
-   SourceTokenC::Reference tok = prep(); ungetStack.push_back(tok);
+   SourceTokenC::Reference tok = get(); ungetStack.push_back(tok);
    doAssert(tok, type);
    return tok;
 }
@@ -874,7 +997,7 @@ SourceTokenC::Reference SourceTokenizerDS::peek(SourceTokenC::TokenType type)
 //
 bool SourceTokenizerDS::peekType(SourceTokenC::TokenType type)
 {
-   SourceTokenC::Reference tok = prep(); ungetStack.push_back(tok);
+   SourceTokenC::Reference tok = get(); ungetStack.push_back(tok);
    return tok->type == type;
 }
 
@@ -884,103 +1007,8 @@ bool SourceTokenizerDS::peekType(SourceTokenC::TokenType type)
 bool SourceTokenizerDS::peekType
 (SourceTokenC::TokenType type, std::string const &data)
 {
-   SourceTokenC::Reference tok = prep(); ungetStack.push_back(tok);
+   SourceTokenC::Reference tok = get(); ungetStack.push_back(tok);
    return tok->type == type && tok->data == data;
-}
-
-//
-// SourceTokenizerDS::prep
-//
-SourceTokenC::Reference SourceTokenizerDS::prep()
-{
-   SourceTokenC::Pointer tok;
-
-   while (true)
-   {
-      if (!ungetStack.empty())
-      {
-         tok = ungetStack.back(); ungetStack.pop_back();
-
-         // Clear whenever the unget stack is emptied.
-         if (ungetStack.empty()) definesUsed.clear();
-      }
-      else try
-      {
-         (tok = new SourceTokenC)->readToken(in.back());
-      }
-      catch (SourceStream::EndOfStream &e)
-      {
-         if (in.size() == 1) throw;
-         delete in.back(); in.pop_back();
-         continue;
-      }
-
-      // Preprocessor directive.
-      if (canCommand && tok->type == SourceTokenC::TT_HASH1)
-      {
-         doCommand(); continue;
-      }
-
-      // Macro expansion.
-      if (canExpand && tok->type == SourceTokenC::TT_NAM)
-      {
-         // Check for macro.
-         if (hasMacro(tok->data) && definesUsed.insert(tok->data).second)
-         {
-            SourceTokenC::Reference oldTok(tok);
-            tok = prep(); unget(tok);
-
-            // Macro invocation!
-            if (tok->type == SourceTokenC::TT_PAREN_O)
-            {
-               prepMacro(static_cast<SourceTokenC::Reference>(oldTok)); continue;
-            }
-
-            tok = oldTok;
-         }
-
-         if (hasDefine(tok->data) && definesUsed.insert(tok->data).second)
-         {
-            prepDefine(tok); continue;
-         }
-
-         if (tok->data == "__FILE__")
-         {
-            tok->data = tok->pos.filename;
-            tok->type = SourceTokenC::TT_STR;
-            break;
-         }
-
-         if (tok->data == "__LINE__")
-         {
-            std::ostringstream oss; oss << tok->pos.line;
-            tok->data = oss.str();
-            tok->type = SourceTokenC::TT_INT;
-            break;
-         }
-      }
-
-      if (canSkip && isSkip())
-         continue;
-
-      break;
-   }
-
-   // String literal concatenation.
-   if (canString && tok->type == SourceTokenC::TT_STR)
-   {
-      SourceTokenC::Reference oldTok(tok);
-      tok = prep();
-
-      if (tok->type == SourceTokenC::TT_STR)
-         oldTok->data += tok->data;
-      else
-         unget(tok);
-
-      tok = oldTok;
-   }
-
-   return static_cast<SourceTokenC::Reference>(tok);
 }
 
 //
@@ -1020,11 +1048,11 @@ void SourceTokenizerDS::prepMacro(SourceTokenC::Reference tok)
    canExpand  = false;
 
    // Collect the macro arguments.
-   doAssert((tok = prep()), SourceTokenC::TT_PAREN_O);
+   doAssert((tok = get()), SourceTokenC::TT_PAREN_O);
    args.push_back(MacroVec());
    while (true)
    {
-      tok = prep();
+      tok = get();
 
       if (tok->type == SourceTokenC::TT_PAREN_O) ++pdepth;
       if (tok->type == SourceTokenC::TT_PAREN_C && !pdepth--) break;
