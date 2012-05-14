@@ -127,8 +127,6 @@ public:
    SourceTokenC(SourcePosition const &_pos, std::string const &_data,
       TokenType _type) : pos(_pos), data(_data), type(_type) {}
 
-   std::string getDataString() const;
-
    void readToken(SourceStream *in) {read_token(in, this);}
 
    SourcePosition pos;
@@ -136,7 +134,12 @@ public:
    TokenType type;
 
 
+   static Reference tt_str(SourcePosition const &pos,
+                           std::vector<Reference> const &args);
+
    static void read_token(SourceStream *in, SourceTokenC *token);
+
+   static Reference tt_none() {static Reference tt(new SourceTokenC); return tt;}
 };
 
 

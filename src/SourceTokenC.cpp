@@ -39,7 +39,7 @@ static std::string const tt_datas[SourceTokenC::TT_NONE+1] =
    "",
    "",
 
-   "\\n",
+   " ",
    "#",
    "##",
    "###",
@@ -98,7 +98,7 @@ static std::string const tt_datas[SourceTokenC::TT_NONE+1] =
 
    ";",
 
-   ""
+   " "
 };
 
 static std::string const tt_names[SourceTokenC::TT_NONE+1] =
@@ -173,32 +173,78 @@ static std::string const tt_names[SourceTokenC::TT_NONE+1] =
 
 
 //----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+//
+// dequote
+//
+static void dequote(std::string &out, std::string const &in)
+{
+   for (std::string::const_iterator end = in.end(),
+        itr = in.begin(); itr != end; ++itr) switch (*itr)
+   {
+   case '"':
+      out += "\\\"";
+      break;
+
+   default:
+      out += *itr;
+      break;
+   }
+}
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
 //
-// SourceTokenC::getDataString
+// SourceTokenC::tt_str
 //
-std::string SourceTokenC::getDataString() const
+SourceTokenC::Reference SourceTokenC::tt_str(SourcePosition const &pos,
+   std::vector<Reference> const &args)
 {
-   if (type > TT_NONE) return tt_datas[TT_NONE];
+   Reference tok(new SourceTokenC(pos, TT_STR));
 
-   switch (type)
+   for (std::vector<Reference>::const_iterator end = args.end(),
+        itr = args.begin(); itr != end; ++itr) switch ((*itr)->type)
    {
    case TT_CHR:
-      return "'" + data + "'"; // WARNING!
+      tok->data.reserve(tok->data.size() + (*itr)->data.size() + 2);
+      tok->data += '\'';
+      dequote(tok->data, (*itr)->data);
+      tok->data += '\'';
+      break;
 
    case TT_FLT:
    case TT_NAM:
    case TT_INT:
-      return data;
+      tok->data += (*itr)->data;
+      break;
 
    case TT_STR:
-      return "\"" + data + "\""; // WARNING!
+      tok->data.reserve(tok->data.size() + (*itr)->data.size() + 2);
+      tok->data += '"';
+      dequote(tok->data, (*itr)->data);
+      tok->data += '"';
+      break;
 
    default:
-      return tt_datas[type];
+      tok->data += tt_datas[(*itr)->type];
+      break;
    }
+
+   // Now search for trailing/leading whitespace and remove.
+   std::string::iterator end = tok->data.end(), itr = tok->data.begin();
+
+   while (itr != end && std::isspace(*itr)) ++itr;
+   while (end != itr && std::isspace(*(end-1))) --end;
+
+   if (end != tok->data.end() || itr != tok->data.begin())
+      tok->data = std::string(itr, end);
+
+   return tok;
 }
 
 //

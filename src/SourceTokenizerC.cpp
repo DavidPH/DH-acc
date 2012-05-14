@@ -129,6 +129,14 @@ static SourceTokenizerC::MacroVec *find_arg
 (std::vector<SourceTokenizerC::MacroVec> &args,
  SourceTokenizerC::MacroArg const &argNames, std::string const &name)
 {
+   if (name == "__VA_ARGS__")
+   {
+      if (argNames.back().empty())
+         return &args.back();
+      else
+         return NULL;
+   }
+
    for (size_t i = 0, e = argNames.size(); i != e; ++i)
       if (argNames[i] == name)
          return &args[i];
@@ -520,6 +528,13 @@ void SourceTokenizerC::doCommand_define(SourceTokenC *)
       SourceTokenC::Reference arg = get();
       if (arg->type != SourceTokenC::TT_PAREN_C) for (;;)
       {
+         if (arg->type == SourceTokenC::TT_DOT3)
+         {
+            dat.first.push_back(std::string());
+            doAssert((arg = get()), SourceTokenC::TT_PAREN_C);
+            break;
+         }
+
          doAssert(arg, SourceTokenC::TT_NAM);
          dat.first.push_back(arg->data);
 
@@ -1045,22 +1060,43 @@ void SourceTokenizerC::prepMacro(SourceTokenC::Reference tok)
    canCommand = false;
    canExpand  = false;
 
-   // Collect the macro arguments.
+   // Collect the macro arguments, if any expected.
    doAssert((tok = get()), SourceTokenC::TT_PAREN_O);
-   args.push_back(MacroVec());
-   while (true)
+
+   if (argNames.empty())
    {
+      doAssert((tok = get()), SourceTokenC::TT_PAREN_C);
+   }
+   else for (args.push_back(MacroVec());;)
+   {
+      while (std::isspace(in.back()->peek()))
+      {
+         in.back()->get();
+         args.back().push_back(SourceTokenC::tt_none());
+      }
+
       tok = get();
 
       if (tok->type == SourceTokenC::TT_PAREN_O) ++pdepth;
       if (tok->type == SourceTokenC::TT_PAREN_C && !pdepth--) break;
 
-      if (tok->type == SourceTokenC::TT_COMMA && !pdepth)
+      // A comma not in parentheses starts a new argument...
+      if (tok->type == SourceTokenC::TT_COMMA && !pdepth &&
+      // ... Unless we've reached the __VA_ARGS__ segment.
+          (args.size() < argNames.size() || !argNames.back().empty()))
       {
          args.push_back(MacroVec()); continue;
       }
 
       args.back().push_back(tok);
+   }
+
+   // Must not have empty args.
+   for (std::vector<MacroVec>::iterator argsEnd = args.end(),
+        argsItr = args.begin(); argsItr != argsEnd; ++argsItr)
+   {
+      if (argsItr->empty())
+         argsItr->push_back(SourceTokenC::tt_none());
    }
 
    if (args.size() != argNames.size())
@@ -1080,14 +1116,7 @@ void SourceTokenizerC::prepMacro(SourceTokenC::Reference tok)
          if (++itr == end || !(arg = find_arg(args, argNames, (*itr)->data)))
             ERROR_P("# must be used on arg");
 
-         tok = static_cast<SourceTokenC::Reference>(
-            new SourceTokenC((*itr)->pos, SourceTokenC::TT_STR));
-
-         MacroVec::iterator tokItr, tokEnd = arg->end();
-         for (tokItr = arg->begin(); tokItr != tokEnd; ++tokItr)
-            tok->data += (*tokItr)->getDataString();
-
-         tmpData.push_back(tok);
+         tmpData.push_back(SourceTokenC::tt_str((*itr)->pos, *arg));
       }
       else
          tmpData.push_back(*itr);
