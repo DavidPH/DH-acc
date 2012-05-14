@@ -29,7 +29,7 @@
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
-#include "../SourceTokenizerDS.hpp"
+#include "../SourceTokenizerC.hpp"
 #include "../SourceVariable.hpp"
 #include "../VariableType.hpp"
 
@@ -53,7 +53,7 @@ struct StoreData
 // make_var
 //
 static SourceExpression::Pointer make_var
-(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
+(SourceTokenizerC *in, SourceExpression::Vector *blocks,
  SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
  SourcePosition const &pos, std::string const &nameSrc, VariableType *type,
  StoreData store, bool externDef)
@@ -255,7 +255,7 @@ static SourceExpression::Pointer make_var
 // make_var
 //
 static SourceExpression::Pointer make_var
-(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
+(SourceTokenizerC *in, SourceExpression::Vector *blocks,
  SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
  SourcePosition const &pos, VariableType *type, StoreData store,
  bool externDef)
@@ -293,7 +293,7 @@ static SourceExpression::Pointer make_var
 // make_var
 //
 static SourceExpression::Pointer make_var
-(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
+(SourceTokenizerC *in, SourceExpression::Vector *blocks,
  SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
  SourcePosition const &pos, StoreData store, bool externDef)
 {
@@ -327,7 +327,7 @@ static SourceExpression::Pointer make_var
 // make_var
 //
 static SourceExpression::Pointer make_var
-(SourceTokenizerDS *in, SourceExpression::Vector *blocks,
+(SourceTokenizerC *in, SourceExpression::Vector *blocks,
  SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
  bool linkCheck, SourcePosition const &pos, bool externDef)
 {

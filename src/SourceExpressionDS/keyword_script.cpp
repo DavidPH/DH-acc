@@ -29,7 +29,7 @@
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
-#include "../SourceTokenizerDS.hpp"
+#include "../SourceTokenizerC.hpp"
 #include "../SourceVariable.hpp"
 #include "../VariableType.hpp"
 
@@ -102,7 +102,7 @@ static bool is_script_type(std::string const &data)
 //
 // make_script_flag
 //
-static ObjectData_Script::ScriptFlag make_script_flag(SourceTokenizerDS *in)
+static ObjectData_Script::ScriptFlag make_script_flag(SourceTokenizerC *in)
 {
    SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
 
@@ -115,7 +115,7 @@ static ObjectData_Script::ScriptFlag make_script_flag(SourceTokenizerDS *in)
 //
 // make_script_type
 //
-static ObjectData_Script::ScriptType make_script_type(SourceTokenizerDS *in)
+static ObjectData_Script::ScriptType make_script_type(SourceTokenizerC *in)
 {
    SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
 
@@ -136,7 +136,7 @@ static ObjectData_Script::ScriptType make_script_type(SourceTokenizerDS *in)
 // make_script
 //
 static SourceExpression::Pointer make_script
-(SourceTokenizerDS *in, SourceTokenC *tok, SourceExpression::Vector *blocks,
+(SourceTokenizerC *in, SourceTokenC *tok, SourceExpression::Vector *blocks,
  SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
  bool externDef)
 {

@@ -28,7 +28,7 @@
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
-#include "../SourceTokenizerDS.hpp"
+#include "../SourceTokenizerC.hpp"
 #include "../SourceVariable.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"

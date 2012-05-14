@@ -27,7 +27,7 @@
 #include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
-#include "../SourceTokenizerDS.hpp"
+#include "../SourceTokenizerC.hpp"
 #include "../VariableType.hpp"
 
 

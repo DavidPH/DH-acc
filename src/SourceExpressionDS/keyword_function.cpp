@@ -29,7 +29,7 @@
 #include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceTokenC.hpp"
-#include "../SourceTokenizerDS.hpp"
+#include "../SourceTokenizerC.hpp"
 #include "../SourceVariable.hpp"
 #include "../VariableType.hpp"
 
@@ -78,7 +78,7 @@ bool option_string_func = true;
 // make_func
 //
 static SourceExpression::Pointer make_func
-(SourceTokenizerDS *in, SourceTokenC *tok, SourceExpression::Vector *blocks,
+(SourceTokenizerC *in, SourceTokenC *tok, SourceExpression::Vector *blocks,
  SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
  bool externDef)
 {

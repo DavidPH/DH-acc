@@ -26,7 +26,7 @@
 #include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
-#include "../SourceTokenizerDS.hpp"
+#include "../SourceTokenizerC.hpp"
 #include "../SourceVariable.hpp"
 #include "../VariableType.hpp"
 
@@ -52,7 +52,7 @@
 //
 static void do_qualifier
 (VariableType::Pointer *type, VariableType::Qualifier qual,
- SourceTokenizerDS *in)
+ SourceTokenizerC *in)
 {
    SourceTokenC::Reference tokenQual = in->get(SourceTokenC::TT_NAM);
 
@@ -62,7 +62,7 @@ static void do_qualifier
 //
 // do_storage
 //
-static void do_storage(VariableType::Pointer *type, SourceTokenizerDS *in,
+static void do_storage(VariableType::Pointer *type, SourceTokenizerC *in,
    SourceExpression::Vector *blocks, SourceContext *context)
 {
    ObjectExpression::Pointer storeArea;
@@ -81,7 +81,7 @@ static void do_storage(VariableType::Pointer *type, SourceTokenizerDS *in,
 // Tries to parse a basic type, returning NULL on failue.
 //
 static VariableType::Pointer make_basic
-(SourceTokenC::Reference tok, SourceTokenizerDS *in)
+(SourceTokenC::Reference tok, SourceTokenizerC *in)
 {
    if (tok->data == "void")
       return VariableType::get_bt_void();
@@ -268,7 +268,7 @@ static VariableType::Pointer make_basic
 // make_struct_lists
 //
 bool make_struct_lists(VariableType::VecStr *names,
-   VariableType::Vector *types, SourceTokenizerDS *in,
+   VariableType::Vector *types, SourceTokenizerC *in,
    SourceExpression::Vector *blocks, SourceContext *context)
 {
    if (!in->peekType(SourceTokenC::TT_BRACE_O)) return false;
@@ -302,7 +302,7 @@ bool make_struct_lists(VariableType::VecStr *names,
 //
 // make_struct
 //
-VariableType::Reference make_struct(bool isUnion, SourceTokenizerDS *in,
+VariableType::Reference make_struct(bool isUnion, SourceTokenizerC *in,
    SourceExpression::Vector *blocks, SourceContext *context)
 {
    std::string           name;
@@ -393,7 +393,7 @@ bool SourceExpressionDS::is_type(std::string const &data,
 //
 // SourceExpressionDS::make_type
 //
-VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerDS *in,
+VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    Vector *blocks, SourceContext *context)
 {
    SourceTokenC::Reference tok = in->peek();

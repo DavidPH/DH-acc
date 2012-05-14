@@ -24,7 +24,7 @@
 #include "../SourceExpressionDS.hpp"
 
 #include "../SourceContext.hpp"
-#include "../SourceTokenizerDS.hpp"
+#include "../SourceTokenizerC.hpp"
 #include "../SourceVariable.hpp"
 #include "../VariableType.hpp"
 
@@ -41,7 +41,7 @@ SourceExpressionDS::ArgList::ArgList(StoreType _store) : store(_store) {}
 //
 // SourceExpressionDS::make_expression_arglist
 //
-void SourceExpressionDS::make_arglist(SourceTokenizerDS *in, Vector *blocks,
+void SourceExpressionDS::make_arglist(SourceTokenizerC *in, Vector *blocks,
    SourceContext *context, ArgList *args)
 {
    args->count = 0;

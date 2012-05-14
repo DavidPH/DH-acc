@@ -125,12 +125,12 @@ add_executable(DH-acc
 	SourceStream.cpp
 	SourceTokenASMPLX.cpp
 	SourceTokenC.cpp
-#  SourceTokenizerC.cpp
-	SourceTokenizerDS.cpp
+   SourceTokenizerC.cpp
 	SourceVariable.cpp
    StoreType.cpp
 	VariableData.cpp
 	VariableType.cpp
 )
 
+# EOF
 

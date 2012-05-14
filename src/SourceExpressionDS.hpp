@@ -38,7 +38,7 @@
 // SRCEXPDS_EXPR_ARGS
 //
 #define SRCEXPDS_EXPR_ARG1 \
-SourceTokenizerDS *in, SourceExpression::Vector *blocks, \
+SourceTokenizerC *in, SourceExpression::Vector *blocks, \
 SourceContext *context
 
 //
@@ -105,7 +105,7 @@ make_extern_##NAME(SRCEXPDS_EXTERN_ARGS)
 // SRCEXPDS_KEYWORD_ARGS
 //
 #define SRCEXPDS_KEYWORD_ARGS             \
-SourceTokenizerDS *in, SourceTokenC *tok, \
+SourceTokenizerC *in, SourceTokenC *tok, \
 SourceExpression::Vector *blocks, SourceContext *context
 
 //
@@ -128,7 +128,7 @@ make_keyword_##NAME(SRCEXPDS_KEYWORD_ARGS)
 //
 
 class SourceTokenC;
-class SourceTokenizerDS;
+class SourceTokenizerC;
 
 class SourceExpressionDS : public SourceExpression
 {
@@ -169,20 +169,20 @@ public:
 
    static bool is_type(std::string const &data, SourceContext *context);
 
-   static void make_arglist(SourceTokenizerDS *in, Vector *blocks,
+   static void make_arglist(SourceTokenizerC *in, Vector *blocks,
       SourceContext *context, ArgList *args);
 
-   static LinkageSpecifier make_linkspec(SourceTokenizerDS *in);
+   static LinkageSpecifier make_linkspec(SourceTokenizerC *in);
 
-   static SourceExpression::Pointer make_statement(SourceTokenizerDS *in,
+   static SourceExpression::Pointer make_statement(SourceTokenizerC *in,
       Vector *blocks, SourceContext *context);
 
-   static SourceExpression::Pointer make_statements(SourceTokenizerDS *in);
+   static SourceExpression::Pointer make_statements(SourceTokenizerC *in);
 
-   static StoreType make_store(SourceTokenizerDS *in, Vector *blocks,
+   static StoreType make_store(SourceTokenizerC *in, Vector *blocks,
       SourceContext *context, CounterPointer<ObjectExpression> *area);
 
-   static CounterReference<VariableType> make_type(SourceTokenizerDS *in,
+   static CounterReference<VariableType> make_type(SourceTokenizerC *in,
       Vector *blocks, SourceContext *context);
 
    SRCEXPDS_EXPR_DECL(primary);
@@ -214,7 +214,7 @@ private:
    typedef std::map<std::string, KeywordHandler> KeywordMap;
 
 
-   static void make_statements(SourceTokenizerDS *in, Vector *exprs,
+   static void make_statements(SourceTokenizerC *in, Vector *exprs,
       Vector *blocks, SourceContext *context);
 
    SRCEXPDS_EXTERN_DECL(function);

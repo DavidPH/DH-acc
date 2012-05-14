@@ -38,7 +38,6 @@
 #include "SourceStream.hpp"
 #include "SourceTokenASMPLX.hpp"
 #include "SourceTokenizerC.hpp"
-#include "SourceTokenizerDS.hpp"
 #include "VariableData.hpp"
 #include "VariableType.hpp"
 
@@ -176,7 +175,7 @@ static void read_source(std::string const &name, SourceType type,
    {
       SourceStream in(name, SourceStream::ST_C);
 
-      SourceTokenizerDS tokenizer(&in);
+      SourceTokenizerC tokenizer(&in);
 
       SourceExpression::Pointer expressions =
          SourceExpressionDS::make_statements(&tokenizer);

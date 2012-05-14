@@ -27,7 +27,7 @@
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
-#include "SourceTokenizerDS.hpp"
+#include "SourceTokenizerC.hpp"
 #include "SourceVariable.hpp"
 #include "VariableData.hpp"
 #include "VariableType.hpp"
@@ -519,7 +519,7 @@ SRCEXPDS_EXPR_DEFN_SINGLE(expression, assignment, COMMA, binary_pair)
 // SourceExpressionDS::make_linkspec
 //
 SourceExpressionDS::LinkageSpecifier SourceExpressionDS::make_linkspec
-(SourceTokenizerDS *in)
+(SourceTokenizerC *in)
 {
    SourceTokenC::Reference linkSpecTok = in->get(SourceTokenC::TT_STR);
 
@@ -538,7 +538,7 @@ SourceExpressionDS::LinkageSpecifier SourceExpressionDS::make_linkspec
 // SourceExpressionDS::make_statement
 //
 SourceExpression::Pointer SourceExpressionDS::make_statement(
-   SourceTokenizerDS *in, Vector *blocks, SourceContext *context)
+   SourceTokenizerC *in, Vector *blocks, SourceContext *context)
 {
    if (in->peekType(SourceTokenC::TT_NAM))
    {
@@ -580,7 +580,7 @@ SourceExpression::Pointer SourceExpressionDS::make_statement(
 // SourceExpressionDS::make_statements
 //
 SourceExpression::Pointer SourceExpressionDS::make_statements
-(SourceTokenizerDS *in)
+(SourceTokenizerC *in)
 {
    SourceContext::Reference context(SourceContext::global_context);
    VariableType::Reference retnType = VariableType::get_bt_void();
@@ -610,7 +610,7 @@ SourceExpression::Pointer SourceExpressionDS::make_statements
 //
 // SourceExpressionDS::make_statements
 //
-void SourceExpressionDS::make_statements(SourceTokenizerDS *in, Vector *exprs,
+void SourceExpressionDS::make_statements(SourceTokenizerC *in, Vector *exprs,
    Vector *blocks, SourceContext *context)
 {
    while (true)

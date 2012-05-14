@@ -25,7 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../SourceException.hpp"
-#include "../SourceTokenizerDS.hpp"
+#include "../SourceTokenizerC.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -82,7 +82,7 @@ bool SourceExpressionDS::is_store(std::string const &data)
 //
 // SourceExpressionDS::make_store
 //
-StoreType SourceExpressionDS::make_store(SourceTokenizerDS *in, Vector *blocks,
+StoreType SourceExpressionDS::make_store(SourceTokenizerC *in, Vector *blocks,
    SourceContext *context, ObjectExpression::Pointer *area)
 {
    SourceTokenC::Reference typeTok = in->get(SourceTokenC::TT_NAM);
