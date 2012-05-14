@@ -39,7 +39,7 @@ static std::string const tt_datas[SourceTokenC::TT_NONE+1] =
    "",
    "",
 
-   "\\n"
+   "\\n",
    "#",
    "##",
    "###",
