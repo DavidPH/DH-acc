@@ -96,9 +96,9 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    {
       std::string label = context->makeLabel();
       objects->setPosition(pos);
-      objects->addToken(OCODE_ADDR_AUTO, objects->getValue(0));
-      objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(label));
-      objects->addToken(OCODE_ADDR_STACK_ADD_IMM, objects->getValue(1));
+      objects->addToken(OCODE_GET_AUTPTR, objects->getValue(0));
+      objects->addToken(OCODE_JMP_TRU, objects->getValue(label));
+      objects->addToken(OCODE_ADD_AUTPTR, objects->getValue(1));
       objects->addLabel(label);
    }
 
@@ -117,9 +117,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    {
       for (bigsint i = 0; i < callSize && i < option_script_regargs; ++i)
       {
-         // FIXME: Should be based on type.
-         objects->addToken(OCODE_GET_REGISTER32I, objects->getValue(i));
-         objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
+         objects->addToken(OCODE_GET_REG, objects->getValue(i));
+         objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
       }
    }
    else
@@ -127,9 +126,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       if (callSize > option_script_regargs)
          for (bigsint i = callSize - option_script_regargs; i--;)
          {
-            // FIXME: Should be based on type.
-            objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));
-            objects->addToken(OCODE_SET_REGISTER32I, objects->getValue(i+option_script_regargs));
+            objects->addToken(OCODE_GET_AUTO, objects->getValue(i));
+            objects->addToken(OCODE_SET_REG, objects->getValue(i+option_script_regargs));
          }
    }
 }

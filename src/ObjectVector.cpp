@@ -130,7 +130,7 @@ void ObjectVector::addToken
 //
 void ObjectVector::addTokenPushZero()
 {
-   addToken(OCODE_GET_LITERAL32I, getValue(0));
+   addToken(OCODE_GET_IMM, getValue(0));
 }
 
 //
@@ -253,8 +253,7 @@ void ObjectVector::optimize_pushdrop()
    while (token != stop)
    {
       if (ocode_is_push_noarg(token->code) && token->labels.empty() &&
-          token->next->code == OCODE_STACK_DROP32 &&
-          token->next->labels.empty())
+          token->next->code == OCODE_STK_DROP && token->next->labels.empty())
       {
          remToken(token++);
          remToken(token++);
@@ -292,7 +291,7 @@ void ObjectVector::optimize_pushpushswap()
          continue;
 
       arg2 = token++;
-      if (arg2->code != OCODE_STACK_SWAP32 || !arg2->labels.empty())
+      if (arg2->code != OCODE_STK_SWAP || !arg2->labels.empty())
          continue;
 
       arg0->swapData(arg1);

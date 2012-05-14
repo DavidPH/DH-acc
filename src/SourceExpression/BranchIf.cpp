@@ -143,7 +143,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    exprCond->makeObjects(objects, destCond);
    objects->setPosition(pos);
-   objects->addToken(OCODE_BRANCH_ZERO,
+   objects->addToken(OCODE_JMP_NIL,
                      objects->getValue(exprElse ? labelElse : labelDone));
 
    objects->addLabel(labelBody);
@@ -152,7 +152,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    if (exprElse)
    {
       objects->setPosition(pos);
-      objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelDone));
+      objects->addToken(OCODE_JMP_IMM, objects->getValue(labelDone));
       objects->addLabel(labelElse);
       exprElse->makeObjects(objects, dst);
    }

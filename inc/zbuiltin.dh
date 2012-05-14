@@ -112,12 +112,12 @@ __asmfunc SetLineSpecial(int, int, int, int, int, int, int) @ __ocode(ACS_LTAG_S
 __asmfunc SetLineTexture(int, int, int, __string) @ __ocode(ACS_LTAG_SET_TEXTURE);
 
 // Math
-__asmfunc Cos(__fixed) -> __fixed @ __ocode(TRIG_COS32F);
-__asmfunc FixedDiv(__fixed, __fixed) -> __fixed @ __ocode(DIV32F);
-__asmfunc FixedMul(__fixed, __fixed) -> __fixed @ __ocode(MUL32F);
+__asmfunc Cos(__fixed) -> __fixed @ __ocode(TRIG_COS_X);
+__asmfunc FixedDiv(__fixed, __fixed) -> __fixed @ __ocode(DIV_STK_X);
+__asmfunc FixedMul(__fixed, __fixed) -> __fixed @ __ocode(MUL_STK_X);
 __asmfunc Random(int, int) -> int @ __ocode(ACS_MISC_RANDOM, ACS_MISC_RANDOM_IMM);
 __asmfunc RandomFixed(__fixed, __fixed) -> __fixed @ __ocode(ACS_MISC_RANDOM, ACS_MISC_RANDOM_IMM);
-__asmfunc Sin(__fixed) -> __fixed @ __ocode(TRIG_SIN32F);
+__asmfunc Sin(__fixed) -> __fixed @ __ocode(TRIG_SIN_X);
 __asmfunc VectorAngle(__fixed, __fixed) -> __fixed @ __ocode(ACSE_TRIG_VECTORANGLE);
 
 // Miscellaneous

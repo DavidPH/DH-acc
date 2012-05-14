@@ -31,13 +31,6 @@
 
 
 //----------------------------------------------------------------------------|
-// Macros                                                                     |
-//
-
-#define TOKEN_CLASS BinaryTokenACS
-
-
-//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -64,10 +57,10 @@ void BinaryTokenACS::make_tokens
    switch (object->code)
    {
    // Direct Mappings
-   BINTOKACS_TOKENS_MAP_ALL_ALL();
+   BINTOKACS_TOKENS_MAP_ALL();
 
    // Translations
-   BINTOKACS_TOKENS_TRAN_ALL_ALL();
+   BINTOKACS_TOKENS_TRAN_ALL();
 
    case OCODE_NONE:
    default:

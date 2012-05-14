@@ -89,18 +89,15 @@ bool ocode_is_push_noarg(ObjectCode ocode)
 {
    switch (ocode)
    {
-   case OCODE_ADDR_AUTO:
-   case OCODE_GET_AUTO32F:
-   case OCODE_GET_AUTO32I:
-   case OCODE_GET_LITERAL32F:
-   case OCODE_GET_LITERAL32I:
-   case OCODE_GET_REGISTER32F:
-   case OCODE_GET_REGISTER32I:
-   case OCODE_GET_STATIC32F:
-   case OCODE_GET_STATIC32I:
-   case OCODE_ACS_GET_MAPREGISTER:
-   case OCODE_ACS_GET_WORLDREGISTER:
-   case OCODE_ACSE_GET_GLOBALREGISTER:
+   case OCODE_GET_AUTPTR:
+
+   case OCODE_GET_IMM:
+   case OCODE_GET_STATIC:
+   case OCODE_GET_AUTO:
+   case OCODE_GET_REG:
+   case OCODE_GET_MAPREG:
+   case OCODE_GET_WLDREG:
+   case OCODE_GET_GBLREG:
       return true;
 
    default:

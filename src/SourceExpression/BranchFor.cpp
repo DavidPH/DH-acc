@@ -117,7 +117,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    exprInit->makeObjects(objects, sink);
    objects->setPosition(pos);
-   objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelCond));
+   objects->addToken(OCODE_JMP_IMM, objects->getValue(labelCond));
 
    objects->addLabel(labelBody);
    exprBody->makeObjects(objects, sink);
@@ -128,7 +128,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    objects->addLabel(labelCond);
    exprCond->makeObjects(objects, destCond);
    objects->setPosition(pos);
-   objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelBody));
+   objects->addToken(OCODE_JMP_TRU, objects->getValue(labelBody));
 
    objects->addLabel(context->getLabelBreak(pos));
 }

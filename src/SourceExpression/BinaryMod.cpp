@@ -70,7 +70,7 @@ protected:
    //
    virtual void doGet(ObjectVector *objects, VariableType *type, int)
    {
-      DO_GET_SWITCH(MOD, , 32F, 32I, 32U);
+      DO_GET_SWITCH(MOD);
    }
 
    //
@@ -79,7 +79,7 @@ protected:
    virtual bool doSet(ObjectVector *objects, VariableData *data,
                       VariableType *type, int)
    {
-      DO_SET_SWITCHES(MOD, 32F, 32I, 32U, ACS);
+      DO_SET_SWITCHES(MOD);
       return false;
    }
 };

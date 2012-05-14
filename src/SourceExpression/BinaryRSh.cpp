@@ -84,7 +84,7 @@ protected:
       if (VariableType::is_bt_unsigned(type->getBasicType()))
          return doGetU(objects, type, tmpBase);
 
-      DO_GET_SWITCH(RSH, BITWISE_, 32, 32, 32);
+      DO_GET_SWITCH(RSH);
    }
 
    //
@@ -96,7 +96,7 @@ protected:
       if (VariableType::is_bt_unsigned(type->getBasicType()))
          return false;
 
-      DO_SET_SWITCHES(RSH, 32, 32, 32, ACSE);
+      DO_SET_SWITCHES(RSH);
       return false;
    }
 
@@ -113,15 +113,15 @@ private:
 
       objects->addToken(OCODE_SET_TEMP, tmpS);
       objects->addToken(OCODE_GET_TEMP, tmpS);
-      objects->addToken(OCODE_BITWISE_RSH32);
+      objects->addToken(OCODE_RSH_STK_I);
       objects->addToken(OCODE_GET_TEMP, tmpS);
-      objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelEnd));
-      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
-      objects->addToken(OCODE_SETOP_DEC_TEMP, tmpS);
+      objects->addToken(OCODE_JMP_NIL, objects->getValue(labelEnd));
+      objects->addToken(OCODE_GET_IMM, objects->getValue(0x80000000));
+      objects->addToken(OCODE_DEC_TEMP_U, tmpS);
       objects->addToken(OCODE_GET_TEMP, tmpS);
-      objects->addToken(OCODE_BITWISE_RSH32);
-      objects->addToken(OCODE_BITWISE_NOT32);
-      objects->addToken(OCODE_BITWISE_AND32);
+      objects->addToken(OCODE_RSH_STK_I);
+      objects->addToken(OCODE_INV_STK_U);
+      objects->addToken(OCODE_AND_STK_U);
 
       objects->addLabel(labelEnd);
    }

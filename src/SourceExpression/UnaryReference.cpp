@@ -148,9 +148,9 @@ private:
       {
       case VariableData::MT_AUTO:
          if (type->getReturn()->getStoreType() == STORE_AUTO)
-            objects->addToken(OCODE_GET_LITERAL32I, data->address);
+            objects->addToken(OCODE_GET_IMM, data->address);
          else
-            objects->addToken(OCODE_ADDR_AUTO, data->address);
+            objects->addToken(OCODE_GET_AUTPTR, data->address);
          break;
 
       case VariableData::MT_LITERAL:
@@ -167,15 +167,15 @@ private:
 
          if (!data->address->canResolve() || data->address->resolveInt())
          {
-            objects->addToken(OCODE_GET_LITERAL32I, data->address);
-            objects->addToken(OCODE_ADD32U);
+            objects->addToken(OCODE_GET_IMM, data->address);
+            objects->addToken(OCODE_ADD_STK_U);
          }
 
          break;
 
       case VariableData::MT_REGISTER:
       case VariableData::MT_STATIC:
-         objects->addToken(OCODE_GET_LITERAL32I, data->address);
+         objects->addToken(OCODE_GET_IMM, data->address);
          break;
 
       case VariableData::MT_REGISTERARRAY:

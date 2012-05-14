@@ -193,7 +193,7 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
 
       expr->makeObjects(objects, tmp);
       objects->addTokenPushZero();
-      objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2), objects->getValue(15));
+      objects->addToken(OCODE_NATIVE, objects->getValue(2), objects->getValue(15));
 
       make_objects_memcpy_post(objects, dst, src, type, context, pos);
 

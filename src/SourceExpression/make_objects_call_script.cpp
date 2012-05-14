@@ -89,7 +89,7 @@ void SourceExpression::make_objects_call_script
 
    if (option_named_scripts)
    {
-      ocode = OCODE_MISC_NATIVE;
+      ocode = OCODE_NATIVE;
       switch (argsSize)
       {
       case  0: oargc = objects->getValue(1); break;
@@ -131,22 +131,20 @@ void SourceExpression::make_objects_call_script
       objects->getValueAdd(context->getLimit(STORE_AUTO), retnSize);
 
    // Advance the stack-pointer.
-   objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
+   objects->addToken(OCODE_ADD_AUTPTR_IMM, ostack);
 
    // Need to handle args not handled by the engine.
    if (callSize > option_script_regargs)
    {
       if (option_script_autoargs)
       {
-         // FIXME: Should be based on type.
          for (bigsint i = callSize; i-- > option_script_regargs;)
-            objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
+            objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
       }
       else
       {
-         // FIXME: Should be based on type.
          for (bigsint i = callSize - option_script_regargs; i--;)
-            objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
+            objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
       }
    }
 
@@ -164,10 +162,10 @@ void SourceExpression::make_objects_call_script
    // For any return bytes we're handling, push them onto the stack.
    // FIXME: Should be based on type.
    for (bigsint i(-retnSize); i; ++i)
-      objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));
+      objects->addToken(OCODE_GET_AUTO, objects->getValue(i));
 
    // Reset the stack-pointer.
-   objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
+   objects->addToken(OCODE_SUB_AUTPTR_IMM, ostack);
 
    make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }

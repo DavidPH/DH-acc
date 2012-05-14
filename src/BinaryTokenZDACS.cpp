@@ -69,33 +69,99 @@ void BinaryTokenZDACS::init()
    #define DO_INIT(NAME,ARGC) \
    arg_counts[BCODE_##NAME] = ARGC
 
-   // Arithmetic
-   DO_INIT(DIV_FIXED, 0);
-   DO_INIT(MUL_FIXED, 0);
+   // Operators
+   DO_INIT(ADD_GBLREG, 1);
+   DO_INIT(ADD_MAPARR, 1);
+   DO_INIT(ADD_WLDARR, 1);
+   DO_INIT(ADD_GBLARR, 1);
+   DO_INIT(AND_REG,    1);
+   DO_INIT(AND_MAPREG, 1);
+   DO_INIT(AND_WLDREG, 1);
+   DO_INIT(AND_GBLREG, 1);
+   DO_INIT(AND_MAPARR, 1);
+   DO_INIT(AND_WLDARR, 1);
+   DO_INIT(AND_GBLARR, 1);
+   DO_INIT(DEC_GBLREG, 1);
+   DO_INIT(DEC_MAPARR, 1);
+   DO_INIT(DEC_WLDARR, 1);
+   DO_INIT(DEC_GBLARR, 1);
+   DO_INIT(DIV_STK_X,  0);
+   DO_INIT(DIV_GBLREG, 1);
+   DO_INIT(DIV_MAPARR, 1);
+   DO_INIT(DIV_WLDARR, 1);
+   DO_INIT(DIV_GBLARR, 1);
+   DO_INIT(INC_GBLREG, 1);
+   DO_INIT(INC_MAPARR, 1);
+   DO_INIT(INC_WLDARR, 1);
+   DO_INIT(INC_GBLARR, 1);
+   DO_INIT(IOR_REG,    1);
+   DO_INIT(IOR_MAPREG, 1);
+   DO_INIT(IOR_WLDREG, 1);
+   DO_INIT(IOR_GBLREG, 1);
+   DO_INIT(IOR_MAPARR, 1);
+   DO_INIT(IOR_WLDARR, 1);
+   DO_INIT(IOR_GBLARR, 1);
+   DO_INIT(LSH_REG,    1);
+   DO_INIT(LSH_MAPREG, 1);
+   DO_INIT(LSH_WLDREG, 1);
+   DO_INIT(LSH_GBLREG, 1);
+   DO_INIT(LSH_MAPARR, 1);
+   DO_INIT(LSH_WLDARR, 1);
+   DO_INIT(LSH_GBLARR, 1);
+   DO_INIT(MOD_GBLREG, 1);
+   DO_INIT(MOD_MAPARR, 1);
+   DO_INIT(MOD_WLDARR, 1);
+   DO_INIT(MOD_GBLARR, 1);
+   DO_INIT(MUL_STK_X,  0);
+   DO_INIT(MUL_GBLREG, 1);
+   DO_INIT(MUL_MAPARR, 1);
+   DO_INIT(MUL_WLDARR, 1);
+   DO_INIT(MUL_GBLARR, 1);
+   DO_INIT(RSH_REG,    1);
+   DO_INIT(RSH_MAPREG, 1);
+   DO_INIT(RSH_WLDREG, 1);
+   DO_INIT(RSH_GBLREG, 1);
+   DO_INIT(RSH_MAPARR, 1);
+   DO_INIT(RSH_WLDARR, 1);
+   DO_INIT(RSH_GBLARR, 1);
+   DO_INIT(SUB_GBLREG, 1);
+   DO_INIT(SUB_MAPARR, 1);
+   DO_INIT(SUB_WLDARR, 1);
+   DO_INIT(SUB_GBLARR, 1);
+   DO_INIT(XOR_REG,    1);
+   DO_INIT(XOR_MAPREG, 1);
+   DO_INIT(XOR_WLDREG, 1);
+   DO_INIT(XOR_GBLREG, 1);
+   DO_INIT(XOR_MAPARR, 1);
+   DO_INIT(XOR_WLDARR, 1);
+   DO_INIT(XOR_GBLARR, 1);
+   DO_INIT(INV_STK,    0);
 
-   // Bitwise
-   DO_INIT(BITWISE_NOT, 0);
-
-   // Branching
-   DO_INIT(BRANCH_CASETABLE, -1);
+   // Jumps
+   DO_INIT(JMP_TAB, -1);
 
    // Stack-ops
-   DO_INIT(STACK_DUP,  0);
-   DO_INIT(STACK_SWAP, 0);
+   DO_INIT(STK_COPY, 0);
+   DO_INIT(STK_SWAP, 0);
 
    // Trigonometry
    DO_INIT(TRIG_COS, 0);
    DO_INIT(TRIG_SIN, 0);
 
-   // Variable Set Op
-   DO_INIT(SETOP_AND_REGISTER, 1);
-   DO_INIT(SETOP_IOR_REGISTER, 1);
-   DO_INIT(SETOP_LSH_REGISTER, 1);
-   DO_INIT(SETOP_RSH_REGISTER, 1);
-   DO_INIT(SETOP_XOR_REGISTER, 1);
+   // Variable Get
+   DO_INIT(GET_GBLREG, 1);
+   DO_INIT(GET_MAPARR, 1);
+   DO_INIT(GET_WLDARR, 1);
+   DO_INIT(GET_GBLARR, 1);
+
+   // Variable Set
+   DO_INIT(SET_GBLREG, 1);
+   DO_INIT(SET_MAPARR, 1);
+   DO_INIT(SET_WLDARR, 1);
+   DO_INIT(SET_GBLARR, 1);
 
    // Miscellaneous
-   DO_INIT(MISC_NATIVE, 2);
+   DO_INIT(NATIVE, 2);
 
    // ACS Extensions
    DO_INIT(FUNC_CALL_IMM,                      1);
@@ -127,10 +193,6 @@ void BinaryTokenZDACS::init()
    DO_INIT(GAME_SET_MUSICLOCAL_IMM,            3);
    DO_INIT(GAME_SET_MUSICST,                   0);
    DO_INIT(GAME_SET_SKY,                       0);
-   DO_INIT(GET_GLOBALARRAY,                    1);
-   DO_INIT(GET_GLOBALREGISTER,                 1);
-   DO_INIT(GET_MAPARRAY,                       1);
-   DO_INIT(GET_WORLDARRAY,                     1);
    DO_INIT(LINE_GET_OFFSETY,                   0);
    DO_INIT(LTAG_SET_BLOCKMONSTER,              0);
    DO_INIT(MISC_PLAYMOVIE,                     0);
@@ -176,68 +238,6 @@ void BinaryTokenZDACS::init()
    DO_INIT(SCREEN_GET_WIDTH,                   0);
    DO_INIT(SCREEN_SET_HUDSIZE,                 0);
    DO_INIT(SCRIPT_SETRETURN,                   0);
-   DO_INIT(SET_GLOBALARRAY,                    1);
-   DO_INIT(SET_GLOBALREGISTER,                 1);
-   DO_INIT(SET_MAPARRAY,                       1);
-   DO_INIT(SET_WORLDARRAY,                     1);
-   DO_INIT(SETOP_ADD_GLOBALARRAY,              1);
-   DO_INIT(SETOP_ADD_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_ADD_MAPARRAY,                 1);
-   DO_INIT(SETOP_ADD_WORLDARRAY,               1);
-   DO_INIT(SETOP_AND_GLOBALARRAY,              1);
-   DO_INIT(SETOP_AND_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_AND_MAPARRAY,                 1);
-   DO_INIT(SETOP_AND_MAPREGISTER,              1);
-   DO_INIT(SETOP_AND_WORLDARRAY,               1);
-   DO_INIT(SETOP_AND_WORLDREGISTER,            1);
-   DO_INIT(SETOP_DEC_GLOBALARRAY,              1);
-   DO_INIT(SETOP_DEC_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_DEC_MAPARRAY,                 1);
-   DO_INIT(SETOP_DEC_WORLDARRAY,               1);
-   DO_INIT(SETOP_DIV_GLOBALARRAY,              1);
-   DO_INIT(SETOP_DIV_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_DIV_MAPARRAY,                 1);
-   DO_INIT(SETOP_DIV_WORLDARRAY,               1);
-   DO_INIT(SETOP_INC_GLOBALARRAY,              1);
-   DO_INIT(SETOP_INC_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_INC_MAPARRAY,                 1);
-   DO_INIT(SETOP_INC_WORLDARRAY,               1);
-   DO_INIT(SETOP_IOR_GLOBALARRAY,              1);
-   DO_INIT(SETOP_IOR_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_IOR_MAPARRAY,                 1);
-   DO_INIT(SETOP_IOR_MAPREGISTER,              1);
-   DO_INIT(SETOP_IOR_WORLDARRAY,               1);
-   DO_INIT(SETOP_IOR_WORLDREGISTER,            1);
-   DO_INIT(SETOP_LSH_GLOBALARRAY,              1);
-   DO_INIT(SETOP_LSH_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_LSH_MAPARRAY,                 1);
-   DO_INIT(SETOP_LSH_MAPREGISTER,              1);
-   DO_INIT(SETOP_LSH_WORLDARRAY,               1);
-   DO_INIT(SETOP_LSH_WORLDREGISTER,            1);
-   DO_INIT(SETOP_MOD_GLOBALARRAY,              1);
-   DO_INIT(SETOP_MOD_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_MOD_MAPARRAY,                 1);
-   DO_INIT(SETOP_MOD_WORLDARRAY,               1);
-   DO_INIT(SETOP_MUL_GLOBALARRAY,              1);
-   DO_INIT(SETOP_MUL_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_MUL_MAPARRAY,                 1);
-   DO_INIT(SETOP_MUL_WORLDARRAY,               1);
-   DO_INIT(SETOP_RSH_GLOBALARRAY,              1);
-   DO_INIT(SETOP_RSH_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_RSH_MAPARRAY,                 1);
-   DO_INIT(SETOP_RSH_MAPREGISTER,              1);
-   DO_INIT(SETOP_RSH_WORLDARRAY,               1);
-   DO_INIT(SETOP_RSH_WORLDREGISTER,            1);
-   DO_INIT(SETOP_SUB_GLOBALARRAY,              1);
-   DO_INIT(SETOP_SUB_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_SUB_MAPARRAY,                 1);
-   DO_INIT(SETOP_SUB_WORLDARRAY,               1);
-   DO_INIT(SETOP_XOR_GLOBALARRAY,              1);
-   DO_INIT(SETOP_XOR_GLOBALREGISTER,           1);
-   DO_INIT(SETOP_XOR_MAPARRAY,                 1);
-   DO_INIT(SETOP_XOR_MAPREGISTER,              1);
-   DO_INIT(SETOP_XOR_WORLDARRAY,               1);
-   DO_INIT(SETOP_XOR_WORLDREGISTER,            1);
    DO_INIT(SOUND_AMBIENTLOCAL,                 0);
    DO_INIT(SOUND_THING,                        0);
    DO_INIT(SPAWN_POINT,                        0);
@@ -288,29 +288,29 @@ void BinaryTokenZDACS::init()
    DO_INIT(TRIG_VECTORANGLE,                   0);
 
    // ACS Printing
-   DO_INIT(PRINT_END_HUD,            0);
-   DO_INIT(PRINT_END_HUD_BOLD,       0);
-   DO_INIT(PRINT_END_LOG,            0);
-   DO_INIT(PRINT_END_OPT,            0);
-   DO_INIT(PRINT_END_STRING,         0);
-   DO_INIT(PRINT_FIXED,              0);
-   DO_INIT(PRINT_KEYBIND,            0);
-   DO_INIT(PRINT_NUM_BIN,            0);
-   DO_INIT(PRINT_NUM_HEX,            0);
-   DO_INIT(PRINT_PLAYER_NAME,        0);
-   DO_INIT(PRINT_SET_FONT,           0);
-   DO_INIT(PRINT_SET_FONT_IMM,       1);
-   DO_INIT(PRINT_START_OPT,          0);
-   DO_INIT(PRINT_STRING_GLOBALARRAY, 0);
-   DO_INIT(PRINT_STRING_GLOBALRANGE, 0);
-   DO_INIT(PRINT_STRING_LOCALIZED,   0);
-   DO_INIT(PRINT_STRING_MAPARRAY,    0);
-   DO_INIT(PRINT_STRING_MAPRANGE,    0);
-   DO_INIT(PRINT_STRING_WORLDARRAY,  0);
-   DO_INIT(PRINT_STRING_WORLDRANGE,  0);
+   DO_INIT(PRINT_END_HUD,      0);
+   DO_INIT(PRINT_END_HUD_BOLD, 0);
+   DO_INIT(PRINT_END_LOG,      0);
+   DO_INIT(PRINT_END_OPT,      0);
+   DO_INIT(PRINT_END_STR,      0);
+   DO_INIT(PRINT_KEYBIND,      0);
+   DO_INIT(PRINT_NUM_BIN,      0);
+   DO_INIT(PRINT_NUM_DEC_X,    0);
+   DO_INIT(PRINT_NUM_HEX,      0);
+   DO_INIT(PRINT_PLAYER_NAME,  0);
+   DO_INIT(PRINT_SET_FONT,     0);
+   DO_INIT(PRINT_SET_FONT_IMM, 1);
+   DO_INIT(PRINT_START_OPT,    0);
+   DO_INIT(PRINT_STR_GBLARR,   0);
+   DO_INIT(PRINT_STR_GBLRNG,   0);
+   DO_INIT(PRINT_STR_LOCALIZED,0);
+   DO_INIT(PRINT_STR_MAPARR,   0);
+   DO_INIT(PRINT_STR_MAPRNG,   0);
+   DO_INIT(PRINT_STR_WLDARR,   0);
+   DO_INIT(PRINT_STR_WLDRNG,   0);
 
    // Other
-   DO_INIT(_BRANCH_TABLE, -1);
+   DO_INIT(_JMP_TAB, -1);
 
    // Unsorted
 
@@ -340,7 +340,7 @@ size_t BinaryTokenZDACS::size() const
 {
    if (arg_counts[code] < 0) switch (code)
    {
-   case BCODE__BRANCH_TABLE:
+   case BCODE__JMP_TAB:
       return args.size()*6 + 4;
 
    default:
@@ -357,17 +357,17 @@ void BinaryTokenZDACS::writeACS0(std::ostream * out) const
 {
    if (arg_counts[code] < 0) switch (code)
    {
-   case BCODE__BRANCH_TABLE:
+   case BCODE__JMP_TAB:
       // TODO: BCODE_BRANCHCASESORTED
 
       for (size_t i(0); i < args.size(); i += 2)
       {
-         BinaryTokenACS::write_ACS0_32(out, BCODE_BRANCH_CASE);
+         BinaryTokenACS::write_ACS0_32(out, BCODE_JMP_VAL);
          BinaryTokenACS::write_ACS0_32(out, *args[i+0]);
          BinaryTokenACS::write_ACS0_32(out, *args[i+1]);
       }
 
-      BinaryTokenACS::write_ACS0_32(out, BCODE_STACK_DROP);
+      BinaryTokenACS::write_ACS0_32(out, BCODE_STK_DROP);
 
       break;
 

@@ -111,7 +111,7 @@ static void make_objects_literal
    case VariableType::BT_FUNCTION:
    case VariableType::BT_LINESPEC:
    case VariableType::BT_NATIVE:
-      objects->addToken(OCODE_GET_LITERAL32I, elem);
+      objects->addToken(OCODE_GET_IMM, elem);
       break;
 
    case VariableType::BT_FIX_HH:
@@ -119,12 +119,12 @@ static void make_objects_literal
    case VariableType::BT_FIX:
    case VariableType::BT_FIX_L:
    case VariableType::BT_FIX_LL:
-      objects->addToken(OCODE_GET_LITERAL32F, elem);
+      objects->addToken(OCODE_GET_IMM, elem);
       break;
 
    case VariableType::BT_INT_LL:
    {
-      objects->addToken(OCODE_GET_LITERAL32I, elem);
+      objects->addToken(OCODE_GET_IMM, elem);
 
       bigsint value = elem->resolveInt();
 
@@ -133,19 +133,19 @@ static void make_objects_literal
       else
          value /= static_cast<bigsint>(0x100000000);
 
-      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(value));
+      objects->addToken(OCODE_GET_IMM, objects->getValue(value));
    }
       break;
 
    case VariableType::BT_UNS_LL:
-      objects->addToken(OCODE_GET_LITERAL32I, elem);
-      objects->addToken(OCODE_GET_LITERAL32I,
+      objects->addToken(OCODE_GET_IMM, elem);
+      objects->addToken(OCODE_GET_IMM,
          ObjectExpression::create_binary_div(elem,
             objects->getValue(0x10000000), pos));
       break;
 
    case VariableType::BT_STR:
-      objects->addToken(OCODE_GET_LITERAL32I, elem);
+      objects->addToken(OCODE_GET_IMM, elem);
 
       if (target_type == TARGET_ZDoom && option_string_tag)
          objects->addToken(OCODE_ACSE_STRING_TAG);
@@ -167,7 +167,7 @@ static void make_objects_literal
       break;
 
    case VariableType::BT_SCRIPT:
-      objects->addToken(OCODE_GET_LITERAL32I, elem);
+      objects->addToken(OCODE_GET_IMM, elem);
 
       if (target_type == TARGET_ZDoom && option_string_tag &&
           option_named_scripts)
@@ -201,11 +201,11 @@ static void make_objects_memcpy_post_part
    //
    case VariableData::MT_AUTO:
       if (set) for (i = data->size; i--;)
-         objects->addToken(OCODE_SET_AUTO32I,
+         objects->addToken(OCODE_SET_AUTO,
                            objects->getValueAdd(data->address, i));
 
       if (get) for (i = 0; i < data->size; ++i)
-         objects->addToken(OCODE_GET_AUTO32I,
+         objects->addToken(OCODE_GET_AUTO,
                            objects->getValueAdd(data->address, i));
 
       break;
@@ -256,11 +256,8 @@ static void make_objects_memcpy_post_part
       // If only get or set and size is 1, only need one copy of the address.
       if (get^set && data->size == 1)
       {
-         if (set)
-            objects->addToken(OCODE_SET_POINTER32I, data->address);
-
-         if (get)
-            objects->addToken(OCODE_GET_POINTER32I, data->address);
+         if (set) objects->addToken(OCODE_SET_PTR, data->address);
+         if (get) objects->addToken(OCODE_GET_PTR, data->address);
       }
       else
       {
@@ -270,14 +267,14 @@ static void make_objects_memcpy_post_part
          if (set) for (i = data->size; i--;)
          {
             objects->addToken(OCODE_GET_TEMP, tmpA);
-            objects->addToken(OCODE_SET_POINTER32I,
+            objects->addToken(OCODE_SET_PTR,
                               objects->getValueAdd(data->address, i));
          }
 
          if (get) for (i = 0; i < data->size; ++i)
          {
             objects->addToken(OCODE_GET_TEMP, tmpA);
-            objects->addToken(OCODE_GET_POINTER32I,
+            objects->addToken(OCODE_GET_PTR,
                               objects->getValueAdd(data->address, i));
          }
       }
@@ -293,22 +290,22 @@ static void make_objects_memcpy_post_part
          switch (data->sectionR)
          {
          case VariableData::SR_LOCAL:
-            objects->addToken(OCODE_SET_REGISTER32I,
+            objects->addToken(OCODE_SET_REG,
                               objects->getValueAdd(data->address, i));
             break;
 
          case VariableData::SR_MAP:
-            objects->addToken(OCODE_ACS_SET_MAPREGISTER,
+            objects->addToken(OCODE_SET_MAPREG,
                               objects->getValueAdd(data->address, i));
             break;
 
          case VariableData::SR_WORLD:
-            objects->addToken(OCODE_ACS_SET_WORLDREGISTER,
+            objects->addToken(OCODE_SET_WLDREG,
                               objects->getValueAdd(data->address, i));
             break;
 
          case VariableData::SR_GLOBAL:
-            objects->addToken(OCODE_ACSE_SET_GLOBALREGISTER,
+            objects->addToken(OCODE_SET_GBLREG,
                               objects->getValueAdd(data->address, i));
             break;
          }
@@ -319,22 +316,22 @@ static void make_objects_memcpy_post_part
          switch (data->sectionR)
          {
          case VariableData::SR_LOCAL:
-            objects->addToken(OCODE_GET_REGISTER32I,
+            objects->addToken(OCODE_GET_REG,
                               objects->getValueAdd(data->address, i));
             break;
 
          case VariableData::SR_MAP:
-            objects->addToken(OCODE_ACS_GET_MAPREGISTER,
+            objects->addToken(OCODE_GET_MAPREG,
                               objects->getValueAdd(data->address, i));
             break;
 
          case VariableData::SR_WORLD:
-            objects->addToken(OCODE_ACS_GET_WORLDREGISTER,
+            objects->addToken(OCODE_GET_WLDREG,
                               objects->getValueAdd(data->address, i));
             break;
 
          case VariableData::SR_GLOBAL:
-            objects->addToken(OCODE_ACSE_GET_GLOBALREGISTER,
+            objects->addToken(OCODE_GET_GBLREG,
                               objects->getValueAdd(data->address, i));
             break;
          }
@@ -359,15 +356,15 @@ static void make_objects_memcpy_post_part
          if (set) switch (data->sectionRA)
          {
          case VariableData::SRA_MAP:
-            objects->addToken(OCODE_ACSE_SET_MAPARRAY, data->address);
+            objects->addToken(OCODE_SET_MAPARR, data->address);
             break;
 
          case VariableData::SRA_WORLD:
-            objects->addToken(OCODE_ACSE_SET_WORLDARRAY, data->address);
+            objects->addToken(OCODE_SET_WLDARR, data->address);
             break;
 
          case VariableData::SRA_GLOBAL:
-            objects->addToken(OCODE_ACSE_SET_GLOBALARRAY, data->address);
+            objects->addToken(OCODE_SET_GBLARR, data->address);
             break;
          }
 
@@ -382,15 +379,15 @@ static void make_objects_memcpy_post_part
          if (get) switch (data->sectionRA)
          {
          case VariableData::SRA_MAP:
-            objects->addToken(OCODE_ACSE_GET_MAPARRAY, data->address);
+            objects->addToken(OCODE_GET_MAPARR, data->address);
             break;
 
          case VariableData::SRA_WORLD:
-            objects->addToken(OCODE_ACSE_GET_WORLDARRAY, data->address);
+            objects->addToken(OCODE_GET_WLDARR, data->address);
             break;
 
          case VariableData::SRA_GLOBAL:
-            objects->addToken(OCODE_ACSE_GET_GLOBALARRAY, data->address);
+            objects->addToken(OCODE_GET_GBLARR, data->address);
             break;
          }
       }
@@ -410,24 +407,24 @@ static void make_objects_memcpy_post_part
 
             if (i)
             {
-               objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(i));
-               objects->addToken(OCODE_ADD32U);
+               objects->addToken(OCODE_GET_IMM, objects->getValue(i));
+               objects->addToken(OCODE_ADD_STK_U);
             }
 
-            objects->addToken(OCODE_STACK_SWAP32);
+            objects->addToken(OCODE_STK_SWAP);
 
             switch (data->sectionRA)
             {
             case VariableData::SRA_MAP:
-               objects->addToken(OCODE_ACSE_SET_MAPARRAY, data->address);
+               objects->addToken(OCODE_SET_MAPARR, data->address);
                break;
 
             case VariableData::SRA_WORLD:
-               objects->addToken(OCODE_ACSE_SET_WORLDARRAY, data->address);
+               objects->addToken(OCODE_SET_WLDARR, data->address);
                break;
 
             case VariableData::SRA_GLOBAL:
-               objects->addToken(OCODE_ACSE_SET_GLOBALARRAY, data->address);
+               objects->addToken(OCODE_SET_GBLARR, data->address);
                break;
             }
          }
@@ -438,22 +435,22 @@ static void make_objects_memcpy_post_part
 
             if (i)
             {
-               objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(i));
-               objects->addToken(OCODE_ADD32U);
+               objects->addToken(OCODE_GET_IMM, objects->getValue(i));
+               objects->addToken(OCODE_ADD_STK_U);
             }
 
             switch (data->sectionRA)
             {
             case VariableData::SRA_MAP:
-               objects->addToken(OCODE_ACSE_GET_MAPARRAY, data->address);
+               objects->addToken(OCODE_GET_MAPARR, data->address);
                break;
 
             case VariableData::SRA_WORLD:
-               objects->addToken(OCODE_ACSE_GET_WORLDARRAY, data->address);
+               objects->addToken(OCODE_GET_WLDARR, data->address);
                break;
 
             case VariableData::SRA_GLOBAL:
-               objects->addToken(OCODE_ACSE_GET_GLOBALARRAY, data->address);
+               objects->addToken(OCODE_GET_GBLARR, data->address);
                break;
             }
          }
@@ -476,11 +473,11 @@ static void make_objects_memcpy_post_part
    //
    case VariableData::MT_STATIC:
       if (set) for (i = data->size; i--;)
-         objects->addToken(OCODE_SET_STATIC32I,
+         objects->addToken(OCODE_SET_STATIC,
                            objects->getValueAdd(data->address, i));
 
       if (get) for (i = 0; i < data->size; ++i)
-         objects->addToken(OCODE_GET_STATIC32I,
+         objects->addToken(OCODE_GET_STATIC,
                            objects->getValueAdd(data->address, i));
       break;
 
@@ -489,7 +486,7 @@ static void make_objects_memcpy_post_part
    //
    case VariableData::MT_VOID:
       if (set) for (i = data->size; i--;)
-         objects->addToken(OCODE_STACK_DROP32);
+         objects->addToken(OCODE_STK_DROP);
 
       if (get) ERROR_P("MT_VOID as src");
 
@@ -629,7 +626,7 @@ void SourceExpression::make_objects_memcpy_void
    objects->setPosition(position);
 
    for (bigsint i = src->size; i--;)
-      objects->addToken(OCODE_STACK_DROP32);
+      objects->addToken(OCODE_STK_DROP);
 }
 
 // EOF

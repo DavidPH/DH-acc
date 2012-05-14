@@ -70,7 +70,7 @@ protected:
    //
    virtual void doGet(ObjectVector *objects, VariableType *type, int)
    {
-      DO_GET_SWITCH(DIV, , 32F, 32I, 32U);
+      DO_GET_SWITCH(DIV);
    }
 
    //
@@ -81,7 +81,7 @@ protected:
    {
       if (VariableType::is_bt_fix(type->getBasicType())) return false;
 
-      DO_SET_SWITCHES(DIV, 32F, 32I, 32U, ACS);
+      DO_SET_SWITCHES(DIV);
       return false;
    }
 };

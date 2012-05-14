@@ -69,7 +69,7 @@ protected:
    //
    virtual void doGet(ObjectVector *objects, VariableType *type, int)
    {
-      DO_GET_SWITCH(LSH, BITWISE_, 32, 32, 32);
+      DO_GET_SWITCH(LSH);
    }
 
    //
@@ -78,7 +78,7 @@ protected:
    virtual bool doSet(ObjectVector *objects, VariableData *data,
                       VariableType *type, int)
    {
-      DO_SET_SWITCHES(LSH, 32, 32, 32, ACSE);
+      DO_SET_SWITCHES(LSH);
       return false;
    }
 };

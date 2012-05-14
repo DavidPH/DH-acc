@@ -72,7 +72,7 @@ public:
       VariableData::Pointer   src     = VariableData::create_stack(srcSize);
 
       make_objects_memcpy_prep(objects, dst, src, pos);
-      objects->addToken(OCODE_ADDR_AUTO, objects->getValue(0));
+      objects->addToken(OCODE_GET_AUTPTR, objects->getValue(0));
       make_objects_memcpy_post(objects, dst, src, srcType, context, pos);
    }
 

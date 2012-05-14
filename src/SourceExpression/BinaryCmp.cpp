@@ -99,12 +99,12 @@ public:
       ObjectCode ocode = OCODE_NONE;
       switch (ct)
       {
-      case CMP_GE: ocode = OCODE_CMP_GE32I; break;
-      case CMP_GT: ocode = OCODE_CMP_GT32I; break;
-      case CMP_LE: ocode = OCODE_CMP_LE32I; break;
-      case CMP_LT: ocode = OCODE_CMP_LT32I; break;
-      case CMP_EQ: ocode = OCODE_CMP_EQ32I; break;
-      case CMP_NE: ocode = OCODE_CMP_NE32I; break;
+      case CMP_GE: ocode = OCODE_CMP_GE_I; break;
+      case CMP_GT: ocode = OCODE_CMP_GT_I; break;
+      case CMP_LE: ocode = OCODE_CMP_LE_I; break;
+      case CMP_LT: ocode = OCODE_CMP_LT_I; break;
+      case CMP_EQ: ocode = OCODE_CMP_EQ_I; break;
+      case CMP_NE: ocode = OCODE_CMP_NE_I; break;
       }
 
       make_objects_memcpy_prep(objects, dst, src, pos);
@@ -118,9 +118,9 @@ public:
 
          exprL->makeObjects(objects, tmp);
          objects->addToken(OCODE_SET_TEMP, tmpH);
-         objects->addToken(OCODE_STACK_DROP32);
+         objects->addToken(OCODE_STK_DROP);
          objects->addToken(OCODE_GET_TEMP, tmpH);
-         objects->addToken(OCODE_GET_LITERAL32I, objR);
+         objects->addToken(OCODE_GET_IMM, objR);
          objects->addToken(ocode);
 
          make_objects_memcpy_post(objects, dst, src, type, context, pos);
@@ -156,33 +156,33 @@ private:
       ObjectExpression::Pointer tmpKh = context->getTempVar(3);
 
       // llbits_t j; llbits_t k;
-      objects->addToken(OCODE_SET_REGISTER32I, tmpKh);
-      objects->addToken(OCODE_SET_REGISTER32I, tmpKl);
-      objects->addToken(OCODE_SET_REGISTER32I, tmpJh);
+      objects->addToken(OCODE_SET_REG, tmpKh);
+      objects->addToken(OCODE_SET_REG, tmpKl);
+      objects->addToken(OCODE_SET_REG, tmpJh);
 
       if (ct == CMP_EQ)
       {
          // (j.lo == k.lo) & (j.hi == k.hi)
-         objects->addToken(OCODE_GET_REGISTER32I, tmpKl);
-         objects->addToken(OCODE_CMP_EQ32I);
+         objects->addToken(OCODE_GET_REG, tmpKl);
+         objects->addToken(OCODE_CMP_EQ_I);
 
-         objects->addToken(OCODE_GET_REGISTER32I, tmpJh);
-         objects->addToken(OCODE_GET_REGISTER32I, tmpKh);
-         objects->addToken(OCODE_CMP_EQ32I);
+         objects->addToken(OCODE_GET_REG, tmpJh);
+         objects->addToken(OCODE_GET_REG, tmpKh);
+         objects->addToken(OCODE_CMP_EQ_I);
 
-         objects->addToken(OCODE_BITWISE_AND32);
+         objects->addToken(OCODE_AND_STK_I);
       }
       else if (ct == CMP_EQ)
       {
          // (j.lo != k.lo) | (j.hi != k.hi)
-         objects->addToken(OCODE_GET_REGISTER32I, tmpKl);
-         objects->addToken(OCODE_CMP_NE32I);
+         objects->addToken(OCODE_GET_REG, tmpKl);
+         objects->addToken(OCODE_CMP_NE_I);
 
-         objects->addToken(OCODE_GET_REGISTER32I, tmpJh);
-         objects->addToken(OCODE_GET_REGISTER32I, tmpKh);
-         objects->addToken(OCODE_CMP_NE32I);
+         objects->addToken(OCODE_GET_REG, tmpJh);
+         objects->addToken(OCODE_GET_REG, tmpKh);
+         objects->addToken(OCODE_CMP_NE_I);
 
-         objects->addToken(OCODE_BITWISE_IOR32);
+         objects->addToken(OCODE_IOR_STK_I);
       }
       else
       {
@@ -192,24 +192,24 @@ private:
 
          tmpJl = context->getTempVar(0);
 
-         objects->addToken(OCODE_SET_REGISTER32I, tmpJl);
+         objects->addToken(OCODE_SET_REG, tmpJl);
 
-         objects->addToken(OCODE_GET_REGISTER32I, tmpJh);
-         objects->addToken(OCODE_GET_REGISTER32I, tmpKh);
-         objects->addToken(OCODE_CMP_EQ32I);
-         objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelLow));
+         objects->addToken(OCODE_GET_REG, tmpJh);
+         objects->addToken(OCODE_GET_REG, tmpKh);
+         objects->addToken(OCODE_CMP_EQ_I);
+         objects->addToken(OCODE_JMP_TRU, objects->getValue(labelLow));
 
          // The two high byes differ, so they determine the result.
          if (inBT == VariableType::BT_INT_LL)
          {
-            objects->addToken(OCODE_GET_REGISTER32I, tmpJh);
-            objects->addToken(OCODE_GET_REGISTER32I, tmpKh);
+            objects->addToken(OCODE_GET_REG, tmpJh);
+            objects->addToken(OCODE_GET_REG, tmpKh);
             objects->addToken(ocode);
          }
          else
             makeObjectsU(objects, ocode, dst, src, type, tmpJh, tmpKh);
 
-         objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelEnd));
+         objects->addToken(OCODE_JMP_IMM, objects->getValue(labelEnd));
 
          // Compare the low bytes. Low bytes are always effectively unsigned.
          objects->addLabel(labelLow);
@@ -240,46 +240,46 @@ private:
          tmpK = context->getTempVar(1);
 
          // unsigned j; unsigned k;
-         objects->addToken(OCODE_SET_REGISTER32I, tmpK);
-         objects->addToken(OCODE_SET_REGISTER32I, tmpJ);
+         objects->addToken(OCODE_SET_REG, tmpK);
+         objects->addToken(OCODE_SET_REG, tmpJ);
       }
 
       // if (j & 0x80000000) ...
-      objects->addToken(OCODE_GET_REGISTER32I, tmpJ);
-      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
-      objects->addToken(OCODE_BITWISE_AND32);
-      objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelPos));
+      objects->addToken(OCODE_GET_REG, tmpJ);
+      objects->addToken(OCODE_GET_IMM, objects->getValue(0x80000000));
+      objects->addToken(OCODE_AND_STK_I);
+      objects->addToken(OCODE_JMP_NIL, objects->getValue(labelPos));
 
       // ... then
       //    if (!(k & 0x80000000)) return +1;
-      objects->addToken(OCODE_GET_REGISTER32I, tmpK);
-      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
-      objects->addToken(OCODE_BITWISE_AND32);
-      objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelCmp));
+      objects->addToken(OCODE_GET_REG, tmpK);
+      objects->addToken(OCODE_GET_IMM, objects->getValue(0x80000000));
+      objects->addToken(OCODE_AND_STK_I);
+      objects->addToken(OCODE_JMP_TRU, objects->getValue(labelCmp));
       if (ct == CMP_GE || ct == CMP_GT)
-         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));
+         objects->addToken(OCODE_GET_IMM, objects->getValue(1));
       else
-         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0));
-      objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelEnd));
+         objects->addToken(OCODE_GET_IMM, objects->getValue(0));
+      objects->addToken(OCODE_JMP_IMM, objects->getValue(labelEnd));
 
       // ... else
       objects->addLabel(labelPos);
       //    if (k & 0x80000000) return -1;
-      objects->addToken(OCODE_GET_REGISTER32I, tmpK);
-      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
-      objects->addToken(OCODE_BITWISE_AND32);
-      objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelCmp));
+      objects->addToken(OCODE_GET_REG, tmpK);
+      objects->addToken(OCODE_GET_IMM, objects->getValue(0x80000000));
+      objects->addToken(OCODE_AND_STK_I);
+      objects->addToken(OCODE_JMP_NIL, objects->getValue(labelCmp));
       if (ct == CMP_LE || ct == CMP_LT)
-         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));
+         objects->addToken(OCODE_GET_IMM, objects->getValue(1));
       else
-         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0));
-      objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelEnd));
+         objects->addToken(OCODE_GET_IMM, objects->getValue(0));
+      objects->addToken(OCODE_JMP_IMM, objects->getValue(labelEnd));
 
       // if (j < k) return -1;
       // if (j > k) return +1;
       objects->addLabel(labelCmp);
-      objects->addToken(OCODE_GET_REGISTER32I, tmpJ);
-      objects->addToken(OCODE_GET_REGISTER32I, tmpK);
+      objects->addToken(OCODE_GET_REG, tmpJ);
+      objects->addToken(OCODE_GET_REG, tmpK);
       objects->addToken(ocode);
 
       objects->addLabel(labelEnd);

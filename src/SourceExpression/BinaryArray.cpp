@@ -148,7 +148,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       objects->setPosition(pos);
 
       // 2 = arg count, 15 = native get_char
-      objects->addToken(OCODE_MISC_NATIVE, objects->getValue(2),
+      objects->addToken(OCODE_NATIVE, objects->getValue(2),
                         objects->getValue(15));
 
       make_objects_memcpy_post(objects, dst, src, type, context, pos);

@@ -30,6 +30,7 @@
 //
 #define MAKE_COMMON_COUNTER_CLASS_TYPES(CLASS)        \
 public:                                               \
+typedef CLASS This;                                   \
 typedef CounterPointer<CLASS> Pointer;                \
 typedef CounterPointer<CLASS const> ConstPointer;     \
 friend class CounterPointer<CLASS>;                   \

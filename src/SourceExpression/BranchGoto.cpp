@@ -125,7 +125,7 @@ void SourceExpression_BranchGoto::virtual_makeObjects(ObjectVector *objects, Var
    {
       if (expr->canMakeObject())
       {
-         objects->addToken(OCODE_BRANCH_GOTO_IMM, expr->makeObject());
+         objects->addToken(OCODE_JMP_IMM, expr->makeObject());
       }
       else
       {
@@ -134,11 +134,11 @@ void SourceExpression_BranchGoto::virtual_makeObjects(ObjectVector *objects, Var
 
          expr->makeObjects(objects, src);
          objects->setPosition(pos);
-         objects->addToken(OCODE_BRANCH_GOTO);
+         objects->addToken(OCODE_JMP);
       }
    }
    else
-      objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelGoto));
+      objects->addToken(OCODE_JMP_IMM, objects->getValue(labelGoto));
 }
 
 // EOF

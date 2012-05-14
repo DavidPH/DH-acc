@@ -95,7 +95,7 @@ void SourceExpression_UnaryNot::virtual_makeObjects
    case VariableType::BT_UNS_H:
    case VariableType::BT_UNS:
    case VariableType::BT_UNS_L:
-      objects->addToken(OCODE_BITWISE_NOT32);
+      objects->addToken(OCODE_INV_STK_I);
       break;
 
    case VariableType::BT_INT_LL:
@@ -103,9 +103,9 @@ void SourceExpression_UnaryNot::virtual_makeObjects
    {
       ObjectExpression::Pointer tmpH = context->getTempVar(0);
 
-      objects->addToken(OCODE_BITWISE_NOT32);
+      objects->addToken(OCODE_INV_STK_I);
       objects->addToken(OCODE_SET_TEMP, tmpH);
-      objects->addToken(OCODE_BITWISE_NOT32);
+      objects->addToken(OCODE_INV_STK_I);
       objects->addToken(OCODE_GET_TEMP, tmpH);
    }
       break;

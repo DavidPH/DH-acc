@@ -47,10 +47,10 @@ void SourceExpression::make_objects_call_native
    FUNCTION_PREAMBLE
    FUNCTION_ARGS
 
-   objects->addToken(OCODE_MISC_NATIVE, objects->getValue(callSize), data);
+   objects->addToken(OCODE_NATIVE, objects->getValue(callSize), data);
 
    // ZDoom always pushes at least one byte.
-   if (!retnSize) objects->addToken(OCODE_STACK_DROP32);
+   if (!retnSize) objects->addToken(OCODE_STK_DROP);
 
    make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }

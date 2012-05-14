@@ -102,15 +102,13 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    if (target_type != TARGET_ZDoom)
    {
-      // FIXME: Should be based on type.
       for (bigsint i(1); i <= retnSize; ++i)
-         objects->addToken(OCODE_SET_AUTO32I, objects->getValue(-i));
+         objects->addToken(OCODE_SET_AUTO, objects->getValue(-i));
    }
    else
    {
-      // FIXME: Should be based on type.
       for (bigsint i(1); i < retnSize; ++i)
-         objects->addToken(OCODE_SET_AUTO32I, objects->getValue(-i));
+         objects->addToken(OCODE_SET_AUTO, objects->getValue(-i));
    }
 
    switch (ct)
@@ -121,7 +119,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    case SourceContext::CT_FUNCTION:
       if (target_type != TARGET_ZDoom)
-         objects->addToken(OCODE_BRANCH_GOTO);
+         objects->addToken(OCODE_JMP);
       else if (retnSize == 0)
          objects->addToken(OCODE_ACSE_FUNC_RETNVOID);
       else

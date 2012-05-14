@@ -97,9 +97,9 @@ if (suf && dst->type != VariableData::MT_VOID)  \
                                                 \
 objects->addToken(ocode, addrL);                \
 objects->addToken(OCODE_##CODEG, addrL);        \
-objects->addToken(OCODE_GET_LITERAL32I, wrapv); \
-objects->addToken(OCODE_CMP_EQ32I);             \
-objects->addToken(OCODE_BRANCH_ZERO, objEnd);   \
+objects->addToken(OCODE_GET_IMM, wrapv);        \
+objects->addToken(OCODE_CMP_EQ_I);              \
+objects->addToken(OCODE_JMP_NIL, objEnd);       \
 objects->addToken(ocode, addrH);                \
 objects->addLabel(labelEnd);                    \
                                                 \
@@ -129,8 +129,8 @@ if (suf && dst->type != VariableData::MT_VOID)  \
    objects->addToken(OCODE_GET_TEMP, tempA);    \
    objects->addToken(OCODE_##CODEG, addrL);     \
    objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));\
-   objects->addToken(OCODE_ADD32U);             \
+   objects->addToken(OCODE_GET_IMM, objects->getValue(1));\
+   objects->addToken(OCODE_ADD_STK_U);          \
    objects->addToken(OCODE_##CODEG, addrH);     \
 }                                               \
                                                 \
@@ -138,12 +138,12 @@ objects->addToken(OCODE_GET_TEMP, tempA);       \
 objects->addToken(ocode, addrL);                \
 objects->addToken(OCODE_GET_TEMP, tempA);       \
 objects->addToken(OCODE_##CODEG, addrL);        \
-objects->addToken(OCODE_GET_LITERAL32I, wrapv); \
-objects->addToken(OCODE_CMP_EQ32I);             \
-objects->addToken(OCODE_BRANCH_ZERO, objEnd);   \
+objects->addToken(OCODE_GET_IMM, wrapv);        \
+objects->addToken(OCODE_CMP_EQ_I);              \
+objects->addToken(OCODE_JMP_NIL, objEnd);       \
 objects->addToken(OCODE_GET_TEMP, tempA);       \
-objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));\
-objects->addToken(OCODE_ADD32U);                \
+objects->addToken(OCODE_GET_IMM, objects->getValue(1));\
+objects->addToken(OCODE_ADD_STK_U);             \
 objects->addToken(ocode, addrH);                \
 objects->addLabel(labelEnd);                    \
                                                 \
@@ -152,8 +152,8 @@ if (!suf && dst->type != VariableData::MT_VOID) \
    objects->addToken(OCODE_GET_TEMP, tempA);    \
    objects->addToken(OCODE_##CODEG, addrL);     \
    objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));\
-   objects->addToken(OCODE_ADD32U);             \
+   objects->addToken(OCODE_GET_IMM, objects->getValue(1));\
+   objects->addToken(OCODE_ADD_STK_U);          \
    objects->addToken(OCODE_##CODEG, addrH);     \
 }                                               \
 break
@@ -184,9 +184,9 @@ objects->addToken(OCODE_GET_TEMP, tempA);       \
 objects->addToken(ocode, addrL);                \
 objects->addToken(OCODE_GET_TEMP, tempA);       \
 objects->addToken(OCODE_##CODEG, addrL);        \
-objects->addToken(OCODE_GET_LITERAL32I, wrapv); \
-objects->addToken(OCODE_CMP_EQ32I);             \
-objects->addToken(OCODE_BRANCH_ZERO, objEnd);   \
+objects->addToken(OCODE_GET_IMM, wrapv);        \
+objects->addToken(OCODE_CMP_EQ_I);              \
+objects->addToken(OCODE_JMP_NIL, objEnd);       \
 objects->addToken(OCODE_GET_TEMP, tempA);       \
 objects->addToken(ocode, addrH);                \
 objects->addLabel(labelEnd);                    \
@@ -209,7 +209,7 @@ ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
 if (suf && dst->type != VariableData::MT_VOID)  \
    objects->addToken(OCODE_##CODEG, addrL);     \
                                                 \
-objects->addToken(OCODE_GET_LITERAL32I, value); \
+objects->addToken(OCODE_GET_IMM, value);        \
 objects->addToken(ocode, addrL);                \
                                                 \
 if (!suf && dst->type != VariableData::MT_VOID) \
@@ -239,7 +239,7 @@ if (suf && dst->type != VariableData::MT_VOID)  \
                                                 \
 if (dst->type != VariableData::MT_VOID)         \
    objects->addToken(OCODE_GET_TEMP, tempA);    \
-objects->addToken(OCODE_GET_LITERAL32I, value); \
+objects->addToken(OCODE_GET_IMM, value);        \
 objects->addToken(ocode, addrL);                \
                                                 \
 if (!suf && dst->type != VariableData::MT_VOID) \
@@ -258,7 +258,7 @@ if (dst->type != VariableData::MT_VOID)         \
 ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
                                                 \
 if (dst->type == VariableData::MT_VOID)         \
-   objects->addToken(OCODE_GET_LITERAL32I, value);\
+   objects->addToken(OCODE_GET_IMM, value);     \
                                                 \
 if (src->offsetExpr)                            \
    src->offsetExpr->makeObjects(objects, tmp);  \
@@ -275,7 +275,7 @@ if (suf && dst->type != VariableData::MT_VOID)  \
                                                 \
 if (dst->type != VariableData::MT_VOID)         \
 {                                               \
-   objects->addToken(OCODE_GET_LITERAL32I, value);\
+   objects->addToken(OCODE_GET_IMM, value);     \
    objects->addToken(OCODE_GET_TEMP, tempA);    \
 }                                               \
 objects->addToken(ocode, addrL);                \
@@ -324,39 +324,29 @@ private:
 
       switch (src->type)
       {
+      case VariableData::MT_STATIC:
+         DO_P_ADDR(GET_STATIC, ADD_STATIC_X, SUB_STATIC_X);
+
       case VariableData::MT_AUTO:
-         DO_P_ADDR(GET_AUTO32F,
-             SETOP_ADD_AUTO32F,
-             SETOP_SUB_AUTO32F);
+         DO_P_ADDR(GET_AUTO, ADD_AUTO_X, SUB_AUTO_X);
 
       case VariableData::MT_POINTER:
-         DO_P_POINTER(GET_POINTER32F,
-                SETOP_ADD_POINTER32F,
-                SETOP_SUB_POINTER32F);
-         break;
+         DO_P_POINTER(GET_PTR, ADD_PTR_X, SUB_PTR_X);
 
       case VariableData::MT_REGISTER:
          switch (src->sectionR)
          {
          case VariableData::SR_LOCAL:
-            DO_P_ADDR(GET_REGISTER32F,
-                SETOP_ADD_REGISTER32F,
-                SETOP_SUB_REGISTER32F);
+            DO_P_ADDR(GET_REG, ADD_REG_X, SUB_REG_X);
 
          case VariableData::SR_MAP:
-            DO_P_ADDR(ACS_GET_MAPREGISTER,
-                ACS_SETOP_ADD_MAPREGISTER,
-                ACS_SETOP_SUB_MAPREGISTER);
+            DO_P_ADDR(GET_MAPREG, ADD_MAPREG_X, SUB_MAPREG_X);
 
          case VariableData::SR_WORLD:
-            DO_P_ADDR(ACS_GET_WORLDREGISTER,
-                ACS_SETOP_ADD_WORLDREGISTER,
-                ACS_SETOP_SUB_WORLDREGISTER);
+            DO_P_ADDR(GET_WLDREG, ADD_WLDREG_X, SUB_WLDREG_X);
 
          case VariableData::SR_GLOBAL:
-            DO_P_ADDR(ACSE_GET_GLOBALREGISTER,
-                ACSE_SETOP_ADD_GLOBALREGISTER,
-                ACSE_SETOP_SUB_GLOBALREGISTER);
+            DO_P_ADDR(GET_GBLREG, ADD_GBLREG_X, SUB_GBLREG_X);
       }
       break;
 
@@ -364,29 +354,15 @@ private:
          switch (src->sectionRA)
          {
          case VariableData::SRA_MAP:
-            DO_P_OFFSET(ACSE_GET_MAPARRAY,
-                  ACSE_SETOP_ADD_MAPARRAY,
-                  ACSE_SETOP_SUB_MAPARRAY);
-            break;
+            DO_P_OFFSET(GET_MAPARR, ADD_MAPARR_X, SUB_MAPARR_X);
 
          case VariableData::SRA_WORLD:
-            DO_P_OFFSET(ACSE_GET_WORLDARRAY,
-                  ACSE_SETOP_ADD_WORLDARRAY,
-                  ACSE_SETOP_SUB_WORLDARRAY);
-            break;
+            DO_P_OFFSET(GET_WLDARR, ADD_WLDARR_X, SUB_WLDARR_X);
 
          case VariableData::SRA_GLOBAL:
-            DO_P_OFFSET(ACSE_GET_GLOBALARRAY,
-                  ACSE_SETOP_ADD_GLOBALARRAY,
-                  ACSE_SETOP_SUB_GLOBALARRAY);
-            break;
+            DO_P_OFFSET(GET_GBLARR, ADD_GBLARR_X, SUB_GBLARR_X);
       }
       break;
-
-      case VariableData::MT_STATIC:
-         DO_P_ADDR(GET_STATIC32F,
-             SETOP_ADD_STATIC32F,
-             SETOP_SUB_STATIC32F);
 
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
@@ -409,39 +385,29 @@ private:
 
       switch (src->type)
       {
+      case VariableData::MT_STATIC:
+         DO_I_ADDR(GET_STATIC, INC_STATIC_I, DEC_STATIC_I);
+
       case VariableData::MT_AUTO:
-         DO_I_ADDR(GET_AUTO32I,
-             SETOP_INC_AUTO32I,
-             SETOP_DEC_AUTO32I);
+         DO_I_ADDR(GET_AUTO, INC_AUTO_I, DEC_AUTO_I);
 
       case VariableData::MT_POINTER:
-         DO_I_OFFSET(GET_POINTER32I,
-               SETOP_INC_POINTER32I,
-               SETOP_DEC_POINTER32I);
-         break;
+         DO_I_OFFSET(GET_PTR, INC_PTR_I, DEC_PTR_I);
 
       case VariableData::MT_REGISTER:
          switch (src->sectionR)
          {
          case VariableData::SR_LOCAL:
-            DO_I_ADDR(GET_REGISTER32I,
-                SETOP_INC_REGISTER32I,
-                SETOP_DEC_REGISTER32I);
+            DO_I_ADDR(GET_REG, INC_REG_I, DEC_REG_I);
 
          case VariableData::SR_MAP:
-            DO_I_ADDR(ACS_GET_MAPREGISTER,
-                ACS_SETOP_INC_MAPREGISTER,
-                ACS_SETOP_DEC_MAPREGISTER);
+            DO_I_ADDR(GET_MAPREG, INC_MAPREG_I, DEC_MAPREG_I);
 
          case VariableData::SR_WORLD:
-            DO_I_ADDR(ACS_GET_WORLDREGISTER,
-                ACS_SETOP_INC_WORLDREGISTER,
-                ACS_SETOP_DEC_WORLDREGISTER);
+            DO_I_ADDR(GET_WLDREG, INC_WLDREG_I, DEC_WLDREG_I);
 
          case VariableData::SR_GLOBAL:
-            DO_I_ADDR(ACSE_GET_GLOBALREGISTER,
-                ACSE_SETOP_INC_GLOBALREGISTER,
-                ACSE_SETOP_DEC_GLOBALREGISTER);
+            DO_I_ADDR(GET_GBLREG, INC_GBLREG_I, DEC_GBLREG_I);
       }
       break;
 
@@ -449,29 +415,15 @@ private:
          switch (src->sectionRA)
          {
          case VariableData::SRA_MAP:
-            DO_I_OFFSET(ACSE_GET_MAPARRAY,
-                  ACSE_SETOP_INC_MAPARRAY,
-                  ACSE_SETOP_DEC_MAPARRAY);
-            break;
+            DO_I_OFFSET(GET_MAPARR, INC_MAPARR_I, DEC_MAPARR_I);
 
          case VariableData::SRA_WORLD:
-            DO_I_OFFSET(ACSE_GET_WORLDARRAY,
-                  ACSE_SETOP_INC_WORLDARRAY,
-                  ACSE_SETOP_DEC_WORLDARRAY);
-            break;
+            DO_I_OFFSET(GET_WLDARR, INC_WLDARR_I, DEC_WLDARR_I);
 
          case VariableData::SRA_GLOBAL:
-            DO_I_OFFSET(ACSE_GET_GLOBALARRAY,
-                  ACSE_SETOP_INC_GLOBALARRAY,
-                  ACSE_SETOP_DEC_GLOBALARRAY);
-            break;
+            DO_I_OFFSET(GET_GBLARR, INC_GBLARR_I, DEC_GBLARR_I);
       }
       break;
-
-      case VariableData::MT_STATIC:
-         DO_I_ADDR(GET_STATIC32I,
-             SETOP_INC_STATIC32I,
-             SETOP_DEC_STATIC32I);
 
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
@@ -500,39 +452,29 @@ private:
 
       switch (src->type)
       {
+      case VariableData::MT_STATIC:
+         DO_LL_ADDR(GET_STATIC, INC_STATIC_I, DEC_STATIC_I);
+
       case VariableData::MT_AUTO:
-         DO_LL_ADDR(GET_AUTO32I,
-              SETOP_INC_AUTO32I,
-              SETOP_DEC_AUTO32I);
+         DO_LL_ADDR(GET_AUTO, INC_AUTO_I, DEC_AUTO_I);
 
       case VariableData::MT_POINTER:
-         DO_LL_POINTER(GET_POINTER32I,
-                 SETOP_INC_POINTER32I,
-                 SETOP_DEC_POINTER32I);
-         break;
+         DO_LL_POINTER(GET_PTR, INC_PTR_I, DEC_PTR_I);
 
       case VariableData::MT_REGISTER:
          switch (src->sectionR)
          {
          case VariableData::SR_LOCAL:
-            DO_LL_ADDR(GET_REGISTER32I,
-                 SETOP_INC_REGISTER32I,
-                 SETOP_DEC_REGISTER32I);
+            DO_LL_ADDR(GET_REG, INC_REG_I, DEC_REG_I);
 
          case VariableData::SR_MAP:
-            DO_LL_ADDR(ACS_GET_MAPREGISTER,
-                 ACS_SETOP_INC_MAPREGISTER,
-                 ACS_SETOP_DEC_MAPREGISTER);
+            DO_LL_ADDR(GET_MAPREG, INC_MAPREG_I, DEC_MAPREG_I);
 
          case VariableData::SR_WORLD:
-            DO_LL_ADDR(ACS_GET_WORLDREGISTER,
-                 ACS_SETOP_INC_WORLDREGISTER,
-                 ACS_SETOP_DEC_WORLDREGISTER);
+            DO_LL_ADDR(GET_WLDREG, INC_WLDREG_I, DEC_WLDREG_I);
 
          case VariableData::SR_GLOBAL:
-            DO_LL_ADDR(ACSE_GET_GLOBALREGISTER,
-                 ACSE_SETOP_INC_GLOBALREGISTER,
-                 ACSE_SETOP_DEC_GLOBALREGISTER);
+            DO_LL_ADDR(GET_GBLREG, INC_GBLREG_I, DEC_GBLREG_I);
       }
       break;
 
@@ -540,29 +482,15 @@ private:
          switch (src->sectionRA)
          {
          case VariableData::SRA_MAP:
-            DO_LL_OFFSET(ACSE_GET_MAPARRAY,
-                   ACSE_SETOP_INC_MAPARRAY,
-                   ACSE_SETOP_DEC_MAPARRAY);
-            break;
+            DO_LL_OFFSET(GET_MAPARR, INC_MAPARR_I, DEC_MAPARR_I);
 
          case VariableData::SRA_WORLD:
-            DO_LL_OFFSET(ACSE_GET_WORLDARRAY,
-                   ACSE_SETOP_INC_WORLDARRAY,
-                   ACSE_SETOP_DEC_WORLDARRAY);
-            break;
+            DO_LL_OFFSET(GET_WLDARR, INC_WLDARR_I, DEC_WLDARR_I);
 
          case VariableData::SRA_GLOBAL:
-            DO_LL_OFFSET(ACSE_GET_GLOBALARRAY,
-                   ACSE_SETOP_INC_GLOBALARRAY,
-                   ACSE_SETOP_DEC_GLOBALARRAY);
-            break;
+            DO_LL_OFFSET(GET_GBLARR, INC_GBLARR_I, DEC_GBLARR_I);
       }
       break;
-
-      case VariableData::MT_STATIC:
-         DO_LL_ADDR(GET_STATIC32I,
-              SETOP_INC_STATIC32I,
-              SETOP_DEC_STATIC32I);
 
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
@@ -585,39 +513,29 @@ private:
 
       switch (src->type)
       {
+      case VariableData::MT_STATIC:
+         DO_P_ADDR(GET_STATIC, ADD_STATIC_U, SUB_STATIC_U);
+
       case VariableData::MT_AUTO:
-         DO_P_ADDR(GET_AUTO32I,
-             SETOP_ADD_AUTO32U,
-             SETOP_SUB_AUTO32U);
+         DO_P_ADDR(GET_AUTO, ADD_AUTO_U, SUB_AUTO_U);
 
       case VariableData::MT_POINTER:
-         DO_P_POINTER(GET_POINTER32I,
-                SETOP_ADD_POINTER32U,
-                SETOP_SUB_POINTER32U);
-         break;
+         DO_P_POINTER(GET_PTR, ADD_PTR_U, SUB_PTR_U);
 
       case VariableData::MT_REGISTER:
          switch (src->sectionR)
          {
          case VariableData::SR_LOCAL:
-            DO_P_ADDR(GET_REGISTER32I,
-                SETOP_ADD_REGISTER32U,
-                SETOP_SUB_REGISTER32U);
+            DO_P_ADDR(GET_REG, ADD_REG_U, SUB_REG_U);
 
          case VariableData::SR_MAP:
-            DO_P_ADDR(ACS_GET_MAPREGISTER,
-                ACS_SETOP_ADD_MAPREGISTER,
-                ACS_SETOP_SUB_MAPREGISTER);
+            DO_P_ADDR(GET_MAPREG, ADD_MAPREG_U, SUB_MAPREG_U);
 
          case VariableData::SR_WORLD:
-            DO_P_ADDR(ACS_GET_WORLDREGISTER,
-                ACS_SETOP_ADD_WORLDREGISTER,
-                ACS_SETOP_SUB_WORLDREGISTER);
+            DO_P_ADDR(GET_WLDREG, ADD_WLDREG_U, SUB_WLDREG_U);
 
          case VariableData::SR_GLOBAL:
-            DO_P_ADDR(ACSE_GET_GLOBALREGISTER,
-                ACSE_SETOP_ADD_GLOBALREGISTER,
-                ACSE_SETOP_SUB_GLOBALREGISTER);
+            DO_P_ADDR(GET_GBLREG, ADD_GBLREG_U, SUB_GBLREG_U);
       }
       break;
 
@@ -625,29 +543,15 @@ private:
          switch (src->sectionRA)
          {
          case VariableData::SRA_MAP:
-            DO_P_OFFSET(ACSE_GET_MAPARRAY,
-                  ACSE_SETOP_ADD_MAPARRAY,
-                  ACSE_SETOP_SUB_MAPARRAY);
-            break;
+            DO_P_OFFSET(GET_MAPARR, ADD_MAPARR_U, SUB_MAPARR_U);
 
          case VariableData::SRA_WORLD:
-            DO_P_OFFSET(ACSE_GET_WORLDARRAY,
-                  ACSE_SETOP_ADD_WORLDARRAY,
-                  ACSE_SETOP_SUB_WORLDARRAY);
-            break;
+            DO_P_OFFSET(GET_WLDARR, ADD_WLDARR_U, SUB_WLDARR_U);
 
          case VariableData::SRA_GLOBAL:
-            DO_P_OFFSET(ACSE_GET_GLOBALARRAY,
-                  ACSE_SETOP_ADD_GLOBALARRAY,
-                  ACSE_SETOP_SUB_GLOBALARRAY);
-            break;
+            DO_P_OFFSET(GET_GBLARR, ADD_GBLARR_U, SUB_GBLARR_U);
       }
       break;
-
-      case VariableData::MT_STATIC:
-         DO_P_ADDR(GET_STATIC32I,
-             SETOP_ADD_STATIC32U,
-             SETOP_SUB_STATIC32U);
 
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:

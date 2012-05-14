@@ -493,8 +493,8 @@ void SourceExpression::make_objects_memcpy_cast
          goto case_src_bad;
 
       case VariableType::BT_BIT_HRD:
-         objects->addToken(OCODE_LOGICAL_NOT32I);
-         objects->addToken(OCODE_LOGICAL_NOT32I);
+         objects->addToken(OCODE_NOT_STK_I);
+         objects->addToken(OCODE_NOT_STK_I);
          break;
 
       case VariableType::BT_BIT_SFT:
@@ -523,7 +523,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FIX:
       case VariableType::BT_FIX_L:
       case VariableType::BT_FIX_LL:
-         objects->addToken(OCODE_CONVERT_32I_32F);
+         objects->addToken(OCODE_CAST_STK_I2X);
          break;
 
       case VariableType::BT_INT_LL:
@@ -538,14 +538,14 @@ void SourceExpression::make_objects_memcpy_cast
          std::string label = context->makeLabel();
          std::string labelPos = label + "_pos";
          std::string labelEnd = label + "_end";
-         objects->addToken(OCODE_STACK_DUP32);
-         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
-         objects->addToken(OCODE_BITWISE_AND32);
-         objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelPos));
-         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0xFFFFFFFF));
-         objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelEnd));
+         objects->addToken(OCODE_STK_COPY);
+         objects->addToken(OCODE_GET_IMM, objects->getValue(0x80000000));
+         objects->addToken(OCODE_AND_STK_I);
+         objects->addToken(OCODE_JMP_NIL, objects->getValue(labelPos));
+         objects->addToken(OCODE_GET_IMM, objects->getValue(0xFFFFFFFF));
+         objects->addToken(OCODE_JMP_IMM, objects->getValue(labelEnd));
          objects->addLabel(labelPos);
-         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x00000000));
+         objects->addToken(OCODE_GET_IMM, objects->getValue(0x00000000));
          objects->addLabel(labelEnd);
       }
          break;
@@ -591,8 +591,8 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
       case VariableType::BT_SCRIPT:
-         objects->addToken(OCODE_LOGICAL_NOT32I);
-         objects->addToken(OCODE_LOGICAL_NOT32I);
+         objects->addToken(OCODE_NOT_STK_I);
+         objects->addToken(OCODE_NOT_STK_I);
          break;
 
       case VariableType::BT_BIT_SFT:
@@ -603,15 +603,15 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FIX:
       case VariableType::BT_FIX_L:
       case VariableType::BT_FIX_LL:
-         objects->addToken(OCODE_LOGICAL_NOT32F);
-         objects->addToken(OCODE_LOGICAL_NOT32F);
-         objects->addToken(OCODE_CONVERT_32I_32F);
+         objects->addToken(OCODE_NOT_STK_X);
+         objects->addToken(OCODE_NOT_STK_X);
+         objects->addToken(OCODE_CAST_STK_I2X);
          break;
 
       case VariableType::BT_INT_LL:
       case VariableType::BT_UNS_LL:
-         objects->addToken(OCODE_LOGICAL_NOT32I);
-         objects->addToken(OCODE_LOGICAL_NOT32I);
+         objects->addToken(OCODE_NOT_STK_I);
+         objects->addToken(OCODE_NOT_STK_I);
          objects->addTokenPushZero();
          break;
       }
@@ -638,8 +638,8 @@ void SourceExpression::make_objects_memcpy_cast
          goto case_src_bad;
 
       case VariableType::BT_BIT_HRD:
-         objects->addToken(OCODE_LOGICAL_NOT32F);
-         objects->addToken(OCODE_LOGICAL_NOT32F);
+         objects->addToken(OCODE_NOT_STK_I);
+         objects->addToken(OCODE_NOT_STK_I);
          break;
 
       case VariableType::BT_BIT_SFT:
@@ -668,7 +668,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
       case VariableType::BT_SCRIPT:
-         objects->addToken(OCODE_CONVERT_32F_32I);
+         objects->addToken(OCODE_CAST_STK_X2I);
          break;
 
       case VariableType::BT_INT_LL:
@@ -677,14 +677,14 @@ void SourceExpression::make_objects_memcpy_cast
          std::string label = context->makeLabel();
          std::string labelPos = label + "_pos";
          std::string labelEnd = label + "_end";
-         objects->addToken(OCODE_STACK_DUP32);
-         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x80000000));
-         objects->addToken(OCODE_BITWISE_AND32);
-         objects->addToken(OCODE_BRANCH_ZERO, objects->getValue(labelPos));
-         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0xFFFFFFFF));
-         objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelEnd));
+         objects->addToken(OCODE_STK_COPY);
+         objects->addToken(OCODE_GET_IMM, objects->getValue(0x80000000));
+         objects->addToken(OCODE_AND_STK_I);
+         objects->addToken(OCODE_JMP_NIL, objects->getValue(labelPos));
+         objects->addToken(OCODE_GET_IMM, objects->getValue(0xFFFFFFFF));
+         objects->addToken(OCODE_JMP_IMM, objects->getValue(labelEnd));
          objects->addLabel(labelPos);
-         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0x00000000));
+         objects->addToken(OCODE_GET_IMM, objects->getValue(0x00000000));
          objects->addLabel(labelEnd);
       }
          break;
@@ -713,11 +713,11 @@ void SourceExpression::make_objects_memcpy_cast
          goto case_src_bad;
 
       case VariableType::BT_BIT_HRD:
-         objects->addToken(OCODE_LOGICAL_IOR32I);
+         objects->addToken(OCODE_LOGIOR_STK_I);
          break;
 
       case VariableType::BT_BIT_SFT:
-         objects->addToken(OCODE_BITWISE_IOR32);
+         objects->addToken(OCODE_IOR_STK_I);
          break;
 
       case VariableType::BT_CHR:
@@ -738,7 +738,7 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
       case VariableType::BT_SCRIPT:
-         objects->addToken(OCODE_STACK_DROP32);
+         objects->addToken(OCODE_STK_DROP);
          break;
 
       case VariableType::BT_FIX_HH:
@@ -748,8 +748,8 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FIX_LL:
          // What about the high byte, you ask? If the high byte is meaningful,
          // we've overflowed the fixed anyway. Therefore: Undefined behavior.
-         objects->addToken(OCODE_STACK_DROP32);
-         objects->addToken(OCODE_CONVERT_32I_32F);
+         objects->addToken(OCODE_STK_DROP);
+         objects->addToken(OCODE_CAST_STK_I2X);
          break;
 
       case VariableType::BT_INT_LL:
@@ -767,8 +767,8 @@ void SourceExpression::make_objects_memcpy_cast
          goto case_src_int;
 
       // Special handling for auto*->static*.
-      objects->addToken(OCODE_ADDR_AUTO, objects->getValue(0));
-      objects->addToken(OCODE_ADD32U);
+      objects->addToken(OCODE_GET_AUTPTR, objects->getValue(0));
+      objects->addToken(OCODE_ADD_STK_U);
       break;
    }
 

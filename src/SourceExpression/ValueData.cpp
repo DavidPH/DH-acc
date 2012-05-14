@@ -121,7 +121,7 @@ void SourceExpression_ValueData::virtual_makeObjects
    {
       // FIXME: Should be based on type.
       if (garbage)
-         objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0xDEADBEEF));
+         objects->addToken(OCODE_GET_IMM, objects->getValue(0xDEADBEEF));
       else
          objects->addTokenPushZero();
    }

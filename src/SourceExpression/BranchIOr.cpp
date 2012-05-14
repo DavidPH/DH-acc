@@ -101,7 +101,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    {
       exprL->makeObjects(objects, tmp);
       objects->setPosition(pos);
-      objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelEnd));
+      objects->addToken(OCODE_JMP_TRU, objects->getValue(labelEnd));
 
       exprR->makeObjects(objects, dst);
       objects->setPosition(pos);
@@ -114,17 +114,17 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
       exprL->makeObjects(objects, tmp);
       objects->setPosition(pos);
-      objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(label1));
+      objects->addToken(OCODE_JMP_TRU, objects->getValue(label1));
 
       exprR->makeObjects(objects, tmp);
       objects->setPosition(pos);
-      objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(label1));
+      objects->addToken(OCODE_JMP_TRU, objects->getValue(label1));
 
-      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(0));
-      objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelEnd));
+      objects->addToken(OCODE_GET_IMM, objects->getValue(0));
+      objects->addToken(OCODE_JMP_IMM, objects->getValue(labelEnd));
 
       objects->addLabel(label1);
-      objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(1));
+      objects->addToken(OCODE_GET_IMM, objects->getValue(1));
 
       objects->addLabel(labelEnd);
 

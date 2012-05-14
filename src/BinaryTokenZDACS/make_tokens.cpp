@@ -35,15 +35,81 @@
 // Macros                                                                     |
 //
 
-#define PUSH_TOKEN_ADD_ARG0()                 \
-   if (object->getArg(0)->resolveInt())       \
-   {                                          \
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1); \
-      PUSH_TOKEN(BCODE_ADD);                  \
-   }                                          \
-   else (void)0
+//
+// CASE_ADDR_BINOP
+//
+#define CASE_ADDR_BINOP(OP,TO,TB)      \
+case OCODE_##OP##_STATIC##TO:          \
+   PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1); \
+   PUSH_TOKEN(BCODE_STK_SWAP);         \
+   args.push_back(indexAddr);          \
+   PUSH_TOKEN(BCODE_##OP##_GBLARR##TB);\
+   break;                              \
+                                       \
+case OCODE_##OP##_AUTO##TO:            \
+   args.push_back(indexStack);         \
+   PUSH_TOKEN(BCODE_GET_WLDREG);       \
+   PUSH_TOKEN_ADD_ARG0();              \
+   PUSH_TOKEN(BCODE_STK_SWAP);         \
+   args.push_back(indexAddr);          \
+   PUSH_TOKEN(BCODE_##OP##_GBLARR##TB);\
+   break;                              \
+                                       \
+case OCODE_##OP##_PTR##TO:             \
+   PUSH_TOKEN_ADD_ARG0();              \
+   PUSH_TOKEN(BCODE_STK_SWAP);         \
+   args.push_back(indexAddr);          \
+   PUSH_TOKEN(BCODE_##OP##_GBLARR##TB);\
+   break
 
-#define TOKEN_CLASS BinaryTokenZDACS
+//
+// CASE_ADDR_UNAOP
+//
+#define CASE_ADDR_UNAOP(OP,TO,TB)      \
+case OCODE_##OP##_STATIC##TO:          \
+   PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1); \
+   args.push_back(indexAddr);          \
+   PUSH_TOKEN(BCODE_##OP##_GBLARR##TB);\
+   break;                              \
+                                       \
+case OCODE_##OP##_AUTO##TO:            \
+   args.push_back(indexStack);         \
+   PUSH_TOKEN(BCODE_GET_WLDREG);       \
+   PUSH_TOKEN_ADD_ARG0();              \
+   args.push_back(indexAddr);          \
+   PUSH_TOKEN(BCODE_##OP##_GBLARR##TB);\
+   break;                              \
+                                       \
+case OCODE_##OP##_PTR##TO:             \
+   PUSH_TOKEN_ADD_ARG0();              \
+   args.push_back(indexAddr);          \
+   PUSH_TOKEN(BCODE_##OP##_GBLARR##TB);\
+   break
+
+//
+// CASE_REMAP_REGS
+//
+#define CASE_REMAP_REGS(OP,TO,TB)             \
+CASE_REMAP(OP##_GBLREG##TO, OP##_GBLREG##TB); \
+CASE_REMAP(OP##_MAPARR##TO, OP##_MAPARR##TB); \
+CASE_REMAP(OP##_WLDARR##TO, OP##_WLDARR##TB); \
+CASE_REMAP(OP##_GBLARR##TO, OP##_GBLARR##TB); \
+CASE_REMAP(OP##_TEMP##TO,   OP##_REG##TB)
+
+//
+// CAS_REMAP_REG2
+//
+#define CASE_REMAP_REG2(OP,TO,TB) \
+CASE_REMAP_REGS(OP,TO,TB);        \
+CASE_REMAP(OP##_REG##TO, OP##_REG##TB)
+
+#define PUSH_TOKEN_ADD_ARG0()          \
+if (object->getArg(0)->resolveInt())   \
+{                                      \
+   PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1); \
+   PUSH_TOKEN(BCODE_ADD_STK);          \
+}                                      \
+else (void)0
 
 
 //----------------------------------------------------------------------------|
@@ -80,57 +146,132 @@ void BinaryTokenZDACS::make_tokens
 
    switch (object->code)
    {
-   // Direct Mappings
+   BINTOKACS_TOKENS_MAP_ALL();
+   BINTOKACS_TOKENS_TRAN_ALL();
 
+   // Operators
+   CASE_ADDR_BINOP(ADD, _I,);
+   CASE_ADDR_BINOP(ADD, _U,);
+   CASE_ADDR_BINOP(ADD, _X,);
+   CASE_REMAP_REGS(ADD, _I,);
+   CASE_REMAP_REGS(ADD, _U,);
+   CASE_REMAP_REGS(ADD, _X,);
 
-   BINTOKACS_TOKENS_MAP_ALL_ALL();
+   CASE_ADDR_BINOP(AND, _I,);
+   CASE_ADDR_BINOP(AND, _U,);
+   CASE_ADDR_BINOP(AND, _X,);
+   CASE_REMAP_REG2(AND, _I,);
+   CASE_REMAP_REG2(AND, _U,);
+   CASE_REMAP_REG2(AND, _X,);
 
-   // Arithmetic
-   CASE_REMAP(DIV32F, DIV_FIXED);
-   CASE_REMAP(MUL32F, MUL_FIXED);
+   CASE_ADDR_UNAOP(DEC, _I,);
+   CASE_ADDR_UNAOP(DEC, _U,);
+   CASE_REMAP_REGS(DEC, _I,);
+   CASE_REMAP_REGS(DEC, _U,);
 
-   // Bitwise
-   CASE_REMAP_PRE(BITWISE, NOT32, NOT);
+   CASE_REMAP(DIV_STK_X, DIV_STK_X);
+   CASE_ADDR_BINOP(DIV, _I,);
+   CASE_REMAP_REGS(DIV, _I,);
 
-   // Branching
+   CASE_ADDR_UNAOP(INC, _I,);
+   CASE_ADDR_UNAOP(INC, _U,);
+   CASE_REMAP_REGS(INC, _I,);
+   CASE_REMAP_REGS(INC, _U,);
 
-   // Comparison
+   CASE_ADDR_BINOP(IOR, _I,);
+   CASE_ADDR_BINOP(IOR, _U,);
+   CASE_ADDR_BINOP(IOR, _X,);
+   CASE_REMAP_REG2(IOR, _I,);
+   CASE_REMAP_REG2(IOR, _U,);
+   CASE_REMAP_REG2(IOR, _X,);
 
-   // Logical
+   CASE_ADDR_BINOP(LSH, _I,);
+   CASE_ADDR_BINOP(LSH, _U,);
+   CASE_ADDR_BINOP(LSH, _X,);
+   CASE_REMAP_REG2(LSH, _I,);
+   CASE_REMAP_REG2(LSH, _U,);
+   CASE_REMAP_REG2(LSH, _X,);
+
+   CASE_ADDR_BINOP(MOD, _I,);
+   CASE_ADDR_BINOP(MOD, _X,);
+   CASE_REMAP_REGS(MOD, _I,);
+   CASE_REMAP_REGS(MOD, _X,);
+
+   CASE_REMAP(MUL_STK_X, MUL_STK_X);
+   CASE_ADDR_BINOP(MUL, _I,);
+   CASE_ADDR_BINOP(MUL, _U,);
+   CASE_REMAP_REGS(MUL, _I,);
+   CASE_REMAP_REGS(MUL, _U,);
+
+   CASE_ADDR_BINOP(RSH, _I,);
+   CASE_ADDR_BINOP(RSH, _X,);
+   CASE_REMAP_REG2(RSH, _I,);
+   CASE_REMAP_REG2(RSH, _X,);
+
+   CASE_ADDR_BINOP(SUB, _I,);
+   CASE_ADDR_BINOP(SUB, _U,);
+   CASE_ADDR_BINOP(SUB, _X,);
+   CASE_REMAP_REGS(SUB, _I,);
+   CASE_REMAP_REGS(SUB, _U,);
+   CASE_REMAP_REGS(SUB, _X,);
+
+   CASE_ADDR_BINOP(XOR, _I,);
+   CASE_ADDR_BINOP(XOR, _U,);
+   CASE_ADDR_BINOP(XOR, _X,);
+   CASE_REMAP_REG2(XOR, _I,);
+   CASE_REMAP_REG2(XOR, _U,);
+   CASE_REMAP_REG2(XOR, _X,);
+
+   CASE_REMAP(INV_STK_I, INV_STK);
+   CASE_REMAP(INV_STK_U, INV_STK);
+   CASE_REMAP(INV_STK_X, INV_STK);
+
+   // Jumps
+   case OCODE_JMP_TAB:
+      if ((args = object->args).size() % 2)
+         ERROR_P("uneven OCODE_BRANCH_TABLE");
+      PUSH_TOKEN(BCODE__JMP_TAB);
+      break;
 
    // Stack-ops.
-   CASE_REMAP_PRE(STACK, DUP32,  DUP);
-   CASE_REMAP_PRE(STACK, SWAP32, SWAP);
+   CASE_REMAP(STK_COPY, STK_COPY);
+   CASE_REMAP(STK_SWAP, STK_SWAP);
 
    // Trigonometry
-   CASE_REMAP_PRE(TRIG, COS32F, COS);
-   CASE_REMAP_PRE(TRIG, SIN32F, SIN);
+   CASE_REMAP(TRIG_COS_X, TRIG_COS);
+   CASE_REMAP(TRIG_SIN_X, TRIG_SIN);
 
    // Variable Address
+   case OCODE_GET_AUTPTR:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WLDREG);
+      PUSH_TOKEN_ADD_ARG0();
+      break;
+
+   case OCODE_ADD_AUTPTR_IMM:
+      PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1);
+   case OCODE_ADD_AUTPTR:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_ADD_WLDREG);
+      break;
+
+   case OCODE_SUB_AUTPTR_IMM:
+      PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1);
+   case OCODE_SUB_AUTPTR:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_SUB_WLDREG);
+      break;
 
    // Variable Get
-   CASE_REMAP_PRE(GET, TEMP, REGISTER);
+   CASE_ADDR_UNAOP(GET,,);
+   CASE_REMAP_REGS(GET,,);
 
    // Variable Set
-   CASE_REMAP_PRE(SET, TEMP, REGISTER);
-
-   // Variable Set Op
-   CASE_REMAP_PRE(SETOP, AND_REGISTER32, AND_REGISTER);
-   CASE_REMAP_PRE(SETOP, IOR_REGISTER32, IOR_REGISTER);
-   CASE_REMAP_PRE(SETOP, LSH_REGISTER32, LSH_REGISTER);
-   CASE_REMAP_PRE(SETOP, RSH_REGISTER32, RSH_REGISTER);
-   CASE_REMAP_PRE(SETOP, XOR_REGISTER32, XOR_REGISTER);
-
-   CASE_REMAP_PRE(SETOP, ADD_TEMP, ADD_REGISTER);
-   CASE_REMAP_PRE(SETOP, AND_TEMP, AND_REGISTER);
-   CASE_REMAP_PRE(SETOP, DEC_TEMP, DEC_REGISTER);
-   CASE_REMAP_PRE(SETOP, INC_TEMP, INC_REGISTER);
-   CASE_REMAP_PRE(SETOP, IOR_TEMP, IOR_REGISTER);
-   CASE_REMAP_PRE(SETOP, SUB_TEMP, SUB_REGISTER);
-   CASE_REMAP_PRE(SETOP, XOR_TEMP, XOR_REGISTER);
+   CASE_ADDR_BINOP(SET,,);
+   CASE_REMAP_REGS(SET,,);
 
    // Miscellaneous
-   CASE_REMAP_PRE(MISC, NATIVE, NATIVE);
+   CASE_REMAP(NATIVE, NATIVE);
 
    // ACS
 
@@ -166,10 +307,6 @@ void BinaryTokenZDACS::make_tokens
    CASE_MAP_ACSE(GAME_SET_MUSICLOCAL_IMM);
    CASE_MAP_ACSE(GAME_SET_MUSICST);
    CASE_MAP_ACSE(GAME_SET_SKY);
-   CASE_MAP_ACSE(GET_GLOBALARRAY);
-   CASE_MAP_ACSE(GET_GLOBALREGISTER);
-   CASE_MAP_ACSE(GET_MAPARRAY);
-   CASE_MAP_ACSE(GET_WORLDARRAY);
    CASE_MAP_ACSE(LINE_GET_OFFSETY);
    CASE_MAP_ACSE(LTAG_SET_BLOCKMONSTER);
    CASE_MAP_ACSE(MISC_PLAYMOVIE);
@@ -215,68 +352,6 @@ void BinaryTokenZDACS::make_tokens
    CASE_MAP_ACSE(SCREEN_GET_WIDTH);
    CASE_MAP_ACSE(SCREEN_SET_HUDSIZE);
    CASE_MAP_ACSE(SCRIPT_SETRETURN);
-   CASE_MAP_ACSE(SET_GLOBALARRAY);
-   CASE_MAP_ACSE(SET_GLOBALREGISTER);
-   CASE_MAP_ACSE(SET_MAPARRAY);
-   CASE_MAP_ACSE(SET_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_ADD_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_ADD_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_ADD_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_ADD_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_AND_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_AND_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_AND_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_AND_MAPREGISTER);
-   CASE_MAP_ACSE(SETOP_AND_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_AND_WORLDREGISTER);
-   CASE_MAP_ACSE(SETOP_DEC_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_DEC_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_DEC_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_DEC_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_DIV_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_DIV_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_DIV_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_DIV_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_INC_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_INC_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_INC_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_INC_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_IOR_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_IOR_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_IOR_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_IOR_MAPREGISTER);
-   CASE_MAP_ACSE(SETOP_IOR_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_IOR_WORLDREGISTER);
-   CASE_MAP_ACSE(SETOP_LSH_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_LSH_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_LSH_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_LSH_MAPREGISTER);
-   CASE_MAP_ACSE(SETOP_LSH_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_LSH_WORLDREGISTER);
-   CASE_MAP_ACSE(SETOP_MOD_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_MOD_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_MOD_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_MOD_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_MUL_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_MUL_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_MUL_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_MUL_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_RSH_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_RSH_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_RSH_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_RSH_MAPREGISTER);
-   CASE_MAP_ACSE(SETOP_RSH_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_RSH_WORLDREGISTER);
-   CASE_MAP_ACSE(SETOP_SUB_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_SUB_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_SUB_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_SUB_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_XOR_GLOBALARRAY);
-   CASE_MAP_ACSE(SETOP_XOR_GLOBALREGISTER);
-   CASE_MAP_ACSE(SETOP_XOR_MAPARRAY);
-   CASE_MAP_ACSE(SETOP_XOR_MAPREGISTER);
-   CASE_MAP_ACSE(SETOP_XOR_WORLDARRAY);
-   CASE_MAP_ACSE(SETOP_XOR_WORLDREGISTER);
    CASE_MAP_ACSE(SOUND_AMBIENTLOCAL);
    CASE_MAP_ACSE(SOUND_THING);
    CASE_MAP_ACSE(SPAWN_POINT);
@@ -331,294 +406,22 @@ void BinaryTokenZDACS::make_tokens
    CASE_MAP_ACSP(END_HUD_BOLD);
    CASE_MAP_ACSP(END_LOG);
    CASE_MAP_ACSP(END_OPT);
-   CASE_MAP_ACSP(END_STRING);
+   CASE_MAP_ACSP(END_STR);
    CASE_MAP_ACSP(KEYBIND);
-   CASE_REMAP_ACSP(NUM_BIN32I, NUM_BIN); // WARNING
-   CASE_REMAP_ACSP(NUM_BIN32U, NUM_BIN);
-   CASE_REMAP_ACSP(NUM_DEC32F, FIXED);
-   CASE_REMAP_ACSP(NUM_HEX32I, NUM_HEX); // WARNING
-   CASE_REMAP_ACSP(NUM_HEX32U, NUM_HEX);
+   CASE_REMAP_ACSP(NUM_BIN_U, NUM_BIN);
+   CASE_REMAP_ACSP(NUM_DEC_X, NUM_DEC_X);
+   CASE_REMAP_ACSP(NUM_HEX_U, NUM_HEX);
    CASE_MAP_ACSP(PLAYER_NAME);
    CASE_MAP_ACSP(SET_FONT);
    CASE_MAP_ACSP(SET_FONT_IMM);
    CASE_MAP_ACSP(START_OPT);
-   CASE_MAP_ACSP(STRING_GLOBALARRAY);
-   CASE_MAP_ACSP(STRING_GLOBALRANGE);
-   CASE_MAP_ACSP(STRING_LOCALIZED);
-   CASE_MAP_ACSP(STRING_MAPARRAY);
-   CASE_MAP_ACSP(STRING_MAPRANGE);
-   CASE_MAP_ACSP(STRING_WORLDARRAY);
-   CASE_MAP_ACSP(STRING_WORLDRANGE);
-
-
-
-   // Translations
-
-
-   BINTOKACS_TOKENS_TRAN_ALL();
-
-   // Branching
-
-   case OCODE_BRANCH_TABLE:
-      args = object->args;
-      if (args.size() % 2)
-         ERROR_P("uneven OCODE_BRANCH_TABLE");
-      PUSH_TOKEN(BCODE__BRANCH_TABLE);
-      break;
-
-   // Variable Address
-
-   case OCODE_ADDR_AUTO:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      PUSH_TOKEN_ADD_ARG0();
-      break;
-
-   case OCODE_ADDR_STACK_ADD_IMM:
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-   case OCODE_ADDR_STACK_ADD:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_SETOP_ADD_WORLDREGISTER);
-      break;
-
-   case OCODE_ADDR_STACK_SUB_IMM:
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-   case OCODE_ADDR_STACK_SUB:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_SETOP_SUB_WORLDREGISTER);
-      break;
-
-   // Variable Get
-
-   case OCODE_GET_AUTO32F:
-   case OCODE_GET_AUTO32I:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      PUSH_TOKEN_ADD_ARG0();
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_GET_GLOBALARRAY);
-      break;
-
-   case OCODE_GET_POINTER32F:
-   case OCODE_GET_POINTER32I:
-      PUSH_TOKEN_ADD_ARG0();
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_GET_GLOBALARRAY);
-      break;
-
-   case OCODE_GET_STATIC32F:
-   case OCODE_GET_STATIC32I:
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_GET_GLOBALARRAY);
-      break;
-
-   // Variable Set
-
-   case OCODE_SET_AUTO32F:
-   case OCODE_SET_AUTO32I:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SET_GLOBALARRAY);
-      break;
-
-   case OCODE_SET_POINTER32F:
-   case OCODE_SET_POINTER32I:
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SET_GLOBALARRAY);
-      break;
-
-   case OCODE_SET_STATIC32F:
-   case OCODE_SET_STATIC32I:
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SET_GLOBALARRAY);
-      break;
-
-   // Variable Set Op
-
-      // ADD
-   case OCODE_SETOP_ADD_AUTO32F:
-   case OCODE_SETOP_ADD_AUTO32I:
-   case OCODE_SETOP_ADD_AUTO32U:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_ADD_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_ADD_POINTER32F:
-   case OCODE_SETOP_ADD_POINTER32I:
-   case OCODE_SETOP_ADD_POINTER32U:
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_ADD_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_ADD_STATIC32F:
-   case OCODE_SETOP_ADD_STATIC32I:
-   case OCODE_SETOP_ADD_STATIC32U:
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_ADD_GLOBALARRAY);
-      break;
-
-      // AND
-   case OCODE_SETOP_AND_AUTO32:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_AND_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_AND_POINTER32:
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_AND_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_AND_STATIC32:
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_AND_GLOBALARRAY);
-      break;
-
-      // DEC
-   case OCODE_SETOP_DEC_AUTO32I:
-   case OCODE_SETOP_DEC_AUTO32U:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      PUSH_TOKEN_ADD_ARG0();
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_DEC_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_DEC_POINTER32I:
-   case OCODE_SETOP_DEC_POINTER32U:
-      PUSH_TOKEN_ADD_ARG0();
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_DEC_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_DEC_STATIC32I:
-   case OCODE_SETOP_DEC_STATIC32U:
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_DEC_GLOBALARRAY);
-      break;
-
-      // INC
-   case OCODE_SETOP_INC_AUTO32I:
-   case OCODE_SETOP_INC_AUTO32U:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      PUSH_TOKEN_ADD_ARG0();
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_INC_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_INC_POINTER32I:
-   case OCODE_SETOP_INC_POINTER32U:
-      PUSH_TOKEN_ADD_ARG0();
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_INC_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_INC_STATIC32I:
-   case OCODE_SETOP_INC_STATIC32U:
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_INC_GLOBALARRAY);
-      break;
-
-      // IOR
-   case OCODE_SETOP_IOR_AUTO32:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_IOR_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_IOR_POINTER32:
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_IOR_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_IOR_STATIC32:
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_IOR_GLOBALARRAY);
-      break;
-
-      // MUL
-   case OCODE_SETOP_MUL_AUTO32I:
-   case OCODE_SETOP_MUL_AUTO32U:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_MUL_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_MUL_POINTER32I:
-   case OCODE_SETOP_MUL_POINTER32U:
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_MUL_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_MUL_STATIC32I:
-   case OCODE_SETOP_MUL_STATIC32U:
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_MUL_GLOBALARRAY);
-      break;
-
-      // IOR
-   case OCODE_SETOP_XOR_AUTO32:
-      args.push_back(indexStack);
-      PUSH_TOKEN(BCODE_GET_WORLDREGISTER);
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_XOR_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_XOR_POINTER32:
-      PUSH_TOKEN_ADD_ARG0();
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_XOR_GLOBALARRAY);
-      break;
-
-   case OCODE_SETOP_XOR_STATIC32:
-      PUSH_TOKEN_ARGS1(BCODE_GET_LITERAL, 1);
-      PUSH_TOKEN(BCODE_STACK_SWAP);
-      args.push_back(indexAddr);
-      PUSH_TOKEN(BCODE_SETOP_XOR_GLOBALARRAY);
-      break;
+   CASE_MAP_ACSP(STR_GBLARR);
+   CASE_MAP_ACSP(STR_GBLRNG);
+   CASE_MAP_ACSP(STR_LOCALIZED);
+   CASE_MAP_ACSP(STR_MAPARR);
+   CASE_MAP_ACSP(STR_MAPRNG);
+   CASE_MAP_ACSP(STR_WLDARR);
+   CASE_MAP_ACSP(STR_WLDRNG);
 
    case OCODE_NONE:
    default:

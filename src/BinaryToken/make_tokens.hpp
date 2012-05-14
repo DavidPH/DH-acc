@@ -24,9 +24,6 @@
 #ifndef HPP_make_tokens__BinaryToken_
 #define HPP_make_tokens__BinaryToken_
 
-// Needed definitions:
-// TOKEN_CLASS - Define to the name of the BinaryToken class.
-
 #define PUSH_ARGS2(START,STOP)       \
    for (int i(START); i < STOP; ++i) \
       args.push_back(object->getArg(i))
@@ -34,9 +31,9 @@
 #define PUSH_ARGS1(STOP) \
    PUSH_ARGS2(0, STOP)
 
-#define PUSH_TOKEN(BCODE)                                           \
-   instructions->push_back(TOKEN_CLASS(BCODE, pos, *labels, args)); \
-   args.clear();                                                    \
+#define PUSH_TOKEN(BCODE)                                    \
+   instructions->push_back(This(BCODE, pos, *labels, args)); \
+   args.clear();                                             \
    labels = &nolabels;
 
 #define PUSH_TOKEN_ARGS1(BCODE,STOP) \

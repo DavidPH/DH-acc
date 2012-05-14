@@ -212,7 +212,7 @@ private:
          ERROR_NP("expected pointer got %s", make_string(argType).c_str());
 
       argExpr->makeObjects(objects, VariableData::create_stack(argSize));
-      objects->addToken(OCODE_ACSP_NUM_HEX32U);
+      objects->addToken(OCODE_ACSP_NUM_HEX_U);
    }
 
    //
@@ -230,7 +230,7 @@ private:
       if (argBT == VariableType::BT_STR)
       {
          argExpr->makeObjects(objects, tmp);
-         objects->addToken(OCODE_ACSP_STRING);
+         objects->addToken(OCODE_ACSP_STR);
          return;
       }
 
@@ -261,7 +261,7 @@ private:
       {
       case STORE_STATIC:
          makeInt(objects, option_addr_array);
-         objects->addToken(OCODE_ACSP_STRING_GLOBALARRAY);
+         objects->addToken(OCODE_ACSP_STR_GBLARR);
          break;
 
       case STORE_AUTO:
@@ -275,21 +275,21 @@ private:
          ERROR_NP("cannot %%s register-pointer");
 
       case STORE_MAPARRAY:
-         objects->addToken(OCODE_GET_LITERAL32I,
+         objects->addToken(OCODE_GET_IMM,
             objects->getValue(argType->getReturn()->getStoreArea()));
-         objects->addToken(OCODE_ACSP_STRING_MAPARRAY);
+         objects->addToken(OCODE_ACSP_STR_MAPARR);
          break;
 
       case STORE_WORLDARRAY:
-         objects->addToken(OCODE_GET_LITERAL32I,
+         objects->addToken(OCODE_GET_IMM,
             objects->getValue(argType->getReturn()->getStoreArea()));
-         objects->addToken(OCODE_ACSP_STRING_WORLDARRAY);
+         objects->addToken(OCODE_ACSP_STR_WLDARR);
          break;
 
       case STORE_GLOBALARRAY:
-         objects->addToken(OCODE_GET_LITERAL32I,
+         objects->addToken(OCODE_GET_IMM,
             objects->getValue(argType->getReturn()->getStoreArea()));
-         objects->addToken(OCODE_ACSP_STRING_GLOBALARRAY);
+         objects->addToken(OCODE_ACSP_STR_GBLARR);
          break;
       }
    }
@@ -319,7 +319,7 @@ private:
          if (*c == '%' && *++c != '%')
          {
             makeString(objects, string);
-            objects->addToken(OCODE_ACSP_STRING);
+            objects->addToken(OCODE_ACSP_STR);
 
             string.clear();
 
@@ -332,7 +332,7 @@ private:
 
             case 'L':
                makeExpr(objects, VariableType::get_bt_int());
-               objects->addToken(OCODE_ACSP_STRING_LOCALIZED);
+               objects->addToken(OCODE_ACSP_STR_LOCALIZED);
                continue;
 
             case 'N':
@@ -342,7 +342,7 @@ private:
 
             case 'X':
                makeExpr(objects, VariableType::get_bt_fix());
-               objects->addToken(OCODE_ACSP_NUM_DEC32F);
+               objects->addToken(OCODE_ACSP_NUM_DEC_X);
                continue;
 
             case 'c':
@@ -352,7 +352,7 @@ private:
 
             case 'i':
                makeExpr(objects, VariableType::get_bt_int());
-               objects->addToken(OCODE_ACSP_NUM_DEC32I);
+               objects->addToken(OCODE_ACSP_NUM_DEC_I);
                continue;
 
             case 'p':
@@ -365,7 +365,7 @@ private:
 
             case 'u':
                makeExpr(objects, VariableType::get_bt_uns());
-               objects->addToken(OCODE_ACSP_NUM_DEC32U);
+               objects->addToken(OCODE_ACSP_NUM_DEC_U);
                continue;
 
             default:
@@ -384,7 +384,7 @@ private:
       else if (!string.empty())
       {
          makeString(objects, string);
-         objects->addToken(OCODE_ACSP_STRING);
+         objects->addToken(OCODE_ACSP_STR);
       }
 
       // Print options.
@@ -406,7 +406,7 @@ private:
             nextExpr(VariableType::get_bt_int())->makeObject();
          bigsint msgtype = msgtypeObj->resolveInt();
 
-         objects->addToken(OCODE_GET_LITERAL32I, msgtypeObj);
+         objects->addToken(OCODE_GET_IMM, msgtypeObj);
          makeExpr(objects, VariableType::get_bt_int());
          makeExpr(objects, VariableType::get_bt_int());
          makeExpr(objects, VariableType::get_bt_fix());
@@ -469,7 +469,7 @@ private:
          break;
 
       case PT_STRING:
-         objects->addToken(OCODE_ACSP_END_STRING);
+         objects->addToken(OCODE_ACSP_END_STR);
          break;
       }
 

@@ -114,7 +114,7 @@ void SourceExpression_BranchWhile::virtual_makeObjects
    std::string labelContinue = context->getLabelContinue(pos);
 
    if (!postCond)
-      objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(labelContinue));
+      objects->addToken(OCODE_JMP_IMM, objects->getValue(labelContinue));
 
    objects->addLabel(labelBody);
    exprBody->makeObjects(objects, VariableData::create_void(0));
@@ -122,7 +122,7 @@ void SourceExpression_BranchWhile::virtual_makeObjects
    objects->addLabel(labelContinue);
    exprCond->makeObjects(objects, destCond);
    objects->setPosition(pos);
-   objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelBody));
+   objects->addToken(OCODE_JMP_TRU, objects->getValue(labelBody));
 
    objects->addLabel(context->getLabelBreak(pos));
 }

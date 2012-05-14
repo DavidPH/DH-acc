@@ -101,90 +101,90 @@ if (!VariableType::is_bt_integer(btR))     \
 //
 // DO_GET_CASES
 //
-#define DO_GET_CASES(OP,PRE,SUFF,SUFI,SUFU)                                    \
-case VariableType::BT_CHR: objects->addToken(OCODE_##PRE##OP##SUFI); break;    \
-                                                                               \
-case VariableType::BT_FIX_HH: objects->addToken(OCODE_##PRE##OP##SUFF); break; \
-case VariableType::BT_FIX_H: objects->addToken(OCODE_##PRE##OP##SUFF); break;  \
-case VariableType::BT_FIX: objects->addToken(OCODE_##PRE##OP##SUFF); break;    \
-case VariableType::BT_FIX_L: objects->addToken(OCODE_##PRE##OP##SUFF); break;  \
-case VariableType::BT_FIX_LL: objects->addToken(OCODE_##PRE##OP##SUFF); break; \
-                                                                               \
-case VariableType::BT_INT_HH: objects->addToken(OCODE_##PRE##OP##SUFI); break; \
-case VariableType::BT_INT_H: objects->addToken(OCODE_##PRE##OP##SUFI); break;  \
-case VariableType::BT_INT: objects->addToken(OCODE_##PRE##OP##SUFI); break;    \
-case VariableType::BT_INT_L: objects->addToken(OCODE_##PRE##OP##SUFI); break;  \
-                                                                               \
-case VariableType::BT_UNS_HH: objects->addToken(OCODE_##PRE##OP##SUFU); break; \
-case VariableType::BT_UNS_H: objects->addToken(OCODE_##PRE##OP##SUFU); break;  \
-case VariableType::BT_UNS: objects->addToken(OCODE_##PRE##OP##SUFU); break;    \
-case VariableType::BT_UNS_L: objects->addToken(OCODE_##PRE##OP##SUFU); break;  \
-                                                                               \
-case VariableType::BT_PTR: objects->addToken(OCODE_##PRE##OP##SUFU); break;    \
-                                                                               \
+#define DO_GET_CASES(OP)                                                    \
+case VariableType::BT_CHR: objects->addToken(OCODE_##OP##_STK_I); break;    \
+                                                                            \
+case VariableType::BT_FIX_HH: objects->addToken(OCODE_##OP##_STK_X); break; \
+case VariableType::BT_FIX_H: objects->addToken(OCODE_##OP##_STK_X); break;  \
+case VariableType::BT_FIX: objects->addToken(OCODE_##OP##_STK_X); break;    \
+case VariableType::BT_FIX_L: objects->addToken(OCODE_##OP##_STK_X); break;  \
+case VariableType::BT_FIX_LL: objects->addToken(OCODE_##OP##_STK_X); break; \
+                                                                            \
+case VariableType::BT_INT_HH: objects->addToken(OCODE_##OP##_STK_I); break; \
+case VariableType::BT_INT_H: objects->addToken(OCODE_##OP##_STK_I); break;  \
+case VariableType::BT_INT: objects->addToken(OCODE_##OP##_STK_I); break;    \
+case VariableType::BT_INT_L: objects->addToken(OCODE_##OP##_STK_I); break;  \
+                                                                            \
+case VariableType::BT_UNS_HH: objects->addToken(OCODE_##OP##_STK_U); break; \
+case VariableType::BT_UNS_H: objects->addToken(OCODE_##OP##_STK_U); break;  \
+case VariableType::BT_UNS: objects->addToken(OCODE_##OP##_STK_U); break;    \
+case VariableType::BT_UNS_L: objects->addToken(OCODE_##OP##_STK_U); break;  \
+                                                                            \
+case VariableType::BT_PTR: objects->addToken(OCODE_##OP##_STK_U); break;    \
+                                                                            \
 default: ERROR_NP("invalid BT: %s", make_string(type->getBasicType()).c_str())
 
 //
 // DO_GET_SWITCH
 //
-#define DO_GET_SWITCH(OP,PRE,SUFF,SUFI,SUFU) \
-switch (type->getBasicType()) {DO_GET_CASES(OP, PRE, SUFF, SUFI, SUFU);}
+#define DO_GET_SWITCH(OP) \
+switch (type->getBasicType()) {DO_GET_CASES(OP);}
 
 //
 // DO_SET_CASES
 //
-#define DO_SET_CASES(OP,MT,PRE,SUFF,SUFI,SUFU)                                                      \
-case VariableType::BT_CHR: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFI); return true;    \
-                                                                                                    \
-case VariableType::BT_FIX_HH: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFF); return true; \
-case VariableType::BT_FIX_H: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFF); return true;  \
-case VariableType::BT_FIX: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFF); return true;    \
-case VariableType::BT_FIX_L: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFF); return true;  \
-case VariableType::BT_FIX_LL: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFF); return true; \
-                                                                                                    \
-case VariableType::BT_INT_HH: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFI); return true; \
-case VariableType::BT_INT_H: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFI); return true;  \
-case VariableType::BT_INT: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFI); return true;    \
-case VariableType::BT_INT_L: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFI); return true;  \
-case VariableType::BT_INT_LL: return false;                                                         \
-                                                                                                    \
-case VariableType::BT_UNS_HH: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFU); return true; \
-case VariableType::BT_UNS_H: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFU); return true;  \
-case VariableType::BT_UNS: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFU); return true;    \
-case VariableType::BT_UNS_L: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFU); return true;  \
-case VariableType::BT_UNS_LL: return false;                                                         \
-                                                                                                    \
-case VariableType::BT_PTR: objects->addToken(OCODE_##PRE##SETOP_##OP##_##MT##SUFU); return true;    \
-                                                                                                    \
-default: ERROR_NP("invalid BT: %s", make_string(type->getBasicType()).c_str());
+#define DO_SET_CASES(OP,MT)                                                          \
+case VariableType::BT_CHR: objects->addToken(OCODE_##OP##_##MT##_I); return true;    \
+                                                                                     \
+case VariableType::BT_FIX_HH: objects->addToken(OCODE_##OP##_##MT##_X); return true; \
+case VariableType::BT_FIX_H: objects->addToken(OCODE_##OP##_##MT##_X); return true;  \
+case VariableType::BT_FIX: objects->addToken(OCODE_##OP##_##MT##_X); return true;    \
+case VariableType::BT_FIX_L: objects->addToken(OCODE_##OP##_##MT##_X); return true;  \
+case VariableType::BT_FIX_LL: objects->addToken(OCODE_##OP##_##MT##_X); return true; \
+                                                                                     \
+case VariableType::BT_INT_HH: objects->addToken(OCODE_##OP##_##MT##_I); return true; \
+case VariableType::BT_INT_H: objects->addToken(OCODE_##OP##_##MT##_I); return true;  \
+case VariableType::BT_INT: objects->addToken(OCODE_##OP##_##MT##_I); return true;    \
+case VariableType::BT_INT_L: objects->addToken(OCODE_##OP##_##MT##_I); return true;  \
+case VariableType::BT_INT_LL: return false;                                          \
+                                                                                     \
+case VariableType::BT_UNS_HH: objects->addToken(OCODE_##OP##_##MT##_U); return true; \
+case VariableType::BT_UNS_H: objects->addToken(OCODE_##OP##_##MT##_U); return true;  \
+case VariableType::BT_UNS: objects->addToken(OCODE_##OP##_##MT##_U); return true;    \
+case VariableType::BT_UNS_L: objects->addToken(OCODE_##OP##_##MT##_U); return true;  \
+case VariableType::BT_UNS_LL: return false;                                          \
+                                                                                     \
+case VariableType::BT_PTR: objects->addToken(OCODE_##OP##_##MT##_U); return true;    \
+                                                                                     \
+default: ERROR_NP("invalid BT: %s", make_string(type->getBasicType()).c_str())
 
 //
 // DO_SET_SWITCH
 //
-#define DO_SET_SWITCH(OP,MT,PRE,SUFF,SUFI,SUFU) \
-switch (type->getBasicType()) {DO_SET_CASES(OP, MT, PRE, SUFF, SUFI, SUFU);}
+#define DO_SET_SWITCH(OP,MT) \
+switch (type->getBasicType()) {DO_SET_CASES(OP, MT);}
 
 //
 // DO_SET_SWITCHES
 //
-#define DO_SET_SWITCHES(OP,SUFF,SUFI,SUFU,ACS)                                   \
-switch (data->type) {                                                            \
-case VariableData::MT_AUTO: DO_SET_SWITCH(OP, AUTO, , SUFF, SUFI, SUFU);         \
-case VariableData::MT_POINTER: DO_SET_SWITCH(OP, POINTER, , SUFF, SUFI, SUFU);   \
-case VariableData::MT_REGISTER:                                                  \
-   switch (data->sectionR) {                                                     \
-   case VariableData::SR_LOCAL: DO_SET_SWITCH(OP, REGISTER, , SUFF, SUFI, SUFU); \
-   case VariableData::SR_MAP: DO_SET_SWITCH(OP, MAPREGISTER, ACS##_, , , );      \
-   case VariableData::SR_WORLD: DO_SET_SWITCH(OP, WORLDREGISTER, ACS##_, , , );  \
-   case VariableData::SR_GLOBAL: DO_SET_SWITCH(OP, GLOBALREGISTER, ACSE_, , , ); \
-   } break;                                                                      \
-case VariableData::MT_REGISTERARRAY:                                             \
-   switch (data->sectionRA) {                                                    \
-   case VariableData::SRA_MAP: DO_SET_SWITCH(OP, MAPARRAY, ACSE_, , , );         \
-   case VariableData::SRA_WORLD: DO_SET_SWITCH(OP, WORLDARRAY, ACSE_, , , );     \
-   case VariableData::SRA_GLOBAL: DO_SET_SWITCH(OP, GLOBALARRAY, ACSE_, , , );   \
-   } break;                                                                      \
-case VariableData::MT_STATIC: DO_SET_SWITCH(OP, STATIC, , SUFF, SUFI, SUFU);     \
+#define DO_SET_SWITCHES(OP)                                  \
+switch (data->type) {                                        \
+case VariableData::MT_STATIC: DO_SET_SWITCH(OP, STATIC);     \
+case VariableData::MT_AUTO: DO_SET_SWITCH(OP, AUTO);         \
+case VariableData::MT_POINTER: DO_SET_SWITCH(OP, PTR);       \
+case VariableData::MT_REGISTER:                              \
+   switch (data->sectionR) {                                 \
+   case VariableData::SR_LOCAL: DO_SET_SWITCH(OP, REG);      \
+   case VariableData::SR_MAP: DO_SET_SWITCH(OP, MAPREG);     \
+   case VariableData::SR_WORLD: DO_SET_SWITCH(OP, WLDREG);   \
+   case VariableData::SR_GLOBAL: DO_SET_SWITCH(OP, GBLREG);  \
+   } break;                                                  \
+case VariableData::MT_REGISTERARRAY:                         \
+   switch (data->sectionRA) {                                \
+   case VariableData::SRA_MAP: DO_SET_SWITCH(OP, MAPARR);    \
+   case VariableData::SRA_WORLD: DO_SET_SWITCH(OP, WLDARR);  \
+   case VariableData::SRA_GLOBAL: DO_SET_SWITCH(OP, GBLARR); \
+   } break;                                                  \
 default: ERROR_NP("invalid MT"); }
 
 //

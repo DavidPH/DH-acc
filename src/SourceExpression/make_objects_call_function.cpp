@@ -72,7 +72,7 @@ void SourceExpression::make_objects_call_function
    // Determine which OCODE to use.
    ObjectCode ocode;
    if (target_type != TARGET_ZDoom)
-      ocode = OCODE_BRANCH_GOTO_IMM;
+      ocode = OCODE_JMP_IMM;
    else if (retnType->getBasicType() == VariableType::BT_VOID)
       ocode = OCODE_ACSE_FUNC_CALLVOID_IMM;
    else
@@ -87,7 +87,7 @@ void SourceExpression::make_objects_call_function
       objects->getValueAdd(context->getLimit(STORE_AUTO), retnSize);
 
    // Advance the stack-pointer.
-   objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
+   objects->addToken(OCODE_ADD_AUTPTR_IMM, ostack);
 
    // For not ZDoom or specified auto args...
    if (option_function_autoargs || target_type != TARGET_ZDoom)
@@ -95,7 +95,7 @@ void SourceExpression::make_objects_call_function
       // ... Place args in auto vars.
       // FIXME: Should be based on type.
       for (bigsint i = callSize; i--;)
-         objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
+         objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
    }
 
    // For not ZDoom...
@@ -105,7 +105,7 @@ void SourceExpression::make_objects_call_function
       ObjectExpression::Pointer retnExpr =
          ObjectExpression::create_value_symbol(labelReturn, pos);
 
-      objects->addToken(OCODE_GET_LITERAL32I, retnExpr);
+      objects->addToken(OCODE_GET_IMM, retnExpr);
    }
 
    // The actual call. Data being the jump target.
@@ -115,10 +115,10 @@ void SourceExpression::make_objects_call_function
    // For any return bytes we're handling, push them onto the stack.
    // FIXME: Should be based on type.
    for (bigsint i(-retnSize); i; ++i)
-      objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));
+      objects->addToken(OCODE_GET_AUTO, objects->getValue(i));
 
    // Reset the stack-pointer.
-   objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
+   objects->addToken(OCODE_SUB_AUTPTR_IMM, ostack);
 
    make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }
@@ -136,7 +136,7 @@ void SourceExpression::make_objects_call_function
    FUNCTION_PREAMBLE
 
    // Must push return address before target address.
-   objects->addToken(OCODE_GET_LITERAL32I, objects->getValue(labelReturn));
+   objects->addToken(OCODE_GET_IMM, objects->getValue(labelReturn));
 
    // Determine jump target.
    data->makeObjects(objects, VariableData::create_stack(type->getSize(pos)));
@@ -144,31 +144,29 @@ void SourceExpression::make_objects_call_function
    FUNCTION_ARGS
 
    // Determine which OCODE to use.
-   ObjectCode ocode = OCODE_BRANCH_GOTO;
+   ObjectCode ocode = OCODE_JMP;
 
    // Calculate total stack offset.
    ObjectExpression::Pointer ostack =
       objects->getValueAdd(context->getLimit(STORE_AUTO), retnSize);
 
    // Advance the stack-pointer.
-   objects->addToken(OCODE_ADDR_STACK_ADD_IMM, ostack);
+   objects->addToken(OCODE_ADD_AUTPTR_IMM, ostack);
 
    // Place args in auto vars.
-   // FIXME: Should be based on type.
    for (bigsint i(callSize); i--;)
-      objects->addToken(OCODE_SET_AUTO32I, objects->getValue(i));
+      objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
 
    // The actual call.
    objects->addToken(ocode);
    objects->addLabel(labelReturn);
 
    // For any return bytes we're handling, push them onto the stack.
-   // FIXME: Should be based on type.
    for (bigsint i(-retnSize); i; ++i)
-      objects->addToken(OCODE_GET_AUTO32I, objects->getValue(i));
+      objects->addToken(OCODE_GET_AUTO, objects->getValue(i));
 
    // Reset the stack-pointer.
-   objects->addToken(OCODE_ADDR_STACK_SUB_IMM, ostack);
+   objects->addToken(OCODE_SUB_AUTPTR_IMM, ostack);
 
    make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }

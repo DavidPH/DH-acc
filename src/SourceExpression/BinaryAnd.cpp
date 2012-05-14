@@ -72,10 +72,10 @@ protected:
    {
       switch (type->getBasicType())
       {
-         DO_GET_CASES(AND, BITWISE_, 32, 32, 32);
+         DO_GET_CASES(AND);
 
-      case VariableType::BT_INT_LL: doGetBaseILLB(objects, type, tmpBase, OCODE_BITWISE_AND32); break;
-      case VariableType::BT_UNS_LL: doGetBaseILLB(objects, type, tmpBase, OCODE_BITWISE_AND32); break;
+      case VariableType::BT_INT_LL: doGetBaseILLB(objects, type, tmpBase, OCODE_AND_TEMP_I); break;
+      case VariableType::BT_UNS_LL: doGetBaseILLB(objects, type, tmpBase, OCODE_AND_TEMP_U); break;
       }
    }
 
@@ -85,7 +85,7 @@ protected:
    virtual bool doSet(ObjectVector *objects, VariableData *data,
                       VariableType *type, int)
    {
-      DO_SET_SWITCHES(AND, 32, 32, 32, ACS);
+      DO_SET_SWITCHES(AND);
       return false;
    }
 };

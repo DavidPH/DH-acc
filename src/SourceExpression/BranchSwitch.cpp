@@ -123,9 +123,9 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    objects->setPosition(pos);
 
    // Generate jump table.
-   objects->addToken(OCODE_BRANCH_TABLE, args);
+   objects->addToken(OCODE_JMP_TAB, args);
 
-   objects->addToken(OCODE_BRANCH_GOTO_IMM, objects->getValue(caseDefault));
+   objects->addToken(OCODE_JMP_IMM, objects->getValue(caseDefault));
 
    // Generate cases.
    exprBody->makeObjects(objects, VariableData::create_void(0));

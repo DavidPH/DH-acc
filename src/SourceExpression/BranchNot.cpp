@@ -86,7 +86,7 @@ void SourceExpression_BranchNot::virtual_makeObjects
    bigsint                 size = type->getSize(pos);
    VariableData::Pointer   src  = VariableData::create_stack(size);
 
-   objects->addToken(OCODE_LOGICAL_NOT32I);
+   objects->addToken(OCODE_NOT_STK_I);
 
    make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }

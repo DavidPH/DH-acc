@@ -125,7 +125,7 @@ void SourceExpression_UnarySub::virtual_makeObjects
    case VariableType::BT_UNS_H:
    case VariableType::BT_UNS:
    case VariableType::BT_UNS_L:
-      objects->addToken(OCODE_MISC_NEGATE32I);
+      objects->addToken(OCODE_NEG_STK_I);
       break;
 
    case VariableType::BT_FIX_HH:
@@ -133,7 +133,7 @@ void SourceExpression_UnarySub::virtual_makeObjects
    case VariableType::BT_FIX:
    case VariableType::BT_FIX_L:
    case VariableType::BT_FIX_LL:
-      objects->addToken(OCODE_MISC_NEGATE32F);
+      objects->addToken(OCODE_NEG_STK_I);
       break;
 
    case VariableType::BT_INT_LL:
@@ -145,15 +145,15 @@ void SourceExpression_UnarySub::virtual_makeObjects
       ObjectExpression::Pointer tmpL = context->getTempVar(0);
       ObjectExpression::Pointer tmpH = context->getTempVar(1);
 
-      objects->addToken(OCODE_BITWISE_NOT32);
+      objects->addToken(OCODE_INV_STK_I);
       objects->addToken(OCODE_SET_TEMP, tmpH);
-      objects->addToken(OCODE_BITWISE_NOT32);
+      objects->addToken(OCODE_INV_STK_I);
       objects->addToken(OCODE_SET_TEMP, tmpL);
 
-      objects->addToken(OCODE_SETOP_INC_TEMP, tmpL);
+      objects->addToken(OCODE_INC_TEMP_I, tmpL);
       objects->addToken(OCODE_GET_TEMP, tmpL);
-      objects->addToken(OCODE_BRANCH_TRUE, objects->getValue(labelEnd));
-      objects->addToken(OCODE_SETOP_INC_TEMP, tmpH);
+      objects->addToken(OCODE_JMP_TRU, objects->getValue(labelEnd));
+      objects->addToken(OCODE_INC_TEMP_I, tmpH);
 
       objects->addLabel(labelEnd);
       objects->addToken(OCODE_GET_TEMP, tmpL);

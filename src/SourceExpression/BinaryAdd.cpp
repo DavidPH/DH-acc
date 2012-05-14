@@ -100,7 +100,7 @@ protected:
    {
       switch (type->getBasicType())
       {
-         DO_GET_CASES(ADD, , 32F, 32I, 32U);
+         DO_GET_CASES(ADD);
 
       case VariableType::BT_INT_LL: doGetBaseILLAS(objects, type, tmpBase, true); break;
       case VariableType::BT_UNS_LL: doGetBaseILLAS(objects, type, tmpBase, true); break;
@@ -113,7 +113,7 @@ protected:
    virtual bool doSet(ObjectVector *objects, VariableData *data,
                       VariableType *type, int)
    {
-      DO_SET_SWITCHES(ADD, 32F, 32I, 32U, ACS);
+      DO_SET_SWITCHES(ADD);
       return false;
    }
 };

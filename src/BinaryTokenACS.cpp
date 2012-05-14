@@ -76,60 +76,68 @@ void BinaryTokenACS::init(int *argCounts)
 
    DO_INIT(NOP, 0);
 
-   // Arithmetic
-   DO_INIT(ADD, 0);
-   DO_INIT(DIV, 0);
-   DO_INIT(MOD, 0);
-   DO_INIT(MUL, 0);
-   DO_INIT(SUB, 0);
+   // Operators
+   DO_INIT(ADD_STK,    0);
+   DO_INIT(ADD_REG,    1);
+   DO_INIT(ADD_MAPREG, 1);
+   DO_INIT(ADD_WLDREG, 1);
+   DO_INIT(AND_STK,    0);
+   DO_INIT(CMP_EQ,     0);
+   DO_INIT(CMP_GE,     0);
+   DO_INIT(CMP_GT,     0);
+   DO_INIT(CMP_LE,     0);
+   DO_INIT(CMP_LT,     0);
+   DO_INIT(CMP_NE,     0);
+   DO_INIT(DEC_REG,    1);
+   DO_INIT(DEC_MAPREG, 1);
+   DO_INIT(DEC_WLDREG, 1);
+   DO_INIT(DIV_STK,    0);
+   DO_INIT(DIV_REG,    1);
+   DO_INIT(DIV_MAPREG, 1);
+   DO_INIT(DIV_WLDREG, 1);
+   DO_INIT(INC_REG,    1);
+   DO_INIT(INC_MAPREG, 1);
+   DO_INIT(INC_WLDREG, 1);
+   DO_INIT(IOR_STK,    0);
+   DO_INIT(LSH_STK,    0);
+   DO_INIT(MOD_STK,    0);
+   DO_INIT(MOD_REG,    1);
+   DO_INIT(MOD_MAPREG, 1);
+   DO_INIT(MOD_WLDREG, 1);
+   DO_INIT(MUL_STK,    0);
+   DO_INIT(MUL_REG,    1);
+   DO_INIT(MUL_MAPREG, 1);
+   DO_INIT(MUL_WLDREG, 1);
+   DO_INIT(NOT_STK,    0);
+   DO_INIT(RSH_STK,    0);
+   DO_INIT(SUB_STK,    0);
+   DO_INIT(SUB_REG,    1);
+   DO_INIT(SUB_MAPREG, 1);
+   DO_INIT(SUB_WLDREG, 1);
+   DO_INIT(XOR_STK,    0);
+   DO_INIT(NEG_STK,    0);
+   DO_INIT(LOGAND_STK, 0);
+   DO_INIT(LOGIOR_STK, 0);
 
-   // Bitwise
-   DO_INIT(BITWISE_AND, 0);
-   DO_INIT(BITWISE_IOR, 0);
-   DO_INIT(BITWISE_LSH, 0);
-   DO_INIT(BITWISE_RSH, 0);
-   DO_INIT(BITWISE_XOR, 0);
-
-   // Branching
-   DO_INIT(BRANCH_CASE,     2);
-   DO_INIT(BRANCH_GOTO_IMM, 1);
-   DO_INIT(BRANCH_TRUE,     1);
-   DO_INIT(BRANCH_ZERO,     1);
-
-   // Comparison
-   DO_INIT(CMP_EQ, 0);
-   DO_INIT(CMP_GE, 0);
-   DO_INIT(CMP_GT, 0);
-   DO_INIT(CMP_LE, 0);
-   DO_INIT(CMP_LT, 0);
-   DO_INIT(CMP_NE, 0);
-
-   // Logical
-   DO_INIT(LOGICAL_AND, 0);
-   DO_INIT(LOGICAL_IOR, 0);
-   DO_INIT(LOGICAL_NOT, 0);
+   // Jumps
+   DO_INIT(JMP_IMM, 1);
+   DO_INIT(JMP_NIL, 1);
+   DO_INIT(JMP_TRU, 1);
+   DO_INIT(JMP_VAL, 2);
 
    // Stack-ops
-   DO_INIT(STACK_DROP, 0);
+   DO_INIT(STK_DROP, 0);
 
    // Variable Get
-   DO_INIT(GET_LITERAL,  1);
-   DO_INIT(GET_REGISTER, 1);
+   DO_INIT(GET_IMM,    1);
+   DO_INIT(GET_REG,    1);
+   DO_INIT(GET_MAPREG, 1);
+   DO_INIT(GET_WLDREG, 1);
 
    // Variable Set
-   DO_INIT(SET_REGISTER, 1);
-
-   // Variable Set Op
-   DO_INIT(SETOP_ADD_REGISTER, 1);
-   DO_INIT(SETOP_DEC_REGISTER, 1);
-   DO_INIT(SETOP_DIV_REGISTER, 1);
-   DO_INIT(SETOP_INC_REGISTER, 1);
-   DO_INIT(SETOP_MOD_REGISTER, 1);
-   DO_INIT(SETOP_MUL_REGISTER, 1);
-   DO_INIT(SETOP_SUB_REGISTER, 1);
-
-   // Miscellaneous
-   DO_INIT(MISC_NEGATE, 0);
+   DO_INIT(SET_REG,    1);
+   DO_INIT(SET_MAPREG, 1);
+   DO_INIT(SET_WLDREG, 1);
 
    // ACS
    DO_INIT(GAME_GET_PLAYERCOUNT,         0);
@@ -138,8 +146,6 @@ void BinaryTokenACS::init(int *argCounts)
    DO_INIT(GAME_GET_THINGCOUNT_SID_IMM,  2);
    DO_INIT(GAME_GET_TIME,                0);
    DO_INIT(GAME_GET_TYPE,                0);
-   DO_INIT(GET_MAPREGISTER,              1);
-   DO_INIT(GET_WORLDREGISTER,            1);
    DO_INIT(LINE_CLR_SPECIAL,             0);
    DO_INIT(LINE_GET_SIDE,                0);
    DO_INIT(LTAG_SET_BLOCK,               0);
@@ -150,22 +156,6 @@ void BinaryTokenACS::init(int *argCounts)
    DO_INIT(SCRIPT_RESTART,               0);
    DO_INIT(SCRIPT_SUSPEND,               0);
    DO_INIT(SCRIPT_TERMINATE,             0);
-   DO_INIT(SET_MAPREGISTER,              1);
-   DO_INIT(SET_WORLDREGISTER,            1);
-   DO_INIT(SETOP_ADD_MAPREGISTER,        1);
-   DO_INIT(SETOP_ADD_WORLDREGISTER,      1);
-   DO_INIT(SETOP_DEC_MAPREGISTER,        1);
-   DO_INIT(SETOP_DEC_WORLDREGISTER,      1);
-   DO_INIT(SETOP_DIV_MAPREGISTER,        1);
-   DO_INIT(SETOP_DIV_WORLDREGISTER,      1);
-   DO_INIT(SETOP_INC_MAPREGISTER,        1);
-   DO_INIT(SETOP_INC_WORLDREGISTER,      1);
-   DO_INIT(SETOP_MOD_MAPREGISTER,        1);
-   DO_INIT(SETOP_MOD_WORLDREGISTER,      1);
-   DO_INIT(SETOP_MUL_MAPREGISTER,        1);
-   DO_INIT(SETOP_MUL_WORLDREGISTER,      1);
-   DO_INIT(SETOP_SUB_MAPREGISTER,        1);
-   DO_INIT(SETOP_SUB_WORLDREGISTER,      1);
    DO_INIT(SOUND_AMBIENT,                0);
    DO_INIT(SOUND_SECTOR,                 0);
    DO_INIT(SOUND_SEQUENCE,               0);
@@ -199,7 +189,7 @@ void BinaryTokenACS::init(int *argCounts)
    DO_INIT(PRINT_END_BOLD,  0);
    DO_INIT(PRINT_NUM_DEC,   0);
    DO_INIT(PRINT_START,     0);
-   DO_INIT(PRINT_STRING,    0);
+   DO_INIT(PRINT_STR,       0);
 
    #undef DO_INIT
 }
