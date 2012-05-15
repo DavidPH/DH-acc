@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// ObjectExpression handling of "operator ^".
+// ObjectExpression handling of "operator >>".
 //
 //-----------------------------------------------------------------------------
 
@@ -29,25 +29,25 @@
 //
 
 //
-// ObjectExpression_BinaryXOr
+// ObjectExpression_BinaryRSh
 //
-class ObjectExpression_BinaryXOr : public ObjectExpression_Binary
+class ObjectExpression_BinaryRSh : public ObjectExpression_Binary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_BinaryXOr,
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_BinaryRSh,
                                    ObjectExpression_Binary);
 
 public:
    //
-   // ::ObjectExpression_BinaryXOr
+   // ::ObjectExpression_BinaryRSh
    //
-   ObjectExpression_BinaryXOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
+   ObjectExpression_BinaryRSh(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
    {
    }
 
    //
-   // ::ObjectExpression_BinaryXOr
+   // ::ObjectExpression_BinaryRSh
    //
-   ObjectExpression_BinaryXOr(std::istream *in) : Super(in)
+   ObjectExpression_BinaryRSh(std::istream *in) : Super(in)
    {
    }
 
@@ -56,7 +56,7 @@ public:
    //
    virtual bigsint resolveInt() const
    {
-      return exprL->resolveInt() ^ exprR->resolveInt();
+      return exprL->resolveInt() >> exprR->resolveInt();
    }
 
 protected:
@@ -65,7 +65,7 @@ protected:
    //
    virtual void writeObject(std::ostream *out) const
    {
-      write_object(out, OT_BINARY_XOR);
+      write_object(out, OT_BINARY_RSH);
 
       Super::writeObject(out);
    }
@@ -77,22 +77,22 @@ protected:
 //
 
 //
-// ObjectExpression::create_binary_xor
+// ObjectExpression::create_binary_rsh
 //
-ObjectExpression::Reference ObjectExpression::create_binary_xor(
+ObjectExpression::Reference ObjectExpression::create_binary_rsh(
    OBJEXP_EXPRBIN_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryXOr(
+   return static_cast<Reference>(new ObjectExpression_BinaryRSh(
       exprL, exprR, pos));
 }
 
 //
-// ObjectExpression::create_binary_xor
+// ObjectExpression::create_binary_rsh
 //
-ObjectExpression::Reference ObjectExpression::create_binary_xor(
+ObjectExpression::Reference ObjectExpression::create_binary_rsh(
    std::istream *in)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryXOr(in));
+   return static_cast<Reference>(new ObjectExpression_BinaryRSh(in));
 }
 
 // EOF

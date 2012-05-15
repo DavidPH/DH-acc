@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// Base class for object-level binary expression handling.
+// ObjectExpression handling of binary expressions.
 //
 //-----------------------------------------------------------------------------
 
@@ -33,21 +33,19 @@
 //
 // ObjectExpression_Binary::ObjectExpression_Binary
 //
-ObjectExpression_Binary::ObjectExpression_Binary
-(ObjectExpression *_exprL, ObjectExpression *_exprR, SourcePosition const &_pos)
- : Super(_pos), exprL(_exprL), exprR(_exprR)
+ObjectExpression_Binary::ObjectExpression_Binary(OBJEXP_EXPRBIN_PARM)
+ : Super(OBJEXP_EXPR_PASS), exprL(_exprL), exprR(_exprR)
 {
    if (exprL->getType() != exprR->getType())
-      ERROR_N(position, "type mismatch");
+      ERROR_NP("type mismatch");
 }
 
 //
 // ObjectExpression_Binary::ObjectExpression_Binary
 //
-ObjectExpression_Binary::ObjectExpression_Binary(std::istream * in) : Super(in)
+ObjectExpression_Binary::ObjectExpression_Binary(std::istream *in)
+ : Super(in), exprL(create(in)), exprR(create(in))
 {
-	read_object(in, &exprL);
-	read_object(in, &exprR);
 }
 
 //
@@ -63,7 +61,7 @@ bool ObjectExpression_Binary::canResolve() const
 //
 ObjectExpression::ExpressionType ObjectExpression_Binary::getType() const
 {
-	return exprL->getType();
+   return exprL->getType();
 }
 
 //

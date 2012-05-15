@@ -43,18 +43,14 @@ public:
    //
    // ::ObjectExpression_BranchAnd
    //
-   ObjectExpression_BranchAnd
-   (ObjectExpression *_exprL, ObjectExpression *_exprR,
-    SourcePosition const &_position)
-   : Super(_exprL, _exprR, _position)
+   ObjectExpression_BranchAnd(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
    {
    }
 
    //
    // ::ObjectExpression_BranchAnd
    //
-   ObjectExpression_BranchAnd(std::istream *in)
-   : Super(in)
+   ObjectExpression_BranchAnd(std::istream *in) : Super(in)
    {
    }
 
@@ -88,17 +84,6 @@ public:
       return Super::resolveInt();
    }
 
-   //
-   // ::writeACSP
-   //
-   virtual void writeACSP(std::ostream *out) const
-   {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LAND);
-
-      exprL->writeACSP(out);
-      exprR->writeACSP(out);
-   }
-
 protected:
    //
    // ::writeObject
@@ -108,6 +93,18 @@ protected:
       write_object(out, OT_BRANCH_AND);
 
       Super::writeObject(out);
+   }
+
+private:
+   //
+   // ::writeACSPLong
+   //
+   virtual void writeACSPLong(std::ostream *out) const
+   {
+      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LAND);
+
+      exprL->writeACSP(out);
+      exprR->writeACSP(out);
    }
 };
 
@@ -119,19 +116,20 @@ protected:
 //
 // ObjectExpression::create_branch_and
 //
-ObjectExpression::Pointer ObjectExpression::
-create_branch_and(ObjectExpression *exprL, ObjectExpression *exprR,
-                  SourcePosition const &position)
+ObjectExpression::Reference ObjectExpression::create_branch_and(
+   OBJEXP_EXPRBIN_ARGS)
 {
-   return new ObjectExpression_BranchAnd(exprL, exprR, position);
+   return static_cast<Reference>(new ObjectExpression_BranchAnd(
+      exprL, exprR, pos));
 }
 
 //
 // ObjectExpression::create_branch_and
 //
-ObjectExpression::Pointer ObjectExpression::create_branch_and(std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_branch_and(
+   std::istream *in)
 {
-   return new ObjectExpression_BranchAnd(in);
+   return static_cast<Reference>(new ObjectExpression_BranchAnd(in));
 }
 
 // EOF

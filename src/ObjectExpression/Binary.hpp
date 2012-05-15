@@ -1,23 +1,25 @@
-/* Copyright (C) 2011 David Hill
-**
-** This program is free software: you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation, either version 3 of the License, or
-** (at your option) any later version.
-**
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**
-** You should have received a copy of the GNU General Public License
-** along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/* ObjectExpression/Binary.hpp
-**
-** Defines the ObjectExpression_Binary class.
-*/
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2011-2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// ObjectExpression handling of binary expressions.
+//
+//-----------------------------------------------------------------------------
 
 #ifndef HPP_Binary__ObjectExpression_
 #define HPP_Binary__ObjectExpression_
@@ -39,17 +41,16 @@ class ObjectExpression_Binary : public ObjectExpression
 public:
    bool canResolve() const;
 
-	virtual ExpressionType getType() const;
+   virtual ExpressionType getType() const;
 
 protected:
-	ObjectExpression_Binary(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
-	ObjectExpression_Binary(std::istream * in);
+   ObjectExpression_Binary(OBJEXP_EXPRBIN_ARGS);
+   ObjectExpression_Binary(std::istream *in);
 
-	virtual void writeObject(std::ostream * out) const;
+   virtual void writeObject(std::ostream *out) const;
 
-	ObjectExpression::Pointer exprL;
-	ObjectExpression::Pointer exprR;
+   ObjectExpression::Reference exprL, exprR;
 };
 
-#endif /* HPP_Binary__ObjectExpression_ */
+#endif//HPP_Binary__ObjectExpression_
 

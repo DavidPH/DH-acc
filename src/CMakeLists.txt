@@ -1,20 +1,20 @@
 add_executable(DH-acc
-	main.cpp
+   main.cpp
 
-	bignum.cpp
-	BinaryTokenACS.cpp
-	BinaryTokenACS/make_tokens.cpp
-	BinaryTokenACS/output.cpp
-	BinaryTokenACS/write_ACS0.cpp
-	BinaryTokenPPACS.cpp
-	BinaryTokenPPACS/make_tokens.cpp
-	BinaryTokenPPACS/output.cpp
-	BinaryTokenPPACS/write_ACSP.cpp
-	BinaryTokenZDACS.cpp
-	BinaryTokenZDACS/make_tokens.cpp
-	BinaryTokenZDACS/output.cpp
-	BinaryTokenZDACS/write_ACSE.cpp
-	ObjectCode.cpp
+   bignum.cpp
+   BinaryTokenACS.cpp
+   BinaryTokenACS/make_tokens.cpp
+   BinaryTokenACS/output.cpp
+   BinaryTokenACS/write_ACS0.cpp
+   BinaryTokenPPACS.cpp
+   BinaryTokenPPACS/make_tokens.cpp
+   BinaryTokenPPACS/output.cpp
+   BinaryTokenPPACS/write_ACSP.cpp
+   BinaryTokenZDACS.cpp
+   BinaryTokenZDACS/make_tokens.cpp
+   BinaryTokenZDACS/output.cpp
+   BinaryTokenZDACS/write_ACSE.cpp
+   ObjectCode.cpp
    ObjectData.cpp
    ObjectData/Array.cpp
    ObjectData/Auto.cpp
@@ -22,96 +22,101 @@ add_executable(DH-acc
    ObjectData/Register.cpp
    ObjectData/Script.cpp
    ObjectData/Static.cpp
-	ObjectData/String.cpp
-	ObjectExpression.cpp
-	ObjectExpression/Binary.cpp
-	ObjectExpression/BinaryAdd.cpp
-	ObjectExpression/BinaryAnd.cpp
-	ObjectExpression/BinaryDiv.cpp
-	ObjectExpression/BinaryIOr.cpp
-	ObjectExpression/BinaryMod.cpp
-	ObjectExpression/BinaryMul.cpp
-	ObjectExpression/BinarySub.cpp
-	ObjectExpression/BinaryXOr.cpp
+   ObjectData/String.cpp
+   ObjectExpression.cpp
+   ObjectExpression/Binary.cpp
+   ObjectExpression/BinaryAdd.cpp
+   ObjectExpression/BinaryAnd.cpp
+   ObjectExpression/BinaryCmp.cpp
+   ObjectExpression/BinaryDiv.cpp
+   ObjectExpression/BinaryIOr.cpp
+   ObjectExpression/BinaryLSh.cpp
+   ObjectExpression/BinaryMod.cpp
+   ObjectExpression/BinaryMul.cpp
+   ObjectExpression/BinaryRSh.cpp
+   ObjectExpression/BinarySub.cpp
+   ObjectExpression/BinaryXOr.cpp
    ObjectExpression/BranchAnd.cpp
+   ObjectExpression/BranchIf.cpp
    ObjectExpression/BranchIOr.cpp
    ObjectExpression/BranchNot.cpp
    ObjectExpression/BranchXOr.cpp
    ObjectExpression/Cast.cpp
-	ObjectExpression/objects_io.cpp
-	ObjectExpression/Unary.cpp
-	ObjectExpression/UnaryAdd.cpp
-	ObjectExpression/UnarySub.cpp
+   ObjectExpression/objects_io.cpp
+   ObjectExpression/Unary.cpp
+   ObjectExpression/UnaryAdd.cpp
+   ObjectExpression/UnaryNot.cpp
+   ObjectExpression/UnarySub.cpp
    ObjectExpression/ValueCompound.cpp
-	ObjectExpression/ValueFloat.cpp
-	ObjectExpression/ValueInt.cpp
-	ObjectExpression/ValueOCode.cpp
-	ObjectExpression/ValueSymbol.cpp
-	ObjectToken.cpp
-	ObjectVector.cpp
-	object_io.cpp
-	option.cpp
-	ost_type.cpp
-#	SourceBlockC.cpp
-	SourceContext.cpp
-	SourceContext/getVariableType.cpp
-	SourceException.cpp
-	SourceExpression.cpp
-	SourceExpression/Binary.cpp
-	SourceExpression/BinaryAdd.cpp
-	SourceExpression/BinaryAnd.cpp
-	SourceExpression/BinaryArray.cpp
-	SourceExpression/BinaryAssign.cpp
+   ObjectExpression/ValueFloat.cpp
+   ObjectExpression/ValueInt.cpp
+   ObjectExpression/ValueOCode.cpp
+   ObjectExpression/ValueSymbol.cpp
+   ObjectToken.cpp
+   ObjectVector.cpp
+   object_io.cpp
+   option.cpp
+   ost_type.cpp
+#  SourceBlockC.cpp
+   SourceContext.cpp
+   SourceContext/getVariableType.cpp
+   SourceException.cpp
+   SourceExpression.cpp
+   SourceExpression/Binary.cpp
+   SourceExpression/BinaryAdd.cpp
+   SourceExpression/BinaryAnd.cpp
+   SourceExpression/BinaryArray.cpp
+   SourceExpression/BinaryAssign.cpp
    SourceExpression/BinaryCmp.cpp
-	SourceExpression/BinaryCompare.cpp
-	SourceExpression/BinaryDiv.cpp
-	SourceExpression/BinaryIOr.cpp
+   SourceExpression/BinaryCompare.cpp
+   SourceExpression/BinaryDiv.cpp
+   SourceExpression/BinaryIOr.cpp
    SourceExpression/BinaryLSh.cpp
-	SourceExpression/BinaryMod.cpp
-	SourceExpression/BinaryMul.cpp
+   SourceExpression/BinaryMod.cpp
+   SourceExpression/BinaryMul.cpp
    SourceExpression/BinaryPair.cpp
    SourceExpression/BinaryRSh.cpp
-	SourceExpression/BinarySub.cpp
-	SourceExpression/BinaryXOr.cpp
-	SourceExpression/BranchAnd.cpp
-	SourceExpression/BranchCall.cpp
-	SourceExpression/BranchFor.cpp
-	SourceExpression/BranchGoto.cpp
-	SourceExpression/BranchIf.cpp
-	SourceExpression/BranchIOr.cpp
-	SourceExpression/BranchNot.cpp
-	SourceExpression/BranchReturn.cpp
-	SourceExpression/BranchSwitch.cpp
-	SourceExpression/BranchWhile.cpp
-	SourceExpression/BranchXOr.cpp
-	SourceExpression/make_objects_call.cpp
-	SourceExpression/make_objects_call_asmfunc.cpp
-	SourceExpression/make_objects_call_function.cpp
-	SourceExpression/make_objects_call_linespec.cpp
-	SourceExpression/make_objects_call_native.cpp
-	SourceExpression/make_objects_call_script.cpp
-	SourceExpression/make_objects_cast.cpp
-	SourceExpression/make_objects_memcpy.cpp
-	SourceExpression/RootOutput.cpp
+   SourceExpression/BinarySub.cpp
+   SourceExpression/BinaryXOr.cpp
+   SourceExpression/BranchAnd.cpp
+   SourceExpression/BranchCall.cpp
+   SourceExpression/BranchFor.cpp
+   SourceExpression/BranchGoto.cpp
+   SourceExpression/BranchIf.cpp
+   SourceExpression/BranchIOr.cpp
+   SourceExpression/BranchNot.cpp
+   SourceExpression/BranchReturn.cpp
+   SourceExpression/BranchSwitch.cpp
+   SourceExpression/BranchWhile.cpp
+   SourceExpression/BranchXOr.cpp
+   SourceExpression/make_objects_call.cpp
+   SourceExpression/make_objects_call_asmfunc.cpp
+   SourceExpression/make_objects_call_function.cpp
+   SourceExpression/make_objects_call_linespec.cpp
+   SourceExpression/make_objects_call_native.cpp
+   SourceExpression/make_objects_call_script.cpp
+   SourceExpression/make_objects_cast.cpp
+   SourceExpression/make_objects_memcpy.cpp
+   SourceExpression/RootOutput.cpp
    SourceExpression/RootPrintf.cpp
-	SourceExpression/RootScript.cpp
-	SourceExpression/Unary.cpp
-	SourceExpression/UnaryDecInc.cpp
-	SourceExpression/UnaryDereference.cpp
-	SourceExpression/UnaryNot.cpp
-	SourceExpression/UnaryReference.cpp
-	SourceExpression/UnarySub.cpp
-	SourceExpression/ValueBlock.cpp
-	SourceExpression/ValueCast.cpp
-	SourceExpression/ValueData.cpp
+   SourceExpression/RootScript.cpp
+   SourceExpression/Unary.cpp
+   SourceExpression/UnaryDecInc.cpp
+   SourceExpression/UnaryDereference.cpp
+   SourceExpression/UnaryNot.cpp
+   SourceExpression/UnaryReference.cpp
+   SourceExpression/UnarySub.cpp
+   SourceExpression/ValueBlock.cpp
+   SourceExpression/ValueCast.cpp
+   SourceExpression/ValueData.cpp
    SourceExpression/ValueFunction.cpp
-	SourceExpression/ValueMember.cpp
+   SourceExpression/ValueMember.cpp
    SourceExpression/ValueStackptr.cpp
-	SourceExpression/ValueVariable.cpp
-#	SourceExpressionACS.cpp
-#	SourceExpressionACS/Base.cpp
-#	SourceExpressionACS/BinaryAdd.cpp
-	SourceExpressionDS.cpp
+   SourceExpression/ValueVariable.cpp
+#  SourceExpressionACS.cpp
+#  SourceExpressionACS/Base.cpp
+#  SourceExpressionACS/BinaryAdd.cpp
+   SourceExpressionDS.cpp
    SourceExpressionDS/arglist.cpp
    SourceExpressionDS/create_value_number.cpp
    SourceExpressionDS/keyword.cpp
@@ -121,15 +126,15 @@ add_executable(DH-acc
    SourceExpressionDS/keyword_variable.cpp
    SourceExpressionDS/store.cpp
    SourceExpressionDS/type.cpp
-	SourcePosition.cpp
-	SourceStream.cpp
-	SourceTokenASMPLX.cpp
-	SourceTokenC.cpp
+   SourcePosition.cpp
+   SourceStream.cpp
+   SourceTokenASMPLX.cpp
+   SourceTokenC.cpp
    SourceTokenizerC.cpp
-	SourceVariable.cpp
+   SourceVariable.cpp
    StoreType.cpp
-	VariableData.cpp
-	VariableType.cpp
+   VariableData.cpp
+   VariableType.cpp
 )
 
 # EOF

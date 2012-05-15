@@ -43,9 +43,7 @@ public:
    //
    // ::ObjectExpression_BranchNot
    //
-   ObjectExpression_BranchNot
-   (ObjectExpression *_expr, SourcePosition const &_position)
-   : Super(_expr, _position)
+   ObjectExpression_BranchNot(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS)
    {
    }
 
@@ -87,12 +85,6 @@ public:
       return Super::resolveInt();
    }
 
-   virtual void writeACSPLong(std::ostream *out) const
-   {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LNOT);
-      expr->writeACSP(out);
-   }
-
 protected:
    //
    // ::writeObject
@@ -102,6 +94,16 @@ protected:
       write_object(out, OT_BRANCH_NOT);
 
       Super::writeObject(out);
+   }
+
+private:
+   //
+   // ::writeACSPLong
+   //
+   virtual void writeACSPLong(std::ostream *out) const
+   {
+      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LNOT);
+      expr->writeACSP(out);
    }
 };
 
@@ -113,19 +115,19 @@ protected:
 //
 // ObjectExpression::create_branch_not
 //
-ObjectExpression::Pointer ObjectExpression::
-create_branch_not(ObjectExpression *expr, SourcePosition const &position)
+ObjectExpression::Reference ObjectExpression::create_branch_not(
+   OBJEXP_EXPRUNA_ARGS)
 {
-   return new ObjectExpression_BranchNot(expr, position);
+   return static_cast<Reference>(new ObjectExpression_BranchNot(expr, pos));
 }
 
 //
 // ObjectExpression::create_branch_not
 //
-ObjectExpression::Pointer ObjectExpression::
-create_branch_not(std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_branch_not(
+   std::istream *in)
 {
-   return new ObjectExpression_BranchNot(in);
+   return static_cast<Reference>(new ObjectExpression_BranchNot(in));
 }
 
 // EOF

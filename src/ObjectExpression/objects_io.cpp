@@ -33,6 +33,97 @@
 //
 
 //
+// ObjectExpression::create
+//
+ObjectExpression::Reference ObjectExpression::create(std::istream *in)
+{
+   ObjectExpression::ObjectType type;
+
+   switch (read_object(in, &type), type)
+   {
+   case ObjectExpression::OT_UNARY_ADD:
+      return ObjectExpression::create_unary_add(in);
+
+   case ObjectExpression::OT_UNARY_NOT:
+      return ObjectExpression::create_unary_not(in);
+
+   case ObjectExpression::OT_UNARY_SUB:
+      return ObjectExpression::create_unary_sub(in);
+
+   case ObjectExpression::OT_BINARY_ADD:
+      return ObjectExpression::create_binary_add(in);
+
+   case ObjectExpression::OT_BINARY_AND:
+      return ObjectExpression::create_binary_and(in);
+
+   case ObjectExpression::OT_BINARY_CMP:
+      return ObjectExpression::create_binary_cmp(in);
+
+   case ObjectExpression::OT_BINARY_DIV:
+      return ObjectExpression::create_binary_div(in);
+
+   case ObjectExpression::OT_BINARY_IOR:
+      return ObjectExpression::create_binary_ior(in);
+
+   case ObjectExpression::OT_BINARY_LSH:
+      return ObjectExpression::create_binary_lsh(in);
+
+   case ObjectExpression::OT_BINARY_MOD:
+      return ObjectExpression::create_binary_mod(in);
+
+   case ObjectExpression::OT_BINARY_MUL:
+      return ObjectExpression::create_binary_mul(in);
+
+   case ObjectExpression::OT_BINARY_RSH:
+      return ObjectExpression::create_binary_rsh(in);
+
+   case ObjectExpression::OT_BINARY_SUB:
+      return ObjectExpression::create_binary_sub(in);
+
+   case ObjectExpression::OT_BINARY_XOR:
+      return ObjectExpression::create_binary_xor(in);
+
+   case ObjectExpression::OT_BRANCH_AND:
+      return ObjectExpression::create_branch_and(in);
+
+   case ObjectExpression::OT_BRANCH_IF:
+      return ObjectExpression::create_branch_if(in);
+
+   case ObjectExpression::OT_BRANCH_IOR:
+      return ObjectExpression::create_branch_ior(in);
+
+   case ObjectExpression::OT_BRANCH_NOT:
+      return ObjectExpression::create_branch_not(in);
+
+   case ObjectExpression::OT_BRANCH_XOR:
+      return ObjectExpression::create_branch_xor(in);
+
+   case ObjectExpression::OT_CAST:
+      return ObjectExpression::create_cast(in);
+
+   case ObjectExpression::OT_VALUE_COMPOUND:
+      return ObjectExpression::create_value_compound(in);
+
+   case ObjectExpression::OT_VALUE_FLOAT:
+      return ObjectExpression::create_value_float(in);
+
+   case ObjectExpression::OT_VALUE_INT:
+      return ObjectExpression::create_value_int(in);
+
+   case ObjectExpression::OT_VALUE_OCODE:
+      return ObjectExpression::create_value_ocode(in);
+
+   case ObjectExpression::OT_VALUE_SYMBOL:
+      return ObjectExpression::create_value_symbol(in);
+
+   case ObjectExpression::OT_NONE:
+      throw "OT_NONE";
+   }
+
+   throw "NOT OT";
+}
+
+//
 // ObjectExpression::read_objects
 //
 void ObjectExpression::read_objects(std::istream *in, ObjectVector *objects)
@@ -98,6 +189,14 @@ void override_object
 }
 
 //
+// override_object<ObjectExpression::Reference>
+//
+void override_object(ObjectExpression::Reference *,
+                     ObjectExpression::Reference const *)
+{
+}
+
+//
 // read_object<ObjectExpression::ExpressionType>
 //
 void read_object(std::istream *in, ObjectExpression::ExpressionType *out)
@@ -124,95 +223,22 @@ void read_object(std::istream *in, ObjectExpression::ObjectType *out)
 //
 void read_object(std::istream *in, ObjectExpression::Pointer *out)
 {
-   ObjectExpression::ObjectType type;
-   read_object(in, &type);
-
-   switch (type)
+   try
    {
-   case ObjectExpression::OT_BINARY_ADD:
-      *out = ObjectExpression::create_binary_add(in);
-      break;
-
-   case ObjectExpression::OT_BINARY_AND:
-      *out = ObjectExpression::create_binary_and(in);
-      break;
-
-   case ObjectExpression::OT_BINARY_DIV:
-      *out = ObjectExpression::create_binary_div(in);
-      break;
-
-   case ObjectExpression::OT_BINARY_IOR:
-      *out = ObjectExpression::create_binary_ior(in);
-      break;
-
-   case ObjectExpression::OT_BINARY_MOD:
-      *out = ObjectExpression::create_binary_mod(in);
-      break;
-
-   case ObjectExpression::OT_BINARY_MUL:
-      *out = ObjectExpression::create_binary_mul(in);
-      break;
-
-   case ObjectExpression::OT_BINARY_SUB:
-      *out = ObjectExpression::create_binary_sub(in);
-      break;
-
-   case ObjectExpression::OT_BINARY_XOR:
-      *out = ObjectExpression::create_binary_xor(in);
-      break;
-
-   case ObjectExpression::OT_BRANCH_AND:
-      *out = ObjectExpression::create_branch_and(in);
-      break;
-
-   case ObjectExpression::OT_BRANCH_IOR:
-      *out = ObjectExpression::create_branch_ior(in);
-      break;
-
-   case ObjectExpression::OT_BRANCH_NOT:
-      *out = ObjectExpression::create_branch_not(in);
-      break;
-
-   case ObjectExpression::OT_BRANCH_XOR:
-      *out = ObjectExpression::create_branch_xor(in);
-      break;
-
-   case ObjectExpression::OT_CAST:
-      *out = ObjectExpression::create_cast(in);
-      break;
-
-   case ObjectExpression::OT_UNARY_ADD:
-      *out = ObjectExpression::create_unary_add(in);
-      break;
-
-   case ObjectExpression::OT_UNARY_SUB:
-      *out = ObjectExpression::create_unary_sub(in);
-      break;
-
-   case ObjectExpression::OT_VALUE_COMPOUND:
-      *out = ObjectExpression::create_value_compound(in);
-      break;
-
-   case ObjectExpression::OT_VALUE_FLOAT:
-      *out = ObjectExpression::create_value_float(in);
-      break;
-
-   case ObjectExpression::OT_VALUE_INT:
-      *out = ObjectExpression::create_value_int(in);
-      break;
-
-   case ObjectExpression::OT_VALUE_OCODE:
-      *out = ObjectExpression::create_value_ocode(in);
-      break;
-
-   case ObjectExpression::OT_VALUE_SYMBOL:
-      *out = ObjectExpression::create_value_symbol(in);
-      break;
-
-   case ObjectExpression::OT_NONE:
-      *out = NULL;
-      break;
+      *out = ObjectExpression::create(in);
    }
+   catch (char const *)
+   {
+      *out = NULL;
+   }
+}
+
+//
+// read_object<ObjectExpression::Reference>
+//
+void read_object(std::istream *in, ObjectExpression::Reference *out)
+{
+   *out = ObjectExpression::create(in);
 }
 
 //
@@ -244,6 +270,14 @@ void write_object(std::ostream *out, ObjectExpression::Pointer const *in)
       (*in)->writeObject(out);
    else
       write_object(out, ObjectExpression::OT_NONE);
+}
+
+//
+// write_object<ObjectExpression::Reference>
+//
+void write_object(std::ostream *out, ObjectExpression::Reference const *in)
+{
+   (*in)->writeObject(out);
 }
 
 // EOF

@@ -35,14 +35,37 @@
 #include <string>
 #include <vector>
 
-struct ObjectCodeSet;
-class ObjectVector;
-class SourceTokenC;
+
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+#define OBJEXP_EXPR_ARGS SourcePosition const &pos
+#define OBJEXP_EXPR_PARM SourcePosition const &_pos
+#define OBJEXP_EXPR_PASS _pos
+
+#define OBJEXP_EXPRUNA_ARGS ObjectExpression *expr, OBJEXP_EXPR_ARGS
+#define OBJEXP_EXPRUNA_PARM ObjectExpression *_expr, OBJEXP_EXPR_PARM
+#define OBJEXP_EXPRUNA_PASS _expr, OBJEXP_EXPR_PASS
+
+#define OBJEXP_EXPRBIN_ARGS ObjectExpression *exprL, ObjectExpression *exprR, \
+                            OBJEXP_EXPR_ARGS
+#define OBJEXP_EXPRBIN_PARM ObjectExpression *_exprL, ObjectExpression *_exprR, \
+                            OBJEXP_EXPR_PARM
+#define OBJEXP_EXPRBIN_PASS _exprL, _exprR, OBJEXP_EXPR_PASS
+
+#define OBJEXP_EXPRTRI_ARGS ObjectExpression *exprC, OBJEXP_EXPRBIN_ARGS
+#define OBJEXP_EXPRTRI_PARM ObjectExpression *_exprC, OBJEXP_EXPRBIN_PARM
+#define OBJEXP_EXPRTRI_PASS _exprC, OBJEXP_EXPRBIN_PASS
 
 
 //----------------------------------------------------------------------------|
 // Types                                                                      |
 //
+
+struct ObjectCodeSet;
+class ObjectVector;
+class SourceTokenC;
 
 //
 // ObjectExpression
@@ -70,14 +93,14 @@ public:
    virtual void expand(Vector *out) {out->push_back(this);}
    virtual void expandOnce(Vector *out) {out->push_back(this);}
 
-   SourcePosition const &getPosition() const;
+   SourcePosition const &getPosition() const {return pos;}
 
    virtual ExpressionType getType() const = 0;
 
-   virtual ObjectExpression::Pointer resolveElement(bigsint index) const;
+   virtual Reference resolveElement(bigsint index) const;
    virtual bigreal resolveFloat() const;
    virtual bigsint resolveInt() const;
-   virtual ObjectExpression::Pointer resolveMember(std::string const &name) const;
+   virtual Reference resolveMember(std::string const &name) const;
    virtual ObjectCodeSet resolveOCode() const;
    virtual std::string resolveSymbol() const;
 
@@ -86,12 +109,15 @@ public:
 
    friend void override_object(ExpressionType *out, ExpressionType const *in);
    friend void override_object(Pointer        *out, Pointer        const *in);
+   friend void override_object(Reference      *out, Reference      const *in);
 
-	friend void read_object(std::istream * in, ExpressionType * out);
-	friend void read_object(std::istream * in, Pointer * out);
+   friend void read_object(std::istream *in, ExpressionType *out);
+   friend void read_object(std::istream *in, Pointer        *out);
+   friend void read_object(std::istream *in, Reference      *out);
 
    friend void write_object(std::ostream *out, ExpressionType const *in);
    friend void write_object(std::ostream *out, Pointer        const *in);
+   friend void write_object(std::ostream *out, Reference      const *in);
 
 	static void add_address_count(bigsint const addressCount);
 
@@ -101,32 +127,42 @@ public:
 	static void add_symbol(std::string const & symbol, ObjectExpression * value);
 	static void add_symbol(std::string const & symbol, ExpressionType type);
 
-	static Pointer create_binary_add(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
-	static Pointer create_binary_and(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
-	static Pointer create_binary_div(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
-	static Pointer create_binary_ior(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
-	static Pointer create_binary_mod(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
-	static Pointer create_binary_mul(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
-	static Pointer create_binary_sub(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
-	static Pointer create_binary_xor(ObjectExpression * exprL, ObjectExpression * exprR, SourcePosition const & position);
+   static Reference create_unary_add(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_unary_not(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_unary_sub(OBJEXP_EXPRUNA_ARGS);
 
-   static Pointer create_branch_and(ObjectExpression *exprL, ObjectExpression *exprR, SourcePosition const &position);
-   static Pointer create_branch_ior(ObjectExpression *exprL, ObjectExpression *exprR, SourcePosition const &position);
-   static Pointer create_branch_not(ObjectExpression *expr, SourcePosition const &position);
-   static Pointer create_branch_xor(ObjectExpression *exprL, ObjectExpression *exprR, SourcePosition const &position);
+   static Reference create_binary_add   (OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_and   (OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_cmp_ge(OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_cmp_gt(OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_cmp_le(OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_cmp_lt(OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_cmp_eq(OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_cmp_ne(OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_div   (OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_ior   (OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_lsh   (OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_mod   (OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_mul   (OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_rsh   (OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_sub   (OBJEXP_EXPRBIN_ARGS);
+   static Reference create_binary_xor   (OBJEXP_EXPRBIN_ARGS);
 
-   static Pointer create_cast_float_to_int(ObjectExpression *expr, SourcePosition const &position);
-   static Pointer create_cast_int_to_float(ObjectExpression *expr, SourcePosition const &position);
+   static Reference create_branch_and(OBJEXP_EXPRBIN_ARGS);
+   static Reference create_branch_if (OBJEXP_EXPRTRI_ARGS);
+   static Reference create_branch_ior(OBJEXP_EXPRBIN_ARGS);
+   static Reference create_branch_not(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_branch_xor(OBJEXP_EXPRBIN_ARGS);
 
-	static Pointer create_unary_add(ObjectExpression * expr, SourcePosition const & position);
-	static Pointer create_unary_sub(ObjectExpression * expr, SourcePosition const & position);
+   static Reference create_cast_float_to_int(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_int_to_float(OBJEXP_EXPRUNA_ARGS);
 
-   static Pointer create_value_array(Vector const &elems, SourcePosition const &position);
-   static Pointer create_value_ocode(ObjectCodeSet const &ocode, SourcePosition const &position);
-   static Pointer create_value_float(bigreal value, SourcePosition const &position);
-   static Pointer create_value_int(bigsint value, SourcePosition const &position);
-   static Pointer create_value_struct(Vector const &elems, VecStr const &names, SourcePosition const &position);
-   static Pointer create_value_symbol(std::string const &symbol, SourcePosition const &position);
+   static Reference create_value_array(Vector const &elems, SourcePosition const &pos);
+   static Reference create_value_ocode(ObjectCodeSet const &ocode, SourcePosition const &pos);
+   static Reference create_value_float(bigreal value, SourcePosition const &pos);
+   static Reference create_value_int(bigsint value, SourcePosition const &pos);
+   static Reference create_value_struct(Vector const &elems, VecStr const &names, SourcePosition const &pos);
+   static Reference create_value_symbol(std::string const &symbol, SourcePosition const &pos);
 
 	static void do_deferred_allocation();
 
@@ -155,24 +191,29 @@ public:
 protected:
    enum ObjectType
    {
+      OT_UNARY_ADD,
+      OT_UNARY_NOT,
+      OT_UNARY_SUB,
+
       OT_BINARY_ADD,
       OT_BINARY_AND,
+      OT_BINARY_CMP,
       OT_BINARY_DIV,
       OT_BINARY_IOR,
+      OT_BINARY_LSH,
       OT_BINARY_MOD,
       OT_BINARY_MUL,
+      OT_BINARY_RSH,
       OT_BINARY_SUB,
       OT_BINARY_XOR,
 
       OT_BRANCH_AND,
+      OT_BRANCH_IF,
       OT_BRANCH_IOR,
       OT_BRANCH_NOT,
       OT_BRANCH_XOR,
 
       OT_CAST,
-
-      OT_UNARY_ADD,
-      OT_UNARY_SUB,
 
       OT_VALUE_COMPOUND,
       OT_VALUE_FLOAT,
@@ -183,44 +224,51 @@ protected:
       OT_NONE
    };
 
-	ObjectExpression(SourcePosition const & position);
-	ObjectExpression(std::istream * in);
+   ObjectExpression(SourcePosition const &pos);
+   ObjectExpression(std::istream *in);
 
-	virtual void writeObject(std::ostream * out) const;
+   virtual void writeObject(std::ostream *out) const;
 
-	SourcePosition position;
+   SourcePosition pos;
 
 
 
-	friend void read_object(std::istream * in, ObjectType * out);
+   friend void read_object(std::istream *in, ObjectType *out);
 
    friend void write_object(std::ostream *out, ObjectType const *in);
    friend void write_object(std::ostream *out, ObjectType const &in);
 
-	static Pointer create_binary_add(std::istream * in);
-	static Pointer create_binary_and(std::istream * in);
-	static Pointer create_binary_div(std::istream * in);
-	static Pointer create_binary_ior(std::istream * in);
-	static Pointer create_binary_mod(std::istream * in);
-	static Pointer create_binary_mul(std::istream * in);
-	static Pointer create_binary_sub(std::istream * in);
-	static Pointer create_binary_xor(std::istream * in);
+   static Reference create(std::istream *in);
 
-   static Pointer create_branch_and(std::istream *in);
-   static Pointer create_branch_ior(std::istream *in);
-   static Pointer create_branch_not(std::istream *in);
-   static Pointer create_branch_xor(std::istream *in);
+   static Reference create_unary_add(std::istream *in);
+   static Reference create_unary_not(std::istream *in);
+   static Reference create_unary_sub(std::istream *in);
 
-   static Pointer create_cast(std::istream *in);
+   static Reference create_binary_add(std::istream *in);
+   static Reference create_binary_and(std::istream *in);
+   static Reference create_binary_cmp(std::istream *in);
+   static Reference create_binary_div(std::istream *in);
+   static Reference create_binary_ior(std::istream *in);
+   static Reference create_binary_lsh(std::istream *in);
+   static Reference create_binary_mod(std::istream *in);
+   static Reference create_binary_mul(std::istream *in);
+   static Reference create_binary_rsh(std::istream *in);
+   static Reference create_binary_sub(std::istream *in);
+   static Reference create_binary_xor(std::istream *in);
 
-	static Pointer create_unary_add(std::istream * in);
-	static Pointer create_unary_sub(std::istream * in);
+   static Reference create_branch_and(std::istream *in);
+   static Reference create_branch_if (std::istream *in);
+   static Reference create_branch_ior(std::istream *in);
+   static Reference create_branch_not(std::istream *in);
+   static Reference create_branch_xor(std::istream *in);
 
-   static Pointer create_value_compound(std::istream *in);
-   static Pointer create_value_float(std::istream *in);
-   static Pointer create_value_int(std::istream *in);
-   static Pointer create_value_ocode(std::istream *in);
-   static Pointer create_value_symbol(std::istream *in);
+   static Reference create_cast(std::istream *in);
+
+   static Reference create_value_compound(std::istream *in);
+   static Reference create_value_float   (std::istream *in);
+   static Reference create_value_int     (std::istream *in);
+   static Reference create_value_ocode   (std::istream *in);
+   static Reference create_value_symbol  (std::istream *in);
 
 private:
    virtual void writeACSPLong(std::ostream *out) const;

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,11 +17,14 @@
 //
 //-----------------------------------------------------------------------------
 //
-// ObjectExpression handling of "operator ^".
+// ObjectExpression handling of "operator ~".
 //
 //-----------------------------------------------------------------------------
 
-#include "Binary.hpp"
+#include "Unary.hpp"
+
+#include "../ACSP.hpp"
+#include "../BinaryTokenACS.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -29,26 +32,34 @@
 //
 
 //
-// ObjectExpression_BinaryXOr
+// ObjectExpression_UnaryNot
 //
-class ObjectExpression_BinaryXOr : public ObjectExpression_Binary
+class ObjectExpression_UnaryNot : public ObjectExpression_Unary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_BinaryXOr,
-                                   ObjectExpression_Binary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_UnaryNot,
+                                   ObjectExpression_Unary);
 
 public:
    //
-   // ::ObjectExpression_BinaryXOr
+   // ::ObjectExpression_UnaryNot
    //
-   ObjectExpression_BinaryXOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
+   ObjectExpression_UnaryNot(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS)
    {
    }
 
    //
-   // ::ObjectExpression_BinaryXOr
+   // ::ObjectExpression_UnaryNot
    //
-   ObjectExpression_BinaryXOr(std::istream *in) : Super(in)
+   ObjectExpression_UnaryNot(std::istream *in) : Super(in)
    {
+   }
+
+   //
+   // ::getType
+   //
+   virtual ExpressionType getType() const
+   {
+      return ET_INT;
    }
 
    //
@@ -56,7 +67,17 @@ public:
    //
    virtual bigsint resolveInt() const
    {
-      return exprL->resolveInt() ^ exprR->resolveInt();
+      return ~expr->resolveInt();
+   }
+
+   //
+   // ::writeACSPLong
+   //
+   virtual void writeACSPLong(std::ostream *out) const
+   {
+      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_BNOT);
+
+      expr->writeACSP(out);
    }
 
 protected:
@@ -65,7 +86,7 @@ protected:
    //
    virtual void writeObject(std::ostream *out) const
    {
-      write_object(out, OT_BINARY_XOR);
+      write_object(out, OT_UNARY_NOT);
 
       Super::writeObject(out);
    }
@@ -77,22 +98,20 @@ protected:
 //
 
 //
-// ObjectExpression::create_binary_xor
+// ObjectExpression::create_unary_not
 //
-ObjectExpression::Reference ObjectExpression::create_binary_xor(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_unary_not(
+   OBJEXP_EXPRUNA_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryXOr(
-      exprL, exprR, pos));
+   return static_cast<Reference>(new ObjectExpression_UnaryNot(expr, pos));
 }
 
 //
-// ObjectExpression::create_binary_xor
+// ObjectExpression::create_unary_not
 //
-ObjectExpression::Reference ObjectExpression::create_binary_xor(
-   std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_unary_not(std::istream *in)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryXOr(in));
+   return static_cast<Reference>(new ObjectExpression_UnaryNot(in));
 }
 
 // EOF

@@ -43,18 +43,14 @@ public:
    //
    // ::ObjectExpression_BranchXOr
    //
-   ObjectExpression_BranchXOr
-   (ObjectExpression *_exprL, ObjectExpression *_exprR,
-    SourcePosition const &_position)
-    : Super(_exprL, _exprR, _position)
+   ObjectExpression_BranchXOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
    {
    }
 
    //
    // ::ObjectExpression_BranchXOr
    //
-   ObjectExpression_BranchXOr(std::istream *in)
-   : Super(in)
+   ObjectExpression_BranchXOr(std::istream *in) : Super(in)
    {
    }
 
@@ -88,17 +84,6 @@ public:
       return Super::resolveInt();
    }
 
-   //
-   // ::writeACSP
-   //
-   virtual void writeACSP(std::ostream *out) const
-   {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LXOR);
-
-      exprL->writeACSP(out);
-      exprR->writeACSP(out);
-   }
-
 protected:
    //
    // ::writeObject
@@ -108,6 +93,18 @@ protected:
       write_object(out, OT_BRANCH_XOR);
 
       Super::writeObject(out);
+   }
+
+private:
+   //
+   // ::writeACSPLong
+   //
+   virtual void writeACSPLong(std::ostream *out) const
+   {
+      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LXOR);
+
+      exprL->writeACSP(out);
+      exprR->writeACSP(out);
    }
 };
 
@@ -119,19 +116,20 @@ protected:
 //
 // ObjectExpression::create_branch_xor
 //
-ObjectExpression::Pointer ObjectExpression::
-create_branch_xor(ObjectExpression *exprL, ObjectExpression *exprR,
-                  SourcePosition const &position)
+ObjectExpression::Reference ObjectExpression::create_branch_xor(
+   OBJEXP_EXPRBIN_ARGS)
 {
-   return new ObjectExpression_BranchXOr(exprL, exprR, position);
+   return static_cast<Reference>(new ObjectExpression_BranchXOr(
+      exprL, exprR, pos));
 }
 
 //
-// ObjectExpression::create_branch_and
+// ObjectExpression::create_branch_xor
 //
-ObjectExpression::Pointer ObjectExpression::create_branch_xor(std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_branch_xor(
+   std::istream *in)
 {
-   return new ObjectExpression_BranchXOr(in);
+   return static_cast<Reference>(new ObjectExpression_BranchXOr(in));
 }
 
 // EOF

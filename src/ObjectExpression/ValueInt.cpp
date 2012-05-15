@@ -114,18 +114,18 @@ private:
 //
 // ObjectExpression::create_value_int
 //
-ObjectExpression::Pointer ObjectExpression::create_value_int
-(bigsint value, SourcePosition const &pos)
+ObjectExpression::Reference ObjectExpression::create_value_int(
+   bigsint value, OBJEXP_EXPR_ARGS)
 {
-   return new ObjectExpression_ValueInt(value, pos);
+   return static_cast<Reference>(new ObjectExpression_ValueInt(value, pos));
 }
 
 //
 // ObjectExpression::create_value_int
 //
-ObjectExpression::Pointer ObjectExpression::create_value_int(std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_value_int(std::istream *in)
 {
-   return new ObjectExpression_ValueInt(in);
+   return static_cast<Reference>(new ObjectExpression_ValueInt(in));
 }
 
 // EOF

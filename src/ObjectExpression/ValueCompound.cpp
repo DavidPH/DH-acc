@@ -42,17 +42,18 @@ public:
    //
    // ::ObjectExpression_ValueCompound
    //
-   ObjectExpression_ValueCompound
-   (Vector const &_elems, VecStr const &_names, SourcePosition const &_pos)
-   : Super(_pos), elems(_elems), names(_names), type(ET_STRUCT)
+   ObjectExpression_ValueCompound(Vector const &_elems, VecStr const &_names,
+                                  SourcePosition const &_pos)
+    : Super(_pos), elems(_elems), names(_names), type(ET_STRUCT)
    {
    }
+
    //
    // ::ObjectExpression_ValueCompound
    //
-   ObjectExpression_ValueCompound
-   (Vector const &_elems, SourcePosition const &_pos)
-   : Super(_pos), elems(_elems), type(ET_ARRAY)
+   ObjectExpression_ValueCompound(Vector const &_elems,
+                                  SourcePosition const &_pos)
+    : Super(_pos), elems(_elems), type(ET_ARRAY)
    {
    }
 
@@ -104,24 +105,24 @@ public:
    //
    // ::resolveElement
    //
-   virtual ObjectExpression::Pointer resolveElement(bigsint index) const
+   virtual ObjectExpression::Reference resolveElement(bigsint index) const
    {
       size_t i = static_cast<size_t>(index);
 
       if (i >= elems.size())
          return Super::resolveElement(index);
 
-      return elems[i];
+      return static_cast<ObjectExpression::Reference>(elems[i]);
    }
 
    //
    // ::resolveMember
    //
-   virtual ObjectExpression::Pointer resolveMember(std::string const &name) const
+   virtual ObjectExpression::Reference resolveMember(std::string const &name) const
    {
       for (size_t i = 0; i < names.size(); ++i)
          if (names[i] == name)
-            return elems[i];
+            return static_cast<ObjectExpression::Reference>(elems[i]);
 
       return Super::resolveMember(name);
    }
@@ -157,28 +158,30 @@ private:
 //
 // ObjectExpression::create_value_array
 //
-ObjectExpression::Pointer ObjectExpression::create_value_array
-(Vector const &elems, SourcePosition const &position)
+ObjectExpression::Reference ObjectExpression::create_value_array(
+   Vector const &elems, OBJEXP_EXPR_ARGS)
 {
-   return new ObjectExpression_ValueCompound(elems, position);
+   return static_cast<Reference>(new ObjectExpression_ValueCompound(
+      elems, pos));
 }
 
 //
 // ObjectExpression::create_value_compound
 //
-ObjectExpression::Pointer ObjectExpression::create_value_compound
-(std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_value_compound(
+   std::istream *in)
 {
-   return new ObjectExpression_ValueCompound(in);
+   return static_cast<Reference>(new ObjectExpression_ValueCompound(in));
 }
 
 //
 // ObjectExpression::create_value_struct
 //
-ObjectExpression::Pointer ObjectExpression::create_value_struct
-(Vector const &elems, VecStr const &names, SourcePosition const &position)
+ObjectExpression::Reference ObjectExpression::create_value_struct(
+   Vector const &elems, VecStr const &names, OBJEXP_EXPR_ARGS)
 {
-   return new ObjectExpression_ValueCompound(elems, names, position);
+   return static_cast<Reference>(new ObjectExpression_ValueCompound(
+      elems, names, pos));
 }
 
 // EOF

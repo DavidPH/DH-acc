@@ -114,18 +114,19 @@ private:
 //
 // ObjectExpression::create_value_float
 //
-ObjectExpression::Pointer ObjectExpression::create_value_float
-(bigreal value, SourcePosition const &pos)
+ObjectExpression::Reference ObjectExpression::create_value_float(
+   bigreal value, OBJEXP_EXPR_ARGS)
 {
-   return new ObjectExpression_ValueFloat(value, pos);
+   return static_cast<Reference>(new ObjectExpression_ValueFloat(value, pos));
 }
 
 //
 // ObjectExpression::create_value_float
 //
-ObjectExpression::Pointer ObjectExpression::create_value_float(std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_value_float(
+   std::istream *in)
 {
-   return new ObjectExpression_ValueFloat(in);
+   return static_cast<Reference>(new ObjectExpression_ValueFloat(in));
 }
 
 // EOF

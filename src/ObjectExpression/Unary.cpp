@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// Base class for object-level unary expression handling.
+// ObjectExpression handling of unary expressions.
 //
 //-----------------------------------------------------------------------------
 
@@ -33,16 +33,17 @@
 //
 // ObjectExpression_Unary::ObjectExpression_Unary
 //
-ObjectExpression_Unary::ObjectExpression_Unary(ObjectExpression * expr_, SourcePosition const & position_) : Super(position_), expr(expr_)
+ObjectExpression_Unary::ObjectExpression_Unary(OBJEXP_EXPRUNA_PARM)
+ : Super(OBJEXP_EXPR_PASS), expr(_expr)
 {
 }
 
 //
 // ObjectExpression_Unary::ObjectExpression_Unary
 //
-ObjectExpression_Unary::ObjectExpression_Unary(std::istream * in) : Super(in)
+ObjectExpression_Unary::ObjectExpression_Unary(std::istream *in)
+ : Super(in), expr(create(in))
 {
-	read_object(in, &expr);
 }
 
 //
@@ -58,7 +59,7 @@ bool ObjectExpression_Unary::canResolve() const
 //
 ObjectExpression::ExpressionType ObjectExpression_Unary::getType() const
 {
-	return expr->getType();
+   return expr->getType();
 }
 
 //

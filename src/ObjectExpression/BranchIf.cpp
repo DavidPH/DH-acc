@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,11 +17,15 @@
 //
 //-----------------------------------------------------------------------------
 //
-// ObjectExpression handling of "operator ^".
+// ObjectExpression handling of "operator ?:".
 //
 //-----------------------------------------------------------------------------
 
 #include "Binary.hpp"
+
+#include "../ACSP.hpp"
+#include "../BinaryTokenACS.hpp"
+#include "../ObjectCode.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -29,26 +33,51 @@
 //
 
 //
-// ObjectExpression_BinaryXOr
+// ObjectExpression_BranchIf
 //
-class ObjectExpression_BinaryXOr : public ObjectExpression_Binary
+class ObjectExpression_BranchIf : public ObjectExpression_Binary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_BinaryXOr,
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_BranchIf,
                                    ObjectExpression_Binary);
 
 public:
    //
-   // ::ObjectExpression_BinaryXOr
+   // ::ObjectExpression_BranchIf
    //
-   ObjectExpression_BinaryXOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
+   ObjectExpression_BranchIf(OBJEXP_EXPRTRI_PARM)
+    : Super(OBJEXP_EXPRBIN_PASS), exprC(_exprC)
    {
    }
 
    //
-   // ::ObjectExpression_BinaryXOr
+   // ::ObjectExpression_BranchIf
    //
-   ObjectExpression_BinaryXOr(std::istream *in) : Super(in)
+   ObjectExpression_BranchIf(std::istream *in) : Super(in), exprC(create(in))
    {
+   }
+
+   //
+   // ::canResolve
+   //
+   virtual bool canResolve() const
+   {
+      return exprC->canResolve() && Super::canResolve();
+   }
+
+   //
+   // ::resolveFloat
+   //
+   virtual bigreal resolveFloat() const
+   {
+      return (exprC->resolveInt() ? exprL : exprR)->resolveFloat();
+   }
+
+   //
+   // ::resolveOCode
+   //
+   virtual ObjectCodeSet resolveOCode() const
+   {
+      return (exprC->resolveInt() ? exprL : exprR)->resolveOCode();
    }
 
    //
@@ -56,7 +85,7 @@ public:
    //
    virtual bigsint resolveInt() const
    {
-      return exprL->resolveInt() ^ exprR->resolveInt();
+      return (exprC->resolveInt() ? exprL : exprR)->resolveInt();
    }
 
 protected:
@@ -65,10 +94,15 @@ protected:
    //
    virtual void writeObject(std::ostream *out) const
    {
-      write_object(out, OT_BINARY_XOR);
+      write_object(out, OT_BRANCH_IF);
 
       Super::writeObject(out);
+
+      write_object(out, &exprC);
    }
+
+private:
+   ObjectExpression::Reference exprC;
 };
 
 
@@ -77,22 +111,21 @@ protected:
 //
 
 //
-// ObjectExpression::create_binary_xor
+// ObjectExpression::create_branch_if
 //
-ObjectExpression::Reference ObjectExpression::create_binary_xor(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_branch_if(
+   OBJEXP_EXPRTRI_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryXOr(
-      exprL, exprR, pos));
+   return static_cast<Reference>(new ObjectExpression_BranchIf(
+      exprC, exprL, exprR, pos));
 }
 
 //
-// ObjectExpression::create_binary_xor
+// ObjectExpression::create_branch_if
 //
-ObjectExpression::Reference ObjectExpression::create_binary_xor(
-   std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_branch_if(std::istream *in)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryXOr(in));
+   return static_cast<Reference>(new ObjectExpression_BranchIf(in));
 }
 
 // EOF

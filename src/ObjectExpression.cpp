@@ -62,7 +62,7 @@ ObjectExpression::symbol_type_table;
 //
 // ObjectExpression::ObjectExpression
 //
-ObjectExpression::ObjectExpression(SourcePosition const &_pos) : position(_pos)
+ObjectExpression::ObjectExpression(OBJEXP_EXPR_PARM) : pos(_pos)
 {
 }
 
@@ -71,7 +71,7 @@ ObjectExpression::ObjectExpression(SourcePosition const &_pos) : position(_pos)
 //
 ObjectExpression::ObjectExpression(std::istream *in)
 {
-   read_object(in, &position);
+   read_object(in, &pos);
 }
 
 //
@@ -193,11 +193,6 @@ ObjectExpression::ExpressionType ObjectExpression::get_symbol_type
    return typeIt->second;
 }
 
-SourcePosition const &ObjectExpression::getPosition() const
-{
-   return position;
-}
-
 //
 // ObjectExpression::iter_library
 //
@@ -213,9 +208,9 @@ void ObjectExpression::iter_library
 //
 // ObjectExpression::resolveElement
 //
-ObjectExpression::Pointer ObjectExpression::resolveElement(bigsint) const
+ObjectExpression::Reference ObjectExpression::resolveElement(bigsint) const
 {
-   ERROR_N(position, "cannot resolve element");
+   ERROR_NP("cannot resolve element");
 }
 
 //
@@ -223,7 +218,7 @@ ObjectExpression::Pointer ObjectExpression::resolveElement(bigsint) const
 //
 bigreal ObjectExpression::resolveFloat() const
 {
-   ERROR_N(position, "cannot resolve float");
+   ERROR_NP("cannot resolve float");
 }
 
 //
@@ -231,16 +226,16 @@ bigreal ObjectExpression::resolveFloat() const
 //
 bigsint ObjectExpression::resolveInt() const
 {
-   ERROR_N(position, "cannot resolve int");
+   ERROR_NP("cannot resolve int");
 }
 
 //
 // ObjectExpression::resolveMember
 //
-ObjectExpression::Pointer ObjectExpression::resolveMember
-(std::string const &name) const
+ObjectExpression::Reference ObjectExpression::resolveMember(
+   std::string const &name) const
 {
-   ERROR_N(position, "cannot resolve member: %s", name.c_str());
+   ERROR_NP("cannot resolve member: %s", name.c_str());
 }
 
 //
@@ -248,7 +243,7 @@ ObjectExpression::Pointer ObjectExpression::resolveMember
 //
 ObjectCodeSet ObjectExpression::resolveOCode() const
 {
-   ERROR_N(position, "cannot resolve ocode");
+   ERROR_NP("cannot resolve ocode");
 }
 
 //
@@ -256,7 +251,7 @@ ObjectCodeSet ObjectExpression::resolveOCode() const
 //
 std::string ObjectExpression::resolveSymbol() const
 {
-   ERROR_N(position, "cannot resolve symbol");
+   ERROR_NP("cannot resolve symbol");
 }
 
 //
@@ -302,15 +297,15 @@ void ObjectExpression::writeACSP(std::ostream *out) const
 //
 void ObjectExpression::writeACSPLong(std::ostream *) const
 {
-   ERROR_N(position, "cannot write ACS+");
+   ERROR_NP("cannot write ACS+");
 }
 
 //
 // ObjectExpression::writeObject
 //
-void ObjectExpression::writeObject(std::ostream * out) const
+void ObjectExpression::writeObject(std::ostream *out) const
 {
-   write_object(out, &position);
+   write_object(out, &pos);
 }
 
 // EOF

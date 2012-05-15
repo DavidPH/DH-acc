@@ -38,15 +38,15 @@
 //
 class ObjectExpression_ValueSymbol : public ObjectExpression
 {
-   MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueSymbol, ObjectExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_ValueSymbol,
+                                   ObjectExpression);
 
 public:
    //
    // ::ObjectExpression_ValueSymbol
    //
-   ObjectExpression_ValueSymbol
-   (std::string const &_value, SourcePosition const &_pos)
-    : Super(_pos), value(_value)
+   ObjectExpression_ValueSymbol(std::string const &_value, OBJEXP_EXPR_PARM)
+    : Super(OBJEXP_EXPR_PASS), value(_value)
    {
    }
 
@@ -74,7 +74,7 @@ public:
    //
    virtual ExpressionType getType() const
    {
-      return ObjectExpression::get_symbol_type(value, position);
+      return ObjectExpression::get_symbol_type(value, pos);
    }
 
    //
@@ -82,7 +82,7 @@ public:
    //
    virtual bigreal resolveFloat() const
    {
-      return ObjectExpression::get_symbol(value, position)->resolveFloat();
+      return ObjectExpression::get_symbol(value, pos)->resolveFloat();
    }
 
    //
@@ -90,7 +90,7 @@ public:
    //
    virtual bigsint resolveInt() const
    {
-      return ObjectExpression::get_symbol(value, position)->resolveInt();
+      return ObjectExpression::get_symbol(value, pos)->resolveInt();
    }
 
    //
@@ -135,19 +135,19 @@ private:
 //
 // ObjectExpression::create_value_symbol
 //
-ObjectExpression::Pointer ObjectExpression::create_value_symbol
-(std::string const &value, SourcePosition const &pos)
+ObjectExpression::Reference ObjectExpression::create_value_symbol(
+   std::string const &value, OBJEXP_EXPR_ARGS)
 {
-   return new ObjectExpression_ValueSymbol(value, pos);
+   return static_cast<Reference>(new ObjectExpression_ValueSymbol(value, pos));
 }
 
 //
 // ObjectExpression::create_value_symbol
 //
-ObjectExpression::Pointer ObjectExpression::create_value_symbol
-(std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_value_symbol(
+   std::istream *in)
 {
-   return new ObjectExpression_ValueSymbol(in);
+   return static_cast<Reference>(new ObjectExpression_ValueSymbol(in));
 }
 
 // EOF

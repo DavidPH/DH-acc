@@ -21,10 +21,11 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "../ObjectExpression.hpp"
+#include "Unary.hpp"
 
 #include "../ACSP.hpp"
 #include "../BinaryTokenACS.hpp"
+#include "../SourceException.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -34,29 +35,26 @@
 //
 // ObjectExpression_Cast
 //
-class ObjectExpression_Cast : public ObjectExpression
+class ObjectExpression_Cast : public ObjectExpression_Unary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_Cast, ObjectExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_Cast,
+                                   ObjectExpression_Unary);
 
 public:
    //
    // ::ObjectExpression_Cast
    //
-   ObjectExpression_Cast
-   (ExpressionType _dstType, ExpressionType _srcType, ObjectExpression *_expr,
-    SourcePosition const &_position)
-   : Super(_position), expr(_expr), dstType(_dstType), srcType(_srcType)
+   ObjectExpression_Cast(OBJEXP_EXPRUNA_PARM, ExpressionType _dstType,
+                         ExpressionType _srcType)
+     : Super(OBJEXP_EXPRUNA_PASS), dstType(_dstType), srcType(_srcType)
    {
    }
 
    //
    // ::ObjectExpression_Cast
    //
-   ObjectExpression_Cast(std::istream *in)
-   : Super(in)
+   ObjectExpression_Cast(std::istream *in) : Super(in)
    {
-      read_object(in, &expr);
-
       read_object(in, &dstType);
       read_object(in, &srcType);
    }
@@ -125,10 +123,25 @@ public:
       return Super::resolveInt();
    }
 
+protected:
    //
-   // ::writeACSP
+   // ::writeObject
    //
-   virtual void writeACSP(std::ostream *out) const
+   virtual void writeObject(std::ostream *out) const
+   {
+      write_object(out, OT_CAST);
+
+      Super::writeObject(out);
+
+      write_object(out, &dstType);
+      write_object(out, &srcType);
+   }
+
+private:
+   //
+   // ::writeACSPLong
+   //
+   virtual void writeACSPLong(std::ostream *out) const
    {
       if (dstType == srcType)
       {
@@ -150,27 +163,8 @@ public:
          return;
       }
 
-      Super::writeACSP(out);
+      ERROR_NP("cannot write ACS+");
    }
-
-protected:
-   //
-   // ::writeObject
-   //
-   virtual void writeObject(std::ostream *out) const
-   {
-      write_object(out, OT_CAST);
-
-      Super::writeObject(out);
-
-      write_object(out, &expr);
-
-      write_object(out, &dstType);
-      write_object(out, &srcType);
-   }
-
-private:
-   ObjectExpression::Pointer expr;
 
    ExpressionType dstType;
    ExpressionType srcType;
@@ -184,27 +178,29 @@ private:
 //
 // ObjectExpression::create_cast
 //
-ObjectExpression::Pointer ObjectExpression::create_cast(std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_cast(std::istream *in)
 {
-   return new ObjectExpression_Cast(in);
+   return static_cast<Reference>(new ObjectExpression_Cast(in));
 }
 
 //
 // ObjectExpression::create_cast_float_to_int
 //
-ObjectExpression::Pointer ObjectExpression::
-create_cast_float_to_int(ObjectExpression *expr, SourcePosition const &position)
+ObjectExpression::Reference ObjectExpression::create_cast_float_to_int(
+   OBJEXP_EXPRUNA_ARGS)
 {
-   return new ObjectExpression_Cast(ET_INT, ET_FLOAT, expr, position);
+   return static_cast<Reference>(new ObjectExpression_Cast(
+      expr, pos, ET_INT, ET_FLOAT));
 }
 
 //
 // ObjectExpression::create_cast_int_to_float
 //
-ObjectExpression::Pointer ObjectExpression::
-create_cast_int_to_float(ObjectExpression *expr, SourcePosition const &position)
+ObjectExpression::Reference ObjectExpression::create_cast_int_to_float(
+   OBJEXP_EXPRUNA_ARGS)
 {
-   return new ObjectExpression_Cast(ET_FLOAT, ET_INT, expr, position);
+   return static_cast<Reference>(new ObjectExpression_Cast(
+      expr, pos, ET_FLOAT, ET_INT));
 }
 
 // EOF
