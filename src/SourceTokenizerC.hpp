@@ -110,6 +110,8 @@ private:
    void expandDefine(SourceTokenC *tok);
    void expandMacro(SourceTokenC *tok);
 
+   SourceTokenC::Reference getExpand();
+
    bool getIf();
    CounterPointer<ObjectExpression> getIfMultiple();
    CounterPointer<ObjectExpression> getIfSingle();

@@ -818,55 +818,17 @@ SourceTokenC::Reference SourceTokenizerC::get()
 
    for (;;)
    {
-      tok = getRaw();
+      tok = getExpand();
 
       // Preprocessor directive.
       if (tok->type == SourceTokenC::TT_ENDL)
       {
          while (tok->type == SourceTokenC::TT_ENDL)
-            tok = getRaw();
+            tok = getExpand();
 
          if (tok->type == SourceTokenC::TT_HASH1)
          {
             doCommand(); continue;
-         }
-      }
-
-      // Macro expansion.
-      if (canExpand && tok->type == SourceTokenC::TT_NAM)
-      {
-         // Check for macro.
-         if (hasMacro(tok->data))
-         {
-            SourceTokenC::Reference tmpTok = get();
-
-            // Macro invocation!
-            if (tmpTok->type == SourceTokenC::TT_PAREN_O)
-            {
-               expandMacro(tok); continue;
-            }
-
-            unget(tmpTok);
-         }
-
-         if (hasDefine(tok->data))
-         {
-            expandDefine(tok); continue;
-         }
-
-         if (tok->data == "__FILE__")
-         {
-            tok = SourceTokenC::create(tok->pos,
-               tok->pos.filename, SourceTokenC::TT_STR);
-            break;
-         }
-
-         if (tok->data == "__LINE__")
-         {
-            std::ostringstream oss; oss << tok->pos.line;
-            tok = SourceTokenC::create(tok->pos,
-               oss.str(), SourceTokenC::TT_INT);
-            break;
          }
       }
 
@@ -882,15 +844,12 @@ SourceTokenC::Reference SourceTokenizerC::get()
    // String literal concatenation.
    if (tok->type == SourceTokenC::TT_STR)
    {
-      SourceTokenC::Reference oldTok(tok);
-      tok = get();
+      SourceTokenC::Reference tmpTok = get();
 
-      if (tok->type == SourceTokenC::TT_STR)
-         oldTok->data += tok->data;
+      if (tmpTok->type == SourceTokenC::TT_STR)
+         tok->data += tmpTok->data;
       else
-         unget(tok);
-
-      tok = oldTok;
+         unget(tmpTok);
    }
 
    return static_cast<SourceTokenC::Reference>(tok);
@@ -914,6 +873,47 @@ SourceTokenC::Reference SourceTokenizerC::get
 {
    SourceTokenC::Reference tok = get();
    doAssert(tok, type); doAssert(tok, data);
+   return tok;
+}
+
+//
+// SourceTokenizerC::getExpand
+//
+SourceTokenC::Reference SourceTokenizerC::getExpand()
+{
+   SourceTokenC::Reference tok = getRaw();
+
+   if (canExpand && tok->type == SourceTokenC::TT_NAM)
+   {
+      if (hasMacro(tok->data))
+      {
+         SourceTokenC::Reference tmpTok = get();
+
+         // Macro invocation!
+         if (tmpTok->type == SourceTokenC::TT_PAREN_O)
+         {
+            expandMacro(tok); return getExpand();
+         }
+
+         unget(tmpTok);
+      }
+
+      if (hasDefine(tok->data))
+      {
+         expandDefine(tok); return getExpand();
+      }
+
+      if (tok->data == "__FILE__")
+         return SourceTokenC::create(tok->pos, tok->pos.filename,
+                                     SourceTokenC::TT_STR);
+
+      if (tok->data == "__LINE__")
+      {
+         std::ostringstream oss; oss << tok->pos.line;
+         return SourceTokenC::create(tok->pos, oss.str(), SourceTokenC::TT_INT);
+      }
+   }
+
    return tok;
 }
 
@@ -992,7 +992,7 @@ done:
 //
 ObjectExpression::Pointer SourceTokenizerC::getIfSingle()
 {
-   SourceTokenC::Reference tok = getRaw();
+   SourceTokenC::Reference tok = getExpand();
 
    switch (tok->type)
    {
