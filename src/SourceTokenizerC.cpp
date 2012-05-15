@@ -40,6 +40,9 @@
 static int add_define_base
 (char const *opt, int optf, int argc, char const *const *argv);
 
+static int rem_define_base
+(char const *opt, int optf, int argc, char const *const *argv);
+
 
 //----------------------------------------------------------------------------|
 // Static Variables                                                           |
@@ -47,6 +50,9 @@ static int add_define_base
 
 static option::option_call option_define_handler
 ('D', "define", NULL, "Adds a define.", NULL, add_define_base);
+
+static option::option_call option_undef_handler
+('U', "undef", NULL, "Removes a define.", NULL, rem_define_base);
 
 
 //----------------------------------------------------------------------------|
@@ -283,6 +289,19 @@ static ObjectExpression::Pointer make_expression(
 
    #undef EXPRR
    #undef EXPRL
+}
+
+//
+// rem_define_base
+//
+static int rem_define_base(char const *opt, int optf, int argc,
+                           char const *const *argv)
+{
+   if (!argc) option::exception::error(opt, optf, "requires argument");
+
+   SourceTokenizerC::rem_define_base(argv[0]);
+
+   return 1;
 }
 
 
