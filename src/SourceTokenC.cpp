@@ -200,50 +200,16 @@ static void dequote(std::string &out, std::string const &in)
 //
 
 //
-// SourceTokenC::tt_str
+// SourceTokenC::create_join
 //
-SourceTokenC::Reference SourceTokenC::tt_str(SourcePosition const &pos,
-   std::vector<Reference> const &args)
+SourceTokenC::Reference SourceTokenC::create_join(SourceTokenC const *l,
+                                                  SourceTokenC const *r)
 {
-   Reference tok(new SourceTokenC(pos, TT_STR));
+   if (l->type != TT_NAM || r->type != TT_NAM)
+      ERROR(l->pos, "TODO:can only join TT_NAM");
 
-   for (std::vector<Reference>::const_iterator end = args.end(),
-        itr = args.begin(); itr != end; ++itr) switch ((*itr)->type)
-   {
-   case TT_CHR:
-      tok->data.reserve(tok->data.size() + (*itr)->data.size() + 2);
-      tok->data += '\'';
-      dequote(tok->data, (*itr)->data);
-      tok->data += '\'';
-      break;
-
-   case TT_FLT:
-   case TT_NAM:
-   case TT_INT:
-      tok->data += (*itr)->data;
-      break;
-
-   case TT_STR:
-      tok->data.reserve(tok->data.size() + (*itr)->data.size() + 2);
-      tok->data += '"';
-      dequote(tok->data, (*itr)->data);
-      tok->data += '"';
-      break;
-
-   default:
-      tok->data += tt_datas[(*itr)->type];
-      break;
-   }
-
-   // Now search for trailing/leading whitespace and remove.
-   std::string::iterator end = tok->data.end(), itr = tok->data.begin();
-
-   while (itr != end && std::isspace(*itr)) ++itr;
-   while (end != itr && std::isspace(*(end-1))) --end;
-
-   if (end != tok->data.end() || itr != tok->data.begin())
-      tok->data = std::string(itr, end);
-
+   Reference tok(new SourceTokenC(*l));
+   tok->data += r->data;
    return tok;
 }
 
@@ -551,6 +517,54 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
    }
 
    ERROR(token->pos, "unexpected character '%c' (%i)", c, static_cast<int>(c));
+}
+
+//
+// SourceTokenC::tt_str
+//
+SourceTokenC::Reference SourceTokenC::tt_str(SourcePosition const &pos,
+   std::vector<Reference> const &args)
+{
+   Reference tok(new SourceTokenC(pos, TT_STR));
+
+   for (std::vector<Reference>::const_iterator end = args.end(),
+        itr = args.begin(); itr != end; ++itr) switch ((*itr)->type)
+   {
+   case TT_CHR:
+      tok->data.reserve(tok->data.size() + (*itr)->data.size() + 2);
+      tok->data += '\'';
+      dequote(tok->data, (*itr)->data);
+      tok->data += '\'';
+      break;
+
+   case TT_FLT:
+   case TT_NAM:
+   case TT_INT:
+      tok->data += (*itr)->data;
+      break;
+
+   case TT_STR:
+      tok->data.reserve(tok->data.size() + (*itr)->data.size() + 2);
+      tok->data += '"';
+      dequote(tok->data, (*itr)->data);
+      tok->data += '"';
+      break;
+
+   default:
+      tok->data += tt_datas[(*itr)->type];
+      break;
+   }
+
+   // Now search for trailing/leading whitespace and remove.
+   std::string::iterator end = tok->data.end(), itr = tok->data.begin();
+
+   while (itr != end && std::isspace(*itr)) ++itr;
+   while (end != itr && std::isspace(*(end-1))) --end;
+
+   if (end != tok->data.end() || itr != tok->data.begin())
+      tok->data = std::string(itr, end);
+
+   return tok;
 }
 
 //

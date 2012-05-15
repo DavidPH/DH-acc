@@ -43,13 +43,14 @@ class SourceStream;
 class SourceTokenizerC
 {
 public:
-   typedef std::vector<SourceTokenC::Reference> DefVec;
-   typedef std::map<std::string, DefVec> DefMap;
+   typedef std::map<std::string, std::string> DefMap;
 
-   typedef std::vector<std::string> MacroArg;
    typedef std::vector<SourceTokenC::Reference> MacroVec;
-   typedef std::pair<MacroArg, MacroVec> MacroDat;
-   typedef std::map<std::string, MacroDat> MacroMap;
+   typedef std::vector<SourceTokenC::Reference> MacroArg;
+   typedef std::vector<MacroArg> MacroArgs;
+   typedef std::vector<std::string> MacroParm;
+   typedef std::pair<MacroParm, std::string> MacroData;
+   typedef std::map<std::string, MacroData> MacroMap;
 
 
    explicit SourceTokenizerC(SourceStream *in);
@@ -69,24 +70,17 @@ public:
    void unget(SourceTokenC *token);
 
 
-   static void add_define_base(std::string const &name);
-   static void add_define_base(std::string const &name, DefVec const &tokens);
-   static void add_define_base(std::string const &name, std::string const &source);
+   static void add_define_base(std::string const &name, std::string const &data);
 
-   static void add_macro_base(std::string const &name, MacroArg const &arg);
-   static void add_macro_base(std::string const &name, MacroArg const &arg,
+   static void add_macro_base(std::string const &name, MacroParm const &parm,
                               std::string const &data);
-   static void add_macro_base(std::string const &name, MacroDat const &dat);
+
+   static void rem_define_base(std::string const &name);
 
 private:
-   SourceTokenizerC(SourceTokenizerC const &tokenizer)/* = delete*/;
+   void addDefine(std::string const &name, std::string const &data);
 
-   void addDefine(std::string const &name);
-   void addDefine(std::string const &name, SourcePosition const &pos,
-                  DefVec const &vec);
-
-   void addMacro(std::string const &name, SourcePosition const &pos,
-                 MacroDat const &dat);
+   void addMacro(std::string const &name, MacroData const &data);
 
    void addSkip(bool skip);
 
@@ -105,6 +99,17 @@ private:
    void doCommand_include(SourceTokenC *tok);
    void doCommand_undef(SourceTokenC *tok);
 
+   void expand(MacroVec &out, std::set<std::string> &used,
+               SourcePosition const &pos, SourceTokenC::Reference tok,
+               SourceStream *in);
+   void expand(MacroVec &out, std::set<std::string> &used,
+               SourcePosition const &pos, std::string const &data);
+   void expand(MacroVec &out, std::set<std::string> &used,
+      SourcePosition const &pos, MacroData const &data, MacroArgs const &args);
+
+   void expandDefine(SourceTokenC *tok);
+   void expandMacro(SourceTokenC *tok);
+
    bool getIf();
    CounterPointer<ObjectExpression> getIfMultiple();
    CounterPointer<ObjectExpression> getIfSingle();
@@ -116,10 +121,10 @@ private:
 
    bool isSkip();
 
-   SourceTokenizerC & operator = (SourceTokenizerC const &tokenizer)/* = delete*/;
+   SourceTokenC::Reference peekRaw();
 
-   void prepDefine(SourceTokenC *tok);
-   void prepMacro(SourceTokenC::Reference tok);
+   void readArgs(MacroArgs &args, SourceStream *in, MacroData const &data,
+                 SourcePosition const &pos);
 
    void remDefine(std::string const &name);
    void remSkip();
@@ -127,16 +132,12 @@ private:
    DefMap defines;
    MacroMap macros;
 
-   std::set<std::string> definesUsed;
-
-   std::vector<SourceStream *> in;
+   std::vector<SourceStream *> inStack;
    std::vector<bool> skipStack;
    std::vector<SourceTokenC::Reference> ungetStack;
    std::vector<bool> unskipStack;
 
-   bool canCommand : 1;
-   bool canExpand  : 1;
-   bool canSkip    : 1;
+   bool canExpand : 1;
 
 
    static DefMap defines_base;

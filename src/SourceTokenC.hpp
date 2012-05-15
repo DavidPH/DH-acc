@@ -134,12 +134,28 @@ public:
    TokenType type;
 
 
-   static Reference tt_str(SourcePosition const &pos,
-                           std::vector<Reference> const &args);
+   static Reference create(SourceStream *in)
+   {
+      Reference tok(new SourceTokenC); read_token(in, tok); return tok;
+   }
+
+   static Reference create(SourcePosition const &pos, std::string const &data,
+                           TokenType type)
+   {
+      return static_cast<Reference>(new SourceTokenC(pos, data, type));
+   }
+
+   static Reference create_join(SourceTokenC const *l, SourceTokenC const *r);
 
    static void read_token(SourceStream *in, SourceTokenC *token);
 
-   static Reference tt_none() {static Reference tt(new SourceTokenC); return tt;}
+   static Reference tt_none()
+   {
+      static Reference tok(new SourceTokenC); return tok;
+   }
+
+   static Reference tt_str(SourcePosition const &pos,
+                           std::vector<Reference> const &args);
 };
 
 
