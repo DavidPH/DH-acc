@@ -131,6 +131,7 @@ add_executable(DH-acc
    SourceTokenASMPLX.cpp
    SourceTokenC.cpp
    SourceTokenizerC.cpp
+   SourceTokenizerC/getExpr.cpp
    SourceVariable.cpp
    StoreType.cpp
    VariableData.cpp

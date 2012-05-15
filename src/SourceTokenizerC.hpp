@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// DS preprocessing.
+// C preprocessing.
 //
 //-----------------------------------------------------------------------------
 
@@ -112,9 +112,20 @@ private:
 
    SourceTokenC::Reference getExpand();
 
-   bool getIf();
-   CounterPointer<ObjectExpression> getIfMultiple();
-   CounterPointer<ObjectExpression> getIfSingle();
+   CounterReference<ObjectExpression> getExprPrimary();
+   CounterReference<ObjectExpression> getExprPrefix();
+   CounterReference<ObjectExpression> getExprMultiplicative();
+   CounterReference<ObjectExpression> getExprAdditive();
+   CounterReference<ObjectExpression> getExprShift();
+   CounterReference<ObjectExpression> getExprRelational();
+   CounterReference<ObjectExpression> getExprEquality();
+   CounterReference<ObjectExpression> getExprBitwiseAnd();
+   CounterReference<ObjectExpression> getExprBitwiseXOr();
+   CounterReference<ObjectExpression> getExprBitwiseIOr();
+   CounterReference<ObjectExpression> getExprLogicalAnd();
+   CounterReference<ObjectExpression> getExprLogicalXOr();
+   CounterReference<ObjectExpression> getExprLogicalIOr();
+   CounterReference<ObjectExpression> getExpr();
 
    SourceTokenC::Reference getRaw();
 

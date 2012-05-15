@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// DS preprocessing.
+// C preprocessing.
 //
 //-----------------------------------------------------------------------------
 
@@ -142,153 +142,6 @@ static SourceTokenizerC::MacroArg const *find_arg(
          return &args[i];
 
    return NULL;
-}
-
-//
-// make_expression
-//
-static ObjectExpression::Pointer make_expression(
-   std::vector<ObjectExpression::Pointer> const &expressions,
-   std::vector<SourceTokenC::Reference> const &operators,
-   size_t begin, size_t end)
-{
-   #define EXPRL make_expression(expressions, operators, begin, iter)
-   #define EXPRR make_expression(expressions, operators, iter+1, end)
-
-   #define CARGS operators[iter]->pos
-
-   // Terminating case. Only one expression, so just return it.
-   if (begin == end) return expressions[begin];
-
-   size_t iter;
-
-   // ?:
-
-   // ||
-   for (iter = end; iter-- > begin;)
-   {
-      switch (operators[iter]->type)
-      {
-      case SourceTokenC::TT_IO2:
-         return ObjectExpression::create_branch_ior(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // ^^
-   for (iter = end; iter-- > begin;)
-   {
-      switch (operators[iter]->type)
-      {
-      case SourceTokenC::TT_XO2:
-         return ObjectExpression::create_branch_xor(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // &&
-   for (iter = end; iter-- > begin;)
-   {
-      switch (operators[iter]->type)
-      {
-      case SourceTokenC::TT_AN2:
-         return ObjectExpression::create_branch_and(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // |
-   for (iter = end; iter-- > begin;)
-   {
-      switch (operators[iter]->type)
-      {
-      case SourceTokenC::TT_IOR:
-         return ObjectExpression::create_binary_ior(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // ^
-   for (iter = end; iter-- > begin;)
-   {
-      switch (operators[iter]->type)
-      {
-      case SourceTokenC::TT_XOR:
-         return ObjectExpression::create_binary_xor(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // &
-   for (iter = end; iter-- > begin;)
-   {
-      switch (operators[iter]->type)
-      {
-      case SourceTokenC::TT_AND:
-         return ObjectExpression::create_binary_and(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // == !=
-
-   // >= > <= <
-
-   // >> <<
-
-   // - +
-   for (iter = end; iter-- > begin;)
-   {
-      switch (operators[iter]->type)
-      {
-      case SourceTokenC::TT_SUB:
-         return ObjectExpression::create_binary_sub(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_ADD:
-         return ObjectExpression::create_binary_add(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   // * % /
-   for (iter = end; iter-- > begin;)
-   {
-      switch (operators[iter]->type)
-      {
-      case SourceTokenC::TT_MUL:
-         return ObjectExpression::create_binary_mul(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_MOD:
-         return ObjectExpression::create_binary_mod(EXPRL, EXPRR, CARGS);
-
-      case SourceTokenC::TT_DIV:
-         return ObjectExpression::create_binary_div(EXPRL, EXPRR, CARGS);
-
-      default:
-         break;
-      }
-   }
-
-   ERROR(operators[begin]->pos, "unexpected operator");
-
-   #undef CARGS
-
-   #undef EXPRR
-   #undef EXPRL
 }
 
 //
@@ -515,7 +368,7 @@ void SourceTokenizerC::doCommand_elif(SourceTokenC *tok)
    if (skipStack.empty())
       ERROR(tok->pos, "unmatched #elif");
 
-   bool ifResult = getIf();
+   bool ifResult = !!getExpr()->resolveInt();
    doAssert(peekRaw(), SourceTokenC::TT_ENDL);
 
      skipStack.back() = unskipStack.back() || !ifResult;
@@ -553,7 +406,7 @@ void SourceTokenizerC::doCommand_error(SourceTokenC *)
 //
 void SourceTokenizerC::doCommand_if(SourceTokenC *)
 {
-   addSkip(!getIf());
+   addSkip(!getExpr()->resolveInt());
    doAssert(peekRaw(), SourceTokenC::TT_ENDL);
 }
 
@@ -915,129 +768,6 @@ SourceTokenC::Reference SourceTokenizerC::getExpand()
    }
 
    return tok;
-}
-
-//
-// SourceTokenizerC::getIf
-//
-bool SourceTokenizerC::getIf()
-{
-   ObjectExpression::Pointer expr = getIfMultiple();
-
-   return !!expr->resolveInt();
-}
-
-//
-// SourceTokenizerC::getIfMultiple
-//
-ObjectExpression::Pointer SourceTokenizerC::getIfMultiple()
-{
-   std::vector<ObjectExpression::Pointer> expressions;
-   std::vector<SourceTokenC::Reference> operators;
-
-   expressions.push_back(getIfSingle());
-
-   SourceTokenC::Reference tok = getRaw();
-   for (; tok->type != SourceTokenC::TT_ENDL; tok = getRaw())
-   {
-      switch (tok->type)
-      {
-      case SourceTokenC::TT_ADD:
-      case SourceTokenC::TT_AN2:
-      case SourceTokenC::TT_AND:
-      case SourceTokenC::TT_CMP_EQ:
-      case SourceTokenC::TT_CMP_GE:
-      case SourceTokenC::TT_CMP_GT:
-      case SourceTokenC::TT_CMP_LE:
-      case SourceTokenC::TT_CMP_LT:
-      case SourceTokenC::TT_CMP_NE:
-      case SourceTokenC::TT_DIV:
-      case SourceTokenC::TT_IO2:
-      case SourceTokenC::TT_IOR:
-      case SourceTokenC::TT_MOD:
-      case SourceTokenC::TT_MUL:
-      case SourceTokenC::TT_LSH:
-      case SourceTokenC::TT_RSH:
-      case SourceTokenC::TT_SUB:
-      case SourceTokenC::TT_XOR:
-      case SourceTokenC::TT_XO2:
-      case_expr:
-         operators.push_back(tok);
-         expressions.push_back(getIfSingle());
-         break;
-
-      case SourceTokenC::TT_COLON:
-      case SourceTokenC::TT_PAREN_C:
-         ungetStack.push_back(tok);
-         goto done;
-
-      case SourceTokenC::TT_QUERY:
-         operators.push_back(tok);
-         expressions.push_back(getIfMultiple());
-         tok = getRaw(); doAssert(tok, SourceTokenC::TT_COLON);
-         goto case_expr;
-
-      default:
-         ERROR(tok->pos, "unexpected token type");
-      }
-   }
-   unget(tok);
-
-done:
-   return make_expression(expressions, operators, 0, operators.size());
-}
-
-//
-// SourceTokenizerC::getIfSingle
-//
-ObjectExpression::Pointer SourceTokenizerC::getIfSingle()
-{
-   SourceTokenC::Reference tok = getExpand();
-
-   switch (tok->type)
-   {
-   case SourceTokenC::TT_NAM:
-      if (tok->data == "defined")
-      {
-         bool hasParen = (tok = getRaw())->type == SourceTokenC::TT_PAREN_O;
-
-         doAssert((hasParen ? (tok = getRaw()) : tok), SourceTokenC::TT_NAM);
-
-         bool isdef = hasDefine(tok->data) || hasMacro(tok->data);
-
-         ObjectExpression::Pointer expr =
-            ObjectExpression::create_value_int(isdef, tok->pos);
-
-         if (hasParen) doAssert(getRaw(), SourceTokenC::TT_PAREN_C);
-
-         return expr;
-      }
-      else
-      {
-         // If this function sees any other identifier, that means it's not a
-         // define. C says that undefined identifiers evaluate to 0.
-         return ObjectExpression::create_value_int(0, tok->pos);
-      }
-
-   case SourceTokenC::TT_INT:
-      return ObjectExpression::create_value_int(
-         get_bigsint(tok->data, tok->pos), tok->pos);
-
-   case SourceTokenC::TT_NOTLOG:
-      return ObjectExpression::create_branch_not(getIfSingle(), tok->pos);
-
-   case SourceTokenC::TT_PAREN_O:
-   {
-      ObjectExpression::Pointer expr = getIfMultiple();
-
-      doAssert(getRaw(), SourceTokenC::TT_PAREN_C);
-
-      return expr;
-   }
-
-   default:
-      ERROR(tok->pos, "unexpected token type");
-   }
 }
 
 //
