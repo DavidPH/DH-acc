@@ -98,7 +98,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       objects->setPosition(pos);
       objects->addToken(OCODE_GET_AUTPTR, objects->getValue(0));
       objects->addToken(OCODE_JMP_TRU, objects->getValue(label));
-      objects->addToken(OCODE_ADD_AUTPTR, objects->getValue(1));
+      objects->addToken(OCODE_ADD_AUTPTR_IMM, objects->getValue(1));
       objects->addLabel(label);
    }
 
