@@ -475,6 +475,9 @@ VariableType::Reference VariableType::getArray(bigsint _width)
       typeArr->store = store;
       typeArr->width = _width;
 
+      if (typeUnq)
+         typeArr->typeUnq = typeUnq->getArray(_width);
+
       return static_cast<Reference>(typeArr);
    }
 
@@ -493,6 +496,9 @@ VariableType::Reference VariableType::getArray(bigsint _width)
    type->quals = quals;
    type->store = store;
    type->width = _width;
+
+   if (typeUnq)
+      type->typeUnq = typeUnq->getArray(_width);
 
    // Link into speclist.
    type->specprev = typeArr;

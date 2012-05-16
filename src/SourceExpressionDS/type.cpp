@@ -620,7 +620,11 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
          do
          {
             in->get(SourceTokenC::TT_BRACK_O);
-            widths.push_back(make_expression(in, blocks, context)->makeObject()->resolveInt());
+            if (in->peekType(SourceTokenC::TT_BRACK_C))
+               widths.push_back(0);
+            else
+               widths.push_back(make_expression(in, blocks, context)
+                  ->makeObject()->resolveInt());
             in->get(SourceTokenC::TT_BRACK_C);
          }
          while (in->peekType(SourceTokenC::TT_BRACK_O));
@@ -631,7 +635,11 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
       else
       {
          in->get(SourceTokenC::TT_BRACK_O);
-         width = make_expression(in, blocks, context)->makeObject()->resolveInt();
+         if (in->peekType(SourceTokenC::TT_BRACK_C))
+            width = 0;
+         else
+            width = make_expression(in, blocks, context)
+               ->makeObject()->resolveInt();
          in->get(SourceTokenC::TT_BRACK_C);
 
          type = type->getArray(width);

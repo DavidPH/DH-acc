@@ -364,13 +364,14 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
          VariableType::Reference dstTypes = dstType->getReturn();
          bigsint                 dstWidth = dstType->getWidth();
 
+         elems.resize(dstWidth);
          for (bigsint i = 0; i < dstWidth; ++i)
          {
-            if (static_cast<size_t>(i) < elems.size())
-               elems[i] = make_object_cast
-               (elems[i], dstTypes, srcTypes[i], pos);
+            if (elems[i])
+               elems[i] = make_object_cast(
+                  elems[i], dstTypes, srcTypes[i], pos);
             else
-               elems.push_back(make_object(dstTypes, pos));
+               elems[i] = make_object(dstTypes, pos);
          }
 
          obj = ObjectExpression::create_value_array(elems, pos);
@@ -380,13 +381,14 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       {
          VariableType::Vector const &dstTypes = dstType->getTypes();
 
+         elems.resize(dstTypes.size());
          for (size_t i = 0; i < dstTypes.size(); ++i)
          {
-            if (i < elems.size())
-               elems[i] = make_object_cast
-               (elems[i], dstTypes[i], srcTypes[i], pos);
+            if (elems[i])
+               elems[i] = make_object_cast(
+                  elems[i], dstTypes[i], srcTypes[i], pos);
             else
-               elems.push_back(make_object(dstTypes[i], pos));
+               elems[i] = make_object(dstTypes[i], pos);
          }
 
          if (dstBT == VariableType::BT_STRUCT)
