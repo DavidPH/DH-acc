@@ -133,29 +133,29 @@ switch (type->getBasicType()) {DO_GET_CASES(OP);}
 //
 // DO_SET_CASES
 //
-#define DO_SET_CASES(OP,MT)                                                          \
-case VariableType::BT_CHR: objects->addToken(OCODE_##OP##_##MT##_I); return true;    \
-                                                                                     \
-case VariableType::BT_FIX_HH: objects->addToken(OCODE_##OP##_##MT##_X); return true; \
-case VariableType::BT_FIX_H: objects->addToken(OCODE_##OP##_##MT##_X); return true;  \
-case VariableType::BT_FIX: objects->addToken(OCODE_##OP##_##MT##_X); return true;    \
-case VariableType::BT_FIX_L: objects->addToken(OCODE_##OP##_##MT##_X); return true;  \
-case VariableType::BT_FIX_LL: objects->addToken(OCODE_##OP##_##MT##_X); return true; \
-                                                                                     \
-case VariableType::BT_INT_HH: objects->addToken(OCODE_##OP##_##MT##_I); return true; \
-case VariableType::BT_INT_H: objects->addToken(OCODE_##OP##_##MT##_I); return true;  \
-case VariableType::BT_INT: objects->addToken(OCODE_##OP##_##MT##_I); return true;    \
-case VariableType::BT_INT_L: objects->addToken(OCODE_##OP##_##MT##_I); return true;  \
-case VariableType::BT_INT_LL: return false;                                          \
-                                                                                     \
-case VariableType::BT_UNS_HH: objects->addToken(OCODE_##OP##_##MT##_U); return true; \
-case VariableType::BT_UNS_H: objects->addToken(OCODE_##OP##_##MT##_U); return true;  \
-case VariableType::BT_UNS: objects->addToken(OCODE_##OP##_##MT##_U); return true;    \
-case VariableType::BT_UNS_L: objects->addToken(OCODE_##OP##_##MT##_U); return true;  \
-case VariableType::BT_UNS_LL: return false;                                          \
-                                                                                     \
-case VariableType::BT_PTR: objects->addToken(OCODE_##OP##_##MT##_U); return true;    \
-                                                                                     \
+#define DO_SET_CASES(OP,MT)                                                                         \
+case VariableType::BT_CHR: objects->addToken(OCODE_##OP##_##MT##_I, data->address); return true;    \
+                                                                                                    \
+case VariableType::BT_FIX_HH: objects->addToken(OCODE_##OP##_##MT##_X, data->address); return true; \
+case VariableType::BT_FIX_H: objects->addToken(OCODE_##OP##_##MT##_X, data->address); return true;  \
+case VariableType::BT_FIX: objects->addToken(OCODE_##OP##_##MT##_X, data->address); return true;    \
+case VariableType::BT_FIX_L: objects->addToken(OCODE_##OP##_##MT##_X, data->address); return true;  \
+case VariableType::BT_FIX_LL: objects->addToken(OCODE_##OP##_##MT##_X, data->address); return true; \
+                                                                                                    \
+case VariableType::BT_INT_HH: objects->addToken(OCODE_##OP##_##MT##_I, data->address); return true; \
+case VariableType::BT_INT_H: objects->addToken(OCODE_##OP##_##MT##_I, data->address); return true;  \
+case VariableType::BT_INT: objects->addToken(OCODE_##OP##_##MT##_I, data->address); return true;    \
+case VariableType::BT_INT_L: objects->addToken(OCODE_##OP##_##MT##_I, data->address); return true;  \
+case VariableType::BT_INT_LL: return false;                                                         \
+                                                                                                    \
+case VariableType::BT_UNS_HH: objects->addToken(OCODE_##OP##_##MT##_U, data->address); return true; \
+case VariableType::BT_UNS_H: objects->addToken(OCODE_##OP##_##MT##_U, data->address); return true;  \
+case VariableType::BT_UNS: objects->addToken(OCODE_##OP##_##MT##_U, data->address); return true;    \
+case VariableType::BT_UNS_L: objects->addToken(OCODE_##OP##_##MT##_U, data->address); return true;  \
+case VariableType::BT_UNS_LL: return false;                                                         \
+                                                                                                    \
+case VariableType::BT_PTR: objects->addToken(OCODE_##OP##_##MT##_U, data->address); return true;    \
+                                                                                                    \
 default: ERROR_NP("invalid BT: %s", make_string(type->getBasicType()).c_str())
 
 //
