@@ -51,6 +51,10 @@
 // Static Variables                                                           |
 //
 
+static option::option_data<std::string> option_ocode_list_debug
+('\0', "debug-ocode-list", "debugging",
+ "Indicates a file to list all OCODEs to. Use - to dump to stdout.", NULL);
+
 static option::option_data<std::string> option_out
 ('o', "out", "output", "Output File.", NULL);
 
@@ -132,7 +136,21 @@ static SourceType divine_source_type(std::string const &name)
 }
 
 //
-// dump_scripts
+// dump_ocodes
+//
+static void dump_ocodes(std::ostream *out, ObjectVector const *objects)
+{
+   for (ObjectVector::const_iterator end = objects->end(),
+        itr = objects->begin(); itr != end; ++itr)
+   {
+      *out << make_string(itr->code) << '@'
+           << itr->pos.filename << ':' << itr->pos.line << ':' << itr->pos.column
+           << '\n';
+   }
+}
+
+//
+// dump_script
 //
 static void dump_script(std::ostream *out, ObjectData_Script const &s)
 {
@@ -279,6 +297,18 @@ static inline int _main()
    // Process object data.
    ObjectExpression::do_deferred_allocation();
    objects.optimize();
+
+   // Dump object token list, if requested.
+   if (!option_ocode_list_debug.data.empty())
+   {
+      if (option_ocode_list_debug.data == "-")
+         dump_ocodes(&std::cout, &objects);
+      else
+      {
+         std::ofstream ofs(option_ocode_list_debug.data.c_str());
+         dump_ocodes(&ofs, &objects);
+      }
+   }
 
    // Dump script list, if requested.
    if (!option_script_list.data.empty())

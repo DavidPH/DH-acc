@@ -130,7 +130,7 @@ static int target_handler
       target_type = TARGET_Eternity;
    else if (!strcmp(argv[0], "Hexen"))
       target_type = TARGET_Hexen;
-   else if (!strcmp(argv[0], "HexPP"))
+   else if (!strcmp(argv[0], "Hex++"))
       target_type = TARGET_HexPP;
    else if (!strcmp(argv[0], "ZDoom"))
       target_type = TARGET_ZDoom;

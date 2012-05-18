@@ -103,6 +103,9 @@ void BinaryTokenPPACS::write_ACSP_static
 void BinaryTokenPPACS::write_ACSP_string
 (std::ostream *out, ObjectData_String const &s)
 {
+   // Don't output if there are no names associated with it.
+   if (s.names.empty()) return;
+
    std::ostringstream token;
 
    // For ACS+ output, there should only be one name.

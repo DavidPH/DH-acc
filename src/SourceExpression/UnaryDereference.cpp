@@ -48,8 +48,10 @@ public:
    // ::SourceExpression_UnaryDereference
    //
    SourceExpression_UnaryDereference(SRCEXP_EXPRUNA_PARM)
-    : Super(_expr->getType()->getReturn()->getPointer(), SRCEXP_EXPRUNA_PASS)
+    : Super(SRCEXP_EXPRUNA_PASS)
    {
+      VariableType::Reference type = expr->getType()->getReturn()->getPointer();
+      expr = create_value_cast_implicit(expr, type, context, pos);
    }
 
    virtual bool canGetData() const;
@@ -59,7 +61,7 @@ public:
    //
    virtual VariableData::Pointer getData() const
    {
-      VariableType::Reference type = getType();
+      VariableType::Reference type = expr->getType()->getReturn();
       bigsint                 size = type->getSize(pos);
       std::string const      &area = type->getStoreArea();
 
@@ -91,8 +93,8 @@ public:
          else
          {
             address = ObjectExpression::create_value_int(0, pos);
-            offset = SourceExpression::create_value_stackptr(context, pos);
-            offset = SourceExpression::create_binary_add(expr, offset, context, pos);
+            offset = SourceExpression::create_value_cast_implicit(expr,
+               type->setStorage(STORE_STATIC)->getPointer(), context, pos);
             return VariableData::create_pointer(size, address, offset);
          }
 
@@ -169,7 +171,12 @@ bool SourceExpression_UnaryDereference::canGetData() const
 //
 VariableType::Reference SourceExpression_UnaryDereference::getType() const
 {
-   return expr->getType()->getReturn();
+   VariableType::Reference type = expr->getType()->getReturn();
+
+   if (type->getStoreType() == STORE_AUTO && !expr->canMakeObject())
+      return type->setStorage(STORE_STATIC);
+
+   return type;
 }
 
 //
