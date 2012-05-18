@@ -298,6 +298,9 @@ makeObjects(ObjectVector *objects, VariableData *dst)
 
       VariableType::Reference type = getType();
 
+      // Don't try to makeObject on a void expression.
+      if (type->getBasicType() == VariableType::BT_VOID) return;
+
       VariableData::Pointer src =
          VariableData::create_literal(type->getSize(pos), makeObject());
 
