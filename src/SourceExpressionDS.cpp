@@ -62,15 +62,7 @@ case SourceTokenC::TT_##TOKN: expr = create_##EXPR(expr, \
 //
 #define SRCEXPDS_EXPR_DEFN_PART_SUF(TOKN,EXPR)           \
 case SourceTokenC::TT_##TOKN: expr = create_##EXPR(expr, \
-   context, tok->pos); break \
-
-//
-// SRCEXPDS_EXPR_DEFN_SINGLE
-//
-#define SRCEXPDS_EXPR_DEFN_SINGLE(NAME1,NAME2,TOKN,EXPR) \
-SRCEXPDS_EXPR_DEFN_MULTI(NAME1, NAME2)                   \
-SRCEXPDS_EXPR_DEFN_PART(NAME2, TOKN, EXPR);              \
-SRCEXPDS_EXPR_DEFN_MULTI_END()
+   context, tok->pos); break
 
 
 //----------------------------------------------------------------------------|
@@ -359,9 +351,9 @@ SRCEXPDS_EXPR_DEF2(prefix)
 // SourceExpressionDS::make_multiplicative
 //
 SRCEXPDS_EXPR_DEFN_MULTI(multiplicative, prefix)
-SRCEXPDS_EXPR_DEFN_PART(multiplicative, MUL, binary_mul);
-SRCEXPDS_EXPR_DEFN_PART(multiplicative, DIV, binary_div);
-SRCEXPDS_EXPR_DEFN_PART(multiplicative, MOD, binary_mod);
+SRCEXPDS_EXPR_DEFN_PART(prefix, MUL, binary_mul);
+SRCEXPDS_EXPR_DEFN_PART(prefix, DIV, binary_div);
+SRCEXPDS_EXPR_DEFN_PART(prefix, MOD, binary_mod);
 SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
@@ -401,32 +393,44 @@ SRCEXPDS_EXPR_DEFN_MULTI_END()
 //
 // SourceExpressionDS::make_bitwise_and
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(bitwise_and, equality, AND, binary_and)
+SRCEXPDS_EXPR_DEFN_MULTI(bitwise_and, equality)
+SRCEXPDS_EXPR_DEFN_PART(equality, AND, binary_and);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
 // SourceExpressionDS::make_bitwise_xor
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(bitwise_xor, bitwise_and, XOR, binary_xor)
+SRCEXPDS_EXPR_DEFN_MULTI(bitwise_xor, bitwise_and)
+SRCEXPDS_EXPR_DEFN_PART(bitwise_and, XOR, binary_xor);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
 // SourceExpressionDS::make_bitwise_ior
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(bitwise_ior, bitwise_xor, IOR, binary_ior)
+SRCEXPDS_EXPR_DEFN_MULTI(bitwise_ior, bitwise_xor)
+SRCEXPDS_EXPR_DEFN_PART(bitwise_xor, IOR, binary_ior);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
 // SourceExpressionDS::make_logical_and
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(logical_and, bitwise_ior, AN2, branch_and)
+SRCEXPDS_EXPR_DEFN_MULTI(logical_and, bitwise_ior)
+SRCEXPDS_EXPR_DEFN_PART(bitwise_ior, AN2, branch_and);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
 // SourceExpressionDS::make_logical_xor
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(logical_xor, logical_and, XO2, branch_xor)
+SRCEXPDS_EXPR_DEFN_MULTI(logical_xor, logical_and)
+SRCEXPDS_EXPR_DEFN_PART(logical_and, XO2, branch_xor);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
 // SourceExpressionDS::make_logical_ior
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(logical_ior, logical_xor, IO2, branch_ior)
+SRCEXPDS_EXPR_DEFN_MULTI(logical_ior, logical_xor)
+SRCEXPDS_EXPR_DEFN_PART(logical_xor, IO2, branch_ior);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
 // SourceExpressionDS::make_conditional
@@ -513,7 +517,9 @@ SRCEXPDS_EXPR_DEF2(assignment)
 //
 // SourceExpressionDS::make_expression
 //
-SRCEXPDS_EXPR_DEFN_SINGLE(expression, assignment, COMMA, binary_pair)
+SRCEXPDS_EXPR_DEFN_MULTI(expression, assignment)
+SRCEXPDS_EXPR_DEFN_PART(assignment, COMMA, binary_pair);
+SRCEXPDS_EXPR_DEFN_MULTI_END()
 
 //
 // SourceExpressionDS::make_linkspec
