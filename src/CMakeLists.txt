@@ -57,7 +57,6 @@ add_executable(DH-acc
    object_io.cpp
    option.cpp
    ost_type.cpp
-#  SourceBlockC.cpp
    SourceContext.cpp
    SourceContext/getVariableType.cpp
    SourceException.cpp
@@ -113,9 +112,6 @@ add_executable(DH-acc
    SourceExpression/ValueMember.cpp
    SourceExpression/ValueStackptr.cpp
    SourceExpression/ValueVariable.cpp
-#  SourceExpressionACS.cpp
-#  SourceExpressionACS/Base.cpp
-#  SourceExpressionACS/BinaryAdd.cpp
    SourceExpressionDS.cpp
    SourceExpressionDS/arglist.cpp
    SourceExpressionDS/create_value_number.cpp

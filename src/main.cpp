@@ -30,16 +30,13 @@
 #include "ObjectVector.hpp"
 #include "option.hpp"
 #include "ost_type.hpp"
-#include "SourceBlockC.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
-#include "SourceExpressionACS.hpp"
 #include "SourceExpressionDS.hpp"
 #include "SourceStream.hpp"
 #include "SourceTokenASMPLX.hpp"
 #include "SourceTokenizerC.hpp"
 #include "VariableData.hpp"
-#include "VariableType.hpp"
 
 #include <fstream>
 #include <iostream>
