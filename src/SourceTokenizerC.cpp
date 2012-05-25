@@ -29,6 +29,7 @@
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
 
+#include <cctype>
 #include <cstring>
 #include <sstream>
 
