@@ -222,7 +222,7 @@ void SourceTokenASMPLX::make_objects(std::vector<SourceTokenASMPLX> const & toke
 		}
 		else if (token->_type == '=')
 		{
-			ObjectExpression::Pointer expr(expr = make_expression(token->_data.empty() ? "" : token->_data[0], token->_position));
+         ObjectExpression::Pointer expr = make_expression(token->_data.empty() ? "" : token->_data[0], token->_position);
 
 			ObjectExpression::add_symbol(token->_name, expr);
 		}
