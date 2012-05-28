@@ -172,6 +172,20 @@ static VariableType::Reference get_array_length(VariableType *exprType,
 }
 
 //
+// is_array_length_zero
+//
+static bool is_array_length_zero(VariableType const *type)
+{
+   if (type->getBasicType() != VariableType::BT_ARR)
+      return false;
+
+   if (type->getWidth())
+      return is_array_length_zero(type->getReturn());
+
+   return true;
+}
+
+//
 // make_var
 //
 static SourceExpression::Pointer make_var(SourceTokenizerC *in,
@@ -206,7 +220,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
 
    // Generate expression (unless final type is determined later).
    SourceExpression::Pointer expr;
-   if (type->getBasicType() != VariableType::BT_ARR || type->getWidth())
+   if (!is_array_length_zero(type) && type->getBasicType() != VariableType::BT_VOID)
       expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
                      addr, externDef, meta);
 
@@ -225,8 +239,16 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
       if (initSrc->canMakeObject())
          initObj = initSrc->makeObject();
 
+      // Automatic type.
+      if (type->getBasicType() == VariableType::BT_VOID)
+      {
+         type = initSrc->getType();
+
+         expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
+                        addr, externDef, meta);
+      }
       // Initializer-determined array length.
-      if (!expr)
+      else if (is_array_length_zero(type))
       {
          VariableType::Reference initSrcType = initSrc->getType();
 
