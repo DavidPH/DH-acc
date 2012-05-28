@@ -93,7 +93,11 @@ SRCEXPDS_KEYWORD_DEFN(constexpr)
    std::string name = in->get(SourceTokenC::TT_NAM)->data;
    in->get(SourceTokenC::TT_EQUALS);
    SourceExpression::Pointer data = make_assignment(in, blocks, context);
-   data = create_value_cast_implicit(data, type, context, tok->pos);
+
+   if (type->getBasicType() == VariableType::BT_VOID)
+      type = data->getType();
+   else
+      data = create_value_cast_implicit(data, type, context, tok->pos);
 
    SourceVariable::Pointer var = SourceVariable::create_constant
       (name, type, data->makeObject(), tok->pos);
@@ -242,7 +246,7 @@ SRCEXPDS_KEYWORD_DEFN(if)
 //
 SRCEXPDS_KEYWORD_DEFN(library)
 {
-   (void)blocks; (void)context;
+   (void)blocks;
 
    in->get(SourceTokenC::TT_PAREN_O);
    ObjectExpression::set_library(in->get(SourceTokenC::TT_STR)->data);
