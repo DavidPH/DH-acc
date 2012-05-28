@@ -123,7 +123,7 @@ static SourceExpression::Pointer add_var(SourceContext *context,
 static void get_array_length(std::vector<bigsint> &len, size_t depth,
                              VariableType::Vector const &types)
 {
-   if (len.size() <= depth) len.resize(depth, 0);
+   if (depth >= len.size()) return;
 
    for (VariableType::Vector::const_iterator end = types.end(),
         itr = types.begin(); itr != end; ++itr)
@@ -164,10 +164,25 @@ static VariableType::Reference get_array_length(std::vector<bigsint> const &len,
 static VariableType::Reference get_array_length(VariableType *exprType,
                                                 VariableType *initType)
 {
-   std::vector<bigsint> len; len.push_back(initType->getTypes().size());
+   size_t depth = 0;
+
+   // Determine how many indexes to find.
+   for (VariableType::Reference type(exprType);
+        type->getBasicType() == VariableType::BT_ARR;
+        type = type->getReturn())
+   {
+      ++depth;
+   }
+
+   // Not an array, so just return.
+   if (!depth)
+      return static_cast<VariableType::Reference>(exprType);
+
+   std::vector<bigsint> len(depth, 0);
+   len[0] = initType->getTypes().size();
    get_array_length(len, 1, initType->getTypes());
 
-   size_t depth = 0;
+   depth = 0;
    return get_array_length(len, depth, exprType);
 }
 
@@ -183,6 +198,40 @@ static bool is_array_length_zero(VariableType const *type)
       return is_array_length_zero(type->getReturn());
 
    return true;
+}
+
+//
+// get_void
+//
+static VariableType::Reference get_void(VariableType *exprType,
+                                        VariableType *initType)
+{
+   if (exprType->getBasicType() == VariableType::BT_VOID)
+      return static_cast<VariableType::Reference>(initType);
+
+   if (initType->getBasicType() == VariableType::BT_BLOCK)
+   {
+      if (!initType->getTypes().empty())
+         return get_void(exprType->getReturn(), initType->getTypes()[0])
+                   ->getArray(exprType->getWidth());
+   }
+
+   return get_void(exprType->getReturn(), VariableType::get_bt_void())
+             ->getArray(exprType->getWidth());
+}
+
+//
+// is_void
+//
+static bool is_void(VariableType const *type)
+{
+   if (type->getBasicType() == VariableType::BT_VOID)
+      return true;
+
+   if (type->getBasicType() == VariableType::BT_ARR)
+      return is_void(type->getReturn());
+
+   return false;
 }
 
 //
@@ -220,7 +269,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
 
    // Generate expression (unless final type is determined later).
    SourceExpression::Pointer expr;
-   if (!is_array_length_zero(type) && type->getBasicType() != VariableType::BT_VOID)
+   if (!is_array_length_zero(type) && !is_void(type))
       expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
                      addr, externDef, meta);
 
@@ -240,9 +289,21 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
          initObj = initSrc->makeObject();
 
       // Automatic type.
-      if (type->getBasicType() == VariableType::BT_VOID)
+      if (is_void(type))
       {
-         type = initSrc->getType();
+         if (type->getBasicType() == VariableType::BT_VOID)
+            type = initSrc->getType();
+         else
+         {
+            VariableType::Reference initSrcType = initSrc->getType();
+
+            if (initSrcType->getBasicType() != VariableType::BT_BLOCK)
+               ERROR_P("expected BT_BLOCK");
+
+            type = get_void(type, initSrcType);
+
+            type = get_array_length(type, initSrcType);
+         }
 
          expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
                         addr, externDef, meta);
