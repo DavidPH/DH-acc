@@ -295,6 +295,25 @@ private:
    }
 
    //
+   // ::makeFormatLiteral
+   //
+   void makeFormatLiteral(ObjectVector *objects, std::string &s)
+   {
+      if (s.size() == 1)
+      {
+         makeChar(objects, s[0]);
+         objects->addToken(OCODE_ACSP_CHARACTER);
+      }
+      else if (!s.empty())
+      {
+         makeString(objects, s);
+         objects->addToken(OCODE_ACSP_STR);
+      }
+
+      s.clear();
+   }
+
+   //
    // ::virtual_makeObjects
    //
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -318,10 +337,7 @@ private:
       {
          if (*c == '%' && *++c != '%')
          {
-            makeString(objects, string);
-            objects->addToken(OCODE_ACSP_STR);
-
-            string.clear();
+            makeFormatLiteral(objects, string);
 
             switch (*c)
             {
@@ -376,16 +392,7 @@ private:
          string += *c;
       }
 
-      if (string.size() == 1)
-      {
-         makeChar(objects, string[0]);
-         objects->addToken(OCODE_ACSP_CHARACTER);
-      }
-      else if (!string.empty())
-      {
-         makeString(objects, string);
-         objects->addToken(OCODE_ACSP_STR);
-      }
+      makeFormatLiteral(objects, string);
 
       // Print options.
       switch (printfType)
