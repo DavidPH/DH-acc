@@ -170,7 +170,7 @@ SRCEXPDS_KEYWORD_DEFN(for)
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_LOOP);
    SourceExpression::Pointer exprBody =
-      make_prefix(in, blocks, contextBody);
+      make_expression(in, blocks, contextBody);
 
    return create_branch_for(exprCond, exprBody, exprIter, exprInit, contextBody, tok->pos);
 }
@@ -224,7 +224,7 @@ SRCEXPDS_KEYWORD_DEFN(if)
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprBody =
-      make_prefix(in, blocks, contextBody);
+      make_expression(in, blocks, contextBody);
 
    if (in->peekType(SourceTokenC::TT_NAM, "else"))
    {
@@ -233,7 +233,7 @@ SRCEXPDS_KEYWORD_DEFN(if)
       SourceContext::Reference contextElse =
          SourceContext::create(contextCond, SourceContext::CT_BLOCK);
       SourceExpression::Pointer exprElse =
-         make_prefix(in, blocks, contextElse);
+         make_expression(in, blocks, contextElse);
 
       return create_branch_if(exprCond, exprBody, exprElse, context, tok->pos);
    }
@@ -397,7 +397,7 @@ SRCEXPDS_KEYWORD_DEFN(switch)
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_SWITCH);
    SourceExpression::Pointer exprBody =
-      make_prefix(in, blocks, contextBody);
+      make_expression(in, blocks, contextBody);
 
    return create_branch_switch(exprCond, exprBody, contextBody, tok->pos);
 }
@@ -444,7 +444,7 @@ SRCEXPDS_KEYWORD_DEFN(while)
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_LOOP);
    SourceExpression::Pointer exprBody =
-      make_prefix(in, blocks, contextBody);
+      make_expression(in, blocks, contextBody);
 
    return create_branch_while(exprCond, exprBody, contextBody, tok->pos);
 }

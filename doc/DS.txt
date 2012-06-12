@@ -239,10 +239,10 @@ Iteration Expressions
 ===========================================================
 
   iteration-expression:
-    <do> loop-name(opt) prefix-expression <while> ( expression )
+    <do> loop-name(opt) expression <while> ( expression )
     <for> loop-name(opt) ( expression(opt) ; expression(opt) ; expression(opt) )
-      prefix-expression
-    <while> loop-name(opt) ( expression ) prefix-expression
+      expression
+    <while> loop-name(opt) ( expression ) expression
 
   loop-name:
     : identifier
@@ -335,9 +335,9 @@ Selection Expressions
 ===========================================================
 
   selection-expression:
-    <if> ( expression ) prefix-expression
-    <if> ( expression ) prefix-expression <else> prefix-expression
-    <switch> loop-name(opt) ( expression ) prefix-expression
+    <if> ( expression ) expression
+    <if> ( expression ) expression <else> expression
+    <switch> loop-name(opt) ( expression ) expression
 
 ===========================================================
 Type Information Expressions
