@@ -131,6 +131,9 @@ char SourceStream::get()
       curC = newC != -2 ? newC : in->get();
       newC = in->get();
 
+      if(!*in && curC < 0)
+         throw EndOfStream();
+
 
       // \t has special counting
       if (curC == '\t')
@@ -300,7 +303,6 @@ char SourceStream::get()
       }
 
 
-      if (!*in) throw EndOfStream();
       return (char)curC;
    }
 }
