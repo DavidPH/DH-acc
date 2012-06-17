@@ -178,6 +178,7 @@ __asmfunc StrLen(__string) -> int @ __ocode(ACSE_STRING_GET_LENGTH);
 __asmfunc Delay(int) @ __ocode(ACS_WAIT_TICS, ACS_WAIT_TICS_IMM);
 __asmfunc PolyWait(int) @ __ocode(ACS_WAIT_POLYOBJECT, ACS_WAIT_POLYOBJECT_IMM);
 __asmfunc ScriptWait(int) @ __ocode(ACS_WAIT_SCRIPT, ACS_WAIT_SCRIPT_IMM);
+__asmfunc Suspend() @ __ocode(ACS_SCRIPT_SUSPEND);
 __asmfunc TagWait(int) @ __ocode(ACS_WAIT_STAG, ACS_WAIT_STAG_IMM);
 
 #endif//__HEADER__ZBUILTIN_DH__
