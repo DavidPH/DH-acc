@@ -27,6 +27,20 @@
 
 
 //----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+//
+// __LIBDS_HEAPSIZE
+//
+// Specifies the size of the dynamic memory heap in megabytes.
+//
+#ifndef __LIBDS_HEAPSIZE
+#define __LIBDS_HEAPSIZE 16
+#endif
+
+
+//----------------------------------------------------------------------------|
 // Types                                                                      |
 //
 
@@ -67,7 +81,7 @@ constexpr decltype(*exitarr) *exitbegin = &exitarr[0];
 constexpr decltype(*exitarr) *exitend = &exitarr[exitsize];
 
 
-constexpr size_t heapsize = 16*1024*1024;
+constexpr size_t heapsize = __LIBDS_HEAPSIZE * 1024 * 1024;
 
 __intvar static char[heapsize] heap;
 __intvar __staticregister heapdata *heapptr = (heapdata *)heap;
@@ -278,8 +292,7 @@ __extfunc realloc(void *ptr, size_t size) -> void *
       return ptr;
    };
 
-   heapdata *nextblock =
-      (heapdata *)&block->data[block->size];
+   heapdata *nextblock = (heapdata *)&block->data[block->size];
 
    // No next block, just resize current block. (If enough space.)
    if (nextblock->size == 0 && (heapdata *)&block->data[size]+1 < heapend)
@@ -299,11 +312,9 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 
    if (!newptr) return NULL;
 
-   char *it1 = (char *)ptr;
-   char *it2 = (char *)newptr;
-   char *end = it1 + block->used;
+   memcpy(newptr, ptr, block->used);
 
-   while (it1 != end) {*it1++ = *it2++;};
+   free(ptr);
 
    return newptr;
 };
