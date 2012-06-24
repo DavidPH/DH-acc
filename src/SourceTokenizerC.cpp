@@ -741,7 +741,7 @@ SourceTokenC::Reference SourceTokenizerC::getExpand()
    {
       if (hasMacro(tok->data))
       {
-         SourceTokenC::Reference tmpTok = get();
+         SourceTokenC::Reference tmpTok = getExpand();
 
          // Macro invocation!
          if (tmpTok->type == SourceTokenC::TT_PAREN_O)

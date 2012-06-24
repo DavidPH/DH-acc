@@ -182,6 +182,7 @@ constexpr int CR_DARKBROWN    = 18;
 constexpr int CR_PURPLE       = 19;
 constexpr int CR_DARKGRAY     = 20;
 constexpr int CR_DARKGREY     = 20;
+constexpr int CR_CYAN         = 21;
 
 // HUD message types.
 constexpr int HUDMSG_PLAIN       = 0;
