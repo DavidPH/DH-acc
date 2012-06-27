@@ -150,7 +150,7 @@ private:
          if (type->getReturn()->getStoreType() == STORE_AUTO)
             objects->addToken(OCODE_GET_IMM, data->address);
          else
-            objects->addToken(OCODE_GET_AUTPTR, data->address);
+            objects->addToken(OCODE_GET_AUTPTR_IMM, data->address);
          break;
 
       case VariableData::MT_LITERAL:

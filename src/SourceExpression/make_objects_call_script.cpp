@@ -90,14 +90,7 @@ void SourceExpression::make_objects_call_script
    if (option_named_scripts)
    {
       ocode = OCODE_NATIVE;
-      switch (argsSize)
-      {
-      case  0: oargc = objects->getValue(1); break;
-      case  1: oargc = objects->getValue(2); break;
-      case  2: oargc = objects->getValue(3); break;
-      case  3: oargc = objects->getValue(4); break;
-      default: oargc = objects->getValue(5); break;
-      }
+      oargc = objects->getValue(argsSize + 1);
    }
    else if (retnSize == 0)
    {
@@ -120,52 +113,52 @@ void SourceExpression::make_objects_call_script
    if (option_named_scripts)
       ospec = objects->getValue(44); // ACSF_ACS_NamedExecuteWithResult
    else
-      ospec = objects->getValue(84);
-
-   // ZDoom handles one of the return bytes for us.
-   if (target_type == TARGET_ZDoom && retnSize >= 1)
-      --retnSize;
-
-   // Calculate total stack offset.
-   ObjectExpression::Pointer ostack =
-      objects->getValueAdd(context->getLimit(STORE_AUTO), retnSize);
-
-   // Advance the stack-pointer.
-   objects->addToken(OCODE_ADD_AUTPTR_IMM, ostack);
+      ospec = objects->getValue(84); // ACS_ExecuteWithResult
 
    // Need to handle args not handled by the engine.
-   if (callSize > option_script_regargs)
+   if(callSize > argsSize)
    {
-      if (option_script_autoargs)
+      for(bigsint i = 0, end = callSize - argsSize; i++ != end;)
       {
-         for (bigsint i = callSize; i-- > option_script_regargs;)
-            objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
-      }
-      else
-      {
-         for (bigsint i = callSize - option_script_regargs; i--;)
-            objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
+         objects->addToken(OCODE_GET_IMM, objects->getValue(-i));
+         objects->addToken(OCODE_STK_SWAP);
+         objects->addToken(OCODE_SET_WLDARR, objects->getValue(option_auto_array));
       }
    }
 
    // Dummy args.
    if (ocode == OCODE_ACSE_SPECIAL_EXEC5_RETN1)
-      while (argsSize++ < 4)
+      for(; argsSize < 5; ++argsSize)
          objects->addTokenPushZero();
 
+   // Save stack pointer.
+   objects->addToken(OCODE_GET_AUTPTR);
+   objects->addToken(OCODE_SET_TEMP, context->getTempVar(0));
+
    // The actual call.
-   if (option_named_scripts)
+   if(option_named_scripts)
+   {
       objects->addToken(ocode, oargc, ospec);
+      if(retnSize == 0)
+         objects->addToken(OCODE_STK_DROP);
+   }
    else
       objects->addToken(ocode, ospec);
 
-   // For any return bytes we're handling, push them onto the stack.
-   // FIXME: Should be based on type.
-   for (bigsint i(-retnSize); i; ++i)
-      objects->addToken(OCODE_GET_AUTO, objects->getValue(i));
+   // Load stack pointer.
+   objects->addToken(OCODE_GET_TEMP, context->getTempVar(0));
+   objects->addToken(OCODE_SET_AUTPTR);
 
-   // Reset the stack-pointer.
-   objects->addToken(OCODE_SUB_AUTPTR_IMM, ostack);
+   // ZDoom handles one of the return bytes for us.
+   if(target_type == TARGET_ZDoom && retnSize >= 1)
+      --retnSize;
+
+   // For any return bytes we're handling, push them onto the stack.
+   if(retnSize) for(bigsint i = -retnSize; i; ++i)
+   {
+      objects->addToken(OCODE_GET_IMM, objects->getValue(i));
+      objects->addToken(OCODE_GET_WLDARR, objects->getValue(option_auto_array));
+   }
 
    make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }

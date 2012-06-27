@@ -25,10 +25,35 @@
 
 #include "ObjectExpression.hpp"
 #include "ObjectVector.hpp"
+#include "option.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "VariableData.hpp"
 #include "VariableType.hpp"
+
+
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
+
+option::option_dptr<int> option_auto_array_handler
+('\0', "auto-array", "features",
+ "Selects which world array to use for automatic variable stack allocations. "
+ "Also used for other miscellaneous features even if auto-stack-part is 0. 0 "
+ "by default.", NULL, &option_auto_array);
+
+option::option_dptr<int> option_auto_stack_part_handler
+('\0', "auto-stack-size", "features",
+ "Sets the size of each thread's automatic variable stack. Use 0 to disable "
+ "per-thread stack pointers. 8192 by default.", NULL, &option_auto_stack_size);
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+int option_auto_array = 0;
+int option_auto_stack_size = 8192;
 
 
 //----------------------------------------------------------------------------|
@@ -255,6 +280,285 @@ VariableData::Pointer SourceExpression::getData() const
 VariableType::Reference SourceExpression::getType() const
 {
    return VariableType::get_bt_void();
+}
+
+//
+// SourceExpression::make_objects_auto_alloc
+//
+void SourceExpression::make_objects_auto_alloc(ObjectVector *objects, SourceContext *context)
+{
+   std::string label = context->makeLabel();
+
+   if(option_auto_stack_size)
+   {
+      // One past the end of the auto-pointer allocation map. This is the
+      // address that points into that map to indicate where to start searching.
+      bigsint stackEnd = (((1 << 31) / option_auto_stack_size) + 31) / 32;
+
+      std::string labelItr1   = label + "_itr1";
+      std::string labelItr2   = label + "_itr2";
+      std::string labelStart1 = label + "_start1";
+
+      ObjectExpression::Pointer jumpItr1   = objects->getValue(labelItr1);
+      ObjectExpression::Pointer jumpItr2   = objects->getValue(labelItr2);
+      ObjectExpression::Pointer jumpStart1 = objects->getValue(labelStart1);
+
+      ObjectExpression::Pointer slotFul = objects->getValue(0xFFFFFFFF);
+
+      ObjectExpression::Pointer autoArr = objects->getValue(option_auto_array);
+      ObjectExpression::Pointer autoStk = objects->getValue(stackEnd);
+      ObjectExpression::Pointer autoItr = context->getTempVar(0);
+
+      // Load the initial search index.
+      objects->addToken(OCODE_GET_IMM,    autoStk);
+      objects->addToken(OCODE_GET_WLDARR, autoArr);
+      objects->addToken(OCODE_SET_TEMP,   autoItr);
+      objects->addToken(OCODE_JMP_IMM,    jumpStart1);
+
+      // Find a free slot. Each bit is a slot.
+      objects->addLabel(labelItr1);
+      objects->addToken(OCODE_INC_TEMP_U, autoItr);
+      objects->addLabel(labelStart1);
+      objects->addToken(OCODE_GET_TEMP,   autoItr);
+      objects->addToken(OCODE_GET_WLDARR, autoArr);
+      objects->addToken(OCODE_JMP_VAL,    slotFul, jumpItr1);
+      objects->addToken(OCODE_STK_DROP);
+
+      // Found free slot, set the iterator for next time.
+      objects->addToken(OCODE_GET_IMM,    autoStk);
+      objects->addToken(OCODE_GET_TEMP,   autoItr);
+      objects->addToken(OCODE_SET_WLDARR, autoArr);
+
+      // Stash temp in stack-pointer.
+      // stackPtr = autoItr;
+      objects->addToken(OCODE_GET_TEMP,   autoItr);
+      objects->addToken(OCODE_SET_AUTPTR);
+
+      // Find which slot is free.
+      // for(autoItr = -1; autoArr[stackPtr] & (1 << ++autoItr););
+      objects->addToken(OCODE_GET_IMM,    objects->getValue(-1));
+      objects->addToken(OCODE_SET_TEMP,   autoItr);
+      objects->addLabel(labelItr2);
+      objects->addToken(OCODE_INC_TEMP_U, autoItr);
+      objects->addToken(OCODE_GET_IMM,    objects->getValue(1));
+      objects->addToken(OCODE_GET_TEMP,   autoItr);
+      objects->addToken(OCODE_LSH_STK_U);
+      objects->addToken(OCODE_GET_AUTPTR);
+      objects->addToken(OCODE_GET_WLDARR, autoArr);
+      objects->addToken(OCODE_AND_STK_U);
+      objects->addToken(OCODE_JMP_TRU,    jumpItr2);
+
+      // Mark slot allocated.
+      // autoArr[stackPtr] |= (1 << autoItr);
+      objects->addToken(OCODE_GET_AUTPTR);
+      objects->addToken(OCODE_GET_IMM,      objects->getValue(1));
+      objects->addToken(OCODE_GET_TEMP,     autoItr);
+      objects->addToken(OCODE_LSH_STK_U);
+      objects->addToken(OCODE_IOR_WLDARR_U, autoArr);
+
+      // Found which slot, set stack-pointer.
+      // stackPtr = ((stackPtr * 32) + autoItr) * auto_stack_size + 0x80000000;
+      objects->addToken(OCODE_GET_AUTPTR);
+      objects->addToken(OCODE_GET_IMM,    objects->getValue(5));
+      objects->addToken(OCODE_LSH_STK_U);
+      objects->addToken(OCODE_GET_TEMP,   autoItr);
+      objects->addToken(OCODE_ADD_STK_U);
+      objects->addToken(OCODE_GET_IMM,    objects->getValue(option_auto_stack_size));
+      objects->addToken(OCODE_MUL_STK_U);
+      objects->addToken(OCODE_GET_IMM,    objects->getValue(0x80000000));
+      objects->addToken(OCODE_ADD_STK_U);
+      objects->addToken(OCODE_SET_AUTPTR);
+   }
+   else
+   {
+      // Just make sure the stack pointer isn't null.
+      objects->addToken(OCODE_GET_AUTPTR);
+      objects->addToken(OCODE_JMP_TRU, objects->getValue(label));
+      objects->addToken(OCODE_ADD_AUTPTR_IMM, objects->getValue(0x80000000));
+      objects->addLabel(label);
+   }
+}
+
+//
+// SourceExpression::make_objects_auto_free
+//
+void SourceExpression::make_objects_auto_free(ObjectVector *objects, SourceContext *context)
+{
+   std::string label = context->makeLabel();
+
+   if(option_auto_stack_size)
+   {
+      // One past the end of the auto-pointer allocation map. This is the
+      // address that points into that map to indicate where to start searching.
+      bigsint stackEnd = (((1 << 31) / option_auto_stack_size) + 31) / 32;
+
+      std::string labelEnd = label + "_end";
+
+      ObjectExpression::Pointer jumpEnd = objects->getValue(labelEnd);
+
+      ObjectExpression::Pointer autoArr = objects->getValue(option_auto_array);
+      ObjectExpression::Pointer autoStk = objects->getValue(stackEnd);
+      ObjectExpression::Pointer autoItr = context->getTempVar(0);
+
+      // Set stackPtr to the index into autoArr. (But save the bit number in autoItr.)
+      // stackPtr = (autoItr = (stackPtr - 0x80000000) / auto_stack_size) / 32;
+      objects->addToken(OCODE_GET_AUTPTR);
+      objects->addToken(OCODE_GET_IMM,    objects->getValue(0x80000000));
+      objects->addToken(OCODE_SUB_STK_U);
+      objects->addToken(OCODE_GET_IMM,    objects->getValue(option_auto_stack_size));
+      objects->addToken(OCODE_DIV_STK_I);
+      objects->addToken(OCODE_SET_TEMP,   autoItr);
+      objects->addToken(OCODE_GET_TEMP,   autoItr);
+      objects->addToken(OCODE_GET_IMM,    objects->getValue(5));
+      objects->addToken(OCODE_RSH_STK_I);
+      objects->addToken(OCODE_SET_AUTPTR);
+
+      // autoArr[stackPtr] &= ~(1 << (autoItr % 32));
+      objects->addToken(OCODE_GET_AUTPTR);
+      objects->addToken(OCODE_GET_IMM,      objects->getValue(1));
+      objects->addToken(OCODE_GET_TEMP,     autoItr);
+      objects->addToken(OCODE_GET_IMM,      objects->getValue(31));
+      objects->addToken(OCODE_AND_STK_U);
+      objects->addToken(OCODE_LSH_STK_U);
+      objects->addToken(OCODE_INV_STK_U);
+      objects->addToken(OCODE_AND_WLDARR_U, autoArr);
+
+      // if(stackPtr < autoArr[autoStk]) autoArr[autoStk] = stackPtr;
+      objects->addToken(OCODE_GET_AUTPTR);
+      objects->addToken(OCODE_GET_IMM,    autoStk);
+      objects->addToken(OCODE_GET_WLDARR, autoArr);
+      objects->addToken(OCODE_CMP_LT_I);
+      objects->addToken(OCODE_JMP_NIL,    jumpEnd);
+      objects->addToken(OCODE_GET_IMM,    autoStk);
+      objects->addToken(OCODE_GET_AUTPTR);
+      objects->addToken(OCODE_SET_WLDARR, autoArr);
+      objects->addLabel(labelEnd);
+   }
+   else
+   {
+      // Do nothing.
+   }
+}
+
+//
+// SourceExpression::make_objects_auto_load
+//
+void SourceExpression::make_objects_auto_load(ObjectVector *objects, SourceContext *context)
+{
+   std::string label = context->makeLabel();
+
+   if(option_auto_stack_size)
+   {
+      std::string labelAlloc = label + "_allloc";
+      std::string labelEnd   = label + "_end";
+
+      ObjectExpression::Pointer jumpAlloc = objects->getValue(labelAlloc);
+      ObjectExpression::Pointer jumpEnd   = objects->getValue(labelEnd);
+
+      ObjectExpression::Pointer autoSav = context->getTempVar(0);
+
+      // If auto stack was unused, re-alloc.
+      // Of course, if this context is using auto variables, then it's not unsued.
+      if(!context->getLimit(STORE_AUTO))
+      {
+         // If we're in a script, then we just proved statically that the stack
+         // allocation was unused, so just alloc it.
+         if(context->getTypeRoot() == SourceContext::CT_SCRIPT)
+         {
+            make_objects_auto_alloc(objects, context);
+         }
+         // Otherwise, this has to be a run-time check.
+         else
+         {
+            // If auto-pointer is marked as free, alloc it.
+            objects->addToken(OCODE_GET_TEMP, autoSav);
+            objects->addToken(OCODE_JMP_VAL,  objects->getValue(0xFFFFFFFF), jumpAlloc);
+            // Otherwise, load it.
+            objects->addToken(OCODE_SET_AUTPTR);
+            objects->addToken(OCODE_JMP_IMM,  jumpEnd);
+
+            // Free the allocation.
+            objects->addLabel(labelAlloc);
+            make_objects_auto_alloc(objects, context);
+         }
+      }
+      // If it's known to be used in this context, then just load the pointer.
+      else
+      {
+         objects->addToken(OCODE_GET_TEMP, autoSav);
+         objects->addToken(OCODE_SET_AUTPTR);
+      }
+
+      objects->addLabel(labelEnd);
+   }
+   else
+   {
+      // Not worth trying to save it.
+   }
+}
+
+//
+// SourceExpression::make_objects_auto_save
+//
+void SourceExpression::make_objects_auto_save(ObjectVector *objects, SourceContext *context)
+{
+   std::string label = context->makeLabel();
+
+   if(option_auto_stack_size)
+   {
+      std::string labelEnd = label + "_end";
+      std::string labelRem = label + "_rem";
+
+      ObjectExpression::Pointer jumpEnd = objects->getValue(labelEnd);
+      ObjectExpression::Pointer jumpRem = objects->getValue(labelRem);
+
+      ObjectExpression::Pointer autoSav = context->getTempVar(0);
+
+      // If auto stack is unused, free it and re-alloc in load.
+      // Of course, if this context is using auto variables, then it's not unsued.
+      if(!context->getLimit(STORE_AUTO))
+      {
+         // If we're in a script, then we just proved statically that the stack
+         // allocation is unused, so just free it.
+         if(context->getTypeRoot() == SourceContext::CT_SCRIPT)
+         {
+            make_objects_auto_free(objects, context);
+         }
+         // Otherwise, this has to be a run-time check.
+         else
+         {
+            // If auto-pointer is at its initial position, free it.
+            objects->addToken(OCODE_GET_AUTPTR);
+            objects->addToken(OCODE_GET_IMM, objects->getValue(option_auto_stack_size));
+            objects->addToken(OCODE_MOD_STK_I);
+            objects->addToken(OCODE_JMP_NIL, jumpRem);
+            // Otherwise, save it.
+            objects->addToken(OCODE_GET_AUTPTR);
+            objects->addToken(OCODE_SET_TEMP, autoSav);
+            objects->addToken(OCODE_JMP_IMM,  jumpEnd);
+
+            // Free the allocation.
+            objects->addLabel(labelRem);
+            make_objects_auto_free(objects, context);
+         }
+
+         // Mark temp as deallocated.
+         objects->addToken(OCODE_GET_IMM,  objects->getValue(0xFFFFFFFF));
+         objects->addToken(OCODE_SET_TEMP, autoSav);
+      }
+      // If it's known to be used in this context, then just save the pointer.
+      else
+      {
+         objects->addToken(OCODE_GET_AUTPTR);
+         objects->addToken(OCODE_SET_TEMP, autoSav);
+      }
+
+      objects->addLabel(labelEnd);
+   }
+   else
+   {
+      // Not worth trying to save it.
+   }
 }
 
 //

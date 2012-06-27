@@ -83,13 +83,35 @@ ObjectCode ocode_get_code
 }
 
 //
+// ocode_is_delay
+//
+bool ocode_is_delay(ObjectCode ocode)
+{
+   switch(ocode)
+   {
+   case OCODE_ACS_WAIT_POLYOBJECT:
+   case OCODE_ACS_WAIT_POLYOBJECT_IMM:
+   case OCODE_ACS_WAIT_SCRIPT:
+   case OCODE_ACS_WAIT_SCRIPT_IMM:
+   case OCODE_ACS_WAIT_STAG:
+   case OCODE_ACS_WAIT_STAG_IMM:
+   case OCODE_ACS_WAIT_TICS:
+   case OCODE_ACS_WAIT_TICS_IMM:
+      return true;
+
+   default:
+      return false;
+   }
+}
+
+//
 // ocode_is_push_noarg
 //
 bool ocode_is_push_noarg(ObjectCode ocode)
 {
    switch (ocode)
    {
-   case OCODE_GET_AUTPTR:
+   case OCODE_GET_AUTPTR_IMM:
 
    case OCODE_GET_IMM:
    case OCODE_GET_STATIC:

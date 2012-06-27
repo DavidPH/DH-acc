@@ -99,7 +99,7 @@ public:
       BCODE_RSH_STATIC      = 141,
       BCODE_RSH_AUTO        = 142,
       BCODE_RSH_PTR         = 143,
-      BCODE_GET_AUTPTR      = 144,
+      BCODE_GET_AUTPTR_IMM  = 144,
       BCODE_ADD_AUTPTR      = 145,
       BCODE_SUB_AUTPTR      = 146,
       BCODE_JMP             = 147,

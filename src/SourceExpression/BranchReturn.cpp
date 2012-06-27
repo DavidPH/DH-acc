@@ -89,28 +89,39 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   bigsint srcSize = expr->getType()->getSize(pos);
-   if (srcSize && target_type == TARGET_ZDoom)
-      --srcSize;
-   VariableData::Pointer src = VariableData::create_stack(srcSize);
+   // How many bytes are we returning?
+   bigsint retnSize = expr->getType()->getSize(pos);
 
-   expr->makeObjects(objects, src);
-
-   objects->setPosition(pos);
-
-   bigsint retnSize(expr->getType()->getSize(pos));
-
-   if (target_type != TARGET_ZDoom)
+   // Evaluate the returned expression.
+   VariableData::Pointer tmp;
+   if(retnSize == 0)
    {
-      for (bigsint i(1); i <= retnSize; ++i)
-         objects->addToken(OCODE_SET_AUTO, objects->getValue(-i));
+      tmp = VariableData::create_void(0);
+      expr->makeObjects(objects, tmp);
+   }
+   else if(retnSize == 1 && target_type == TARGET_ZDoom)
+   {
+      tmp = VariableData::create_stack(1);
+      expr->makeObjects(objects, tmp);
    }
    else
    {
-      for (bigsint i(1); i < retnSize; ++i)
-         objects->addToken(OCODE_SET_AUTO, objects->getValue(-i));
+      ObjectExpression::Pointer objArray = objects->getValue(option_auto_array);
+
+      // Use the end of the auto-array for extended return data.
+      tmp = VariableData::create_registerarray(retnSize, VariableData::SRA_WORLD,
+         objArray, create_value_int(-retnSize, context, pos));
+      expr->makeObjects(objects, tmp);
+
+      // But the first value needs to be on the stack.
+      objects->setPosition(pos);
+      objects->addToken(OCODE_GET_IMM, objects->getValue(-retnSize));
+      objects->addToken(OCODE_GET_WLDARR, objArray);
    }
 
+   objects->setPosition(pos);
+
+   // Add the branch instruction.
    switch (ct)
    {
    case SourceContext::CT_BLOCK:
@@ -128,6 +139,8 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       break;
 
    case SourceContext::CT_SCRIPT:
+      make_objects_auto_free(objects, context);
+
       if (retnSize != 0)
          objects->addToken(OCODE_ACSE_SCRIPT_SETRETURN);
 

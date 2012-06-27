@@ -769,7 +769,7 @@ void SourceExpression::make_objects_memcpy_cast
          goto case_src_int;
 
       // Special handling for auto*->static*.
-      objects->addToken(OCODE_GET_AUTPTR, objects->getValue(0));
+      objects->addToken(OCODE_GET_AUTPTR);
       objects->addToken(OCODE_ADD_STK_U);
       break;
    }

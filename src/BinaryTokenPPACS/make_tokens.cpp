@@ -172,7 +172,7 @@ void BinaryTokenPPACS::make_tokens
    //
    // Variable Address
    //
-   CASE_REMAP(GET_AUTPTR, GET_AUTPTR);
+   CASE_REMAP(GET_AUTPTR_IMM, GET_AUTPTR_IMM);
 
    CASE_REMAP(ADD_AUTPTR, ADD_AUTPTR);
    case OCODE_ADD_AUTPTR_IMM:

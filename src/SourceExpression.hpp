@@ -398,6 +398,11 @@ protected:
    CounterReference<SourceContext> context;
 
 
+   static void make_objects_auto_alloc(ObjectVector *objects, SourceContext *context);
+   static void make_objects_auto_free(ObjectVector *objects, SourceContext *context);
+   static void make_objects_auto_save(ObjectVector *objects, SourceContext *context);
+   static void make_objects_auto_load(ObjectVector *objects, SourceContext *context);
+
    static void make_objects_call
    (ObjectVector *objects, VariableData *dst, SourceExpression *expr,
     Vector const &args, SourceContext *context, SourcePosition const &position);
@@ -480,6 +485,8 @@ private:
 // Global Variables                                                           |
 //
 
+extern int  option_auto_array;
+extern int  option_auto_stack_size;
 extern bool option_string_tag;
 
 #endif//HPP_SourceExpression_

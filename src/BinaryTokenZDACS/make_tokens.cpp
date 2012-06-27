@@ -245,7 +245,19 @@ void BinaryTokenZDACS::make_tokens
    case OCODE_GET_AUTPTR:
       args.push_back(indexStack);
       PUSH_TOKEN(BCODE_GET_WLDREG);
+      break;
+
+   case OCODE_GET_AUTPTR_IMM:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_GET_WLDREG);
       PUSH_TOKEN_ADD_ARG0();
+      break;
+
+   case OCODE_SET_AUTPTR_IMM:
+      PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1);
+   case OCODE_SET_AUTPTR:
+      args.push_back(indexStack);
+      PUSH_TOKEN(BCODE_SET_WLDREG);
       break;
 
    case OCODE_ADD_AUTPTR_IMM:

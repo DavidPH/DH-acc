@@ -116,9 +116,9 @@ void BinaryTokenPPACS::init()
    DO_INIT(JMP, 0);
 
    // Variable Address
-   DO_INIT(GET_AUTPTR, 1);
-   DO_INIT(ADD_AUTPTR, 0);
-   DO_INIT(SUB_AUTPTR, 0);
+   DO_INIT(GET_AUTPTR_IMM, 1);
+   DO_INIT(ADD_AUTPTR,     0);
+   DO_INIT(SUB_AUTPTR,     0);
 
    // Variable Get
    DO_INIT(GET_STATIC, 1);

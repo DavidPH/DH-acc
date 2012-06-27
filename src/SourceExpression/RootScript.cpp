@@ -92,16 +92,6 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   if (target_type == TARGET_ZDoom)
-   {
-      std::string label = context->makeLabel();
-      objects->setPosition(pos);
-      objects->addToken(OCODE_GET_AUTPTR, objects->getValue(0));
-      objects->addToken(OCODE_JMP_TRU, objects->getValue(label));
-      objects->addToken(OCODE_ADD_AUTPTR_IMM, objects->getValue(1));
-      objects->addLabel(label);
-   }
-
    bigsint callSize = 0;
    VariableType::Vector const &callTypes = type->getTypes();
 
@@ -113,22 +103,33 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       callSize += callTypes[i]->getSize(pos);
    }
 
-   if (option_script_autoargs)
+   // Acquire new stack pointer.
+   if(target_type == TARGET_ZDoom)
+      make_objects_auto_alloc(objects, context);
+
+   // Automatic-variable arguments.
+   if(option_script_autoargs)
    {
-      for (bigsint i = 0; i < callSize && i < option_script_regargs; ++i)
+      for(bigsint i = 0; i < callSize && i < option_script_regargs; ++i)
       {
          objects->addToken(OCODE_GET_REG, objects->getValue(i));
          objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
       }
    }
-   else
+
+   // Extended arguments.
+   if(callSize > option_script_regargs)
    {
-      if (callSize > option_script_regargs)
-         for (bigsint i = callSize - option_script_regargs; i--;)
-         {
-            objects->addToken(OCODE_GET_AUTO, objects->getValue(i));
-            objects->addToken(OCODE_SET_REG, objects->getValue(i+option_script_regargs));
-         }
+      for(bigsint i = -callSize + option_script_regargs; i; ++i)
+      {
+         objects->addToken(OCODE_GET_IMM, objects->getValue(i));
+         objects->addToken(OCODE_GET_WLDARR, objects->getValue(option_auto_array));
+
+         if(option_script_autoargs)
+            objects->addToken(OCODE_SET_AUTO, objects->getValue(callSize + i));
+         else
+            objects->addToken(OCODE_SET_REG, objects->getValue(callSize + i));
+      }
    }
 }
 

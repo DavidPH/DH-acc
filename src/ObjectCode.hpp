@@ -66,6 +66,9 @@ struct ObjectCodeSet
 ObjectCode ocode_get_code
 (std::string const &data, SourcePosition const &position);
 
+// Returns true if the passed ocode delays further execution.
+bool ocode_is_delay(ObjectCode ocode);
+
 // Returns true if the passed ocode pushes something to the stack without
 // taking anything.
 bool ocode_is_push_noarg(ObjectCode ocode);

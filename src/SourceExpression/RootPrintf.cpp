@@ -208,6 +208,12 @@ private:
          argSize = argType->getSize(pos);
       }
 
+      if (argType->getReturn()->getStoreType() == STORE_AUTO)
+      {
+         argType = argType->getReturn()->setStorage(STORE_STATIC)->getPointer();
+         argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
+      }
+
       if (argBT != VariableType::BT_PTR)
          ERROR_NP("expected pointer got %s", make_string(argType).c_str());
 

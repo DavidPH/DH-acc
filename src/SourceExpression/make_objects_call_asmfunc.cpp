@@ -50,6 +50,10 @@ void SourceExpression::make_objects_call_asmfunc
 
    bool immediate = ocode.ocode_imm != OCODE_NONE;
 
+   // Do we need to preserve the auto-stack-pointer?
+   // TODO: __attribute__((__savestack__))
+   bool savestack = ocode_is_delay(ocode.ocode) || ocode_is_delay(ocode.ocode_imm);
+
    for (size_t i = 0; i < callTypes.size(); ++i)
    {
       if (!callTypes[i])
@@ -65,6 +69,10 @@ void SourceExpression::make_objects_call_asmfunc
 
       immediate = immediate && args[i]->canMakeObject();
    }
+
+   // Save stack pointer.
+   if(savestack)
+      make_objects_auto_save(objects, context);
 
    if (immediate)
    {
@@ -87,6 +95,10 @@ void SourceExpression::make_objects_call_asmfunc
       objects->setPosition(pos);
       objects->addToken(ocode.ocode);
    }
+
+   // Load stack pointer.
+   if(savestack)
+      make_objects_auto_load(objects, context);
 
    make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
 }

@@ -93,7 +93,6 @@ void SourceExpression::make_objects_call_function
    if (option_function_autoargs || target_type != TARGET_ZDoom)
    {
       // ... Place args in auto vars.
-      // FIXME: Should be based on type.
       for (bigsint i = callSize; i--;)
          objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
    }
@@ -113,9 +112,11 @@ void SourceExpression::make_objects_call_function
    objects->addLabel(labelReturn);
 
    // For any return bytes we're handling, push them onto the stack.
-   // FIXME: Should be based on type.
-   for (bigsint i(-retnSize); i; ++i)
-      objects->addToken(OCODE_GET_AUTO, objects->getValue(i));
+   if(retnSize) for(bigsint i = -retnSize; ++i;)
+   {
+      objects->addToken(OCODE_GET_IMM, objects->getValue(i));
+      objects->addToken(OCODE_GET_WLDARR, objects->getValue(option_auto_array));
+   }
 
    // Reset the stack-pointer.
    objects->addToken(OCODE_SUB_AUTPTR_IMM, ostack);
@@ -162,8 +163,11 @@ void SourceExpression::make_objects_call_function
    objects->addLabel(labelReturn);
 
    // For any return bytes we're handling, push them onto the stack.
-   for (bigsint i(-retnSize); i; ++i)
-      objects->addToken(OCODE_GET_AUTO, objects->getValue(i));
+   if(retnSize) for(bigsint i = -retnSize; ++i;)
+   {
+      objects->addToken(OCODE_GET_IMM, objects->getValue(i));
+      objects->addToken(OCODE_GET_WLDARR, objects->getValue(option_auto_array));
+   }
 
    // Reset the stack-pointer.
    objects->addToken(OCODE_SUB_AUTPTR_IMM, ostack);
