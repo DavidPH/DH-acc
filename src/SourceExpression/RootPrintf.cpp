@@ -372,6 +372,7 @@ private:
                objects->addToken(OCODE_ACSP_CHARACTER);
                continue;
 
+            case 'd':
             case 'i':
                makeExpr(objects, VariableType::get_bt_int());
                objects->addToken(OCODE_ACSP_NUM_DEC_I);
@@ -387,7 +388,7 @@ private:
 
             case 'u':
                makeExpr(objects, VariableType::get_bt_uns());
-               objects->addToken(OCODE_ACSP_NUM_DEC_U);
+               objects->addToken(OCODE_ACSP_NUM_DEC_I);
                continue;
 
             default:

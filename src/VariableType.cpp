@@ -433,7 +433,8 @@ VariableType::~VariableType()
       break;
 
    case BT_PTR:
-      typeRet->typePtr = NULL;
+      if(typeRet->typePtr == this)
+         typeRet->typePtr = NULL;
       break;
 
    case BT_PTR_NUL:
