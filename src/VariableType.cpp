@@ -1260,6 +1260,15 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       if (srcBT == BT_BLOCK && (dstBT == BT_ARR || dstBT == BT_STRUCT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
+      // block->*
+      if(srcBT == BT_BLOCK && dstBT != BT_BLOCK)
+      {
+         if(src->types.empty())
+            return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
+         else
+            return get_cast(dst, src->types.back());
+      }
+
       // enum->int
       if (srcBT == BT_ENUM && (is_bt_integer(dstBT) && dstBT != BT_ENUM))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
