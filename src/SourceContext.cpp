@@ -665,6 +665,9 @@ ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
       {"__temp0__", "__temp1__", "__temp2__", "__temp3__", "__temp4__",
        "__temp5__", "__temp6__", "__temp7__", "__temp8__", "__temp9__"};
 
+   if(inheritLocals)
+      return parent->getTempVar(i);
+
    SourceVariable::Pointer var = findTempVar(i);
 
    if (!var)
@@ -680,7 +683,8 @@ ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
       var = SourceVariable::create_variable(nameSrc, type, nameObj, store, pos);
 
       tempVars[i] = var;
-      addVar(var, false, false);
+      addVar(var, false, false, getLimit(store));
+      addLimit(getLimit(store) + type->getSize(pos), store);
    }
 
    return var->getData()->address;
