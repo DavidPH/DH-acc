@@ -98,10 +98,12 @@ void SourceExpression::make_objects_call_asmfunc
 
       for(size_t i = 0; i < callTypes.size(); ++i)
       {
-         VariableData::Pointer tmp =
-            VariableData::create_stack(args[i]->getType()->getSize(pos));
+         SourceExpression::Pointer arg = i < args.size() ? args[i] : func->args[i];
 
-         (i < args.size() ? args[i] : func->args[i])->makeObjects(objects, tmp);
+         VariableData::Pointer tmp =
+            VariableData::create_stack(arg->getType()->getSize(pos));
+
+         arg->makeObjects(objects, tmp);
       }
 
       objects->setPosition(pos);
