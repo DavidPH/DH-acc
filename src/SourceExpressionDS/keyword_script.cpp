@@ -28,6 +28,7 @@
 #include "../option.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
+#include "../SourceFunction.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerC.hpp"
 #include "../SourceVariable.hpp"
@@ -270,8 +271,10 @@ static SourceExpression::Pointer make_script
       (scriptNameObj, scriptLabel, scriptType, scriptFlags, args.count,
        args.context, externVis);
 
+   SourceFunction::Reference func = SourceFunction::create(scriptVar, args.args);
+
    if (scriptAdded)
-      context->addFunction(scriptVar);
+      context->addFunction(func);
 
    // scriptExpr
    if (!externDef)
@@ -293,7 +296,7 @@ static SourceExpression::Pointer make_script
       blocks->push_back(scriptExprRetn);
    }
 
-   return SourceExpression::create_value_variable(scriptVar, context, tok->pos);
+   return SourceExpression::create_value_function(func, context, tok->pos);
 }
 
 //

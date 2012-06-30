@@ -26,6 +26,7 @@
 #include "ObjectExpression.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
+#include "SourceFunction.hpp"
 #include "SourceStream.hpp"
 #include "SourceTokenizerC.hpp"
 #include "SourceVariable.hpp"
@@ -158,7 +159,7 @@ SRCEXPDS_EXPR_DEF1(primary)
    {  // Check for function designator.
       int count = context->isFunction(tok->data);
       if (count == 1)
-         return create_value_variable(context->getFunction(tok->data, tok->pos),
+         return create_value_function(context->getFunction(tok->data, tok->pos),
                                       context, tok->pos);
       else if (count)
          return create_value_function(tok->data, context, tok->pos);

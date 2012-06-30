@@ -21,6 +21,7 @@
 //
 //-----------------------------------------------------------------------------
 
+#include "make_objects_call.hpp"
 #include "../SourceExpression.hpp"
 
 #include "../ObjectExpression.hpp"
@@ -40,7 +41,11 @@ void SourceExpression::make_objects_call
 (ObjectVector *objects, VariableData *dst, SourceExpression *expr,
  Vector const &args, SourceContext *context, SourcePosition const &pos)
 {
+   SourceFunction::Pointer func;
    VariableType::Reference type = expr->getType();
+
+   if(expr->canGetFunction())
+      func = expr->getFunction();
 
    switch (type->getBasicType())
    {
@@ -48,7 +53,7 @@ void SourceExpression::make_objects_call
       if (expr->canMakeObject())
       {
          make_objects_call_asmfunc
-         (objects, dst, type, expr->makeObject(), args, context, pos);
+         (objects, dst, func, type, expr->makeObject(), args, context, pos);
       }
       else
          ERROR_P("non-constant asmfunc");
@@ -58,12 +63,12 @@ void SourceExpression::make_objects_call
       if (expr->canMakeObject())
       {
          make_objects_call_function
-         (objects, dst, type, expr->makeObject(), args, context, pos);
+         (objects, dst, func, type, expr->makeObject(), args, context, pos);
       }
       else
       {
          make_objects_call_function
-         (objects, dst, type, expr, args, context, pos);
+         (objects, dst, func, type, expr, args, context, pos);
       }
       break;
 
@@ -71,7 +76,7 @@ void SourceExpression::make_objects_call
       if (expr->canMakeObject())
       {
          make_objects_call_linespec
-         (objects, dst, type, expr->makeObject(), args, context, pos);
+         (objects, dst, func, type, expr->makeObject(), args, context, pos);
       }
       else
          ERROR_P("non-constant linespec");
@@ -81,7 +86,7 @@ void SourceExpression::make_objects_call
       if (expr->canMakeObject())
       {
          make_objects_call_native
-         (objects, dst, type, expr->makeObject(), args, context, pos);
+         (objects, dst, func, type, expr->makeObject(), args, context, pos);
       }
       else
          ERROR_P("non-constant native");
@@ -89,7 +94,7 @@ void SourceExpression::make_objects_call
 
    case VariableType::BT_SCRIPT:
       make_objects_call_script
-      (objects, dst, type, expr, args, context, pos);
+      (objects, dst, func, type, expr, args, context, pos);
       break;
 
    default:

@@ -148,6 +148,7 @@ public:
 
       std::vector<std::string> names;
       std::vector<CounterPointer<VariableType> > types;
+      SourceExpression::Vector args;
       std::string name;
       CounterPointer<SourceContext> context;
       CounterPointer<VariableType> retn;

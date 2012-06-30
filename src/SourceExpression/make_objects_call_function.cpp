@@ -60,9 +60,9 @@ bool option_function_autoargs = false;
 // SourceExpression::make_objects_call_function
 //
 void SourceExpression::make_objects_call_function
-(ObjectVector *objects, VariableData *dst, VariableType *type,
- ObjectExpression *data, Vector const &args, SourceContext *context,
- SourcePosition const &pos)
+(ObjectVector *objects, VariableData *dst, SourceFunction *func,
+ VariableType *type, ObjectExpression *data, Vector const &args,
+ SourceContext *context, SourcePosition const &pos)
 {
    std::string labelReturn = context->makeLabel();
 
@@ -128,9 +128,9 @@ void SourceExpression::make_objects_call_function
 // SourceExpression::make_objects_call_function
 //
 void SourceExpression::make_objects_call_function
-(ObjectVector *objects, VariableData *dst, VariableType *type,
- SourceExpression *data, Vector const &args, SourceContext *context,
- SourcePosition const &pos)
+(ObjectVector *objects, VariableData *dst, SourceFunction *func,
+ VariableType *type, SourceExpression *data, Vector const &args,
+ SourceContext *context, SourcePosition const &pos)
 {
    std::string labelReturn = context->makeLabel();
 

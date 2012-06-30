@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,19 +17,14 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of calling native functions.
+// Source-level function handling.
 //
 //-----------------------------------------------------------------------------
 
-#include "../SourceExpression.hpp"
+#include "SourceFunction.hpp"
 
-#include "make_objects_call.hpp"
-
-#include "../ObjectExpression.hpp"
-#include "../ObjectVector.hpp"
-#include "../SourceException.hpp"
-#include "../VariableData.hpp"
-#include "../VariableType.hpp"
+#include "SourceExpression.hpp"
+#include "SourceVariable.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -37,22 +32,18 @@
 //
 
 //
-// SourceExpression::make_objects_call_native
+// SourceFunction::SourceFunction
 //
-void SourceExpression::make_objects_call_native
-(ObjectVector *objects, VariableData *dst, SourceFunction *func,
- VariableType *type, ObjectExpression *data, Vector const &args,
- SourceContext *context, SourcePosition const &pos)
+SourceFunction::SourceFunction(SourceVariable *_var, SourceExpression::Vector const &_args)
+ : var(_var), args(_args)
 {
-   FUNCTION_PREAMBLE
-   FUNCTION_ARGS
+}
 
-   objects->addToken(OCODE_NATIVE, objects->getValue(callSize), data);
-
-   // ZDoom always pushes at least one byte.
-   if (!retnSize) objects->addToken(OCODE_STK_DROP);
-
-   make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
+//
+// SourceFunction::~SourceFunction
+//
+SourceFunction::~SourceFunction()
+{
 }
 
 // EOF

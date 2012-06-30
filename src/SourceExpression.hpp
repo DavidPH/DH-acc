@@ -181,6 +181,10 @@
    SourceExpression *expr, VariableType *type, \
    SRCEXP_EXPR_ARGS
 
+#define SRCEXP_EXPRVALf_ARGS \
+   SourceFunction *func,     \
+   SRCEXP_EXPR_ARGS
+
 #define SRCEXP_EXPRVALi_ARGS \
    bigsint value,            \
    SRCEXP_EXPR_ARGS
@@ -241,6 +245,7 @@
 class ObjectExpression;
 class ObjectVector;
 class SourceContext;
+class SourceFunction;
 class SourceVariable;
 class VariableData;
 class VariableType;
@@ -259,10 +264,13 @@ public:
    void addLabel(std::string const &label);
 
    virtual bool canGetData() const;
+   virtual bool canGetFunction() const {return false;}
 
    virtual bool canMakeObject() const;
 
    virtual CounterPointer<VariableData> getData() const;
+
+   virtual CounterReference<SourceFunction> getFunction() const;
 
    virtual CounterReference<VariableType> getType() const;
 
@@ -356,6 +364,7 @@ public:
    SRCEXP_EXPRVAL_DECL(  , data);
    SRCEXP_EXPRVAL_DECL( t, data);
    SRCEXP_EXPRVAL_DECL( t, data_garbage);
+   SRCEXP_EXPRVAL_DECL( f, function);
    SRCEXP_EXPRVAL_DECL( s, function);
    SRCEXP_EXPRVAL_DECL( i, int);
    SRCEXP_EXPRVAL_DECL( i, llong);
@@ -450,34 +459,34 @@ private:
 
 
    static void make_objects_call_asmfunc
-   (ObjectVector *objects, VariableData *dst, VariableType *type,
-    ObjectExpression *data, Vector const &args, SourceContext *context,
-    SourcePosition const &position);
+   (ObjectVector *objects, VariableData *dst, SourceFunction *func,
+    VariableType *type, ObjectExpression *data, Vector const &args,
+    SourceContext *context, SourcePosition const &pos);
 
    static void make_objects_call_function
-   (ObjectVector *objects, VariableData *dst, VariableType *type,
-    ObjectExpression *data, Vector const &args, SourceContext *context,
-    SourcePosition const &position);
+   (ObjectVector *objects, VariableData *dst, SourceFunction *func,
+    VariableType *type, ObjectExpression *data, Vector const &args,
+    SourceContext *context, SourcePosition const &pos);
 
    static void  make_objects_call_function
-   (ObjectVector *objects, VariableData *dst, VariableType *type,
-    SourceExpression *data, Vector const &args, SourceContext *context,
-    SourcePosition const &position);
+   (ObjectVector *objects, VariableData *dst, SourceFunction *func,
+    VariableType *type, SourceExpression *data, Vector const &args,
+    SourceContext *context, SourcePosition const &pos);
 
    static void make_objects_call_linespec
-   (ObjectVector *objects, VariableData *dst, VariableType *type,
-    ObjectExpression *data, Vector const &args, SourceContext *context,
-    SourcePosition const &position);
+   (ObjectVector *objects, VariableData *dst, SourceFunction *func,
+    VariableType *type, ObjectExpression *data, Vector const &args,
+    SourceContext *context, SourcePosition const &pos);
 
    static void make_objects_call_native
-   (ObjectVector *objects, VariableData *dst, VariableType *type,
-    ObjectExpression *data, Vector const &args, SourceContext *context,
-    SourcePosition const &position);
+   (ObjectVector *objects, VariableData *dst, SourceFunction *func,
+    VariableType *type, ObjectExpression *data, Vector const &args,
+    SourceContext *context, SourcePosition const &pos);
 
    static void make_objects_call_script
-   (ObjectVector *objects, VariableData *dst, VariableType *type,
-    SourceExpression *data, Vector const &args, SourceContext *context,
-    SourcePosition const &position);
+   (ObjectVector *objects, VariableData *dst, SourceFunction *func,
+    VariableType *type, SourceExpression *data, Vector const &args,
+    SourceContext *context, SourcePosition const &pos);
 };
 
 

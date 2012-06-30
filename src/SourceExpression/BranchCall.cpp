@@ -82,8 +82,9 @@ SourceExpression_BranchCall::SourceExpression_BranchCall
       if (!types[i])
          ERROR_NP("variadic call");
 
+      // The legality of this will be determined by make_objects_call.
       if (i >= args.size())
-         ERROR_NP("incorrect arg count");
+         break;
 
       args[i] = create_value_cast_implicit(args[i], types[i], context, pos);
    }

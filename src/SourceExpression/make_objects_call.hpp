@@ -24,6 +24,8 @@
 #ifndef HPP_make_objects_call__SourceExpression_
 #define HPP_make_objects_call__SourceExpression_
 
+#include "../SourceFunction.hpp"
+
 
 //----------------------------------------------------------------------------|
 // Macros                                                                     |
@@ -55,10 +57,15 @@
                                                         \
       callSize += callTypes[i]->getSize(pos);           \
                                                         \
-      if (i >= args.size())                             \
+      SourceExpression::Pointer arg;                    \
+      if(i < args.size())                               \
+         arg = args[i];                                 \
+      else if(func)                                     \
+         arg = func->args[i];                           \
+                                                        \
+      if(!arg)                                          \
          ERROR_P("bad count");                          \
                                                         \
-      SourceExpression::Pointer arg = args[i];          \
       VariableType::Reference argType = arg->getType(); \
       bigsint argSize = argType->getSize(pos);          \
       VariableData::Pointer argDst =                    \

@@ -79,6 +79,16 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in, Vector *blocks,
       else
          args->names.push_back(std::string());
 
+      if(in->peekType(SourceTokenC::TT_EQUALS))
+      {
+         in->get();
+         SourceExpression::Pointer expr = make_assignment(in, blocks, context);
+         expr = create_value_cast_implicit(expr, args->types.back(), context, pos);
+         args->args.push_back(expr);
+      }
+      else
+         args->args.push_back(NULL);
+
       if (!in->peekType(SourceTokenC::TT_COMMA)) break;
 
       in->get(SourceTokenC::TT_COMMA);

@@ -28,6 +28,7 @@
 #include "../option.hpp"
 #include "../ost_type.hpp"
 #include "../SourceContext.hpp"
+#include "../SourceFunction.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerC.hpp"
 #include "../SourceVariable.hpp"
@@ -194,8 +195,10 @@ static SourceExpression::Pointer make_func
       (funcNameObj, funcLabel, args.count, args.retn->getSize(tok->pos),
        args.context);
 
+   SourceFunction::Reference func = SourceFunction::create(funcVar, args.args);
+
    if (funcAdded)
-      context->addFunction(funcVar);
+      context->addFunction(func);
 
    // funcExpr
    if (!externDef)
@@ -213,7 +216,7 @@ static SourceExpression::Pointer make_func
       blocks->push_back(funcExprRetn);
    }
 
-   return SourceExpression::create_value_variable(funcVar, context, tok->pos);
+   return SourceExpression::create_value_function(func, context, tok->pos);
 }
 
 //

@@ -40,9 +40,9 @@
 // SourceExpression::make_objects_call_asmfunc
 //
 void SourceExpression::make_objects_call_asmfunc
-(ObjectVector *objects, VariableData *dst, VariableType *type,
- ObjectExpression *data, Vector const &args, SourceContext *context,
- SourcePosition const &pos)
+(ObjectVector *objects, VariableData *dst, SourceFunction *func,
+ VariableType *type, ObjectExpression *data, Vector const &args,
+ SourceContext *context, SourcePosition const &pos)
 {
    FUNCTION_PREAMBLE
 
@@ -61,13 +61,20 @@ void SourceExpression::make_objects_call_asmfunc
 
       callSize += callTypes[i]->getSize(pos);
 
-      if (i >= args.size())
+      SourceExpression::Pointer arg;
+
+      if(i < args.size())
+         arg = args[i];
+      else if(func)
+         arg = func->args[i];
+
+      if(!arg)
          ERROR_P("bad count");
 
-      if (args[i]->getType() != callTypes[i])
-         ERROR(args[i]->pos, "bad type");
+      if (arg->getType() != callTypes[i])
+         ERROR(arg->pos, "bad type");
 
-      immediate = immediate && args[i]->canMakeObject();
+      immediate = immediate && arg->canMakeObject();
    }
 
    // Save stack pointer.
@@ -78,8 +85,8 @@ void SourceExpression::make_objects_call_asmfunc
    {
       std::vector<ObjectExpression::Pointer> oargs;
 
-      for (size_t i = 0; i < args.size(); ++i)
-         oargs.push_back(args[i]->makeObject());
+      for(size_t i = 0; i < callTypes.size(); ++i)
+         oargs.push_back((i < args.size() ? args[i] : func->args[i])->makeObject());
 
       objects->setPosition(pos);
       objects->addToken(ocode.ocode_imm, oargs);
@@ -89,8 +96,13 @@ void SourceExpression::make_objects_call_asmfunc
       if (ocode.ocode == OCODE_NONE)
          ERROR_P("no ocode");
 
-      for (size_t i = 0; i < args.size(); ++i)
-         args[i]->makeObjects(objects, VariableData::create_stack(args[i]->getType()->getSize(pos)));
+      for(size_t i = 0; i < callTypes.size(); ++i)
+      {
+         VariableData::Pointer tmp =
+            VariableData::create_stack(args[i]->getType()->getSize(pos));
+
+         (i < args.size() ? args[i] : func->args[i])->makeObjects(objects, tmp);
+      }
 
       objects->setPosition(pos);
       objects->addToken(ocode.ocode);

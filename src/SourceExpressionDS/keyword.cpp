@@ -27,6 +27,7 @@
 #include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
+#include "../SourceFunction.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerC.hpp"
 #include "../SourceVariable.hpp"
@@ -273,8 +274,10 @@ SRCEXPDS_KEYWORD_DEFN(linespec)
    SourceVariable::Pointer var = SourceVariable::create_constant
       (args.name, varType, obj, tok->pos);
 
-   if (!args.name.empty()) context->addFunction(var);
-   return create_value_variable(var, context, tok->pos);
+   SourceFunction::Reference func = SourceFunction::create(var, args.args);
+
+   if (!args.name.empty()) context->addFunction(func);
+   return create_value_function(func, context, tok->pos);
 }
 
 //

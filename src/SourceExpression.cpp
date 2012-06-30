@@ -275,6 +275,14 @@ VariableData::Pointer SourceExpression::getData() const
 }
 
 //
+// SourceExpression::getFunction
+//
+CounterReference<SourceFunction> SourceExpression::getFunction() const
+{
+   ERROR_NP("getFunction on invalid expression");
+}
+
+//
 // SourceExpression::getType
 //
 VariableType::Reference SourceExpression::getType() const

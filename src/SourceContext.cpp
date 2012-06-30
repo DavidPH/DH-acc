@@ -26,6 +26,7 @@
 #include "ObjectData.hpp"
 #include "ObjectExpression.hpp"
 #include "SourceException.hpp"
+#include "SourceFunction.hpp"
 #include "SourceTokenC.hpp"
 #include "SourceVariable.hpp"
 #include "VariableData.hpp"
@@ -165,11 +166,9 @@ void SourceContext::addCount(int count, StoreType store)
 //
 // SourceContext::addFunction
 //
-void SourceContext::addFunction(SourceVariable *func)
+void SourceContext::addFunction(SourceFunction *func)
 {
-   funcNames.push_back(func->getNameSource());
-   funcTypes.push_back(func->getType());
-   funcVars .push_back(func);
+   funcs.push_back(static_cast<SourceFunction::Reference>(func));
 }
 
 //
@@ -474,11 +473,11 @@ int SourceContext::getCount(StoreType store) const
 //
 // SourceContext::getFunction
 //
-SourceVariable::Pointer SourceContext::getFunction
+SourceFunction::Reference SourceContext::getFunction
 (std::string const &name, SourcePosition const &pos)
 {
-   for (size_t i = 0; i < funcVars.size(); ++i)
-      if (funcNames[i] == name) return funcVars[i];
+   for (size_t i = 0; i < funcs.size(); ++i)
+      if (funcs[i]->var->getNameSource() == name) return funcs[i];
 
    if (parent) return parent->getFunction(name, pos);
 
@@ -488,29 +487,31 @@ SourceVariable::Pointer SourceContext::getFunction
 //
 // SourceContext::getFunction
 //
-SourceVariable::Pointer SourceContext::getFunction
+SourceFunction::Reference SourceContext::getFunction
 (std::string const &name, SourcePosition const &pos,
  VariableType::Vector const &types)
 {
    unsigned cast, funcCount = 0;
-   SourceVariable *func;
+   std::vector<SourceFunction::Reference>::iterator func, funcItr, funcEnd = funcs.end();
 
-   for (size_t i = 0; i < funcVars.size(); ++i)
+   for(funcItr = funcs.begin(); funcItr != funcEnd; ++funcItr)
    {
-      if (funcNames[i] != name) continue;
+      if ((*funcItr)->var->getNameSource() != name) continue;
 
-      func = funcVars[i];
-      cast = VariableType::get_cast(funcTypes[i]->getTypes(), types);
+      cast = VariableType::get_cast((*funcItr)->var->getType()->getTypes(), types);
 
       if (cast & VariableType::CAST_NONE)
-         return func;
+         return *funcItr;
 
       if (cast & VariableType::CAST_IMPLICIT)
+      {
+         func = funcItr;
          ++funcCount;
+      }
    }
 
    if (funcCount == 1)
-      return func;
+      return *func;
 
    if (funcCount > 1)
       ERROR_NP("ambiguous overload: %s", name.c_str());
@@ -770,8 +771,8 @@ void SourceContext::init()
 int SourceContext::isFunction(std::string const &name) const
 {
    int count = 0;
-   for (size_t i = 0; i < funcVars.size(); ++i)
-      if (funcNames[i] == name) ++count;
+   for (size_t i = 0; i < funcs.size(); ++i)
+      if (funcs[i]->var->getNameSource() == name) ++count;
 
    if (!count && parent) return parent->isFunction(name);
 

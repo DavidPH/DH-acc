@@ -38,6 +38,7 @@
 //
 
 class ObjectExpression;
+class SourceFunction;
 class SourcePosition;
 class SourceVariable;
 class VariableType;
@@ -60,21 +61,20 @@ public:
    };
 
 
-   void addFunction(SourceVariable *func);
+   void addFunction(SourceFunction *func);
 
    std::string addLabelCase(bigsint value, SourcePosition const & position);
    std::string addLabelCaseDefault(SourcePosition const & position);
    std::string addLabelGoto(std::string const &name, SourcePosition const &position);
 
    void addVar(SourceVariable *var, bool externDef, bool externVis);
-   void addVar(SourceVariable *var, bool externDef, bool externVis,
-               bigsint address);
+   void addVar(SourceVariable *var, bool externDef, bool externVis, bigsint address);
 
    std::vector<bigsint> getCases(SourcePosition const & position) const;
 
-   CounterPointer<SourceVariable> getFunction
+   CounterReference<SourceFunction> getFunction
    (std::string const &name, SourcePosition const &pos);
-   CounterPointer<SourceVariable> getFunction
+   CounterReference<SourceFunction> getFunction
    (std::string const &name, SourcePosition const &pos,
     std::vector<CounterPointer<VariableType> > const &types);
 
@@ -170,9 +170,7 @@ private:
    std::vector<std::string> enumNames;
    std::vector<CounterReference<VariableType> > enumTypes;
 
-   std::vector<std::string> funcNames;
-   std::vector<CounterReference<VariableType> > funcTypes;
-   std::vector<CounterPointer<SourceVariable> > funcVars;
+   std::vector<CounterReference<SourceFunction> > funcs;
 
    std::vector<std::string> structNames;
    std::vector<CounterReference<VariableType> > structTypes;

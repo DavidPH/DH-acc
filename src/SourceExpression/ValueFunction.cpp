@@ -25,7 +25,10 @@
 
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
+#include "../SourceFunction.hpp"
 #include "../SourceVariable.hpp"
+#include "../VariableData.hpp"
+#include "../VariableType.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -44,16 +47,65 @@ public:
    //
    // ::SourceExpression_ValueFunction
    //
+   SourceExpression_ValueFunction(SourceFunction *_func, SRCEXP_EXPR_PARM)
+    : Super(SRCEXP_EXPR_PASS), func(_func)
+   {
+   }
+
+   //
+   // ::SourceExpression_ValueFunction
+   //
    SourceExpression_ValueFunction(std::string const &_name, SRCEXP_EXPR_PARM)
     : Super(SRCEXP_EXPR_PASS), name(_name)
    {
    }
 
    //
+   // ::canGetData
+   //
+   virtual bool canGetData() const
+   {
+      return !!func;
+   }
+
+   //
+   // ::canGetFunction
+   //
+   virtual bool canGetFunction() const
+   {
+      return !!func;
+   }
+
+   //
+   // ::getData
+   //
+   virtual VariableData::Pointer getData() const
+   {
+      if(func)
+         return func->var->getData();
+
+      return Super::getData();
+   }
+
+   //
+   // ::getFunction
+   //
+   virtual SourceFunction::Reference getFunction() const
+   {
+      if(func)
+         return static_cast<SourceFunction::Reference>(func);
+
+      return Super::getFunction();
+   }
+
+   //
    // ::getType
    //
-   virtual CounterReference<VariableType> getType() const
+   virtual VariableType::Reference getType() const
    {
+      if(func)
+         return func->var->getType();
+
       ERROR_NP("designator has no type");
    }
 
@@ -61,20 +113,31 @@ public:
    // ::makeExpressionFunction
    //
    virtual SourceExpression::Pointer makeExpressionFunction
-   (std::vector<CounterPointer<VariableType> > const &types)
+   (VariableType::Vector const &types)
    {
-      SourceVariable::Pointer func = context->getFunction(name, pos, types);
-      return create_value_variable(func, context, pos);
+      if(func)
+         return this;
+
+      return create_value_function(context->getFunction(name, pos, types), context, pos);
    }
 
 private:
    std::string name;
+   SourceFunction::Pointer func;
 };
 
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
+
+//
+// SourceExpression::create_value_function
+//
+SRCEXP_EXPRVAL_DEFN(f, function)
+{
+   return new SourceExpression_ValueFunction(func, context, pos);
+}
 
 //
 // SourceExpression::create_value_function

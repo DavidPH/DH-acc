@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2012 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,43 +17,50 @@
 //
 //-----------------------------------------------------------------------------
 //
-// SourceExpression handling of calling native functions.
+// Source-level function handling.
 //
 //-----------------------------------------------------------------------------
 
-#include "../SourceExpression.hpp"
+#ifndef HPP_SourceFunction_
+#define HPP_SourceFunction_
 
-#include "make_objects_call.hpp"
+#include "Counter.hpp"
 
-#include "../ObjectExpression.hpp"
-#include "../ObjectVector.hpp"
-#include "../SourceException.hpp"
-#include "../VariableData.hpp"
-#include "../VariableType.hpp"
+#include <vector>
 
 
 //----------------------------------------------------------------------------|
-// Global Functions                                                           |
+// Types                                                                      |
 //
 
+class SourceExpression;
+class SourceVariable;
+
 //
-// SourceExpression::make_objects_call_native
+// SourceFunction
 //
-void SourceExpression::make_objects_call_native
-(ObjectVector *objects, VariableData *dst, SourceFunction *func,
- VariableType *type, ObjectExpression *data, Vector const &args,
- SourceContext *context, SourcePosition const &pos)
+class SourceFunction : public PlainCounter
 {
-   FUNCTION_PREAMBLE
-   FUNCTION_ARGS
+   MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(SourceFunction, PlainCounter);
 
-   objects->addToken(OCODE_NATIVE, objects->getValue(callSize), data);
+public:
+   ~SourceFunction();
 
-   // ZDoom always pushes at least one byte.
-   if (!retnSize) objects->addToken(OCODE_STK_DROP);
+   CounterReference<SourceVariable> var;
+   std::vector<CounterPointer<SourceExpression> > args;
 
-   make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
-}
 
-// EOF
+   //
+   // ::create
+   //
+   static Reference create(SourceVariable *var, std::vector<CounterPointer<SourceExpression> > const &args)
+   {
+      return static_cast<Reference>(new SourceFunction(var, args));
+   }
+
+private:
+   SourceFunction(SourceVariable *var, std::vector<CounterPointer<SourceExpression> > const &args);
+};
+
+#endif//HPP_SourceFunction_
 

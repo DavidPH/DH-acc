@@ -122,6 +122,7 @@ add_executable(DH-acc
    SourceExpressionDS/keyword_variable.cpp
    SourceExpressionDS/store.cpp
    SourceExpressionDS/type.cpp
+   SourceFunction.cpp
    SourcePosition.cpp
    SourceStream.cpp
    SourceTokenASMPLX.cpp

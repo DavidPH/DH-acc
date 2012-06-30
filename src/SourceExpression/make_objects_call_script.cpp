@@ -68,9 +68,9 @@ int option_script_regargs = 3;
 // SourceExpression::make_objects_call_script
 //
 void SourceExpression::make_objects_call_script
-(ObjectVector *objects, VariableData *dst, VariableType *type,
- SourceExpression *data, Vector const &args, SourceContext *context,
- SourcePosition const &pos)
+(ObjectVector *objects, VariableData *dst, SourceFunction *func,
+ VariableType *type, SourceExpression *data, Vector const &args,
+ SourceContext *context, SourcePosition const &pos)
 {
    FUNCTION_PREAMBLE
 
