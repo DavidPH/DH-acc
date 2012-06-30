@@ -95,8 +95,8 @@ static std::string const basic_names[] =
    "BT_UNION",
 
    // Anonymous types.
-   "BT_ASMFUNC",
    "BT_BLOCK",
+   "BT_ASMFUNC",
    "BT_FUNCTION",
    "BT_LINESPEC",
    "BT_NATIVE",
