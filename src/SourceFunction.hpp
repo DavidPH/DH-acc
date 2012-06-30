@@ -26,6 +26,7 @@
 
 #include "Counter.hpp"
 
+#include <cstddef>
 #include <vector>
 
 
@@ -35,6 +36,7 @@
 
 class SourceExpression;
 class SourceVariable;
+class VariableType;
 
 //
 // SourceFunction
@@ -48,6 +50,11 @@ public:
 
    CounterReference<SourceVariable> var;
    std::vector<CounterPointer<SourceExpression> > args;
+
+   size_t argsMin, argsMax;
+   // For overload detection. If there are fewer args than argsMax, but at least
+   // as many as argsMin, use types[argc - argsMin] to resolve.
+   std::vector<CounterPointer<VariableType> > *types;
 
 
    //

@@ -25,6 +25,7 @@
 
 #include "SourceExpression.hpp"
 #include "SourceVariable.hpp"
+#include "VariableType.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -37,6 +38,29 @@
 SourceFunction::SourceFunction(SourceVariable *_var, SourceExpression::Vector const &_args)
  : var(_var), args(_args)
 {
+   VariableType::Vector const &varTypes = var->getType()->getTypes();
+   size_t i, j;
+
+   argsMin = 0;
+   argsMax = varTypes.size();
+
+   for(i = 0; i < args.size(); ++i)
+      if(!args[i]) argsMin = i + 1;
+
+   if(argsMin == argsMax)
+      types = NULL;
+   else
+   {
+      types = new VariableType::Vector[argsMax - argsMin];
+      for(i = argsMin; i != argsMax; ++i)
+      {
+         VariableType::Vector &type = types[i - argsMin];
+
+         type.resize(i);
+         for(j = 0; j != i; ++j)
+            type[j] = varTypes[j];
+      }
+   }
 }
 
 //
@@ -44,6 +68,7 @@ SourceFunction::SourceFunction(SourceVariable *_var, SourceExpression::Vector co
 //
 SourceFunction::~SourceFunction()
 {
+   delete[] types;
 }
 
 // EOF

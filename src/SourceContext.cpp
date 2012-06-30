@@ -498,7 +498,13 @@ SourceFunction::Reference SourceContext::getFunction
    {
       if ((*funcItr)->var->getNameSource() != name) continue;
 
-      cast = VariableType::get_cast((*funcItr)->var->getType()->getTypes(), types);
+      if(types.size() < (*funcItr)->argsMin) continue;
+      if(types.size() > (*funcItr)->argsMax) continue;
+
+      if(types.size() == (*funcItr)->argsMax)
+         cast = VariableType::get_cast((*funcItr)->var->getType()->getTypes(), types);
+      else
+         cast = VariableType::get_cast((*funcItr)->types[types.size() - (*funcItr)->argsMin], types);
 
       if (cast & VariableType::CAST_NONE)
          return *funcItr;

@@ -95,12 +95,13 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in, Vector *blocks,
    }
    in->get(SourceTokenC::TT_PAREN_C);
 
-   // (void) should be read as (), unless the void is named.
-   if (args->types.size() == 1 && args->names[0].empty() &&
+   // (void) should be read as (), unless the void is named or defaulted.
+   if (args->types.size() == 1 && args->names[0].empty() && !args->args[0] &&
        args->types[0]->getBasicType() == VariableType::BT_VOID)
    {
       args->types.clear();
       args->names.clear();
+      args->args.clear();
    }
 
    // Read suffix return. (If one.)
