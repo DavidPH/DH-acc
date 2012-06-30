@@ -474,7 +474,8 @@ void SourceTokenizerC::doCommand_undef(SourceTokenC *)
 // Expands a token.
 //
 void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
-   SourcePosition const &pos, SourceTokenC::Reference tok, SourceStream *in)
+   SourcePosition const &pos, SourceTokenC::Reference tok, SourceStream *in,
+   MacroArgs const *altArgs, MacroParm const *altParm)
 {
    if (tok->type == SourceTokenC::TT_PAREN_O &&
        !out.empty() && out.back()->type == SourceTokenC::TT_NAM &&
@@ -483,7 +484,7 @@ void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
       tok = out.back(); out.pop_back();
       MacroData const &mdata = macros[tok->data];
       MacroArgs margs;
-      readArgs(margs, in, mdata, pos);
+      readArgs(margs, in, mdata, pos, altArgs, altParm);
 
       used.insert(tok->data);
       expand(out, used, pos, mdata, margs);
@@ -622,7 +623,7 @@ void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
          continue;
       }
 
-      expand(out, used, pos, tok, &in);
+      expand(out, used, pos, tok, &in, &args, &data.first);
    }
    } catch (SourceStream::EndOfStream const &) {}
 }
@@ -880,8 +881,10 @@ bool SourceTokenizerC::peekType
 // SourceTokenizerC::readArgs
 //
 void SourceTokenizerC::readArgs(MacroArgs &args, SourceStream *in,
-   MacroData const &data, SourcePosition const &pos)
+   MacroData const &data, SourcePosition const &pos, MacroArgs const *altArgs,
+   MacroParm const *altParm)
 {
+   MacroArg const *arg;
    MacroParm const &parm = data.first;
    int pdepth = 0;
 
@@ -910,7 +913,17 @@ void SourceTokenizerC::readArgs(MacroArgs &args, SourceStream *in,
          args.push_back(MacroArg()); continue;
       }
 
-      args.back().push_back(tok);
+      if(tok->type == SourceTokenC::TT_NAM && altArgs && altParm &&
+         (arg = find_arg(*altArgs, *altParm, tok->data)))
+      {
+         for (MacroArg::const_iterator tokEnd = arg->end(),
+              tokItr = arg->begin(); tokItr != tokEnd; ++tokItr)
+         {
+            args.back().push_back(*tokItr);
+         }
+      }
+      else
+         args.back().push_back(tok);
    }
 
    // Must not have empty args.

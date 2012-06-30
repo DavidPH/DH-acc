@@ -101,7 +101,8 @@ private:
 
    void expand(MacroVec &out, std::set<std::string> &used,
                SourcePosition const &pos, SourceTokenC::Reference tok,
-               SourceStream *in);
+               SourceStream *in, MacroArgs const *altArgs = NULL,
+               MacroParm const *altParm = NULL);
    void expand(MacroVec &out, std::set<std::string> &used,
                SourcePosition const &pos, std::string const &data);
    void expand(MacroVec &out, std::set<std::string> &used,
@@ -137,7 +138,8 @@ private:
    SourceTokenC::Reference peekRaw();
 
    void readArgs(MacroArgs &args, SourceStream *in, MacroData const &data,
-                 SourcePosition const &pos);
+                 SourcePosition const &pos, MacroArgs const *altArgs = NULL,
+                 MacroParm const *altParm = NULL);
 
    void remDefine(std::string const &name);
    void remSkip();
