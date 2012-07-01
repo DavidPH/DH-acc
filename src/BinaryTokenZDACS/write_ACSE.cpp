@@ -143,7 +143,7 @@ void BinaryTokenZDACS::write_ACSE_array_ASTR
 void BinaryTokenZDACS::write_ACSE_array_MEXP
 (std::ostream *, ObjectData_Array const &a)
 {
-   if (!a.externDef) return;
+   if (a.externDef || !a.externVis) return;
 
    if (strings_temp.size() < static_cast<size_t>(a.number + 1))
       strings_temp.resize(a.number + 1);
@@ -257,7 +257,7 @@ write_ACSE_register_MIMP(std::ostream *out, ObjectData_Register const &r)
 void BinaryTokenZDACS::
 write_ACSE_register_MEXP(std::ostream *, ObjectData_Register const &r)
 {
-   if (!r.externVis) return;
+   if (r.externDef || !r.externVis) return;
 
    std::ostringstream oss;
 
