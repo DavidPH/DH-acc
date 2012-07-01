@@ -255,6 +255,22 @@ std::string ObjectExpression::resolveSymbol() const
 }
 
 //
+// ObjectExpression::resolveString
+//
+std::string ObjectExpression::resolveString() const
+{
+   std::string symbol = resolveSymbol();
+   ObjectData_String const *string;
+
+   string = ObjectData_String::find(symbol);
+
+   if(!string)
+      ERROR_NP("cannot resolve string");
+
+   return string->string;
+}
+
+//
 // ObjectExpression::set_address_count
 //
 void ObjectExpression::set_address_count(bigsint addressCount)

@@ -54,6 +54,20 @@ public:
    }
 
    //
+   // ::canMakeObject
+   //
+   virtual bool canMakeObject() const
+   {
+      if (exprL->getType()->getBasicType() == VariableType::BT_STR)
+      {
+         return exprL->canMakeObject() && exprR->canMakeObject() &&
+                exprR->makeObject()->canResolve();
+      }
+      else
+         return false;
+   }
+
+   //
    // ::getData
    //
    virtual VariableData::Pointer getData() const
@@ -68,6 +82,25 @@ public:
    }
 
    virtual VariableType::Reference getType() const;
+
+   //
+   // ::makeObject
+   //
+   virtual ObjectExpression::Pointer makeObject() const
+   {
+      if (exprL->getType()->getBasicType() == VariableType::BT_STR)
+      {
+         std::string string = exprL->makeObject()->resolveString();
+         biguint     index  = exprR->makeObject()->resolveInt();
+
+         if(index >= string.size())
+            return ObjectExpression::create_value_int(0, pos);
+
+         return ObjectExpression::create_value_int(string[index], pos);
+      }
+      else
+         ERROR_NP("invalid BT");
+   }
 
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);

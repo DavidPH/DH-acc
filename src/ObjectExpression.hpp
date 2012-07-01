@@ -102,6 +102,7 @@ public:
    virtual bigsint resolveInt() const;
    virtual Reference resolveMember(std::string const &name) const;
    virtual ObjectCodeSet resolveOCode() const;
+   virtual std::string resolveString() const;
    virtual std::string resolveSymbol() const;
 
    void writeACSP(std::ostream *out) const;

@@ -83,6 +83,28 @@ std::string const &ObjectData_String::add(std::string const &string)
 }
 
 //
+// ObjectData_String::find
+//
+ObjectData_String const *ObjectData_String::find(std::string const &symbol)
+{
+   StringIter strItr, strEnd;
+   std::vector<std::string>::iterator symItr, symEnd;
+
+   for(strItr = string_table.begin(), strEnd = string_table.end();
+       strItr != strEnd; ++strItr)
+   {
+      for(symItr = strItr->second.names.begin(), symEnd = strItr->second.names.end();
+          symItr != symEnd; ++symItr)
+      {
+         if(*symItr == symbol)
+            return &strItr->second;
+      }
+   }
+
+   return NULL;
+}
+
+//
 // ObjectData_String::generate_symbols
 //
 void ObjectData_String::generate_symbols()

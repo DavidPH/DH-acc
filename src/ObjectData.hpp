@@ -337,6 +337,8 @@ struct ObjectData_String
    // Returns the new string's name.
    static std::string const &add(std::string const &string);
 
+   static ObjectData_String const *find(std::string const &symbol);
+
    static void generate_symbols();
 
    static void iterate(IterFunc iterFunc, std::ostream *out);
