@@ -92,8 +92,7 @@ extern __function strncpy
 extern __function strcat(char *restrict s1, char const *restrict s2) -> char *;
 
 // Concatenates two null-terminated strings.
-extern __function strncat
-(char restrict *s1, char const *restrict s2, size_t n) -> char *;
+extern __function char *strncat(char *restrict s1, char const *restrict s2, size_t n);
 
 //
 // Comparison functions.
