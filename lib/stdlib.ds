@@ -104,61 +104,97 @@ __intvar __staticregister unsigned randval = 1;
 //
 // atof
 //
-//__extfunc atof(char const *nptr) -> __real
+__function float atof(char const *nptr)
+{
+   //return 0;
+};
 
 //
 // atoi
 //
-//__extfunc atoi(char const *nptr) -> int
+__function int atoi(char const *nptr)
+{
+   return 0;
+};
 
 //
 // atol
 //
-//__extfunc atol(char const *nptr) -> int
+__function long atol(char const *nptr)
+{
+   return 0;
+};
 
 //
 // atoll
 //
-//__extfunc atoll(char const *nptr) -> int
+__function long long atoll(char const *nptr)
+{
+   return 0;
+};
 
 //
 // strtod
 //
-//__extfunc strtod(char const *restrict nptr, char **restrict endptr) -> double
+__function double strtod(char const *restrict nptr, char **restrict endptr)
+{
+   if(endptr) *endptr = NULL;
+   //return 0;
+};
 
 //
 // strtof
 //
-//__extfunc strtof(char const *restrict nptr, char **restrict endptr) -> float
+__function float strtof(char const *restrict nptr, char **restrict endptr)
+{
+   if(endptr) *endptr = NULL;
+   //return 0;
+};
 
 //
 // strtold
 //
-//__extfunc strtold
-//(char const *restrict nptr, char **restrict endptr) -> long double
+__function long double strtold(char const *restrict nptr, char **restrict endptr)
+{
+   if(endptr) *endptr = NULL;
+   //return 0;
+};
 
 //
 // strtol
 //
-//__extfunc strtol(char const *restrict nptr, char **restrict endptr) -> long int
+__function long strtol(char const *restrict nptr, char **restrict endptr)
+{
+   if(endptr) *endptr = NULL;
+   return 0;
+};
 
 //
 // strtoll
 //
-//__extfunc strtoll
-//(char const *restrict nptr, char **restrict endptr) -> long long int
+__function long long strtoll(char const *restrict nptr, char **restrict endptr)
+{
+   if(endptr) *endptr = NULL;
+   return 0;
+};
 
 //
 // strtoul
 //
-//__extfunc strtoul
-//(char const *restrict nptr, char **restrict endptr) -> unsigned long int
+__function unsigned long strtoul(char const *restrict nptr, char **restrict endptr)
+{
+   if(endptr) *endptr = NULL;
+   return 0;
+};
 
 //
 // strtoull
 //
-//__extfunc strtoull
-//(char const *restrict nptr, char **restrict endptr) -> unsigned long long int
+__function unsigned long long strtoull(char const *restrict nptr, char **restrict endptr)
+{
+   if(endptr) *endptr = NULL;
+   return 0;
+};
 
 //===================================================================
 // Pseudo-random sequence generation functions.
@@ -438,10 +474,10 @@ __extfunc int system(char const *string)
 //
 // Don't compile for ZDoom, due to lack of function-pointers.
 //
-#if !defined(__TARGET_ZDoom__)
-__extfunc bsearch void *(void const *key, void const *base, size_t nmemb,
+__function void *bsearch (void const *key, void const *base, size_t nmemb,
    size_t size, __func_t(void const *, void const *) -> int compar)
 {
+#if !defined(__TARGET_ZDoom__)
    int cmp;
    char const *begin = static_cast<char const *>(base);
    char const *end = begin + nmemb*size;
@@ -456,10 +492,10 @@ __extfunc bsearch void *(void const *key, void const *base, size_t nmemb,
 
       if (cmp < 0) {end = itr;} else {begin = itr;};
    };
+#endif
 
    return NULL;
 };
-#endif
 
 //
 // qsort
@@ -470,10 +506,10 @@ __extfunc bsearch void *(void const *key, void const *base, size_t nmemb,
 //
 // Don't compile for ZDoom, due to lack of function-pointers.
 //
-#if !defined(__TARGET_ZDoom__)
 __extfunc qsort(void *base, size_t nmemb, size_t size,
  __func_t(void const *, void const *) -> int compar) -> void
 {
+#if !defined(__TARGET_ZDoom__)
    char *iter = (char *)base;
    char *end = (char *)base + nmemb*size;
 
@@ -493,8 +529,8 @@ __extfunc qsort(void *base, size_t nmemb, size_t size,
 
       iter += size;
    };
-};
 #endif
+};
 
 //===================================================================
 // Integer arithmetic functions.
@@ -555,15 +591,18 @@ __extfunc ldiv(long int numer, long int denom) -> ldiv_t
 //
 // "operator /"
 //
-#if 0
 __extfunc lldiv(long long int numer, long long int denom) -> lldiv_t
 {
    lldiv_t d;
+#if 0
    d.quot = numer / denom;
    d.rem  = numer % denom;
+#else
+   d.quot = 0;
+   d.rem  = numer;
+#endif
    return d;
 };
-#endif
 
 //===================================================================
 // Multibyte/wide character conversion functions.
@@ -572,17 +611,40 @@ __extfunc lldiv(long long int numer, long long int denom) -> lldiv_t
 //
 // mblen
 //
-//__extfunc mblen(char const *s, size_t n) -> int
+__function int mblen(char const *s, size_t n)
+{
+   if(!s) return 0;
+
+   if(!n) return -1;
+
+   return 1;
+};
 
 //
 // mbtowc
 //
-//__extfunc mbtowc(wchar_t *restrict pwc, char const *restrict s, size_t n) -> int
+__function int mbtowc(wchar_t *restrict pwc, char const *restrict s, size_t n)
+{
+   if(!s) return 0;
+
+   if(!n) return -1;
+
+   if(pwc) *pwc = *s;
+
+   return 1;
+};
 
 //
 // wctomb
 //
-//__extfunc wctomb(char *s, wchar_t wc) -> int
+__function int wctomb(char *s, wchar_t wc)
+{
+   if(!s) return 0;
+
+   *s = wc;
+
+   return 1;
+};
 
 //===================================================================
 // Multibyte/wide string conversion functions.
@@ -591,14 +653,40 @@ __extfunc lldiv(long long int numer, long long int denom) -> lldiv_t
 //
 // mbstowcs
 //
-//__extfunc mbstowcs
-//(wchar_t *restrict pwcs, char const *restrict s, size_t n) -> size_t
+__function size_t mbstowcs(wchar_t *restrict pwcs, char const *restrict s, size_t n)
+{
+   size_t i = 0;
+
+   while(*s)
+   {
+      if(i++ == n) return n;
+
+      *pwcs++ = *s++;
+   };
+
+   *pwcs = 0;
+
+   return i;
+};
 
 //
 // wcstombs
 //
-//__extfunc wcstombs
-//(char *restrict s, wchar_t const *restrict pwcs, size_t n) -> size_t
+__function size_t wcstombs(char *restrict s, wchar_t const *restrict pwcs, size_t n)
+{
+   size_t i = 0;
+
+   while(*pwcs)
+   {
+      if(i++ == n) return n;
+
+      *s++ = *pwcs++;
+   };
+
+   *s = 0;
+
+   return i;
+};
 
 // EOF
 

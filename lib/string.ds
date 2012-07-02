@@ -228,7 +228,10 @@ __extfunc strcmp(char const *s1, char const *s2) -> int
 //
 // strcoll
 //
-//__extfunc strcoll(char const *s1, char const *s2) -> int
+__function int strcoll(char const *s1, char const *s2)
+{
+   return strcmp(s1, s2);
+};
 
 //
 // strncmp
@@ -253,7 +256,10 @@ __extfunc strncmp(char const *s1, char const *s2, size_t n) -> int
 //
 // strxfrm
 //
-//__extfunc strxfrm(char *restrict s1, char const *restrict s2, size_t n)
+__function void strxfrm(char *restrict s1, char const *restrict s2, size_t n)
+{
+   strncpy(s1, s2, n);
+};
 
 //===================================================================
 // Search functions.
