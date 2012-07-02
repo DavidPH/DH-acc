@@ -348,7 +348,7 @@ private:
             switch (*c)
             {
             case 'K':
-               makeExpr(objects, VariableType::get_bt_int());
+               makeExpr(objects, VariableType::get_bt_str());
                objects->addToken(OCODE_ACSP_KEYBIND);
                continue;
 
