@@ -129,12 +129,10 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       break;
 
    case SourceContext::CT_FUNCTION:
-      if (target_type != TARGET_ZDoom)
-         objects->addToken(OCODE_JMP);
-      else if (retnSize == 0)
-         objects->addToken(OCODE_ACSE_FUNC_RETNVOID);
+      if(retnSize == 0)
+         objects->addToken(OCODE_JMP_RET_NIL);
       else
-         objects->addToken(OCODE_ACSE_FUNC_RETN);
+         objects->addToken(OCODE_JMP_RET);
 
       break;
 

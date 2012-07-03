@@ -138,7 +138,12 @@ void BinaryTokenZDACS::init()
    DO_INIT(INV_STK,    0);
 
    // Jumps
-   DO_INIT(JMP_TAB, -1);
+   DO_INIT(JMP_CAL,         0);
+   DO_INIT(JMP_CAL_IMM,     1);
+   DO_INIT(JMP_CAL_NIL_IMM, 1);
+   DO_INIT(JMP_RET,         0);
+   DO_INIT(JMP_RET_NIL,     0);
+   DO_INIT(JMP_TAB,        -1);
 
    // Stack-ops
    DO_INIT(STK_COPY, 0);
@@ -149,6 +154,7 @@ void BinaryTokenZDACS::init()
    DO_INIT(TRIG_SIN, 0);
 
    // Variable Get
+   DO_INIT(GET_FUNCP,  1);
    DO_INIT(GET_GBLREG, 1);
    DO_INIT(GET_MAPARR, 1);
    DO_INIT(GET_WLDARR, 1);
@@ -164,10 +170,6 @@ void BinaryTokenZDACS::init()
    DO_INIT(NATIVE, 2);
 
    // ACS Extensions
-   DO_INIT(FUNC_CALL_IMM,                      1);
-   DO_INIT(FUNC_CALLVOID_IMM,                  1);
-   DO_INIT(FUNC_RETN,                          0);
-   DO_INIT(FUNC_RETNVOID,                      0);
    DO_INIT(GAME_EXEC,                          0);
    DO_INIT(GAME_EXEC_IMM,                      3);
    DO_INIT(GAME_GET_CVAR,                      0);

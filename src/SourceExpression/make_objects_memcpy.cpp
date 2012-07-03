@@ -108,7 +108,6 @@ static void make_objects_literal
    case VariableType::BT_PTR:
    case VariableType::BT_PTR_NUL:
    case VariableType::BT_ENUM:
-   case VariableType::BT_FUNCTION:
    case VariableType::BT_LINESPEC:
    case VariableType::BT_NATIVE:
       objects->addToken(OCODE_GET_IMM, elem);
@@ -120,6 +119,10 @@ static void make_objects_literal
    case VariableType::BT_FIX_L:
    case VariableType::BT_FIX_LL:
       objects->addToken(OCODE_GET_IMM, elem);
+      break;
+
+   case VariableType::BT_FUNCTION:
+      objects->addToken(OCODE_GET_FUNCP, elem);
       break;
 
    case VariableType::BT_INT_LL:

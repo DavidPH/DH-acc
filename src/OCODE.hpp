@@ -91,8 +91,14 @@
    //
 
    DO_INIT(JMP)
+   DO_INIT(JMP_CAL)
+   DO_INIT(JMP_CAL_IMM)
+   DO_INIT(JMP_CAL_NIL)
+   DO_INIT(JMP_CAL_NIL_IMM)
    DO_INIT(JMP_IMM)
    DO_INIT(JMP_NIL)
+   DO_INIT(JMP_RET)
+   DO_INIT(JMP_RET_NIL)
    DO_INIT(JMP_TRU)
    DO_INIT(JMP_VAL)
    DO_INIT(JMP_TAB)
@@ -145,6 +151,7 @@
    //
 
    DO_INIT(GET_IMM)
+   DO_INIT(GET_FUNCP)
    DO_INIT(GET_STATIC)
    DO_INIT(GET_AUTO)
    DO_INIT(GET_PTR)
@@ -255,11 +262,6 @@
    //-------------------------------------------------------------------------|
    // ACS Extensions                                                          |
    //
-
-   DO_INIT(ACSE_FUNC_CALL_IMM)
-   DO_INIT(ACSE_FUNC_CALLVOID_IMM)
-   DO_INIT(ACSE_FUNC_RETN)
-   DO_INIT(ACSE_FUNC_RETNVOID)
 
    DO_INIT(ACSE_GAME_EXEC)
    DO_INIT(ACSE_GAME_EXEC_IMM)

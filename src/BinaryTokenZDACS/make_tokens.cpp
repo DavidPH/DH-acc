@@ -232,6 +232,15 @@ void BinaryTokenZDACS::make_tokens
          ERROR_P("uneven OCODE_BRANCH_TABLE");
       PUSH_TOKEN(BCODE__JMP_TAB);
       break;
+   CASE_REMAP(JMP_CAL,         JMP_CAL);
+   CASE_REMAP(JMP_CAL_IMM,     JMP_CAL_IMM);
+   case OCODE_JMP_CAL_NIL:
+      PUSH_TOKEN(BCODE_JMP_CAL);
+      PUSH_TOKEN(BCODE_STK_DROP);
+      break;
+   CASE_REMAP(JMP_CAL_NIL_IMM, JMP_CAL_NIL_IMM);
+   CASE_REMAP(JMP_RET,         JMP_RET);
+   CASE_REMAP(JMP_RET_NIL,     JMP_RET_NIL);
 
    // Stack-ops.
    CASE_REMAP(STK_COPY, STK_COPY);
@@ -275,6 +284,7 @@ void BinaryTokenZDACS::make_tokens
       break;
 
    // Variable Get
+   CASE_REMAP(GET_FUNCP, GET_FUNCP);
    CASE_ADDR_UNAOP(GET,,);
    CASE_REMAP_REGS(GET,,);
 
@@ -290,10 +300,6 @@ void BinaryTokenZDACS::make_tokens
    // ACS Common Extensions
 
    // ACS Extensions
-   CASE_MAP_ACSE(FUNC_CALL_IMM);
-   CASE_MAP_ACSE(FUNC_CALLVOID_IMM);
-   CASE_MAP_ACSE(FUNC_RETN);
-   CASE_MAP_ACSE(FUNC_RETNVOID);
    CASE_MAP_ACSE(GAME_EXEC);
    CASE_MAP_ACSE(GAME_EXEC_IMM);
    CASE_MAP_ACSE(GAME_GET_CVAR);

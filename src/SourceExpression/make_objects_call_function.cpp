@@ -61,22 +61,28 @@ bool option_function_autoargs = false;
 //
 void SourceExpression::make_objects_call_function
 (ObjectVector *objects, VariableData *dst, SourceFunction *func,
- VariableType *type, ObjectExpression *data, Vector const &args,
+ VariableType *type, SourceExpression *data, Vector const &args,
  SourceContext *context, SourcePosition const &pos)
 {
-   std::string labelReturn = context->makeLabel();
-
    FUNCTION_PREAMBLE
    FUNCTION_ARGS
 
    // Determine which OCODE to use.
    ObjectCode ocode;
-   if (target_type != TARGET_ZDoom)
-      ocode = OCODE_JMP_IMM;
-   else if (retnType->getBasicType() == VariableType::BT_VOID)
-      ocode = OCODE_ACSE_FUNC_CALLVOID_IMM;
+   if(data->canMakeObject())
+   {
+      if(retnSize == 0)
+         ocode = OCODE_JMP_CAL_NIL_IMM;
+      else
+         ocode = OCODE_JMP_CAL_IMM;
+   }
    else
-      ocode = OCODE_ACSE_FUNC_CALL_IMM;
+   {
+      if(retnSize == 0)
+         ocode = OCODE_JMP_CAL_NIL;
+      else
+         ocode = OCODE_JMP_CAL;
+   }
 
    // ZDoom handles one of the return bytes for us.
    if (target_type == TARGET_ZDoom && retnSize >= 1)
@@ -97,70 +103,14 @@ void SourceExpression::make_objects_call_function
          objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
    }
 
-   // For not ZDoom...
-   if (target_type != TARGET_ZDoom)
-   {
-      // ... Push return address.
-      ObjectExpression::Pointer retnExpr =
-         ObjectExpression::create_value_symbol(labelReturn, pos);
-
-      objects->addToken(OCODE_GET_IMM, retnExpr);
-   }
-
    // The actual call. Data being the jump target.
-   objects->addToken(ocode, data);
-   objects->addLabel(labelReturn);
-
-   // For any return bytes we're handling, push them onto the stack.
-   if(retnSize) for(bigsint i = -retnSize; ++i;)
+   if(data->canMakeObject())
+      objects->addToken(ocode, data->makeObject());
+   else
    {
-      objects->addToken(OCODE_GET_IMM, objects->getValue(i));
-      objects->addToken(OCODE_GET_WLDARR, objects->getValue(option_auto_array));
+      data->makeObjects(objects, VariableData::create_stack(1));
+      objects->addToken(ocode);
    }
-
-   // Reset the stack-pointer.
-   objects->addToken(OCODE_SUB_AUTPTR_IMM, ostack);
-
-   make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
-}
-
-//
-// SourceExpression::make_objects_call_function
-//
-void SourceExpression::make_objects_call_function
-(ObjectVector *objects, VariableData *dst, SourceFunction *func,
- VariableType *type, SourceExpression *data, Vector const &args,
- SourceContext *context, SourcePosition const &pos)
-{
-   std::string labelReturn = context->makeLabel();
-
-   FUNCTION_PREAMBLE
-
-   // Must push return address before target address.
-   objects->addToken(OCODE_GET_IMM, objects->getValue(labelReturn));
-
-   // Determine jump target.
-   data->makeObjects(objects, VariableData::create_stack(type->getSize(pos)));
-
-   FUNCTION_ARGS
-
-   // Determine which OCODE to use.
-   ObjectCode ocode = OCODE_JMP;
-
-   // Calculate total stack offset.
-   ObjectExpression::Pointer ostack =
-      objects->getValueAdd(context->getLimit(STORE_AUTO), retnSize);
-
-   // Advance the stack-pointer.
-   objects->addToken(OCODE_ADD_AUTPTR_IMM, ostack);
-
-   // Place args in auto vars.
-   for (bigsint i(callSize); i--;)
-      objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
-
-   // The actual call.
-   objects->addToken(ocode);
-   objects->addLabel(labelReturn);
 
    // For any return bytes we're handling, push them onto the stack.
    if(retnSize) for(bigsint i = -retnSize; ++i;)

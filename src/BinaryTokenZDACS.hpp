@@ -133,10 +133,10 @@ public:
       BCODE_TRANSLATION_PALETTE                = 200,
       BCODE_TRANSLATION_RGB                    = 201,
       BCODE_TRANSLATION_END                    = 202,
-      BCODE_FUNC_CALL_IMM                      = 203,
-      BCODE_FUNC_CALLVOID_IMM                  = 204,
-      BCODE_FUNC_RETNVOID                      = 205,
-      BCODE_FUNC_RETN                          = 206,
+      BCODE_JMP_CAL_IMM                        = 203,
+      BCODE_JMP_CAL_NIL_IMM                    = 204,
+      BCODE_JMP_RET_NIL                        = 205,
+      BCODE_JMP_RET                            = 206,
       BCODE_GET_MAPARR                         = 207,
       BCODE_SET_MAPARR                         = 208,
       BCODE_ADD_MAPARR                         = 209,
@@ -286,6 +286,8 @@ public:
       BCODE_STRING_COPY_MAPRANGE               = 356,
       BCODE_STRING_COPY_WORLDRANGE             = 357,
       BCODE_STRING_COPY_GLOBALRANGE            = 358,
+      BCODE_GET_FUNCP                          = 359,
+      BCODE_JMP_CAL                            = 360,
 
       // Used as an intermediary so as to defer resolving labels.
       BCODE__JMP_TAB,

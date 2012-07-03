@@ -60,16 +60,7 @@ void SourceExpression::make_objects_call
       break;
 
    case VariableType::BT_FUNCTION:
-      if (expr->canMakeObject())
-      {
-         make_objects_call_function
-         (objects, dst, func, type, expr->makeObject(), args, context, pos);
-      }
-      else
-      {
-         make_objects_call_function
-         (objects, dst, func, type, expr, args, context, pos);
-      }
+      make_objects_call_function(objects, dst, func, type, expr, args, context, pos);
       break;
 
    case VariableType::BT_LINESPEC:
