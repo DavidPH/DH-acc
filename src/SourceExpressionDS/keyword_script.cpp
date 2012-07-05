@@ -212,45 +212,30 @@ static SourceExpression::Pointer make_script
       args.context->addVar(scriptFuncVar, false, false);
    }
 
-   // scriptLabel
-   std::string scriptLabel;
+   // scriptNameObj
+   std::string scriptNameObj = args.name.empty() ? context->makeLabel() : args.name;
    switch (linkSpec)
    {
    case SourceExpressionDS::LS_INTERN:
       if (!args.name.empty())
-      {
-         scriptLabel  = context->getLabel();
-         scriptLabel += args.name;
-      }
-      else
-         scriptLabel = context->makeLabel();
+         scriptNameObj = context->getLabel() + scriptNameObj;
 
-      mangle_types(args.types, scriptLabel);
+      mangle_types(args.types, scriptNameObj);
 
       break;
 
    case SourceExpressionDS::LS_ACS:
-      if (!args.name.empty())
-         scriptLabel = args.name;
-      else
-         scriptLabel = context->makeLabel();
-
       break;
 
    case SourceExpressionDS::LS_DS:
-      if (!args.name.empty())
-         scriptLabel = args.name;
-      else
-         scriptLabel = context->makeLabel();
-
       if (option_script_mangle_types)
-         mangle_types(args.types, scriptLabel);
+         mangle_types(args.types, scriptNameObj);
 
       break;
    }
 
-   // scriptNameObj
-   std::string scriptNameObj = scriptLabel + "_id";
+   // scriptLabel
+   std::string scriptLabel = scriptNameObj + "_label";
 
    // scriptVarType
    VariableType::Reference scriptVarType =

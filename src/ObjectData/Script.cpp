@@ -162,7 +162,7 @@ void ObjectData_Script::generate_symbols()
    {
       if (iter->second.number < 0)
          obj = ObjectExpression::create_value_symbol
-         (ObjectData_String::add(iter->second.label), SourcePosition::none());
+         (ObjectData_String::add(iter->second.name), SourcePosition::none());
       else
          obj = ObjectExpression::create_value_int
          (iter->second.number, SourcePosition::none());

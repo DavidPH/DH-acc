@@ -152,7 +152,7 @@ static void dump_ocodes(std::ostream *out, ObjectVector const *objects)
 static void dump_script(std::ostream *out, ObjectData_Script const &s)
 {
    if (!s.externDef && s.externVis)
-      *out << s.name << ' ' << s.label << ' ' << s.number << '\n';
+      *out << s.name << ' ' << s.number << '\n';
 }
 
 //

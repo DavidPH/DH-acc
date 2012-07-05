@@ -97,45 +97,30 @@ static SourceExpression::Pointer make_func
    // Don't count automatic variable args.
    if (args.store == STORE_AUTO) args.count = 0;
 
-   // funcLabel
-   std::string funcLabel;
+   // funcNameObj
+   std::string funcNameObj = args.name.empty() ? context->makeLabel() : args.name;
    switch (linkSpec)
    {
    case SourceExpressionDS::LS_INTERN:
       if (!args.name.empty())
-      {
-         funcLabel  = context->getLabel();
-         funcLabel += args.name;
-      }
-      else
-         funcLabel = context->makeLabel();
+         funcNameObj = context->getLabel() + args.name;
 
-      mangle_types(args.types, funcLabel);
+      mangle_types(args.types, funcNameObj);
 
       break;
 
    case SourceExpressionDS::LS_ACS:
-      if (!args.name.empty())
-         funcLabel = args.name;
-      else
-         funcLabel = context->makeLabel();
-
       break;
 
    case SourceExpressionDS::LS_DS:
-      if (!args.name.empty())
-         funcLabel = args.name;
-      else
-         funcLabel = context->makeLabel();
-
       if (option_function_mangle_types)
-         mangle_types(args.types, funcLabel);
+         mangle_types(args.types, funcNameObj);
 
       break;
    }
 
-   // funcNameObject
-   std::string funcNameObj = funcLabel + "_id";
+   // funcLabel
+   std::string funcLabel = funcNameObj + "_label";
 
    // __func__
    if (!externDef && option_string_func)

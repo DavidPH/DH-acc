@@ -377,7 +377,7 @@ write_ACSE_script_SNAM(std::ostream *, ObjectData_Script const &s)
    if (strings_temp.size() <= index)
       strings_temp.resize(index+1);
 
-   strings_temp[index] = s.label;
+   strings_temp[index] = s.name;
 }
 
 //
