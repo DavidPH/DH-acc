@@ -56,6 +56,8 @@ public:
    explicit SourceTokenizerC(SourceStream *in);
    ~SourceTokenizerC();
 
+   void addDefine(std::string const &name) {addDefine(name, "");}
+
    SourceTokenC::Reference get();
    SourceTokenC::Reference get(SourceTokenC::TokenType type);
    SourceTokenC::Reference get(SourceTokenC::TokenType type,

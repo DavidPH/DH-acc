@@ -191,6 +191,7 @@ static void read_source(std::string const &name, SourceType type,
       SourceStream in(name, SourceStream::ST_C);
 
       SourceTokenizerC tokenizer(&in);
+      tokenizer.addDefine("__LANG_DS__");
 
       SourceExpression::Pointer expressions =
          SourceExpressionDS::make_statements(&tokenizer);
