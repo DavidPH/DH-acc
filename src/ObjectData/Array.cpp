@@ -26,6 +26,7 @@
 #include "../ObjectExpression.hpp"
 #include "../object_io.hpp"
 #include "../option.hpp"
+#include "../SourceExpression.hpp"
 #include "../VariableType.hpp"
 
 #include <map>
@@ -233,7 +234,7 @@ void ObjectData_Array::generate_symbols()
    ObjectData_Register::iterate_map(count_register, NULL);
    ::generate_symbols(map_table);
 
-   used.clear();
+   used.clear(); used.insert(option_auto_array);
    ::generate_symbols(world_table);
 
    used.clear(); used.insert(option_addr_array);
