@@ -94,6 +94,14 @@ public:
 
 protected:
    //
+   // ::canDoSet
+   //
+   virtual bool canDoSet(VariableData *data, VariableType *type) const
+   {
+      CAN_SET_SWITCHES(ADD);
+   }
+
+   //
    // ::doGet
    //
    virtual void doGet(ObjectVector *objects, VariableType *type, int tmpBase)
@@ -110,11 +118,9 @@ protected:
    //
    // ::doSet
    //
-   virtual bool doSet(ObjectVector *objects, VariableData *data,
-                      VariableType *type, int)
+   virtual void doSet(ObjectVector *objects, VariableData *data, VariableType *type, int)
    {
       DO_SET_SWITCHES(ADD);
-      return false;
    }
 };
 

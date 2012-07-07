@@ -67,6 +67,16 @@ public:
 
 protected:
    //
+   // ::canDoSet
+   //
+   virtual bool canDoSet(VariableData *data, VariableType *type) const
+   {
+      if(VariableType::is_bt_fix(type->getBasicType())) return false;
+
+      CAN_SET_SWITCHES(MUL);
+   }
+
+   //
    // ::doGet
    //
    virtual void doGet(ObjectVector *objects, VariableType *type, int)
@@ -77,13 +87,9 @@ protected:
    //
    // ::doSet
    //
-   virtual bool doSet(ObjectVector *objects, VariableData *data,
-                      VariableType *type, int)
+   virtual void doSet(ObjectVector *objects, VariableData *data, VariableType *type, int)
    {
-      if (VariableType::is_bt_fix(type->getBasicType())) return false;
-
       DO_SET_SWITCHES(MUL);
-      return false;
    }
 };
 

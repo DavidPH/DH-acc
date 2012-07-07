@@ -45,9 +45,10 @@
    PUSH_TOKEN(BCODE)
 
 
-#define CASE_REMAP(OCODE, BCODE)                                  \
-   case OCODE_##OCODE:                                            \
-      PUSH_TOKEN_ARGS1(BCODE_##BCODE, arg_counts[BCODE_##BCODE]); \
+#define CASE_REMAP(OCODE, BCODE) \
+   case OCODE_##OCODE: \
+      instructions->push_back(This(BCODE_##BCODE, pos, *labels, object->args)); \
+      labels = &nolabels; \
       break
 
 #define CASE_REMAP_PRE(PREFIX,OCODE,BCODE) \

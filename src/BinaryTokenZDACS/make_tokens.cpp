@@ -100,8 +100,10 @@ CASE_REMAP(OP##_TEMP##TO,   OP##_REG##TB)
 // CAS_REMAP_REG2
 //
 #define CASE_REMAP_REG2(OP,TO,TB) \
-CASE_REMAP_REGS(OP,TO,TB);        \
-CASE_REMAP(OP##_REG##TO, OP##_REG##TB)
+CASE_REMAP_REGS(OP,TO,TB); \
+CASE_REMAP(OP##_REG##TO,    OP##_REG##TB); \
+CASE_REMAP(OP##_MAPREG##TO, OP##_MAPREG##TB); \
+CASE_REMAP(OP##_WLDREG##TO, OP##_WLDREG##TB)
 
 #define PUSH_TOKEN_ADD_ARG0()          \
 if (object->getArg(0)->resolveInt())   \

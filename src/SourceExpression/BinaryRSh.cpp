@@ -77,6 +77,17 @@ public:
 
 protected:
    //
+   // ::canDoSet
+   //
+   virtual bool canDoSet(VariableData *data, VariableType *type) const
+   {
+      if (VariableType::is_bt_unsigned(type->getBasicType()))
+         return false;
+
+      CAN_SET_SWITCHES(RSH);
+   }
+
+   //
    // ::doGet
    //
    virtual void doGet(ObjectVector *objects, VariableType *type, int tmpBase)
@@ -90,14 +101,9 @@ protected:
    //
    // ::doSet
    //
-   virtual bool doSet(ObjectVector *objects, VariableData *data,
-                      VariableType *type, int)
+   virtual void doSet(ObjectVector *objects, VariableData *data, VariableType *type, int)
    {
-      if (VariableType::is_bt_unsigned(type->getBasicType()))
-         return false;
-
       DO_SET_SWITCHES(RSH);
-      return false;
    }
 
 private:
