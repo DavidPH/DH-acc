@@ -126,25 +126,10 @@ static void make_objects_literal
       break;
 
    case VariableType::BT_INT_LL:
-   {
-      objects->addToken(OCODE_GET_IMM, elem);
-
-      bigsint value = elem->resolveInt();
-
-      if (0 > value && value > -static_cast<bigsint>(0x100000000))
-         value = -1;
-      else
-         value /= static_cast<bigsint>(0x100000000);
-
-      objects->addToken(OCODE_GET_IMM, objects->getValue(value));
-   }
-      break;
-
    case VariableType::BT_UNS_LL:
       objects->addToken(OCODE_GET_IMM, elem);
-      objects->addToken(OCODE_GET_IMM,
-         ObjectExpression::create_binary_div(elem,
-            objects->getValue(0x10000000), pos));
+      objects->addToken(OCODE_GET_IMM, ObjectExpression::
+         create_binary_rsh(elem, objects->getValue(32), pos));
       break;
 
    case VariableType::BT_STR:
