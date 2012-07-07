@@ -63,6 +63,14 @@ static option::option_data<bool> option_init_code
  "Enables the implicit creation of an initialization function/script for "
  "top-level code. On-as-needed by default.", NULL, true);
 
+static option::option_data<std::string> option_maparray_list_debug
+('\0', "debug-maparray-list", "debugging",
+ "Indicates a file to list all map arrays to. Use - to dump to stdout.", NULL);
+
+static option::option_data<std::string> option_mapregister_list_debug
+('\0', "debug-mapregister-list", "debugging",
+ "Indicates a file to list all map registers to. Use - to dump to stdout.", NULL);
+
 static option::option_data<std::string> option_script_list
 ('\0', "script-list", "output",
  "Indicates a file to list script names and numbers to. Use - to dump to "
@@ -136,6 +144,14 @@ static SourceType divine_source_type(std::string const &name)
 }
 
 //
+// dump_array_debug
+//
+static void dump_array_debug(std::ostream *out, ObjectData_Array const &a)
+{
+   *out << a.name << ' ' << a.number << ' ' << a.size << '\n';
+}
+
+//
 // dump_ocodes
 //
 static void dump_ocodes(std::ostream *out, ObjectVector const *objects)
@@ -147,6 +163,14 @@ static void dump_ocodes(std::ostream *out, ObjectVector const *objects)
            << itr->pos.filename << ':' << itr->pos.line << ':' << itr->pos.column
            << '\n';
    }
+}
+
+//
+// dump_register_debug
+//
+static void dump_register_debug(std::ostream *out, ObjectData_Register const &r)
+{
+   *out << r.name << ' ' << r.number << ' ' << r.size << '\n';
 }
 
 //
@@ -335,6 +359,30 @@ static inline int _main()
    // Process object data.
    ObjectExpression::do_deferred_allocation();
    objects.optimize();
+
+   // Dump maparray list, if requested.
+   if (option_maparray_list_debug.handled)
+   {
+      if (option_maparray_list_debug.data == "-")
+         ObjectData_Array::iterate_map(dump_array_debug, &std::cout);
+      else
+      {
+         std::ofstream ofs(option_maparray_list_debug.data.c_str());
+         ObjectData_Array::iterate_map(dump_array_debug, &ofs);
+      }
+   }
+
+   // Dump mapregister list, if requested.
+   if (option_mapregister_list_debug.handled)
+   {
+      if (option_mapregister_list_debug.data == "-")
+         ObjectData_Register::iterate_map(dump_register_debug, &std::cout);
+      else
+      {
+         std::ofstream ofs(option_mapregister_list_debug.data.c_str());
+         ObjectData_Register::iterate_map(dump_register_debug, &ofs);
+      }
+   }
 
    // Dump object token list, if requested.
    if (!option_ocode_list_debug.data.empty())

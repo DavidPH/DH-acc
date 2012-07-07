@@ -97,7 +97,7 @@ static void add
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
    }
-   else if (data.externDef && externDef)
+   else if(data.externDef && !externDef)
    {
       data.externDef = false;
    }
