@@ -268,9 +268,13 @@ public:
 
    virtual bool canMakeObject() const;
 
+   CounterReference<SourceContext> const &getContext() const {return context;}
+
    virtual CounterPointer<VariableData> getData() const;
 
    virtual CounterReference<SourceFunction> getFunction() const;
+
+   SourcePosition const &getPosition() const {return pos;}
 
    virtual CounterReference<VariableType> getType() const;
 

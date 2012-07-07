@@ -63,11 +63,10 @@ static void do_qualifier
 // do_storage
 //
 static void do_storage(VariableType::Pointer *type, SourceTokenizerC *in,
-   SourceExpression::Vector *blocks, SourceContext *context)
+   SourceContext *context)
 {
    ObjectExpression::Pointer storeArea;
-   StoreType storeType = SourceExpressionDS::
-      make_store(in, blocks, context, &storeArea);
+   StoreType storeType = SourceExpressionDS::make_store(in, context, &storeArea);
 
    if (storeArea)
       *type = (*type)->setStorage(storeType, storeArea->resolveSymbol());
@@ -268,8 +267,7 @@ static VariableType::Pointer make_basic
 // make_struct_lists
 //
 bool make_struct_lists(VariableType::VecStr *names,
-   VariableType::Vector *types, SourceTokenizerC *in,
-   SourceExpression::Vector *blocks, SourceContext *context)
+   VariableType::Vector *types, SourceTokenizerC *in, SourceContext *context)
 {
    if (!in->peekType(SourceTokenC::TT_BRACE_O)) return false;
 
@@ -279,7 +277,7 @@ bool make_struct_lists(VariableType::VecStr *names,
 
    while (!in->peekType(SourceTokenC::TT_BRACE_C))
    {
-      type = SourceExpressionDS::make_type(in, blocks, context);
+      type = SourceExpressionDS::make_type(in, context);
 
       types->push_back(type);
       names->push_back(in->get(SourceTokenC::TT_NAM)->data);
@@ -303,7 +301,7 @@ bool make_struct_lists(VariableType::VecStr *names,
 // make_struct
 //
 VariableType::Reference make_struct(bool isUnion, SourceTokenizerC *in,
-   SourceExpression::Vector *blocks, SourceContext *context)
+   SourceContext *context)
 {
    std::string           name;
    VariableType::VecStr  names;
@@ -327,14 +325,14 @@ VariableType::Reference make_struct(bool isUnion, SourceTokenizerC *in,
 
    if (isUnion)
    {
-      if (make_struct_lists(&names, &types, in, blocks, context))
+      if(make_struct_lists(&names, &types, in, context))
          return context->getVariableType_union(name, names, types, pos);
       else
          return context->getVariableType_union(name, pos);
    }
    else
    {
-      if (make_struct_lists(&names, &types, in, blocks, context))
+      if(make_struct_lists(&names, &types, in, context))
          return context->getVariableType_struct(name, names, types, pos);
       else
          return context->getVariableType_struct(name, pos);
@@ -394,7 +392,7 @@ bool SourceExpressionDS::is_type(std::string const &data,
 // SourceExpressionDS::make_type
 //
 VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
-   Vector *blocks, SourceContext *context)
+   SourceContext *context)
 {
    SourceTokenC::Reference tok = in->peek();
 
@@ -405,7 +403,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    if (tok->type == SourceTokenC::TT_PAREN_O)
    {
       in->get(SourceTokenC::TT_PAREN_O);
-      type = make_type(in,blocks, context);
+      type = make_type(in, context);
       in->get(SourceTokenC::TT_PAREN_C);
    }
    else
@@ -416,7 +414,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    }
    else if (tok->data == "__asmfunc_t")
    {
-      make_arglist(in, blocks, context, &args);
+      make_arglist(in, context, &args);
 
       type = VariableType::get_bt_asmfunc(args.types, args.retn);
 
@@ -429,7 +427,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
 
       while (!in->peekType(SourceTokenC::TT_BRACE_C))
       {
-         args.types.push_back(make_type(in, blocks, context));
+         args.types.push_back(make_type(in, context));
          in->get(SourceTokenC::TT_SEMICOLON);
       }
 
@@ -439,7 +437,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    }
    else if (tok->data == "decltype")
    {
-      type = make_prefix(in, blocks, context)->getType();
+      type = make_prefix(in, context)->getType();
    }
    else if (tok->data == "enum")
    {
@@ -462,8 +460,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
             {
                in->get();
 
-               enumVal = make_assignment(in, blocks, context)
-                  ->makeObject()->resolveInt();
+               enumVal = make_assignment(in, context)->makeObject()->resolveInt();
             }
 
             ObjectExpression::Pointer enumObj =
@@ -488,7 +485,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    }
    else if (tok->data == "__func_t")
    {
-      make_arglist(in, blocks, context, &args);
+      make_arglist(in, context, &args);
 
       type = VariableType::get_bt_function(args.types, args.retn);
 
@@ -497,7 +494,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    }
    else if (tok->data == "__lnspec_t")
    {
-      make_arglist(in, blocks, context, &args);
+      make_arglist(in, context, &args);
 
       type = VariableType::get_bt_linespec(args.types, args.retn);
 
@@ -506,7 +503,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    }
    else if (tok->data == "__native_t")
    {
-      make_arglist(in, blocks, context, &args);
+      make_arglist(in, context, &args);
 
       type = VariableType::get_bt_native(args.types, args.retn);
 
@@ -515,7 +512,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    }
    else if (tok->data == "__script_t")
    {
-      make_arglist(in, blocks, context, &args);
+      make_arglist(in, context, &args);
 
       type = VariableType::get_bt_script(args.types, args.retn);
 
@@ -523,11 +520,11 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
          type = context->getVariableType_typedef(args.name, type, tok->pos);
    }
    else if (tok->data == "struct" || tok->data == "union")
-      type = make_struct(tok->data == "union", in, blocks, context);
+      type = make_struct(tok->data == "union", in, context);
 
    else if (tok->data == "typedef")
    {
-      type = make_type(in, blocks, context);
+      type = make_type(in, context);
       tok = in->get(SourceTokenC::TT_NAM);
       type = context->getVariableType_typedef(tok->data, type, tok->pos);
    }
@@ -553,7 +550,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
          do_qualifier(&type, VariableType::QUAL_RESTRICT, in);
 
       else if (is_store(in->peek()->data))
-         do_storage(&type, in, blocks, context);
+         do_storage(&type, in, context);
 
       else
          return static_cast<VariableType::Reference>(type);
@@ -623,8 +620,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
             if (in->peekType(SourceTokenC::TT_BRACK_C))
                widths.push_back(0);
             else
-               widths.push_back(make_expression(in, blocks, context)
-                  ->makeObject()->resolveInt());
+               widths.push_back(make_expression(in, context)->makeObject()->resolveInt());
             in->get(SourceTokenC::TT_BRACK_C);
          }
          while (in->peekType(SourceTokenC::TT_BRACK_O));
@@ -638,8 +634,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
          if (in->peekType(SourceTokenC::TT_BRACK_C))
             width = 0;
          else
-            width = make_expression(in, blocks, context)
-               ->makeObject()->resolveInt();
+            width = make_expression(in, context)->makeObject()->resolveInt();
          in->get(SourceTokenC::TT_BRACK_C);
 
          type = type->getArray(width);

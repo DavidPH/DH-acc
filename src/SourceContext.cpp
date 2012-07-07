@@ -168,6 +168,12 @@ void SourceContext::addCount(int count, StoreType store)
 //
 void SourceContext::addFunction(SourceFunction *func)
 {
+   for(std::vector<SourceFunction::Reference>::iterator itr = funcs.begin(),
+       end = funcs.end(); itr != end; ++itr)
+   {
+      if(*itr == func) return;
+   }
+
    funcs.push_back(static_cast<SourceFunction::Reference>(func));
 }
 

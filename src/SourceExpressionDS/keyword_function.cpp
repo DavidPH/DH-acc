@@ -79,9 +79,8 @@ bool option_string_func = true;
 // make_func
 //
 static SourceExpression::Pointer make_func
-(SourceTokenizerC *in, SourceTokenC *tok, SourceExpression::Vector *blocks,
- SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
- bool externDef)
+(SourceTokenizerC *in, SourceTokenC *tok, SourceContext *context,
+ SourceExpressionDS::LinkageSpecifier linkSpec, bool externDef)
 {
    SourceExpressionDS::ArgList args;
 
@@ -93,7 +92,7 @@ static SourceExpression::Pointer make_func
    if (!externDef)
       args.context = SourceContext::create(context, SourceContext::CT_FUNCTION);
 
-   SourceExpressionDS::make_arglist(in, blocks, context, &args);
+   SourceExpressionDS::make_arglist(in, context, &args);
    // Don't count automatic variable args.
    if (args.store == STORE_AUTO) args.count = 0;
 
@@ -163,43 +162,20 @@ static SourceExpression::Pointer make_func
       VariableType::get_bt_function(args.types, args.retn);
 
    // funcVar
-   SourceVariable::Pointer funcVar;
-   if (target_type != TARGET_ZDoom)
-   {
-      funcVar = SourceVariable::create_constant
-         (args.name, funcVarType, funcLabel, tok->pos);
-   }
-   else
-   {
-      funcVar = SourceVariable::create_constant
-         (args.name, funcVarType, funcNameObj, tok->pos);
-   }
+   SourceVariable::Pointer funcVar = SourceVariable::
+      create_constant(args.name, funcVarType, funcNameObj, tok->pos);
 
    // funcAdded
-   bool funcAdded = ObjectData_Function::add
-      (funcNameObj, funcLabel, args.count, args.retn->getSize(tok->pos),
-       args.context);
+   ObjectData_Function::add(funcNameObj, funcLabel, args.count,
+                            args.retn->getSize(tok->pos), args.context);
 
-   SourceFunction::Reference func = SourceFunction::create(funcVar, args.args);
+   SourceFunction::Reference func = SourceFunction::FindFunction(funcVar, args.args);
 
-   if (funcAdded)
-      context->addFunction(func);
+   context->addFunction(func);
 
    // funcExpr
-   if (!externDef)
-   {
-      SourceExpression::Pointer funcExpr = SourceExpressionDS::
-         make_prefix(in, blocks, args.context);
-
-      SourceExpression::Pointer funcExprData = SourceExpression::
-         create_value_data_garbage(args.retn, args.context, tok->pos);
-      SourceExpression::Pointer funcExprRetn = SourceExpression::
-         create_branch_return(funcExprData, args.context, tok->pos);
-
-      funcExpr->addLabel(funcLabel);
-      blocks->push_back(funcExpr);
-      blocks->push_back(funcExprRetn);
-   }
+   if(!externDef)
+      func->setBody(SourceExpressionDS::make_prefix(in, args.context), tok->pos);
 
    return SourceExpression::create_value_function(func, context, tok->pos);
 }
@@ -225,7 +201,7 @@ static void mangle_types(VariableType::Vector const &types, std::string &name)
 //
 SRCEXPDS_EXTERN_DEFN(function)
 {
-   return make_func(in, tok, blocks, context, linkSpec, true);
+   return make_func(in, tok, context, linkSpec, true);
 }
 
 //
@@ -252,7 +228,7 @@ SRCEXPDS_KEYWORD_DEFN(function)
    else
       linkSpec = LS_INTERN;
 
-   return make_func(in, tok, blocks, context, linkSpec, false);
+   return make_func(in, tok, context, linkSpec, false);
 }
 
 // EOF

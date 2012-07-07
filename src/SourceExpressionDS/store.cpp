@@ -82,7 +82,7 @@ bool SourceExpressionDS::is_store(std::string const &data)
 //
 // SourceExpressionDS::make_store
 //
-StoreType SourceExpressionDS::make_store(SourceTokenizerC *in, Vector *blocks,
+StoreType SourceExpressionDS::make_store(SourceTokenizerC *in,
    SourceContext *context, ObjectExpression::Pointer *area)
 {
    SourceTokenC::Reference typeTok = in->get(SourceTokenC::TT_NAM);
@@ -90,7 +90,7 @@ StoreType SourceExpressionDS::make_store(SourceTokenizerC *in, Vector *blocks,
    if (in->peekType(SourceTokenC::TT_PAREN_O))
    {
       in->get(SourceTokenC::TT_PAREN_O);
-      *area = make_expression(in, blocks, context)->makeObject();
+      *area = make_expression(in, context)->makeObject();
       in->get(SourceTokenC::TT_PAREN_C);
    }
 

@@ -23,9 +23,17 @@
 
 #include "SourceFunction.hpp"
 
+#include "SourceException.hpp"
 #include "SourceExpression.hpp"
 #include "SourceVariable.hpp"
 #include "VariableType.hpp"
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+SourceFunction::FuncMap SourceFunction::FunctionTable;
 
 
 //----------------------------------------------------------------------------|
@@ -35,7 +43,7 @@
 //
 // SourceFunction::SourceFunction
 //
-SourceFunction::SourceFunction(SourceVariable *_var, SourceExpression::Vector const &_args)
+SourceFunction::SourceFunction(SourceVariable *_var, ArgVec const &_args)
  : var(_var), args(_args)
 {
    VariableType::Vector const &varTypes = var->getType()->getTypes();
@@ -69,6 +77,65 @@ SourceFunction::SourceFunction(SourceVariable *_var, SourceExpression::Vector co
 SourceFunction::~SourceFunction()
 {
    delete[] types;
+}
+
+//
+// setBody
+//
+void SourceFunction::setBody(SourceExpression *expr, SourcePosition const &pos)
+{
+   if(body) ERROR_P("redefined function");
+
+   body = expr;
+}
+
+//
+// SourceFunction::FindFunction
+//
+SourceFunction::Pointer SourceFunction::FindFunction(std::string const &name)
+{
+   FuncMap::iterator funcp = FunctionTable.find(name);
+
+   if(funcp == FunctionTable.end())
+      return NULL;
+   else
+      return funcp->second;
+}
+
+//
+// SourceFunction::FindFunction
+//
+SourceFunction::Reference SourceFunction::FindFunction(SourceVariable *var, ArgVec const &args)
+{
+   std::string const &name = var->getNameObject();
+
+   if(name.empty())
+      return static_cast<Reference>(new SourceFunction(var, args));
+
+   FuncMap::iterator funcp = FunctionTable.find(var->getNameObject());
+
+   if(funcp == FunctionTable.end())
+   {
+      // Just make a new SourceFunction, add it, and return it.
+      Reference func(new SourceFunction(var, args));
+      FuncMap::value_type pair(var->getNameObject(), func);
+      FunctionTable.insert(pair);
+      return func;
+   }
+   else
+   {
+      // Check for redefined defaults.
+      for(ArgVec::const_iterator itr = args.begin(), end = args.end(); itr != end; ++itr)
+         if(*itr) ERROR(var->getPosition(), "redefined defaults");
+
+      Reference func = funcp->second;
+
+      // Check type.
+      //if(func->var->getType() != var->getType())
+      //   ERROR(var->getPosition(), "wrong type");
+
+      return func;
+   }
 }
 
 // EOF

@@ -41,14 +41,14 @@ SourceExpressionDS::ArgList::ArgList(StoreType _store) : store(_store) {}
 //
 // SourceExpressionDS::make_expression_arglist
 //
-void SourceExpressionDS::make_arglist(SourceTokenizerC *in, Vector *blocks,
-   SourceContext *context, ArgList *args)
+void SourceExpressionDS::make_arglist(SourceTokenizerC *in,
+                                      SourceContext *context, ArgList *args)
 {
    args->count = 0;
 
    // Read prefix return. (If one.)
    if (in->peekType(SourceTokenC::TT_NAM) && is_type(in->peek()->data, context))
-      args->retn = make_type(in, blocks, context);
+      args->retn = make_type(in, context);
 
    // Read name. (If one.)
    {
@@ -71,7 +71,7 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in, Vector *blocks,
    SourcePosition const pos = in->get(SourceTokenC::TT_PAREN_O)->pos;
    if (!in->peekType(SourceTokenC::TT_PAREN_C)) while (true)
    {
-      args->types.push_back(make_type(in, blocks, context));
+      args->types.push_back(make_type(in, context));
       args->count += args->types.back()->getSize(pos);
 
       if (in->peekType(SourceTokenC::TT_NAM))
@@ -82,7 +82,7 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in, Vector *blocks,
       if(in->peekType(SourceTokenC::TT_EQUALS))
       {
          in->get();
-         SourceExpression::Pointer expr = make_assignment(in, blocks, context);
+         SourceExpression::Pointer expr = make_assignment(in, context);
          expr = create_value_cast_implicit(expr, args->types.back(), context, pos);
          args->args.push_back(expr);
       }
@@ -110,7 +110,7 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in, Vector *blocks,
       if (in->peekType(SourceTokenC::TT_MEM))
       {
          in->get(SourceTokenC::TT_MEM);
-         args->retn = make_type(in, blocks, context);
+         args->retn = make_type(in, context);
       }
       else
          args->retn = VariableType::get_bt_void();

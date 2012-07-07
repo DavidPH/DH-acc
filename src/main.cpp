@@ -33,10 +33,13 @@
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "SourceExpressionDS.hpp"
+#include "SourceFunction.hpp"
 #include "SourceStream.hpp"
+#include "SourceVariable.hpp"
 #include "SourceTokenASMPLX.hpp"
 #include "SourceTokenizerC.hpp"
 #include "VariableData.hpp"
+#include "VariableType.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -280,6 +283,43 @@ static inline int _main()
                    **end  = option::option_args::arg_count+iter;
         iter != end; ++iter)
       read_source(*iter, source_type, &objects);
+
+   // Generate functions.
+   for(SourceFunction::FuncMap::iterator itr = SourceFunction::FunctionTable.begin(),
+       end = SourceFunction::FunctionTable.end(); itr != end; ++itr)
+   {
+      if(!itr->second->body) continue;
+
+      VariableType::Reference type = itr->second->var->getType();
+
+      // Function body.
+      SourceExpression::Pointer expr = itr->second->body;
+      SourceContext::Reference context = expr->getContext();
+      SourcePosition const &pos = expr->getPosition();
+
+      // Function preamble.
+      SourceExpression::Pointer exprRoot;
+      if(type->getBasicType() == VariableType::BT_SCRIPT)
+         exprRoot = SourceExpression::create_root_script(type, context, pos);
+
+      // Function fallback return.
+      SourceExpression::Pointer exprRetn;
+      if(type->getReturn()->getBasicType() == VariableType::BT_VOID)
+      {
+         SourceExpression::Pointer exprData = SourceExpression::
+            create_value_data_garbage(type->getReturn(), context, pos);
+         exprRetn = SourceExpression::create_branch_return(exprData, context, pos);
+      }
+
+      // Do codegen.
+      objects.addLabel(itr->second->var->getNameObject() + "_label");
+
+      if(exprRoot) exprRoot->makeObjects(&objects, VariableData::create_void(0));
+      expr->makeObjects(&objects, VariableData::create_void(0));
+      if(exprRetn) exprRetn->makeObjects(&objects, VariableData::create_void(0));
+   }
+
+   objects.addToken(OCODE_NOP);
 
    // If doing object output, don't process object data.
    if (output_type == OUTPUT_object)

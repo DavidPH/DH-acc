@@ -137,9 +137,8 @@ static ObjectData_Script::ScriptType make_script_type(SourceTokenizerC *in)
 // make_script
 //
 static SourceExpression::Pointer make_script
-(SourceTokenizerC *in, SourceTokenC *tok, SourceExpression::Vector *blocks,
- SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
- bool externDef)
+(SourceTokenizerC *in, SourceTokenC *tok, SourceContext *context,
+ SourceExpressionDS::LinkageSpecifier linkSpec, bool externDef)
 {
    bool externVis = linkSpec != SourceExpressionDS::LS_INTERN;
 
@@ -153,7 +152,7 @@ static SourceExpression::Pointer make_script
    if (!externDef)
       args.context = SourceContext::create(context, SourceContext::CT_SCRIPT);
 
-   SourceExpressionDS::make_arglist(in, blocks, context, &args);
+   SourceExpressionDS::make_arglist(in, context, &args);
 
    // script-type
    ObjectData_Script::ScriptType scriptType;
@@ -172,7 +171,7 @@ static SourceExpression::Pointer make_script
    if (in->peekType(SourceTokenC::TT_AT))
    {
       in->get(SourceTokenC::TT_AT);
-      scriptNumber = SourceExpressionDS::make_prefix(in, blocks, context)
+      scriptNumber = SourceExpressionDS::make_prefix(in, context)
          ->makeObject();
    }
 
@@ -246,40 +245,21 @@ static SourceExpression::Pointer make_script
       (args.name, scriptVarType, scriptNameObj, tok->pos);
 
    // scriptAdded
-   bool scriptAdded;
-   if (scriptNumber)
-      scriptAdded = ObjectData_Script::add
-      (scriptNameObj, scriptLabel, scriptType, scriptFlags, args.count,
-       args.context, externVis, scriptNumber->resolveInt());
+   if(scriptNumber)
+      ObjectData_Script::add(scriptNameObj, scriptLabel, scriptType, scriptFlags,
+                             args.count, args.context, externVis,
+                             scriptNumber->resolveInt());
    else
-      scriptAdded = ObjectData_Script::add
-      (scriptNameObj, scriptLabel, scriptType, scriptFlags, args.count,
-       args.context, externVis);
+      ObjectData_Script::add(scriptNameObj, scriptLabel, scriptType, scriptFlags,
+                             args.count, args.context, externVis);
 
-   SourceFunction::Reference func = SourceFunction::create(scriptVar, args.args);
+   SourceFunction::Reference func = SourceFunction::FindFunction(scriptVar, args.args);
 
-   if (scriptAdded)
-      context->addFunction(func);
+   context->addFunction(func);
 
    // scriptExpr
-   if (!externDef)
-   {
-      SourceExpression::Pointer scriptExprRoot = SourceExpression::
-         create_root_script(scriptVarType, args.context, tok->pos);
-
-      SourceExpression::Pointer scriptExpr = SourceExpressionDS::
-         make_prefix(in, blocks, args.context);
-
-      SourceExpression::Pointer scriptExprData = SourceExpression::
-         create_value_data_garbage(args.retn, args.context, tok->pos);
-      SourceExpression::Pointer scriptExprRetn = SourceExpression::
-         create_branch_return(scriptExprData, args.context, tok->pos);
-
-      scriptExprRoot->addLabel(scriptLabel);
-      blocks->push_back(scriptExprRoot);
-      blocks->push_back(scriptExpr);
-      blocks->push_back(scriptExprRetn);
-   }
+   if(!externDef)
+      func->setBody(SourceExpressionDS::make_prefix(in, args.context), tok->pos);
 
    return SourceExpression::create_value_function(func, context, tok->pos);
 }
@@ -305,7 +285,7 @@ static void mangle_types(VariableType::Vector const &types, std::string &name)
 //
 SRCEXPDS_EXTERN_DEFN(script)
 {
-   return make_script(in, tok, blocks, context, linkSpec, true);
+   return make_script(in, tok, context, linkSpec, true);
 }
 
 //
@@ -332,7 +312,7 @@ SRCEXPDS_KEYWORD_DEFN(script)
    else
       linkSpec = LS_INTERN;
 
-   return make_script(in, tok, blocks, context, linkSpec, false);
+   return make_script(in, tok, context, linkSpec, false);
 }
 
 // EOF

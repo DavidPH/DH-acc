@@ -38,8 +38,7 @@
 // SRCEXPDS_EXPR_ARGS
 //
 #define SRCEXPDS_EXPR_ARG1 \
-SourceTokenizerC *in, SourceExpression::Vector *blocks, \
-SourceContext *context
+SourceTokenizerC *in, SourceContext *context
 
 //
 // SRCEXPDS_EXPR_ARG2
@@ -61,10 +60,10 @@ make_##NAME(SRCEXPDS_EXPR_ARG2)
 //
 // Convenience macro for DEF1/DEF2.
 //
-#define SRCEXPDS_EXPR_DEFN(NAME1,NAME2)     \
-SRCEXPDS_EXPR_DEF1(NAME1) {                 \
-   return make_##NAME1(in, blocks, context, \
-      make_##NAME2(in, blocks, context)); } \
+#define SRCEXPDS_EXPR_DEFN(NAME1,NAME2) \
+SRCEXPDS_EXPR_DEF1(NAME1) {             \
+   return make_##NAME1(in, context,     \
+      make_##NAME2(in, context)); }     \
 SRCEXPDS_EXPR_DEF2(NAME1)
 
 //
@@ -104,9 +103,8 @@ make_extern_##NAME(SRCEXPDS_EXTERN_ARGS)
 //
 // SRCEXPDS_KEYWORD_ARGS
 //
-#define SRCEXPDS_KEYWORD_ARGS             \
-SourceTokenizerC *in, SourceTokenC *tok, \
-SourceExpression::Vector *blocks, SourceContext *context
+#define SRCEXPDS_KEYWORD_ARGS \
+SourceTokenizerC *in, SourceTokenC *tok, SourceContext *context
 
 //
 // SRCEXPDS_KEYWORD_DECL
@@ -170,21 +168,20 @@ public:
 
    static bool is_type(std::string const &data, SourceContext *context);
 
-   static void make_arglist(SourceTokenizerC *in, Vector *blocks,
-      SourceContext *context, ArgList *args);
+   static void make_arglist(SourceTokenizerC *in, SourceContext *context, ArgList *args);
 
    static LinkageSpecifier make_linkspec(SourceTokenizerC *in);
 
    static SourceExpression::Pointer make_statement(SourceTokenizerC *in,
-      Vector *blocks, SourceContext *context);
+                                                   SourceContext *context);
 
    static SourceExpression::Pointer make_statements(SourceTokenizerC *in);
 
-   static StoreType make_store(SourceTokenizerC *in, Vector *blocks,
-      SourceContext *context, CounterPointer<ObjectExpression> *area);
+   static StoreType make_store(SourceTokenizerC *in, SourceContext *context,
+                               CounterPointer<ObjectExpression> *area);
 
    static CounterReference<VariableType> make_type(SourceTokenizerC *in,
-      Vector *blocks, SourceContext *context);
+                                                   SourceContext *context);
 
    SRCEXPDS_EXPR_DECL(primary);
    SRCEXPDS_EXPR_DECL(suffix);
@@ -215,8 +212,7 @@ private:
    typedef std::map<std::string, KeywordHandler> KeywordMap;
 
 
-   static void make_statements(SourceTokenizerC *in, Vector *exprs,
-      Vector *blocks, SourceContext *context);
+   static void make_statements(SourceTokenizerC *in, Vector *exprs, SourceContext *context);
 
    SRCEXPDS_EXTERN_DECL(function);
    SRCEXPDS_EXTERN_DECL(script);

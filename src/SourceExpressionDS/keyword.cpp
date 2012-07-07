@@ -52,7 +52,7 @@ bool SourceExpressionDS::is_keyword(std::string const &data)
 //
 SRCEXPDS_KEYWORD_DEFN(break)
 {
-   (void)in; (void)blocks;
+   (void)in;
 
    return create_branch_break(context, tok->pos);
 }
@@ -63,11 +63,11 @@ SRCEXPDS_KEYWORD_DEFN(break)
 SRCEXPDS_KEYWORD_DEFN(cast)
 {
    in->get(SourceTokenC::TT_CMP_LT);
-   VariableType::Reference type = make_type(in, blocks, context);
+   VariableType::Reference type = make_type(in, context);
    in->get(SourceTokenC::TT_CMP_GT);
 
    in->get(SourceTokenC::TT_PAREN_O);
-   SourceExpression::Pointer expr = make_expression(in, blocks, context);
+   SourceExpression::Pointer expr = make_expression(in, context);
    in->get(SourceTokenC::TT_PAREN_C);
 
    if (tok->data == "const_cast")
@@ -90,10 +90,10 @@ SRCEXPDS_KEYWORD_DEFN(cast)
 //
 SRCEXPDS_KEYWORD_DEFN(constexpr)
 {
-   VariableType::Reference type = make_type(in, blocks, context);
+   VariableType::Reference type = make_type(in, context);
    std::string name = in->get(SourceTokenC::TT_NAM)->data;
    in->get(SourceTokenC::TT_EQUALS);
-   SourceExpression::Pointer data = make_assignment(in, blocks, context);
+   SourceExpression::Pointer data = make_assignment(in, context);
 
    if (type->getBasicType() == VariableType::BT_VOID)
       type = data->getType();
@@ -113,7 +113,7 @@ SRCEXPDS_KEYWORD_DEFN(constexpr)
 //
 SRCEXPDS_KEYWORD_DEFN(continue)
 {
-   (void)in; (void)blocks;
+   (void)in;
 
    return create_branch_continue(context, tok->pos);
 }
@@ -125,16 +125,14 @@ SRCEXPDS_KEYWORD_DEFN(do)
 {
    SourceContext::Reference contextBody =
       SourceContext::create(context, SourceContext::CT_LOOP);
-   SourceExpression::Pointer exprBody =
-      make_prefix(in, blocks, contextBody);
+   SourceExpression::Pointer exprBody = make_prefix(in, contextBody);
 
    in->get(SourceTokenC::TT_NAM, "while");
 
    in->get(SourceTokenC::TT_PAREN_O);
    SourceContext::Reference contextCond =
       SourceContext::create(contextBody, SourceContext::CT_BLOCK);
-   SourceExpression::Pointer exprCond =
-      make_expression(in, blocks, contextCond);
+   SourceExpression::Pointer exprCond = make_expression(in, contextCond);
    in->get(SourceTokenC::TT_PAREN_C);
 
    return create_branch_do(exprCond, exprBody, contextCond, tok->pos);
@@ -149,29 +147,25 @@ SRCEXPDS_KEYWORD_DEFN(for)
 
    SourceContext::Reference contextInit =
       SourceContext::create(context, SourceContext::CT_BLOCK);
-   SourceExpression::Pointer exprInit =
-      make_expression(in, blocks, contextInit);
+   SourceExpression::Pointer exprInit = make_expression(in, contextInit);
 
    in->get(SourceTokenC::TT_SEMICOLON);
 
    SourceContext::Reference contextCond =
       SourceContext::create(contextInit, SourceContext::CT_BLOCK);
-   SourceExpression::Pointer exprCond =
-      make_expression(in, blocks, contextCond);
+   SourceExpression::Pointer exprCond = make_expression(in, contextCond);
 
    in->get(SourceTokenC::TT_SEMICOLON);
 
    SourceContext::Reference contextIter =
       SourceContext::create(contextCond, SourceContext::CT_BLOCK);
-   SourceExpression::Pointer exprIter =
-      make_expression(in, blocks, contextIter);
+   SourceExpression::Pointer exprIter = make_expression(in, contextIter);
 
    in->get(SourceTokenC::TT_PAREN_C);
 
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_LOOP);
-   SourceExpression::Pointer exprBody =
-      make_expression(in, blocks, contextBody);
+   SourceExpression::Pointer exprBody = make_expression(in, contextBody);
 
    return create_branch_for(exprCond, exprBody, exprIter, exprInit, contextBody, tok->pos);
 }
@@ -193,7 +187,7 @@ SRCEXPDS_KEYWORD_DEFN(goto)
          label = context->getLabelCaseDefault(tok->pos);
       }
       else
-         label = context->getLabelCase(make_expression(in, blocks, context)
+         label = context->getLabelCase(make_expression(in, context)
             ->makeObject()->resolveInt(), tok->pos);
    }
    else
@@ -207,7 +201,7 @@ SRCEXPDS_KEYWORD_DEFN(goto)
 //
 SRCEXPDS_KEYWORD_DEFN(goto_dyn)
 {
-   return create_branch_goto(make_expression(in, blocks, context), context, tok->pos);
+   return create_branch_goto(make_expression(in, context), context, tok->pos);
 }
 
 //
@@ -218,14 +212,12 @@ SRCEXPDS_KEYWORD_DEFN(if)
    in->get(SourceTokenC::TT_PAREN_O);
    SourceContext::Reference contextCond =
       SourceContext::create(context, SourceContext::CT_BLOCK);
-   SourceExpression::Pointer exprCond =
-     make_expression(in, blocks, contextCond);
+   SourceExpression::Pointer exprCond = make_expression(in, contextCond);
    in->get(SourceTokenC::TT_PAREN_C);
 
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_BLOCK);
-   SourceExpression::Pointer exprBody =
-      make_expression(in, blocks, contextBody);
+   SourceExpression::Pointer exprBody = make_expression(in, contextBody);
 
    if (in->peekType(SourceTokenC::TT_NAM, "else"))
    {
@@ -233,8 +225,7 @@ SRCEXPDS_KEYWORD_DEFN(if)
 
       SourceContext::Reference contextElse =
          SourceContext::create(contextCond, SourceContext::CT_BLOCK);
-      SourceExpression::Pointer exprElse =
-         make_expression(in, blocks, contextElse);
+      SourceExpression::Pointer exprElse = make_expression(in, contextElse);
 
       return create_branch_if(exprCond, exprBody, exprElse, context, tok->pos);
    }
@@ -247,8 +238,6 @@ SRCEXPDS_KEYWORD_DEFN(if)
 //
 SRCEXPDS_KEYWORD_DEFN(library)
 {
-   (void)blocks;
-
    in->get(SourceTokenC::TT_PAREN_O);
    ObjectExpression::set_library(in->get(SourceTokenC::TT_STR)->data);
    in->get(SourceTokenC::TT_PAREN_C);
@@ -261,10 +250,10 @@ SRCEXPDS_KEYWORD_DEFN(library)
 //
 SRCEXPDS_KEYWORD_DEFN(linespec)
 {
-   ArgList args; make_arglist(in, blocks, context, &args);
+   ArgList args; make_arglist(in, context, &args);
 
    in->get(SourceTokenC::TT_AT); ObjectExpression::Pointer obj =
-      make_prefix(in, blocks, context)->makeObject();
+      make_prefix(in, context)->makeObject();
 
    VariableType::Reference varType = tok->data == "__linespec"
       ? VariableType::get_bt_linespec(args.types, args.retn) : tok->data == "__native"
@@ -274,7 +263,7 @@ SRCEXPDS_KEYWORD_DEFN(linespec)
    SourceVariable::Pointer var = SourceVariable::create_constant
       (args.name, varType, obj, tok->pos);
 
-   SourceFunction::Reference func = SourceFunction::create(var, args.args);
+   SourceFunction::Reference func = SourceFunction::FindFunction(var, args.args);
 
    if (!args.name.empty()) context->addFunction(func);
    return create_value_function(func, context, tok->pos);
@@ -285,8 +274,6 @@ SRCEXPDS_KEYWORD_DEFN(linespec)
 //
 SRCEXPDS_KEYWORD_DEFN(ocode)
 {
-   (void)blocks;
-
    ObjectExpression::Pointer ocodeObj;
    SourceVariable::Pointer ocodeVar;
    VariableType::Reference ocodeTyp = VariableType::get_bt_void();
@@ -318,7 +305,7 @@ SRCEXPDS_KEYWORD_DEFN(ocode)
 //
 SRCEXPDS_KEYWORD_DEFN(output)
 {
-   return create_root_output(make_expression(in, blocks, context), context, tok->pos);
+   return create_root_output(make_expression(in, context), context, tok->pos);
 }
 
 //
@@ -344,7 +331,7 @@ SRCEXPDS_KEYWORD_DEFN(printf)
    while (in->peekType(SourceTokenC::TT_COMMA))
    {
       in->get(SourceTokenC::TT_COMMA);
-      exprs.push_back(make_assignment(in, blocks, context));
+      exprs.push_back(make_assignment(in, context));
    }
 
    in->get(SourceTokenC::TT_PAREN_C);
@@ -357,7 +344,7 @@ SRCEXPDS_KEYWORD_DEFN(printf)
 //
 SRCEXPDS_KEYWORD_DEFN(return)
 {
-   return create_branch_return(make_expression(in, blocks, context), context, tok->pos);
+   return create_branch_return(make_expression(in, context), context, tok->pos);
 }
 
 //
@@ -373,14 +360,14 @@ SRCEXPDS_KEYWORD_DEFN(sizeof)
 
       if (in->peekType(SourceTokenC::TT_NAM) &&
           is_type(in->peek()->data, context))
-         type = make_type(in, blocks, context);
+         type = make_type(in, context);
       else
-         type = make_expression(in, blocks, context)->getType();
+         type = make_expression(in, context)->getType();
 
       in->get(SourceTokenC::TT_PAREN_C);
    }
    else
-      type = make_prefix(in, blocks, context)->getType();
+      type = make_prefix(in, context)->getType();
 
    return create_value_uint(type->getSize(tok->pos), context, tok->pos);
 }
@@ -393,14 +380,12 @@ SRCEXPDS_KEYWORD_DEFN(switch)
    in->get(SourceTokenC::TT_PAREN_O);
    SourceContext::Reference contextCond =
       SourceContext::create(context, SourceContext::CT_BLOCK);
-   SourceExpression::Pointer exprCond =
-      make_expression(in, blocks, contextCond);
+   SourceExpression::Pointer exprCond = make_expression(in, contextCond);
    in->get(SourceTokenC::TT_PAREN_C);
 
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_SWITCH);
-   SourceExpression::Pointer exprBody =
-      make_expression(in, blocks, contextBody);
+   SourceExpression::Pointer exprBody = make_expression(in, contextBody);
 
    return create_branch_switch(exprCond, exprBody, contextBody, tok->pos);
 }
@@ -411,7 +396,7 @@ SRCEXPDS_KEYWORD_DEFN(switch)
 SRCEXPDS_KEYWORD_DEFN(symbol)
 {
    in->get(SourceTokenC::TT_PAREN_O);
-   VariableType::Reference type = make_type(in, blocks, context);
+   VariableType::Reference type = make_type(in, context);
    in->get(SourceTokenC::TT_COMMA);
    std::string name = in->get(SourceTokenC::TT_STR)->data;
    in->get(SourceTokenC::TT_PAREN_C);
@@ -427,7 +412,7 @@ SRCEXPDS_KEYWORD_DEFN(symbol)
 //
 SRCEXPDS_KEYWORD_DEFN(typestr)
 {
-   VariableType::Reference type = make_type(in, blocks, context);
+   VariableType::Reference type = make_type(in, context);
 
    return create_value_string(make_string(type), context, tok->pos);
 }
@@ -440,14 +425,12 @@ SRCEXPDS_KEYWORD_DEFN(while)
    in->get(SourceTokenC::TT_PAREN_O);
    SourceContext::Reference contextCond =
       SourceContext::create(context, SourceContext::CT_BLOCK);
-   SourceExpression::Pointer exprCond =
-      make_expression(in, blocks, contextCond);
+   SourceExpression::Pointer exprCond = make_expression(in, contextCond);
    in->get(SourceTokenC::TT_PAREN_C);
 
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_LOOP);
-   SourceExpression::Pointer exprBody =
-      make_expression(in, blocks, contextBody);
+   SourceExpression::Pointer exprBody = make_expression(in, contextBody);
 
    return create_branch_while(exprCond, exprBody, contextBody, tok->pos);
 }

@@ -66,8 +66,7 @@ SRCEXPDS_KEYWORD_DEFN(extern)
             ERROR(externToken->pos, "unknown extern type %s",
                   externToken->data.c_str());
 
-         exprs.push_back(externFunc->second(
-            in, externToken, blocks, context, linkSpec));
+         exprs.push_back(externFunc->second(in, externToken, context, linkSpec));
 
          in->get(SourceTokenC::TT_SEMICOLON);
       }
@@ -86,7 +85,7 @@ SRCEXPDS_KEYWORD_DEFN(extern)
          ERROR(externToken->pos, "unknown extern type %s",
                externToken->data.c_str());
 
-      return externFunc->second(in, externToken, blocks, context, linkSpec);
+      return externFunc->second(in, externToken, context, linkSpec);
    }
 }
 
