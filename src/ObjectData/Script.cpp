@@ -94,20 +94,9 @@ static bigsint get_number()
 //
 // ObjectData_Script::add
 //
-bool ObjectData_Script::add
-(std::string const &name, std::string const &label, ScriptType stype,
- bigsint flags, bigsint argCount, SourceContext *context, bool externVis)
-{
-   return add(name, label, stype, flags, argCount, context, externVis, -1);
-}
-
-//
-// ObjectData_Script::add
-//
-bool ObjectData_Script::add
-(std::string const &name, std::string const &label, ScriptType stype,
- bigsint flags, bigsint argCount, SourceContext *context, bool externVis,
- bigsint number)
+bool ObjectData_Script::add(std::string const &name, std::string const &label,
+   ScriptType stype, bigsint flags, bigsint argCount, SourceContext *context,
+   bool externVis, bigsint number, std::string const &string)
 {
    ObjectData_Script &data = script_table[name];
 
@@ -115,6 +104,7 @@ bool ObjectData_Script::add
    {
       data.label     = label;
       data.name      = name;
+      data.string    = string;
       data.stype     = stype;
       data.argCount  = argCount;
       data.flags     = flags;
@@ -130,6 +120,7 @@ bool ObjectData_Script::add
    }
    else if (data.externDef && context)
    {
+      data.string    = string;
       data.number    = number;
       data.externDef = false;
    }
@@ -151,7 +142,7 @@ void ObjectData_Script::generate_symbols()
    {
       if (iter->second.number >= 0 || iter->second.externDef) continue;
 
-      if (option_named_scripts)
+      if(iter->second.number == -2)
          iter->second.number = --number;
       else
          iter->second.number = get_number();
@@ -162,7 +153,7 @@ void ObjectData_Script::generate_symbols()
    {
       if (iter->second.number < 0)
          obj = ObjectExpression::create_value_symbol
-         (ObjectData_String::add(iter->second.name), SourcePosition::none());
+         (ObjectData_String::add(iter->second.string), SourcePosition::none());
       else
          obj = ObjectExpression::create_value_int
          (iter->second.number, SourcePosition::none());
@@ -223,6 +214,7 @@ void read_object(std::istream *in, ObjectData_Script *out)
 {
    read_object(in, &out->label);
    read_object(in, &out->name);
+   read_object(in, &out->string);
    read_object(in, &out->stype);
    read_object(in, &out->argCount);
    read_object(in, &out->flags);
@@ -258,6 +250,7 @@ void write_object(std::ostream *out, ObjectData_Script const *in)
 
    write_object(out, &in->label);
    write_object(out, &in->name);
+   write_object(out, &in->string);
    write_object(out, &in->stype);
    write_object(out, &in->argCount);
    write_object(out, &in->flags);

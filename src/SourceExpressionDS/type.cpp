@@ -23,6 +23,7 @@
 
 #include "../SourceExpressionDS.hpp"
 
+#include "../ObjectData.hpp"
 #include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
@@ -514,7 +515,28 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    {
       make_arglist(in, context, &args);
 
-      type = VariableType::get_bt_script(args.types, args.retn);
+      if(option_named_scripts)
+         type = VariableType::get_bt_snam(args.types, args.retn);
+      else
+         type = VariableType::get_bt_snum(args.types, args.retn);
+
+      if (!args.name.empty())
+         type = context->getVariableType_typedef(args.name, type, tok->pos);
+   }
+   else if (tok->data == "__snam_t")
+   {
+      make_arglist(in, context, &args);
+
+      type = VariableType::get_bt_snam(args.types, args.retn);
+
+      if (!args.name.empty())
+         type = context->getVariableType_typedef(args.name, type, tok->pos);
+   }
+   else if (tok->data == "__snum_t")
+   {
+      make_arglist(in, context, &args);
+
+      type = VariableType::get_bt_snum(args.types, args.retn);
 
       if (!args.name.empty())
          type = context->getVariableType_typedef(args.name, type, tok->pos);

@@ -124,7 +124,8 @@ public:
       BT_FUNCTION,
       BT_LINESPEC,
       BT_NATIVE,
-      BT_SCRIPT
+      BT_SNAM, // script, named
+      BT_SNUM, // script, numbered
    };
 
    //
@@ -225,7 +226,8 @@ public:
    static Reference get_bt_function(Vector const &types, VariableType *typeRet);
    static Reference get_bt_linespec(Vector const &types, VariableType *typeRet);
    static Reference get_bt_native(Vector const &types, VariableType *typeRet);
-   static Reference get_bt_script(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_snam(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_snum(Vector const &types, VariableType *typeRet);
 
    static unsigned get_cast(VariableType *dst, VariableType *src);
    static unsigned get_cast(Vector const &dst, Vector const &src);
@@ -240,6 +242,9 @@ public:
 
    // Returns true if the given type is an integer type.
    static bool is_bt_integer(BasicType type);
+
+   // Returns true if the given type is a named or numbered script type.
+   static bool is_bt_script(BasicType type) {return type == BT_SNAM || type == BT_SNUM;}
 
    // Returns true if the given type is an unsigned type.
    static bool is_bt_unsigned(BasicType type);

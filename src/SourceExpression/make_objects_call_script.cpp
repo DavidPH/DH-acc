@@ -55,7 +55,6 @@ static option::option_dptr<int> option_script_regargs_handler
 // Global Variables                                                           |
 //
 
-extern bool option_named_scripts;
 bool option_script_autoargs = false;
 int option_script_regargs = 3;
 
@@ -72,6 +71,8 @@ void SourceExpression::make_objects_call_script
  VariableType *type, SourceExpression *data, Vector const &args,
  SourceContext *context, SourcePosition const &pos)
 {
+   bool named = type->getBasicType() == VariableType::BT_SNAM;
+
    FUNCTION_PREAMBLE
 
    data->makeObjects(objects, VariableData::create_stack(type->getSize(pos)));
@@ -87,7 +88,7 @@ void SourceExpression::make_objects_call_script
    if (argsSize > option_script_regargs)
       argsSize = option_script_regargs;
 
-   if (option_named_scripts)
+   if(named)
    {
       ocode = OCODE_NATIVE;
       oargc = objects->getValue(argsSize + 1);
@@ -110,7 +111,7 @@ void SourceExpression::make_objects_call_script
 
    // Determine which line special to use.
    ObjectExpression::Pointer ospec;
-   if (option_named_scripts)
+   if(named)
       ospec = objects->getValue(44); // ACSF_ACS_NamedExecuteWithResult
    else
       ospec = objects->getValue(84); // ACS_ExecuteWithResult
@@ -136,7 +137,7 @@ void SourceExpression::make_objects_call_script
    objects->addToken(OCODE_SET_TEMP, context->getTempVar(0));
 
    // The actual call.
-   if(option_named_scripts)
+   if(named)
    {
       objects->addToken(ocode, oargc, ospec);
       if(retnSize == 0)

@@ -259,6 +259,7 @@ struct ObjectData_Script
 
    std::string label;
    std::string name;
+   std::string string;
    ScriptType stype;
    bigsint argCount;
    bigsint flags;
@@ -269,14 +270,9 @@ struct ObjectData_Script
    bool externVis;
 
 
-   static bool add
-   (std::string const &name, std::string const &label, ScriptType stype,
-    bigsint flags, bigsint argCount, SourceContext *context, bool externVis);
-
-   static bool add
-   (std::string const &name, std::string const &label, ScriptType stype,
-    bigsint flags, bigsint argCount, SourceContext *context, bool externVis,
-    bigsint number);
+   static bool add(std::string const &name, std::string const &label,
+      ScriptType stype, bigsint flags, bigsint argCount, SourceContext *context,
+      bool externVis, bigsint number, std::string const &string);
 
    static void generate_symbols();
 

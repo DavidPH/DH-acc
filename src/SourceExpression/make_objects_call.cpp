@@ -83,9 +83,9 @@ void SourceExpression::make_objects_call
          ERROR_P("non-constant native");
       break;
 
-   case VariableType::BT_SCRIPT:
-      make_objects_call_script
-      (objects, dst, func, type, expr, args, context, pos);
+   case VariableType::BT_SNAM:
+   case VariableType::BT_SNUM:
+      make_objects_call_script(objects, dst, func, type, expr, args, context, pos);
       break;
 
    default:

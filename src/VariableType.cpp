@@ -100,7 +100,8 @@ static std::string const basic_names[] =
    "BT_FUNCTION",
    "BT_LINESPEC",
    "BT_NATIVE",
-   "BT_SCRIPT"
+   "BT_SNAM",
+   "BT_SNUM",
 };
 
 
@@ -192,7 +193,8 @@ static std::ostream &operator <<
    case VariableType::BT_FUNCTION:
    case VariableType::BT_LINESPEC:
    case VariableType::BT_NATIVE:
-   case VariableType::BT_SCRIPT:
+   case VariableType::BT_SNAM:
+   case VariableType::BT_SNUM:
       out << type->getBasicType();
       out << '(';
    {
@@ -371,7 +373,8 @@ VariableType::VariableType(BasicType _basic)
    case BT_FUNCTION:
    case BT_LINESPEC:
    case BT_NATIVE:
-   case BT_SCRIPT:
+   case BT_SNAM:
+   case BT_SNUM:
       break;
    }
 }
@@ -452,7 +455,8 @@ VariableType::~VariableType()
    case BT_FUNCTION:
    case BT_LINESPEC:
    case BT_NATIVE:
-   case BT_SCRIPT:
+   case BT_SNAM:
+   case BT_SNUM:
       break;
    }
 }
@@ -634,7 +638,8 @@ void VariableType::getNameMangled(std::string &out) const
    case BT_ASMFUNC:  out += "FA{"; TYPES; out += '}'; break;
    case BT_LINESPEC: out += "FL{"; TYPES; out += '}'; break;
    case BT_NATIVE:   out += "FN{"; TYPES; out += '}'; break;
-   case BT_SCRIPT:   out += "FS{"; TYPES; out += '}'; break;
+   case BT_SNAM:     out += "FSA{"; TYPES; out += '}'; break;
+   case BT_SNUM:     out += "FSU{"; TYPES; out += '}'; break;
    case BT_INT_HH:   out += "IHH"; break;
    case BT_INT_H:    out += "IH"; break;
    case BT_INT:      out += 'I'; break;
@@ -727,7 +732,8 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
    case BT_FUNCTION:
    case BT_LINESPEC:
    case BT_NATIVE:
-   case BT_SCRIPT:
+   case BT_SNAM:
+   case BT_SNUM:
       return 1;
 
    case BT_FLT_L:
@@ -1199,16 +1205,27 @@ VariableType::Reference VariableType::get_bt_native
 }
 
 //
-// VariableType::get_bt_script
+// VariableType::get_bt_snam
 //
-VariableType::Reference VariableType::get_bt_script
-(Vector const &types, VariableType *typeRet)
+VariableType::Reference VariableType::get_bt_snam(Vector const &types, VariableType *typeRet)
 {
-   static Reference type(new VariableType(BT_SCRIPT));
+   static Reference type(new VariableType(BT_SNAM));
 
    if (types.empty() && typeRet->basic == BT_VOID) return type;
 
-   return get_bt_anonymous(types, typeRet, type, BT_SCRIPT);
+   return get_bt_anonymous(types, typeRet, type, BT_SNAM);
+}
+
+//
+// VariableType::get_bt_snum
+//
+VariableType::Reference VariableType::get_bt_snum(Vector const &types, VariableType *typeRet)
+{
+   static Reference type(new VariableType(BT_SNUM));
+
+   if(types.empty() && typeRet->basic == BT_VOID) return type;
+
+   return get_bt_anonymous(types, typeRet, type, BT_SNUM);
 }
 
 //===================================================================
@@ -1310,7 +1327,8 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
    case BT_FUNCTION:
    case BT_LINESPEC:
    case BT_NATIVE:
-   case BT_SCRIPT:
+   case BT_SNAM:
+   case BT_SNUM:
       return CAST_EXPLICIT|CAST_REINTERPRET;
 
    case BT_BIT_HRD:
@@ -1485,7 +1503,8 @@ bool VariableType::is_bt_function(BasicType type)
    case BT_FUNCTION:
    case BT_LINESPEC:
    case BT_NATIVE:
-   case BT_SCRIPT:
+   case BT_SNAM:
+   case BT_SNUM:
       return true;
 
    default:
@@ -1544,7 +1563,8 @@ bool VariableType::is_bt_unsigned(BasicType type)
    case BT_FUNCTION:
    case BT_LINESPEC:
    case BT_NATIVE:
-   case BT_SCRIPT:
+   case BT_SNAM:
+   case BT_SNUM:
       return true;
 
    default:

@@ -111,7 +111,8 @@ static ObjectExpression::Pointer make_object
    case VariableType::BT_FUNCTION:
    case VariableType::BT_LINESPEC:
    case VariableType::BT_NATIVE:
-   case VariableType::BT_SCRIPT:
+   case VariableType::BT_SNAM:
+   case VariableType::BT_SNUM:
       return ObjectExpression::create_value_int(0, pos);
    }
 
@@ -169,7 +170,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
    case VariableType::BT_FUNCTION:
    case VariableType::BT_LINESPEC:
    case VariableType::BT_NATIVE:
-   case VariableType::BT_SCRIPT:
+   case VariableType::BT_SNAM:
+   case VariableType::BT_SNUM:
    case_src_int:
       switch (dstBT)
       {
@@ -206,7 +208,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_FUNCTION:
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
-      case VariableType::BT_SCRIPT:
+      case VariableType::BT_SNAM:
+      case VariableType::BT_SNUM:
          break;
 
       case VariableType::BT_FIX_HH:
@@ -255,7 +258,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_FUNCTION:
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
-      case VariableType::BT_SCRIPT:
+      case VariableType::BT_SNAM:
+      case VariableType::BT_SNUM:
          obj = ObjectExpression::create_branch_not(obj, pos);
          obj = ObjectExpression::create_branch_not(obj, pos);
          break;
@@ -323,7 +327,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_FUNCTION:
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
-      case VariableType::BT_SCRIPT:
+      case VariableType::BT_SNAM:
+      case VariableType::BT_SNUM:
          obj = ObjectExpression::create_cast_float_to_int(obj, pos);
          break;
 
@@ -477,7 +482,8 @@ void SourceExpression::make_objects_memcpy_cast
    case VariableType::BT_FUNCTION:
    case VariableType::BT_LINESPEC:
    case VariableType::BT_NATIVE:
-   case VariableType::BT_SCRIPT:
+   case VariableType::BT_SNAM:
+   case VariableType::BT_SNUM:
    case_src_int:
       switch (dstBT)
       {
@@ -517,7 +523,8 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FUNCTION:
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
-      case VariableType::BT_SCRIPT:
+      case VariableType::BT_SNAM:
+      case VariableType::BT_SNUM:
          break;
 
       case VariableType::BT_FIX_HH:
@@ -592,7 +599,8 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FUNCTION:
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
-      case VariableType::BT_SCRIPT:
+      case VariableType::BT_SNAM:
+      case VariableType::BT_SNUM:
          objects->addToken(OCODE_NOT_STK_I);
          objects->addToken(OCODE_NOT_STK_I);
          break;
@@ -669,7 +677,8 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FUNCTION:
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
-      case VariableType::BT_SCRIPT:
+      case VariableType::BT_SNAM:
+      case VariableType::BT_SNUM:
          objects->addToken(OCODE_CAST_STK_X2I);
          break;
 
@@ -739,7 +748,8 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FUNCTION:
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
-      case VariableType::BT_SCRIPT:
+      case VariableType::BT_SNAM:
+      case VariableType::BT_SNUM:
          objects->addToken(OCODE_STK_DROP);
          break;
 

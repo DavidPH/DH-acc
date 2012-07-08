@@ -49,7 +49,6 @@ static option::option_dptr<bool> option_string_tag_handler
 // Global Variables                                                           |
 //
 
-extern bool option_named_scripts;
 bool option_string_tag = true;
 
 
@@ -110,6 +109,7 @@ static void make_objects_literal
    case VariableType::BT_ENUM:
    case VariableType::BT_LINESPEC:
    case VariableType::BT_NATIVE:
+   case VariableType::BT_SNUM:
       objects->addToken(OCODE_GET_IMM, elem);
       break;
 
@@ -133,6 +133,7 @@ static void make_objects_literal
       break;
 
    case VariableType::BT_STR:
+   case VariableType::BT_SNAM:
       objects->addToken(OCODE_GET_IMM, elem);
 
       if (target_type == TARGET_ZDoom && option_string_tag)
@@ -152,15 +153,6 @@ static void make_objects_literal
       for (size_t i = 0; i < elems.size(); ++i)
          make_objects_literal(objects, elems[i], types, pos);
    }
-      break;
-
-   case VariableType::BT_SCRIPT:
-      objects->addToken(OCODE_GET_IMM, elem);
-
-      if (target_type == TARGET_ZDoom && option_string_tag &&
-          option_named_scripts)
-         objects->addToken(OCODE_ACSE_STRING_TAG);
-
       break;
    }
 }

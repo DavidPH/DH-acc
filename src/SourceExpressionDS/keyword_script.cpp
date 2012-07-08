@@ -142,6 +142,9 @@ static SourceExpression::Pointer make_script
 {
    bool externVis = linkSpec != SourceExpressionDS::LS_INTERN;
 
+   // Is this a named script? --named-script determines the default.
+   bool named = option_named_scripts;
+
    SourceExpressionDS::ArgList args;
 
    if (option_script_autoargs)
@@ -166,14 +169,29 @@ static SourceExpression::Pointer make_script
    while (in->peekType(SourceTokenC::TT_NAM) && is_script_flag(in->peek()->data))
       scriptFlags |= make_script_flag(in);
 
-   // scriptNumber
-   ObjectExpression::Pointer scriptNumber;
-   if (in->peekType(SourceTokenC::TT_AT))
+   // scriptNumber/String
+   bigsint     scriptNumber;
+   std::string scriptString;
+   if(in->peekType(SourceTokenC::TT_AT))
    {
-      in->get(SourceTokenC::TT_AT);
-      scriptNumber = SourceExpressionDS::make_prefix(in, context)
-         ->makeObject();
+      in->get();
+
+      SourceExpression::Pointer expr = SourceExpressionDS::make_prefix(in, context);
+
+      if(expr->getType()->getBasicType() == VariableType::BT_STR)
+      {
+         scriptNumber = -2;
+         scriptString = expr->makeObject()->resolveString();
+         named = true;
+      }
+      else
+      {
+         scriptNumber = expr->makeObject()->resolveInt();
+         named = false;
+      }
    }
+   else
+      scriptNumber = named ? -2 : -1;
 
    // __func__
    if (!externDef && option_string_func)
@@ -233,25 +251,23 @@ static SourceExpression::Pointer make_script
       break;
    }
 
+   // String defaults to object name.
+   if(scriptString.empty()) scriptString = scriptNameObj;
+
    // scriptLabel
    std::string scriptLabel = scriptNameObj + "_label";
 
    // scriptVarType
    VariableType::Reference scriptVarType =
-      VariableType::get_bt_script(args.types, args.retn);
+      named ? VariableType::get_bt_snam(args.types, args.retn)
+            : VariableType::get_bt_snum(args.types, args.retn);
 
    // scriptVar
    SourceVariable::Pointer scriptVar = SourceVariable::create_constant
       (args.name, scriptVarType, scriptNameObj, tok->pos);
 
-   // scriptAdded
-   if(scriptNumber)
-      ObjectData_Script::add(scriptNameObj, scriptLabel, scriptType, scriptFlags,
-                             args.count, args.context, externVis,
-                             scriptNumber->resolveInt());
-   else
-      ObjectData_Script::add(scriptNameObj, scriptLabel, scriptType, scriptFlags,
-                             args.count, args.context, externVis);
+   ObjectData_Script::add(scriptNameObj, scriptLabel, scriptType, scriptFlags,
+      args.count, args.context, externVis, scriptNumber, scriptString);
 
    SourceFunction::Reference func = SourceFunction::FindFunction(scriptVar, args.args);
 

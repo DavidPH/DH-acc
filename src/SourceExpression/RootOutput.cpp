@@ -296,9 +296,15 @@ void SourceExpression_RootOutput::doOut
       doChar(objects, "fN");
       break;
 
-   case VariableType::BT_SCRIPT:
+   case VariableType::BT_SNAM:
+      doChar(objects, '"');
+      objects->addToken(OCODE_ACSP_STR);
+      doChar(objects, "\"fSa");
+      break;
+
+   case VariableType::BT_SNUM:
       objects->addToken(OCODE_ACSP_NUM_DEC_I);
-      doChar(objects, "fS");
+      doChar(objects, "fSu");
       break;
    }
 

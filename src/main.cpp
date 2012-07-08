@@ -231,15 +231,15 @@ static void read_source(std::string const &name, SourceType type,
 
       if (mainGen)
       {
-         std::string mainName =
-            SourceContext::global_context->makeLabel() + "::main";
-         std::string mainID = mainName + "_id";
+         bigsint mainNumber = option_named_scripts ? -2 : -1;
+         std::string mainName = SourceContext::global_context->makeLabel() + "main";
+         std::string mainLabel = mainName + "_label";
 
-         ObjectData_Script::ScriptType stype = ObjectData_Script::ST_OPEN;
+         ObjectData_Script::ScriptType mainType = ObjectData_Script::ST_OPEN;
 
-         expressions->addLabel(mainName);
-         ObjectData_Script::add
-         (mainID, mainName, stype, 0, 0, SourceContext::global_context, false);
+         expressions->addLabel(mainLabel);
+         ObjectData_Script::add(mainName, mainLabel, mainType, 0, 0,
+            SourceContext::global_context, false, mainNumber, mainName);
       }
 
       expressions->makeObjects(objects, VariableData::create_void(0));
@@ -323,7 +323,7 @@ static inline int _main()
 
       // Function preamble.
       SourceExpression::Pointer exprRoot;
-      if(type->getBasicType() == VariableType::BT_SCRIPT)
+      if(VariableType::is_bt_script(type->getBasicType()))
          exprRoot = SourceExpression::create_root_script(type, context, pos);
 
       // Function fallback return.

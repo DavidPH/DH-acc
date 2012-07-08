@@ -111,11 +111,12 @@ void odata_set_strings(std::vector<int> &strings, VariableType const *type)
    case VariableType::BT_FUNCTION:
    case VariableType::BT_LINESPEC:
    case VariableType::BT_NATIVE:
+   case VariableType::BT_SNUM:
       strings.push_back(false);
       break;
 
-   case VariableType::BT_SCRIPT:
-      strings.push_back(option_named_scripts);
+   case VariableType::BT_SNAM:
+      strings.push_back(true);
       break;
    }
 }
