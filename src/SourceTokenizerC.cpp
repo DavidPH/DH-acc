@@ -438,20 +438,35 @@ void SourceTokenizerC::doCommand_ifndef(SourceTokenC *)
 //
 void SourceTokenizerC::doCommand_include(SourceTokenC *)
 {
-   SourceTokenC::Reference inc = getRaw(); doAssert(inc, SourceTokenC::TT_STR);
+   SourceTokenC::Reference inc = getRaw();
+   std::string filename;
+
+   if(inc->type == SourceTokenC::TT_STR)
+      filename = inc->data;
+   else if(inc->type == SourceTokenC::TT_CMP_LT)
+   {
+      for(char c; (c = inStack.back()->get()) != '>';)
+      {
+         if(c == '\n') ERROR(inc->pos, "unterminated include");
+         filename += c;
+      }
+   }
+   else
+      ERROR(inc->pos, "expected TT_STR or TT_CMP_LT");
+
    doAssert(peekRaw(), SourceTokenC::TT_ENDL);
 
    if (isSkip()) return;
 
    try
    {
-      inStack.push_back(new SourceStream(inc->data, SourceStream::ST_C));
+      inStack.push_back(new SourceStream(filename, SourceStream::ST_C));
       ungetStack.push_back(static_cast<SourceTokenC::Reference>(
          new SourceTokenC(SourcePosition::builtin(), SourceTokenC::TT_ENDL)));
    }
    catch (std::exception const &)
    {
-      ERROR(inc->pos, "file not found: %s", inc->data.c_str());
+      ERROR(inc->pos, "file not found: %s", filename.c_str());
    }
 }
 
