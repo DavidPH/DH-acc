@@ -1,11 +1,11 @@
 //-----------------------------------------------------------------------------
 //
-// Definitions compatible with zspecial.acs.
+// Definitions compatible with acc's zspecial.acs.
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __HEADER__ZNATIVE_DH__
-#define __HEADER__ZNATIVE_DH__ #
+#ifndef __HEADER__ZNATIVE_ACS__
+#define __HEADER__ZNATIVE_ACS__
 
 
 //----------------------------------------------------------------------------|
@@ -89,5 +89,5 @@ __native ACS_NamedExecuteAlways(__string, int, int) -> bool @ 45;
 __native ACS_NamedExecuteAlways(__string, int, int, int) -> bool @ 45;
 __native ACS_NamedExecuteAlways(__string, int, int, int, int) -> bool @ 45;
 
-#endif//__HEADER__ZNATIVE_DH__
+#endif//__HEADER__ZNATIVE_ACS__
 

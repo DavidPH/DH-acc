@@ -21,8 +21,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __HEADER__CTYPE_DH__
-#define __HEADER__CTYPE_DH__ #
+#ifndef __HEADER__CTYPE_H__
+#define __HEADER__CTYPE_H__ #
 
 #ifndef __LIBDS_NOLIB
 # ifdef __LIBDS_PARTS
@@ -87,5 +87,5 @@ extern __function int tolower(int c);
 // To uppercase.
 extern __function int toupper(int c);
 
-#endif//__HEADER__CTYPE_DH__
+#endif//__HEADER__CTYPE_H__
 

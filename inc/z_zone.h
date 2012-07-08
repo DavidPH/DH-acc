@@ -32,8 +32,8 @@
 //
 //---------------------------------------------------------------------
 
-#ifndef __HEADER__Z_ZONE_DH__
-#define __HEADER__Z_ZONE_DH__
+#ifndef __HEADER__Z_ZONE_H__
+#define __HEADER__Z_ZONE_H__
 
 #ifndef __LIBDS_NOLIB
 # ifdef __LIBDS_PARTS
@@ -43,7 +43,7 @@ __library("libDS");
 # endif
 #endif
 
-#include "stdlib.dh"
+#include "stdlib.h"
 
 // ZONE MEMORY
 
@@ -119,7 +119,7 @@ extern __function void Z_PrintStats(); // killough 8/23/98
 extern __function void Z_PrintZoneHeap();
 extern __function void Z_DumpCore();
 
-#endif//__HEADER__Z_ZONE_DH__
+#endif//__HEADER__Z_ZONE_H__
 
 //----------------------------------------------------------------------------
 //

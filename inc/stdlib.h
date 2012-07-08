@@ -21,8 +21,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __HEADER__STDLIB_DH__
-#define __HEADER__STDLIB_DH__
+#ifndef __HEADER__STDLIB_H__
+#define __HEADER__STDLIB_H__
 
 #ifndef __LIBDS_NOLIB
 # ifdef __LIBDS_PARTS
@@ -214,5 +214,5 @@ extern __function mbstowcs
 extern __function wcstombs
 (char *restrict s, wchar_t const *restrict pwcs, size_t n) -> size_t;
 
-#endif//__HEADER__STDLIB_DH__
+#endif//__HEADER__STDLIB_H__
 

@@ -1,13 +1,13 @@
 //-----------------------------------------------------------------------------
 //
-// Definitions compatible with zspecial.acs.
+// Definitions compatible with acc's zspecial.acs.
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __HEADER__ZSPECIAL_DH__
-#define __HEADER__ZSPECIAL_DH__ #
+#ifndef __HEADER__ZSPECIAL_ACS__
+#define __HEADER__ZSPECIAL_ACS__
 
-#include "znative.dh"
+#include "znative.acs"
 
 
 //----------------------------------------------------------------------------|
@@ -326,5 +326,5 @@ __linespec Ceiling_LowerToFloor(int, int) @ 254;
 __linespec Ceiling_CrushRaiseAndStaySilA(int, int, int, int) @ 255;
 __linespec Ceiling_CrushRaiseAndStaySilA(int, int, int, int, int) @ 255;
 
-#endif//__HEADER__ZSPECIAL_DH__
+#endif//__HEADER__ZSPECIAL_ACS__
 

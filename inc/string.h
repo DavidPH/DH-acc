@@ -21,8 +21,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __HEADER__STRING_DH__
-#define __HEADER__STRING_DH__
+#ifndef __HEADER__STRING_H__
+#define __HEADER__STRING_H__
 
 #ifndef __LIBDS_NOLIB
 # ifdef __LIBDS_PARTS
@@ -155,5 +155,5 @@ extern __function strerror(int errnum) -> char *;
 // Finds the length of a null-terminated string.
 extern __function strlen(char const *s) -> size_t;
 
-#endif//__HEADER__STRING_DH__
+#endif//__HEADER__STRING_H__
 

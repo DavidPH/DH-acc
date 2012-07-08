@@ -4,8 +4,8 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef __HEADER__ZBUILTIN_DH__
-#define __HEADER__ZBUILTIN_DH__ #
+#ifndef __HEADER__ZBUILTIN_ACS__
+#define __HEADER__ZBUILTIN_ACS__
 
 
 //----------------------------------------------------------------------------|
@@ -181,5 +181,5 @@ __asmfunc ScriptWait(int) @ __ocode(ACS_WAIT_SCRIPT, ACS_WAIT_SCRIPT_IMM);
 __asmfunc Suspend() @ __ocode(ACS_SCRIPT_SUSPEND);
 __asmfunc TagWait(int) @ __ocode(ACS_WAIT_STAG, ACS_WAIT_STAG_IMM);
 
-#endif//__HEADER__ZBUILTIN_DH__
+#endif//__HEADER__ZBUILTIN_ACS__
 
