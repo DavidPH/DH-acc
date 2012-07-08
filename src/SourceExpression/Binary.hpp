@@ -167,9 +167,9 @@ switch (type->getBasicType()) {DO_SET_CASES(OP, MT);}
 //
 #define DO_SET_SWITCHES(OP) \
 switch (data->type) { \
-case VariableData::MT_STATIC: DO_SET_SWITCH(OP, STATIC); \
-case VariableData::MT_AUTO: DO_SET_SWITCH(OP, AUTO); \
-case VariableData::MT_POINTER: DO_SET_SWITCH(OP, PTR); \
+case VariableData::MT_STATIC: DO_SET_SWITCH(OP, STATIC); break; \
+case VariableData::MT_AUTO: DO_SET_SWITCH(OP, AUTO); break; \
+case VariableData::MT_POINTER: DO_SET_SWITCH(OP, PTR); break; \
 case VariableData::MT_REGISTER: \
    switch (data->sectionR) { \
    case VariableData::SR_LOCAL: DO_SET_SWITCH(OP, REG); break; \
