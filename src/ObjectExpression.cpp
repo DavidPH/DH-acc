@@ -27,6 +27,7 @@
 #include "BinaryTokenACS.hpp"
 #include "ObjectCode.hpp"
 #include "ObjectData.hpp"
+#include "option.hpp"
 #include "ost_type.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
@@ -37,6 +38,13 @@
 //----------------------------------------------------------------------------|
 // Static Variables                                                           |
 //
+
+static option::option_dptr<bool> option_string_tag_handler
+('\0', "string-tag", "features",
+ "For targets that support it, enables tagging of strings. On by default.",
+ "For targets that support it, enables tagging of strings. Turning this off "
+ "will very slightly improve performance, but at the cost of ACSE-library "
+ "compatibility. On by default.", &option_string_tag);
 
 
 //----------------------------------------------------------------------------|
@@ -49,10 +57,10 @@ std::string ObjectExpression::filename, ObjectExpression::filename_raw;
 
 std::set<std::string> ObjectExpression::library_table;
 
-std::map<std::string, ObjectExpression::Pointer>
-ObjectExpression::symbol_table;
-std::map<std::string, ObjectExpression::ExpressionType>
-ObjectExpression::symbol_type_table;
+std::map<std::string, ObjectExpression::Pointer> ObjectExpression::symbol_table;
+std::map<std::string, ObjectExpression::ExpressionType> ObjectExpression::symbol_type_table;
+
+bool option_string_tag = true;
 
 
 //----------------------------------------------------------------------------|

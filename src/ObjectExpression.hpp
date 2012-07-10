@@ -294,6 +294,7 @@ extern int option_addr_array;
 extern int option_addr_stack;
 
 extern bool option_string_fold;
+extern bool option_string_tag;
 
 #endif//HPP_ObjectExpression_
 

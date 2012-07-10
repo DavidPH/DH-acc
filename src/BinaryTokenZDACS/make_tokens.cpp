@@ -287,6 +287,14 @@ void BinaryTokenZDACS::make_tokens
 
    // Variable Get
    CASE_REMAP(GET_FUNCP, GET_FUNCP);
+
+   case OCODE_GET_STRING:
+      PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1);
+      // Don't tag nullptr.
+      if(option_string_tag && object->getArg(0)->resolveInt())
+         PUSH_TOKEN(BCODE_STRING_TAG);
+      break;
+
    CASE_ADDR_UNAOP(GET,,);
    CASE_REMAP_REGS(GET,,);
 
@@ -394,7 +402,6 @@ void BinaryTokenZDACS::make_tokens
    CASE_MAP_ACSE(STRING_COPY_MAPRANGE);
    CASE_MAP_ACSE(STRING_COPY_WORLDRANGE);
    CASE_MAP_ACSE(STRING_GET_LENGTH);
-   CASE_MAP_ACSE(STRING_TAG);
    CASE_MAP_ACSE(THING_ADD_INVENTORY);
    CASE_MAP_ACSE(THING_ADD_INVENTORY_IMM);
    CASE_MAP_ACSE(THING_CHK_WEAPON);

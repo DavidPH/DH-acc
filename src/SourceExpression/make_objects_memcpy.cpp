@@ -25,31 +25,11 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
-#include "../option.hpp"
 #include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
-
-
-//----------------------------------------------------------------------------|
-// Static Variables                                                           |
-//
-
-static option::option_dptr<bool> option_string_tag_handler
-('\0', "string-tag", "features",
- "For targets that support it, enables tagging of strings. On by default.",
- "For targets that support it, enables tagging of strings. Turning this off "
- "will very slightly improve performance, but at the cost of ACSE-library "
- "compatibility. On by default.", &option_string_tag);
-
-
-//----------------------------------------------------------------------------|
-// Global Variables                                                           |
-//
-
-bool option_string_tag = true;
 
 
 //----------------------------------------------------------------------------|
@@ -134,11 +114,7 @@ static void make_objects_literal
 
    case VariableType::BT_STR:
    case VariableType::BT_SNAM:
-      objects->addToken(OCODE_GET_IMM, elem);
-
-      if (target_type == TARGET_ZDoom && option_string_tag)
-         objects->addToken(OCODE_ACSE_STRING_TAG);
-
+      objects->addToken(OCODE_GET_STRING, elem);
       break;
 
    case VariableType::BT_ARR:
