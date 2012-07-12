@@ -1257,6 +1257,10 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       if (srcBT == BT_PTR_NUL && is_bt_function(dstBT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
+      // nullptr->string
+      if(srcBT == BT_PTR_NUL && dstBT == BT_STR)
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+
       // pointer->boolean
       if (srcBT == BT_PTR && (dstBT == BT_BIT_HRD || dstBT == BT_BIT_SFT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
