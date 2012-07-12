@@ -381,14 +381,10 @@ __extfunc int atexit(__func_t() func)
 {
    if (exitptr == exitend) return 1;
 
-   #if defined(__TAGET_ZDoom__)
-   return 1;
-   #else
    exitptr->isScript = false;
    exitptr->func.f = func;
    exitptr++;
    return 0;
-   #endif
 };
 
 //
@@ -417,11 +413,7 @@ __extfunc void exit(int status)
       }
       else
       {
-         #if defined(__TARGET_ZDoom__)
-         __printf<__printf_log>("Cannot call atexit function.");
-         #else
          exitptr->func.f();
-         #endif
       };
    };
 
@@ -472,14 +464,11 @@ __extfunc int system(char const *string)
 //
 // Like qsort below, this is more for reference than anything.
 //
-// Don't compile for ZDoom, due to lack of function-pointers.
-//
 __function void *bsearch (void const *key, void const *base, size_t nmemb,
    size_t size, __func_t(void const *, void const *) -> int compar)
 {
-#if !defined(__TARGET_ZDoom__)
    int cmp;
-   char const *begin = static_cast<char const *>(base);
+   char const *begin = reinterpret_cast<char const *>(base);
    char const *end = begin + nmemb*size;
    char const *itr;
 
@@ -492,7 +481,6 @@ __function void *bsearch (void const *key, void const *base, size_t nmemb,
 
       if (cmp < 0) {end = itr;} else {begin = itr;};
    };
-#endif
 
    return NULL;
 };
@@ -504,12 +492,9 @@ __function void *bsearch (void const *key, void const *base, size_t nmemb,
 // version. (Which is highly likely to be needed. Even if it took __script_t,
 // it would still require static* inputs.)
 //
-// Don't compile for ZDoom, due to lack of function-pointers.
-//
 __extfunc qsort(void *base, size_t nmemb, size_t size,
  __func_t(void const *, void const *) -> int compar) -> void
 {
-#if !defined(__TARGET_ZDoom__)
    char *iter = (char *)base;
    char *end = (char *)base + nmemb*size;
 
@@ -529,7 +514,6 @@ __extfunc qsort(void *base, size_t nmemb, size_t size,
 
       iter += size;
    };
-#endif
 };
 
 //===================================================================
