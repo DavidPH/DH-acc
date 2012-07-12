@@ -98,12 +98,16 @@ private:
 
    bool inComment : 1; // Single-line comment.
 
+   bool inEOF : 1; // Used to give one last byte.
+
    bool inQuoteDouble : 1; // "
    bool inQuoteSingle : 1; // '
 
    bool doCommentASM : 1; // ;
    bool doCommentC   : 1; // /* */
    bool doCommentCPP : 1; // //
+
+   bool doPadEOF : 1; // Pads EOF with a linefeed.
 
    bool doQuoteDouble : 1; // "
    bool doQuoteSingle : 1; // '

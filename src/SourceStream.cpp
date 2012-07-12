@@ -50,6 +50,9 @@ static option::option_data<int> option_tab_columns
 // Global Functions                                                           |
 //
 
+//
+// SourceStream::SourceStream
+//
 SourceStream::SourceStream(std::string const &_filename, unsigned type)
  :
 oldC(-2), curC(-2), newC(-2),
@@ -63,8 +66,12 @@ depthComment(0),
 
 inComment(false),
 
+inEOF(false),
+
 inQuoteDouble(false),
-inQuoteSingle(false)
+inQuoteSingle(false),
+
+doPadEOF(true)
 {
    switch (type & ST_MASK)
    {
@@ -89,6 +96,7 @@ inQuoteSingle(false)
 
    if (type & STF_STRING)
    {
+      doPadEOF = false;
       in = new std::istringstream(filename);
       filename = "string";
    }
@@ -116,6 +124,9 @@ SourceStream::~SourceStream()
    delete in;
 }
 
+//
+// SourceStream::get
+//
 char SourceStream::get()
 {
    if (!ungetStack.empty())
@@ -132,7 +143,10 @@ char SourceStream::get()
       newC = in->get();
 
       if(!*in && curC < 0)
+      {
+         if(!inEOF && doPadEOF) {inEOF = true; return '\n';}
          throw EndOfStream();
+      }
 
 
       // \t has special counting
@@ -144,6 +158,9 @@ char SourceStream::get()
       // \n end of line
       if (curC == '\n')
       {
+         if(isInQuote())
+            ERROR(SourcePosition(filename, countLine, countColumn), "unterminated string");
+
          inComment = false;
          countColumn = 0;
          ++countLine;
@@ -171,6 +188,10 @@ char SourceStream::get()
       if (curC == '*' && newC == '/' && doCommentC && !inComment && depthComment && !isInQuote())
       {
          --depthComment;
+
+         // Convert multi-line comments into a space.
+         curC = ' ';
+         newC = -2;
       }
 
       // " double quote
@@ -197,15 +218,9 @@ char SourceStream::get()
       }
 
 
-
       // Comments are stripped.
       if (isInComment())
          continue;
-
-      // End of multi-line comments are stripped, unless quoted.
-      if (((curC == '*' && newC == '/') || (oldC == '*' && curC == '/')) && !isInQuote())
-         continue;
-
 
 
       // Quoted string escape sequences.
