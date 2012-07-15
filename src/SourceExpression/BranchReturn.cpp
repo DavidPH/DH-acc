@@ -124,16 +124,16 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    // Add the branch instruction.
    switch (ct)
    {
-   case SourceContext::CT_BLOCK:
-      objects->addToken(OCODE_ACS_SCRIPT_TERMINATE);
-      break;
-
    case SourceContext::CT_FUNCTION:
       if(retnSize == 0)
          objects->addToken(OCODE_JMP_RET_NIL);
       else
          objects->addToken(OCODE_JMP_RET);
 
+      break;
+
+   case SourceContext::CT_NAMESPACE:
+      objects->addToken(OCODE_ACS_SCRIPT_TERMINATE);
       break;
 
    case SourceContext::CT_SCRIPT:

@@ -254,13 +254,15 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
    switch (linkSpec)
    {
    case SourceExpressionDS::LS_INTERN:
-      nameObj  = context->getLabel();
-      nameObj += nameSrc;
+      nameObj = context->getLabel() + nameSrc;
       break;
 
    case SourceExpressionDS::LS_ACS:
+      nameObj = nameSrc;
+      break;
+
    case SourceExpressionDS::LS_DS:
-      nameObj  = nameSrc;
+      nameObj = context->getLabelNamespace() + nameSrc;
       break;
    }
 
@@ -466,7 +468,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
    // STORE_CONST is used to signal automatic storetype selection.
    if (store.type == STORE_CONST)
    {
-      if (context == SourceContext::global_context)
+      if(context->getType() == SourceContext::CT_NAMESPACE)
       {
          if (type->getBasicType() == VariableType::BT_ARR)
             store.type = store_staticarray();
@@ -525,7 +527,7 @@ SRCEXPDS_KEYWORD_DEFN(variable)
 
    if (tok->data == "__variable")
    {
-      if (context == SourceContext::global_context)
+      if(context->getType() == SourceContext::CT_NAMESPACE)
       {
          linkCheck = true;
          linkSpec = LS_DS;
@@ -556,7 +558,7 @@ SRCEXPDS_KEYWORD_DEFN(variable_store)
 
    in->unget(tok);
 
-   if (context == SourceContext::global_context)
+   if(context->getType() == SourceContext::CT_NAMESPACE)
    {
       linkCheck = true;
       linkSpec = LS_DS;
@@ -577,7 +579,7 @@ SRCEXPDS_KEYWORD_DEFN(variable_type)
 
    in->unget(tok);
 
-   if (context == SourceContext::global_context)
+   if(context->getType() == SourceContext::CT_NAMESPACE)
       linkSpec = LS_DS;
    else
       linkSpec = LS_INTERN;

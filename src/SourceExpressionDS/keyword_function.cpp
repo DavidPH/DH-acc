@@ -28,6 +28,7 @@
 #include "../option.hpp"
 #include "../ost_type.hpp"
 #include "../SourceContext.hpp"
+#include "../SourceException.hpp"
 #include "../SourceFunction.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerC.hpp"
@@ -96,12 +97,21 @@ static SourceExpression::Pointer make_func
    // Don't count automatic variable args.
    if (args.store == STORE_AUTO) args.count = 0;
 
+   // Anonymous function.
+   if(args.name.empty())
+   {
+      linkSpec = SourceExpressionDS::LS_INTERN;
+      if(externDef) ERROR(tok->pos, "extern anonymous");
+   }
+
    // funcNameObj
-   std::string funcNameObj = args.name.empty() ? context->makeLabel() : args.name;
+   std::string funcNameObj;
    switch (linkSpec)
    {
    case SourceExpressionDS::LS_INTERN:
-      if (!args.name.empty())
+      if(args.name.empty())
+         funcNameObj = context->makeLabel();
+      else
          funcNameObj = context->getLabel() + args.name;
 
       mangle_types(args.types, funcNameObj);
@@ -109,9 +119,12 @@ static SourceExpression::Pointer make_func
       break;
 
    case SourceExpressionDS::LS_ACS:
+      funcNameObj = args.name;
       break;
 
    case SourceExpressionDS::LS_DS:
+      funcNameObj = context->getLabelNamespace() + args.name;
+
       if (option_function_mangle_types)
          mangle_types(args.types, funcNameObj);
 
@@ -124,7 +137,7 @@ static SourceExpression::Pointer make_func
    // __func__
    if (!externDef && option_string_func)
    {
-      std::string funcFunc = args.name;
+      std::string funcFunc = context->getLabelNamespace() + args.name;
 
       if (option_function_mangle_types)
       {
@@ -213,7 +226,7 @@ SRCEXPDS_KEYWORD_DEFN(function)
 
    if (tok->data == "__function")
    {
-      if (context == SourceContext::global_context)
+      if(context->getType() == SourceContext::CT_NAMESPACE)
          linkSpec = LS_DS;
       else
          linkSpec = LS_INTERN;

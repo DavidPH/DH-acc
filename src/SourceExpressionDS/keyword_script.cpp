@@ -193,10 +193,50 @@ static SourceExpression::Pointer make_script
    else
       scriptNumber = named ? -2 : -1;
 
+   // Anonymous script.
+   if(args.name.empty())
+   {
+      linkSpec = SourceExpressionDS::LS_INTERN;
+      if(externDef) ERROR(tok->pos, "extern anonymous");
+   }
+
+   // scriptNameObj
+   std::string scriptNameObj;
+   switch (linkSpec)
+   {
+   case SourceExpressionDS::LS_INTERN:
+      if(args.name.empty())
+         scriptNameObj = context->makeLabel();
+      else
+         scriptNameObj = context->getLabel() + args.name;
+
+      mangle_types(args.types, scriptNameObj);
+
+      break;
+
+   case SourceExpressionDS::LS_ACS:
+      scriptNameObj = args.name;
+      break;
+
+   case SourceExpressionDS::LS_DS:
+      scriptNameObj = context->getLabelNamespace() + args.name;
+
+      if (option_script_mangle_types)
+         mangle_types(args.types, scriptNameObj);
+
+      break;
+   }
+
+   // String defaults to object name.
+   if(scriptString.empty()) scriptString = scriptNameObj;
+
+   // scriptLabel
+   std::string scriptLabel = scriptNameObj + "_label";
+
    // __func__
    if (!externDef && option_string_func)
    {
-      std::string scriptFunc = args.name;
+      std::string scriptFunc = context->getLabelNamespace() + args.name;
 
       if (option_script_mangle_types)
       {
@@ -228,34 +268,6 @@ static SourceExpression::Pointer make_script
 
       args.context->addVar(scriptFuncVar, false, false);
    }
-
-   // scriptNameObj
-   std::string scriptNameObj = args.name.empty() ? context->makeLabel() : args.name;
-   switch (linkSpec)
-   {
-   case SourceExpressionDS::LS_INTERN:
-      if (!args.name.empty())
-         scriptNameObj = context->getLabel() + scriptNameObj;
-
-      mangle_types(args.types, scriptNameObj);
-
-      break;
-
-   case SourceExpressionDS::LS_ACS:
-      break;
-
-   case SourceExpressionDS::LS_DS:
-      if (option_script_mangle_types)
-         mangle_types(args.types, scriptNameObj);
-
-      break;
-   }
-
-   // String defaults to object name.
-   if(scriptString.empty()) scriptString = scriptNameObj;
-
-   // scriptLabel
-   std::string scriptLabel = scriptNameObj + "_label";
 
    // scriptVarType
    VariableType::Reference scriptVarType =
@@ -313,7 +325,7 @@ SRCEXPDS_KEYWORD_DEFN(script)
 
    if (tok->data == "__script")
    {
-      if (context == SourceContext::global_context)
+      if(context->getType() == SourceContext::CT_NAMESPACE)
          linkSpec = LS_DS;
       else
          linkSpec = LS_INTERN;

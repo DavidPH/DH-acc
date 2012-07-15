@@ -75,7 +75,7 @@ SourceContext::SourceContext() :
    labelCount(0),
    limitAuto(0),
    limitRegister(0),
-   typeContext(CT_BLOCK),
+   typeContext(CT_NAMESPACE),
    caseDefault(false),
    inheritLocals(false)
 {
@@ -87,8 +87,10 @@ SourceContext::SourceContext() :
 //
 // SourceContext::SourceContext
 //
-SourceContext::SourceContext(SourceContext *_parent, ContextType _typeContext) :
-   label(_parent->makeLabelShort()),
+SourceContext::SourceContext(SourceContext *_parent, std::string const &_label,
+                             ContextType _typeContext)
+ :
+   label(_label),
    parent(_parent),
    countAuto(0),
    countRegister(0),
@@ -99,6 +101,8 @@ SourceContext::SourceContext(SourceContext *_parent, ContextType _typeContext) :
    caseDefault(false),
    inheritLocals(false)
 {
+   if(parent) parent->children.insert(this);
+
    switch (typeContext)
    {
    case CT_BLOCK:
@@ -110,6 +114,9 @@ SourceContext::SourceContext(SourceContext *_parent, ContextType _typeContext) :
 
    case CT_LOOP:
       inheritLocals = true;
+      break;
+
+   case CT_NAMESPACE:
       break;
 
    case CT_SCRIPT:
@@ -132,6 +139,7 @@ SourceContext::SourceContext(SourceContext *_parent, ContextType _typeContext) :
 //
 SourceContext::~SourceContext()
 {
+   if(parent) parent->children.erase(this);
 }
 
 //
@@ -397,7 +405,28 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis,
 SourceContext::Reference SourceContext::
 create(SourceContext *parent, ContextType typeContext)
 {
-   return Reference(new SourceContext(parent, typeContext));
+   return Reference(new SourceContext(parent, parent->makeLabelShort(), typeContext));
+}
+
+//
+// SourceContext::create
+//
+// Finds or creates a namespace.
+//
+SourceContext::Reference SourceContext::
+create(SourceContext *_parent, std::string const &name)
+{
+   SourceContext::Pointer parent = _parent;
+
+   while(parent->typeContext != CT_NAMESPACE) parent = parent->parent;
+
+   for(std::set<SourceContext *>::const_iterator itr = parent->children.begin(),
+       end = parent->children.end(); itr != end; ++itr)
+   {
+      if((*itr)->label == name) return static_cast<Reference>(*itr);
+   }
+
+   return static_cast<Reference>(new SourceContext(parent, name, CT_NAMESPACE));
 }
 
 //
@@ -441,6 +470,35 @@ std::vector<bigsint> SourceContext::getCases(SourcePosition const &pos) const
       return parent->getCases(pos);
 
    ERROR_NP("not CT_SWITCH");
+}
+
+//
+// SourceContext::getContext
+//
+SourceContext::Reference SourceContext::getContext(std::string const &name,
+                                                   SourcePosition const &pos) const
+{
+   SourceContext::Pointer context = getContextNull(name);
+
+   if(!context) ERROR_NP("no such context '%s'", name.c_str());
+
+   return static_cast<Reference>(context);
+}
+
+//
+// SourceContext::getContextNull
+//
+SourceContext::Pointer SourceContext::getContextNull(std::string const &name) const
+{
+   for(std::set<SourceContext *>::const_iterator itr = children.begin(),
+       end = children.end(); itr != end; ++itr)
+   {
+      if((*itr)->label == name) return static_cast<Reference>(*itr);
+   }
+
+   if(parent) return parent->getContextNull(name);
+
+   return NULL;
 }
 
 //
@@ -623,6 +681,19 @@ getLabelGoto(std::string const &name, SourcePosition const &pos) const
 }
 
 //
+// SourceContext::getLabelNamespace
+//
+std::string SourceContext::getLabelNamespace() const
+{
+   if(!parent) return label + "::";
+
+   if(typeContext == CT_NAMESPACE)
+      return parent->getLabelNamespace() + label + "::";
+   else
+      return parent->getLabelNamespace();
+}
+
+//
 // SourceContext::getLimit
 //
 int SourceContext::getLimit(StoreType store) const
@@ -711,6 +782,7 @@ SourceContext::ContextType SourceContext::getTypeRoot() const
       break;
 
    case CT_FUNCTION:
+   case CT_NAMESPACE:
    case CT_SCRIPT:
       return typeContext;
    }

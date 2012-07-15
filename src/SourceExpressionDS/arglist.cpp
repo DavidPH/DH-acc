@@ -47,7 +47,7 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in,
    args->count = 0;
 
    // Read prefix return. (If one.)
-   if (in->peekType(SourceTokenC::TT_NAM) && is_type(in->peek()->data, context))
+   if(is_type(in, NULL, context))
       args->retn = make_type(in, context);
 
    // Read name. (If one.)
@@ -56,8 +56,7 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in,
 
       while (in->peekType(SourceTokenC::TT_PAREN_O)) toks.push_back(in->get());
 
-      if (in->peekType(SourceTokenC::TT_NAM) &&
-         !is_type(in->peek()->data, context))
+      if(!is_type(in, NULL, context) && in->peekType(SourceTokenC::TT_NAM))
       {
          args->name = in->get()->data;
 

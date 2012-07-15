@@ -29,6 +29,7 @@
 #include "StoreType.hpp"
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -56,6 +57,7 @@ public:
       CT_BLOCK,
       CT_FUNCTION,
       CT_LOOP,
+      CT_NAMESPACE,
       CT_SCRIPT,
       CT_SWITCH
    };
@@ -72,6 +74,9 @@ public:
 
    std::vector<bigsint> getCases(SourcePosition const & position) const;
 
+   Reference getContext(std::string const &name, SourcePosition const &pos) const;
+   Pointer getContextNull(std::string const &name) const;
+
    CounterReference<SourceFunction> getFunction
    (std::string const &name, SourcePosition const &pos);
    CounterReference<SourceFunction> getFunction
@@ -84,6 +89,7 @@ public:
    std::string getLabelCaseDefault(SourcePosition const & position) const;
    std::string getLabelContinue(SourcePosition const & position) const;
    std::string getLabelGoto(std::string const &name, SourcePosition const &position) const;
+   std::string getLabelNamespace() const;
 
    int getLimit(StoreType store) const;
 
@@ -91,7 +97,7 @@ public:
 
    CounterPointer<ObjectExpression> getTempVar(unsigned i);
 
-   ContextType getType() const;
+   ContextType getType() const {return typeContext;}
    ContextType getTypeRoot() const;
 
    CounterPointer<SourceVariable> getVariable(std::string const &name, SourcePosition const &position) const;
@@ -140,13 +146,14 @@ public:
 
 
    static Reference create(SourceContext *parent, ContextType type);
+   static Reference create(SourceContext *parent, std::string const &name);
 
    static void init();
 
    static Pointer global_context;
 
 private:
-   SourceContext(SourceContext *parent, ContextType type);
+   SourceContext(SourceContext *parent, std::string const &label, ContextType type);
    SourceContext();
    ~SourceContext();
 
@@ -166,6 +173,8 @@ private:
    std::string makeLabelShort();
 
    std::map<bigsint, bool> cases;
+
+   std::set<SourceContext *> children;
 
    std::vector<std::string> enumNames;
    std::vector<CounterReference<VariableType> > enumTypes;

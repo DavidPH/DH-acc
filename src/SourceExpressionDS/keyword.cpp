@@ -270,6 +270,31 @@ SRCEXPDS_KEYWORD_DEFN(linespec)
 }
 
 //
+// SourceExpressionDS::make_keyword_namespace
+//
+SRCEXPDS_KEYWORD_DEFN(namespace)
+{
+   SourceContext::Pointer contextNS;
+
+   if(in->peekType(SourceTokenC::TT_NAM))
+      contextNS = SourceContext::create(context, in->get()->data);
+   else
+      contextNS = SourceContext::create(context, SourceContext::CT_NAMESPACE);
+
+   // Special consideration (definitely not hack) for {} block to use same context.
+   if(in->peekType(SourceTokenC::TT_BRACE_O))
+   {
+      in->get();
+      Vector expressions;
+      make_statements(in, &expressions, contextNS);
+      in->get(SourceTokenC::TT_BRACE_C);
+      return create_value_block(expressions, contextNS, tok->pos);
+   }
+   else
+      return make_expression(in, contextNS);
+}
+
+//
 // SourceExpressionDS::make_keyword_ocode
 //
 SRCEXPDS_KEYWORD_DEFN(ocode)
@@ -358,8 +383,7 @@ SRCEXPDS_KEYWORD_DEFN(sizeof)
    {
       in->get(SourceTokenC::TT_PAREN_O);
 
-      if (in->peekType(SourceTokenC::TT_NAM) &&
-          is_type(in->peek()->data, context))
+      if(is_type(in, NULL, context))
          type = make_type(in, context);
       else
          type = make_expression(in, context)->getType();

@@ -116,6 +116,7 @@ void SourceExpressionDS::init()
    expr_keyword["__intvar"]   = make_keyword_variable;
    expr_keyword["__library"]  = make_keyword_library;
    expr_keyword["__linespec"] = make_keyword_linespec;
+   expr_keyword[  "namespace"]= make_keyword_namespace;
    expr_keyword["__native"]   = make_keyword_linespec;
    expr_keyword["__ocode"]    = make_keyword_ocode;
    expr_keyword["__output"]   = make_keyword_output;
@@ -142,6 +143,8 @@ void SourceExpressionDS::init()
 //
 SRCEXPDS_EXPR_DEF1(primary)
 {
+   SourceContext::Pointer contextNS;
+
    SourceTokenC::Reference tok = in->get(); switch (tok->type)
    {
    default: in->unget(tok); return create_value_data(context, tok->pos);
@@ -153,20 +156,37 @@ SRCEXPDS_EXPR_DEF1(primary)
       if (is_store(tok->data))
          return make_keyword_variable_store(in, tok, context);
 
-      if (is_type(tok->data, context))
+   case SourceTokenC::TT_COLON2:
+      if(is_type(in, tok, context))
          return make_keyword_variable_type(in, tok, context);
 
+      if(tok->type == SourceTokenC::TT_COLON2)
+      {
+         tok = in->get(SourceTokenC::TT_NAM);
+         contextNS = SourceContext::global_context;
+      }
+      else
+         contextNS = context;
+
+      while(in->peekType(SourceTokenC::TT_COLON2))
+      {
+         contextNS = contextNS->getContext(tok->data, tok->pos);
+
+         in->get();
+         tok = in->get(SourceTokenC::TT_NAM);
+      }
+
    {  // Check for function designator.
-      int count = context->isFunction(tok->data);
+      int count = contextNS->isFunction(tok->data);
       if (count == 1)
-         return create_value_function(context->getFunction(tok->data, tok->pos),
+         return create_value_function(contextNS->getFunction(tok->data, tok->pos),
                                       context, tok->pos);
       else if (count)
-         return create_value_function(tok->data, context, tok->pos);
+         return create_value_function(tok->data, contextNS, tok->pos);
    }
 
-      return create_value_variable(context->getVariable(tok->data, tok->pos),
-                                   context, tok->pos);
+      return create_value_variable(contextNS->getVariable(tok->data, tok->pos),
+                                   contextNS, tok->pos);
 
    case SourceTokenC::TT_CHR:
       return create_value_char(tok->data, context, tok->pos);
@@ -225,8 +245,7 @@ case SourceTokenC::TT_BRACK_O: expr = create_binary_array(expr,
    in->get(SourceTokenC::TT_BRACK_C); break;
 
 case SourceTokenC::TT_PAREN_O:
-   if (in->peekType(SourceTokenC::TT_NAM) &&
-       is_type(in->peek()->data, context))
+   if(is_type(in, NULL, context))
    {
       VariableType::Vector types;
 
@@ -325,8 +344,7 @@ SRCEXPDS_EXPR_DEF1(prefix)
    }
 
    case SourceTokenC::TT_PAREN_O:
-      if (in->peekType(SourceTokenC::TT_NAM) &&
-          is_type(in->peek()->data, context))
+      if(is_type(in, NULL, context))
       {
          VariableType::Reference type = make_type(in, context);
          in->get(SourceTokenC::TT_PAREN_C);

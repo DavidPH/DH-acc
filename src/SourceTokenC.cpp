@@ -59,6 +59,7 @@ static std::string const tt_datas[SourceTokenC::TT_NONE+1] =
    "<",
    "!=",
    ":",
+   "::",
    ",",
    "/",
    "/=",
@@ -129,6 +130,7 @@ static std::string const tt_names[SourceTokenC::TT_NONE+1] =
    "TT_CMP_LT", // <
    "TT_CMP_NE", // !=
    "TT_COLON",  // :
+   "TT_COLON2", // ::
    "TT_COMMA",  // ,
    "TT_DIV",    // /
    "TT_DIV_EQ", // /=
@@ -233,7 +235,6 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
    {
    case '\n': token->type = TT_ENDL; return;
    case '@': token->type = TT_AT;     return;
-   case ':': token->type = TT_COLON;  return;
    case ',': token->type = TT_COMMA;  return;
    case '~': token->type = TT_NOTBIT; return;
    case '?': token->type = TT_QUERY;  return;
@@ -274,6 +275,11 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
          if (c == '=') {token->type = TT_LSH_EQ; return;}
          in->unget(c);  token->type = TT_LSH;    return;}
       in->unget(c);     token->type = TT_CMP_LT; return;
+
+   case ':':
+      c = in->get();
+      if(c == ':') {token->type = TT_COLON2; return;}
+      in->unget(c); token->type = TT_COLON;  return;
 
    case '.':
       c = in->get();

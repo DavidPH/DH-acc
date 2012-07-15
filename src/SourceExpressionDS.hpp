@@ -166,7 +166,7 @@ public:
 
    static bool is_store(std::string const &data);
 
-   static bool is_type(std::string const &data, SourceContext *context);
+   static bool is_type(SourceTokenizerC *in, SourceTokenC *tok, SourceContext *context);
 
    static void make_arglist(SourceTokenizerC *in, SourceContext *context, ArgList *args);
 
@@ -231,6 +231,7 @@ private:
    SRCEXPDS_KEYWORD_DECL(if);
    SRCEXPDS_KEYWORD_DECL(library);
    SRCEXPDS_KEYWORD_DECL(linespec);
+   SRCEXPDS_KEYWORD_DECL(namespace);
    SRCEXPDS_KEYWORD_DECL(ocode);
    SRCEXPDS_KEYWORD_DECL(output);
    SRCEXPDS_KEYWORD_DECL(printf);

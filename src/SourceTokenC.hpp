@@ -76,6 +76,7 @@ public:
       TT_CMP_LT, // <
       TT_CMP_NE, // !=
       TT_COLON,  // :
+      TT_COLON2, // ::
       TT_COMMA,  // ,
       TT_DIV,    // /
       TT_DIV_EQ, // /=

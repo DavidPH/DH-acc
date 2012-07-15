@@ -348,45 +348,81 @@ VariableType::Reference make_struct(bool isUnion, SourceTokenizerC *in,
 //
 // SourceExpressionDS::is_type
 //
-bool SourceExpressionDS::is_type(std::string const &data,
-   SourceContext *context)
+bool SourceExpressionDS::is_type(SourceTokenizerC *in, SourceTokenC *_tok,
+                                 SourceContext *_context)
 {
-   if (data == "void")
-      return true;
+   SourceContext::Pointer context = _context;
+   SourceTokenC::Pointer tok = _tok;
+   std::vector<SourceTokenC::Pointer> toks;
 
-   if (data == "bool" || data == "_Bool")
-      return true;
+   if(!tok) toks.push_back(tok = in->get());
 
-   if (data == "__boolsoft")
-      return true;
+   if(tok->type == SourceTokenC::TT_NAM)
+   {
+      if(!_tok) in->unget(tok);
 
-   if (data == "__label")
-      return true;
+      if(tok->data == "void")
+         return true;
 
-   if (data == "__string")
-      return true;
+      if(tok->data == "bool" || tok->data == "_Bool")
+         return true;
 
-   if (data == "char"   || data == "int"     ||
-       data == "float"  || data == "double"  ||
-       data == "__real" || data == "__fixed" ||
-       data == "short"  || data == "long"    ||
-       data == "signed" || data == "unsigned")
-      return true;
+      if(tok->data == "__boolsoft")
+         return true;
 
-   if (data == "__asmfunc_t")return true;
-   if (data == "__block")    return true;
-   if (data ==   "decltype") return true;
-   if (data ==   "enum")     return true;
-   if (data == "__func_t")   return true;
-   if (data == "__lnspec_t") return true;
-   if (data == "__native_t") return true;
-   if (data == "__script_t") return true;
-   if (data ==   "struct")   return true;
-   if (data ==   "typedef")  return true;
-   if (data ==   "typename") return true;
-   if (data ==   "union")    return true;
+      if(tok->data == "__label")
+         return true;
 
-   return context->getVariableTypeNull(data);
+      if(tok->data == "__string")
+         return true;
+
+      if(tok->data == "char"   || tok->data == "int"     ||
+         tok->data == "float"  || tok->data == "double"  ||
+         tok->data == "__real" || tok->data == "__fixed" ||
+         tok->data == "short"  || tok->data == "long"    ||
+         tok->data == "signed" || tok->data == "unsigned")
+         return true;
+
+      if(tok->data == "__asmfunc_t")return true;
+      if(tok->data == "__block")    return true;
+      if(tok->data ==   "decltype") return true;
+      if(tok->data ==   "enum")     return true;
+      if(tok->data == "__func_t")   return true;
+      if(tok->data == "__lnspec_t") return true;
+      if(tok->data == "__native_t") return true;
+      if(tok->data == "__script_t") return true;
+      if(tok->data == "__snam_t")   return true;
+      if(tok->data == "__snum_t")   return true;
+      if(tok->data ==   "struct")   return true;
+      if(tok->data ==   "typedef")  return true;
+      if(tok->data ==   "typename") return true;
+      if(tok->data ==   "union")    return true;
+
+      if(!_tok) in->get();
+   }
+   else if(tok->type == SourceTokenC::TT_COLON2)
+   {
+      context = SourceContext::global_context;
+      toks.push_back(tok = in->get(SourceTokenC::TT_NAM));
+   }
+   else
+   {
+      if(!_tok) in->unget(tok);
+
+      return false;
+   }
+
+   while(in->peekType(SourceTokenC::TT_COLON2))
+   {
+      context = context->getContext(tok->data, tok->pos);
+
+      toks.push_back(in->get());
+      toks.push_back(tok = in->get(SourceTokenC::TT_NAM));
+   }
+
+   while(!toks.empty()) in->unget(toks.back()), toks.pop_back();
+
+   return context->getVariableTypeNull(tok->data);
 }
 
 //
