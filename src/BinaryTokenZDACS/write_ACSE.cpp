@@ -55,6 +55,49 @@ extern int option_script_regargs;
 
 
 //----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+//
+// SetTempString
+//
+// Sets an index of strings_temp, automatically expanding as needed.
+//
+static void SetTempString(size_t i, std::string const &s)
+{
+   if(i >= strings_temp.size())
+      strings_temp.resize(i+1);
+
+   std::string &out = strings_temp[i];
+
+   out.reserve(s.size());
+
+   for(std::string::const_iterator itr = s.begin(), end = s.end(); itr != end; ++itr)
+   {
+      switch(*itr)
+      {
+      case '\0':
+         out += "\\x00";
+         break;
+
+      case '\\':
+         out += '\\';
+      default:
+         out += *itr;
+      }
+   }
+}
+
+//
+// AddStringsTemp
+//
+static void AddStringsTemp(std::string const &s)
+{
+   SetTempString(strings_temp.size(), s);
+}
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -145,10 +188,7 @@ void BinaryTokenZDACS::write_ACSE_array_MEXP
 {
    if (a.externDef || !a.externVis) return;
 
-   if (strings_temp.size() < static_cast<size_t>(a.number + 1))
-      strings_temp.resize(a.number + 1);
-
-   strings_temp[a.number] = a.name;
+   SetTempString(a.number, a.name);
 }
 
 //
@@ -210,12 +250,7 @@ write_ACSE_function_FUNC(std::ostream *out, ObjectData_Function const &f)
 void BinaryTokenZDACS::
 write_ACSE_function_FNAM(std::ostream *, ObjectData_Function const &f)
 {
-   size_t index = static_cast<size_t>(f.number);
-
-   if (strings_temp.size() <= index)
-      strings_temp.resize(index+1);
-
-   strings_temp[index] = f.name;
+   SetTempString(f.number, f.name);
 }
 
 //
@@ -259,25 +294,20 @@ write_ACSE_register_MEXP(std::ostream *, ObjectData_Register const &r)
 {
    if (r.externDef || !r.externVis) return;
 
-   std::ostringstream oss;
-
-   if (strings_temp.size() < static_cast<size_t>(r.number + r.size))
-      strings_temp.resize(r.number + r.size);
-
    if (r.size > 1)
    {
+      std::ostringstream oss;
+
       // Mangle the name for each byte.
       for (bigsint i = 0; i < r.size; ++i)
       {
          oss.str(r.name);
          oss << "::" << i;
-         strings_temp[r.number + i] = oss.str();
+         SetTempString(r.number + i, oss.str());
       }
    }
    else
-   {
-      strings_temp[r.number] = r.name;
-   }
+      SetTempString(r.number, r.name);
 }
 
 //
@@ -365,19 +395,13 @@ write_ACSE_script_SFLG(std::ostream *out, ObjectData_Script const &s)
 //
 // BinaryTokenZDACS::write_ACSE_script_SNAM
 //
-void BinaryTokenZDACS::
-write_ACSE_script_SNAM(std::ostream *, ObjectData_Script const &s)
+void BinaryTokenZDACS::write_ACSE_script_SNAM(std::ostream *, ObjectData_Script const &s)
 {
    if (s.externDef) return;
    // ACSE named scripts must be negative.
    if (s.number >= 0) return;
 
-   size_t index = static_cast<size_t>(-s.number - 1);
-
-   if (strings_temp.size() <= index)
-      strings_temp.resize(index+1);
-
-   strings_temp[index] = s.string;
+   SetTempString(-s.number - 1, s.string);
 }
 
 //
@@ -400,7 +424,7 @@ write_ACSE_script_SVCT(std::ostream *out, ObjectData_Script const &s)
 void BinaryTokenZDACS::
 write_ACSE_string_STRL(std::ostream *, ObjectData_String const &s)
 {
-   strings_temp.push_back(s.string);
+   AddStringsTemp(s.string);
 }
 
 //
