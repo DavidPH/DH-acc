@@ -542,17 +542,20 @@ SRCEXPDS_EXPR_DEFN_MULTI_END()
 //
 // SourceExpressionDS::make_linkspec
 //
-SourceExpressionDS::LinkageSpecifier SourceExpressionDS::make_linkspec
-(SourceTokenizerC *in)
+LinkageSpecifier SourceExpressionDS::make_linkspec(SourceTokenizerC *in)
 {
    SourceTokenC::Reference linkSpecTok = in->get(SourceTokenC::TT_STR);
 
    if (linkSpecTok->data == "internal")
-      return LS_INTERN;
+      return LINKAGE_INTERN;
    else if (linkSpecTok->data == "ACS")
-      return LS_ACS;
+      return LINKAGE_ACS;
+   else if (linkSpecTok->data == "C")
+      return LINKAGE_C;
+   else if (linkSpecTok->data == "C++")
+      return LINKAGE_CPP;
    else if (linkSpecTok->data == "DS")
-      return LS_DS;
+      return LINKAGE_DS;
    else
       ERROR(linkSpecTok->pos, "unknown linkage specifier '%s'",
             linkSpecTok->data.c_str());

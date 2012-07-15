@@ -138,9 +138,9 @@ static ObjectData_Script::ScriptType make_script_type(SourceTokenizerC *in)
 //
 static SourceExpression::Pointer make_script
 (SourceTokenizerC *in, SourceTokenC *tok, SourceContext *context,
- SourceExpressionDS::LinkageSpecifier linkSpec, bool externDef)
+ LinkageSpecifier linkSpec, bool externDef)
 {
-   bool externVis = linkSpec != SourceExpressionDS::LS_INTERN;
+   bool externVis = linkSpec != LINKAGE_INTERN;
 
    // Is this a named script? --named-script determines the default.
    bool named = option_named_scripts;
@@ -196,7 +196,7 @@ static SourceExpression::Pointer make_script
    // Anonymous script.
    if(args.name.empty())
    {
-      linkSpec = SourceExpressionDS::LS_INTERN;
+      linkSpec = LINKAGE_INTERN;
       if(externDef) ERROR(tok->pos, "extern anonymous");
    }
 
@@ -204,7 +204,7 @@ static SourceExpression::Pointer make_script
    std::string scriptNameObj;
    switch (linkSpec)
    {
-   case SourceExpressionDS::LS_INTERN:
+   case LINKAGE_INTERN:
       if(args.name.empty())
          scriptNameObj = context->makeLabel();
       else
@@ -214,11 +214,20 @@ static SourceExpression::Pointer make_script
 
       break;
 
-   case SourceExpressionDS::LS_ACS:
+   case LINKAGE_ACS:
       scriptNameObj = args.name;
       break;
 
-   case SourceExpressionDS::LS_DS:
+   case LINKAGE_C:
+      scriptNameObj = "_" + args.name;
+      break;
+
+   case LINKAGE_CPP:
+      scriptNameObj = context->getLabelNamespace() + args.name;
+      mangle_types(args.types, scriptNameObj);
+      break;
+
+   case LINKAGE_DS:
       scriptNameObj = context->getLabelNamespace() + args.name;
 
       if (option_script_mangle_types)
@@ -323,19 +332,19 @@ SRCEXPDS_KEYWORD_DEFN(script)
    if (tok->data == "__script")
    {
       if(context->getType() == SourceContext::CT_NAMESPACE)
-         linkSpec = LS_DS;
+         linkSpec = LINKAGE_DS;
       else
-         linkSpec = LS_INTERN;
+         linkSpec = LINKAGE_INTERN;
    }
    else if (tok->data == "__extscript")
    {
       if (in->peekType(SourceTokenC::TT_STR))
          linkSpec = make_linkspec(in);
       else
-         linkSpec = LS_DS;
+         linkSpec = LINKAGE_DS;
    }
    else
-      linkSpec = LS_INTERN;
+      linkSpec = LINKAGE_INTERN;
 
    return make_script(in, tok, context, linkSpec, false);
 }

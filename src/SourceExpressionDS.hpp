@@ -24,6 +24,7 @@
 #ifndef HPP_SourceExpressionDS_
 #define HPP_SourceExpressionDS_
 
+#include "LinkSpec.hpp"
 #include "SourceExpression.hpp"
 #include "StoreType.hpp"
 
@@ -133,13 +134,6 @@ class SourceExpressionDS : public SourceExpression
    MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpressionDS, SourceExpression);
 
 public:
-   enum LinkageSpecifier
-   {
-      LS_INTERN,
-      LS_ACS,
-      LS_DS,
-   };
-
    struct ArgList
    {
       ArgList(StoreType store = STORE_REGISTER);

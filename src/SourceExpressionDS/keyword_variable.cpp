@@ -53,11 +53,11 @@ struct StoreData
 // add_var
 //
 static SourceExpression::Pointer add_var(SourceContext *context,
-   SourceExpressionDS::LinkageSpecifier linkSpec, SourcePosition const &pos,
+   LinkageSpecifier linkSpec, SourcePosition const &pos,
    std::string const &nameSrc, std::string const &nameObj, VariableType *type,
    StoreData store, ObjectExpression *addr, bool externDef, bool &meta)
 {
-   bool externVis = linkSpec != SourceExpressionDS::LS_INTERN;
+   bool externVis = linkSpec != LINKAGE_INTERN;
 
    SourceVariable::Pointer var = SourceVariable::create_variable(
       nameSrc, type, nameObj, store.type, pos);
@@ -96,17 +96,17 @@ static SourceExpression::Pointer add_var(SourceContext *context,
    switch (store.type)
    {
    case STORE_MAPARRAY:
-      if (linkSpec == SourceExpressionDS::LS_ACS)
+      if (linkSpec == LINKAGE_ACS)
          ObjectData_Array::meta_map(nameObj, meta=false);
       break;
 
    case STORE_WORLDARRAY:
-      if (linkSpec == SourceExpressionDS::LS_ACS)
+      if (linkSpec == LINKAGE_ACS)
          ObjectData_Array::meta_world(nameObj, meta=false);
       break;
 
    case STORE_GLOBALARRAY:
-      if (linkSpec == SourceExpressionDS::LS_ACS)
+      if (linkSpec == LINKAGE_ACS)
          ObjectData_Array::meta_global(nameObj, meta=false);
       break;
 
@@ -238,9 +238,9 @@ static bool is_void(VariableType const *type)
 // make_var
 //
 static SourceExpression::Pointer make_var(SourceTokenizerC *in,
-   SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
-   SourcePosition const &pos, std::string const &nameSrc,
-   VariableType::Reference type, StoreData store, bool externDef)
+   SourceContext *context, LinkageSpecifier linkSpec, SourcePosition const &pos,
+   std::string const &nameSrc, VariableType::Reference type, StoreData store,
+   bool externDef)
 {
    ObjectExpression::Pointer addr;
    if (in->peekType(SourceTokenC::TT_AT))
@@ -253,15 +253,20 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
    std::string nameObj;
    switch (linkSpec)
    {
-   case SourceExpressionDS::LS_INTERN:
+   case LINKAGE_INTERN:
       nameObj = context->getLabel() + nameSrc;
       break;
 
-   case SourceExpressionDS::LS_ACS:
+   case LINKAGE_ACS:
       nameObj = nameSrc;
       break;
 
-   case SourceExpressionDS::LS_DS:
+   case LINKAGE_C:
+      nameObj = "_" + nameSrc;
+      break;
+
+   case LINKAGE_CPP:
+   case LINKAGE_DS:
       nameObj = context->getLabelNamespace() + nameSrc;
       break;
    }
@@ -424,9 +429,8 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
 // make_var
 //
 static SourceExpression::Pointer make_var(SourceTokenizerC *in,
-   SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
-   SourcePosition const &pos, VariableType::Reference type, StoreData store,
-   bool externDef)
+   SourceContext *context, LinkageSpecifier linkSpec, SourcePosition const &pos,
+   VariableType::Reference type, StoreData store, bool externDef)
 {
    // If not followed by an identifier, then don't try to read any names.
    // (This is needed for standalone struct definitions.)
@@ -459,8 +463,8 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
 // make_var
 //
 static SourceExpression::Pointer make_var(SourceTokenizerC *in,
-   SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
-   SourcePosition const &pos, StoreData store, bool externDef)
+   SourceContext *context, LinkageSpecifier linkSpec, SourcePosition const &pos,
+   StoreData store, bool externDef)
 {
    // Read variable type.
    VariableType::Reference type = SourceExpressionDS::make_type(in, context);
@@ -491,15 +495,15 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
 // make_var
 //
 static SourceExpression::Pointer make_var(SourceTokenizerC *in,
-   SourceContext *context, SourceExpressionDS::LinkageSpecifier linkSpec,
-   bool linkCheck, SourcePosition const &pos, bool externDef)
+   SourceContext *context, LinkageSpecifier linkSpec, bool linkCheck,
+   SourcePosition const &pos, bool externDef)
 {
    // Read storage class.
    StoreData store;
    store.type = SourceExpressionDS::make_store(in, context, &store.area);
 
    if (linkCheck && (store.type == STORE_AUTO || store.type == STORE_REGISTER))
-      linkSpec = SourceExpressionDS::LS_INTERN;
+      linkSpec = LINKAGE_INTERN;
 
    return make_var(in, context, linkSpec, pos, store, externDef);
 }
@@ -530,20 +534,20 @@ SRCEXPDS_KEYWORD_DEFN(variable)
       if(context->getType() == SourceContext::CT_NAMESPACE)
       {
          linkCheck = true;
-         linkSpec = LS_DS;
+         linkSpec = LINKAGE_DS;
       }
       else
-         linkSpec = LS_INTERN;
+         linkSpec = LINKAGE_INTERN;
    }
    else if (tok->data == "__extvar")
    {
       if (in->peekType(SourceTokenC::TT_STR))
          linkSpec = make_linkspec(in);
       else
-         linkSpec = LS_DS;
+         linkSpec = LINKAGE_DS;
    }
    else
-      linkSpec = LS_INTERN;
+      linkSpec = LINKAGE_INTERN;
 
    return make_var(in, context, linkSpec, linkCheck, tok->pos, false);
 }
@@ -561,10 +565,10 @@ SRCEXPDS_KEYWORD_DEFN(variable_store)
    if(context->getType() == SourceContext::CT_NAMESPACE)
    {
       linkCheck = true;
-      linkSpec = LS_DS;
+      linkSpec = LINKAGE_DS;
    }
    else
-      linkSpec = LS_INTERN;
+      linkSpec = LINKAGE_INTERN;
 
    return make_var(in, context, linkSpec, linkCheck, tok->pos, false);
 }
@@ -580,9 +584,9 @@ SRCEXPDS_KEYWORD_DEFN(variable_type)
    in->unget(tok);
 
    if(context->getType() == SourceContext::CT_NAMESPACE)
-      linkSpec = LS_DS;
+      linkSpec = LINKAGE_DS;
    else
-      linkSpec = LS_INTERN;
+      linkSpec = LINKAGE_INTERN;
 
    return make_var(in, context, linkSpec, tok->pos, store, false);
 }

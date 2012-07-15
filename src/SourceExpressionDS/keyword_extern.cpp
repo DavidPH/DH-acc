@@ -44,11 +44,11 @@ SRCEXPDS_KEYWORD_DEFN(extern)
    LinkageSpecifier linkSpec;
 
    if (tok->data != "extern")
-      linkSpec = LS_INTERN;
+      linkSpec = LINKAGE_INTERN;
    else if (in->peekType(SourceTokenC::TT_STR))
       linkSpec = make_linkspec(in);
    else
-      linkSpec = LS_DS;
+      linkSpec = LINKAGE_DS;
 
    if (in->peekType(SourceTokenC::TT_BRACE_O))
    {

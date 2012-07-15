@@ -81,7 +81,7 @@ bool option_string_func = true;
 //
 static SourceExpression::Pointer make_func
 (SourceTokenizerC *in, SourceTokenC *tok, SourceContext *context,
- SourceExpressionDS::LinkageSpecifier linkSpec, bool externDef)
+ LinkageSpecifier linkSpec, bool externDef)
 {
    SourceExpressionDS::ArgList args;
 
@@ -100,7 +100,7 @@ static SourceExpression::Pointer make_func
    // Anonymous function.
    if(args.name.empty())
    {
-      linkSpec = SourceExpressionDS::LS_INTERN;
+      linkSpec = LINKAGE_INTERN;
       if(externDef) ERROR(tok->pos, "extern anonymous");
    }
 
@@ -108,7 +108,7 @@ static SourceExpression::Pointer make_func
    std::string funcNameObj;
    switch (linkSpec)
    {
-   case SourceExpressionDS::LS_INTERN:
+   case LINKAGE_INTERN:
       if(args.name.empty())
          funcNameObj = context->makeLabel();
       else
@@ -118,11 +118,20 @@ static SourceExpression::Pointer make_func
 
       break;
 
-   case SourceExpressionDS::LS_ACS:
+   case LINKAGE_ACS:
       funcNameObj = args.name;
       break;
 
-   case SourceExpressionDS::LS_DS:
+   case LINKAGE_C:
+      funcNameObj = "_" + args.name;
+      break;
+
+   case LINKAGE_CPP:
+      funcNameObj = context->getLabelNamespace() + args.name;
+      mangle_types(args.types, funcNameObj);
+      break;
+
+   case LINKAGE_DS:
       funcNameObj = context->getLabelNamespace() + args.name;
 
       if (option_function_mangle_types)
@@ -224,19 +233,19 @@ SRCEXPDS_KEYWORD_DEFN(function)
    if (tok->data == "__function")
    {
       if(context->getType() == SourceContext::CT_NAMESPACE)
-         linkSpec = LS_DS;
+         linkSpec = LINKAGE_DS;
       else
-         linkSpec = LS_INTERN;
+         linkSpec = LINKAGE_INTERN;
    }
    else if (tok->data == "__extfunc")
    {
       if (in->peekType(SourceTokenC::TT_STR))
          linkSpec = make_linkspec(in);
       else
-         linkSpec = LS_DS;
+         linkSpec = LINKAGE_DS;
    }
    else
-      linkSpec = LS_INTERN;
+      linkSpec = LINKAGE_INTERN;
 
    return make_func(in, tok, context, linkSpec, false);
 }
