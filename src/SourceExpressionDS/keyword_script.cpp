@@ -256,9 +256,6 @@ static SourceExpression::Pointer make_script
          }
          else
             scriptFunc += "(void)";
-
-         scriptFunc += " -> ";
-         scriptFunc += make_string(args.retn);
       }
 
       scriptFunc = ObjectData_String::add(scriptFunc);

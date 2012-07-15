@@ -157,9 +157,6 @@ static SourceExpression::Pointer make_func
          }
          else
             funcFunc += "(void)";
-
-         funcFunc += " -> ";
-         funcFunc += make_string(args.retn);
       }
 
       funcFunc = ObjectData_String::add(funcFunc);
