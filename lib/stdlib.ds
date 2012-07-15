@@ -45,19 +45,6 @@
 //
 
 //
-// exitdata
-//
-struct exitdata
-{
-   bool isScript;
-   union
-   {
-      __func_t()   f;
-      __script_t() s;
-   } func;
-};
-
-//
 // heapdata
 //
 struct heapdata
@@ -74,7 +61,7 @@ struct heapdata
 
 constexpr size_t exitsize = 256;
 
-__intvar __staticarray exitdata[exitsize] exitarr;
+__intvar __staticarray __func_t()[exitsize] exitarr;
 __intvar __staticregister decltype(*exitarr) *exitptr = exitarr;
 
 constexpr decltype(*exitarr) *exitbegin = &exitarr[0];
@@ -379,24 +366,10 @@ __extfunc void abort()
 //
 __extfunc int atexit(__func_t() func)
 {
-   if (exitptr == exitend) return 1;
+   if(exitptr == exitend) return 1;
 
-   exitptr->isScript = false;
-   exitptr->func.f = func;
-   exitptr++;
-   return 0;
-};
+   *exitptr++ = func;
 
-//
-// __atexit_script
-//
-__extfunc int __atexit_script(__script_t() func)
-{
-   if (exitptr == exitend) return 1;
-
-   exitptr->isScript = true;
-   exitptr->func.s = func;
-   exitptr++;
    return 0;
 };
 
@@ -405,17 +378,8 @@ __extfunc int __atexit_script(__script_t() func)
 //
 __extfunc void exit(int status)
 {
-   while (exitptr != exitbegin)
-   {
-      if ((--exitptr)->isScript)
-      {
-         exitptr->func.s();
-      }
-      else
-      {
-         exitptr->func.f();
-      };
-   };
+   while(exitptr-- != exitbegin)
+      (*exitptr)();
 
    _Exit(status);
 };
@@ -462,8 +426,6 @@ __extfunc int system(char const *string)
 //
 // bsearch
 //
-// Like qsort below, this is more for reference than anything.
-//
 __function void *bsearch (void const *key, void const *base, size_t nmemb,
    size_t size, __func_t(void const *, void const *) -> int compar)
 {
@@ -487,10 +449,6 @@ __function void *bsearch (void const *key, void const *base, size_t nmemb,
 
 //
 // qsort
-//
-// Probably not the best algorithm, but it can serve as a base for a customized
-// version. (Which is highly likely to be needed. Even if it took __script_t,
-// it would still require static* inputs.)
 //
 __extfunc qsort(void *base, size_t nmemb, size_t size,
  __func_t(void const *, void const *) -> int compar) -> void
