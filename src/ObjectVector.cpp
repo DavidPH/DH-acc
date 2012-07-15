@@ -33,9 +33,13 @@
 // Static Variables                                                           |
 //
 
+static option::option_data<bool> option_opt_branch_flip
+('\0', "opt-branch-flip", "optimization",
+ "Inverts conditional branches preceded by a NOT. On by default.", NULL, true);
+static option::option_data<bool> option_opt_math_nop
+('\0', "opt-math-nop", "optimization", "Strips mathematical no-ops.", NULL, false);
 static option::option_data<bool> option_opt_nop
-('\0', "opt-nop", "optimization",
- "Strips NOP instructions.", NULL, false);
+('\0', "opt-nop", "optimization", "Strips NOP instructions.", NULL, false);
 static option::option_data<bool> option_opt_pushdrop
 ('\0', "opt-pushdrop", "optimization",
  "Strips PUSH/DROP pairs. On by default.", NULL, true);
@@ -207,13 +211,121 @@ void ObjectVector::optimize()
 {
    // NOP removal.
    // Off by default because NOPs do not normally get generated.
-   if (option_opt_nop.data) optimize_nop();
+   if(option_opt_nop.data) optimize_nop();
+
+   // NOT JMP_NIL/JMP_TRU fixing.
+   if(option_opt_branch_flip.data) optimize_branch_flip();
+
+   // Mathematical no-op removal.
+   if(option_opt_math_nop.data) optimize_math_nop();
 
    // PUSH/DROP removal.
-   if (option_opt_pushdrop.data) optimize_pushdrop();
+   if(option_opt_pushdrop.data) optimize_pushdrop();
 
    // PUSH/PUSH/SWAP fixing.
-   if (option_opt_pushpushswap.data) optimize_pushpushswap();
+   if(option_opt_pushpushswap.data) optimize_pushpushswap();
+}
+
+//
+// ObjectVector::optimize_branch_flip
+//
+// NOT JMP_NIL/JMP_TRU fixing.
+//
+void ObjectVector::optimize_branch_flip()
+{
+   ObjectToken *arg0, *arg1;
+
+   iterator token = begin();
+   iterator stop = end();
+
+   while(token != stop)
+   {
+      arg0 = token++;
+      if(arg0->code != OCODE_NOT_STK_I && arg0->code != OCODE_NOT_STK_U &&
+         arg0->code != OCODE_NOT_STK_X)
+         continue;
+
+      arg1 = token++;
+      if((arg1->code != OCODE_JMP_NIL && arg1->code != OCODE_JMP_TRU) ||
+         !arg1->labels.empty())
+         continue;
+
+      arg1->addLabel(arg0->labels);
+      if(arg1->code == OCODE_JMP_NIL)
+         arg1->code = OCODE_JMP_TRU;
+      else
+         arg1->code = OCODE_JMP_NIL;
+
+      remToken(arg0);
+   }
+}
+
+//
+// ObjectVector::optimize_math_nop
+//
+// Mathematical no-op removal.
+//  * PUSH 1 MUL
+//  * PUSH 1 DIV
+//  * PUSH 0 ADD
+//  * PUSH 0 SUB
+//
+void ObjectVector::optimize_math_nop()
+{
+   ObjectToken *arg0, *arg1;
+
+   iterator token = begin();
+   iterator stop = end();
+
+   while(token != stop)
+   {
+      arg0 = token++;
+      if(arg0->code != OCODE_GET_IMM || !arg0->labels.empty() || !arg0->getArg(0)->canResolve())
+         continue;
+
+      arg1 = token++;
+      if(!arg1->labels.empty())
+         continue;
+
+      switch(arg1->code)
+      {
+      case OCODE_ADD_STK_I:
+      case OCODE_ADD_STK_U:
+      case OCODE_SUB_STK_I:
+      case OCODE_SUB_STK_U:
+         if(arg0->getArg(0)->resolveInt() != 0)
+            continue;
+         break;
+
+      case OCODE_ADD_STK_X:
+      case OCODE_SUB_STK_X:
+         if(arg0->getArg(0)->resolveFloat() != 0)
+            continue;
+         break;
+
+      case OCODE_DIV_STK_I:
+      case OCODE_DIV_STK_U:
+      case OCODE_MUL_STK_I:
+      case OCODE_MUL_STK_U:
+         if(arg0->getArg(0)->resolveInt() != 1)
+            continue;
+         break;
+
+      case OCODE_DIV_STK_X:
+      case OCODE_MUL_STK_X:
+         if(arg0->getArg(0)->resolveFloat() != 1)
+            continue;
+         break;
+
+      default:
+         continue;
+      }
+
+      token->addLabel(arg0->labels);
+      token->addLabel(arg1->labels);
+
+      remToken(arg0);
+      remToken(arg1);
+   }
 }
 
 //
@@ -247,24 +359,27 @@ void ObjectVector::optimize_nop()
 //
 void ObjectVector::optimize_pushdrop()
 {
+   ObjectToken *arg0, *arg1;
+
    iterator token = begin();
    iterator stop = end();
 
-   while (token != stop)
+   while(token != stop)
    {
-      if (ocode_is_push_noarg(token->code) && token->labels.empty() &&
-          token->next->code == OCODE_STK_DROP && token->next->labels.empty())
-      {
-         remToken(token++);
-         remToken(token++);
+      arg0 = token++;
+      if(!ocode_is_push_noarg(arg0->code))
+         continue;
 
-         // Go back in case there was an earlier PUSH.
-         if (token != begin()) --token;
-      }
-      else
-      {
-         ++token;
-      }
+      arg1 = token++;
+      if(arg1->code != OCODE_STK_DROP || !arg1->labels.empty())
+         continue;
+
+      token->addLabel(arg0->labels);
+      remToken(arg0);
+      remToken(arg1);
+
+      // Go back in case there was an earlier PUSH.
+      if(token != begin()) --token;
    }
 }
 
@@ -280,18 +395,18 @@ void ObjectVector::optimize_pushpushswap()
    iterator token = begin();
    iterator stop = end();
 
-   while (token != stop)
+   while(token != stop)
    {
       arg0 = token++;
-      if (!ocode_is_push_noarg(arg0->code) || !arg0->labels.empty())
+      if(!ocode_is_push_noarg(arg0->code))
          continue;
 
       arg1 = token++;
-      if (!ocode_is_push_noarg(arg1->code) || !arg1->labels.empty())
+      if(!ocode_is_push_noarg(arg1->code) || !arg1->labels.empty())
          continue;
 
       arg2 = token++;
-      if (arg2->code != OCODE_STK_SWAP || !arg2->labels.empty())
+      if(arg2->code != OCODE_STK_SWAP || !arg2->labels.empty())
          continue;
 
       arg0->swapData(arg1);

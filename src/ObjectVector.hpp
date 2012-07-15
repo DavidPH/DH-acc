@@ -149,6 +149,8 @@ public:
    }
 
    void optimize();
+   void optimize_branch_flip();
+   void optimize_math_nop();
    void optimize_nop();
    void optimize_pushdrop();
    void optimize_pushpushswap();
