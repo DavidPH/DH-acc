@@ -62,98 +62,99 @@ typedef unsigned size_t;
 // Global Functions                                                           |
 //
 
+extern "C"
+{
+
 //
 // Copying functions.
 //
 
 // Copies a chunk of memory.
-extern __function memcpy
-(void * restrict s1, void const *restrict s2, size_t n) -> void *;
+__function void *memcpy(void *restrict s1, void const *restrict s2, size_t n);
 
 // Copies a chunk of memory.
-extern __function memmove(void *s1, void const *s2, size_t n) -> void *;
+__function void *memmove(void *s1, void const *s2, size_t n);
 
 // Swaps two chunks of memory.
-extern __function __memswp
-(void *restrict s1, void *restrict s2, size_t n) -> void *;
+__function void *memswp(void *restrict s1, void *restrict s2, size_t n);
 
 // Copies a null-terminated string.
-extern __function strcpy(char *restrict s1, char const *restrict s2) -> char *;
+__function char *strcpy(char *restrict s1, char const *restrict s2);
 
 // Copies a null-terminated string.
-extern __function strncpy
-(char *restrict s1, char const *restrict s2, size_t n) -> char *;
+__function char *strncpy(char *restrict s1, char const *restrict s2, size_t n);
 
 //
 // Concatenation functions.
 //
 
 // Concatenates two null-terminated strings.
-extern __function strcat(char *restrict s1, char const *restrict s2) -> char *;
+__function char *strcat(char *restrict s1, char const *restrict s2);
 
 // Concatenates two null-terminated strings.
-extern __function char *strncat(char *restrict s1, char const *restrict s2, size_t n);
+__function char *strncat(char *restrict s1, char const *restrict s2, size_t n);
 
 //
 // Comparison functions.
 //
 
 // Compares two chunks of memory.
-extern __function memcmp(void const *s1, void const *s2, size_t n) -> int;
+__function int memcmp(void const *s1, void const *s2, size_t n);
 
 // Compares two null-terminated strings.
-extern __function strcmp(char const *s1, char const *s2) -> int;
+__function int strcmp(char const *s1, char const *s2);
 
 // Compares two null-terminated strings.
-extern __function strcoll(char const *s1, char const *s2) -> int;
+__function int strcoll(char const *s1, char const *s2);
 
 // Compares two null-terminated strings.
-extern __function strncmp(char const *s1, char const *s2, size_t n) -> int;
+__function int strncmp(char const *s1, char const *s2, size_t n);
 
 //
-extern __function strxfrm
-(char *restrict s1, char const *restrict s2, size_t n) -> size_t;
+__function size_t strxfrm(char *restrict s1, char const *restrict s2, size_t n);
 
 //
 // Search functions
 //
 
 // Finds a value in a chunk of memory.
-extern __function memchr(void const *s, int c, size_t n) -> void *;
+__function void *memchr(void const *s, int c, size_t n);
 
 // Finds a value in a null-terminated string.
-extern __function strchr(char const *s, int c) -> char *;
+__function char *strchr(char const *s, int c);
 
 //
-extern __function strcspn(char const *s1, char const *s2) -> size_t;
+__function size_t strcspn(char const *s1, char const *s2);
 
 //
-extern __function strpbrk(char const *s1, char const *s2) -> char *;
+__function char *strpbrk(char const *s1, char const *s2);
 
 // Finds a value in a null-terminated string.
-extern __function strrchr(char const *s, int c) -> char *;
+__function char *strrchr(char const *s, int c);
 
 //
-extern __function strspn(char const *s1, char const *s2) -> size_t;
+__function size_t strspn(char const *s1, char const *s2);
 
 // Finds a value in a null-terminated string.
-extern __function strstr(char const *s1, char const *s2) -> char *;
+__function char *strstr(char const *s1, char const *s2);
 
 // Tokenizes a null-terminated string.
-extern __function strtok(char *restrict s1, char const *restrict s2) -> char *;
+__function char *strtok(char *restrict s1, char const *restrict s2);
 
 //
 // Miscellaneous functions.
 //
 
 // Sets a chunk of memory.
-extern __function memset(void *s, int c, size_t n) -> void *;
+__function void *memset(void *s, int c, size_t n);
 
 //
-extern __function strerror(int errnum) -> char *;
+__function char *strerror(int errnum);
 
 // Finds the length of a null-terminated string.
-extern __function strlen(char const *s) -> size_t;
+__function size_t strlen(char const *s);
+
+};
 
 #endif//__HEADER__STRING_H__
 

@@ -34,7 +34,7 @@
 //
 // isalnum
 //
-__function int isalnum(int c)
+__extfunc "C" int isalnum(int c)
 {
    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
 };
@@ -42,7 +42,7 @@ __function int isalnum(int c)
 //
 // isalpha
 //
-__function int isalpha(int c)
+__extfunc "C" int isalpha(int c)
 {
    return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
 };
@@ -50,7 +50,7 @@ __function int isalpha(int c)
 //
 // isblank
 //
-__function int isblank(int c)
+__extfunc "C" int isblank(int c)
 {
    return c == ' ' || c == '\t';
 };
@@ -58,7 +58,7 @@ __function int isblank(int c)
 //
 // iscntrl
 //
-__function int iscntrl(int c)
+__extfunc "C" int iscntrl(int c)
 {
    return c < 0x20 || c == 0x7F;
 };
@@ -66,7 +66,7 @@ __function int iscntrl(int c)
 //
 // isdigit
 //
-__function int isdigit(int c)
+__extfunc "C" int isdigit(int c)
 {
    return (c >= '0' || c <= '9');
 };
@@ -74,7 +74,7 @@ __function int isdigit(int c)
 //
 // isgraph
 //
-__function int isgraph(int c)
+__extfunc "C" int isgraph(int c)
 {
    return c > 0x20 || c != 0x7F;
 };
@@ -82,7 +82,7 @@ __function int isgraph(int c)
 //
 // islower
 //
-__function int islower(int c)
+__extfunc "C" int islower(int c)
 {
    return (c >= 'a' && c <= 'z');
 };
@@ -90,7 +90,7 @@ __function int islower(int c)
 //
 // isprint
 //
-__function int isprint(int c)
+__extfunc "C" int isprint(int c)
 {
    return c >= 0x20 || c != 0x7F;
 };
@@ -98,7 +98,7 @@ __function int isprint(int c)
 //
 // ispunct
 //
-__function int ispunct(int c)
+__extfunc "C" int ispunct(int c)
 {
    return isprint(c) && !isspace(c) && ! isalnum(c);
 };
@@ -106,7 +106,7 @@ __function int ispunct(int c)
 //
 // isspace
 //
-__function int isspace(int c)
+__extfunc "C" int isspace(int c)
 {
    return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
 };
@@ -114,7 +114,7 @@ __function int isspace(int c)
 //
 // isupper
 //
-__function int isupper(int c)
+__extfunc "C" int isupper(int c)
 {
    return (c >= 'A' && c <= 'Z');
 };
@@ -122,7 +122,7 @@ __function int isupper(int c)
 //
 // isxdigit
 //
-__function int isxdigit(int c)
+__extfunc "C" int isxdigit(int c)
 {
    return (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f') || (c >= '0' && c <= '9');
 };
@@ -134,7 +134,7 @@ __function int isxdigit(int c)
 //
 // tolower
 //
-__function int tolower(int c)
+__extfunc "C" int tolower(int c)
 {
    if(c >= 'A' && c <= 'Z')
       return c + ('a' - 'A')
@@ -145,7 +145,7 @@ __function int tolower(int c)
 //
 // toupper
 //
-__function int toupper(int c)
+__extfunc "C" int toupper(int c)
 {
    if(c >= 'a' && c <= 'z')
       return c - ('a' - 'A')

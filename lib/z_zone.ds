@@ -53,6 +53,8 @@
 #define __LIBDS_ZONESIZE 16
 #endif
 
+#define HEAPSIZE (__LIBDS_ZONESIZE * 1024 * 1024)
+
 #define zonef __printf<__printf_log>
 
 //===================================================================
@@ -229,9 +231,7 @@ struct alloca_header_t
 // Static Variables                                                           |
 //
 
-constexpr size_t heapsize = __LIBDS_ZONESIZE * 1024 * 1024;
-
-__intvar static char[heapsize] heap;
+__intvar static char[HEAPSIZE] heap;
 
 __intvar static memblock_t*         rover;         // roving pointer to memory blocks
 __intvar static memblock_t*         zone;          // pointer to first block
@@ -355,7 +355,7 @@ __intfunc void (Z_LogPuts)(__string msg)
 //
 // davidph 06/17/12: User must find the right time to call this.
 //
-__function void (Z_Close)(__string file, int line)
+__extfunc "C" void (Z_Close)(__string file, int line)
 {
    Z_CloseLogFile();
    Z_PrintZoneHeap();
@@ -367,14 +367,14 @@ __function void (Z_Close)(__string file, int line)
 //
 // Z_Init
 //
-__function void (Z_Init)(__string file, int line)
+__extfunc "C" void (Z_Init)(__string file, int line)
 {
    size_t size;
 
    // Allocate the memory
    // davidph 06/17/12: For DS, memory is a static allocation.
    zonebase = (memblock_t *)heap;
-   zonebase_size = heapsize;
+   zonebase_size = HEAPSIZE;
 
    // Align on cache boundary
    zone = (memblock_t *)(((size_t)zonebase + CACHE_ALIGN - 1) & ~(CACHE_ALIGN - 1));
@@ -405,7 +405,7 @@ __function void (Z_Init)(__string file, int line)
 //
 // You can pass a NULL user if the tag is < PU_PURGELEVEL.
 //
-__function void *(Z_Malloc)(size_t size, int tag, void **user, __string file, int line)
+__extfunc "C" void *(Z_Malloc)(size_t size, int tag, void **user, __string file, int line)
 {
    register memblock_t *block;
    memblock_t *start;
@@ -544,7 +544,7 @@ allocated:
 //
 // Z_Free
 //
-__function void (Z_Free)(void *p, __string file, int line)
+__extfunc "C" void (Z_Free)(void *p, __string file, int line)
 {
    DEBUG_CHECKHEAP();
 
@@ -636,7 +636,7 @@ __function void (Z_Free)(void *p, __string file, int line)
 //
 // Z_FreeTags
 //
-__function void (Z_FreeTags)(int lowtag, int hightag, __string file, int line)
+__extfunc "C" void (Z_FreeTags)(int lowtag, int hightag, __string file, int line)
 {
    memblock_t *block = zone;
 
@@ -699,7 +699,7 @@ __function void (Z_FreeTags)(int lowtag, int hightag, __string file, int line)
 //
 // Z_ChangeTag
 //
-__function void (Z_ChangeTag)(void *ptr, int tag, __string file, int line)
+__extfunc "C" void (Z_ChangeTag)(void *ptr, int tag, __string file, int line)
 {
    memblock_t *block = (memblock_t *)((char *)ptr - HEADER_SIZE);
 
@@ -746,8 +746,8 @@ __function void (Z_ChangeTag)(void *ptr, int tag, __string file, int line)
 //
 // Z_Calloc
 //
-__function void *(Z_Calloc)(size_t n1, size_t n2, int tag, void **user,
-                            __string file, int line)
+__extfunc "C" void *(Z_Calloc)(size_t n1, size_t n2, int tag, void **user,
+                               __string file, int line)
 {
    return (n1*=n2) ? memset((Z_Malloc)(n1, tag, user, file, line), 0, n1) : NULL;
 };
@@ -802,8 +802,8 @@ __intfunc void *(Z_ReallocOld)(void *ptr, size_t n, int tag, void **user,
 // 4. If the block is already the same size as "n", we don't need to do anything
 //    aside from adjusting the INSTRUMENTED block data for debugging purposes.
 //
-__function void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
-                             __string file, int line)
+__extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
+                                __string file, int line)
 {
    memblock_t *block, other = NULL;
    size_t curr_size = 0;
@@ -1005,8 +1005,8 @@ __function void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
 // haleyjd 05/29/08: *Something* is wrong with my Z_Realloc routine, and I
 // cannot figure out what! So we're back to using Old Faithful for now.
 //
-__function void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
-                             __string file, int line)
+__extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
+                                __string file, int line)
 {
    void *p = (Z_Malloc)(n, tag, user, file, line);
    if(ptr)
@@ -1029,7 +1029,8 @@ __function void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
 //
 // Z_Strdup
 //
-__function char *(Z_Strdup)(char const *s, int tag, void **user, __string file, int line)
+__extfunc "C" char *(Z_Strdup)(char const *s, int tag, void **user,
+                               __string file, int line)
 {
    return (char *)strcpy((char *)(Z_Malloc)(strlen(s)+1, tag, user, file, line), s);
 };
@@ -1043,7 +1044,7 @@ __function char *(Z_Strdup)(char const *s, int tag, void **user, __string file, 
 //
 // haleyjd 12/06/06: Frees all blocks allocated with Z_Alloca.
 //
-__function void (Z_FreeAlloca)(__string file, int line)
+__extfunc "C" void (Z_FreeAlloca)(__string file, int line)
 {
    alloca_header_t* hdr = alloca_root, next;
 
@@ -1067,7 +1068,7 @@ __function void (Z_FreeAlloca)(__string file, int line)
 // haleyjd 12/06/06:
 // Implements a portable garbage-collected alloca on the zone heap.
 //
-__function void *(Z_Alloca)(size_t n, __string file, int line)
+__extfunc "C" void *(Z_Alloca)(size_t n, __string file, int line)
 {
    alloca_header_t *hdr;
    void *ptr;
@@ -1094,7 +1095,7 @@ __function void *(Z_Alloca)(size_t n, __string file, int line)
 //
 // haleyjd 05/07/08: strdup that uses alloca, for convenience.
 //
-__function char *(Z_Strdupa)(char const *s, __string file, int line)
+__extfunc "C" char *(Z_Strdupa)(char const *s, __string file, int line)
 {
    return (char *)strcpy((char *)(Z_Alloca)(strlen(s)+1, file, line), s);
 };
@@ -1102,7 +1103,7 @@ __function char *(Z_Strdupa)(char const *s, __string file, int line)
 //
 // Z_CheckHeap
 //
-__function void (Z_CheckHeap)(__string file, int line)
+__extfunc "C" void (Z_CheckHeap)(__string file, int line)
 {
    memblock_t *block = zone;   // Start at base of zone mem
    do                          // Consistency check (last node treated special)
@@ -1137,7 +1138,7 @@ __function void (Z_CheckHeap)(__string file, int line)
 // inadvertently lower the cache level of lump allocations and
 // cause code which expects them to be static to lose them
 //
-__function int (Z_CheckTag)(void *ptr, __string file, int line)
+__extfunc "C" int (Z_CheckTag)(void *ptr, __string file, int line)
 {
    memblock_t *block = (memblock_t *)((char *)ptr - HEADER_SIZE);
 
@@ -1152,7 +1153,7 @@ __function int (Z_CheckTag)(void *ptr, __string file, int line)
 //
 // Z_PrintZoneHeap
 //
-__function void Z_PrintZoneHeap(void)
+__extfunc "C" void Z_PrintZoneHeap(void)
 {
    // davidph 06/17/12: Uses FILE so it's a no-op for now.
    #if 0
@@ -1235,7 +1236,7 @@ __function void Z_PrintZoneHeap(void)
 //
 // haleyjd 03/18/07: Write the zone heap to file
 //
-__function void Z_DumpCore()
+__extfunc "C" void Z_DumpCore()
 {
    // davidph 06/17/12: Uses FILE so it's a no-op for now.
    #if 0
@@ -1259,7 +1260,7 @@ __function void Z_DumpCore()
 //
 // Care must be taken, of course, to not mix zone and C heap allocations.
 //
-__function void *(Z_SysMalloc)(size_t size, __string file, int line)
+__extfunc "C" void *(Z_SysMalloc)(size_t size, __string file, int line)
 {
    void *ret;
 
@@ -1277,7 +1278,7 @@ __function void *(Z_SysMalloc)(size_t size, __string file, int line)
 //
 // Convenience routine to match above.
 //
-__function void *(Z_SysCalloc)(size_t n1, size_t n2, __string file, int line)
+__extfunc "C" void *(Z_SysCalloc)(size_t n1, size_t n2, __string file, int line)
 {
    void *ret;
 
@@ -1296,7 +1297,7 @@ __function void *(Z_SysCalloc)(size_t n1, size_t n2, __string file, int line)
 // Turns out I need this in the sound code to avoid possible multithreaded
 // race conditions.
 //
-__function void *(Z_SysRealloc)(void *ptr, size_t size, __string file, int line)
+__extfunc "C" void *(Z_SysRealloc)(void *ptr, size_t size, __string file, int line)
 {
    void *ret;
 
@@ -1314,7 +1315,7 @@ __function void *(Z_SysRealloc)(void *ptr, size_t size, __string file, int line)
 //
 // For use with Z_SysAlloc.
 //
-__function void (Z_SysFree)(void *p, __string file, int line)
+__extfunc "C" void (Z_SysFree)(void *p, __string file, int line)
 {
    if(p)
       (free)(p);
@@ -1326,7 +1327,7 @@ __function void (Z_SysFree)(void *p, __string file, int line)
 //
 // Print allocation statistics.
 //
-__function void (Z_PrintStats)()
+__extfunc "C" void (Z_PrintStats)()
 {
    #ifdef INSTRUMENTED
    unsigned int total_memory = free_memory + active_memory +

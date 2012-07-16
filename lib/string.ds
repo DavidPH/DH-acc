@@ -35,17 +35,15 @@
 //
 // memcpy
 //
-__extfunc memcpy(void *restrict s1, void const *restrict s2, size_t n) -> void *
+__extfunc "C" void *memcpy(void *restrict s1, void const *restrict s2, size_t n)
 {
    char const *end = (char const *)s2 + n;
 
    char       *i1 = (char       *)s1;
    char const *i2 = (char const *)s2;
 
-   while (i2 != end)
-   {
+   while(i2 != end)
       *i1++ = *i2++;
-   };
 
    return s1;
 };
@@ -53,19 +51,16 @@ __extfunc memcpy(void *restrict s1, void const *restrict s2, size_t n) -> void *
 //
 // memmove
 //
-__extfunc memmove(void *s1, void const *s2, size_t n) -> void *
+__extfunc "C" void *memmove(void *s1, void const *s2, size_t n)
 {
-   if ((void const *)s1 < s2)
+   if((void const *)s1 < s2)
    {
       char const *end = (char const *)s2 + n;
 
       char       *i1 = (char       *)s1;
       char const *i2 = (char const *)s2;
 
-      while (i2 != end)
-      {
-         *i1++ = *i2++;
-      };
+      while(i2 != end) *i1++ = *i2++;
    }
    else
    {
@@ -74,19 +69,16 @@ __extfunc memmove(void *s1, void const *s2, size_t n) -> void *
       char       *i1 = (char       *)s1 + n;
       char const *i2 = (char const *)s2 + n;
 
-      while (i2 != end)
-      {
-         *--i1 = *--i2;
-      };
+      while(i2 != end) *--i1 = *--i2;
    };
 
    return s1;
 };
 
 //
-// __memswp
+// memswp
 //
-__extfunc __memswp(void *restrict s1, void *restrict s2, size_t n) -> void *
+__extfunc "C" void *memswp(void *restrict s1, void *restrict s2, size_t n)
 {
    char const *end = (char const *)s2 + n;
 
@@ -95,7 +87,7 @@ __extfunc __memswp(void *restrict s1, void *restrict s2, size_t n) -> void *
 
    char tmp;
 
-   while (i2 != end)
+   while(i2 != end)
    {
       tmp = *i1;
       *i1++ = *i2;
@@ -108,11 +100,11 @@ __extfunc __memswp(void *restrict s1, void *restrict s2, size_t n) -> void *
 //
 // strcpy
 //
-__extfunc strcpy(char *restrict s1, char const *restrict s2) -> char *
+__extfunc "C" char *strcpy(char *restrict s1, char const *restrict s2)
 {
    char *i = s1;
 
-   while (*s2) {*i++ = *s2++;};
+   while(*s2) *i++ = *s2++;
 
    *i = 0;
 
@@ -122,13 +114,11 @@ __extfunc strcpy(char *restrict s1, char const *restrict s2) -> char *
 //
 // strncpy
 //
-__extfunc strncpy
-(char *restrict s1, char const *restrict s2, size_t n) -> char *
+__extfunc "C" char *strncpy(char *restrict s1, char const *restrict s2, size_t n)
 {
    char *i = s1;
-   char *end = i + n;
 
-   while (*s2 && i != end) {*i++ = *s2++;};
+   while(*s2 && n--) *i++ = *s2++;
 
    *i = 0;
 
@@ -142,16 +132,13 @@ __extfunc strncpy
 //
 // strcat
 //
-__extfunc strcat(char *restrict s1, char const *restrict s2) -> char *
+__extfunc "C" char *strcat(char *restrict s1, char const *restrict s2)
 {
    char *i = s1;
 
-   while (*i) {++i;};
+   while(*i) ++i;
 
-   while (*s2)
-   {
-      *i++ = *s2++;
-   };
+   while(*s2) *i++ = *s2++;
 
    *i = 0;
 
@@ -161,19 +148,15 @@ __extfunc strcat(char *restrict s1, char const *restrict s2) -> char *
 //
 // strncat
 //
-__extfunc strncat
-(char *restrict s1, char const *restrict s2, size_t n) -> char *
+__extfunc "C" char *strncat(char *restrict s1, char const *restrict s2, size_t n)
 {
    char *i = s1;
 
-   while (*i) {++i;};
+   while(*i) ++i;
 
    char *end = i + n;
 
-   while (*s2 && i != end)
-   {
-      *i++ = *s2++;
-   };
+   while(*s2 && n--) *i++ = *s2++;
 
    *i = 0;
 
@@ -187,19 +170,17 @@ __extfunc strncat
 //
 // memcmp
 //
-__extfunc memcmp(void const *s1, void const *s2, size_t n) -> int
+__extfunc "C" int memcmp(void const *s1, void const *s2, size_t n)
 {
    char const *end = (char const *)s1 + n;
 
    char const *i1 = (char const *)s1;
    char const *i2 = (char const *)s2;
 
-   while (i1 != end)
+   while(i1 != end)
    {
-      if (*i1 != *i2)
-      {
+      if(*i1 != *i2)
          return *i1 - *i2;
-      };
 
       ++i1; ++i2;
    };
@@ -210,14 +191,12 @@ __extfunc memcmp(void const *s1, void const *s2, size_t n) -> int
 //
 // strcmp
 //
-__extfunc strcmp(char const *s1, char const *s2) -> int
+__extfunc "C" int strcmp(char const *s1, char const *s2)
 {
-   while (*s1 && *s2)
+   while(*s1 && *s2)
    {
-      if (*s1 != *s2)
-      {
+      if(*s1 != *s2)
          return *s1 - *s2;
-      };
 
       ++s1; ++s2;
    };
@@ -228,7 +207,7 @@ __extfunc strcmp(char const *s1, char const *s2) -> int
 //
 // strcoll
 //
-__function int strcoll(char const *s1, char const *s2)
+__extfunc "C" int strcoll(char const *s1, char const *s2)
 {
    return strcmp(s1, s2);
 };
@@ -236,16 +215,12 @@ __function int strcoll(char const *s1, char const *s2)
 //
 // strncmp
 //
-__extfunc strncmp(char const *s1, char const *s2, size_t n) -> int
+__extfunc "C" int strncmp(char const *s1, char const *s2, size_t n)
 {
-   char const *end = s1 + n;
-
-   while (*s1 && *s2 && s1 != end)
+   while(*s1 && *s2 && n--)
    {
-      if (*s1 != *s2)
-      {
+      if(*s1 != *s2)
          return *s1 - *s2;
-      };
 
       ++s1; ++s2;
    };
@@ -256,7 +231,7 @@ __extfunc strncmp(char const *s1, char const *s2, size_t n) -> int
 //
 // strxfrm
 //
-__function void strxfrm(char *restrict s1, char const *restrict s2, size_t n)
+__extfunc "C" void strxfrm(char *restrict s1, char const *restrict s2, size_t n)
 {
    strncpy(s1, s2, n);
 };
@@ -268,16 +243,14 @@ __function void strxfrm(char *restrict s1, char const *restrict s2, size_t n)
 //
 // memchr
 //
-__extfunc memchr(void const *s, int c, size_t n) -> void *
+__extfunc "C" void *memchr(void const *s, int c, size_t n)
 {
    char const *end = (char const *)s + n;
 
-   for (char const *i = (char const *)s; i != end; ++i)
+   for(char const *i = (char const *)s; i != end; ++i)
    {
-      if (*i == (char)c)
-      {
+      if(*i == (char)c)
          return (void *)i;
-      };
    };
 
    return NULL;
@@ -286,16 +259,14 @@ __extfunc memchr(void const *s, int c, size_t n) -> void *
 //
 // strchr
 //
-__extfunc strchr(char const *s, int c) -> char *
+__extfunc "C" char *strchr(char const *s, int c)
 {
-   while (true)
+   while(true)
    {
-      if (*s == (char)c)
-      {
+      if(*s == (char)c)
          return (char *)s;
-      };
 
-      if (!*s++) break;
+      if(!*s++) break;
    };
 
    return NULL;
@@ -304,11 +275,11 @@ __extfunc strchr(char const *s, int c) -> char *
 //
 // strcspn
 //
-__extfunc strcspn(char const *s1, char const *s2) -> size_t
+__extfunc "C" size_t strcspn(char const *s1, char const *s2)
 {
    char const *i = s1;
 
-   while (*i && strchr(s2, *i)) {++i;};
+   while(*i && strchr(s2, *i)) ++i;
 
    return i - s1;
 };
@@ -316,14 +287,12 @@ __extfunc strcspn(char const *s1, char const *s2) -> size_t
 //
 // strpbrk
 //
-__extfunc strpbrk(char const *s1, char const *s2) -> char *
+__extfunc "C" char *strpbrk(char const *s1, char const *s2)
 {
-   while (*s1)
+   while(*s1)
    {
-      if (strchr(s2, *s1))
-      {
+      if(strchr(s2, *s1))
          return (char *)s1;
-      };
 
       ++s1;
    };
@@ -334,18 +303,16 @@ __extfunc strpbrk(char const *s1, char const *s2) -> char *
 //
 // strrchr
 //
-__extfunc strrchr(char const *s, int c) -> char *
+__extfunc "C" char *strrchr(char const *s, int c)
 {
    char const *found = NULL;
 
-   while (true)
+   while(true)
    {
       if (*s == (char)c)
-      {
          found = s;
-      };
 
-      if (!*s++) break;
+      if(!*s++) break;
    };
 
    return (char *)found;
@@ -354,11 +321,11 @@ __extfunc strrchr(char const *s, int c) -> char *
 //
 // strspn
 //
-__extfunc strspn(char const *s1, char const *s2) -> size_t
+__extfunc "C" size_t strspn(char const *s1, char const *s2)
 {
    size_t n = 0;
 
-   while (*s1 && strchr(s2, *s1++)) {++n;};
+   while(*s1 && strchr(s2, *s1++)) ++n;
 
    return n;
 };
@@ -366,20 +333,20 @@ __extfunc strspn(char const *s1, char const *s2) -> size_t
 //
 // strstr
 //
-__extfunc strstr(char const *s1, char const *s2) -> char *
+__extfunc "C" char *strstr(char const *s1, char const *s2)
 {
-   if (!*s2) {return (char *)s1;};
+   if(!*s2) return (char *)s1;
 
-   while (s1 = strchr(s1, *s2))
+   while(s1 = strchr(s1, *s2))
    {
       char const *i1 = s1;
       char const *i2 = s2;
 
-      while (*i1 && *i2)
+      while(*i1 && *i2)
       {
-         if (*i1 != *i2) break;
+         if(*i1 != *i2) break;
 
-         if (!*i2) return (char *)s1;
+         if(!*i2) return (char *)s1;
 
          ++i1; ++i2;
       };
@@ -393,21 +360,21 @@ __extfunc strstr(char const *s1, char const *s2) -> char *
 //
 // strtok
 //
-__extfunc strtok(char *restrict s1, char const *restrict s2) -> char *
+__extfunc "C" char *strtok(char *restrict s1, char const *restrict s2)
 {
-   __variable static char *tok;
+   static char *tok;
 
    char *tmp;
 
-   if (s1) {tok = s1;};
+   if(s1) tok = s1;
 
-   if (!tok) {return NULL;};
+   if(!tok) return NULL;
 
    // Skip any separators.
    tok += strcspn(tok, s2);
 
    // If tok points to the null-terminator, there are no more tokens.
-   if (!*tok) {return NULL;};
+   if(!*tok) return NULL;
 
    // Store the pointer to the token in a temporary.
    tmp = tok;
@@ -416,7 +383,7 @@ __extfunc strtok(char *restrict s1, char const *restrict s2) -> char *
    tok = strpbrk(tok, s2);
 
    // If no end is found, then we're at the last token.
-   if (!tok) {return tmp;};
+   if(!tok) return tmp;
 
    // Null-terminate the token and point to the start of the next.
    *tok++ = 0;
@@ -431,11 +398,11 @@ __extfunc strtok(char *restrict s1, char const *restrict s2) -> char *
 //
 // memset
 //
-__extfunc memset(void *s, int c, size_t n) -> void *
+__extfunc "C" void *memset(void *s, int c, size_t n)
 {
    char *end = (char *)s + n;
 
-   for (char *i = (char *)s; i != end; ++i)
+   for(char *i = (char *)s; i != end; ++i)
    {
       *i = (char)c;
    };
@@ -446,9 +413,9 @@ __extfunc memset(void *s, int c, size_t n) -> void *
 //
 // strerror
 //
-__extfunc strerror(int errnum) -> char *
+__extfunc "C" char *strerror(int errnum)
 {
-   __variable static char c = 0;
+   static char c = 0;
 
    return &c; // :v
 };
@@ -456,11 +423,11 @@ __extfunc strerror(int errnum) -> char *
 //
 // strlen
 //
-__extfunc strlen(char const *s) -> size_t
+__extfunc "C" size_t strlen(char const *s)
 {
    size_t n = 0;
 
-   while (*s++) {++n;};
+   while(*s++) ++n;
 
    return n;
 };

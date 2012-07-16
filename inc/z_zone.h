@@ -72,26 +72,29 @@ enum
 
 #define PU_PURGELEVEL PU_CACHE        /* First purgable tag's level */
 
-extern __function void  (Z_Close)(__string, int);
-extern __function void  (Z_Init)(__string, int);
-extern __function void *(Z_Malloc)(size_t size, int tag, void **ptr, __string, int);
-extern __function void  (Z_Free)(void *ptr, __string, int);
-extern __function void  (Z_FreeTags)(int lowtag, int hightag, __string, int);
-extern __function void  (Z_ChangeTag)(void *ptr, int tag, __string, int);
-extern __function void *(Z_Calloc)(size_t n, size_t n2, int tag, void **user, __string, int);
-extern __function void *(Z_Realloc)(void *p, size_t n, int tag, void **user, __string, int);
-extern __function char *(Z_Strdup)(char const *s, int tag, void **user, __string, int);
-extern __function void  (Z_FreeAlloca)(__string, int);
-extern __function void *(Z_Alloca)(size_t n, __string, int);
-extern __function void *(Z_Realloca)(void *ptr, size_t n, __string, int);
-extern __function char *(Z_Strdupa)(char const *s, __string, int);
-extern __function void  (Z_CheckHeap)(__string, int);   // killough 3/22/98: add file/line info
-extern __function int   (Z_CheckTag)(void *, __string, int);
+extern "C"
+{
 
-extern __function void *(Z_SysMalloc)(size_t size, __string, int);
-extern __function void *(Z_SysCalloc)(size_t n1, size_t n2, __string, int);
-extern __function void *(Z_SysRealloc)(void *ptr, size_t size, __string, int);
-extern __function void  (Z_SysFree)(void *p, __string, int);
+__function void  (Z_Close)(__string, int);
+__function void  (Z_Init)(__string, int);
+__function void *(Z_Malloc)(size_t size, int tag, void **ptr, __string, int);
+__function void  (Z_Free)(void *ptr, __string, int);
+__function void  (Z_FreeTags)(int lowtag, int hightag, __string, int);
+__function void  (Z_ChangeTag)(void *ptr, int tag, __string, int);
+__function void *(Z_Calloc)(size_t n, size_t n2, int tag, void **user, __string, int);
+__function void *(Z_Realloc)(void *p, size_t n, int tag, void **user, __string, int);
+__function char *(Z_Strdup)(char const *s, int tag, void **user, __string, int);
+__function void  (Z_FreeAlloca)(__string, int);
+__function void *(Z_Alloca)(size_t n, __string, int);
+__function void *(Z_Realloca)(void *ptr, size_t n, __string, int);
+__function char *(Z_Strdupa)(char const *s, __string, int);
+__function void  (Z_CheckHeap)(__string, int);   // killough 3/22/98: add file/line info
+__function int   (Z_CheckTag)(void *, __string, int);
+
+__function void *(Z_SysMalloc)(size_t size, __string, int);
+__function void *(Z_SysCalloc)(size_t n1, size_t n2, __string, int);
+__function void *(Z_SysRealloc)(void *ptr, size_t size, __string, int);
+__function void  (Z_SysFree)(void *p, __string, int);
 
 #define Z_Init()           (Z_Init)      (        __FILE__,__LINE__)
 #define Z_Close()          (Z_Close)     (        __FILE__,__LINE__)
@@ -114,10 +117,12 @@ extern __function void  (Z_SysFree)(void *p, __string, int);
 #define Z_SysRealloc(a,b)  (Z_SysRealloc)(a,b,    __FILE__,__LINE__)
 #define Z_SysFree(a)       (Z_SysFree)   (a,      __FILE__,__LINE__)
 
-extern __function void Z_ZoneHistory(char *);
-extern __function void Z_PrintStats(); // killough 8/23/98
-extern __function void Z_PrintZoneHeap();
-extern __function void Z_DumpCore();
+__function void Z_ZoneHistory(char *);
+__function void Z_PrintStats(); // killough 8/23/98
+__function void Z_PrintZoneHeap();
+__function void Z_DumpCore();
+
+};
 
 #endif//__HEADER__Z_ZONE_H__
 

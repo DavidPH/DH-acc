@@ -39,6 +39,14 @@
 #define __LIBDS_HEAPSIZE 16
 #endif
 
+#define EXITSIZE  (256)
+#define EXITBEGIN (&exitarr[0])
+#define EXITEND   (&exitarr[EXITSIZE])
+
+#define HEAPSIZE  (__LIBDS_HEAPSIZE * 1024 * 1024)
+#define HEAPBEGIN ((heapdata *)&heap[0])
+#define HEAPEND   ((heapdata *)&heap[HEAPSIZE])
+
 
 //----------------------------------------------------------------------------|
 // Types                                                                      |
@@ -59,22 +67,12 @@ struct heapdata
 // Static Variables                                                           |
 //
 
-constexpr size_t exitsize = 256;
-
-__intvar __staticarray __func_t()[exitsize] exitarr;
+__intvar __staticarray __func_t()[EXITSIZE] exitarr;
 __intvar __staticregister decltype(*exitarr) *exitptr = exitarr;
 
-constexpr decltype(*exitarr) *exitbegin = &exitarr[0];
-constexpr decltype(*exitarr) *exitend = &exitarr[exitsize];
 
-
-constexpr size_t heapsize = __LIBDS_HEAPSIZE * 1024 * 1024;
-
-__intvar static char[heapsize] heap;
-__intvar __staticregister heapdata *heapptr = (heapdata *)heap;
-
-constexpr heapdata *heapbegin = (heapdata *)&heap[0];
-constexpr heapdata *heapend = (heapdata *)&heap[heapsize];
+__intvar static char[HEAPSIZE] heap;
+__intvar __staticregister heapdata *heapptr = HEAPBEGIN;
 
 
 __intvar __staticregister unsigned randval = 1;
@@ -91,7 +89,7 @@ __intvar __staticregister unsigned randval = 1;
 //
 // atof
 //
-__function float atof(char const *nptr)
+__extfunc "C" double atof(char const *nptr)
 {
    //return 0;
 };
@@ -99,7 +97,7 @@ __function float atof(char const *nptr)
 //
 // atoi
 //
-__function int atoi(char const *nptr)
+__extfunc "C" int atoi(char const *nptr)
 {
    return 0;
 };
@@ -107,7 +105,7 @@ __function int atoi(char const *nptr)
 //
 // atol
 //
-__function long atol(char const *nptr)
+__extfunc "C" long atol(char const *nptr)
 {
    return 0;
 };
@@ -115,7 +113,7 @@ __function long atol(char const *nptr)
 //
 // atoll
 //
-__function long long atoll(char const *nptr)
+__extfunc "C" long long atoll(char const *nptr)
 {
    return 0;
 };
@@ -123,7 +121,7 @@ __function long long atoll(char const *nptr)
 //
 // strtod
 //
-__function double strtod(char const *restrict nptr, char **restrict endptr)
+__extfunc "C" double strtod(char const *restrict nptr, char **restrict endptr)
 {
    if(endptr) *endptr = NULL;
    //return 0;
@@ -132,7 +130,7 @@ __function double strtod(char const *restrict nptr, char **restrict endptr)
 //
 // strtof
 //
-__function float strtof(char const *restrict nptr, char **restrict endptr)
+__extfunc "C" float strtof(char const *restrict nptr, char **restrict endptr)
 {
    if(endptr) *endptr = NULL;
    //return 0;
@@ -141,7 +139,7 @@ __function float strtof(char const *restrict nptr, char **restrict endptr)
 //
 // strtold
 //
-__function long double strtold(char const *restrict nptr, char **restrict endptr)
+__extfunc "C" long double strtold(char const *restrict nptr, char **restrict endptr)
 {
    if(endptr) *endptr = NULL;
    //return 0;
@@ -150,7 +148,7 @@ __function long double strtold(char const *restrict nptr, char **restrict endptr
 //
 // strtol
 //
-__function long strtol(char const *restrict nptr, char **restrict endptr)
+__extfunc "C" long strtol(char const *restrict nptr, char **restrict endptr)
 {
    if(endptr) *endptr = NULL;
    return 0;
@@ -159,7 +157,7 @@ __function long strtol(char const *restrict nptr, char **restrict endptr)
 //
 // strtoll
 //
-__function long long strtoll(char const *restrict nptr, char **restrict endptr)
+__extfunc "C" long long strtoll(char const *restrict nptr, char **restrict endptr)
 {
    if(endptr) *endptr = NULL;
    return 0;
@@ -168,7 +166,7 @@ __function long long strtoll(char const *restrict nptr, char **restrict endptr)
 //
 // strtoul
 //
-__function unsigned long strtoul(char const *restrict nptr, char **restrict endptr)
+__extfunc "C" unsigned long strtoul(char const *restrict nptr, char **restrict endptr)
 {
    if(endptr) *endptr = NULL;
    return 0;
@@ -177,7 +175,7 @@ __function unsigned long strtoul(char const *restrict nptr, char **restrict endp
 //
 // strtoull
 //
-__function unsigned long long strtoull(char const *restrict nptr, char **restrict endptr)
+__extfunc "C" unsigned long long strtoull(char const *restrict nptr, char **restrict endptr)
 {
    if(endptr) *endptr = NULL;
    return 0;
@@ -190,7 +188,7 @@ __function unsigned long long strtoull(char const *restrict nptr, char **restric
 //
 // rand
 //
-__extfunc rand() -> int
+__extfunc "C" int rand()
 {
    randval = randval * 1103515245 + 12345;
    return (unsigned)(randval >> 8) & RAND_MAX;
@@ -199,7 +197,7 @@ __extfunc rand() -> int
 //
 // srand
 //
-__extfunc srand(unsigned int seed) -> void
+__extfunc "C" void srand(unsigned int seed)
 {
    randval = seed;
 };
@@ -211,16 +209,16 @@ __extfunc srand(unsigned int seed) -> void
 //
 // calloc
 //
-__extfunc calloc(size_t nmemb, size_t size) -> void *
+__extfunc "C" void *calloc(size_t nmemb, size_t size)
 {
    nmemb = (size_t)malloc(size *= nmemb);
 
-   if (!nmemb) return NULL;
+   if(!nmemb) return NULL;
 
    char *ptr = (char *)nmemb;
    char *end = ptr + size;
 
-   while (ptr != end) {*ptr++ = 0;};
+   while(ptr != end) {*ptr++ = 0;};
 
    return (void *)nmemb;
 };
@@ -228,9 +226,9 @@ __extfunc calloc(size_t nmemb, size_t size) -> void *
 //
 // free
 //
-__extfunc free(void *ptr) -> void
+__extfunc "C" void free(void *ptr)
 {
-   if (!ptr) return;
+   if(!ptr) return;
 
    heapdata *block = (heapdata *)ptr - 1;
 
@@ -242,23 +240,23 @@ __extfunc free(void *ptr) -> void
 //
 // malloc
 //
-__extfunc malloc(size_t size) -> void *
+__extfunc "C" void *malloc(size_t size)
 {
-   if (!size) return NULL;
+   if(!size) return NULL;
 
-   if (!heapptr) {heapptr = heapbegin;};
+   if(!heapptr) {heapptr = HEAPBEGIN;};
 
-   while (true)
+   while(true)
    {
       // Used block.
-      if (heapptr->used)
+      if(heapptr->used)
       {
          heapptr = (heapdata *)&heapptr->data[heapptr->size];
          continue;
       };
 
       // Unused block.
-      if (heapptr->size)
+      if(heapptr->size)
       {
          if (heapptr->size >= size)
          {
@@ -275,7 +273,7 @@ __extfunc malloc(size_t size) -> void *
       // No block.
 
       // Verify that there is sufficient space first.
-      if ((heapdata *)&heapptr->data[size]+1 >= heapend)
+      if((heapdata *)&heapptr->data[size]+1 >= HEAPEND)
          return NULL;
 
       heapptr->used = size;
@@ -291,7 +289,7 @@ __extfunc malloc(size_t size) -> void *
       return ptr;
    };
 
-   heapptr = heapbegin;
+   heapptr = HEAPBEGIN;
 
    return NULL;
 };
@@ -299,16 +297,16 @@ __extfunc malloc(size_t size) -> void *
 //
 // realloc
 //
-__extfunc realloc(void *ptr, size_t size) -> void *
+__extfunc "C" void *realloc(void *ptr, size_t size)
 {
-   if (!ptr) return malloc(size);
+   if(!ptr) return malloc(size);
 
-   if (!size) {free(ptr); return NULL;};
+   if(!size) {free(ptr); return NULL;};
 
    heapdata *block = (heapdata *)ptr - 1;
 
    // Enough size in current block.
-   if (block->size >= size)
+   if(block->size >= size)
    {
       block->used = size;
 
@@ -318,7 +316,7 @@ __extfunc realloc(void *ptr, size_t size) -> void *
    heapdata *nextblock = (heapdata *)&block->data[block->size];
 
    // No next block, just resize current block. (If enough space.)
-   if (nextblock->size == 0 && (heapdata *)&block->data[size]+1 < heapend)
+   if(nextblock->size == 0 && (heapdata *)&block->data[size]+1 < HEAPEND)
    {
       block->size = size;
       block->used = size;
@@ -333,7 +331,7 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 
    void *newptr = malloc(size);
 
-   if (!newptr) return NULL;
+   if(!newptr) return NULL;
 
    memcpy(newptr, ptr, block->used);
 
@@ -349,7 +347,7 @@ __extfunc realloc(void *ptr, size_t size) -> void *
 //
 // abort
 //
-__extfunc void abort()
+__extfunc "C" void abort()
 {
    #if defined(__TARGET_ZDoom__)
    *(int *)NULL = 0xDEADC0DE; // Flag abort.
@@ -364,9 +362,9 @@ __extfunc void abort()
 //
 // atexit
 //
-__extfunc int atexit(__func_t() func)
+__extfunc "C" int atexit(__func_t() func)
 {
-   if(exitptr == exitend) return 1;
+   if(exitptr == EXITEND) return 1;
 
    *exitptr++ = func;
 
@@ -376,9 +374,9 @@ __extfunc int atexit(__func_t() func)
 //
 // exit
 //
-__extfunc void exit(int status)
+__extfunc "C" void exit(int status)
 {
-   while(exitptr-- != exitbegin)
+   while(exitptr-- != EXITBEGIN)
       (*exitptr)();
 
    _Exit(status);
@@ -387,9 +385,9 @@ __extfunc void exit(int status)
 //
 // _Exit
 //
-__extfunc void _Exit(int status)
+__extfunc "C" void _Exit(int status)
 {
-   if (status & 1)
+   if(status & 1)
    {
       (__linespec(int) @ 244)(status >> 1);
    }
@@ -404,7 +402,7 @@ __extfunc void _Exit(int status)
 //
 // getenv
 //
-__extfunc char *getenv(char const *name)
+__extfunc "C" char *getenv(char const *name)
 {
    return NULL;
 };
@@ -412,9 +410,9 @@ __extfunc char *getenv(char const *name)
 //
 // system
 //
-__extfunc int system(char const *string)
+__extfunc "C" int system(char const *string)
 {
-   if (!string) return 0;
+   if(!string) return 0;
 
    return 0;
 };
@@ -426,22 +424,22 @@ __extfunc int system(char const *string)
 //
 // bsearch
 //
-__function void *bsearch (void const *key, void const *base, size_t nmemb,
-   size_t size, __func_t(void const *, void const *) -> int compar)
+__extfunc "C" void *bsearch(void const *key, void const *base, size_t nmemb, size_t size,
+                            __func_t(void const *, void const *) -> int compar)
 {
    int cmp;
    char const *begin = reinterpret_cast<char const *>(base);
    char const *end = begin + nmemb*size;
    char const *itr;
 
-   while (begin != end)
+   while(begin != end)
    {
       // itr = begin + (end - begin) / 2
       itr = begin + ((((end - begin) / size) / 2) * size);
 
-      if (!(cmp = compar(key, itr))) return (void *)itr;
+      if(!(cmp = compar(key, itr))) return (void *)itr;
 
-      if (cmp < 0) {end = itr;} else {begin = itr;};
+      if(cmp < 0) end = itr else begin = itr;
    };
 
    return NULL;
@@ -450,27 +448,27 @@ __function void *bsearch (void const *key, void const *base, size_t nmemb,
 //
 // qsort
 //
-__extfunc qsort(void *base, size_t nmemb, size_t size,
- __func_t(void const *, void const *) -> int compar) -> void
+__extfunc "C" void qsort(void *base, size_t nmemb, size_t size,
+                         __func_t(void const *, void const *) -> int compar)
 {
-   char *iter = (char *)base;
+   char *itr = (char *)base;
    char *end = (char *)base + nmemb*size;
 
-   while (iter != end)
+   while(itr != end)
    {
       // If iter >= iter+1...
-      if (compar(iter, iter+size) >= 0)
+      if(compar(itr, itr+size) >= 0)
       {
          // Swap the two elements.
-         __memswp(iter, iter+size, size);
+         memswp(itr, itr+size, size);
 
          // Reset the iterator.
-         if (iter != base) (iter -= size);
+         if(itr != base) itr -= size;
 
          continue;
       };
 
-      iter += size;
+      itr += size;
    };
 };
 
@@ -481,7 +479,7 @@ __extfunc qsort(void *base, size_t nmemb, size_t size,
 //
 // abs
 //
-__extfunc abs(int j) -> int
+__extfunc "C" int abs(int j)
 {
    return j < 0 ? -j : j;
 };
@@ -489,7 +487,7 @@ __extfunc abs(int j) -> int
 //
 // labs
 //
-__extfunc labs(long int j) -> long int
+__extfunc "C" long labs(long int j)
 {
    return j < 0 ? -j : j;
 };
@@ -497,7 +495,7 @@ __extfunc labs(long int j) -> long int
 //
 // llabs
 //
-__extfunc llabs(long long int j) -> long long int
+__extfunc "C" long long llabs(long long int j)
 {
    return j < 0 ? -j : j;
 };
@@ -507,7 +505,7 @@ __extfunc llabs(long long int j) -> long long int
 //
 // "operator /"
 //
-__extfunc div(int numer, int denom) -> div_t
+__extfunc "C" div_t div(int numer, int denom)
 {
    div_t d;
    d.quot = numer / denom;
@@ -520,7 +518,7 @@ __extfunc div(int numer, int denom) -> div_t
 //
 // "operator /"
 //
-__extfunc ldiv(long int numer, long int denom) -> ldiv_t
+__extfunc "C" ldiv_t ldiv(long int numer, long int denom)
 {
    ldiv_t d;
    d.quot = numer / denom;
@@ -533,7 +531,7 @@ __extfunc ldiv(long int numer, long int denom) -> ldiv_t
 //
 // "operator /"
 //
-__extfunc lldiv(long long int numer, long long int denom) -> lldiv_t
+__extfunc "C" lldiv_t lldiv(long long int numer, long long int denom)
 {
    lldiv_t d;
 #if 0
@@ -553,7 +551,7 @@ __extfunc lldiv(long long int numer, long long int denom) -> lldiv_t
 //
 // mblen
 //
-__function int mblen(char const *s, size_t n)
+__extfunc "C" int mblen(char const *s, size_t n)
 {
    if(!s) return 0;
 
@@ -565,7 +563,7 @@ __function int mblen(char const *s, size_t n)
 //
 // mbtowc
 //
-__function int mbtowc(wchar_t *restrict pwc, char const *restrict s, size_t n)
+__extfunc "C" int mbtowc(wchar_t *restrict pwc, char const *restrict s, size_t n)
 {
    if(!s) return 0;
 
@@ -579,7 +577,7 @@ __function int mbtowc(wchar_t *restrict pwc, char const *restrict s, size_t n)
 //
 // wctomb
 //
-__function int wctomb(char *s, wchar_t wc)
+__extfunc "C" int wctomb(char *s, wchar_t wc)
 {
    if(!s) return 0;
 
@@ -595,7 +593,7 @@ __function int wctomb(char *s, wchar_t wc)
 //
 // mbstowcs
 //
-__function size_t mbstowcs(wchar_t *restrict pwcs, char const *restrict s, size_t n)
+__extfunc "C" size_t mbstowcs(wchar_t *restrict pwcs, char const *restrict s, size_t n)
 {
    size_t i = 0;
 
@@ -614,7 +612,7 @@ __function size_t mbstowcs(wchar_t *restrict pwcs, char const *restrict s, size_
 //
 // wcstombs
 //
-__function size_t wcstombs(char *restrict s, wchar_t const *restrict pwcs, size_t n)
+__extfunc "C" size_t wcstombs(char *restrict s, wchar_t const *restrict pwcs, size_t n)
 {
    size_t i = 0;
 
