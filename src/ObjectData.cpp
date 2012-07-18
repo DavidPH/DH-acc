@@ -93,6 +93,8 @@ void odata_set_strings(std::vector<int> &strings, VariableType const *type)
       strings.push_back(false);
       break;
 
+   case VariableType::BT_CLX:
+   case VariableType::BT_CLX_IM:
    case VariableType::BT_STRUCT:
    case VariableType::BT_BLOCK:
       for (VariableType::Vector::const_iterator end = type->getTypes().end(),

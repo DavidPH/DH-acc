@@ -80,6 +80,9 @@ public:
 
       BT_CHR,
 
+      BT_CLX,    // complex
+      BT_CLX_IM, // imaginary
+
       BT_FIX_HH,
       BT_FIX_H,
       BT_FIX,
@@ -175,6 +178,9 @@ public:
    Reference getType(std::string const &name, SourcePosition const &position);
 
 
+   // Basic types.
+   static Reference get_bt(BasicType bt);
+
    // Void type.
    static Reference get_bt_void();
 
@@ -183,6 +189,9 @@ public:
    static Reference get_bt_bit_sft();
 
    static Reference get_bt_chr();
+
+   static Reference get_bt_clx(BasicType bt);
+   static Reference get_bt_clx_im(BasicType bt);
 
    static Reference get_bt_fix_hh();
    static Reference get_bt_fix_h();
@@ -282,6 +291,8 @@ private:
 
    static Reference get_bt_anonymous
    (Vector types, VariableType *typeRet, VariableType *head, BasicType basic);
+
+   static Reference get_bt_complex(Pointer *types, BasicType bt, BasicType clx);
 };
 
 

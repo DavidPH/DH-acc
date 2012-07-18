@@ -56,6 +56,9 @@ static std::string const basic_names[] =
 
    "BT_CHR",
 
+   "BT_CLX",
+   "BT_CLX_IM",
+
    "BT_FIX_HH",
    "BT_FIX_H",
    "BT_FIX",
@@ -112,8 +115,7 @@ static std::string const basic_names[] =
 //
 // operator << <VariableType>
 //
-static std::ostream &operator <<
-(std::ostream &out, VariableType const *type)
+static std::ostream &operator << (std::ostream &out, VariableType const *type)
 {
    switch (type->getBasicType())
    {
@@ -148,6 +150,10 @@ static std::ostream &operator <<
    case VariableType::BT_UNS_LL:
       out << type->getBasicType();
       break;
+
+   case VariableType::BT_CLX:
+   case VariableType::BT_CLX_IM:
+      out << type->getBasicType() << ' ' << type->getTypes()[0]->getBasicType();
 
       // Special types.
    case VariableType::BT_LABEL:
@@ -346,6 +352,17 @@ VariableType::VariableType(BasicType _basic)
    case BT_UNS_LL:
       break;
 
+   case BT_CLX:
+      types.resize(width = 2);
+      names.push_back("real");
+      names.push_back("imag");
+      break;
+
+   case BT_CLX_IM:
+      types.resize(width = 1);
+      names.push_back("real");
+      break;
+
       // Special types.
    case BT_LABEL:
       break;
@@ -402,6 +419,8 @@ VariableType::~VariableType()
    case BT_BIT_HRD:
    case BT_BIT_SFT:
    case BT_CHR:
+   case BT_CLX:
+   case BT_CLX_IM:
    case BT_FIX_HH:
    case BT_FIX_H:
    case BT_FIX:
@@ -549,7 +568,8 @@ VariableType::Reference VariableType::setQualifier(unsigned _quals)
    VariableType::Reference type(new VariableType(*this));
 
    type->quals = _quals;
-   if (basic == BT_STRUCT || basic == BT_UNION || basic == BT_BLOCK)
+   if(basic == BT_CLX || basic == BT_CLX_IM || basic == BT_STRUCT ||
+      basic == BT_UNION || basic == BT_BLOCK)
    {
       for (Vector::iterator iter = type->types.begin();
            iter != type->types.end(); ++iter)
@@ -591,7 +611,8 @@ VariableType::Reference VariableType::setStorage
 
    type->store     = _store;
    type->storeArea = _storeArea;
-   if (basic == BT_STRUCT || basic == BT_UNION || basic == BT_BLOCK)
+   if(basic == BT_CLX || basic == BT_CLX_IM || basic == BT_STRUCT ||
+      basic == BT_UNION || basic == BT_BLOCK)
    {
       for (Vector::iterator iter = type->types.begin();
            iter != type->types.end(); ++iter)
@@ -612,6 +633,8 @@ void VariableType::getNameMangled(std::string &out) const
 {
    #define RETRN typeRet->getNameMangled(out)
 
+   #define TYPE0 types[0]->getNameMangled(out)
+
    #define TYPES                             \
    for (size_t i = 0; i < types.size(); ++i) \
    {                                         \
@@ -628,6 +651,7 @@ void VariableType::getNameMangled(std::string &out) const
    case BT_BIT_HRD:  out += 'B'; break;
    case BT_BIT_SFT:  out += "BS"; break;
    case BT_CHR:      out += 'C'; break;
+   case BT_CLX:      out += "C{"; TYPE0; out += '}'; break;
    case BT_ENUM:     out += "E("; out += name; out += ')'; break;
    case BT_FLT_HH:   out += "FHH"; break;
    case BT_FLT_H:    out += "FH"; break;
@@ -645,6 +669,7 @@ void VariableType::getNameMangled(std::string &out) const
    case BT_INT:      out += 'I'; break;
    case BT_INT_L:    out += "IL"; break;
    case BT_INT_LL:   out += "ILL"; break;
+   case BT_CLX_IM:   out += "I{"; TYPE0; out += '}'; break;
    case BT_LABEL:    out += "LABEL"; break;
    case BT_PTR:      out += "P{"; RETRN; out += '}'; break;
    case BT_PTR_NUL:  out += "PN"; break;
@@ -684,6 +709,7 @@ void VariableType::getNameMangled(std::string &out) const
 
    #undef WIDTH
    #undef TYPES
+   #undef TYPE0
    #undef RETRN
 }
 
@@ -735,6 +761,10 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
    case BT_SNAM:
    case BT_SNUM:
       return 1;
+
+   case BT_CLX:
+   case BT_CLX_IM:
+      return typeRet->getSize(pos) * width;
 
    case BT_FLT_L:
    case BT_FLT_LL:
@@ -838,6 +868,56 @@ VariableType::Reference VariableType::getType
 }
 
 //===================================================================
+// Basic types
+//
+
+//
+// VariableType::get_bt
+//
+VariableType::Reference VariableType::get_bt(BasicType bt)
+{
+   switch(bt)
+   {
+   default:
+   case BT_VOID: return get_bt_void();
+
+   case BT_BIT_HRD: return get_bt_bit_hrd();
+   case BT_BIT_SFT: return get_bt_bit_sft();
+
+   case BT_CHR: return get_bt_chr();
+
+   case BT_FIX_HH: return get_bt_fix_hh();
+   case BT_FIX_H:  return get_bt_fix_h();
+   case BT_FIX:    return get_bt_fix();
+   case BT_FIX_L:  return get_bt_fix_l();
+   case BT_FIX_LL: return get_bt_fix_ll();
+
+   case BT_FLT_HH: return get_bt_flt_hh();
+   case BT_FLT_H:  return get_bt_flt_h();
+   case BT_FLT:    return get_bt_flt();
+   case BT_FLT_L:  return get_bt_flt_l();
+   case BT_FLT_LL: return get_bt_flt_ll();
+
+   case BT_INT_HH: return get_bt_int_hh();
+   case BT_INT_H:  return get_bt_int_h();
+   case BT_INT:    return get_bt_int();
+   case BT_INT_L:  return get_bt_int_l();
+   case BT_INT_LL: return get_bt_int_ll();
+
+   case BT_UNS_HH: return get_bt_uns_hh();
+   case BT_UNS_H:  return get_bt_uns_h();
+   case BT_UNS:    return get_bt_uns();
+   case BT_UNS_L:  return get_bt_uns_l();
+   case BT_UNS_LL: return get_bt_uns_ll();
+
+   case BT_LABEL: return get_bt_label();
+   case BT_STR:   return get_bt_str();
+
+   case BT_PTR_NUL: return get_bt_ptr_nul();
+   }
+}
+
+//===================================================================
 // Void type
 //
 
@@ -875,6 +955,53 @@ VariableType::Reference VariableType::get_bt_bit_sft()
 VariableType::Reference VariableType::get_bt_chr()
 {
    static Reference type(new VariableType(BT_CHR)); return type;
+}
+
+//
+// VariableType::get_bt_clx
+//
+VariableType::Reference VariableType::get_bt_clx(BasicType bt)
+{
+   static Pointer types[10]; return get_bt_complex(types, bt, BT_CLX);
+}
+
+//
+// VariableType::get_bt_clx_im
+//
+VariableType::Reference VariableType::get_bt_clx_im(BasicType bt)
+{
+   static Pointer types[10]; return get_bt_complex(types, bt, BT_CLX_IM);
+}
+
+//
+// VariableType::get_bt_complex
+//
+VariableType::Reference VariableType::get_bt_complex(Pointer *types, BasicType bt,
+                                                     BasicType clx)
+{
+   switch(bt)
+   {
+   case BT_FIX_HH: types = types+0; break;
+   case BT_FIX_H:  types = types+1; break;
+   case BT_FIX:    types = types+2; break;
+   case BT_FIX_L:  types = types+3; break;
+   case BT_FIX_LL: types = types+4; break;
+   case BT_FLT_HH: types = types+5; break;
+   case BT_FLT_H:  types = types+6; break;
+   case BT_FLT:    types = types+7; break;
+   case BT_FLT_L:  types = types+8; break;
+   case BT_FLT_LL: types = types+9; break;
+   default: return get_bt_void();
+   }
+
+   if(!*types)
+   {
+      (*types = new VariableType(clx))->types[0] = get_bt(bt);
+
+      if(clx == BT_CLX) (*types)->types[1] = get_bt_clx_im(bt);
+   }
+
+   return static_cast<Reference>(*types);
 }
 
 //
@@ -1364,6 +1491,10 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
    case BT_VOID:
       // Should have been handled by the previous equality test...
       return CAST_ANY;
+
+   case BT_CLX:
+   case BT_CLX_IM:
+      return get_cast(dst->types[0], src->types[0]);
 
    case BT_ENUM:
       return CAST_EXPLICIT|CAST_REINTERPRET;

@@ -64,6 +64,12 @@ static ObjectExpression::Pointer make_object
    case VariableType::BT_UNS_LL:
       return ObjectExpression::create_value_int(0, pos);
 
+   case VariableType::BT_CLX:
+      ERROR_P("make_object BT_CLX");
+
+   case VariableType::BT_CLX_IM:
+      ERROR_P("make_object BT_CLX_IM");
+
    case VariableType::BT_FIX_HH:
    case VariableType::BT_FIX_H:
    case VariableType::BT_FIX:
@@ -143,6 +149,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
    switch (srcBT)
    {
    case VariableType::BT_VOID:
+   case VariableType::BT_CLX:
+   case VariableType::BT_CLX_IM:
    case VariableType::BT_ARR:
    case VariableType::BT_STRUCT:
    case VariableType::BT_UNION:
@@ -176,6 +184,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       switch (dstBT)
       {
       case VariableType::BT_VOID:
+      case VariableType::BT_CLX:
+      case VariableType::BT_CLX_IM:
       case VariableType::BT_ARR:
       case VariableType::BT_STRUCT:
       case VariableType::BT_UNION:
@@ -231,6 +241,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       switch (dstBT)
       {
       case VariableType::BT_VOID:
+      case VariableType::BT_CLX:
+      case VariableType::BT_CLX_IM:
       case VariableType::BT_ARR:
       case VariableType::BT_ASMFUNC:
       case VariableType::BT_STRUCT:
@@ -297,6 +309,8 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       switch (dstBT)
       {
       case VariableType::BT_VOID:
+      case VariableType::BT_CLX:
+      case VariableType::BT_CLX_IM:
       case VariableType::BT_ARR:
       case VariableType::BT_ASMFUNC:
       case VariableType::BT_STRUCT:
@@ -452,6 +466,8 @@ void SourceExpression::make_objects_memcpy_cast
    {
    case VariableType::BT_VOID:
    case VariableType::BT_ARR:
+   case VariableType::BT_CLX:
+   case VariableType::BT_CLX_IM:
    case VariableType::BT_FLT_HH:
    case VariableType::BT_FLT_H:
    case VariableType::BT_FLT:
@@ -489,6 +505,8 @@ void SourceExpression::make_objects_memcpy_cast
       {
       case VariableType::BT_VOID:
       case VariableType::BT_ARR:
+      case VariableType::BT_CLX:
+      case VariableType::BT_CLX_IM:
       case VariableType::BT_FLT_HH:
       case VariableType::BT_FLT_H:
       case VariableType::BT_FLT:
@@ -570,6 +588,8 @@ void SourceExpression::make_objects_memcpy_cast
       {
       case VariableType::BT_VOID:
       case VariableType::BT_ARR:
+      case VariableType::BT_CLX:
+      case VariableType::BT_CLX_IM:
       case VariableType::BT_FLT_HH:
       case VariableType::BT_FLT_H:
       case VariableType::BT_FLT:
@@ -636,6 +656,8 @@ void SourceExpression::make_objects_memcpy_cast
       {
       case VariableType::BT_VOID:
       case VariableType::BT_ARR:
+      case VariableType::BT_CLX:
+      case VariableType::BT_CLX_IM:
       case VariableType::BT_FLT_HH:
       case VariableType::BT_FLT_H:
       case VariableType::BT_FLT:
@@ -712,6 +734,8 @@ void SourceExpression::make_objects_memcpy_cast
       {
       case VariableType::BT_VOID:
       case VariableType::BT_ARR:
+      case VariableType::BT_CLX:
+      case VariableType::BT_CLX_IM:
       case VariableType::BT_FLT_HH:
       case VariableType::BT_FLT_H:
       case VariableType::BT_FLT:

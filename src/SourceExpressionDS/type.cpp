@@ -80,8 +80,7 @@ static void do_storage(VariableType::Pointer *type, SourceTokenizerC *in,
 //
 // Tries to parse a basic type, returning NULL on failue.
 //
-static VariableType::Pointer make_basic
-(SourceTokenC::Reference tok, SourceTokenizerC *in)
+static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceTokenizerC *in)
 {
    if (tok->data == "void")
       return VariableType::get_bt_void();
@@ -98,14 +97,16 @@ static VariableType::Pointer make_basic
    if (tok->data == "__string")
       return VariableType::get_bt_str();
 
-   if (tok->data != "char"   && tok->data != "int"     &&
-       tok->data != "float"  && tok->data != "double"  &&
-       tok->data != "__real" && tok->data != "__fixed" &&
-       tok->data != "short"  && tok->data != "long"    &&
-       tok->data != "signed" && tok->data != "unsigned")
+   if(tok->data != "char"     && tok->data != "int"      &&
+      tok->data != "float"    && tok->data != "double"   &&
+      tok->data != "__real"   && tok->data != "__fixed"  &&
+      tok->data != "short"    && tok->data != "long"     &&
+      tok->data != "signed"   && tok->data != "unsigned" &&
+      tok->data != "_Complex" && tok->data != "_Imaginary")
       return NULL;
 
    int typeBase  = 0;
+   int typeCmplx = 0;
    int typeLong  = 0;
    int typeShort = 0;
    int typeSign  = 0;
@@ -130,6 +131,12 @@ static VariableType::Pointer make_basic
       else if (tok->data == "__real" && !typeBase)
          typeBase = TYPE_BASE_REAL;
 
+      else if(tok->data == "_Complex" && !typeCmplx)
+         typeCmplx = 2;
+
+      else if(tok->data == "_Imaginary" && !typeCmplx)
+         typeCmplx = 1;
+
       else if (tok->data == "short")
          ++typeShort;
 
@@ -149,119 +156,83 @@ static VariableType::Pointer make_basic
       tok = in->get();
    }
 
-   // Default to int.
-   if (!typeBase) typeBase = TYPE_BASE_INT;
+   if(typeShort && typeLong) ERROR(tok->pos, "short long");
+   if(typeShort > 2) ERROR(tok->pos, "short short short");
+   if(typeLong  > 2) ERROR(tok->pos, "long long long");
+
+   // Default to int. Except for _Complex or _Imaginary, then default to double.
+   if(!typeBase) typeBase = typeCmplx ? TYPE_BASE_DOUBLE : TYPE_BASE_INT;
+
+   VariableType::BasicType bt;
 
    switch (typeBase)
    {
    case TYPE_BASE_CHAR:
-      if (typeLong)
-         ERROR(tok->pos, "long char");
+      if(typeLong)  ERROR(tok->pos, "long char");
+      if(typeShort) ERROR(tok->pos, "short char");
 
-      if (typeShort)
-         ERROR(tok->pos, "short char");
-
-      if (typeSign < 0)
-         return VariableType::get_bt_int_hh();
-
-      if (typeSign > 0)
-         return VariableType::get_bt_uns_hh();
-
-      return VariableType::get_bt_chr();
+      if(typeSign < 0) {bt = VariableType::BT_INT_HH; break;}
+      if(typeSign > 0) {bt = VariableType::BT_UNS_HH; break;}
+      bt = VariableType::BT_CHR; break;
 
    case TYPE_BASE_INT:
-      if (typeShort && typeLong)
-         ERROR(tok->pos, "short long int");
-
-      if (typeShort > 1)
-         ERROR(tok->pos, "short short int");
-
-      if (typeLong > 2)
-         ERROR(tok->pos, "long long long int");
-
       if (typeSign > 0)
       {
-         if (typeShort)
-            return VariableType::get_bt_uns_h();
-
-         if (typeLong == 1)
-            return VariableType::get_bt_uns_l();
-
-         if (typeLong == 2)
-            return VariableType::get_bt_uns_ll();
-
-         return VariableType::get_bt_uns();
+         if(typeShort == 2) {bt = VariableType::BT_UNS_HH; break;}
+         if(typeShort == 1) {bt = VariableType::BT_UNS_H;  break;}
+         if(typeLong  == 1) {bt = VariableType::BT_UNS_L;  break;}
+         if(typeLong  == 2) {bt = VariableType::BT_UNS_LL; break;}
+         bt = VariableType::BT_UNS; break;
       }
       else
       {
-         if (typeShort)
-            return VariableType::get_bt_int_h();
-
-         if (typeLong == 1)
-            return VariableType::get_bt_int_l();
-
-         if (typeLong == 2)
-            return VariableType::get_bt_int_ll();
-
-         return VariableType::get_bt_int();
+         if(typeShort == 2) {bt = VariableType::BT_INT_HH; break;}
+         if(typeShort == 1) {bt = VariableType::BT_INT_H;  break;}
+         if(typeLong  == 1) {bt = VariableType::BT_INT_L;  break;}
+         if(typeLong  == 2) {bt = VariableType::BT_INT_LL; break;}
+         bt = VariableType::BT_INT; break;
       }
 
    case TYPE_BASE_DOUBLE:
       ++typeLong;
    case TYPE_BASE_FLOAT:
-      if (typeShort)
-         ERROR(tok->pos, "short float");
+      if(typeSign > 0) ERROR(tok->pos, "unsigned float");
+      if(typeSign < 0) ERROR(tok->pos, "signed float");
 
-      if (typeSign > 0)
-         ERROR(tok->pos, "unsigned float");
-
-      if (typeSign < 0)
-         ERROR(tok->pos, "signed float");
-
-      if (typeLong == 0)
-         return VariableType::get_bt_flt();
-
-      if (typeLong == 1)
-         return VariableType::get_bt_flt_l();
-
-      if (typeLong == 2)
-         return VariableType::get_bt_flt_ll();
-
-      ERROR(tok->pos, "long long long float");
+      if(typeShort == 2) {bt = VariableType::BT_FLT_HH; break;}
+      if(typeShort == 1) {bt = VariableType::BT_FLT_H;  break;}
+      if(typeLong  == 1) {bt = VariableType::BT_FLT_L;  break;}
+      if(typeLong  == 2) {bt = VariableType::BT_FLT_LL; break;}
+      bt = VariableType::BT_FLT; break;
 
    case TYPE_BASE_FIXED:
-      if (typeShort)
-         ERROR(tok->pos, "short fixed");
+      if(typeSign > 0) ERROR(tok->pos, "unsigned fixed");
+      if(typeSign < 0) ERROR(tok->pos, "signed fixed");
 
-      if (typeLong)
-         ERROR(tok->pos, "long fixed");
-
-      if (typeSign > 0)
-         ERROR(tok->pos, "unsigned fixed");
-
-      if (typeSign < 0)
-         ERROR(tok->pos, "signed fixed");
-
-      return VariableType::get_bt_fix();
+      if(typeShort == 2) {bt = VariableType::BT_FIX_HH; break;}
+      if(typeShort == 1) {bt = VariableType::BT_FIX_H;  break;}
+      if(typeLong  == 1) {bt = VariableType::BT_FIX_L;  break;}
+      if(typeLong  == 2) {bt = VariableType::BT_FIX_LL; break;}
+      bt = VariableType::BT_FIX; break;
 
    case TYPE_BASE_REAL:
-      if (typeShort)
-         ERROR(tok->pos, "short real");
+      if(typeSign > 0) ERROR(tok->pos, "unsigned real");
+      if(typeSign < 0) ERROR(tok->pos, "signed real");
 
-      if (typeLong)
-         ERROR(tok->pos, "long real");
-
-      if (typeSign > 0)
-         ERROR(tok->pos, "unsigned real");
-
-      if (typeSign < 0)
-         ERROR(tok->pos, "signed real");
-
-      return VariableType::get_bt_fix();
+      if(typeShort == 2) {bt = VariableType::BT_FIX_HH; break;}
+      if(typeShort == 1) {bt = VariableType::BT_FIX_H;  break;}
+      if(typeLong  == 1) {bt = VariableType::BT_FIX_L;  break;}
+      if(typeLong  == 2) {bt = VariableType::BT_FIX_LL; break;}
+      bt = VariableType::BT_FIX; break;
    }
 
-   // Should be unreachable.
-   return NULL;
+   switch(typeCmplx)
+   {
+   default:
+   case 0: return VariableType::get_bt(bt);
+   case 1: return VariableType::get_bt_clx_im(bt);
+   case 2: return VariableType::get_bt_clx(bt);
+   }
 }
 
 //
@@ -376,11 +347,12 @@ bool SourceExpressionDS::is_type(SourceTokenizerC *in, SourceTokenC *_tok,
       if(tok->data == "__string")
          return true;
 
-      if(tok->data == "char"   || tok->data == "int"     ||
-         tok->data == "float"  || tok->data == "double"  ||
-         tok->data == "__real" || tok->data == "__fixed" ||
-         tok->data == "short"  || tok->data == "long"    ||
-         tok->data == "signed" || tok->data == "unsigned")
+      if(tok->data == "char"     || tok->data == "int"      ||
+         tok->data == "float"    || tok->data == "double"   ||
+         tok->data == "__real"   || tok->data == "__fixed"  ||
+         tok->data == "short"    || tok->data == "long"     ||
+         tok->data == "signed"   || tok->data == "unsigned" ||
+         tok->data == "_Complex" || tok->data == "_Imaginary")
          return true;
 
       if(tok->data == "__asmfunc_t")return true;

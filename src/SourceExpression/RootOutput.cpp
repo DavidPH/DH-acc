@@ -124,6 +124,20 @@ void SourceExpression_RootOutput::doOut
       doChar(objects, '\'');
       break;
 
+   case VariableType::BT_CLX:
+      doChar(objects, "C{");
+      doOut(objects, type->getTypes()[1]);
+      doChar(objects, ' ');
+      doOut(objects, type->getTypes()[0]);
+      doChar(objects, '}');
+      break;
+
+   case VariableType::BT_CLX_IM:
+      doChar(objects, "I{");
+      doOut(objects, type->getTypes()[0]);
+      doChar(objects, '}');
+      break;
+
    case VariableType::BT_FIX_HH:
       objects->addToken(OCODE_ACSP_NUM_DEC_X);
       doChar(objects, "XHH");

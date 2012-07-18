@@ -57,6 +57,8 @@ static void make_objects_literal
    case VariableType::BT_ASMFUNC:
       ERROR_P("bad BT: %s", make_string(type->getBasicType()).c_str());
 
+   case VariableType::BT_CLX:
+   case VariableType::BT_CLX_IM:
    case VariableType::BT_BLOCK:
    case VariableType::BT_STRUCT:
    {
