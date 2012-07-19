@@ -201,6 +201,20 @@ static bool is_array_length_zero(VariableType const *type)
 }
 
 //
+// is_autoptr
+//
+static bool is_autoptr(VariableType const *type)
+{
+   if(type->getBasicType() != VariableType::BT_PTR)
+      return false;
+
+   if(type->getReturn()->getStoreType() != STORE_AUTO)
+      return false;
+
+   return true;
+}
+
+//
 // get_void
 //
 static VariableType::Reference get_void(VariableType *exprType,
@@ -275,7 +289,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
 
    // Generate expression (unless final type is determined later).
    SourceExpression::Pointer expr;
-   if (!is_array_length_zero(type) && !is_void(type))
+   if(!is_array_length_zero(type) && !is_void(type) && !is_autoptr(type))
       expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
                      addr, externDef, meta);
 
@@ -323,6 +337,23 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
             ERROR_P("expected BT_BLOCK");
 
          type = get_array_length(type, initSrcType);
+
+         expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
+                        addr, externDef, meta);
+      }
+      // Initializer-determined storage.
+      else if(is_autoptr(type))
+      {
+         VariableType::Reference initSrcType = initSrc->getType();
+
+         if(initSrcType->getBasicType() == VariableType::BT_PTR)
+         {
+            initSrcType = initSrcType->getReturn();
+            type = type->getReturn()
+                       ->setStorage(initSrcType->getStoreType(),
+                                    initSrcType->getStoreArea())
+                       ->getPointer();
+         }
 
          expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
                         addr, externDef, meta);
