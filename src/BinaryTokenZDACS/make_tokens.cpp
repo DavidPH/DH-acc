@@ -230,9 +230,9 @@ void BinaryTokenZDACS::make_tokens
 
    // Jumps
    case OCODE_JMP_TAB:
-      if ((args = object->args).size() % 2)
-         ERROR_P("uneven OCODE_BRANCH_TABLE");
-      PUSH_TOKEN(BCODE__JMP_TAB);
+      if((args = object->args).size() % 2)
+         ERROR_P("uneven OCODE_JMP_TAB");
+      PUSH_TOKEN(BCODE_JMP_TAB);
       break;
    CASE_REMAP(JMP_CAL,         JMP_CAL);
    CASE_REMAP(JMP_CAL_IMM,     JMP_CAL_IMM);

@@ -25,6 +25,7 @@
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
@@ -98,22 +99,6 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   // Build case data.
-   std::vector<bigsint> cases = context->getCases(pos);
-   std::string caseDefault = context->getLabelCaseDefault(pos);
-
-   std::vector<ObjectExpression::Pointer> args;
-   args.reserve(cases.size() * 2);
-
-   for (size_t i(0); i < cases.size(); ++i)
-   {
-      bigsint     caseNum = cases[i];
-      std::string caseLab = context->getLabelCase(caseNum, pos);
-
-      args.push_back(objects->getValue(caseNum));
-      args.push_back(objects->getValue(caseLab));
-   }
-
    // Generate condition.
    bigsint               sizeCond = exprCond->getType()->getSize(pos);
    VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
@@ -122,16 +107,49 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
    objects->setPosition(pos);
 
-   // Generate jump table.
-   objects->addToken(OCODE_JMP_TAB, args);
+   // Acquire case data.
+   std::vector<bigsint> cases = context->getCases(pos);
+   std::string caseDefault = context->getLabelCaseDefault(pos);
 
+   std::vector<bigsint>::iterator caseItr, caseEnd = cases.end();
+
+   // Generate jump table.
+   if(cases.size() < 4 || target_type == TARGET_Hexen)
+   {
+      // Linear search via JMP_VAL.
+
+      // Fall back to this for very small tables, since it is probably faster.
+      // Or for Hexen which only has this method.
+
+      for(caseItr = cases.begin(); caseItr != caseEnd; ++caseItr)
+         objects->addToken(OCODE_JMP_VAL, objects->getValue(*caseItr),
+                           objects->getValue(context->getLabelCase(*caseItr, pos)));
+   }
+   else
+   {
+      // Binary search via JMP_TAB.
+
+      ObjectExpression::Vector args;
+      args.reserve(cases.size() * 2);
+
+      for(caseItr = cases.begin(); caseItr != caseEnd; ++caseItr)
+      {
+         args.push_back(objects->getValue(*caseItr));
+         args.push_back(objects->getValue(context->getLabelCase(*caseItr, pos)));
+      }
+
+      // Generate jump table.
+      objects->addToken(OCODE_JMP_TAB, args);
+   }
+
+   objects->addToken(OCODE_STK_DROP);
    objects->addToken(OCODE_JMP_IMM, objects->getValue(caseDefault));
 
    // Generate cases.
    exprBody->makeObjects(objects, VariableData::create_void(0));
 
    // Add default target if none specified.
-   if (!context->hasLabelCaseDefault())
+   if(!context->hasLabelCaseDefault())
       objects->addLabel(caseDefault);
 
    // Add break target.

@@ -289,9 +289,6 @@ public:
       BCODE_GET_FUNCP                          = 359,
       BCODE_JMP_CAL                            = 360,
 
-      // Used as an intermediary so as to defer resolving labels.
-      BCODE__JMP_TAB,
-
       BCODE_NONE
    };
 

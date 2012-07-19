@@ -311,11 +311,6 @@ void BinaryTokenZDACS::init()
    DO_INIT(PRINT_STR_WLDARR,   0);
    DO_INIT(PRINT_STR_WLDRNG,   0);
 
-   // Other
-   DO_INIT(_JMP_TAB, -1);
-
-   // Unsorted
-
    #undef DO_INIT
 }
 
@@ -342,8 +337,8 @@ size_t BinaryTokenZDACS::size() const
 {
    if (arg_counts[code] < 0) switch (code)
    {
-   case BCODE__JMP_TAB:
-      return args.size()*6 + 4;
+   case BCODE_JMP_TAB:
+      return args.size()*4 + 8;
 
    default:
       ERROR(position, "???");
@@ -359,18 +354,14 @@ void BinaryTokenZDACS::writeACS0(std::ostream * out) const
 {
    if (arg_counts[code] < 0) switch (code)
    {
-   case BCODE__JMP_TAB:
-      // TODO: BCODE_BRANCHCASESORTED
-
-      for (size_t i(0); i < args.size(); i += 2)
+   case BCODE_JMP_TAB:
+      BinaryTokenACS::write_ACS0_32(out, BCODE_JMP_TAB);
+      BinaryTokenACS::write_ACS0_32(out, args.size() / 2);
+      for(size_t i = 0; i < args.size(); i += 2)
       {
-         BinaryTokenACS::write_ACS0_32(out, BCODE_JMP_VAL);
          BinaryTokenACS::write_ACS0_32(out, *args[i+0]);
          BinaryTokenACS::write_ACS0_32(out, *args[i+1]);
       }
-
-      BinaryTokenACS::write_ACS0_32(out, BCODE_STK_DROP);
-
       break;
 
    default:
