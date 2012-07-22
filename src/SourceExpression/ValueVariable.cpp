@@ -74,6 +74,18 @@ static SourceExpression::Pointer create_int
    return SourceExpression::create_value_variable(var, context, pos);
 }
 
+static SourceExpression::Pointer create_uns(
+   bigsint data, VariableType *varType, SRCEXP_EXPR_ARGS)
+{
+   ObjectExpression::Pointer varData =
+      ObjectExpression::create_value_uns(data, pos);
+
+   SourceVariable::Pointer var =
+      SourceVariable::create_literal(varType, varData, pos);
+
+   return SourceExpression::create_value_variable(var, context, pos);
+}
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -136,7 +148,7 @@ SRCEXP_EXPRVAL_DEFN(i, long)
 SRCEXP_EXPRVAL_DEFN(r, real)
 {
    ObjectExpression::Pointer realVarData =
-      ObjectExpression::create_value_float(value, pos);
+      ObjectExpression::create_value_fix(value, pos);
 
    VariableType::Reference realVarType = VariableType::get_bt_fix();
 
@@ -190,7 +202,7 @@ SRCEXP_EXPRVAL_DEFN(s, string)
 //
 SRCEXP_EXPRVAL_DEFN(i, uchar)
 {
-   return create_int(value, VariableType::get_bt_uns_hh(), context, pos);
+   return create_uns(value, VariableType::get_bt_uns_hh(), context, pos);
 }
 
 //
@@ -198,7 +210,7 @@ SRCEXP_EXPRVAL_DEFN(i, uchar)
 //
 SRCEXP_EXPRVAL_DEFN(i, uint)
 {
-   return create_int(value, VariableType::get_bt_uns(), context, pos);
+   return create_uns(value, VariableType::get_bt_uns(), context, pos);
 }
 
 //
@@ -206,7 +218,7 @@ SRCEXP_EXPRVAL_DEFN(i, uint)
 //
 SRCEXP_EXPRVAL_DEFN(i, ullong)
 {
-   return create_int(value, VariableType::get_bt_uns_ll(), context, pos);
+   return create_uns(value, VariableType::get_bt_uns_ll(), context, pos);
 }
 
 //
@@ -214,7 +226,7 @@ SRCEXP_EXPRVAL_DEFN(i, ullong)
 //
 SRCEXP_EXPRVAL_DEFN(i, ulong)
 {
-   return create_int(value, VariableType::get_bt_uns_l(), context, pos);
+   return create_uns(value, VariableType::get_bt_uns_l(), context, pos);
 }
 
 //
@@ -222,7 +234,7 @@ SRCEXP_EXPRVAL_DEFN(i, ulong)
 //
 SRCEXP_EXPRVAL_DEFN(i, ushort)
 {
-   return create_int(value, VariableType::get_bt_uns_h(), context, pos);
+   return create_uns(value, VariableType::get_bt_uns_h(), context, pos);
 }
 
 //

@@ -51,13 +51,8 @@ public:
    {
    }
 
-   //
-   // ::resolveInt
-   //
-   virtual bigsint resolveInt() const
-   {
-      return exprL->resolveInt() >> exprR->resolveInt();
-   }
+   bigsint resolveINT() const {return exprL->resolveINT() >> exprR->resolveINT();}
+   biguint resolveUNS() const {return exprL->resolveUNS() >> exprR->resolveUNS();}
 
 protected:
    //
@@ -79,18 +74,15 @@ protected:
 //
 // ObjectExpression::create_binary_rsh
 //
-ObjectExpression::Reference ObjectExpression::create_binary_rsh(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_binary_rsh(OBJEXP_EXPRBIN_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryRSh(
-      exprL, exprR, pos));
+   return static_cast<Reference>(new ObjectExpression_BinaryRSh(exprL, exprR, pos));
 }
 
 //
 // ObjectExpression::create_binary_rsh
 //
-ObjectExpression::Reference ObjectExpression::create_binary_rsh(
-   std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_binary_rsh(std::istream *in)
 {
    return static_cast<Reference>(new ObjectExpression_BinaryRSh(in));
 }

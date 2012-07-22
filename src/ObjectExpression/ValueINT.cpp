@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// ObjectExpression handling of symbols.
+// ObjectExpression handling of signed integer numbers.
 //
 //-----------------------------------------------------------------------------
 
@@ -25,8 +25,6 @@
 
 #include "../ACSP.hpp"
 #include "../BinaryTokenACS.hpp"
-#include "../BinaryTokenPPACS.hpp"
-#include "../ObjectCode.hpp"
 #include "../object_io.hpp"
 
 
@@ -35,26 +33,25 @@
 //
 
 //
-// ObjectExpression_ValueSymbol
+// ObjectExpression_ValueINT
 //
-class ObjectExpression_ValueSymbol : public ObjectExpression
+class ObjectExpression_ValueINT : public ObjectExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_ValueSymbol,
-                                   ObjectExpression);
+   MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueINT, ObjectExpression);
 
 public:
    //
-   // ::ObjectExpression_ValueSymbol
+   // ::ObjectExpression_ValueINT
    //
-   ObjectExpression_ValueSymbol(std::string const &_value, OBJEXP_EXPR_PARM)
-    : Super(OBJEXP_EXPR_PASS), value(_value)
+   ObjectExpression_ValueINT(bigsint _value, SourcePosition const &_pos)
+    : Super(_pos), value(_value)
    {
    }
 
    //
-   // ::ObjectExpression_ValueSymbol
+   // ::ObjectExpression_ValueINT
    //
-   ObjectExpression_ValueSymbol(std::istream *in) : Super(in)
+   ObjectExpression_ValueINT(std::istream *in) : Super(in)
    {
       read_object(in, &value);
    }
@@ -64,10 +61,7 @@ public:
    //
    virtual bool canResolve() const
    {
-      ObjectExpression::Pointer symbol =
-         ObjectExpression::get_symbol_null(value);
-
-      return symbol && symbol->canResolve();
+      return true;
    }
 
    //
@@ -75,19 +69,23 @@ public:
    //
    virtual ExpressionType getType() const
    {
-      return ObjectExpression::get_symbol_type(value, pos);
+      return ET_INT;
    }
 
-   bigreal resolveFIX() const {return get_symbol(value, pos)->resolveFIX();}
-   bigreal resolveFLT() const {return get_symbol(value, pos)->resolveFLT();}
-   bigsint resolveINT() const {return get_symbol(value, pos)->resolveINT();}
-   biguint resolveUNS() const {return get_symbol(value, pos)->resolveUNS();}
-   ObjectCodeSet resolveOCS() const {return get_symbol(value, pos)->resolveOCS();}
+   //
+   // ::resolveINT
+   //
+   virtual bigsint resolveINT() const
+   {
+      return value;
+   }
 
    //
-   // ::resolveSymbol
+   // ::resolveUNS
    //
-   virtual std::string resolveSymbol() const
+   // HACK! Allow resolving as UNS.
+   //
+   virtual biguint resolveUNS() const
    {
       return value;
    }
@@ -98,7 +96,7 @@ protected:
    //
    virtual void writeObject(std::ostream *out) const
    {
-      write_object(out, OT_VALUE_SYMBOL);
+      write_object(out, OT_VALUE_INT);
 
       Super::writeObject(out);
 
@@ -111,11 +109,11 @@ private:
    //
    virtual void writeACSPLong(std::ostream *out) const
    {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_SYMBOL);
-      BinaryTokenPPACS::write_ACSP_string(out, value);
+      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LITERAL);
+      BinaryTokenACS::write_ACS0_32(out, value);
    }
 
-   std::string value;
+   bigsint value;
 };
 
 
@@ -124,20 +122,19 @@ private:
 //
 
 //
-// ObjectExpression::create_value_symbol
+// ObjectExpression::create_value_int
 //
-ObjectExpression::Reference ObjectExpression::create_value_symbol(
-   std::string const &value, OBJEXP_EXPR_ARGS)
+ObjectExpression::Reference ObjectExpression::create_value_int(bigsint value, OBJEXP_EXPR_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueSymbol(value, pos));
+   return static_cast<Reference>(new ObjectExpression_ValueINT(value, pos));
 }
 
 //
-// ObjectExpression::create_value_symbol
+// ObjectExpression::create_value_int
 //
-ObjectExpression::Reference ObjectExpression::create_value_symbol(std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_value_int(std::istream *in)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueSymbol(in));
+   return static_cast<Reference>(new ObjectExpression_ValueINT(in));
 }
 
 // EOF

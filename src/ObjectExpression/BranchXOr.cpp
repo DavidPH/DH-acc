@@ -69,19 +69,17 @@ public:
    {
       switch (exprL->getType())
       {
-      case ET_ARRAY:
-      case ET_OCODE:
-      case ET_STRUCT:
-         break;
+      case ET_FIX: return !exprL->resolveFIX() ^ !exprR->resolveFIX();
+      case ET_FLT: return !exprL->resolveFLT() ^ !exprR->resolveFLT();
+      case ET_INT: return !exprL->resolveINT() ^ !exprR->resolveINT();
+      case ET_UNS: return !exprL->resolveUNS() ^ !exprR->resolveUNS();
+      case ET_OCS: break;
 
-      case ET_FLOAT:
-         return !!exprL->resolveFloat() ^ !!exprR->resolveFloat();
-
-      case ET_INT:
-         return !!exprL->resolveInt() ^ !!exprR->resolveInt();
+      case ET_ARR: break;
+      case ET_MAP: break;
       }
 
-      return Super::resolveInt();
+      return Super::resolveINT();
    }
 
 protected:

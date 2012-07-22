@@ -68,7 +68,7 @@ static SourceExpression::Pointer add_var(SourceContext *context,
    case STORE_WORLDARRAY:
    case STORE_GLOBALARRAY:
       if (store.area)
-         context->addVar(var, externDef, externVis, store.area->resolveInt());
+         context->addVar(var, externDef, externVis, store.area->resolveUNS());
       else
          context->addVar(var, externDef, externVis);
 
@@ -85,7 +85,7 @@ static SourceExpression::Pointer add_var(SourceContext *context,
             make_string(store.type).c_str());
 
       if (addr)
-         context->addVar(var, externDef, externVis, addr->resolveInt());
+         context->addVar(var, externDef, externVis, addr->resolveUNS());
       else
          context->addVar(var, externDef, externVis);
 

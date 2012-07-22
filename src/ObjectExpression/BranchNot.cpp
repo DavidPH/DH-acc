@@ -64,25 +64,23 @@ public:
    }
 
    //
-   // ::resolveInt
+   // ::resolveINT
    //
-   virtual bigsint resolveInt() const
+   virtual bigsint resolveINT() const
    {
-      switch (expr->getType())
+      switch(expr->getType())
       {
-      case ET_ARRAY:
-      case ET_OCODE:
-      case ET_STRUCT:
-         break;
+      case ET_FIX: return !expr->resolveFIX();
+      case ET_FLT: return !expr->resolveFLT();
+      case ET_INT: return !expr->resolveINT();
+      case ET_UNS: return !expr->resolveUNS();
+      case ET_OCS: break;
 
-      case ET_FLOAT:
-         return !expr->resolveFloat();
-
-      case ET_INT:
-         return !expr->resolveInt();
+      case ET_ARR: break;
+      case ET_MAP: break;
       }
 
-      return Super::resolveInt();
+      return Super::resolveINT();
    }
 
 protected:
@@ -115,8 +113,7 @@ private:
 //
 // ObjectExpression::create_branch_not
 //
-ObjectExpression::Reference ObjectExpression::create_branch_not(
-   OBJEXP_EXPRUNA_ARGS)
+ObjectExpression::Reference ObjectExpression::create_branch_not(OBJEXP_EXPRUNA_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_BranchNot(expr, pos));
 }
@@ -124,8 +121,7 @@ ObjectExpression::Reference ObjectExpression::create_branch_not(
 //
 // ObjectExpression::create_branch_not
 //
-ObjectExpression::Reference ObjectExpression::create_branch_not(
-   std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_branch_not(std::istream *in)
 {
    return static_cast<Reference>(new ObjectExpression_BranchNot(in));
 }

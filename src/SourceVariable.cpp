@@ -120,7 +120,7 @@ VariableData::Pointer SourceVariable::getData() const
 
    case STORE_MAPARRAY:
       if (ObjectData_Array::meta_map(nameObj))
-         arrbase = SourceExpression::create_value_int
+         arrbase = SourceExpression::create_value_uint
             (1, SourceContext::global_context, pos);
 
       return VariableData::create_registerarray
@@ -128,7 +128,7 @@ VariableData::Pointer SourceVariable::getData() const
 
    case STORE_WORLDARRAY:
       if (ObjectData_Array::meta_world(nameObj))
-         arrbase = SourceExpression::create_value_int
+         arrbase = SourceExpression::create_value_uint
             (1, SourceContext::global_context, pos);
 
       return VariableData::create_registerarray
@@ -136,7 +136,7 @@ VariableData::Pointer SourceVariable::getData() const
 
    case STORE_GLOBALARRAY:
       if (ObjectData_Array::meta_global(nameObj))
-         arrbase = SourceExpression::create_value_int
+         arrbase = SourceExpression::create_value_uint
             (1, SourceContext::global_context, pos);
 
       return VariableData::create_registerarray

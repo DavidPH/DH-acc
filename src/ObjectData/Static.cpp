@@ -129,7 +129,7 @@ void ObjectData_Static::add
       data.externDef = externDef;
       data.externVis = externVis;
 
-      ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
+      ObjectExpression::add_symbol(name, ObjectExpression::ET_UNS);
    }
    else if (data.externDef && externDef)
    {
@@ -150,7 +150,7 @@ void ObjectData_Static::generate_symbols()
 
    for (itr = static_table.begin(); itr != end; ++itr)
    {
-      obj = ObjectExpression::create_value_int
+      obj = ObjectExpression::create_value_uns
       (itr->second.number, SourcePosition::none());
 
       ObjectExpression::add_symbol(itr->second.name, obj);

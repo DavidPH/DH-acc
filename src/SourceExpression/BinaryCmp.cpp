@@ -112,7 +112,7 @@ public:
       // long long < 0 and long long >= 0 can be optimized by only checking the
       // high byte.
       if (inBT == VariableType::BT_INT_LL && (ct == CMP_LT || ct == CMP_GE) &&
-          objR && !objR->resolveInt())
+          objR && !objR->resolveINT())
       {
          ObjectExpression::Pointer tmpH = context->getTempVar(0);
 

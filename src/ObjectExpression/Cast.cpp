@@ -76,51 +76,84 @@ public:
    }
 
    //
-   // ::resolveFloat
+   // ::resolveFIX
    //
-   virtual bigreal resolveFloat() const
+   virtual bigreal resolveFIX() const
    {
-      if (dstType != ET_FLOAT) return Super::resolveFloat();
-
-      switch (srcType)
+      if(dstType == ET_FIX) switch(srcType)
       {
-      case ET_ARRAY:
-      case ET_OCODE:
-      case ET_STRUCT:
-         break;
+      case ET_FIX: return expr->resolveFIX();
+      case ET_FLT: return expr->resolveFLT();
+      case ET_INT: return static_cast<bigreal>(expr->resolveINT());
+      case ET_UNS: return static_cast<bigreal>(expr->resolveUNS());
+      case ET_OCS: break;
 
-      case ET_FLOAT:
-         return expr->resolveFloat();
-
-      case ET_INT:
-         return static_cast<bigreal>(expr->resolveInt());
+      case ET_ARR: break;
+      case ET_MAP: break;
       }
 
-      return Super::resolveFloat();
+      return Super::resolveFIX();
    }
 
    //
-   // ::resolveInt
+   // ::resolveFLT
    //
-   virtual bigsint resolveInt() const
+   virtual bigreal resolveFLT() const
    {
-      if (dstType != ET_INT) return Super::resolveInt();
-
-      switch (srcType)
+      if(dstType == ET_FLT) switch(srcType)
       {
-      case ET_ARRAY:
-      case ET_OCODE:
-      case ET_STRUCT:
-         break;
+      case ET_FIX: return expr->resolveFIX();
+      case ET_FLT: return expr->resolveFLT();
+      case ET_INT: return static_cast<bigreal>(expr->resolveINT());
+      case ET_UNS: return static_cast<bigreal>(expr->resolveUNS());
+      case ET_OCS: break;
 
-      case ET_FLOAT:
-         return static_cast<bigsint>(expr->resolveFloat());
-
-      case ET_INT:
-         return expr->resolveInt();
+      case ET_ARR: break;
+      case ET_MAP: break;
       }
 
-      return Super::resolveInt();
+      return Super::resolveFLT();
+   }
+
+   //
+   // ::resolveINT
+   //
+   virtual bigsint resolveINT() const
+   {
+      if(dstType == ET_INT) switch(srcType)
+      {
+      case ET_FIX: return static_cast<bigsint>(expr->resolveFIX());
+      case ET_FLT: return static_cast<bigsint>(expr->resolveFLT());
+      case ET_INT: return expr->resolveINT();
+      case ET_UNS: return expr->resolveUNS();
+      case ET_OCS: break;
+
+      case ET_ARR: break;
+      case ET_MAP: break;
+      }
+
+      return Super::resolveINT();
+   }
+
+   //
+   // ::resolveUNS
+   //
+   virtual biguint resolveUNS() const
+   {
+      // HACK! Allow UNS for INT.
+      if(dstType == ET_UNS || dstType == ET_INT) switch(srcType)
+      {
+      case ET_FIX: return static_cast<bigsint>(expr->resolveFIX());
+      case ET_FLT: return static_cast<bigsint>(expr->resolveFLT());
+      case ET_INT: return expr->resolveINT();
+      case ET_UNS: return expr->resolveUNS();
+      case ET_OCS: break;
+
+      case ET_ARR: break;
+      case ET_MAP: break;
+      }
+
+      return Super::resolveUNS();
    }
 
 protected:
@@ -149,14 +182,14 @@ private:
          return;
       }
 
-      if (dstType == ET_FLOAT && srcType == ET_INT)
+      if(dstType == ET_FIX && srcType == ET_INT)
       {
          BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_F2I);
          expr->writeACSP(out);
          return;
       }
 
-      if (dstType == ET_INT && srcType == ET_FLOAT)
+      if(dstType == ET_INT && srcType == ET_FIX)
       {
          BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_I2F);
          expr->writeACSP(out);
@@ -184,23 +217,99 @@ ObjectExpression::Reference ObjectExpression::create_cast(std::istream *in)
 }
 
 //
-// ObjectExpression::create_cast_float_to_int
+// ObjectExpression::create_cast_fix_to_flt
 //
-ObjectExpression::Reference ObjectExpression::create_cast_float_to_int(
-   OBJEXP_EXPRUNA_ARGS)
+ObjectExpression::Reference ObjectExpression::create_cast_fix_to_flt(OBJEXP_EXPRUNA_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_Cast(
-      expr, pos, ET_INT, ET_FLOAT));
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_FLT, ET_FIX));
 }
 
 //
-// ObjectExpression::create_cast_int_to_float
+// ObjectExpression::create_cast_fix_to_int
 //
-ObjectExpression::Reference ObjectExpression::create_cast_int_to_float(
-   OBJEXP_EXPRUNA_ARGS)
+ObjectExpression::Reference ObjectExpression::create_cast_fix_to_int(OBJEXP_EXPRUNA_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_Cast(
-      expr, pos, ET_FLOAT, ET_INT));
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_INT, ET_FIX));
+}
+
+//
+// ObjectExpression::create_cast_fix_to_uns
+//
+ObjectExpression::Reference ObjectExpression::create_cast_fix_to_uns(OBJEXP_EXPRUNA_ARGS)
+{
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_UNS, ET_FIX));
+}
+
+//
+// ObjectExpression::create_cast_flt_to_fix
+//
+ObjectExpression::Reference ObjectExpression::create_cast_flt_to_fix(OBJEXP_EXPRUNA_ARGS)
+{
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_FIX, ET_FLT));
+}
+
+//
+// ObjectExpression::create_cast_flt_to_int
+//
+ObjectExpression::Reference ObjectExpression::create_cast_flt_to_int(OBJEXP_EXPRUNA_ARGS)
+{
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_INT, ET_FLT));
+}
+
+//
+// ObjectExpression::create_cast_flt_to_uns
+//
+ObjectExpression::Reference ObjectExpression::create_cast_flt_to_uns(OBJEXP_EXPRUNA_ARGS)
+{
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_UNS, ET_FLT));
+}
+
+//
+// ObjectExpression::create_cast_int_to_fix
+//
+ObjectExpression::Reference ObjectExpression::create_cast_int_to_fix(OBJEXP_EXPRUNA_ARGS)
+{
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_FIX, ET_INT));
+}
+
+//
+// ObjectExpression::create_cast_int_to_flt
+//
+ObjectExpression::Reference ObjectExpression::create_cast_int_to_flt(OBJEXP_EXPRUNA_ARGS)
+{
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_FLT, ET_INT));
+}
+
+//
+// ObjectExpression::create_cast_int_to_uns
+//
+ObjectExpression::Reference ObjectExpression::create_cast_int_to_uns(OBJEXP_EXPRUNA_ARGS)
+{
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_UNS, ET_INT));
+}
+
+//
+// ObjectExpression::create_cast_uns_to_fix
+//
+ObjectExpression::Reference ObjectExpression::create_cast_uns_to_fix(OBJEXP_EXPRUNA_ARGS)
+{
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_FIX, ET_UNS));
+}
+
+//
+// ObjectExpression::create_cast_uns_to_flt
+//
+ObjectExpression::Reference ObjectExpression::create_cast_uns_to_flt(OBJEXP_EXPRUNA_ARGS)
+{
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_FLT, ET_UNS));
+}
+
+//
+// ObjectExpression::create_cast_uns_to_int
+//
+ObjectExpression::Reference ObjectExpression::create_cast_uns_to_int(OBJEXP_EXPRUNA_ARGS)
+{
+   return static_cast<Reference>(new ObjectExpression_Cast(expr, pos, ET_INT, ET_UNS));
 }
 
 // EOF

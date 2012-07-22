@@ -70,7 +70,7 @@ public:
            iter != expressions.end(); ++iter)
          elems.push_back((*iter)->makeObject());
 
-      return ObjectExpression::create_value_array(elems, pos);
+      return ObjectExpression::create_value_arr(elems, pos);
    }
 
 private:

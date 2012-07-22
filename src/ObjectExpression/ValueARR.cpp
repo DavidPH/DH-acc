@@ -31,36 +31,34 @@
 //
 
 //
-// ObjectExpression_ValueCompound
+// ObjectExpression_ValueARR
 //
-class ObjectExpression_ValueCompound : public ObjectExpression
+class ObjectExpression_ValueARR : public ObjectExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_ValueCompound,
-                                   ObjectExpression);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_ValueARR, ObjectExpression);
 
 public:
    //
-   // ::ObjectExpression_ValueCompound
+   // ::ObjectExpression_ValueARR
    //
-   ObjectExpression_ValueCompound(Vector const &_elems, VecStr const &_names,
-                                  SourcePosition const &_pos)
-    : Super(_pos), elems(_elems), names(_names), type(ET_STRUCT)
+   ObjectExpression_ValueARR(Vector const &_elems, VecStr const &_names,
+                             SourcePosition const &_pos)
+    : Super(_pos), elems(_elems), names(_names), type(ET_MAP)
    {
    }
 
    //
-   // ::ObjectExpression_ValueCompound
+   // ::ObjectExpression_ValueARR
    //
-   ObjectExpression_ValueCompound(Vector const &_elems,
-                                  SourcePosition const &_pos)
-    : Super(_pos), elems(_elems), type(ET_ARRAY)
+   ObjectExpression_ValueARR(Vector const &_elems, SourcePosition const &_pos)
+    : Super(_pos), elems(_elems), type(ET_ARR)
    {
    }
 
    //
-   // ::ObjectExpression_ValueCompound
+   // ::ObjectExpression_ValueARR
    //
-   ObjectExpression_ValueCompound(std::istream *in) : Super(in)
+   ObjectExpression_ValueARR(std::istream *in) : Super(in)
    {
       read_object(in, &elems);
       read_object(in, &names);
@@ -103,28 +101,26 @@ public:
    }
 
    //
-   // ::resolveElement
+   // ::resolveARR
    //
-   virtual ObjectExpression::Reference resolveElement(bigsint index) const
+   virtual ObjectExpression::Reference resolveARR(biguint index) const
    {
-      size_t i = static_cast<size_t>(index);
+      if(index >= elems.size())
+         return Super::resolveARR(index);
 
-      if (i >= elems.size())
-         return Super::resolveElement(index);
-
-      return static_cast<ObjectExpression::Reference>(elems[i]);
+      return static_cast<ObjectExpression::Reference>(elems[index]);
    }
 
    //
-   // ::resolveMember
+   // ::resolveMAP
    //
-   virtual ObjectExpression::Reference resolveMember(std::string const &name) const
+   virtual ObjectExpression::Reference resolveMAP(std::string const &name) const
    {
       for (size_t i = 0; i < names.size(); ++i)
          if (names[i] == name)
             return static_cast<ObjectExpression::Reference>(elems[i]);
 
-      return Super::resolveMember(name);
+      return Super::resolveMAP(name);
    }
 
 protected:
@@ -133,7 +129,7 @@ protected:
    //
    virtual void writeObject(std::ostream *out) const
    {
-      write_object(out, OT_VALUE_COMPOUND);
+      write_object(out, OT_VALUE_ARR);
 
       Super::writeObject(out);
 
@@ -156,32 +152,29 @@ private:
 //
 
 //
-// ObjectExpression::create_value_array
+// ObjectExpression::create_value_arr
 //
-ObjectExpression::Reference ObjectExpression::create_value_array(
+ObjectExpression::Reference ObjectExpression::create_value_arr(
    Vector const &elems, OBJEXP_EXPR_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueCompound(
-      elems, pos));
+   return static_cast<Reference>(new ObjectExpression_ValueARR(elems, pos));
 }
 
 //
-// ObjectExpression::create_value_compound
+// ObjectExpression::create_value_arr
 //
-ObjectExpression::Reference ObjectExpression::create_value_compound(
-   std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_value_arr(std::istream *in)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueCompound(in));
+   return static_cast<Reference>(new ObjectExpression_ValueARR(in));
 }
 
 //
-// ObjectExpression::create_value_struct
+// ObjectExpression::create_value_map
 //
-ObjectExpression::Reference ObjectExpression::create_value_struct(
+ObjectExpression::Reference ObjectExpression::create_value_map(
    Vector const &elems, VecStr const &names, OBJEXP_EXPR_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueCompound(
-      elems, names, pos));
+   return static_cast<Reference>(new ObjectExpression_ValueARR(elems, names, pos));
 }
 
 // EOF

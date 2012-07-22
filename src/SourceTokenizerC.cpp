@@ -369,7 +369,7 @@ void SourceTokenizerC::doCommand_elif(SourceTokenC *tok)
    if (skipStack.empty())
       ERROR(tok->pos, "unmatched #elif");
 
-   bool ifResult = !!getExpr()->resolveInt();
+   bool ifResult = !!getExpr()->resolveINT();
    doAssert(peekRaw(), SourceTokenC::TT_ENDL);
 
      skipStack.back() = unskipStack.back() || !ifResult;
@@ -407,7 +407,7 @@ void SourceTokenizerC::doCommand_error(SourceTokenC *)
 //
 void SourceTokenizerC::doCommand_if(SourceTokenC *)
 {
-   addSkip(!getExpr()->resolveInt());
+   addSkip(!getExpr()->resolveINT());
    doAssert(peekRaw(), SourceTokenC::TT_ENDL);
 }
 

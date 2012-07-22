@@ -582,7 +582,7 @@ SourceExpression::Pointer SourceExpressionDS::make_statement(
       else if (tok->data == "case")
       {
          expr = make_expression(in, context);
-         bigsint value = expr->makeObject()->resolveInt();
+         bigsint value = expr->makeObject()->resolveINT();
 
          in->get(SourceTokenC::TT_COLON);
          expr = make_statement(in, context);

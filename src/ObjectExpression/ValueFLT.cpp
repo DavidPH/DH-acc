@@ -17,13 +17,15 @@
 //
 //-----------------------------------------------------------------------------
 //
-// ObjectExpression handling of object-codes.
+// ObjectExpression handling of floating-point numbers.
 //
 //-----------------------------------------------------------------------------
 
 #include "../ObjectExpression.hpp"
 
-#include "../ObjectCode.hpp"
+#include "../ACSP.hpp"
+#include "../BinaryTokenACS.hpp"
+#include "../object_io.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -31,26 +33,25 @@
 //
 
 //
-// ObjectExpression_ValueOCode
+// ObjectExpression_ValueFLT
 //
-class ObjectExpression_ValueOCode : public ObjectExpression
+class ObjectExpression_ValueFLT : public ObjectExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_ValueOCode,
-                                   ObjectExpression);
+   MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueFLT, ObjectExpression);
 
 public:
    //
-   // ::ObjectExpression_ValueOCode
+   // ::ObjectExpression_ValueFLT
    //
-   ObjectExpression_ValueOCode(ObjectCodeSet const &_value, OBJEXP_EXPR_PARM)
-    : Super(OBJEXP_EXPR_PASS), value(_value)
+   ObjectExpression_ValueFLT(bigreal _value, SourcePosition const &_pos)
+    : Super(_pos), value(_value)
    {
    }
 
    //
-   // ::ObjectExpression_ValueOCode
+   // ::ObjectExpression_ValueFLT
    //
-   ObjectExpression_ValueOCode(std::istream *in) : Super(in)
+   ObjectExpression_ValueFLT(std::istream *in) : Super(in)
    {
       read_object(in, &value);
    }
@@ -68,13 +69,13 @@ public:
    //
    virtual ExpressionType getType() const
    {
-      return ET_OCODE;
+      return ET_FLT;
    }
 
    //
-   // ::resolveOCode
+   // ::resolveFLT
    //
-   virtual ObjectCodeSet resolveOCode() const
+   virtual bigreal resolveFLT() const
    {
       return value;
    }
@@ -83,9 +84,9 @@ protected:
    //
    // ::writeObject
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual void writeObject(std::ostream * out) const
    {
-      write_object(out, OT_VALUE_OCODE);
+      write_object(out, OT_VALUE_FLT);
 
       Super::writeObject(out);
 
@@ -93,7 +94,16 @@ protected:
    }
 
 private:
-   ObjectCodeSet value;
+   //
+   // ::writeACSPLong
+   //
+   virtual void writeACSPLong(std::ostream *out) const
+   {
+      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LITERAL);
+      BinaryTokenACS::write_ACS0_32(out, *this);
+   }
+
+   bigreal value;
 };
 
 
@@ -102,21 +112,19 @@ private:
 //
 
 //
-// ObjectExpression::create_value_ocode
+// ObjectExpression::create_value_flt
 //
-ObjectExpression::Reference ObjectExpression::create_value_ocode(
-   ObjectCodeSet const &value, OBJEXP_EXPR_ARGS)
+ObjectExpression::Reference ObjectExpression::create_value_flt(bigreal value, OBJEXP_EXPR_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueOCode(value, pos));
+   return static_cast<Reference>(new ObjectExpression_ValueFLT(value, pos));
 }
 
 //
-// ObjectExpression::create_value_ocode
+// ObjectExpression::create_value_flt
 //
-ObjectExpression::Reference ObjectExpression::create_value_ocode(
-   std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_value_flt(std::istream *in)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueOCode(in));
+   return static_cast<Reference>(new ObjectExpression_ValueFLT(in));
 }
 
 // EOF

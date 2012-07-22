@@ -39,6 +39,18 @@
 // Static Variables                                                           |
 //
 
+static std::string et_names[] =
+{
+   "ET_FIX",
+   "ET_FLT",
+   "ET_INT",
+   "ET_UNS",
+   "ET_OCS",
+
+   "ET_ARR",
+   "ET_MAP",
+};
+
 static option::option_dptr<bool> option_string_tag_handler
 ('\0', "string-tag", "features",
  "For targets that support it, enables tagging of strings. On by default.",
@@ -214,44 +226,79 @@ void ObjectExpression::iter_library
 }
 
 //
-// ObjectExpression::resolveElement
+// ObjectExpression::resolveFIX
 //
-ObjectExpression::Reference ObjectExpression::resolveElement(bigsint) const
+bigreal ObjectExpression::resolveFIX() const
 {
-   ERROR_NP("cannot resolve element");
+   ERROR_NP("cannot resolve fixed for %s", make_string(getType()).c_str());
 }
 
 //
-// ObjectExpression::resolveFloat
+// ObjectExpression::resolveFLT
 //
-bigreal ObjectExpression::resolveFloat() const
+bigreal ObjectExpression::resolveFLT() const
 {
-   ERROR_NP("cannot resolve float");
+   ERROR_NP("cannot resolve float for %s", make_string(getType()).c_str());
 }
 
 //
-// ObjectExpression::resolveInt
+// ObjectExpression::resolveINT
 //
-bigsint ObjectExpression::resolveInt() const
+bigsint ObjectExpression::resolveINT() const
 {
-   ERROR_NP("cannot resolve int");
+   ERROR_NP("cannot resolve integer for %s", make_string(getType()).c_str());
 }
 
 //
-// ObjectExpression::resolveMember
+// ObjectExpression::resolveUNS
 //
-ObjectExpression::Reference ObjectExpression::resolveMember(
-   std::string const &name) const
+biguint ObjectExpression::resolveUNS() const
 {
-   ERROR_NP("cannot resolve member: %s", name.c_str());
+   ERROR_NP("cannot resolve unsigned for %s", make_string(getType()).c_str());
 }
 
 //
-// ObjectExpression::resolveOCode
+// ObjectExpression::resolveOCS
 //
-ObjectCodeSet ObjectExpression::resolveOCode() const
+ObjectCodeSet ObjectExpression::resolveOCS() const
 {
-   ERROR_NP("cannot resolve ocode");
+   ERROR_NP("cannot resolve object-code for %s", make_string(getType()).c_str());
+}
+
+//
+// ObjectExpression::resolveARR
+//
+ObjectExpression::Reference ObjectExpression::resolveARR(biguint index) const
+{
+   ERROR_NP("cannot resolve array element: %u", static_cast<unsigned int>(index));
+}
+
+//
+// ObjectExpression::resolveMAP
+//
+ObjectExpression::Reference ObjectExpression::resolveMAP(std::string const &name) const
+{
+   ERROR_NP("cannot resolve struct element: '%s'", name.c_str());
+}
+
+//
+// ObjectExpression::resolveBinary
+//
+biguint ObjectExpression::resolveBinary() const
+{
+   switch(getType())
+   {
+   case ET_FIX: return static_cast<bigsint>(resolveFIX() * 65536.0);
+   case ET_FLT: ERROR_NP("TODO");
+   case ET_INT: return resolveINT();
+   case ET_UNS: return resolveUNS();
+   case ET_OCS: ERROR_NP("cannot resolve raw bits of ET_OCS");
+
+   case ET_ARR: ERROR_NP("cannot resolve raw bits of ET_ARR");
+   case ET_MAP: ERROR_NP("cannot resolve raw bits of ET_MAP");
+   }
+
+   ERROR_NP("invalid ET");
 }
 
 //
@@ -330,6 +377,14 @@ void ObjectExpression::writeACSPLong(std::ostream *) const
 void ObjectExpression::writeObject(std::ostream *out) const
 {
    write_object(out, &pos);
+}
+
+//
+// make_string<ObjectExpression::ExpressionType>
+//
+std::string const &make_string(ObjectExpression::ExpressionType et)
+{
+   return et_names[et];
 }
 
 // EOF

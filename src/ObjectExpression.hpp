@@ -80,11 +80,14 @@ public:
 
    enum ExpressionType
    {
-      ET_ARRAY,
-      ET_OCODE,
-      ET_FLOAT,
-      ET_INT,
-      ET_STRUCT
+      ET_FIX, // bigreal
+      ET_FLT, // bigreal
+      ET_INT, // bigsint
+      ET_UNS, // biguint
+      ET_OCS, // ObjectCodeSet
+
+      ET_ARR,
+      ET_MAP,
    };
 
 
@@ -97,16 +100,23 @@ public:
 
    virtual ExpressionType getType() const = 0;
 
-   virtual Reference resolveElement(bigsint index) const;
-   virtual bigreal resolveFloat() const;
-   virtual bigsint resolveInt() const;
-   virtual Reference resolveMember(std::string const &name) const;
-   virtual ObjectCodeSet resolveOCode() const;
+   virtual bigreal resolveFIX() const;
+   virtual bigreal resolveFLT() const;
+   virtual bigsint resolveINT() const;
+   virtual biguint resolveUNS() const;
+   virtual ObjectCodeSet resolveOCS() const;
+
+   virtual Reference resolveARR(biguint index) const;
+   virtual Reference resolveMAP(std::string const &name) const;
+
+   virtual biguint     resolveBinary() const;
    virtual std::string resolveString() const;
    virtual std::string resolveSymbol() const;
 
    void writeACSP(std::ostream *out) const;
 
+
+   friend std::string const &make_string(ExpressionType et);
 
    friend void override_object(ExpressionType *out, ExpressionType const *in);
    friend void override_object(Pointer        *out, Pointer        const *in);
@@ -155,14 +165,26 @@ public:
    static Reference create_branch_not(OBJEXP_EXPRUNA_ARGS);
    static Reference create_branch_xor(OBJEXP_EXPRBIN_ARGS);
 
-   static Reference create_cast_float_to_int(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_int_to_float(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_fix_to_flt(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_fix_to_int(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_fix_to_uns(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_flt_to_fix(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_flt_to_int(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_flt_to_uns(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_int_to_fix(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_int_to_flt(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_int_to_uns(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_uns_to_fix(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_uns_to_flt(OBJEXP_EXPRUNA_ARGS);
+   static Reference create_cast_uns_to_int(OBJEXP_EXPRUNA_ARGS);
 
-   static Reference create_value_array(Vector const &elems, SourcePosition const &pos);
-   static Reference create_value_ocode(ObjectCodeSet const &ocode, SourcePosition const &pos);
-   static Reference create_value_float(bigreal value, SourcePosition const &pos);
+   static Reference create_value_fix(bigreal value, SourcePosition const &pos);
+   static Reference create_value_flt(bigreal value, SourcePosition const &pos);
    static Reference create_value_int(bigsint value, SourcePosition const &pos);
-   static Reference create_value_struct(Vector const &elems, VecStr const &names, SourcePosition const &pos);
+   static Reference create_value_uns(biguint value, SourcePosition const &pos);
+   static Reference create_value_ocs(ObjectCodeSet const &ocode, SourcePosition const &pos);
+   static Reference create_value_arr(Vector const &elems, SourcePosition const &pos);
+   static Reference create_value_map(Vector const &elems, VecStr const &names, SourcePosition const &pos);
    static Reference create_value_symbol(std::string const &symbol, SourcePosition const &pos);
 
 	static void do_deferred_allocation();
@@ -216,10 +238,12 @@ protected:
 
       OT_CAST,
 
-      OT_VALUE_COMPOUND,
-      OT_VALUE_FLOAT,
+      OT_VALUE_FIX,
+      OT_VALUE_FLT,
       OT_VALUE_INT,
-      OT_VALUE_OCODE,
+      OT_VALUE_UNS,
+      OT_VALUE_OCS,
+      OT_VALUE_ARR,
       OT_VALUE_SYMBOL,
 
       OT_NONE
@@ -265,11 +289,13 @@ protected:
 
    static Reference create_cast(std::istream *in);
 
-   static Reference create_value_compound(std::istream *in);
-   static Reference create_value_float   (std::istream *in);
-   static Reference create_value_int     (std::istream *in);
-   static Reference create_value_ocode   (std::istream *in);
-   static Reference create_value_symbol  (std::istream *in);
+   static Reference create_value_fix(std::istream *in);
+   static Reference create_value_flt(std::istream *in);
+   static Reference create_value_int(std::istream *in);
+   static Reference create_value_uns(std::istream *in);
+   static Reference create_value_ocs(std::istream *in);
+   static Reference create_value_arr(std::istream *in);
+   static Reference create_value_symbol(std::istream *in);
 
 private:
    virtual void writeACSPLong(std::ostream *out) const;

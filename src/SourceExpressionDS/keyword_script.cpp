@@ -186,7 +186,7 @@ static SourceExpression::Pointer make_script
       }
       else
       {
-         scriptNumber = expr->makeObject()->resolveInt();
+         scriptNumber = expr->makeObject()->resolveINT();
          named = false;
       }
    }

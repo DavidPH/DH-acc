@@ -46,7 +46,7 @@ void SourceExpression::make_objects_call_asmfunc
 {
    FUNCTION_PREAMBLE
 
-   ObjectCodeSet ocode = data->resolveOCode();
+   ObjectCodeSet ocode = data->resolveOCS();
 
    bool immediate = ocode.ocode_imm != OCODE_NONE;
 

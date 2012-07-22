@@ -51,21 +51,10 @@ public:
    {
    }
 
-   //
-   // ::resolveFloat
-   //
-   virtual bigreal resolveFloat() const
-   {
-      return exprL->resolveFloat() + exprR->resolveFloat();
-   }
-
-   //
-   // ::resolveInt
-   //
-   virtual bigsint resolveInt() const
-   {
-      return exprL->resolveInt() + exprR->resolveInt();
-   }
+   bigreal resolveFLT() const {return exprL->resolveFLT() + exprR->resolveFLT();}
+   bigreal resolveFIX() const {return exprL->resolveFIX() + exprR->resolveFIX();}
+   bigsint resolveINT() const {return exprL->resolveINT() + exprR->resolveINT();}
+   biguint resolveUNS() const {return exprL->resolveUNS() + exprR->resolveUNS();}
 
 protected:
    //
@@ -99,18 +88,15 @@ private:
 //
 // ObjectExpression::create_binary_add
 //
-ObjectExpression::Reference ObjectExpression::create_binary_add(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_binary_add(OBJEXP_EXPRBIN_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryAdd(
-      exprL, exprR, pos));
+   return static_cast<Reference>(new ObjectExpression_BinaryAdd(exprL, exprR, pos));
 }
 
 //
 // ObjectExpression::create_binary_add
 //
-ObjectExpression::Reference ObjectExpression::create_binary_add(
-   std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_binary_add(std::istream *in)
 {
    return static_cast<Reference>(new ObjectExpression_BinaryAdd(in));
 }

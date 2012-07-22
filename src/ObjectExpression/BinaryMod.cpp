@@ -53,21 +53,10 @@ public:
    {
    }
 
-   //
-   // ::resolveFloat
-   //
-   virtual bigreal resolveFloat() const
-   {
-      return std::fmod(exprL->resolveFloat(), exprR->resolveFloat());
-   }
-
-   //
-   // ::resolveInt
-   //
-   virtual bigsint resolveInt() const
-   {
-      return exprL->resolveInt() % exprR->resolveInt();
-   }
+   bigreal resolveFLT() const {return std::fmod(exprL->resolveFLT(), exprR->resolveFLT());}
+   bigreal resolveFIX() const {return std::fmod(exprL->resolveFIX(), exprR->resolveFIX());}
+   bigsint resolveINT() const {return exprL->resolveINT() % exprR->resolveINT();}
+   biguint resolveUNS() const {return exprL->resolveUNS() % exprR->resolveUNS();}
 
 protected:
    //
@@ -89,18 +78,15 @@ protected:
 //
 // ObjectExpression::create_binary_mod
 //
-ObjectExpression::Reference ObjectExpression::create_binary_mod(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_binary_mod(OBJEXP_EXPRBIN_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryMod(
-      exprL, exprR, pos));
+   return static_cast<Reference>(new ObjectExpression_BinaryMod(exprL, exprR, pos));
 }
 
 //
 // ObjectExpression::create_binary_mod
 //
-ObjectExpression::Reference ObjectExpression::create_binary_mod(
-   std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_binary_mod(std::istream *in)
 {
    return static_cast<Reference>(new ObjectExpression_BinaryMod(in));
 }

@@ -469,7 +469,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
             {
                in->get();
 
-               enumVal = make_assignment(in, context)->makeObject()->resolveInt();
+               enumVal = make_assignment(in, context)->makeObject()->resolveINT();
             }
 
             ObjectExpression::Pointer enumObj =
@@ -650,7 +650,10 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
             if (in->peekType(SourceTokenC::TT_BRACK_C))
                widths.push_back(0);
             else
-               widths.push_back(make_expression(in, context)->makeObject()->resolveInt());
+            {
+               widths.push_back(create_value_cast_explicit(make_expression(in, context),
+                  VariableType::get_bt_uns(), context, tok->pos)->makeObject()->resolveUNS());
+            }
             in->get(SourceTokenC::TT_BRACK_C);
          }
          while (in->peekType(SourceTokenC::TT_BRACK_O));
@@ -664,7 +667,10 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
          if (in->peekType(SourceTokenC::TT_BRACK_C))
             width = 0;
          else
-            width = make_expression(in, context)->makeObject()->resolveInt();
+         {
+            width = create_value_cast_explicit(make_expression(in, context),
+               VariableType::get_bt_uns(), context, tok->pos)->makeObject()->resolveUNS();
+         }
          in->get(SourceTokenC::TT_BRACK_C);
 
          type = type->getArray(width);

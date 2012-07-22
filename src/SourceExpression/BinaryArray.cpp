@@ -76,7 +76,7 @@ public:
       bigsint                 size = type->getSize(pos);
 
       ObjectExpression::Pointer obj = exprL->makeObject();
-      obj = obj->resolveElement(exprR->makeObject()->resolveInt());
+      obj = obj->resolveARR(exprR->makeObject()->resolveUNS());
 
       return VariableData::create_literal(size, obj);
    }
@@ -91,7 +91,7 @@ public:
       if (exprL->getType()->getBasicType() == VariableType::BT_STR)
       {
          std::string string = exprL->makeObject()->resolveString();
-         biguint     index  = exprR->makeObject()->resolveInt();
+         biguint     index  = exprR->makeObject()->resolveUNS();
 
          if(index >= string.size())
             return ObjectExpression::create_value_int(0, pos);

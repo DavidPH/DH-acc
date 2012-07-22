@@ -106,7 +106,7 @@ CASE_REMAP(OP##_MAPREG##TO, OP##_MAPREG##TB); \
 CASE_REMAP(OP##_WLDREG##TO, OP##_WLDREG##TB)
 
 #define PUSH_TOKEN_ADD_ARG0()          \
-if (object->getArg(0)->resolveInt())   \
+if (object->getArg(0)->resolveINT())   \
 {                                      \
    PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1); \
    PUSH_TOKEN(BCODE_ADD_STK);          \
@@ -291,7 +291,7 @@ void BinaryTokenZDACS::make_tokens
    case OCODE_GET_STRING:
       PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1);
       // Don't tag nullptr.
-      if(option_string_tag && object->getArg(0)->resolveInt())
+      if(option_string_tag && object->getArg(0)->resolveINT())
          PUSH_TOKEN(BCODE_STRING_TAG);
       break;
 

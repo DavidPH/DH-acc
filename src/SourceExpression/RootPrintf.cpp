@@ -418,7 +418,7 @@ private:
 
          ObjectExpression::Pointer msgtypeObj =
             nextExpr(VariableType::get_bt_int())->makeObject();
-         bigsint msgtype = msgtypeObj->resolveInt();
+         bigsint msgtype = msgtypeObj->resolveINT();
 
          objects->addToken(OCODE_GET_IMM, msgtypeObj);
          makeExpr(objects, VariableType::get_bt_int());

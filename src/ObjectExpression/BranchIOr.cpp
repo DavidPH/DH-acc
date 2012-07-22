@@ -63,25 +63,23 @@ public:
    }
 
    //
-   // ::resolveInt
+   // ::resolveINT
    //
-   virtual bigsint resolveInt() const
+   virtual bigsint resolveINT() const
    {
-      switch (exprL->getType())
+      switch(exprL->getType())
       {
-      case ET_ARRAY:
-      case ET_OCODE:
-      case ET_STRUCT:
-         break;
+      case ET_FIX: return exprL->resolveFIX() || exprR->resolveFIX();
+      case ET_FLT: return exprL->resolveFLT() || exprR->resolveFLT();
+      case ET_INT: return exprL->resolveINT() || exprR->resolveINT();
+      case ET_UNS: return exprL->resolveUNS() || exprR->resolveUNS();
+      case ET_OCS: break;
 
-      case ET_FLOAT:
-         return exprL->resolveFloat() || exprR->resolveFloat();
-
-      case ET_INT:
-         return exprL->resolveInt() || exprR->resolveInt();
+      case ET_ARR: break;
+      case ET_MAP: break;
       }
 
-      return Super::resolveInt();
+      return Super::resolveINT();
    }
 
 protected:
@@ -116,8 +114,7 @@ private:
 //
 // ObjectExpression::create_branch_ior
 //
-ObjectExpression::Reference ObjectExpression::create_branch_ior(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_branch_ior(OBJEXP_EXPRBIN_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_BranchIOr(
       exprL, exprR, pos));
@@ -126,8 +123,7 @@ ObjectExpression::Reference ObjectExpression::create_branch_ior(
 //
 // ObjectExpression::create_branch_ior
 //
-ObjectExpression::Reference ObjectExpression::create_branch_ior(
-   std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_branch_ior(std::istream *in)
 {
    return static_cast<Reference>(new ObjectExpression_BranchIOr(in));
 }

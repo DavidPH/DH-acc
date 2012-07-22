@@ -57,11 +57,6 @@ static ObjectExpression::Pointer make_object
    case VariableType::BT_INT:
    case VariableType::BT_INT_L:
    case VariableType::BT_INT_LL:
-   case VariableType::BT_UNS_HH:
-   case VariableType::BT_UNS_H:
-   case VariableType::BT_UNS:
-   case VariableType::BT_UNS_L:
-   case VariableType::BT_UNS_LL:
       return ObjectExpression::create_value_int(0, pos);
 
    case VariableType::BT_CLX:
@@ -75,25 +70,34 @@ static ObjectExpression::Pointer make_object
    case VariableType::BT_FIX:
    case VariableType::BT_FIX_L:
    case VariableType::BT_FIX_LL:
+      return ObjectExpression::create_value_fix(0, pos);
+
    case VariableType::BT_FLT_HH:
    case VariableType::BT_FLT_H:
    case VariableType::BT_FLT:
    case VariableType::BT_FLT_L:
    case VariableType::BT_FLT_LL:
-      return ObjectExpression::create_value_float(0, pos);
+      return ObjectExpression::create_value_flt(0, pos);
+
+   case VariableType::BT_UNS_HH:
+   case VariableType::BT_UNS_H:
+   case VariableType::BT_UNS:
+   case VariableType::BT_UNS_L:
+   case VariableType::BT_UNS_LL:
+      return ObjectExpression::create_value_uns(0, pos);
 
    case VariableType::BT_LABEL:
    case VariableType::BT_STR:
-      return ObjectExpression::create_value_int(0, pos);
+      return ObjectExpression::create_value_uns(0, pos);
 
    case VariableType::BT_ARR:
       for (bigsint i = type->getWidth(); i--;)
          elems.push_back(make_object(type->getReturn(), pos));
-      return ObjectExpression::create_value_array(elems, pos);
+      return ObjectExpression::create_value_arr(elems, pos);
 
    case VariableType::BT_PTR:
    case VariableType::BT_PTR_NUL:
-      return ObjectExpression::create_value_int(0, pos);
+      return ObjectExpression::create_value_uns(0, pos);
 
    case VariableType::BT_ENUM:
       return ObjectExpression::create_value_int(0, pos);
@@ -101,7 +105,7 @@ static ObjectExpression::Pointer make_object
    case VariableType::BT_STRUCT:
       for (iter = types.begin(); iter != types.end(); ++iter)
          elems.push_back(make_object(*iter, pos));
-      return ObjectExpression::create_value_struct(elems, names, pos);
+      return ObjectExpression::create_value_map(elems, names, pos);
 
    case VariableType::BT_UNION:
       ERROR_P("make_object BT_UNION");
@@ -109,7 +113,7 @@ static ObjectExpression::Pointer make_object
    case VariableType::BT_BLOCK:
       for (iter = types.begin(); iter != types.end(); ++iter)
          elems.push_back(make_object(*iter, pos));
-      return ObjectExpression::create_value_array(elems, pos);
+      return ObjectExpression::create_value_arr(elems, pos);
 
    case VariableType::BT_ASMFUNC:
       ERROR_P("make_object BT_ASMFUNC");
@@ -119,7 +123,7 @@ static ObjectExpression::Pointer make_object
    case VariableType::BT_NATIVE:
    case VariableType::BT_SNAM:
    case VariableType::BT_SNUM:
-      return ObjectExpression::create_value_int(0, pos);
+      return ObjectExpression::create_value_uns(0, pos);
    }
 
    ERROR_P("unknown BT");
@@ -160,12 +164,76 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
               make_string(dstType).c_str());
 
    case VariableType::BT_BIT_HRD:
+   case VariableType::BT_BIT_SFT:
    case VariableType::BT_CHR:
    case VariableType::BT_INT_HH:
    case VariableType::BT_INT_H:
    case VariableType::BT_INT:
    case VariableType::BT_INT_L:
    case VariableType::BT_INT_LL:
+   case VariableType::BT_ENUM:
+      switch (dstBT)
+      {
+      case VariableType::BT_VOID:
+      case VariableType::BT_CLX:
+      case VariableType::BT_CLX_IM:
+      case VariableType::BT_ARR:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_BLOCK:
+      case VariableType::BT_ASMFUNC:
+         goto case_src_bad;
+
+      case VariableType::BT_BIT_HRD:
+      case VariableType::BT_BIT_SFT:
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         break;
+
+      case VariableType::BT_CHR:
+      case VariableType::BT_INT_HH:
+      case VariableType::BT_INT_H:
+      case VariableType::BT_INT:
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_ENUM:
+         break;
+
+      case VariableType::BT_UNS_HH:
+      case VariableType::BT_UNS_H:
+      case VariableType::BT_UNS:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_STR:
+      case VariableType::BT_PTR:
+      case VariableType::BT_PTR_NUL:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_SNAM:
+      case VariableType::BT_SNUM:
+         obj = ObjectExpression::create_cast_int_to_uns(obj, pos);
+         break;
+
+      case VariableType::BT_FIX_HH:
+      case VariableType::BT_FIX_H:
+      case VariableType::BT_FIX:
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
+         obj = ObjectExpression::create_cast_int_to_fix(obj, pos);
+         break;
+
+      case VariableType::BT_FLT_HH:
+      case VariableType::BT_FLT_H:
+      case VariableType::BT_FLT:
+      case VariableType::BT_FLT_L:
+      case VariableType::BT_FLT_LL:
+         obj = ObjectExpression::create_cast_int_to_flt(obj, pos);
+         break;
+      }
+      break;
+
    case VariableType::BT_UNS_HH:
    case VariableType::BT_UNS_H:
    case VariableType::BT_UNS:
@@ -174,13 +242,12 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
    case VariableType::BT_LABEL:
    case VariableType::BT_STR:
    case VariableType::BT_PTR_NUL:
-   case VariableType::BT_ENUM:
    case VariableType::BT_FUNCTION:
    case VariableType::BT_LINESPEC:
    case VariableType::BT_NATIVE:
    case VariableType::BT_SNAM:
    case VariableType::BT_SNUM:
-   case_src_int:
+   case_src_uns:
       switch (dstBT)
       {
       case VariableType::BT_VOID:
@@ -194,17 +261,21 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
          goto case_src_bad;
 
       case VariableType::BT_BIT_HRD:
+      case VariableType::BT_BIT_SFT:
          obj = ObjectExpression::create_branch_not(obj, pos);
          obj = ObjectExpression::create_branch_not(obj, pos);
          break;
 
-      case VariableType::BT_BIT_SFT:
       case VariableType::BT_CHR:
       case VariableType::BT_INT_HH:
       case VariableType::BT_INT_H:
       case VariableType::BT_INT:
       case VariableType::BT_INT_L:
       case VariableType::BT_INT_LL:
+      case VariableType::BT_ENUM:
+         obj = ObjectExpression::create_cast_uns_to_int(obj, pos);
+         break;
+
       case VariableType::BT_UNS_HH:
       case VariableType::BT_UNS_H:
       case VariableType::BT_UNS:
@@ -214,7 +285,6 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_STR:
       case VariableType::BT_PTR:
       case VariableType::BT_PTR_NUL:
-      case VariableType::BT_ENUM:
       case VariableType::BT_FUNCTION:
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
@@ -227,71 +297,15 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_FIX:
       case VariableType::BT_FIX_L:
       case VariableType::BT_FIX_LL:
+         obj = ObjectExpression::create_cast_uns_to_fix(obj, pos);
+         break;
+
       case VariableType::BT_FLT_HH:
       case VariableType::BT_FLT_H:
       case VariableType::BT_FLT:
       case VariableType::BT_FLT_L:
       case VariableType::BT_FLT_LL:
-         obj = ObjectExpression::create_cast_int_to_float(obj, pos);
-         break;
-      }
-      break;
-
-   case VariableType::BT_BIT_SFT:
-      switch (dstBT)
-      {
-      case VariableType::BT_VOID:
-      case VariableType::BT_CLX:
-      case VariableType::BT_CLX_IM:
-      case VariableType::BT_ARR:
-      case VariableType::BT_ASMFUNC:
-      case VariableType::BT_STRUCT:
-      case VariableType::BT_UNION:
-      case VariableType::BT_BLOCK:
-         goto case_src_bad;
-
-      case VariableType::BT_BIT_HRD:
-      case VariableType::BT_CHR:
-      case VariableType::BT_INT_HH:
-      case VariableType::BT_INT_H:
-      case VariableType::BT_INT:
-      case VariableType::BT_INT_L:
-      case VariableType::BT_INT_LL:
-      case VariableType::BT_UNS_HH:
-      case VariableType::BT_UNS_H:
-      case VariableType::BT_UNS:
-      case VariableType::BT_UNS_L:
-      case VariableType::BT_UNS_LL:
-      case VariableType::BT_LABEL:
-      case VariableType::BT_STR:
-      case VariableType::BT_PTR:
-      case VariableType::BT_PTR_NUL:
-      case VariableType::BT_ENUM:
-      case VariableType::BT_FUNCTION:
-      case VariableType::BT_LINESPEC:
-      case VariableType::BT_NATIVE:
-      case VariableType::BT_SNAM:
-      case VariableType::BT_SNUM:
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         break;
-
-      case VariableType::BT_BIT_SFT:
-         break;
-
-      case VariableType::BT_FIX_HH:
-      case VariableType::BT_FIX_H:
-      case VariableType::BT_FIX:
-      case VariableType::BT_FIX_L:
-      case VariableType::BT_FIX_LL:
-      case VariableType::BT_FLT_HH:
-      case VariableType::BT_FLT_H:
-      case VariableType::BT_FLT:
-      case VariableType::BT_FLT_L:
-      case VariableType::BT_FLT_LL:
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         obj = ObjectExpression::create_branch_not(obj, pos);
-         obj = ObjectExpression::create_cast_int_to_float(obj, pos);
+         obj = ObjectExpression::create_cast_uns_to_flt(obj, pos);
          break;
       }
       break;
@@ -301,6 +315,68 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
    case VariableType::BT_FIX:
    case VariableType::BT_FIX_L:
    case VariableType::BT_FIX_LL:
+      switch (dstBT)
+      {
+      case VariableType::BT_VOID:
+      case VariableType::BT_CLX:
+      case VariableType::BT_CLX_IM:
+      case VariableType::BT_ARR:
+      case VariableType::BT_ASMFUNC:
+      case VariableType::BT_STRUCT:
+      case VariableType::BT_UNION:
+      case VariableType::BT_BLOCK:
+         goto case_src_bad;
+
+      case VariableType::BT_BIT_HRD:
+      case VariableType::BT_BIT_SFT:
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         obj = ObjectExpression::create_branch_not(obj, pos);
+         break;
+
+      case VariableType::BT_CHR:
+      case VariableType::BT_INT_HH:
+      case VariableType::BT_INT_H:
+      case VariableType::BT_INT:
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_ENUM:
+         obj = ObjectExpression::create_cast_fix_to_int(obj, pos);
+         break;
+
+      case VariableType::BT_UNS_HH:
+      case VariableType::BT_UNS_H:
+      case VariableType::BT_UNS:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+      case VariableType::BT_LABEL:
+      case VariableType::BT_STR:
+      case VariableType::BT_PTR:
+      case VariableType::BT_PTR_NUL:
+      case VariableType::BT_FUNCTION:
+      case VariableType::BT_LINESPEC:
+      case VariableType::BT_NATIVE:
+      case VariableType::BT_SNAM:
+      case VariableType::BT_SNUM:
+         obj = ObjectExpression::create_cast_fix_to_uns(obj, pos);
+         break;
+
+      case VariableType::BT_FIX_HH:
+      case VariableType::BT_FIX_H:
+      case VariableType::BT_FIX:
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
+         break;
+
+      case VariableType::BT_FLT_HH:
+      case VariableType::BT_FLT_H:
+      case VariableType::BT_FLT:
+      case VariableType::BT_FLT_L:
+      case VariableType::BT_FLT_LL:
+         obj = ObjectExpression::create_cast_fix_to_flt(obj, pos);
+         break;
+      }
+      break;
+
    case VariableType::BT_FLT_HH:
    case VariableType::BT_FLT_H:
    case VariableType::BT_FLT:
@@ -318,16 +394,22 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_BLOCK:
          goto case_src_bad;
 
+      case VariableType::BT_BIT_HRD:
       case VariableType::BT_BIT_SFT:
          obj = ObjectExpression::create_branch_not(obj, pos);
          obj = ObjectExpression::create_branch_not(obj, pos);
-      case VariableType::BT_BIT_HRD:
+         break;
+
       case VariableType::BT_CHR:
       case VariableType::BT_INT_HH:
       case VariableType::BT_INT_H:
       case VariableType::BT_INT:
       case VariableType::BT_INT_L:
       case VariableType::BT_INT_LL:
+      case VariableType::BT_ENUM:
+         obj = ObjectExpression::create_cast_flt_to_int(obj, pos);
+         break;
+
       case VariableType::BT_UNS_HH:
       case VariableType::BT_UNS_H:
       case VariableType::BT_UNS:
@@ -337,13 +419,12 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_STR:
       case VariableType::BT_PTR:
       case VariableType::BT_PTR_NUL:
-      case VariableType::BT_ENUM:
       case VariableType::BT_FUNCTION:
       case VariableType::BT_LINESPEC:
       case VariableType::BT_NATIVE:
       case VariableType::BT_SNAM:
       case VariableType::BT_SNUM:
-         obj = ObjectExpression::create_cast_float_to_int(obj, pos);
+         obj = ObjectExpression::create_cast_flt_to_uns(obj, pos);
          break;
 
       case VariableType::BT_FIX_HH:
@@ -351,6 +432,9 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
       case VariableType::BT_FIX:
       case VariableType::BT_FIX_L:
       case VariableType::BT_FIX_LL:
+         obj = ObjectExpression::create_cast_flt_to_fix(obj, pos);
+         break;
+
       case VariableType::BT_FLT_HH:
       case VariableType::BT_FLT_H:
       case VariableType::BT_FLT:
@@ -362,11 +446,11 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
 
    case VariableType::BT_PTR:
       if (dstBT != VariableType::BT_PTR)
-         goto case_src_int;
+         goto case_src_uns;
 
       if (srcType->getReturn()->getStoreType() != STORE_AUTO ||
           dstType->getReturn()->getStoreType() != STORE_STATIC)
-         goto case_src_int;
+         goto case_src_uns;
 
       // Special handling for auto*->static*.
       ERROR_P("bad compile-time cast: %s to %s", make_string(srcType).c_str(),
@@ -393,7 +477,7 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
                elems[i] = make_object(dstTypes, pos);
          }
 
-         obj = ObjectExpression::create_value_array(elems, pos);
+         obj = ObjectExpression::create_value_arr(elems, pos);
       }
       else if (dstBT == VariableType::BT_STRUCT ||
                dstBT == VariableType::BT_BLOCK)
@@ -411,8 +495,9 @@ ObjectExpression::Pointer SourceExpression::make_object_cast
          }
 
          if (dstBT == VariableType::BT_STRUCT)
-            obj = ObjectExpression::create_value_struct
-               (elems, dstType->getNames(), pos);
+            obj = ObjectExpression::create_value_map(elems, dstType->getNames(), pos);
+         else
+            obj = ObjectExpression::create_value_arr(elems, pos);
       }
       else if (!elems.empty())
          obj = make_object_cast(elems.back(), dstType, srcTypes.back(), pos);

@@ -79,9 +79,9 @@ public:
    }
 
    //
-   // ::resolveInt
+   // ::resolveINT
    //
-   virtual bigsint resolveInt() const
+   virtual bigsint resolveINT() const
    {
       int cmp = doCmp();
       switch (ct)
@@ -94,7 +94,7 @@ public:
       case CMP_NE: return cmp != 0;
       }
 
-      return Super::resolveInt();
+      return Super::resolveINT();
    }
 
 
@@ -120,28 +120,46 @@ private:
    {
       switch (Super::getType())
       {
-      case ET_ARRAY:
-      case ET_OCODE:
-      case ET_STRUCT:
-         ERROR_NP("bad ET");
-
-      case ET_FLOAT:
+      case ET_FIX:
       {
-         bigreal l = exprL->resolveFloat();
-         bigreal r = exprR->resolveFloat();
-         if (l < r) return -1;
-         if (l > r) return +1;
+         bigreal l = exprL->resolveFIX();
+         bigreal r = exprR->resolveFIX();
+         if(l < r) return -1;
+         if(l > r) return +1;
+         return 0;
+      }
+
+      case ET_FLT:
+      {
+         bigreal l = exprL->resolveFLT();
+         bigreal r = exprR->resolveFLT();
+         if(l < r) return -1;
+         if(l > r) return +1;
          return 0;
       }
 
       case ET_INT:
       {
-         bigsint l = exprL->resolveInt();
-         bigsint r = exprR->resolveInt();
-         if (l < r) return -1;
-         if (l > r) return +1;
+         bigsint l = exprL->resolveINT();
+         bigsint r = exprR->resolveINT();
+         if(l < r) return -1;
+         if(l > r) return +1;
          return 0;
       }
+
+      case ET_UNS:
+      {
+         biguint l = exprL->resolveUNS();
+         biguint r = exprR->resolveUNS();
+         if(l < r) return -1;
+         if(l > r) return +1;
+         return 0;
+      }
+
+      case ET_OCS:
+      case ET_ARR:
+      case ET_MAP:
+         ERROR_NP("bad ET");
       }
 
       ERROR_NP("bad ET");
@@ -158,8 +176,7 @@ private:
 //
 // ObjectExpression::create_binary_cmp
 //
-ObjectExpression::Reference ObjectExpression::create_binary_cmp(
-   std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_binary_cmp(std::istream *in)
 {
    return static_cast<Reference>(new ObjectExpression_BinaryCmp(in));
 }
@@ -167,8 +184,7 @@ ObjectExpression::Reference ObjectExpression::create_binary_cmp(
 //
 // ObjectExpression::create_binary_cmp_ge
 //
-ObjectExpression::Reference ObjectExpression::create_binary_cmp_ge(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_binary_cmp_ge(OBJEXP_EXPRBIN_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_BinaryCmp(
       exprL, exprR, pos, ObjectExpression_BinaryCmp::CMP_GE));
@@ -177,8 +193,7 @@ ObjectExpression::Reference ObjectExpression::create_binary_cmp_ge(
 //
 // ObjectExpression::create_binary_cmp_gt
 //
-ObjectExpression::Reference ObjectExpression::create_binary_cmp_gt(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_binary_cmp_gt(OBJEXP_EXPRBIN_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_BinaryCmp(
       exprL, exprR, pos, ObjectExpression_BinaryCmp::CMP_GT));
@@ -187,8 +202,7 @@ ObjectExpression::Reference ObjectExpression::create_binary_cmp_gt(
 //
 // ObjectExpression::create_binary_cmp_le
 //
-ObjectExpression::Reference ObjectExpression::create_binary_cmp_le(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_binary_cmp_le(OBJEXP_EXPRBIN_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_BinaryCmp(
       exprL, exprR, pos, ObjectExpression_BinaryCmp::CMP_LE));
@@ -197,8 +211,7 @@ ObjectExpression::Reference ObjectExpression::create_binary_cmp_le(
 //
 // ObjectExpression::create_binary_cmp_lt
 //
-ObjectExpression::Reference ObjectExpression::create_binary_cmp_lt(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_binary_cmp_lt(OBJEXP_EXPRBIN_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_BinaryCmp(
       exprL, exprR, pos, ObjectExpression_BinaryCmp::CMP_LT));
@@ -207,8 +220,7 @@ ObjectExpression::Reference ObjectExpression::create_binary_cmp_lt(
 //
 // ObjectExpression::create_binary_cmp_eq
 //
-ObjectExpression::Reference ObjectExpression::create_binary_cmp_eq(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_binary_cmp_eq(OBJEXP_EXPRBIN_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_BinaryCmp(
       exprL, exprR, pos, ObjectExpression_BinaryCmp::CMP_EQ));
@@ -217,8 +229,7 @@ ObjectExpression::Reference ObjectExpression::create_binary_cmp_eq(
 //
 // ObjectExpression::create_binary_cmp_ne
 //
-ObjectExpression::Reference ObjectExpression::create_binary_cmp_ne(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_binary_cmp_ne(OBJEXP_EXPRBIN_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_BinaryCmp(
       exprL, exprR, pos, ObjectExpression_BinaryCmp::CMP_NE));

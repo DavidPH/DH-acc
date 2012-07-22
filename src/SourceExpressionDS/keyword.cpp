@@ -188,7 +188,7 @@ SRCEXPDS_KEYWORD_DEFN(goto)
       }
       else
          label = context->getLabelCase(make_expression(in, context)
-            ->makeObject()->resolveInt(), tok->pos);
+            ->makeObject()->resolveINT(), tok->pos);
    }
    else
       label = context->getLabelGoto(gotoToken->data, gotoToken->pos);
@@ -319,7 +319,7 @@ SRCEXPDS_KEYWORD_DEFN(ocode)
 
    in->get(SourceTokenC::TT_PAREN_C);
 
-   ocodeObj = ObjectExpression::create_value_ocode(ocode, tok->pos);
+   ocodeObj = ObjectExpression::create_value_ocs(ocode, tok->pos);
    ocodeVar = SourceVariable::create_literal(ocodeTyp, ocodeObj, tok->pos);
 
    return create_value_variable(ocodeVar, context, tok->pos);

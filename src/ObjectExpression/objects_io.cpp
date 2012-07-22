@@ -101,17 +101,23 @@ ObjectExpression::Reference ObjectExpression::create(std::istream *in)
    case ObjectExpression::OT_CAST:
       return ObjectExpression::create_cast(in);
 
-   case ObjectExpression::OT_VALUE_COMPOUND:
-      return ObjectExpression::create_value_compound(in);
+   case ObjectExpression::OT_VALUE_FIX:
+      return ObjectExpression::create_value_fix(in);
 
-   case ObjectExpression::OT_VALUE_FLOAT:
-      return ObjectExpression::create_value_float(in);
+   case ObjectExpression::OT_VALUE_FLT:
+      return ObjectExpression::create_value_flt(in);
 
    case ObjectExpression::OT_VALUE_INT:
       return ObjectExpression::create_value_int(in);
 
-   case ObjectExpression::OT_VALUE_OCODE:
-      return ObjectExpression::create_value_ocode(in);
+   case ObjectExpression::OT_VALUE_UNS:
+      return ObjectExpression::create_value_uns(in);
+
+   case ObjectExpression::OT_VALUE_OCS:
+      return ObjectExpression::create_value_ocs(in);
+
+   case ObjectExpression::OT_VALUE_ARR:
+      return ObjectExpression::create_value_arr(in);
 
    case ObjectExpression::OT_VALUE_SYMBOL:
       return ObjectExpression::create_value_symbol(in);

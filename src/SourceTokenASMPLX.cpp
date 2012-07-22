@@ -155,7 +155,7 @@ ObjectExpression::Pointer SourceTokenASMPLX::make_expression(std::string const &
 			if (expr.find_first_of('.') == std::string::npos)
 				return ObjectExpression::create_value_int(string_to_int(expr, position), position);
 			else
-				return ObjectExpression::create_value_float(string_to_real(expr, position), position);
+				return ObjectExpression::create_value_fix(string_to_real(expr, position), position);
 		}
 		else
 		{

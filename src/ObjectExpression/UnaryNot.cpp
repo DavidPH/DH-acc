@@ -54,21 +54,8 @@ public:
    {
    }
 
-   //
-   // ::getType
-   //
-   virtual ExpressionType getType() const
-   {
-      return ET_INT;
-   }
-
-   //
-   // ::resolveInt
-   //
-   virtual bigsint resolveInt() const
-   {
-      return ~expr->resolveInt();
-   }
+   virtual bigsint resolveINT() const {return ~expr->resolveINT();}
+   virtual biguint resolveUNS() const {return ~expr->resolveUNS();}
 
    //
    // ::writeACSPLong
@@ -100,8 +87,7 @@ protected:
 //
 // ObjectExpression::create_unary_not
 //
-ObjectExpression::Reference ObjectExpression::create_unary_not(
-   OBJEXP_EXPRUNA_ARGS)
+ObjectExpression::Reference ObjectExpression::create_unary_not(OBJEXP_EXPRUNA_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_UnaryNot(expr, pos));
 }

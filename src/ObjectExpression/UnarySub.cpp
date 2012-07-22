@@ -54,21 +54,10 @@ public:
    {
    }
 
-   //
-   // ::resolveFloat
-   //
-   virtual bigreal resolveFloat() const
-   {
-      return -expr->resolveFloat();
-   }
-
-   //
-   // ::resolveInt
-   //
-   virtual bigsint resolveInt() const
-   {
-      return -expr->resolveInt();
-   }
+   bigreal resolveFIX() const {return -expr->resolveFIX();}
+   bigreal resolveFLT() const {return -expr->resolveFLT();}
+   bigsint resolveINT() const {return -expr->resolveINT();}
+   biguint resolveUNS() const {return -expr->resolveUNS();}
 
 protected:
    //
@@ -101,8 +90,7 @@ private:
 //
 // ObjectExpression::create_unary_sub
 //
-ObjectExpression::Reference ObjectExpression::create_unary_sub(
-   OBJEXP_EXPRUNA_ARGS)
+ObjectExpression::Reference ObjectExpression::create_unary_sub(OBJEXP_EXPRUNA_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_UnarySub(expr, pos));
 }

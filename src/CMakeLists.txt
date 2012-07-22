@@ -47,11 +47,13 @@ add_executable(DH-acc
    ObjectExpression/UnaryAdd.cpp
    ObjectExpression/UnaryNot.cpp
    ObjectExpression/UnarySub.cpp
-   ObjectExpression/ValueCompound.cpp
-   ObjectExpression/ValueFloat.cpp
-   ObjectExpression/ValueInt.cpp
-   ObjectExpression/ValueOCode.cpp
+   ObjectExpression/ValueARR.cpp
+   ObjectExpression/ValueFIX.cpp
+   ObjectExpression/ValueFLT.cpp
+   ObjectExpression/ValueINT.cpp
+   ObjectExpression/ValueOCS.cpp
    ObjectExpression/ValueSymbol.cpp
+   ObjectExpression/ValueUNS.cpp
    ObjectToken.cpp
    ObjectVector.cpp
    object_io.cpp

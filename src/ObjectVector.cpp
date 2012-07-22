@@ -142,7 +142,7 @@ void ObjectVector::addTokenPushZero()
 //
 ObjectExpression::Pointer ObjectVector::getValue(bigreal f) const
 {
-   return ObjectExpression::create_value_float(f, head.pos);
+   return ObjectExpression::create_value_fix(f, head.pos);
 }
 
 //
@@ -292,13 +292,13 @@ void ObjectVector::optimize_math_nop()
       case OCODE_ADD_STK_U:
       case OCODE_SUB_STK_I:
       case OCODE_SUB_STK_U:
-         if(arg0->getArg(0)->resolveInt() != 0)
+         if(arg0->getArg(0)->resolveINT() != 0)
             continue;
          break;
 
       case OCODE_ADD_STK_X:
       case OCODE_SUB_STK_X:
-         if(arg0->getArg(0)->resolveFloat() != 0)
+         if(arg0->getArg(0)->resolveFIX() != 0)
             continue;
          break;
 
@@ -306,13 +306,13 @@ void ObjectVector::optimize_math_nop()
       case OCODE_DIV_STK_U:
       case OCODE_MUL_STK_I:
       case OCODE_MUL_STK_U:
-         if(arg0->getArg(0)->resolveInt() != 1)
+         if(arg0->getArg(0)->resolveINT() != 1)
             continue;
          break;
 
       case OCODE_DIV_STK_X:
       case OCODE_MUL_STK_X:
-         if(arg0->getArg(0)->resolveFloat() != 1)
+         if(arg0->getArg(0)->resolveFIX() != 1)
             continue;
          break;
 

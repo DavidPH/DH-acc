@@ -126,7 +126,7 @@ public:
 
       case VariableData::MT_REGISTERARRAY:
          if (!data->offsetExpr)
-            return ObjectExpression::create_value_int(0, pos);
+            return ObjectExpression::create_value_uns(0, pos);
 
          return data->offsetExpr->makeObject();
       }
@@ -165,7 +165,7 @@ private:
          else
             objects->addTokenPushZero();
 
-         if (!data->address->canResolve() || data->address->resolveInt())
+         if(!data->address->canResolve() || data->address->resolveUNS())
          {
             objects->addToken(OCODE_GET_IMM, data->address);
             objects->addToken(OCODE_ADD_STK_U);

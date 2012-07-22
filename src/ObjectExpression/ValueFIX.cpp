@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// ObjectExpression handling of integer numbers.
+// ObjectExpression handling of fixed-point numbers.
 //
 //-----------------------------------------------------------------------------
 
@@ -33,25 +33,25 @@
 //
 
 //
-// ObjectExpression_ValueInt
+// ObjectExpression_ValueFIX
 //
-class ObjectExpression_ValueInt : public ObjectExpression
+class ObjectExpression_ValueFIX : public ObjectExpression
 {
-   MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueInt, ObjectExpression);
+   MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueFIX, ObjectExpression);
 
 public:
    //
-   // ::ObjectExpression_ValueInt
+   // ::ObjectExpression_ValueFIX
    //
-   ObjectExpression_ValueInt(bigsint _value, SourcePosition const &_pos)
+   ObjectExpression_ValueFIX(bigreal _value, SourcePosition const &_pos)
     : Super(_pos), value(_value)
    {
    }
 
    //
-   // ::ObjectExpression_ValueInt
+   // ::ObjectExpression_ValueFIX
    //
-   ObjectExpression_ValueInt(std::istream *in) : Super(in)
+   ObjectExpression_ValueFIX(std::istream *in) : Super(in)
    {
       read_object(in, &value);
    }
@@ -69,13 +69,13 @@ public:
    //
    virtual ExpressionType getType() const
    {
-      return ET_INT;
+      return ET_FIX;
    }
 
    //
-   // ::resolveInt
+   // ::resolveFIX
    //
-   virtual bigsint resolveInt() const
+   virtual bigreal resolveFIX() const
    {
       return value;
    }
@@ -86,7 +86,7 @@ protected:
    //
    virtual void writeObject(std::ostream *out) const
    {
-      write_object(out, OT_VALUE_INT);
+      write_object(out, OT_VALUE_FIX);
 
       Super::writeObject(out);
 
@@ -100,10 +100,10 @@ private:
    virtual void writeACSPLong(std::ostream *out) const
    {
       BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LITERAL);
-      BinaryTokenACS::write_ACS0_32(out, value);
+      BinaryTokenACS::write_ACS0_32(out, *this);
    }
 
-   bigsint value;
+   bigreal value;
 };
 
 
@@ -112,20 +112,19 @@ private:
 //
 
 //
-// ObjectExpression::create_value_int
+// ObjectExpression::create_value_fix
 //
-ObjectExpression::Reference ObjectExpression::create_value_int(
-   bigsint value, OBJEXP_EXPR_ARGS)
+ObjectExpression::Reference ObjectExpression::create_value_fix(bigreal value, OBJEXP_EXPR_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueInt(value, pos));
+   return static_cast<Reference>(new ObjectExpression_ValueFIX(value, pos));
 }
 
 //
-// ObjectExpression::create_value_int
+// ObjectExpression::create_value_fix
 //
-ObjectExpression::Reference ObjectExpression::create_value_int(std::istream *in)
+ObjectExpression::Reference ObjectExpression::create_value_fix(std::istream *in)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueInt(in));
+   return static_cast<Reference>(new ObjectExpression_ValueFIX(in));
 }
 
 // EOF

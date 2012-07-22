@@ -68,22 +68,9 @@ void BinaryTokenACS::write_ACS0_16(std::ostream *out, bigsint i)
 //
 // BinaryTokenACS::write_ACS0_32
 //
-void BinaryTokenACS::write_ACS0_32
-(std::ostream *out, ObjectExpression const &expr)
+void BinaryTokenACS::write_ACS0_32(std::ostream *out, ObjectExpression const &expr)
 {
-   switch (expr.getType())
-   {
-   case ObjectExpression::ET_FLOAT:
-      write_ACS0_32(out, (bigsint)(expr.resolveFloat() * 65536.0));
-      break;
-
-   case ObjectExpression::ET_INT:
-      write_ACS0_32(out, expr.resolveInt());
-      break;
-
-   default:
-      ERROR(expr.getPosition(), "invalid ET");
-   }
+   write_ACS0_32(out, expr.resolveBinary());
 }
 
 //

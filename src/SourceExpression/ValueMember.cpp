@@ -112,7 +112,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
    {
       SourceExpression::Pointer offset;
 
-      if (memberOffset) offset = create_value_int(memberOffset, context, pos);
+      if(memberOffset) offset = create_value_uint(memberOffset, context, pos);
 
       if (src->offsetExpr) offset = offset ? create_binary_add
          (src->offsetExpr, offset, context, pos) : src->offsetExpr;
@@ -123,13 +123,13 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
 
    if (src->type == VariableData::MT_LITERAL)
    {
-      ObjectExpression::Pointer obj = src->address->resolveMember(name);
+      ObjectExpression::Pointer obj = src->address->resolveMAP(name);
 
       return VariableData::create_literal(memberSize, obj);
    }
 
    ObjectExpression::Pointer memberOffsetObj =
-      ObjectExpression::create_value_int(memberOffset, pos);
+      ObjectExpression::create_value_uns(memberOffset, pos);
 
    ObjectExpression::Pointer address =
       ObjectExpression::create_binary_add(src->address, memberOffsetObj, pos);

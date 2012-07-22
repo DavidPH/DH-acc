@@ -36,8 +36,14 @@
 ObjectExpression_Binary::ObjectExpression_Binary(OBJEXP_EXPRBIN_PARM)
  : Super(OBJEXP_EXPR_PASS), exprL(_exprL), exprR(_exprR)
 {
-   if (exprL->getType() != exprR->getType())
-      ERROR_NP("type mismatch");
+   ExpressionType typeL = exprL->getType(), typeR = exprR->getType();
+
+   // HACK! Allow type mismatch for INT vs UNS.
+   if((typeL == ET_INT && typeR == ET_UNS) || (typeL == ET_UNS && typeR == ET_INT))
+      return;
+
+   if(typeL != typeR)
+      ERROR_NP("type mismatch: %s %s", make_string(typeL).c_str(), make_string(typeR).c_str());
 }
 
 //

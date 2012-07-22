@@ -64,29 +64,11 @@ public:
       return exprC->canResolve() && Super::canResolve();
    }
 
-   //
-   // ::resolveFloat
-   //
-   virtual bigreal resolveFloat() const
-   {
-      return (exprC->resolveInt() ? exprL : exprR)->resolveFloat();
-   }
-
-   //
-   // ::resolveOCode
-   //
-   virtual ObjectCodeSet resolveOCode() const
-   {
-      return (exprC->resolveInt() ? exprL : exprR)->resolveOCode();
-   }
-
-   //
-   // ::resolveInt
-   //
-   virtual bigsint resolveInt() const
-   {
-      return (exprC->resolveInt() ? exprL : exprR)->resolveInt();
-   }
+   bigreal resolveFIX() const {return (exprC->resolveINT() ? exprL : exprR)->resolveFIX();}
+   bigreal resolveFLT() const {return (exprC->resolveINT() ? exprL : exprR)->resolveFLT();}
+   bigsint resolveINT() const {return (exprC->resolveINT() ? exprL : exprR)->resolveINT();}
+   biguint resolveUNS() const {return (exprC->resolveINT() ? exprL : exprR)->resolveUNS();}
+   ObjectCodeSet resolveOCS() const {return (exprC->resolveINT() ? exprL : exprR)->resolveOCS();}
 
 protected:
    //
@@ -113,11 +95,9 @@ private:
 //
 // ObjectExpression::create_branch_if
 //
-ObjectExpression::Reference ObjectExpression::create_branch_if(
-   OBJEXP_EXPRTRI_ARGS)
+ObjectExpression::Reference ObjectExpression::create_branch_if(OBJEXP_EXPRTRI_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_BranchIf(
-      exprC, exprL, exprR, pos));
+   return static_cast<Reference>(new ObjectExpression_BranchIf(exprC, exprL, exprR, pos));
 }
 
 //
