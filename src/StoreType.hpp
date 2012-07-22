@@ -36,6 +36,7 @@
 //
 enum StoreType
 {
+   STORE_NONE,
    STORE_STATIC,
    STORE_AUTO,
    STORE_CONST,
@@ -46,6 +47,7 @@ enum StoreType
    STORE_MAPARRAY,
    STORE_WORLDARRAY,
    STORE_GLOBALARRAY,
+   STORE_STRING,
 };
 
 

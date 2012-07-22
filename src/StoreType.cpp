@@ -30,8 +30,9 @@
 // Static Variables                                                           |
 //
 
-std::string const store_name[] =
+static std::string const store_name[] =
 {
+   "STORE_NONE",
    "STORE_STATIC",
    "STORE_AUTO",
    "STORE_CONST",
@@ -42,6 +43,7 @@ std::string const store_name[] =
    "STORE_MAPARRAY",
    "STORE_WORLDARRAY",
    "STORE_GLOBALARRAY",
+   "STORE_STRING",
 };
 
 

@@ -270,8 +270,10 @@ private:
          objects->addToken(OCODE_ACSP_STR_GBLARR);
          break;
 
+      case STORE_NONE:
       case STORE_AUTO:
       case STORE_CONST:
+      case STORE_STRING:
          ERROR_NP("cannot %%s pointer");
 
       case STORE_REGISTER:

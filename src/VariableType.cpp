@@ -228,15 +228,17 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
 
    switch (type->getStoreType())
    {
-   case STORE_STATIC:
+   case STORE_NONE:
       break;
 
+   case STORE_STATIC:
    case STORE_AUTO:
    case STORE_CONST:
    case STORE_REGISTER:
    case STORE_MAPREGISTER:
    case STORE_WORLDREGISTER:
    case STORE_GLOBALREGISTER:
+   case STORE_STRING:
       out << ' ' << make_string(type->getStoreType());
       break;
 
@@ -695,7 +697,8 @@ void VariableType::getNameMangled(std::string &out) const
 
    switch (store)
    {
-   case STORE_STATIC: break;
+   case STORE_NONE: break;
+   case STORE_STATIC:         out += "sS"; break;
    case STORE_AUTO:           out += "sA"; break;
    case STORE_CONST:          out += "sC"; break;
    case STORE_REGISTER:       out += "sR"; break;
@@ -705,6 +708,7 @@ void VariableType::getNameMangled(std::string &out) const
    case STORE_MAPARRAY:       out += "sMA("; out += storeArea; out += ')'; break;
    case STORE_WORLDARRAY:     out += "sWA("; out += storeArea; out += ')'; break;
    case STORE_GLOBALARRAY:    out += "sGA("; out += storeArea; out += ')'; break;
+   case STORE_STRING:         out += "sSA"; break;
    }
 
    #undef WIDTH
@@ -751,7 +755,6 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
    case BT_STR:
 
    case BT_PTR_NUL:
-   case BT_PTR:
 
    case BT_ENUM:
 
@@ -774,6 +777,9 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
 
    case BT_ARR:
       return width ? typeRet->getSize(pos) * width : 0;
+
+   case BT_PTR:
+      return (typeRet->store == STORE_NONE || typeRet->store == STORE_STRING) ? 2 : 1;
 
    case BT_STRUCT:
    case BT_BLOCK:

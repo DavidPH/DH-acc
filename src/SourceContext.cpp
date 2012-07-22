@@ -149,6 +149,7 @@ void SourceContext::addCount(int count, StoreType store)
 {
    switch (store)
    {
+   case STORE_NONE:
    case STORE_STATIC:
    case STORE_CONST:
    case STORE_MAPREGISTER:
@@ -157,6 +158,7 @@ void SourceContext::addCount(int count, StoreType store)
    case STORE_MAPARRAY:
    case STORE_WORLDARRAY:
    case STORE_GLOBALARRAY:
+   case STORE_STRING:
       break;
 
    case STORE_AUTO:
@@ -244,6 +246,7 @@ void SourceContext::addLimit(int limit, StoreType store)
 {
    switch (store)
    {
+   case STORE_NONE:
    case STORE_STATIC:
    case STORE_CONST:
    case STORE_MAPREGISTER:
@@ -252,6 +255,7 @@ void SourceContext::addLimit(int limit, StoreType store)
    case STORE_MAPARRAY:
    case STORE_WORLDARRAY:
    case STORE_GLOBALARRAY:
+   case STORE_STRING:
       break;
 
    case STORE_AUTO:
@@ -291,6 +295,11 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis)
 
    switch (store)
    {
+   case STORE_NONE:
+   case STORE_CONST:
+   case STORE_STRING:
+      break;
+
    case STORE_STATIC:
       ObjectData_Static::add(PARM);
       break;
@@ -298,9 +307,6 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis)
    case STORE_AUTO:
       ObjectData_Auto::add(PARM, getCount(store));
       addCount(type->getSize(pos), store);
-      break;
-
-   case STORE_CONST:
       break;
 
    case STORE_REGISTER:
@@ -354,6 +360,11 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis,
 
    switch (store)
    {
+   case STORE_NONE:
+   case STORE_CONST:
+   case STORE_STRING:
+      break;
+
    case STORE_STATIC:
       ObjectData_Static::add(PARM);
       break;
@@ -361,9 +372,6 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis,
    case STORE_AUTO:
       ObjectData_Auto::add(PARM);
       addCount(type->getSize(pos), store);
-      break;
-
-   case STORE_CONST:
       break;
 
    case STORE_REGISTER:
@@ -508,6 +516,7 @@ int SourceContext::getCount(StoreType store) const
 {
    switch (store)
    {
+   case STORE_NONE:
    case STORE_STATIC:
    case STORE_CONST:
    case STORE_MAPREGISTER:
@@ -516,6 +525,7 @@ int SourceContext::getCount(StoreType store) const
    case STORE_MAPARRAY:
    case STORE_WORLDARRAY:
    case STORE_GLOBALARRAY:
+   case STORE_STRING:
       return 0;
 
    case STORE_AUTO:
@@ -700,6 +710,7 @@ int SourceContext::getLimit(StoreType store) const
 {
    switch (store)
    {
+   case STORE_NONE:
    case STORE_STATIC:
    case STORE_CONST:
    case STORE_MAPREGISTER:
@@ -708,6 +719,7 @@ int SourceContext::getLimit(StoreType store) const
    case STORE_MAPARRAY:
    case STORE_WORLDARRAY:
    case STORE_GLOBALARRAY:
+   case STORE_STRING:
       return 0;
 
    case STORE_AUTO:
@@ -811,6 +823,7 @@ SourceVariable::Pointer SourceContext::getVariable
       {
          switch (varVars[i]->getStoreType())
          {
+         case STORE_NONE:
          case STORE_STATIC:
          case STORE_CONST:
          case STORE_MAPREGISTER:
@@ -819,6 +832,7 @@ SourceVariable::Pointer SourceContext::getVariable
          case STORE_MAPARRAY:
          case STORE_WORLDARRAY:
          case STORE_GLOBALARRAY:
+         case STORE_STRING:
             return varVars[i];
 
          case STORE_AUTO:

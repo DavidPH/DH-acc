@@ -72,6 +72,9 @@ public:
 
       switch (type->getStoreType())
       {
+      case STORE_NONE:
+         ERROR_NP("STORE_NONE");
+
       case STORE_STATIC:
          if (expr->canMakeObject())
          {
@@ -134,6 +137,9 @@ public:
       case STORE_GLOBALARRAY:
          sectionRA = VariableData::SRA_GLOBAL;
          goto case_array;
+
+      case STORE_STRING:
+         ERROR_NP("STORE_STRING");
       }
 
       return Super::getData();

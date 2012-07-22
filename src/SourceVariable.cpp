@@ -93,6 +93,9 @@ VariableData::Pointer SourceVariable::getData() const
 
    switch (store)
    {
+   case STORE_NONE:
+      ERROR_NP("STORE_NONE");
+
    case STORE_STATIC:
       return VariableData::create_static(size, address);
 
@@ -141,6 +144,9 @@ VariableData::Pointer SourceVariable::getData() const
 
       return VariableData::create_registerarray
          (size, VariableData::SRA_GLOBAL, address, arrbase);
+
+   case STORE_STRING:
+      ERROR_NP("STORE_STRING");
    }
 
    ERROR_NP("invalid store");
