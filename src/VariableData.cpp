@@ -84,6 +84,15 @@ VariableData::~VariableData()
 }
 
 //
+// VariableData::create_array
+//
+VariableData::Pointer VariableData::create_array(bigsint size, SectionA section,
+   ObjectExpression *address, SourceExpression *offset)
+{
+   return new VariableData(MT_ARRAY, size, section, address, offset);
+}
+
+//
 // VariableData::create_auto
 //
 VariableData::Pointer VariableData::
@@ -99,6 +108,14 @@ VariableData::Pointer VariableData::
 create_literal(bigsint size, ObjectExpression *value)
 {
    return new VariableData(MT_LITERAL, size, value, NULL);
+}
+
+//
+// VariableData::create_longptr
+//
+VariableData::Pointer VariableData::create_longptr(bigsint size, SourceExpression *offset)
+{
+   return new VariableData(MT_LONGPTR, size, NULL, offset);
 }
 
 //
@@ -122,15 +139,6 @@ create_register(bigsint size, SectionR section,
 }
 
 //
-// VariableData::create_registerarray
-//
-VariableData::Pointer VariableData::create_array(bigsint size, SectionA section,
-   ObjectExpression *address, SourceExpression *offset)
-{
-   return new VariableData(MT_ARRAY, size, section, address, offset);
-}
-
-//
 // VariableData::create_stack
 //
 VariableData::Pointer VariableData::create_stack(bigsint size)
@@ -149,6 +157,14 @@ VariableData::Pointer VariableData::
 create_static(bigsint size, ObjectExpression *address)
 {
    return new VariableData(MT_STATIC, size, address, NULL);
+}
+
+//
+// VariableData::create_string
+//
+VariableData::Pointer VariableData::create_string(bigsint size, SourceExpression *offset)
+{
+   return new VariableData(MT_STRING, size, NULL, offset);
 }
 
 //

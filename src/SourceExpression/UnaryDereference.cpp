@@ -73,7 +73,7 @@ public:
       switch (type->getStoreType())
       {
       case STORE_NONE:
-         ERROR_NP("STORE_NONE");
+         return VariableData::create_longptr(size, expr);
 
       case STORE_STATIC:
          if (expr->canMakeObject())
@@ -139,7 +139,7 @@ public:
          goto case_array;
 
       case STORE_STRING:
-         ERROR_NP("STORE_STRING");
+         return VariableData::create_string(size, expr);
       }
 
       return Super::getData();

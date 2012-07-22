@@ -185,6 +185,14 @@ static void make_objects_memcpy_post_part
       break;
 
    //
+   // MT_LONGPTR
+   //
+   case VariableData::MT_LONGPTR:
+      if(set) ERROR_P("MT_LONGPTR as dst");
+      if(get) ERROR_P("MT_LONGPTR as src");
+      break;
+
+   //
    // MT_POINTER
    //
    case VariableData::MT_POINTER:
@@ -440,6 +448,38 @@ static void make_objects_memcpy_post_part
       break;
 
    //
+   // MT_STRING
+   //
+   case VariableData::MT_STRING:
+      if(set) ERROR_P("MT_STRING as dst");
+
+      if(get)
+      {
+         if(data->size == 1)
+            objects->addToken(OCODE_NATIVE, objects->getValue(2), objects->getValue(15));
+         else
+         {
+            ObjectExpression::Pointer tmpStr = context->getTempVar(0);
+            ObjectExpression::Pointer tmpOff = context->getTempVar(1);
+
+            objects->addToken(OCODE_SET_TEMP, tmpOff);
+            objects->addToken(OCODE_SET_TEMP, tmpStr);
+
+            for(i = 0; i < data->size; ++i)
+            {
+               objects->addToken(OCODE_GET_TEMP, tmpStr);
+               objects->addToken(OCODE_GET_TEMP, tmpOff);
+
+               if(i) objects->addToken(OCODE_INC_TEMP_U, tmpOff);
+
+               objects->addToken(OCODE_NATIVE, objects->getValue(2), objects->getValue(15));
+            }
+         }
+      }
+
+      break;
+
+   //
    // MT_VOID
    //
    case VariableData::MT_VOID:
@@ -488,10 +528,12 @@ void SourceExpression::make_objects_memcpy_prep
    if (!dup && dst->size == 1) switch (dst->type)
    {
    case VariableData::MT_AUTO:
+   case VariableData::MT_LONGPTR:
    case VariableData::MT_POINTER:
    case VariableData::MT_REGISTER:
    case VariableData::MT_STACK:
    case VariableData::MT_STATIC:
+   case VariableData::MT_STRING:
    case VariableData::MT_VOID:
       break;
 
@@ -521,11 +563,13 @@ void SourceExpression::make_objects_memcpy_prep
    {
    case VariableData::MT_AUTO:
    case VariableData::MT_LITERAL:
+   case VariableData::MT_LONGPTR:
    case VariableData::MT_POINTER:
    case VariableData::MT_REGISTER:
    case VariableData::MT_ARRAY:
    case VariableData::MT_STACK:
    case VariableData::MT_STATIC:
+   case VariableData::MT_STRING:
       break;
 
    case VariableData::MT_NONE:

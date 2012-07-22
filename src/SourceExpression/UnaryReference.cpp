@@ -60,6 +60,12 @@ public:
 
       switch (data->type)
       {
+      case VariableData::MT_ARRAY:
+      case VariableData::MT_LONGPTR:
+      case VariableData::MT_POINTER:
+      case VariableData::MT_STRING:
+         return !data->offsetExpr || data->offsetExpr->canMakeObject();
+
       case VariableData::MT_AUTO:
          if (type->getReturn()->getStoreType() == STORE_AUTO)
             return true;
@@ -71,10 +77,6 @@ public:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
          return false;
-
-      case VariableData::MT_POINTER:
-      case VariableData::MT_ARRAY:
-         return !data->offsetExpr || data->offsetExpr->canMakeObject();
 
       case VariableData::MT_REGISTER:
       case VariableData::MT_STATIC:
@@ -101,6 +103,14 @@ public:
 
       switch (data->type)
       {
+      case VariableData::MT_ARRAY:
+      case VariableData::MT_LONGPTR:
+      case VariableData::MT_STRING:
+         if (!data->offsetExpr)
+            return ObjectExpression::create_value_uns(0, pos);
+
+         return data->offsetExpr->makeObject();
+
       case VariableData::MT_AUTO:
          if (type->getReturn()->getStoreType() == STORE_AUTO)
             return data->address;
@@ -123,12 +133,6 @@ public:
       case VariableData::MT_REGISTER:
       case VariableData::MT_STATIC:
          return data->address;
-
-      case VariableData::MT_ARRAY:
-         if (!data->offsetExpr)
-            return ObjectExpression::create_value_uns(0, pos);
-
-         return data->offsetExpr->makeObject();
       }
 
       return Super::makeObject();
@@ -146,6 +150,13 @@ private:
 
       switch (data->type)
       {
+      case VariableData::MT_ARRAY:
+         if (data->offsetExpr)
+            data->offsetExpr->makeObjects(objects, dst);
+         else
+            objects->addTokenPushZero();
+         break;
+
       case VariableData::MT_AUTO:
          if (type->getReturn()->getStoreType() == STORE_AUTO)
             objects->addToken(OCODE_GET_IMM, data->address);
@@ -158,6 +169,14 @@ private:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
          ERROR_NP("invalid MT");
+
+      case VariableData::MT_LONGPTR:
+      case VariableData::MT_STRING:
+         if (data->offsetExpr)
+            data->offsetExpr->makeObjects(objects, dst);
+         else
+            create_value_data(getType(), context, pos)->makeObjects(objects, dst);
+         break;
 
       case VariableData::MT_POINTER:
          if (data->offsetExpr)
@@ -176,13 +195,6 @@ private:
       case VariableData::MT_REGISTER:
       case VariableData::MT_STATIC:
          objects->addToken(OCODE_GET_IMM, data->address);
-         break;
-
-      case VariableData::MT_ARRAY:
-         if (data->offsetExpr)
-            data->offsetExpr->makeObjects(objects, dst);
-         else
-            objects->addTokenPushZero();
          break;
       }
    }

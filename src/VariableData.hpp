@@ -45,16 +45,25 @@ class VariableData : public PlainCounter
 public:
    enum MemoryType
    {
+      MT_ARRAY,
       MT_AUTO,
       MT_LITERAL,
+      MT_LONGPTR,
       MT_POINTER,
       MT_REGISTER,
-      MT_ARRAY,
       MT_STACK,
       MT_STATIC,
+      MT_STRING,
       MT_VOID,
 
       MT_NONE
+   };
+
+   enum SectionA // Array
+   {
+      SA_MAP,
+      SA_WORLD,
+      SA_GLOBAL
    };
 
    enum SectionR // Register
@@ -65,13 +74,6 @@ public:
       SR_GLOBAL
    };
 
-   enum SectionA // Array
-   {
-      SA_MAP,
-      SA_WORLD,
-      SA_GLOBAL
-   };
-
 
    MemoryType type;
 
@@ -79,8 +81,8 @@ public:
 
    union
    {
-      SectionR sectionR;
       SectionA sectionA;
+      SectionR sectionR;
    };
 
    CounterPointer<ObjectExpression> address;
@@ -89,9 +91,14 @@ public:
    Pointer offsetTemp;
 
 
+   static Pointer create_array(bigsint size, SectionA section,
+                               ObjectExpression *address, SourceExpression *offset);
+
    static Pointer create_auto(bigsint size, ObjectExpression *address);
 
    static Pointer create_literal(bigsint size, ObjectExpression *value);
+
+   static Pointer create_longptr(bigsint size, SourceExpression *offset);
 
    static Pointer create_pointer(bigsint size, ObjectExpression *address,
                                  SourceExpression *offset);
@@ -99,12 +106,11 @@ public:
    static Pointer create_register(bigsint size, SectionR section,
                                   ObjectExpression *address);
 
-   static Pointer create_array(bigsint size, SectionA section,
-                               ObjectExpression *address, SourceExpression *offset);
-
    static Pointer create_stack(bigsint size);
 
    static Pointer create_static(bigsint size, ObjectExpression *address);
+
+   static Pointer create_string(bigsint size, SourceExpression *offset);
 
    static Pointer create_void(bigsint size);
 

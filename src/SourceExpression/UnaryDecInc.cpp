@@ -365,7 +365,9 @@ private:
       break;
 
       case VariableData::MT_LITERAL:
+      case VariableData::MT_LONGPTR:
       case VariableData::MT_STACK:
+      case VariableData::MT_STRING:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
          ERROR_NP("invalid MT");
@@ -426,7 +428,9 @@ private:
       break;
 
       case VariableData::MT_LITERAL:
+      case VariableData::MT_LONGPTR:
       case VariableData::MT_STACK:
+      case VariableData::MT_STRING:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
          ERROR_NP("invalid MT");
@@ -493,7 +497,9 @@ private:
       break;
 
       case VariableData::MT_LITERAL:
+      case VariableData::MT_LONGPTR:
       case VariableData::MT_STACK:
+      case VariableData::MT_STRING:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
          ERROR_NP("invalid MT");
@@ -554,7 +560,9 @@ private:
       break;
 
       case VariableData::MT_LITERAL:
+      case VariableData::MT_LONGPTR:
       case VariableData::MT_STACK:
+      case VariableData::MT_STRING:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
          ERROR_NP("invalid MT");
