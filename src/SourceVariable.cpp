@@ -126,24 +126,21 @@ VariableData::Pointer SourceVariable::getData() const
          arrbase = SourceExpression::create_value_uint
             (1, SourceContext::global_context, pos);
 
-      return VariableData::create_registerarray
-         (size, VariableData::SRA_MAP, address, arrbase);
+      return VariableData::create_array(size, VariableData::SA_MAP, address, arrbase);
 
    case STORE_WORLDARRAY:
       if (ObjectData_Array::meta_world(nameObj))
          arrbase = SourceExpression::create_value_uint
             (1, SourceContext::global_context, pos);
 
-      return VariableData::create_registerarray
-         (size, VariableData::SRA_WORLD, address, arrbase);
+      return VariableData::create_array(size, VariableData::SA_WORLD, address, arrbase);
 
    case STORE_GLOBALARRAY:
       if (ObjectData_Array::meta_global(nameObj))
          arrbase = SourceExpression::create_value_uint
             (1, SourceContext::global_context, pos);
 
-      return VariableData::create_registerarray
-         (size, VariableData::SRA_GLOBAL, address, arrbase);
+      return VariableData::create_array(size, VariableData::SA_GLOBAL, address, arrbase);
 
    case STORE_STRING:
       ERROR_NP("STORE_STRING");

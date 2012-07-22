@@ -177,11 +177,11 @@ case VariableData::MT_REGISTER: \
    case VariableData::SR_WORLD: DO_SET_SWITCH(OP, WLDREG); break; \
    case VariableData::SR_GLOBAL: DO_SET_SWITCH(OP, GBLREG); break; \
    } break; \
-case VariableData::MT_REGISTERARRAY: \
-   switch (data->sectionRA) { \
-   case VariableData::SRA_MAP: DO_SET_SWITCH(OP, MAPARR); break; \
-   case VariableData::SRA_WORLD: DO_SET_SWITCH(OP, WLDARR); break; \
-   case VariableData::SRA_GLOBAL: DO_SET_SWITCH(OP, GBLARR); break; \
+case VariableData::MT_ARRAY: \
+   switch (data->sectionA) { \
+   case VariableData::SA_MAP: DO_SET_SWITCH(OP, MAPARR); break; \
+   case VariableData::SA_WORLD: DO_SET_SWITCH(OP, WLDARR); break; \
+   case VariableData::SA_GLOBAL: DO_SET_SWITCH(OP, GBLARR); break; \
    } break; \
 default: ERROR_NP("invalid MT"); }
 
@@ -234,11 +234,11 @@ case VariableData::MT_REGISTER:  \
    case VariableData::SR_WORLD: CAN_SET_SWITCH(OP, WLDREG); \
    case VariableData::SR_GLOBAL: CAN_SET_SWITCH(OP, GBLREG); \
    } return false; \
-case VariableData::MT_REGISTERARRAY: \
-   switch (data->sectionRA) { \
-   case VariableData::SRA_MAP: CAN_SET_SWITCH(OP, MAPARR); \
-   case VariableData::SRA_WORLD: CAN_SET_SWITCH(OP, WLDARR); \
-   case VariableData::SRA_GLOBAL: CAN_SET_SWITCH(OP, GBLARR); \
+case VariableData::MT_ARRAY: \
+   switch (data->sectionA) { \
+   case VariableData::SA_MAP: CAN_SET_SWITCH(OP, MAPARR); \
+   case VariableData::SA_WORLD: CAN_SET_SWITCH(OP, WLDARR); \
+   case VariableData::SA_GLOBAL: CAN_SET_SWITCH(OP, GBLARR); \
    } return false; \
 default: return false; }
 

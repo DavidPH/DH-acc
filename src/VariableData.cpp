@@ -31,8 +31,8 @@
 // Static Variables                                                           |
 //
 
-static ObjectExpression::Pointer address0 =
-   ObjectExpression::create_value_int(0, SourcePosition::none());
+static ObjectExpression::Reference address0 =
+   ObjectExpression::create_value_uns(0, SourcePosition::none());
 
 
 //----------------------------------------------------------------------------|
@@ -68,10 +68,9 @@ VariableData(MemoryType _type, bigsint _size, SectionR section,
 // VariableData::VariableData
 //
 VariableData::
-VariableData(MemoryType _type, bigsint _size, SectionRA section,
+VariableData(MemoryType _type, bigsint _size, SectionA section,
              ObjectExpression *_address, SourceExpression *offset)
-             : type(_type), size(_size), sectionRA(section), address(_address),
-               offsetExpr(offset)
+ : type(_type), size(_size), sectionA(section), address(_address), offsetExpr(offset)
 {
    if (!address)
       address = address0;
@@ -125,11 +124,10 @@ create_register(bigsint size, SectionR section,
 //
 // VariableData::create_registerarray
 //
-VariableData::Pointer VariableData::
-create_registerarray(bigsint size, SectionRA section,
-                     ObjectExpression *address, SourceExpression *offset)
+VariableData::Pointer VariableData::create_array(bigsint size, SectionA section,
+   ObjectExpression *address, SourceExpression *offset)
 {
-   return new VariableData(MT_REGISTERARRAY, size, section, address, offset);
+   return new VariableData(MT_ARRAY, size, section, address, offset);
 }
 
 //

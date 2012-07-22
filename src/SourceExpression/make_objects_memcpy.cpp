@@ -298,9 +298,9 @@ static void make_objects_memcpy_post_part
       break;
 
    //
-   // MT_REGISTERARRAY
+   // MT_ARRAY
    //
-   case VariableData::MT_REGISTERARRAY:
+   case VariableData::MT_ARRAY:
       if (!data->offsetTemp)
          data->offsetTemp = ptrStack;
 
@@ -311,17 +311,17 @@ static void make_objects_memcpy_post_part
       // Furthermore, that one copy has already been setup by prep.
       if (get^set && data->size == 1)
       {
-         if (set) switch (data->sectionRA)
+         if(set) switch(data->sectionA)
          {
-         case VariableData::SRA_MAP:
+         case VariableData::SA_MAP:
             objects->addToken(OCODE_SET_MAPARR, data->address);
             break;
 
-         case VariableData::SRA_WORLD:
+         case VariableData::SA_WORLD:
             objects->addToken(OCODE_SET_WLDARR, data->address);
             break;
 
-         case VariableData::SRA_GLOBAL:
+         case VariableData::SA_GLOBAL:
             objects->addToken(OCODE_SET_GBLARR, data->address);
             break;
          }
@@ -334,17 +334,17 @@ static void make_objects_memcpy_post_part
                objects->addTokenPushZero();
          }
 
-         if (get) switch (data->sectionRA)
+         if(get) switch(data->sectionA)
          {
-         case VariableData::SRA_MAP:
+         case VariableData::SA_MAP:
             objects->addToken(OCODE_GET_MAPARR, data->address);
             break;
 
-         case VariableData::SRA_WORLD:
+         case VariableData::SA_WORLD:
             objects->addToken(OCODE_GET_WLDARR, data->address);
             break;
 
-         case VariableData::SRA_GLOBAL:
+         case VariableData::SA_GLOBAL:
             objects->addToken(OCODE_GET_GBLARR, data->address);
             break;
          }
@@ -371,17 +371,17 @@ static void make_objects_memcpy_post_part
 
             objects->addToken(OCODE_STK_SWAP);
 
-            switch (data->sectionRA)
+            switch(data->sectionA)
             {
-            case VariableData::SRA_MAP:
+            case VariableData::SA_MAP:
                objects->addToken(OCODE_SET_MAPARR, data->address);
                break;
 
-            case VariableData::SRA_WORLD:
+            case VariableData::SA_WORLD:
                objects->addToken(OCODE_SET_WLDARR, data->address);
                break;
 
-            case VariableData::SRA_GLOBAL:
+            case VariableData::SA_GLOBAL:
                objects->addToken(OCODE_SET_GBLARR, data->address);
                break;
             }
@@ -397,17 +397,17 @@ static void make_objects_memcpy_post_part
                objects->addToken(OCODE_ADD_STK_U);
             }
 
-            switch (data->sectionRA)
+            switch(data->sectionA)
             {
-            case VariableData::SRA_MAP:
+            case VariableData::SA_MAP:
                objects->addToken(OCODE_GET_MAPARR, data->address);
                break;
 
-            case VariableData::SRA_WORLD:
+            case VariableData::SA_WORLD:
                objects->addToken(OCODE_GET_WLDARR, data->address);
                break;
 
-            case VariableData::SRA_GLOBAL:
+            case VariableData::SA_GLOBAL:
                objects->addToken(OCODE_GET_GBLARR, data->address);
                break;
             }
@@ -501,7 +501,7 @@ void SourceExpression::make_objects_memcpy_prep
    case VariableData::MT_NONE:
       ERROR_P("MT_NONE as dst");
 
-   case VariableData::MT_REGISTERARRAY:
+   case VariableData::MT_ARRAY:
       if (!dst->offsetTemp)
          dst->offsetTemp = VariableData::create_stack(ptrSize);
 
@@ -523,7 +523,7 @@ void SourceExpression::make_objects_memcpy_prep
    case VariableData::MT_LITERAL:
    case VariableData::MT_POINTER:
    case VariableData::MT_REGISTER:
-   case VariableData::MT_REGISTERARRAY:
+   case VariableData::MT_ARRAY:
    case VariableData::MT_STACK:
    case VariableData::MT_STATIC:
       break;

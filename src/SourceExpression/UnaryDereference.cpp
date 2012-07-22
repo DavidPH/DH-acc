@@ -68,7 +68,7 @@ public:
       ObjectExpression::Pointer address;
       SourceExpression::Pointer offset;
       VariableData::SectionR sectionR;
-      VariableData::SectionRA sectionRA;
+      VariableData::SectionA sectionA;
 
       switch (type->getStoreType())
       {
@@ -123,19 +123,19 @@ public:
          goto case_register;
 
       case STORE_MAPARRAY:
-         sectionRA = VariableData::SRA_MAP;
+         sectionA = VariableData::SA_MAP;
       case_array:
          address = ObjectExpression::create_value_symbol(area, pos);
-         return VariableData::create_registerarray(size, sectionRA, address,
+         return VariableData::create_array(size, sectionA, address,
             create_value_cast_explicit(expr, VariableType::get_bt_uns(),
                context, pos));
 
       case STORE_WORLDARRAY:
-         sectionRA = VariableData::SRA_WORLD;
+         sectionA = VariableData::SA_WORLD;
          goto case_array;
 
       case STORE_GLOBALARRAY:
-         sectionRA = VariableData::SRA_GLOBAL;
+         sectionA = VariableData::SA_GLOBAL;
          goto case_array;
 
       case STORE_STRING:

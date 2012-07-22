@@ -229,7 +229,7 @@ void SourceExpression_Binary::doSetBase(ObjectVector *objects,
       make_objects_memcpy_prep(objects, dst, tmp, pos);
 
    // MT_REGISTERARRAY addressing.
-   if (src->type == VariableData::MT_REGISTERARRAY)
+   if(src->type == VariableData::MT_ARRAY)
    {
       src->offsetTemp = VariableData::create_stack
                         (src->offsetExpr->getType()->getSize(pos));
@@ -288,7 +288,7 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
       make_objects_memcpy_prep(objects, dst, tmp, pos);
 
    // For addressed variables, acquire the address now.
-   if(src->type == VariableData::MT_POINTER || src->type == VariableData::MT_REGISTERARRAY)
+   if(src->type == VariableData::MT_POINTER || src->type == VariableData::MT_ARRAY)
    {
       src->offsetTemp = VariableData::create_stack
                      (src->offsetExpr->getType()->getSize(pos));
@@ -319,7 +319,7 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
    }
 
    // Get address to set exprL.
-   if(src->type == VariableData::MT_REGISTERARRAY)
+   if(src->type == VariableData::MT_ARRAY)
       objects->addToken(OCODE_GET_TEMP, tmpA);
 
    // Evaluate.
@@ -368,15 +368,15 @@ void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
          objects->addToken(OCODE_GET_GBLREG, src->address); break;
       }
       break;
-   case VariableData::MT_REGISTERARRAY:
+   case VariableData::MT_ARRAY:
       if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
-      switch (src->sectionRA)
+      switch (src->sectionA)
       {
-      case VariableData::SRA_MAP:
+      case VariableData::SA_MAP:
          objects->addToken(OCODE_GET_MAPARR, src->address); break;
-      case VariableData::SRA_WORLD:
+      case VariableData::SA_WORLD:
          objects->addToken(OCODE_GET_WLDARR, src->address); break;
-      case VariableData::SRA_GLOBAL:
+      case VariableData::SA_GLOBAL:
          objects->addToken(OCODE_GET_GBLARR, src->address); break;
       }
       break;
@@ -414,19 +414,19 @@ void SourceExpression_Binary::doSetBaseSet(ObjectVector *objects,
          objects->addToken(OCODE_SET_GBLREG, src->address); break;
       }
       break;
-   case VariableData::MT_REGISTERARRAY:
+   case VariableData::MT_ARRAY:
       if(tmpA)
       {
          objects->addToken(OCODE_GET_TEMP, tmpA);
          objects->addToken(OCODE_STK_SWAP);
       }
-      switch (src->sectionRA)
+      switch (src->sectionA)
       {
-      case VariableData::SRA_MAP:
+      case VariableData::SA_MAP:
          objects->addToken(OCODE_SET_MAPARR, src->address); break;
-      case VariableData::SRA_WORLD:
+      case VariableData::SA_WORLD:
          objects->addToken(OCODE_SET_WLDARR, src->address); break;
-      case VariableData::SRA_GLOBAL:
+      case VariableData::SA_GLOBAL:
          objects->addToken(OCODE_SET_GBLARR, src->address); break;
       }
       break;

@@ -350,16 +350,16 @@ private:
       }
       break;
 
-      case VariableData::MT_REGISTERARRAY:
-         switch (src->sectionRA)
+      case VariableData::MT_ARRAY:
+         switch(src->sectionA)
          {
-         case VariableData::SRA_MAP:
+         case VariableData::SA_MAP:
             DO_P_OFFSET(GET_MAPARR, ADD_MAPARR_X, SUB_MAPARR_X);
 
-         case VariableData::SRA_WORLD:
+         case VariableData::SA_WORLD:
             DO_P_OFFSET(GET_WLDARR, ADD_WLDARR_X, SUB_WLDARR_X);
 
-         case VariableData::SRA_GLOBAL:
+         case VariableData::SA_GLOBAL:
             DO_P_OFFSET(GET_GBLARR, ADD_GBLARR_X, SUB_GBLARR_X);
       }
       break;
@@ -411,16 +411,16 @@ private:
       }
       break;
 
-      case VariableData::MT_REGISTERARRAY:
-         switch (src->sectionRA)
+      case VariableData::MT_ARRAY:
+         switch(src->sectionA)
          {
-         case VariableData::SRA_MAP:
+         case VariableData::SA_MAP:
             DO_I_OFFSET(GET_MAPARR, INC_MAPARR_I, DEC_MAPARR_I);
 
-         case VariableData::SRA_WORLD:
+         case VariableData::SA_WORLD:
             DO_I_OFFSET(GET_WLDARR, INC_WLDARR_I, DEC_WLDARR_I);
 
-         case VariableData::SRA_GLOBAL:
+         case VariableData::SA_GLOBAL:
             DO_I_OFFSET(GET_GBLARR, INC_GBLARR_I, DEC_GBLARR_I);
       }
       break;
@@ -478,16 +478,16 @@ private:
       }
       break;
 
-      case VariableData::MT_REGISTERARRAY:
-         switch (src->sectionRA)
+      case VariableData::MT_ARRAY:
+         switch(src->sectionA)
          {
-         case VariableData::SRA_MAP:
+         case VariableData::SA_MAP:
             DO_LL_OFFSET(GET_MAPARR, INC_MAPARR_I, DEC_MAPARR_I);
 
-         case VariableData::SRA_WORLD:
+         case VariableData::SA_WORLD:
             DO_LL_OFFSET(GET_WLDARR, INC_WLDARR_I, DEC_WLDARR_I);
 
-         case VariableData::SRA_GLOBAL:
+         case VariableData::SA_GLOBAL:
             DO_LL_OFFSET(GET_GBLARR, INC_GBLARR_I, DEC_GBLARR_I);
       }
       break;
@@ -539,16 +539,16 @@ private:
       }
       break;
 
-      case VariableData::MT_REGISTERARRAY:
-         switch (src->sectionRA)
+      case VariableData::MT_ARRAY:
+         switch(src->sectionA)
          {
-         case VariableData::SRA_MAP:
+         case VariableData::SA_MAP:
             DO_P_OFFSET(GET_MAPARR, ADD_MAPARR_U, SUB_MAPARR_U);
 
-         case VariableData::SRA_WORLD:
+         case VariableData::SA_WORLD:
             DO_P_OFFSET(GET_WLDARR, ADD_WLDARR_U, SUB_WLDARR_U);
 
-         case VariableData::SRA_GLOBAL:
+         case VariableData::SA_GLOBAL:
             DO_P_OFFSET(GET_GBLARR, ADD_GBLARR_U, SUB_GBLARR_U);
       }
       break;

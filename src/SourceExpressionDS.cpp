@@ -331,7 +331,7 @@ SRCEXPDS_EXPR_DEF1(prefix)
       case VariableData::MT_VOID:
          ERROR(tok->pos, "invalid MT for @");
 
-      case VariableData::MT_REGISTERARRAY:
+      case VariableData::MT_ARRAY:
          addr = data->address;
          break;
       }

@@ -108,7 +108,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
    VariableType::Reference memberType   = srcType->getType(name, pos);
    bigsint                 memberSize   = memberType->getSize(pos);
 
-   if (src->type == VariableData::MT_REGISTERARRAY)
+   if(src->type == VariableData::MT_ARRAY)
    {
       SourceExpression::Pointer offset;
 
@@ -117,8 +117,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
       if (src->offsetExpr) offset = offset ? create_binary_add
          (src->offsetExpr, offset, context, pos) : src->offsetExpr;
 
-      return VariableData::create_registerarray(memberSize, src->sectionRA,
-                                                src->address, offset);
+      return VariableData::create_array(memberSize, src->sectionA, src->address, offset);
    }
 
    if (src->type == VariableData::MT_LITERAL)

@@ -49,7 +49,7 @@ public:
       MT_LITERAL,
       MT_POINTER,
       MT_REGISTER,
-      MT_REGISTERARRAY,
+      MT_ARRAY,
       MT_STACK,
       MT_STATIC,
       MT_VOID,
@@ -65,11 +65,11 @@ public:
       SR_GLOBAL
    };
 
-   enum SectionRA // RegisterArray
+   enum SectionA // Array
    {
-      SRA_MAP,
-      SRA_WORLD,
-      SRA_GLOBAL
+      SA_MAP,
+      SA_WORLD,
+      SA_GLOBAL
    };
 
 
@@ -79,8 +79,8 @@ public:
 
    union
    {
-      SectionR  sectionR;
-      SectionRA sectionRA;
+      SectionR sectionR;
+      SectionA sectionA;
    };
 
    CounterPointer<ObjectExpression> address;
@@ -99,9 +99,8 @@ public:
    static Pointer create_register(bigsint size, SectionR section,
                                   ObjectExpression *address);
 
-   static Pointer create_registerarray(bigsint size, SectionRA section,
-                                       ObjectExpression *address,
-                                       SourceExpression *offset);
+   static Pointer create_array(bigsint size, SectionA section,
+                               ObjectExpression *address, SourceExpression *offset);
 
    static Pointer create_stack(bigsint size);
 
@@ -116,7 +115,7 @@ private:
    VariableData(MemoryType type, bigsint size, SectionR section,
                 ObjectExpression *address, SourceExpression *offset);
 
-   VariableData(MemoryType type, bigsint size, SectionRA section,
+   VariableData(MemoryType type, bigsint size, SectionA section,
                 ObjectExpression *address, SourceExpression *offset);
 
    ~VariableData();

@@ -109,7 +109,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       ObjectExpression::Pointer objArray = objects->getValue(option_auto_array);
 
       // Use the end of the auto-array for extended return data.
-      tmp = VariableData::create_registerarray(retnSize, VariableData::SRA_WORLD,
+      tmp = VariableData::create_array(retnSize, VariableData::SA_WORLD,
          objArray, create_value_int(-retnSize, context, pos));
       expr->makeObjects(objects, tmp);
 

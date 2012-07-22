@@ -73,7 +73,7 @@ public:
          return false;
 
       case VariableData::MT_POINTER:
-      case VariableData::MT_REGISTERARRAY:
+      case VariableData::MT_ARRAY:
          return !data->offsetExpr || data->offsetExpr->canMakeObject();
 
       case VariableData::MT_REGISTER:
@@ -124,7 +124,7 @@ public:
       case VariableData::MT_STATIC:
          return data->address;
 
-      case VariableData::MT_REGISTERARRAY:
+      case VariableData::MT_ARRAY:
          if (!data->offsetExpr)
             return ObjectExpression::create_value_uns(0, pos);
 
@@ -178,7 +178,7 @@ private:
          objects->addToken(OCODE_GET_IMM, data->address);
          break;
 
-      case VariableData::MT_REGISTERARRAY:
+      case VariableData::MT_ARRAY:
          if (data->offsetExpr)
             data->offsetExpr->makeObjects(objects, dst);
          else
