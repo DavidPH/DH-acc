@@ -420,9 +420,8 @@ protected:
    (ObjectVector *objects, VariableData *dst, SourceExpression *expr,
     Vector const &args, SourceContext *context, SourcePosition const &position);
 
-   static CounterPointer<ObjectExpression> make_object_cast
-   (ObjectExpression *src, VariableType *dstType, VariableType *srcType,
-    SourcePosition const &position);
+   static CounterReference<ObjectExpression> make_object_cast(ObjectExpression *src,
+      VariableType *dstType, VariableType *srcType, SourcePosition const &pos);
 
    static void make_objects_memcpy_cast
    (ObjectVector *objects, VariableData *dst, VariableData *src,

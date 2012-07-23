@@ -244,6 +244,9 @@ public:
    // Returns true if the given type is an arithmetic type.
    static bool is_bt_arithmetic(BasicType type);
 
+   // Returns true if the given type is a BT_BIT* type.
+   static bool is_bt_bit(BasicType type) {return type == BT_BIT_HRD || type == BT_BIT_SFT;}
+
    // Returns true if the given type is a BT_FIX* type.
    static bool is_bt_fix(BasicType type);
 
