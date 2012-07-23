@@ -271,7 +271,7 @@ get_promoted_type(VariableType *_type1, VariableType *_type2,
 //
 VariableData::Pointer SourceExpression::getData() const
 {
-   ERROR_NP("getData on invalid expression");
+   ERROR_NP("expected lvalue");
 }
 
 //
@@ -279,7 +279,7 @@ VariableData::Pointer SourceExpression::getData() const
 //
 CounterReference<SourceFunction> SourceExpression::getFunction() const
 {
-   ERROR_NP("getFunction on invalid expression");
+   ERROR_NP("expected function designator");
 }
 
 //
@@ -572,26 +572,26 @@ void SourceExpression::make_objects_auto_save(ObjectVector *objects, SourceConte
 //
 // SourceExpression::makeExpressionFunction
 //
-SourceExpression::Pointer SourceExpression::makeExpressionFunction
-(VariableType::Vector const &)
+SourceExpression::Pointer SourceExpression::makeExpressionFunction(
+   VariableType::Vector const &)
 {
    VariableType::Reference type = getType();
 
-   if (VariableType::is_bt_function(type->getBasicType()))
+   if(VariableType::is_bt_function(type->getBasicType()))
       return this;
 
-   ERROR_NP("makeExpressionFunction on invalid expression");
+   ERROR_NP("expected function designator");
 }
 
 //
 // SourceExpression::makeObject
 //
-CounterPointer<ObjectExpression> SourceExpression::makeObject() const
+ObjectExpression::Pointer SourceExpression::makeObject() const
 {
    VariableData::Pointer src = getData();
 
-   if (src->type != VariableData::MT_LITERAL)
-      ERROR_NP("makeObject on invalid expression");
+   if(src->type != VariableData::MT_LITERAL)
+      ERROR_NP("expected constant");
 
    return src->address;
 }
@@ -626,13 +626,12 @@ makeObjects(ObjectVector *objects, VariableData *dst)
 //
 // SourceExpression::makeObjectsBase
 //
-void SourceExpression::
-makeObjectsBase(ObjectVector *objects, VariableData *)
+void SourceExpression::makeObjectsBase(ObjectVector *objects, VariableData *)
 {
-   if (!labels.empty())
+   if(!labels.empty())
    {
-      if (evaluated)
-         ERROR_NP("multiple-evaluation of labelled expression");
+      if(evaluated)
+         ERROR_NP("multiple-evaluation of labeled expression");
 
       objects->addLabel(labels);
    }
