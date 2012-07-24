@@ -71,16 +71,22 @@ public:
          CONSTRAINT_ARITHMETIC("+");
       }
 
-      if (assign && !VariableType::is_bt_arithmetic(btR))
-         ERROR_NP("X -= non-arithmetic");
+      if(assign && !VariableType::is_bt_arithmetic(btR))
+         ERROR_NP("X += non-arithmetic");
 
       CONSTRUCTOR_POINTER_PREAMBLE();
 
-      if (btL == VariableType::BT_PTR)
+      if(btL == VariableType::BT_PTR)
+      {
+         exprR = create_value_cast_implicit(exprR, VariableType::get_bt_uns(), context, pos);
          exprR = create_binary_mul(exprR, exprSize, context, pos);
+      }
 
-      if (btR == VariableType::BT_PTR)
+      if(btR == VariableType::BT_PTR)
+      {
+         exprL = create_value_cast_implicit(exprL, VariableType::get_bt_uns(), context, pos);
          exprL = create_binary_mul(exprL, exprSize, context, pos);
+      }
    }
 
    //
