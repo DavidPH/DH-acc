@@ -73,7 +73,7 @@ if (type->getBasicType() != VariableType::BT_PTR) return; \
                                                           \
 bigsint retnSize = type->getReturn()->getSize(pos);       \
                                                           \
-if (retnSize == 1) return;                                \
+if(retnSize == 1 && type->getSize(pos) == 1) return;      \
                                                           \
 SourceExpression::Pointer exprSize =                      \
    create_value_uint(retnSize, context, pos);
@@ -288,10 +288,19 @@ protected:
    virtual void doSet(ObjectVector *objects, VariableData *data,
                       VariableType *type, int tmpBase);
 
+   void swapExpr()
+   {
+      SourceExpression::Pointer
+      exprT = exprL;
+      exprL = exprR;
+      exprR = exprT;
+   }
+
    SourceExpression::Pointer exprL;
    SourceExpression::Pointer exprR;
 
    bool assign;
+   bool docast : 1;
 
 private:
    void doGetBase(ObjectVector *objects, VariableData *dst);

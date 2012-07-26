@@ -231,6 +231,23 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
       return obj;
    }
 
+   // String-to-strptr.
+   // Note that the compile-time representation differs from the run-time one.
+   if(srcBT == VariableType::BT_STR && dstBT == VariableType::BT_PTR &&
+      dstType->getReturn()->getStoreType() == STORE_STRING)
+   {
+      ObjectExpression::Reference obj32 = ObjectExpression::create_value_uns(32, pos);
+      return ObjectExpression::create_binary_lsh(obj, obj32, pos);
+   }
+
+   // Strptr-to-string.
+   if(dstBT == VariableType::BT_STR && srcBT == VariableType::BT_PTR &&
+      srcType->getReturn()->getStoreType() == STORE_STRING)
+   {
+      ObjectExpression::Reference obj32 = ObjectExpression::create_value_uns(32, pos);
+      return ObjectExpression::create_binary_rsh(obj, obj32, pos);
+   }
+
    // Pointer-to-pointer casts are special if changing storage.
    if(srcBT == VariableType::BT_PTR && dstBT == VariableType::BT_PTR)
    {
@@ -251,16 +268,15 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
          return obj;
 
       ObjectExpression::Reference obj32 = ObjectExpression::create_value_uns(32, pos);
+      ObjectExpression::Reference objMask = ObjectExpression::create_value_uns(0xFFFFFFFF, pos);
 
       // Cast from long to near is pure truncation!
       if(srcST == STORE_NONE && dstNear)
-         return ObjectExpression::create_binary_rsh(obj, obj32, pos);
+         return ObjectExpression::create_binary_and(obj, objMask, pos);
 
       // Casting from near to long.
       if(srcNear && dstST == STORE_NONE)
       {
-         obj = ObjectExpression::create_binary_lsh(obj, obj32, pos);
-
          biguint ptrBase;
 
          switch(srcST)
@@ -276,6 +292,8 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
 
          ObjectExpression::Reference objSA = ObjectExpression::
             create_value_symbol(srcType->getReturn()->getStoreArea(), pos);
+
+         objSA = ObjectExpression::create_binary_lsh(objSA, obj32, pos);
 
          objPtr = ObjectExpression::create_binary_ior(objPtr, objSA, pos);
          objPtr = ObjectExpression::create_binary_ior(objPtr, obj, pos);

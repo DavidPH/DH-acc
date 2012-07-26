@@ -509,13 +509,16 @@ private:
    //
    // ::doP
    //
-   void doP
-   (ObjectVector *objects, VariableData *dst, VariableData *src,
-    VariableData *tmp, ObjectExpression *value)
+   void doP(ObjectVector *objects, VariableData *dst, VariableData *src,
+            VariableData *tmp, VariableType *type, ObjectExpression *value)
    {
+      StoreType store = type->getReturn()->getStoreType();
       ObjectExpression::Pointer addrL = src->address;
       ObjectExpression::Pointer tempA;
       ObjectCode ocode;
+
+      if(store == STORE_NONE || store == STORE_STRING)
+         addrL = objects->getValueAdd(addrL, 1);
 
       switch (src->type)
       {
@@ -591,10 +594,10 @@ private:
       else if (bt == VariableType::BT_PTR)
       {
          bigsint value = type->getReturn()->getSize(pos);
-         if (value == 1)
+         if(value == 1 && type->getSize(pos) == 1)
             doI(objects, dst, src, tmp);
          else
-            doP(objects, dst, src, tmp, objects->getValue(value));
+            doP(objects, dst, src, tmp, type, objects->getValue(value));
       }
       else if (VariableType::is_bt_fix(bt))
          doF(objects, dst, src, tmp);

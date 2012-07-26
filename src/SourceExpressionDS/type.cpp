@@ -97,6 +97,10 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
    if (tok->data == "__string")
       return VariableType::get_bt_str();
 
+   if(tok->data == "__strptr")
+      return VariableType::get_bt_chr()->setQualifier(VariableType::QUAL_CONST)
+                                       ->setStorage(STORE_STRING)->getPointer();
+
    if(tok->data != "char"     && tok->data != "int"      &&
       tok->data != "float"    && tok->data != "double"   &&
       tok->data != "__real"   && tok->data != "__fixed"  &&
@@ -345,6 +349,9 @@ bool SourceExpressionDS::is_type(SourceTokenizerC *in, SourceTokenC *_tok,
          return true;
 
       if(tok->data == "__string")
+         return true;
+
+      if(tok->data == "__strptr")
          return true;
 
       if(tok->data == "char"     || tok->data == "int"      ||

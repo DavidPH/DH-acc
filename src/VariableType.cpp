@@ -1402,6 +1402,11 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       if (is_bt_function(srcBT) && (dstBT == BT_BIT_HRD || dstBT == BT_BIT_SFT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
 
+      // string->strptr
+      if(srcBT == BT_STR && dstBT == BT_PTR && dst->getReturn()->getQualifier(QUAL_CONST) &&
+         dst->getReturn()->getStoreType() == STORE_STRING)
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
+
       // arithmetic<->arithmetic
       if (is_bt_arithmetic(srcBT) && is_bt_arithmetic(dstBT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;

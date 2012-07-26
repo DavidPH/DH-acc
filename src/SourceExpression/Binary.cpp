@@ -39,7 +39,7 @@
 // SourceExpression_Binary::SourceExpression_Binary
 //
 SourceExpression_Binary::SourceExpression_Binary(SRCEXP_EXPRBIN_PARM)
- : Super(SRCEXP_EXPR_PASS), exprL(_exprL), exprR(_exprR), assign(false)
+ : Super(SRCEXP_EXPR_PASS), exprL(_exprL), exprR(_exprR), assign(false), docast(true)
 {
    VariableType::Reference type = getType();
 
@@ -52,7 +52,7 @@ SourceExpression_Binary::SourceExpression_Binary(SRCEXP_EXPRBIN_PARM)
 //
 SourceExpression_Binary::SourceExpression_Binary(SRCEXP_EXPRBIN_PARM,
    VariableType *castL, VariableType *castR, bool _assign)
- : Super(SRCEXP_EXPR_PASS), exprL(_exprL), exprR(_exprR), assign(_assign)
+ : Super(SRCEXP_EXPR_PASS), exprL(_exprL), exprR(_exprR), assign(_assign), docast(true)
 {
    if (castL) exprL = create_value_cast_implicit(exprL, castL, context, pos);
    if (castR) exprR = create_value_cast_implicit(exprR, castR, context, pos);
@@ -86,16 +86,25 @@ void SourceExpression_Binary::doGetBase(ObjectVector *objects,
                                         VariableData *dst)
 {
    VariableType::Reference type = getType();
-   VariableData::Pointer src = VariableData::
-      create_stack(type->getSize(pos));
+   VariableData::Pointer   src  = VariableData::create_stack(type->getSize(pos));
 
    make_objects_memcpy_prep(objects, dst, src, pos);
 
-   create_value_cast_explicit(exprL, type, context, pos)
-      ->makeObjects(objects, src);
+   if(docast)
+   {
+      create_value_cast_explicit(exprL, type, context, pos)->makeObjects(objects, src);
+      create_value_cast_explicit(exprR, type, context, pos)->makeObjects(objects, src);
+   }
+   else
+   {
+      VariableData::Pointer tmp;
 
-   create_value_cast_explicit(exprR, type, context, pos)
-      ->makeObjects(objects, src);
+      tmp = VariableData::create_stack(exprL->getType()->getSize(pos));
+      exprL->makeObjects(objects, tmp);
+
+      tmp = VariableData::create_stack(exprR->getType()->getSize(pos));
+      exprR->makeObjects(objects, tmp);
+   }
 
    doGet(objects, type, 0);
 
@@ -240,8 +249,10 @@ void SourceExpression_Binary::doSetBase(ObjectVector *objects,
          objects->addToken(OCODE_STK_COPY);
    }
 
-   create_value_cast_explicit(exprR, typeL, context, pos)
-      ->makeObjects(objects, tmp);
+   if(docast)
+      create_value_cast_explicit(exprR, typeL, context, pos)->makeObjects(objects, tmp);
+   else
+      exprR->makeObjects(objects, tmp);
 
    // MT_POINTER addressing.
    if (src->type == VariableData::MT_POINTER)
@@ -305,7 +316,10 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
    if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
 
    // Acquire exprR.
-   create_value_cast_explicit(exprR, typeL, context, pos)->makeObjects(objects, tmp);
+   if(docast)
+      create_value_cast_explicit(exprR, typeL, context, pos)->makeObjects(objects, tmp);
+   else
+      exprR->makeObjects(objects, tmp);
 
    // Swap out exprR to set tmpA, if needed.
    if(tmpA)

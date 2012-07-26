@@ -37,6 +37,9 @@
 //
 bool SourceExpressionDS::is_store(std::string const &data)
 {
+   if(data == "__far")
+      return true;
+
    if (data == "static")
       return true;
 
@@ -76,6 +79,9 @@ bool SourceExpressionDS::is_store(std::string const &data)
    if (data == "__globalarray")
       return true;
 
+   if(data == "__stringarray")
+      return true;
+
    return false;
 }
 
@@ -93,6 +99,9 @@ StoreType SourceExpressionDS::make_store(SourceTokenizerC *in,
       *area = make_expression(in, context)->makeObject();
       in->get(SourceTokenC::TT_PAREN_C);
    }
+
+   if(typeTok->data == "__far")
+      return STORE_NONE;
 
    if (typeTok->data == "static")
       return STORE_STATIC;
@@ -132,6 +141,9 @@ StoreType SourceExpressionDS::make_store(SourceTokenizerC *in,
 
    if (typeTok->data == "__globalarray")
       return STORE_GLOBALARRAY;
+
+   if(typeTok->data == "__stringarray")
+      return STORE_STRING;
 
    ERROR(typeTok->pos, "unknown storage class '%s'", typeTok->data.c_str());
 }

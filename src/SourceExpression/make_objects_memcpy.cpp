@@ -86,7 +86,6 @@ static void make_objects_literal
    case VariableType::BT_UNS:
    case VariableType::BT_UNS_L:
    case VariableType::BT_LABEL:
-   case VariableType::BT_PTR:
    case VariableType::BT_PTR_NUL:
    case VariableType::BT_ENUM:
    case VariableType::BT_LINESPEC:
@@ -112,6 +111,27 @@ static void make_objects_literal
       objects->addToken(OCODE_GET_IMM, elem);
       objects->addToken(OCODE_GET_IMM, ObjectExpression::
          create_binary_rsh(elem, objects->getValue(32), pos));
+      break;
+
+   case VariableType::BT_PTR:
+      switch(type->getReturn()->getStoreType())
+      {
+      case STORE_NONE:
+         objects->addToken(OCODE_GET_IMM, ObjectExpression::
+            create_binary_rsh(elem, objects->getValue(32), pos));
+         objects->addToken(OCODE_GET_IMM, elem);
+         break;
+
+      case STORE_STRING:
+         objects->addToken(OCODE_GET_STRING, ObjectExpression::
+            create_binary_rsh(elem, objects->getValue(32), pos));
+         objects->addToken(OCODE_GET_IMM, elem);
+         break;
+
+      default:
+         objects->addToken(OCODE_GET_IMM, elem);
+         break;
+      }
       break;
 
    case VariableType::BT_STR:
@@ -451,6 +471,14 @@ static void make_objects_memcpy_post_part
    // MT_STRING
    //
    case VariableData::MT_STRING:
+      if(!data->offsetTemp)
+         data->offsetTemp = ptrStack;
+
+      if(data->offsetTemp->type != VariableData::MT_STACK)
+         ERROR_P("offsetTemp not MT_STACK");
+
+      data->offsetExpr->makeObjects(objects, data->offsetTemp);
+
       if(set) ERROR_P("MT_STRING as dst");
 
       if(get)
