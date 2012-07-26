@@ -111,8 +111,8 @@ public:
 
       // long long < 0 and long long >= 0 can be optimized by only checking the
       // high byte.
-      if (inBT == VariableType::BT_INT_LL && (ct == CMP_LT || ct == CMP_GE) &&
-          objR && !objR->resolveINT())
+      if((inBT == VariableType::BT_INT_L || inBT == VariableType::BT_INT_LL) &&
+         (ct == CMP_LT || ct == CMP_GE) && objR && !objR->resolveINT())
       {
          ObjectExpression::Pointer tmpH = context->getTempVar(0);
 
@@ -130,8 +130,9 @@ public:
       exprL->makeObjects(objects, tmp);
       exprR->makeObjects(objects, tmp);
 
-      if (inBT == VariableType::BT_INT_LL || inBT == VariableType::BT_UNS_LL)
-         return makeObjectsLL(objects, ocode, dst, src, type, inBT);
+      if(inBT == VariableType::BT_INT_L || inBT == VariableType::BT_INT_LL ||
+         inBT == VariableType::BT_UNS_L || inBT == VariableType::BT_UNS_LL)
+         return makeObjectsL(objects, ocode, dst, src, type, inBT);
 
       if (ct < CMP_EQ && VariableType::is_bt_unsigned(inBT))
          return makeObjectsU(objects, ocode, dst, src, type, NULL, NULL);
@@ -143,11 +144,10 @@ public:
 
 private:
    //
-   // ::makeObjectsLL
+   // ::makeObjectsL
    //
-   void makeObjectsLL
-   (ObjectVector *objects, ObjectCode ocode, VariableData *dst,
-    VariableData *src, VariableType *type, VariableType::BasicType inBT)
+   void makeObjectsL(ObjectVector *objects, ObjectCode ocode, VariableData *dst,
+                     VariableData *src, VariableType *type, VariableType::BasicType inBT)
    {
       // Don't always need Jl, so don't allocate it yet.
       ObjectExpression::Pointer tmpJl;

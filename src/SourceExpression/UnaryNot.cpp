@@ -90,15 +90,15 @@ void SourceExpression_UnaryNot::virtual_makeObjects
    case VariableType::BT_INT_HH:
    case VariableType::BT_INT_H:
    case VariableType::BT_INT:
-   case VariableType::BT_INT_L:
    case VariableType::BT_UNS_HH:
    case VariableType::BT_UNS_H:
    case VariableType::BT_UNS:
-   case VariableType::BT_UNS_L:
       objects->addToken(OCODE_INV_STK_I);
       break;
 
+   case VariableType::BT_INT_L:
    case VariableType::BT_INT_LL:
+   case VariableType::BT_UNS_L:
    case VariableType::BT_UNS_LL:
    {
       ObjectExpression::Pointer tmpH = context->getTempVar(0);

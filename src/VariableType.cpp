@@ -745,11 +745,9 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
    case BT_INT_HH:
    case BT_INT_H:
    case BT_INT:
-   case BT_INT_L:
    case BT_UNS_HH:
    case BT_UNS_H:
    case BT_UNS:
-   case BT_UNS_L:
 
    case BT_LABEL:
    case BT_STR:
@@ -771,7 +769,9 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
 
    case BT_FLT_L:
    case BT_FLT_LL:
+   case BT_INT_L:
    case BT_INT_LL:
+   case BT_UNS_L:
    case BT_UNS_LL:
       return 2;
 

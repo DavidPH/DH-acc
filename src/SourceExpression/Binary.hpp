@@ -113,12 +113,10 @@ case VariableType::BT_FIX_LL: objects->addToken(OCODE_##OP##_STK_X); break; \
 case VariableType::BT_INT_HH: objects->addToken(OCODE_##OP##_STK_I); break; \
 case VariableType::BT_INT_H: objects->addToken(OCODE_##OP##_STK_I); break;  \
 case VariableType::BT_INT: objects->addToken(OCODE_##OP##_STK_I); break;    \
-case VariableType::BT_INT_L: objects->addToken(OCODE_##OP##_STK_I); break;  \
                                                                             \
 case VariableType::BT_UNS_HH: objects->addToken(OCODE_##OP##_STK_U); break; \
 case VariableType::BT_UNS_H: objects->addToken(OCODE_##OP##_STK_U); break;  \
 case VariableType::BT_UNS: objects->addToken(OCODE_##OP##_STK_U); break;    \
-case VariableType::BT_UNS_L: objects->addToken(OCODE_##OP##_STK_U); break;  \
                                                                             \
 case VariableType::BT_PTR: objects->addToken(OCODE_##OP##_STK_U); break;    \
                                                                             \
@@ -145,12 +143,10 @@ case VariableType::BT_FIX_LL: objects->addToken(OCODE_##OP##_##MT##_X, data->add
 case VariableType::BT_INT_HH: objects->addToken(OCODE_##OP##_##MT##_I, data->address); break; \
 case VariableType::BT_INT_H: objects->addToken(OCODE_##OP##_##MT##_I, data->address); break; \
 case VariableType::BT_INT: objects->addToken(OCODE_##OP##_##MT##_I, data->address); break; \
-case VariableType::BT_INT_L: objects->addToken(OCODE_##OP##_##MT##_I, data->address); break; \
  \
 case VariableType::BT_UNS_HH: objects->addToken(OCODE_##OP##_##MT##_U, data->address); break; \
 case VariableType::BT_UNS_H: objects->addToken(OCODE_##OP##_##MT##_U, data->address); break; \
 case VariableType::BT_UNS: objects->addToken(OCODE_##OP##_##MT##_U, data->address); break; \
-case VariableType::BT_UNS_L: objects->addToken(OCODE_##OP##_##MT##_U, data->address); break; \
  \
 case VariableType::BT_PTR: objects->addToken(OCODE_##OP##_##MT##_U, data->address); break; \
  \
@@ -200,13 +196,13 @@ case VariableType::BT_FIX_LL: return true; \
 case VariableType::BT_INT_HH: return true; \
 case VariableType::BT_INT_H: return true; \
 case VariableType::BT_INT: return true; \
-case VariableType::BT_INT_L: return true; \
+case VariableType::BT_INT_L: return false; \
 case VariableType::BT_INT_LL: return false; \
  \
 case VariableType::BT_UNS_HH: return true; \
 case VariableType::BT_UNS_H: return true; \
 case VariableType::BT_UNS: return true; \
-case VariableType::BT_UNS_L: return true; \
+case VariableType::BT_UNS_L: return false; \
 case VariableType::BT_UNS_LL: return false; \
  \
 case VariableType::BT_PTR: return true; \
@@ -279,10 +275,9 @@ protected:
 
    virtual void doGet(ObjectVector *objects, VariableType *type, int tmpBase);
 
-   void doGetBaseILLAS(ObjectVector *objects, VariableType *type, int tmpBase,
-                       bool add);
+   void doGetBaseILAS(ObjectVector *objects, VariableType *type, int tmpBase, bool add);
 
-   void doGetBaseILLB(ObjectVector *objects, VariableType *type, int tmpBase,
+   void doGetBaseILB(ObjectVector *objects, VariableType *type, int tmpBase,
                       ObjectCode ocode);
 
    virtual void doSet(ObjectVector *objects, VariableData *data,

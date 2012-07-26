@@ -63,13 +63,13 @@ SourceExpression::Pointer SourceExpressionDS::create_value_integer
    static biguint const maxs_HH = 0x7FFFFFFF;
    static biguint const maxs_H  = 0x7FFFFFFF;
    static biguint const maxs    = 0x7FFFFFFF;
-   static biguint const maxs_L  = 0x7FFFFFFF;
+   static biguint const maxs_L  = 0x7FFFFFFFFFFFFFFF;
    static biguint const maxs_LL = 0x7FFFFFFFFFFFFFFF;
 
    static biguint const maxu_HH = 0xFFFFFFFF;
    static biguint const maxu_H  = 0xFFFFFFFF;
    static biguint const maxu    = 0xFFFFFFFF;
-   static biguint const maxu_L  = 0xFFFFFFFF;
+   static biguint const maxu_L  = 0xFFFFFFFFFFFFFFFF;
    static biguint const maxu_LL = 0xFFFFFFFFFFFFFFFF;
 
    int         base = 10;

@@ -438,11 +438,9 @@ private:
    }
 
    //
-   // ::doLL
+   // ::doL
    //
-   void doLL
-   (ObjectVector *objects, VariableData *dst, VariableData *src,
-    VariableData *tmp)
+   void doL(ObjectVector *objects, VariableData *dst, VariableData *src, VariableData *tmp)
    {
       ObjectExpression::Pointer addrL = src->address;
       ObjectExpression::Pointer addrH;
@@ -587,10 +585,15 @@ private:
       if (dst->type != VariableData::MT_VOID)
          make_objects_memcpy_prep(objects, dst, data, pos);
 
-      if (bt == VariableType::BT_INT_LL || bt == VariableType::BT_UNS_LL)
-         doLL(objects, dst, src, tmp);
+      if(bt == VariableType::BT_INT_L || bt == VariableType::BT_INT_LL ||
+         bt == VariableType::BT_UNS_L || bt == VariableType::BT_UNS_LL)
+      {
+         doL(objects, dst, src, tmp);
+      }
       else if (VariableType::is_bt_integer(bt))
+      {
          doI(objects, dst, src, tmp);
+      }
       else if (bt == VariableType::BT_PTR)
       {
          bigsint value = type->getReturn()->getSize(pos);

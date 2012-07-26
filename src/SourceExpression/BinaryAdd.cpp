@@ -155,8 +155,12 @@ protected:
       {
          DO_GET_CASES(ADD);
 
-      case VariableType::BT_INT_LL: doGetBaseILLAS(objects, type, tmpBase, true); break;
-      case VariableType::BT_UNS_LL: doGetBaseILLAS(objects, type, tmpBase, true); break;
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+         doGetBaseILAS(objects, type, tmpBase, true);
+         break;
       }
    }
 

@@ -82,8 +82,15 @@ protected:
       {
          DO_GET_CASES(XOR);
 
-      case VariableType::BT_INT_LL: doGetBaseILLB(objects, type, tmpBase, OCODE_XOR_TEMP_I); break;
-      case VariableType::BT_UNS_LL: doGetBaseILLB(objects, type, tmpBase, OCODE_XOR_TEMP_U); break;
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+         doGetBaseILB(objects, type, tmpBase, OCODE_XOR_TEMP_I);
+         break;
+
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+         doGetBaseILB(objects, type, tmpBase, OCODE_XOR_TEMP_U);
+         break;
       }
    }
 

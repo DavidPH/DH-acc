@@ -114,7 +114,7 @@ void SourceExpression_Binary::doGetBase(ObjectVector *objects,
 //
 // SourceExpression_Binary::doGetBaseILLAS
 //
-void SourceExpression_Binary::doGetBaseILLAS(ObjectVector *objects,
+void SourceExpression_Binary::doGetBaseILAS(ObjectVector *objects,
    VariableType *type, int tmpBase, bool add)
 {
    VariableData::Pointer tmp = VariableData::create_stack(type->getSize(pos));
@@ -187,9 +187,9 @@ void SourceExpression_Binary::doGetBaseILLAS(ObjectVector *objects,
 }
 
 //
-// SourceExpression_Binary::doGetBaseILLB
+// SourceExpression_Binary::doGetBaseILB
 //
-void SourceExpression_Binary::doGetBaseILLB(ObjectVector *objects,
+void SourceExpression_Binary::doGetBaseILB(ObjectVector *objects,
    VariableType *, int tmpBase, ObjectCode ocode)
 {
    ObjectExpression::Pointer tmpL = context->getTempVar(tmpBase+0);
