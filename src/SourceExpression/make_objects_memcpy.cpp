@@ -208,8 +208,64 @@ static void make_objects_memcpy_post_part
    // MT_LONGPTR
    //
    case VariableData::MT_LONGPTR:
-      if(set) ERROR_P("MT_LONGPTR as dst");
-      if(get) ERROR_P("MT_LONGPTR as src");
+      if(get && !set)
+      {
+         // A bit of a hack, but the only time this is already set is from
+         // UnaryDecInc. And only for getting.
+         if(!data->offsetTemp)
+         {
+            if(data->offsetExpr)
+               data->offsetExpr->makeObjects(objects, ptrStack);
+            else
+               objects->addTokenPushZero();
+         }
+      }
+      else
+      {
+         if(!data->offsetTemp)
+            data->offsetTemp = ptrStack;
+
+         if(data->offsetTemp->type != VariableData::MT_STACK)
+            ERROR_P("offsetTemp not MT_STACK");
+
+         data->offsetExpr->makeObjects(objects, data->offsetTemp);
+      }
+
+      // If only get or set and size is 1, only need one copy of the address.
+      if(get^set && data->size == 1)
+      {
+         if(set) objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Setptr"));
+         if(get) objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Getptr"));
+      }
+      else
+      {
+         ObjectExpression::Pointer tmpT = context->getTempVar(0);
+         ObjectExpression::Pointer tmpI = context->getTempVar(1);
+
+         objects->addToken(OCODE_SET_TEMP, tmpI);
+         objects->addToken(OCODE_SET_TEMP, tmpT);
+
+         if(set) for(i = data->size; i--;)
+         {
+            objects->addToken(OCODE_GET_TEMP, tmpT);
+            objects->addToken(OCODE_GET_TEMP, tmpI);
+
+            if(i) objects->addToken(OCODE_DEC_TEMP_U, tmpI);
+
+            objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Setptr"));
+         }
+
+         if(get) for(i = 0; i < data->size; ++i)
+         {
+            if(i) objects->addToken(OCODE_DEC_TEMP_U, tmpI);
+
+            objects->addToken(OCODE_GET_TEMP, tmpT);
+            objects->addToken(OCODE_GET_TEMP, tmpI);
+
+            objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Getptr"));
+         }
+      }
+
       break;
 
    //
@@ -495,10 +551,10 @@ static void make_objects_memcpy_post_part
 
             for(i = 0; i < data->size; ++i)
             {
+               if(i) objects->addToken(OCODE_INC_TEMP_U, tmpOff);
+
                objects->addToken(OCODE_GET_TEMP, tmpStr);
                objects->addToken(OCODE_GET_TEMP, tmpOff);
-
-               if(i) objects->addToken(OCODE_INC_TEMP_U, tmpOff);
 
                objects->addToken(OCODE_NATIVE, objects->getValue(2), objects->getValue(15));
             }

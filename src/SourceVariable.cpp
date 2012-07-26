@@ -58,11 +58,17 @@ SourceVariable::SourceVariable(std::string const &_nameSrc, VariableType *_type,
 {
    switch (store)
    {
+   case STORE_NONE:
+      ERROR_NP("far-storage variable");
+
    case STORE_MAPARRAY:
    case STORE_WORLDARRAY:
    case STORE_GLOBALARRAY:
       type = type->setStorage(store, nameObj);
       break;
+
+   case STORE_STRING:
+      ERROR_NP("string-storage variable");
 
    default:
       type = type->setStorage(store);

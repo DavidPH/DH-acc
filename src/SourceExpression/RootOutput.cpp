@@ -246,7 +246,11 @@ void SourceExpression_RootOutput::doOut
       break;
 
    case VariableType::BT_PTR:
-      objects->addToken(OCODE_ACSP_NUM_HEX_U);
+      for(biguint i = type->getSize(pos); i--;)
+      {
+         objects->addToken(OCODE_ACSP_NUM_HEX_U);
+         if(i) doChar(objects, ' ');
+      }
       doChar(objects, 'P');
       break;
 

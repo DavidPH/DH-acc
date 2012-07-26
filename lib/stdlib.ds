@@ -628,5 +628,90 @@ __extfunc "C" size_t wcstombs(char *restrict s, wchar_t const *restrict pwcs, si
    return i;
 };
 
+//===================================================================
+// Implementation extensions.
+//
+
+#define CASE256(N) CASE128((N)); CASE128((N)+128)
+#define CASE128(N) CASE64((N)); CASE64((N)+64)
+#define CASE64(N) CASE32((N)); CASE32((N)+32)
+#define CASE32(N) CASE16((N)); CASE16((N)+16)
+#define CASE16(N) CASE8((N)); CASE8((N)+8)
+#define CASE8(N) CASE4((N)); CASE4((N)+4)
+#define CASE4(N) CASE2((N)); CASE2((N)+2)
+#define CASE2(N) CASE1((N)); CASE1((N)+1)
+
+__asmfunc _PushREG(void register *) @ __ocode(NONE, GET_REG);
+__asmfunc int _GetWLDARR(int) @ __ocode(NONE, GET_WLDARR);
+__asmfunc int _GetGBLARR(int) @ __ocode(NONE, GET_GBLARR);
+__asmfunc _SetWLDARR(int) @ __ocode(NONE, SET_WLDARR);
+__asmfunc _SetGBLARR(int) @ __ocode(NONE, SET_GBLARR);
+
+typedef struct {unsigned t, i;} _Farptr;
+
+//
+// _Getptr
+//
+__extfunc "C" int _Getptr(void const __far *p)
+{
+   constexpr _Farptr register *s = (_Farptr register *)&p;
+
+   switch(s->t & 0xC0000000)
+   {
+   case 0x00000000: // STORE_STATIC
+      return *(int const static *)s->i;
+
+   case 0x40000000: // STORE_STRING
+      s->t &=       ~0xC0000000;
+      s->t |= s->i & 0xC0000000;
+      s->i &=       ~0xC0000000;
+      return **(__strptr register *)s;
+
+   case 0x80000000: // STORE_WLDARR, STORE_GBLARR
+      switch(s->t & ~0xC0000000)
+      {
+      default: return 0;
+      #define CASE1(N) case (N): _PushREG(&s->i); return _GetWLDARR((N));
+      CASE256(0);
+      #define CASE1(N) case (N)|0x10000: _PushREG(&s->i); return _GetGBLARR((N));
+      CASE256(0);
+      };
+
+   case 0xC0000000: // STORE_MAPARR
+      return 0;
+   };
+};
+
+//
+// _Setptr
+//
+__extfunc "C" void _Setptr(int v, void __far *p)
+{
+   constexpr _Farptr register *s = (_Farptr register *)&p;
+
+   switch(s->t & 0xC0000000)
+   {
+   case 0x00000000: // STORE_STATIC
+      *(int static *)s->i = v;
+      return;
+
+   case 0x40000000: // STORE_STRING
+      return;
+
+   case 0x80000000: // STORE_WLDARR, STORE_GBLARR
+      switch(s->t & ~0xC0000000)
+      {
+      default: return;
+      #define CASE1(N) case (N): _PushREG(&s->i); _PushREG(&v); _SetWLDARR((N)); return;
+      CASE256(0);
+      #define CASE1(N) case (N)|0x10000: _PushREG(&s->i); _PushREG(&v); _SetGBLARR((N)); return;
+      CASE256(0);
+      };
+
+   case 0xC0000000: // STORE_MAPARR
+      return;
+   };
+};
+
 // EOF
 

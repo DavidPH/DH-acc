@@ -231,6 +231,13 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
       return obj;
    }
 
+   // String-to-far*.
+   if(srcBT == VariableType::BT_STR && dstBT == VariableType::BT_PTR &&
+      dstType->getReturn()->getStoreType() == STORE_NONE)
+   {
+      BAD_CAST();
+   }
+
    // String-to-strptr.
    // Note that the compile-time representation differs from the run-time one.
    if(srcBT == VariableType::BT_STR && dstBT == VariableType::BT_PTR &&
@@ -253,8 +260,8 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
    {
       // OK, so for the purposes of this block there are three types of pointers.
       // A "near" pointer is basically an old-style, storage-specific pointer.
-      // A "long" pointer is them newfangled universal pointers. And a "string"
-      // pointer is a STORE_STRING pointer.
+      // A "long" (or "far") pointer is them newfangled universal pointers. And
+      // a "string" pointer is a STORE_STRING pointer.
 
       StoreType dstST = dstType->getReturn()->getStoreType();
       StoreType srcST = srcType->getReturn()->getStoreType();
@@ -293,20 +300,17 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
          ObjectExpression::Reference objSA = ObjectExpression::
             create_value_symbol(srcType->getReturn()->getStoreArea(), pos);
 
-         objSA = ObjectExpression::create_binary_lsh(objSA, obj32, pos);
-
          objPtr = ObjectExpression::create_binary_ior(objPtr, objSA, pos);
+         objPtr = ObjectExpression::create_binary_lsh(objPtr, obj32, pos);
          objPtr = ObjectExpression::create_binary_ior(objPtr, obj, pos);
 
          // But here's the thing. If it's null, it needs to stay null.
-         ObjectExpression::Reference objNull = obj;
-         objNull = ObjectExpression::create_branch_not(objNull, pos);
-         objNull = ObjectExpression::create_branch_not(objNull, pos);
+         ObjectExpression::Reference objNull = ObjectExpression::create_branch_not(obj, pos);
 
-         return ObjectExpression::create_branch_if(objNull, objPtr, obj, pos);
+         return ObjectExpression::create_branch_if(objNull, obj, objPtr, pos);
       }
 
-      // TODO: near->string, long->string, string->near, string->long
+      // Invalid at compile-time: near->string, long->string, string->near, string->long
       BAD_CAST();
    }
 
@@ -467,6 +471,49 @@ void SourceExpression::make_objects_memcpy_cast
    StoreType dstST, srcST;
    bool dstNear, srcNear;
 
+   // Strptr information.
+   ObjectExpression::Pointer tmpStr, tmpOff;
+
+   std::string label, labelEnd;
+
+   // String-to-far*.
+   if(srcBT == VariableType::BT_STR && dstBT == VariableType::BT_PTR &&
+      dstType->getReturn()->getStoreType() == STORE_NONE)
+   {
+      tmpStr = context->getTempVar(0);
+
+      objects->addToken(OCODE_SET_TEMP, tmpStr);
+
+      objects->addToken(OCODE_GET_TEMP, tmpStr);
+      objects->addToken(OCODE_GET_IMM,  objects->getValue(0x3FFFFFFF));
+      objects->addToken(OCODE_AND_STK_U);
+      objects->addToken(OCODE_GET_IMM,  objects->getValue(0x40000000));
+      objects->addToken(OCODE_IOR_STK_U);
+
+      objects->addToken(OCODE_GET_TEMP, tmpStr);
+      objects->addToken(OCODE_GET_IMM,  objects->getValue(0xC0000000));
+      objects->addToken(OCODE_AND_STK_U);
+
+      goto cast_done;
+   }
+
+   // Far*-to-string.
+   if(dstBT == VariableType::BT_STR && srcBT == VariableType::BT_PTR &&
+      srcType->getReturn()->getStoreType() == STORE_NONE)
+   {
+      objects->addToken(OCODE_GET_IMM,  objects->getValue(0xC0000000));
+      objects->addToken(OCODE_AND_STK_U);
+
+      objects->addToken(OCODE_STK_SWAP);
+
+      objects->addToken(OCODE_GET_IMM,  objects->getValue(0x3FFFFFFF));
+      objects->addToken(OCODE_AND_STK_U);
+
+      objects->addToken(OCODE_IOR_STK_U);
+
+      goto cast_done;
+   }
+
    // Pointer to pointer casts are special.
    if(srcBT == VariableType::BT_PTR && dstBT == VariableType::BT_PTR)
    {
@@ -505,14 +552,112 @@ void SourceExpression::make_objects_memcpy_cast
       {
          switch(srcST)
          {
+         case STORE_AUTO:
+            objects->addToken(OCODE_GET_AUTPTR);
+            objects->addToken(OCODE_ADD_STK_U);
          case STORE_STATIC:
             objects->addTokenPushZero();
             objects->addToken(OCODE_STK_SWAP);
             goto cast_done;
 
+         case STORE_WORLDARRAY:
+            tmpStr = objects->getValue(0x80000000);
+
+         gblarr_to_far:
+            label = context->makeLabel();
+            labelEnd = label + "_end";
+
+            tmpOff = objects->getValue(srcType->getReturn()->getStoreArea());
+            tmpOff = ObjectExpression::create_binary_ior(tmpStr, tmpOff, pos);
+
+            // if(stk) PUSH(storeArea) else PUSH(0); SWAP();
+            objects->addToken(OCODE_STK_COPY);
+            objects->addToken(OCODE_JMP_TRU, objects->getValue(label));
+            objects->addTokenPushZero();
+            objects->addToken(OCODE_JMP_IMM, objects->getValue(labelEnd));
+            objects->addLabel(label);
+            objects->addToken(OCODE_GET_IMM, tmpOff);
+            objects->addLabel(labelEnd);
+            objects->addToken(OCODE_STK_SWAP);
+
+            goto cast_done;
+
+         case STORE_GLOBALARRAY:
+            tmpStr = objects->getValue(0x80010000);
+            goto gblarr_to_far;
+
          default:
             BAD_CAST();
          }
+      }
+
+      // String to long.
+      if(srcST == STORE_STRING && dstST == STORE_NONE)
+      {
+         label = context->makeLabel();
+
+         tmpStr = context->getTempVar(0);
+         tmpOff = context->getTempVar(1);
+
+         objects->addToken(OCODE_SET_TEMP,   tmpOff);
+         objects->addToken(OCODE_SET_TEMP,   tmpStr);
+
+         // Null pointers must stay null.
+         objects->addToken(OCODE_GET_TEMP,   tmpStr);
+         objects->addToken(OCODE_GET_TEMP,   tmpOff);
+         objects->addToken(OCODE_IOR_STK_U);
+         objects->addToken(OCODE_JMP_NIL,    objects->getValue(label));
+
+         // off &= ~0xC0000000; // Unneeded. If those bits set, undefined.
+       //objects->addToken(OCODE_GET_IMM,    objects->getValue(0x3FFFFFFF);
+       //objects->addToken(OCODE_AND_TEMP_U, tmpOff);
+         // off |= str & 0xC0000000;
+         objects->addToken(OCODE_GET_TEMP,   tmpStr);
+         objects->addToken(OCODE_GET_IMM,    objects->getValue(0xC0000000));
+         objects->addToken(OCODE_AND_STK_U);
+         objects->addToken(OCODE_IOR_TEMP_U, tmpOff);
+         // str &= ~0xC0000000;
+         objects->addToken(OCODE_GET_IMM,    objects->getValue(0x3FFFFFFF));
+         objects->addToken(OCODE_AND_TEMP_U, tmpStr);
+         // str |= 0x40000000;
+         objects->addToken(OCODE_GET_IMM,    objects->getValue(0x40000000));
+         objects->addToken(OCODE_IOR_TEMP_U, tmpStr);
+
+         objects->addLabel(label);
+         objects->addToken(OCODE_GET_TEMP,   tmpStr);
+         objects->addToken(OCODE_GET_TEMP,   tmpOff);
+
+         goto cast_done;
+      }
+
+      // Long to string.
+      if(srcST == STORE_NONE && dstST == STORE_STRING)
+      {
+         tmpStr = context->getTempVar(0);
+         tmpOff = context->getTempVar(1);
+
+         objects->addToken(OCODE_SET_TEMP,   tmpOff);
+         objects->addToken(OCODE_SET_TEMP,   tmpStr);
+
+         // Null pointers must stay null.
+         // But in this case, this is handled implicitly.
+
+         // str &= ~0xC0000000;
+         objects->addToken(OCODE_GET_IMM,    objects->getValue(0x3FFFFFFF));
+         objects->addToken(OCODE_AND_TEMP_U, tmpStr);
+         // str |= off & 0xC0000000;
+         objects->addToken(OCODE_GET_TEMP,   tmpOff);
+         objects->addToken(OCODE_GET_IMM,    objects->getValue(0xC0000000));
+         objects->addToken(OCODE_AND_STK_U);
+         objects->addToken(OCODE_IOR_TEMP_U, tmpStr);
+         // off &= ~0xC0000000;
+         objects->addToken(OCODE_GET_IMM,    objects->getValue(0x3FFFFFFF));
+         objects->addToken(OCODE_AND_TEMP_U, tmpOff);
+
+         objects->addToken(OCODE_GET_TEMP,   tmpStr);
+         objects->addToken(OCODE_GET_TEMP,   tmpOff);
+
+         goto cast_done;
       }
 
       // Anything else has to be an error.

@@ -205,6 +205,13 @@ __function int wctomb(char *s, wchar_t wc);
 __function size_t mbstowcs(wchar_t *restrict pwcs, char const *restrict s, size_t n);
 __function size_t wcstombs(char *restrict s, wchar_t const *restrict pwcs, size_t n);
 
+//
+// Implementation extensions.
+//
+
+__function int _Getptr(void const __far *p);
+__function void _Setptr(int v, void __far *p);
+
 };
 
 #endif//__HEADER__STDLIB_H__

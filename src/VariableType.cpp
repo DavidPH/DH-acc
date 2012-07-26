@@ -1523,15 +1523,17 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       if (srcR->getStoreType() != dstR->getStoreType() ||
           srcR->getStoreArea() != dstR->getStoreArea())
       {
-         // ... Unless going from auto* to static* which is safe!
-         if (srcR->getStoreType() != STORE_AUTO ||
-             dstR->getStoreType() != STORE_STATIC)
-            return CAST_EXPLICIT;
+         // Implicit conversion to far pointer is OK.
+         // Don't allow CAST_NONE, though.
+         if(dstR->getStoreType() == STORE_NONE)
+            return get_cast(dst, srcR->setStorage(STORE_NONE)->getPointer()) & ~CAST_NONE;
 
-         // If only going from auto* to static*, consider it no change.
-         // (It requires translation, but this make overloading sane.)
-         if (srcR->setStorage(STORE_STATIC) == dstR)
-            return CAST_ANY;
+         // Also for auto pointer to static pointer.
+         // In this case, allow CAST_NONE for saner overloading.
+         if(srcR->getStoreType() == STORE_AUTO && dstR->getStoreType() == STORE_STATIC)
+            return get_cast(dst, srcR->setStorage(STORE_STATIC)->getPointer());
+
+         return CAST_EXPLICIT;
       }
 
       // If they differ only in qualifiers, it's time for const_cast!

@@ -193,6 +193,9 @@ void SourceContext::addFunction(SourceFunction *func)
 std::string SourceContext::
 addLabelCase(bigsint value, SourcePosition const &pos)
 {
+   // Pretend it's a 32-bit signed number.
+   if((value &= 0xFFFFFFFF) > 0x7FFFFFFF) value = value - 0x100000000;
+
    if (typeContext == CT_SWITCH)
    {
       if (cases.find(value) == cases.end() || !cases[value])
@@ -632,6 +635,9 @@ std::string SourceContext::getLabelBreak(SourcePosition const &pos) const
 std::string SourceContext::
 getLabelCase(bigsint value, SourcePosition const &pos)
 {
+   // Pretend it's a 32-bit signed number.
+   if((value &= 0xFFFFFFFF) > 0x7FFFFFFF) value = value - 0x100000000;
+
    if (typeContext == CT_SWITCH)
    {
       if (cases.find(value) == cases.end())

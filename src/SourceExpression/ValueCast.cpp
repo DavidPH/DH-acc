@@ -149,20 +149,30 @@ bool SourceExpression_ValueCast::canMakeObject() const
    VariableType::BasicType exprBT = exprType->getBasicType();
    VariableType::BasicType thisBT = thisType->getBasicType();
 
-   // Can't do compile-time auto*->static*.
-   if (thisBT == VariableType::BT_PTR &&
-       thisType->getReturn()->getStoreType() == STORE_STATIC &&
-       (exprBT == VariableType::BT_ARR || exprBT == VariableType::BT_PTR) &&
-       exprType->getReturn()->getStoreType() == STORE_AUTO)
+   // Special pointer considerations.
+   if(thisBT == VariableType::BT_PTR &&
+      (exprBT == VariableType::BT_ARR || exprBT == VariableType::BT_PTR))
    {
-      return false;
+      StoreType exprST = exprType->getReturn()->getStoreType();
+      StoreType thisST = thisType->getReturn()->getStoreType();
+
+      // Can't do compile-time auto*->static*.
+      if(thisST == STORE_STATIC && exprST == STORE_AUTO)
+         return false;
+
+      // Can't do compile-time string*->far*.
+      if(thisST == STORE_NONE && exprST == STORE_STRING)
+         return false;
    }
+
+   // Can't do compile-time __string->far*.
+   if(thisBT == VariableType::BT_PTR && exprBT == VariableType::BT_STR &&
+      thisType->getReturn()->getStoreType() == STORE_NONE)
+      return false;
 
    // Special case for casting an array to a pointer.
    if (exprBT == VariableType::BT_ARR && thisBT == VariableType::BT_PTR)
-   {
       return exprRef->canMakeObject();
-   }
 
    return expr->canMakeObject();
 }
