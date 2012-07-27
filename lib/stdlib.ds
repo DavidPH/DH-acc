@@ -211,16 +211,11 @@ __extfunc "C" void srand(unsigned int seed)
 //
 __extfunc "C" void *calloc(size_t nmemb, size_t size)
 {
-   nmemb = (size_t)malloc(size *= nmemb);
+   void *ptr = malloc(size *= nmemb);
 
-   if(!nmemb) return NULL;
+   if(!ptr) return NULL;
 
-   char *ptr = (char *)nmemb;
-   char *end = ptr + size;
-
-   while(ptr != end) {*ptr++ = 0;};
-
-   return (void *)nmemb;
+   return memset(ptr, 0, size);
 };
 
 //
