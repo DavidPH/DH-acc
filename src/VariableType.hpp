@@ -62,8 +62,7 @@ public:
       CAST_IMPLICIT    = 0x04,
       CAST_QUALIFIER   = 0x08,
       CAST_STATIC      = 0x10,
-      CAST_REINTERPRET = 0x20,
-      CAST_ANY         = 0x3F
+      CAST_ANY         = 0x1F
    };
 
    //

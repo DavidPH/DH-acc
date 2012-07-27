@@ -26,6 +26,7 @@
 #include "../SourceException.hpp"
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
+#include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
 
@@ -79,6 +80,58 @@ private:
    VariableType::Reference type;
 };
 
+//
+// SourceExpression_ValueCastRaw
+//
+class SourceExpression_ValueCastRaw : public SourceExpression
+{
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueCastRaw, SourceExpression);
+
+public:
+   //
+   // ::SourceExpression_ValueCastRaw
+   //
+   SourceExpression_ValueCastRaw(SourceExpression *_expr, VariableType *_type,
+      SRCEXP_EXPR_PARM) : Super(SRCEXP_EXPR_PASS), expr(_expr), type(_type) {}
+
+   //
+   // ::canMakeObject
+   //
+   virtual bool canMakeObject() const {return false;}
+
+   //
+   // ::getType
+   //
+   virtual VariableType::Reference getType() const {return type;}
+
+private:
+   //
+   // ::virtual_makeObjects
+   //
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+   {
+      Super::recurse_makeObjects(objects, dst);
+
+
+      biguint exprSize = expr->getType()->getSize(pos), size = type->getSize(pos);
+
+      VariableData::Pointer tmp = VariableData::create_stack(size);
+
+
+      make_objects_memcpy_prep(objects, dst, tmp, pos);
+
+      expr->makeObjects(objects, VariableData::create_stack(exprSize));
+
+      for(; exprSize < size; ++exprSize) objects->addTokenPushZero();
+      for(; exprSize > size; --exprSize) objects->addToken(OCODE_STK_DROP);
+
+      make_objects_memcpy_post(objects, dst, tmp, type, context, pos);
+   }
+
+   SourceExpression::Pointer expr;
+   VariableType::Reference type;
+};
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -121,12 +174,11 @@ SRCEXP_EXPRVAL_DEFN(et, cast_qualifier)
 }
 
 //
-// SourceExpression::create_value_cast_reinterpret
+// SourceExpression::create_value_cast_raw
 //
-SRCEXP_EXPRVAL_DEFN(et, cast_reinterpret)
+SRCEXP_EXPRVAL_DEFN(et, cast_raw)
 {
-   return new SourceExpression_ValueCast
-   (VariableType::CAST_REINTERPRET, expr, type, context, pos);
+   return new SourceExpression_ValueCastRaw(expr, type, context, pos);
 }
 
 //

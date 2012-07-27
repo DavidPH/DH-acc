@@ -1384,23 +1384,23 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
    {
       // nullptr->pointer
       if (srcBT == BT_PTR_NUL && dstBT == BT_PTR)
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
 
       // nullptr->function
       if (srcBT == BT_PTR_NUL && is_bt_function(dstBT))
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
 
       // nullptr->string
       if(srcBT == BT_PTR_NUL && dstBT == BT_STR)
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
 
       // pointer->boolean
       if (srcBT == BT_PTR && (dstBT == BT_BIT_HRD || dstBT == BT_BIT_SFT))
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
 
       // function->boolean
       if (is_bt_function(srcBT) && (dstBT == BT_BIT_HRD || dstBT == BT_BIT_SFT))
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
 
       // string->strptr
       if(srcBT == BT_STR && dstBT == BT_PTR && dst->getReturn()->getQualifier(QUAL_CONST) &&
@@ -1409,15 +1409,15 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
 
       // arithmetic<->arithmetic
       if (is_bt_arithmetic(srcBT) && is_bt_arithmetic(dstBT))
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
 
       // arithmetic->enum
       if (is_bt_arithmetic(srcBT) && dstBT == BT_ENUM)
-         return CAST_EXPLICIT|CAST_REINTERPRET;
+         return CAST_EXPLICIT;
 
       // block->array,struct
       if (srcBT == BT_BLOCK && (dstBT == BT_ARR || dstBT == BT_STRUCT))
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
 
       // block->*
       if(srcBT == BT_BLOCK && dstBT != BT_BLOCK)
@@ -1430,11 +1430,11 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
 
       // enum->int
       if (srcBT == BT_ENUM && (is_bt_integer(dstBT) && dstBT != BT_ENUM))
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
 
       // enum->arithmetic
       if (srcBT == BT_ENUM && is_bt_arithmetic(dstBT))
-         return CAST_EXPLICIT|CAST_REINTERPRET;
+         return CAST_EXPLICIT;
 
       // function<->function
       if (is_bt_function(srcBT) && is_bt_function(dstBT))
@@ -1442,16 +1442,16 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
 
       // int->pointer
       if (is_bt_integer(srcBT) && dstBT == BT_PTR)
-         return CAST_EXPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_STATIC;
 
       // pointer->int
       if (srcBT == BT_PTR && (is_bt_integer(dstBT) && dstBT != BT_ENUM))
-         return CAST_EXPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_STATIC;
 
 
       // *->void
       if (dstBT == BT_VOID)
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
 
 
       // *->*
@@ -1471,7 +1471,7 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
    case BT_NATIVE:
    case BT_SNAM:
    case BT_SNUM:
-      return CAST_EXPLICIT|CAST_REINTERPRET;
+      return CAST_EXPLICIT;
 
    case BT_BIT_HRD:
    case BT_BIT_SFT:
@@ -1508,7 +1508,7 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       return get_cast(dst->types[0], src->types[0]);
 
    case BT_ENUM:
-      return CAST_EXPLICIT|CAST_REINTERPRET;
+      return CAST_EXPLICIT;
 
    case BT_PTR:
    {
@@ -1553,14 +1553,14 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
 
       // Can go to void* implicitly.
       if (dstR->getBasicType() == BT_VOID)
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
 
       // Can come from void* via static.
       if (dstR->getBasicType() == BT_VOID)
-         return CAST_EXPLICIT|CAST_STATIC|CAST_REINTERPRET;
+         return CAST_EXPLICIT|CAST_STATIC;
 
       // Not losing qualifiers, but still differing types.
-      return CAST_EXPLICIT|CAST_REINTERPRET;
+      return CAST_EXPLICIT;
    }
    }
 

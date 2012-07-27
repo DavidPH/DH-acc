@@ -74,7 +74,7 @@ SRCEXPDS_KEYWORD_DEFN(cast)
       return create_value_cast_qualifier(expr, type, context, tok->pos);
 
    if (tok->data == "reinterpret_cast")
-      return create_value_cast_reinterpret(expr, type, context, tok->pos);
+      return create_value_cast_raw(expr, type, context, tok->pos);
 
    if (tok->data == "static_cast")
       return create_value_cast_static(expr, type, context, tok->pos);
