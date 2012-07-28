@@ -102,20 +102,20 @@ create_auto(bigsint size, ObjectExpression *address)
 }
 
 //
+// VariableData::create_farptr
+//
+VariableData::Pointer VariableData::create_farptr(bigsint size, SourceExpression *offset)
+{
+   return new VariableData(MT_FARPTR, size, NULL, offset);
+}
+
+//
 // VariableData::create_literal
 //
 VariableData::Pointer VariableData::
 create_literal(bigsint size, ObjectExpression *value)
 {
    return new VariableData(MT_LITERAL, size, value, NULL);
-}
-
-//
-// VariableData::create_longptr
-//
-VariableData::Pointer VariableData::create_longptr(bigsint size, SourceExpression *offset)
-{
-   return new VariableData(MT_LONGPTR, size, NULL, offset);
 }
 
 //

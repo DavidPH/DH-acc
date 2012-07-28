@@ -324,8 +324,8 @@ SRCEXPDS_EXPR_DEF1(prefix)
          addr = ObjectExpression::create_value_int(option_addr_array, tok->pos);
          break;
 
+      case VariableData::MT_FARPTR:
       case VariableData::MT_LITERAL:
-      case VariableData::MT_LONGPTR:
       case VariableData::MT_NONE:
       case VariableData::MT_REGISTER:
       case VariableData::MT_STACK:

@@ -47,8 +47,8 @@ public:
    {
       MT_ARRAY,
       MT_AUTO,
+      MT_FARPTR,
       MT_LITERAL,
-      MT_LONGPTR,
       MT_POINTER,
       MT_REGISTER,
       MT_STACK,
@@ -96,9 +96,9 @@ public:
 
    static Pointer create_auto(bigsint size, ObjectExpression *address);
 
-   static Pointer create_literal(bigsint size, ObjectExpression *value);
+   static Pointer create_farptr(bigsint size, SourceExpression *offset);
 
-   static Pointer create_longptr(bigsint size, SourceExpression *offset);
+   static Pointer create_literal(bigsint size, ObjectExpression *value);
 
    static Pointer create_pointer(bigsint size, ObjectExpression *address,
                                  SourceExpression *offset);

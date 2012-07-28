@@ -108,7 +108,9 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
    VariableType::Reference memberType   = srcType->getType(name, pos);
    bigsint                 memberSize   = memberType->getSize(pos);
 
-   if(src->type == VariableData::MT_ARRAY || src->type == VariableData::MT_LONGPTR)
+   // Need special handling for array and far storage, since they don't use
+   // address for an offset.
+   if(src->type == VariableData::MT_ARRAY || src->type == VariableData::MT_FARPTR)
    {
       SourceExpression::Pointer offset;
 
@@ -128,7 +130,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
       if(src->type == VariableData::MT_ARRAY)
          return VariableData::create_array(memberSize, src->sectionA, src->address, offset);
       else
-         return VariableData::create_longptr(memberSize, offset);
+         return VariableData::create_farptr(memberSize, offset);
    }
 
    if(src->type == VariableData::MT_LITERAL)

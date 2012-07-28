@@ -211,9 +211,9 @@ static void make_objects_memcpy_post_part
       break;
 
    //
-   // MT_LONGPTR
+   // MT_FARPTR
    //
-   case VariableData::MT_LONGPTR:
+   case VariableData::MT_FARPTR:
       if(get && !set)
       {
          // A bit of a hack, but the only time this is already set is from
@@ -618,7 +618,7 @@ void SourceExpression::make_objects_memcpy_prep
    if (!dup && dst->size == 1) switch (dst->type)
    {
    case VariableData::MT_AUTO:
-   case VariableData::MT_LONGPTR:
+   case VariableData::MT_FARPTR:
    case VariableData::MT_POINTER:
    case VariableData::MT_REGISTER:
    case VariableData::MT_STACK:
@@ -652,8 +652,8 @@ void SourceExpression::make_objects_memcpy_prep
    if (src) switch (src->type)
    {
    case VariableData::MT_AUTO:
+   case VariableData::MT_FARPTR:
    case VariableData::MT_LITERAL:
-   case VariableData::MT_LONGPTR:
    case VariableData::MT_POINTER:
    case VariableData::MT_REGISTER:
    case VariableData::MT_ARRAY:

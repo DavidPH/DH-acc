@@ -364,8 +364,8 @@ private:
       }
       break;
 
+      case VariableData::MT_FARPTR:
       case VariableData::MT_LITERAL:
-      case VariableData::MT_LONGPTR:
       case VariableData::MT_STACK:
       case VariableData::MT_STRING:
       case VariableData::MT_VOID:
@@ -427,8 +427,8 @@ private:
       }
       break;
 
+      case VariableData::MT_FARPTR:
       case VariableData::MT_LITERAL:
-      case VariableData::MT_LONGPTR:
       case VariableData::MT_STACK:
       case VariableData::MT_STRING:
       case VariableData::MT_VOID:
@@ -494,8 +494,8 @@ private:
       }
       break;
 
+      case VariableData::MT_FARPTR:
       case VariableData::MT_LITERAL:
-      case VariableData::MT_LONGPTR:
       case VariableData::MT_STACK:
       case VariableData::MT_STRING:
       case VariableData::MT_VOID:
@@ -560,8 +560,8 @@ private:
       }
       break;
 
+      case VariableData::MT_FARPTR:
       case VariableData::MT_LITERAL:
-      case VariableData::MT_LONGPTR:
       case VariableData::MT_STACK:
       case VariableData::MT_STRING:
       case VariableData::MT_VOID:

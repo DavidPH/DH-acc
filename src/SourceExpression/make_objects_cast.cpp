@@ -260,8 +260,8 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
    {
       // OK, so for the purposes of this block there are three types of pointers.
       // A "near" pointer is basically an old-style, storage-specific pointer.
-      // A "long" (or "far") pointer is them newfangled universal pointers. And
-      // a "string" pointer is a STORE_STRING pointer.
+      // A "far" pointer is a STORE_NONE pointer. And a "string" pointer is a
+      // STORE_STRING pointer (surprisingly enough).
 
       StoreType dstST = dstType->getReturn()->getStoreType();
       StoreType srcST = srcType->getReturn()->getStoreType();
@@ -277,11 +277,11 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
       ObjectExpression::Reference obj32 = ObjectExpression::create_value_uns(32, pos);
       ObjectExpression::Reference objMask = ObjectExpression::create_value_uns(0xFFFFFFFF, pos);
 
-      // Cast from long to near is pure truncation!
+      // Cast from far to near is pure truncation!
       if(srcST == STORE_NONE && dstNear)
          return ObjectExpression::create_binary_and(obj, objMask, pos);
 
-      // Casting from near to long.
+      // Casting from near to far.
       if(srcNear && dstST == STORE_NONE)
       {
          biguint ptrBase;
@@ -310,7 +310,8 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
          return ObjectExpression::create_branch_if(objNull, obj, objPtr, pos);
       }
 
-      // Invalid at compile-time: near->string, long->string, string->near, string->long
+      // Invalid at compile-time: near->string, far->string, string->near, string->far
+      // This is because strings can't be tagged inside far pointers.
       BAD_CAST();
    }
 
@@ -539,7 +540,7 @@ void SourceExpression::make_objects_memcpy_cast
       if(srcST == dstST || (srcNear && dstNear))
          goto cast_done;
 
-      // Cast from long to near is pure truncation!
+      // Cast from far to near is pure truncation!
       if(srcST == STORE_NONE && dstNear)
       {
          objects->addToken(OCODE_STK_SWAP);
@@ -547,7 +548,7 @@ void SourceExpression::make_objects_memcpy_cast
          goto cast_done;
       }
 
-      // Near to long.
+      // Near to far.
       if(srcNear && dstST == STORE_NONE)
       {
          switch(srcST)
@@ -591,7 +592,7 @@ void SourceExpression::make_objects_memcpy_cast
          }
       }
 
-      // String to long.
+      // String to far.
       if(srcST == STORE_STRING && dstST == STORE_NONE)
       {
          label = context->makeLabel();
@@ -630,7 +631,7 @@ void SourceExpression::make_objects_memcpy_cast
          goto cast_done;
       }
 
-      // Long to string.
+      // Far to string.
       if(srcST == STORE_NONE && dstST == STORE_STRING)
       {
          tmpStr = context->getTempVar(0);

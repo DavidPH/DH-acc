@@ -86,7 +86,7 @@ public:
       switch (type->getStoreType())
       {
       case STORE_NONE:
-         return VariableData::create_longptr(size, expr);
+         return VariableData::create_farptr(size, expr);
 
       case STORE_STATIC:
          if (expr->canMakeObject())
