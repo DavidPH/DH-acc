@@ -108,24 +108,31 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
    VariableType::Reference memberType   = srcType->getType(name, pos);
    bigsint                 memberSize   = memberType->getSize(pos);
 
-   if(src->type == VariableData::MT_ARRAY)
+   if(src->type == VariableData::MT_ARRAY || src->type == VariableData::MT_LONGPTR)
    {
       SourceExpression::Pointer offset;
 
       if(memberOffset) offset = create_value_uint(memberOffset, context, pos);
 
-      if (src->offsetExpr) offset = offset ? create_binary_add
-         (src->offsetExpr, offset, context, pos) : src->offsetExpr;
+      if(src->offsetExpr)
+      {
+         SourceExpression::Pointer base = create_value_cast_explicit(src->offsetExpr,
+            VariableType::get_bt_uns(), context, pos);
 
-      return VariableData::create_array(memberSize, src->sectionA, src->address, offset);
+         offset = offset ? create_binary_add(base, offset, context, pos) : base;
+      }
+
+      if(offset)
+         offset = create_value_cast_explicit(offset, memberType->getPointer(), context, pos);
+
+      if(src->type == VariableData::MT_ARRAY)
+         return VariableData::create_array(memberSize, src->sectionA, src->address, offset);
+      else
+         return VariableData::create_longptr(memberSize, offset);
    }
 
-   if (src->type == VariableData::MT_LITERAL)
-   {
-      ObjectExpression::Pointer obj = src->address->resolveMAP(name);
-
-      return VariableData::create_literal(memberSize, obj);
-   }
+   if(src->type == VariableData::MT_LITERAL)
+      return VariableData::create_literal(memberSize, src->address->resolveMAP(name));
 
    ObjectExpression::Pointer memberOffsetObj =
       ObjectExpression::create_value_uns(memberOffset, pos);

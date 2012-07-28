@@ -139,9 +139,7 @@ public:
          sectionA = VariableData::SA_MAP;
       case_array:
          address = ObjectExpression::create_value_symbol(area, pos);
-         return VariableData::create_array(size, sectionA, address,
-            create_value_cast_explicit(expr, VariableType::get_bt_uns(),
-               context, pos));
+         return VariableData::create_array(size, sectionA, address, expr);
 
       case STORE_WORLDARRAY:
          sectionA = VariableData::SA_WORLD;
