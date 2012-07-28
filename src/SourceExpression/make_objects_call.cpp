@@ -49,7 +49,11 @@ void SourceExpression::make_objects_call
 
    switch (type->getBasicType())
    {
-   case VariableType::BT_ASMFUNC:
+   case VariableType::BT_FUN:
+      make_objects_call_function(objects, dst, func, type, expr, args, context, pos);
+      break;
+
+   case VariableType::BT_FUN_ASM:
       if (expr->canMakeObject())
       {
          make_objects_call_asmfunc
@@ -59,11 +63,7 @@ void SourceExpression::make_objects_call
          ERROR_P("non-constant asmfunc");
       break;
 
-   case VariableType::BT_FUNCTION:
-      make_objects_call_function(objects, dst, func, type, expr, args, context, pos);
-      break;
-
-   case VariableType::BT_LINESPEC:
+   case VariableType::BT_FUN_LIN:
       if (expr->canMakeObject())
       {
          make_objects_call_linespec
@@ -73,7 +73,7 @@ void SourceExpression::make_objects_call
          ERROR_P("non-constant linespec");
       break;
 
-   case VariableType::BT_NATIVE:
+   case VariableType::BT_FUN_NAT:
       if (expr->canMakeObject())
       {
          make_objects_call_native
@@ -83,8 +83,8 @@ void SourceExpression::make_objects_call
          ERROR_P("non-constant native");
       break;
 
-   case VariableType::BT_SNAM:
-   case VariableType::BT_SNUM:
+   case VariableType::BT_FUN_SNA:
+   case VariableType::BT_FUN_SNU:
       make_objects_call_script(objects, dst, func, type, expr, args, context, pos);
       break;
 

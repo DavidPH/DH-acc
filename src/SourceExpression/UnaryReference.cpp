@@ -56,6 +56,9 @@ public:
    //
    virtual bool canMakeObject() const
    {
+      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+         return expr->canMakeObject();
+
       VariableData::Pointer data = expr->getData();
 
       switch (data->type)
@@ -99,6 +102,9 @@ public:
    //
    virtual ObjectExpression::Pointer makeObject() const
    {
+      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+         return expr->makeObject();
+
       VariableData::Pointer data = expr->getData();
 
       switch (data->type)
@@ -145,6 +151,9 @@ private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    {
       Super::recurse_makeObjects(objects, dst);
+
+      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+         return expr->makeObjects(objects, dst);
 
       VariableData::Pointer data = expr->getData();
 

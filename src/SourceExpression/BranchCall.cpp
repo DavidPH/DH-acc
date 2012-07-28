@@ -75,6 +75,16 @@ SourceExpression_BranchCall::SourceExpression_BranchCall
  : Super(SRCEXP_EXPR_PASS), args(_args), expr(_expr)
 {
    VariableType::Reference type = expr->getType();
+
+   if(type->getBasicType() == VariableType::BT_PTR)
+   {
+      expr = create_unary_dereference(expr, context, pos);
+      type = expr->getType();
+   }
+
+   if(!VariableType::is_bt_function(type->getBasicType()))
+      ERROR_NP("expected function type");
+
    VariableType::Vector const &types = type->getTypes();
 
    for (size_t i = 0; i < types.size(); ++i)

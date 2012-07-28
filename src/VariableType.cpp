@@ -99,12 +99,12 @@ static std::string const basic_names[] =
 
    // Anonymous types.
    "BT_BLOCK",
-   "BT_ASMFUNC",
-   "BT_FUNCTION",
-   "BT_LINESPEC",
-   "BT_NATIVE",
-   "BT_SNAM",
-   "BT_SNUM",
+   "BT_FUN",
+   "BT_FUN_ASM",
+   "BT_FUN_LIN",
+   "BT_FUN_NAT",
+   "BT_FUN_SNA",
+   "BT_FUN_SNU",
 };
 
 
@@ -195,12 +195,12 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
       out << '}';
       break;
 
-   case VariableType::BT_ASMFUNC:
-   case VariableType::BT_FUNCTION:
-   case VariableType::BT_LINESPEC:
-   case VariableType::BT_NATIVE:
-   case VariableType::BT_SNAM:
-   case VariableType::BT_SNUM:
+   case VariableType::BT_FUN:
+   case VariableType::BT_FUN_ASM:
+   case VariableType::BT_FUN_LIN:
+   case VariableType::BT_FUN_NAT:
+   case VariableType::BT_FUN_SNA:
+   case VariableType::BT_FUN_SNU:
       out << type->getBasicType();
       out << '(';
    {
@@ -387,13 +387,13 @@ VariableType::VariableType(BasicType _basic)
       break;
 
       // Anonymous types.
-   case BT_ASMFUNC:
    case BT_BLOCK:
-   case BT_FUNCTION:
-   case BT_LINESPEC:
-   case BT_NATIVE:
-   case BT_SNAM:
-   case BT_SNUM:
+   case BT_FUN:
+   case BT_FUN_ASM:
+   case BT_FUN_LIN:
+   case BT_FUN_NAT:
+   case BT_FUN_SNA:
+   case BT_FUN_SNU:
       break;
    }
 }
@@ -471,13 +471,13 @@ VariableType::~VariableType()
       break;
 
       // Anonymous types.
-   case BT_ASMFUNC:
    case BT_BLOCK:
-   case BT_FUNCTION:
-   case BT_LINESPEC:
-   case BT_NATIVE:
-   case BT_SNAM:
-   case BT_SNUM:
+   case BT_FUN:
+   case BT_FUN_ASM:
+   case BT_FUN_LIN:
+   case BT_FUN_NAT:
+   case BT_FUN_SNA:
+   case BT_FUN_SNU:
       break;
    }
 }
@@ -660,12 +660,12 @@ void VariableType::getNameMangled(std::string &out) const
    case BT_FLT:      out += 'F'; break;
    case BT_FLT_L:    out += "FL"; break;
    case BT_FLT_LL:   out += "FLL"; break;
-   case BT_FUNCTION: out += "F{"; TYPES; out += '}'; break;
-   case BT_ASMFUNC:  out += "FA{"; TYPES; out += '}'; break;
-   case BT_LINESPEC: out += "FL{"; TYPES; out += '}'; break;
-   case BT_NATIVE:   out += "FN{"; TYPES; out += '}'; break;
-   case BT_SNAM:     out += "FSA{"; TYPES; out += '}'; break;
-   case BT_SNUM:     out += "FSU{"; TYPES; out += '}'; break;
+   case BT_FUN:      out += "F{"; TYPES; out += '}'; break;
+   case BT_FUN_ASM:  out += "FA{"; TYPES; out += '}'; break;
+   case BT_FUN_LIN:  out += "FL{"; TYPES; out += '}'; break;
+   case BT_FUN_NAT:  out += "FN{"; TYPES; out += '}'; break;
+   case BT_FUN_SNA:  out += "FSA{"; TYPES; out += '}'; break;
+   case BT_FUN_SNU:  out += "FSU{"; TYPES; out += '}'; break;
    case BT_INT_HH:   out += "IHH"; break;
    case BT_INT_H:    out += "IH"; break;
    case BT_INT:      out += 'I'; break;
@@ -728,7 +728,6 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
    switch (basic)
    {
    case BT_VOID:
-   case BT_ASMFUNC:
       return 0;
 
    case BT_BIT_HRD:
@@ -755,12 +754,6 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
    case BT_PTR_NUL:
 
    case BT_ENUM:
-
-   case BT_FUNCTION:
-   case BT_LINESPEC:
-   case BT_NATIVE:
-   case BT_SNAM:
-   case BT_SNUM:
       return 1;
 
    case BT_CLX:
@@ -779,7 +772,13 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
       return width ? typeRet->getSize(pos) * width : 0;
 
    case BT_PTR:
-      return (typeRet->store == STORE_NONE || typeRet->store == STORE_STRING) ? 2 : 1;
+      if(is_bt_function(typeRet->basic))
+         return typeRet->getSize(pos);
+
+      if(typeRet->store == STORE_NONE || typeRet->store == STORE_STRING)
+         return 2;
+
+      return 1;
 
    case BT_STRUCT:
    case BT_BLOCK:
@@ -802,6 +801,16 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
 	 }
       return size;
    }
+
+   case BT_FUN_ASM:
+      return 0;
+
+   case BT_FUN:
+   case BT_FUN_LIN:
+   case BT_FUN_NAT:
+   case BT_FUN_SNA:
+   case BT_FUN_SNU:
+      return 1;
    }
 
    ERROR_NP("invalid type");
@@ -1286,79 +1295,75 @@ VariableType::Reference VariableType::get_bt_block(Vector const &types)
 }
 
 //
-// VariableType::get_bt_asmfunc
+// VariableType::get_bt_fun
 //
-VariableType::Reference VariableType::get_bt_asmfunc
-(Vector const &types, VariableType *typeRet)
+VariableType::Reference VariableType::get_bt_fun(Vector const &types, VariableType *typeRet)
 {
-   static Reference type(new VariableType(BT_ASMFUNC));
-
-   if (types.empty() && typeRet->basic == BT_VOID) return type;
-
-   return get_bt_anonymous(types, typeRet, type, BT_ASMFUNC);
-}
-
-//
-// VariableType::get_bt_function
-//
-VariableType::Reference VariableType::get_bt_function
-(Vector const &types, VariableType *typeRet)
-{
-   static Reference type(new VariableType(BT_FUNCTION));
-
-   if (types.empty() && typeRet->basic == BT_VOID) return type;
-
-   return get_bt_anonymous(types, typeRet, type, BT_FUNCTION);
-}
-
-//
-// VariableType::get_bt_linespec
-//
-VariableType::Reference VariableType::get_bt_linespec
-(Vector const &types, VariableType *typeRet)
-{
-   static Reference type(new VariableType(BT_LINESPEC));
-
-   if (types.empty() && typeRet->basic == BT_VOID) return type;
-
-   return get_bt_anonymous(types, typeRet, type, BT_LINESPEC);
-}
-
-//
-// VariableType::get_bt_native
-//
-VariableType::Reference VariableType::get_bt_native
-(Vector const &types, VariableType *typeRet)
-{
-   static Reference type(new VariableType(BT_NATIVE));
-
-   if (types.empty() && typeRet->basic == BT_VOID) return type;
-
-   return get_bt_anonymous(types, typeRet, type, BT_NATIVE);
-}
-
-//
-// VariableType::get_bt_snam
-//
-VariableType::Reference VariableType::get_bt_snam(Vector const &types, VariableType *typeRet)
-{
-   static Reference type(new VariableType(BT_SNAM));
-
-   if (types.empty() && typeRet->basic == BT_VOID) return type;
-
-   return get_bt_anonymous(types, typeRet, type, BT_SNAM);
-}
-
-//
-// VariableType::get_bt_snum
-//
-VariableType::Reference VariableType::get_bt_snum(Vector const &types, VariableType *typeRet)
-{
-   static Reference type(new VariableType(BT_SNUM));
+   static Reference type(new VariableType(BT_FUN));
 
    if(types.empty() && typeRet->basic == BT_VOID) return type;
 
-   return get_bt_anonymous(types, typeRet, type, BT_SNUM);
+   return get_bt_anonymous(types, typeRet, type, BT_FUN);
+}
+
+//
+// VariableType::get_bt_fun_asm
+//
+VariableType::Reference VariableType::get_bt_fun_asm(Vector const &types, VariableType *typeRet)
+{
+   static Reference type(new VariableType(BT_FUN_ASM));
+
+   if (types.empty() && typeRet->basic == BT_VOID) return type;
+
+   return get_bt_anonymous(types, typeRet, type, BT_FUN_ASM);
+}
+
+//
+// VariableType::get_bt_fun_lin
+//
+VariableType::Reference VariableType::get_bt_fun_lin(Vector const &types, VariableType *typeRet)
+{
+   static Reference type(new VariableType(BT_FUN_LIN));
+
+   if (types.empty() && typeRet->basic == BT_VOID) return type;
+
+   return get_bt_anonymous(types, typeRet, type, BT_FUN_LIN);
+}
+
+//
+// VariableType::get_bt_fun_nat
+//
+VariableType::Reference VariableType::get_bt_fun_nat(Vector const &types, VariableType *typeRet)
+{
+   static Reference type(new VariableType(BT_FUN_NAT));
+
+   if (types.empty() && typeRet->basic == BT_VOID) return type;
+
+   return get_bt_anonymous(types, typeRet, type, BT_FUN_NAT);
+}
+
+//
+// VariableType::get_bt_fun_sna
+//
+VariableType::Reference VariableType::get_bt_fun_sna(Vector const &types, VariableType *typeRet)
+{
+   static Reference type(new VariableType(BT_FUN_SNA));
+
+   if (types.empty() && typeRet->basic == BT_VOID) return type;
+
+   return get_bt_anonymous(types, typeRet, type, BT_FUN_SNA);
+}
+
+//
+// VariableType::get_bt_fun_snu
+//
+VariableType::Reference VariableType::get_bt_fun_snu(Vector const &types, VariableType *typeRet)
+{
+   static Reference type(new VariableType(BT_FUN_SNU));
+
+   if(types.empty() && typeRet->basic == BT_VOID) return type;
+
+   return get_bt_anonymous(types, typeRet, type, BT_FUN_SNU);
 }
 
 //===================================================================
@@ -1401,6 +1406,10 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       // function->boolean
       if (is_bt_function(srcBT) && (dstBT == BT_BIT_HRD || dstBT == BT_BIT_SFT))
          return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
+
+      // function->pointer
+      if(is_bt_function(srcBT) && dstBT == BT_PTR)
+         return get_cast(dst, src->getPointer());
 
       // string->strptr
       if(srcBT == BT_STR && dstBT == BT_PTR && dst->getReturn()->getQualifier(QUAL_CONST) &&
@@ -1465,12 +1474,12 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
    case BT_UNION:
       return 0;
 
-   case BT_ASMFUNC:
-   case BT_FUNCTION:
-   case BT_LINESPEC:
-   case BT_NATIVE:
-   case BT_SNAM:
-   case BT_SNUM:
+   case BT_FUN:
+   case BT_FUN_ASM:
+   case BT_FUN_LIN:
+   case BT_FUN_NAT:
+   case BT_FUN_SNA:
+   case BT_FUN_SNU:
       return CAST_EXPLICIT;
 
    case BT_BIT_HRD:
@@ -1647,12 +1656,12 @@ bool VariableType::is_bt_function(BasicType type)
 {
    switch (type)
    {
-   case BT_ASMFUNC:
-   case BT_FUNCTION:
-   case BT_LINESPEC:
-   case BT_NATIVE:
-   case BT_SNAM:
-   case BT_SNUM:
+   case BT_FUN:
+   case BT_FUN_ASM:
+   case BT_FUN_LIN:
+   case BT_FUN_NAT:
+   case BT_FUN_SNA:
+   case BT_FUN_SNU:
       return true;
 
    default:
@@ -1708,11 +1717,11 @@ bool VariableType::is_bt_unsigned(BasicType type)
 
    case BT_PTR:
 
-   case BT_FUNCTION:
-   case BT_LINESPEC:
-   case BT_NATIVE:
-   case BT_SNAM:
-   case BT_SNUM:
+   case BT_FUN:
+   case BT_FUN_LIN:
+   case BT_FUN_NAT:
+   case BT_FUN_SNA:
+   case BT_FUN_SNU:
       return true;
 
    default:

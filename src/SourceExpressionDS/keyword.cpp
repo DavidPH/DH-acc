@@ -256,9 +256,9 @@ SRCEXPDS_KEYWORD_DEFN(linespec)
       make_prefix(in, context)->makeObject();
 
    VariableType::Reference varType = tok->data == "__linespec"
-      ? VariableType::get_bt_linespec(args.types, args.retn) : tok->data == "__native"
-      ? VariableType::get_bt_native  (args.types, args.retn)
-      : VariableType::get_bt_asmfunc (args.types, args.retn);
+      ? VariableType::get_bt_fun_lin(args.types, args.retn) : tok->data == "__native"
+      ? VariableType::get_bt_fun_nat(args.types, args.retn)
+      : VariableType::get_bt_fun_asm(args.types, args.retn);
 
    SourceVariable::Pointer var = SourceVariable::create_constant
       (args.name, varType, obj, tok->pos);

@@ -576,9 +576,13 @@ SourceExpression::Pointer SourceExpression::makeExpressionFunction(
    VariableType::Vector const &)
 {
    VariableType::Reference type = getType();
+   VariableType::BasicType bt   = type->getBasicType();
 
-   if(VariableType::is_bt_function(type->getBasicType()))
+   if(VariableType::is_bt_function(bt))
       return this;
+
+   if(bt == VariableType::BT_PTR && VariableType::is_bt_function(type->getReturn()->getBasicType()))
+      return create_unary_dereference(this, context, pos);
 
    ERROR_NP("expected function designator");
 }

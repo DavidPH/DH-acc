@@ -177,8 +177,7 @@ static SourceExpression::Pointer make_func
    }
 
    // funcVarType
-   VariableType::Reference funcVarType =
-      VariableType::get_bt_function(args.types, args.retn);
+   VariableType::Reference funcVarType = VariableType::get_bt_fun(args.types, args.retn);
 
    // funcVar
    SourceVariable::Pointer funcVar = SourceVariable::

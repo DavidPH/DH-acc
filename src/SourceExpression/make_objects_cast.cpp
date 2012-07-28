@@ -145,14 +145,14 @@ static ObjectExpression::ExpressionType GetET(VariableType const *type)
    case VariableType::BT_BLOCK:
       return ObjectExpression::ET_ARR;
 
-   case VariableType::BT_ASMFUNC:
+   case VariableType::BT_FUN_ASM:
       return ObjectExpression::ET_OCS;
 
-   case VariableType::BT_FUNCTION:
-   case VariableType::BT_LINESPEC:
-   case VariableType::BT_NATIVE:
-   case VariableType::BT_SNAM:
-   case VariableType::BT_SNUM:
+   case VariableType::BT_FUN:
+   case VariableType::BT_FUN_LIN:
+   case VariableType::BT_FUN_NAT:
+   case VariableType::BT_FUN_SNA:
+   case VariableType::BT_FUN_SNU:
       return ObjectExpression::ET_UNS;
    }
 

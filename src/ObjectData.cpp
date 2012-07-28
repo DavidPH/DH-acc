@@ -107,17 +107,17 @@ void odata_set_strings(std::vector<int> &strings, VariableType const *type)
          strings.push_back(false);
       break;
 
-   case VariableType::BT_ASMFUNC:
+   case VariableType::BT_FUN_ASM:
       break;
 
-   case VariableType::BT_FUNCTION:
-   case VariableType::BT_LINESPEC:
-   case VariableType::BT_NATIVE:
-   case VariableType::BT_SNUM:
+   case VariableType::BT_FUN:
+   case VariableType::BT_FUN_LIN:
+   case VariableType::BT_FUN_NAT:
+   case VariableType::BT_FUN_SNU:
       strings.push_back(false);
       break;
 
-   case VariableType::BT_SNAM:
+   case VariableType::BT_FUN_SNA:
       strings.push_back(true);
       break;
    }

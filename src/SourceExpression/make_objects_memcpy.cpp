@@ -54,7 +54,7 @@ static void make_objects_literal
    case VariableType::BT_FLT_L:
    case VariableType::BT_FLT_LL:
    case VariableType::BT_UNION:
-   case VariableType::BT_ASMFUNC:
+   case VariableType::BT_FUN_ASM:
       ERROR_P("bad BT: %s", make_string(type->getBasicType()).c_str());
 
    case VariableType::BT_CLX:
@@ -88,9 +88,9 @@ static void make_objects_literal
    case VariableType::BT_LABEL:
    case VariableType::BT_PTR_NUL:
    case VariableType::BT_ENUM:
-   case VariableType::BT_LINESPEC:
-   case VariableType::BT_NATIVE:
-   case VariableType::BT_SNUM:
+   case VariableType::BT_FUN_LIN:
+   case VariableType::BT_FUN_NAT:
+   case VariableType::BT_FUN_SNU:
       objects->addToken(OCODE_GET_IMM, elem);
       break;
 
@@ -102,7 +102,7 @@ static void make_objects_literal
       objects->addToken(OCODE_GET_IMM, elem);
       break;
 
-   case VariableType::BT_FUNCTION:
+   case VariableType::BT_FUN:
       objects->addToken(OCODE_GET_FUNCP, elem);
       break;
 
@@ -114,6 +114,12 @@ static void make_objects_literal
       break;
 
    case VariableType::BT_PTR:
+      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+      {
+         make_objects_literal(objects, elem, type->getReturn(), pos);
+         break;
+      }
+
       switch(type->getReturn()->getStoreType())
       {
       case STORE_NONE:
@@ -135,7 +141,7 @@ static void make_objects_literal
       break;
 
    case VariableType::BT_STR:
-   case VariableType::BT_SNAM:
+   case VariableType::BT_FUN_SNA:
       objects->addToken(OCODE_GET_STRING, elem);
       break;
 

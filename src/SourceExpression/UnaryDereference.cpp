@@ -54,7 +54,18 @@ public:
       expr = create_value_cast_implicit(expr, type, context, pos);
    }
 
-   virtual bool canGetData() const;
+   //
+   // ::canGetData
+   //
+   virtual bool canGetData() const
+   {
+      VariableType::Reference type = expr->getType();
+
+      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+         return false;
+
+      return type->getBasicType() != VariableType::BT_STR;
+   }
 
    //
    // ::getData
@@ -62,8 +73,12 @@ public:
    virtual VariableData::Pointer getData() const
    {
       VariableType::Reference type = expr->getType()->getReturn();
-      bigsint                 size = type->getSize(pos);
-      std::string const      &area = type->getStoreArea();
+
+      if(VariableType::is_bt_function(type->getBasicType()))
+         return Super::getData();
+
+      biguint            size = type->getSize(pos);
+      std::string const &area = type->getStoreArea();
 
       ObjectExpression::Pointer address;
       SourceExpression::Pointer offset;
@@ -165,14 +180,6 @@ SRCEXP_EXPRUNA_DEFN(dereference)
 }
 
 //
-// SourceExpression_UnaryDereference::canGetData
-//
-bool SourceExpression_UnaryDereference::canGetData() const
-{
-   return expr->getType()->getBasicType() != VariableType::BT_STR;
-}
-
-//
 // SourceExpression_UnaryDereference::getType
 //
 VariableType::Reference SourceExpression_UnaryDereference::getType() const
@@ -194,6 +201,9 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
    Super::recurse_makeObjects(objects, dst);
 
    VariableType::Reference type = getType();
+
+   if(VariableType::is_bt_function(type->getBasicType()))
+      return expr->makeObjects(objects, dst);
 
    if (expr->getType()->getBasicType() == VariableType::BT_STR)
    {

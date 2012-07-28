@@ -432,7 +432,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    {
       make_arglist(in, context, &args);
 
-      type = VariableType::get_bt_asmfunc(args.types, args.retn);
+      type = VariableType::get_bt_fun_asm(args.types, args.retn)->getPointer();
 
       if (!args.name.empty())
          type = context->getVariableType_typedef(args.name, type, tok->pos);
@@ -503,7 +503,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    {
       make_arglist(in, context, &args);
 
-      type = VariableType::get_bt_function(args.types, args.retn);
+      type = VariableType::get_bt_fun(args.types, args.retn)->getPointer();
 
       if (!args.name.empty())
          type = context->getVariableType_typedef(args.name, type, tok->pos);
@@ -512,7 +512,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    {
       make_arglist(in, context, &args);
 
-      type = VariableType::get_bt_linespec(args.types, args.retn);
+      type = VariableType::get_bt_fun_lin(args.types, args.retn)->getPointer();
 
       if (!args.name.empty())
          type = context->getVariableType_typedef(args.name, type, tok->pos);
@@ -521,7 +521,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    {
       make_arglist(in, context, &args);
 
-      type = VariableType::get_bt_native(args.types, args.retn);
+      type = VariableType::get_bt_fun_nat(args.types, args.retn)->getPointer();
 
       if (!args.name.empty())
          type = context->getVariableType_typedef(args.name, type, tok->pos);
@@ -531,9 +531,9 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
       make_arglist(in, context, &args);
 
       if(option_named_scripts)
-         type = VariableType::get_bt_snam(args.types, args.retn);
+         type = VariableType::get_bt_fun_sna(args.types, args.retn)->getPointer();
       else
-         type = VariableType::get_bt_snum(args.types, args.retn);
+         type = VariableType::get_bt_fun_snu(args.types, args.retn)->getPointer();
 
       if (!args.name.empty())
          type = context->getVariableType_typedef(args.name, type, tok->pos);
@@ -542,7 +542,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    {
       make_arglist(in, context, &args);
 
-      type = VariableType::get_bt_snam(args.types, args.retn);
+      type = VariableType::get_bt_fun_sna(args.types, args.retn)->getPointer();
 
       if (!args.name.empty())
          type = context->getVariableType_typedef(args.name, type, tok->pos);
@@ -551,7 +551,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    {
       make_arglist(in, context, &args);
 
-      type = VariableType::get_bt_snum(args.types, args.retn);
+      type = VariableType::get_bt_fun_snu(args.types, args.retn)->getPointer();
 
       if (!args.name.empty())
          type = context->getVariableType_typedef(args.name, type, tok->pos);

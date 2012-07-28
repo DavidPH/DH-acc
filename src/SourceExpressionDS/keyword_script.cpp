@@ -277,8 +277,8 @@ static SourceExpression::Pointer make_script
 
    // scriptVarType
    VariableType::Reference scriptVarType =
-      named ? VariableType::get_bt_snam(args.types, args.retn)
-            : VariableType::get_bt_snum(args.types, args.retn);
+      named ? VariableType::get_bt_fun_sna(args.types, args.retn)
+            : VariableType::get_bt_fun_snu(args.types, args.retn);
 
    // scriptVar
    SourceVariable::Pointer scriptVar = SourceVariable::create_constant

@@ -122,12 +122,12 @@ public:
 
       // Anonymous types.
       BT_BLOCK,
-      BT_ASMFUNC,
-      BT_FUNCTION,
-      BT_LINESPEC,
-      BT_NATIVE,
-      BT_SNAM, // script, named
-      BT_SNUM, // script, numbered
+      BT_FUN,
+      BT_FUN_ASM, // asmfunc
+      BT_FUN_LIN, // linepec
+      BT_FUN_NAT, // native
+      BT_FUN_SNA, // script, named
+      BT_FUN_SNU, // script, numbered
    };
 
    //
@@ -230,12 +230,12 @@ public:
 
    // Anonymous types.
    static Reference get_bt_block(Vector const &types);
-   static Reference get_bt_asmfunc(Vector const &types, VariableType *typeRet);
-   static Reference get_bt_function(Vector const &types, VariableType *typeRet);
-   static Reference get_bt_linespec(Vector const &types, VariableType *typeRet);
-   static Reference get_bt_native(Vector const &types, VariableType *typeRet);
-   static Reference get_bt_snam(Vector const &types, VariableType *typeRet);
-   static Reference get_bt_snum(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_fun(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_fun_asm(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_fun_lin(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_fun_nat(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_fun_sna(Vector const &types, VariableType *typeRet);
+   static Reference get_bt_fun_snu(Vector const &types, VariableType *typeRet);
 
    static unsigned get_cast(VariableType *dst, VariableType *src);
    static unsigned get_cast(Vector const &dst, Vector const &src);
@@ -255,7 +255,7 @@ public:
    static bool is_bt_integer(BasicType type);
 
    // Returns true if the given type is a named or numbered script type.
-   static bool is_bt_script(BasicType type) {return type == BT_SNAM || type == BT_SNUM;}
+   static bool is_bt_script(BasicType type) {return type == BT_FUN_SNA || type == BT_FUN_SNU;}
 
    // Returns true if the given type is an unsigned type.
    static bool is_bt_unsigned(BasicType type);

@@ -59,9 +59,12 @@ public:
                  make_string(exprType).c_str(), make_string(type).c_str());
       }
 
+      VariableType::BasicType exprBT = exprType->getBasicType();
+
       // Special case for casting an array to a pointer.
-      if (exprType->getBasicType() == VariableType::BT_ARR &&
-              type->getBasicType() == VariableType::BT_PTR)
+      // Or for casting a function to a pointer.
+      if((exprBT == VariableType::BT_ARR || VariableType::is_bt_function(exprBT)) &&
+         type->getBasicType() == VariableType::BT_PTR)
       {
          exprRef = create_unary_reference(expr, context, pos);
       }
@@ -222,9 +225,8 @@ bool SourceExpression_ValueCast::canMakeObject() const
       thisType->getReturn()->getStoreType() == STORE_NONE)
       return false;
 
-   // Special case for casting an array to a pointer.
-   if (exprBT == VariableType::BT_ARR && thisBT == VariableType::BT_PTR)
-      return exprRef->canMakeObject();
+   // Special cast.
+   if(exprRef) return exprRef->canMakeObject();
 
    return expr->canMakeObject();
 }
@@ -242,19 +244,10 @@ VariableType::Reference SourceExpression_ValueCast::getType() const
 //
 ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
 {
-   VariableType::Reference exprType = expr->getType()->getUnqualified();
-   VariableType           *thisType = type;
+   // Special cast.
+   if(exprRef) return exprRef->makeObject();
 
-   VariableType::BasicType exprBT = exprType->getBasicType();
-   VariableType::BasicType thisBT = thisType->getBasicType();
-
-   // Special case for casting an array to a pointer.
-   if (exprBT == VariableType::BT_ARR && thisBT == VariableType::BT_PTR)
-   {
-      return exprRef->makeObject();
-   }
-
-   return make_object_cast(expr->makeObject(), thisType, exprType, pos);
+   return make_object_cast(expr->makeObject(), type, expr->getType(), pos);
 }
 
 //
@@ -265,12 +258,9 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 {
    Super::recurse_makeObjects(objects, dst);
 
-   // Special case for casting an array to a pointer.
-   if (expr->getType()->getBasicType() == VariableType::BT_ARR &&
-                type  ->getBasicType() == VariableType::BT_PTR)
-   {
+   // Special cast.
+   if(exprRef)
       exprRef->makeObjectsCast(objects, dst, type);
-   }
    else
       expr->makeObjectsCast(objects, dst, type);
 }

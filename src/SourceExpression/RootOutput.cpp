@@ -246,7 +246,11 @@ void SourceExpression_RootOutput::doOut
       break;
 
    case VariableType::BT_PTR:
-      for(biguint i = type->getSize(pos); i--;)
+      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+      {
+         doOut(objects, type->getReturn());
+      }
+      else for(biguint i = type->getSize(pos); i--;)
       {
          objects->addToken(OCODE_ACSP_NUM_HEX_U);
          if(i) doChar(objects, ' ');
@@ -295,32 +299,32 @@ void SourceExpression_RootOutput::doOut
       doChar(objects, "}B");
       break;
 
-   case VariableType::BT_ASMFUNC:
-      doChar(objects, "fA");
-      break;
-
-   case VariableType::BT_FUNCTION:
+   case VariableType::BT_FUN:
       objects->addToken(OCODE_ACSP_NUM_DEC_I);
       doChar(objects, 'f');
       break;
 
-   case VariableType::BT_LINESPEC:
+   case VariableType::BT_FUN_ASM:
+      doChar(objects, "fA");
+      break;
+
+   case VariableType::BT_FUN_LIN:
       objects->addToken(OCODE_ACSP_NUM_DEC_I);
       doChar(objects, "fL");
       break;
 
-   case VariableType::BT_NATIVE:
+   case VariableType::BT_FUN_NAT:
       objects->addToken(OCODE_ACSP_NUM_DEC_I);
       doChar(objects, "fN");
       break;
 
-   case VariableType::BT_SNAM:
+   case VariableType::BT_FUN_SNA:
       doChar(objects, '"');
       objects->addToken(OCODE_ACSP_STR);
       doChar(objects, "\"fSa");
       break;
 
-   case VariableType::BT_SNUM:
+   case VariableType::BT_FUN_SNU:
       objects->addToken(OCODE_ACSP_NUM_DEC_I);
       doChar(objects, "fSu");
       break;

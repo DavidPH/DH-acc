@@ -71,7 +71,7 @@ void SourceExpression::make_objects_call_script
  VariableType *type, SourceExpression *data, Vector const &args,
  SourceContext *context, SourcePosition const &pos)
 {
-   bool named = type->getBasicType() == VariableType::BT_SNAM;
+   bool named = type->getBasicType() == VariableType::BT_FUN_SNA;
 
    FUNCTION_PREAMBLE
 
