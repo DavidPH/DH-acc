@@ -492,9 +492,12 @@ void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
    SourcePosition const &pos, SourceTokenC::Reference tok, SourceStream *in,
    MacroArgs const *altArgs, MacroParm const *altParm)
 {
-   if (tok->type == SourceTokenC::TT_PAREN_O &&
-       !out.empty() && out.back()->type == SourceTokenC::TT_NAM &&
-       hasMacro(out.back()->data) && !used.count(out.back()->data))
+   // Check for function-like macro expansion.
+   // That is, a function-like macro name followed by an open parenthesis.
+   // And of course, that name must not have been expanded yet.
+   if(tok->type == SourceTokenC::TT_PAREN_O &&
+      !out.empty() && out.back()->type == SourceTokenC::TT_NAM &&
+      hasMacro(out.back()->data) && !used.count(out.back()->data))
    {
       tok = out.back(); out.pop_back();
       MacroData const &mdata = macros[tok->data];
@@ -508,8 +511,9 @@ void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
       return;
    }
 
-   if (tok->type == SourceTokenC::TT_NAM &&
-       hasDefine(tok->data) && !used.count(tok->data))
+   // Check for object-like macro expansion.
+   // Like above, but it only needs one token to trigger.
+   if(tok->type == SourceTokenC::TT_NAM && hasDefine(tok->data) && !used.count(tok->data))
    {
       used.insert(tok->data);
       expand(out, used, pos, defines[tok->data]);
@@ -518,23 +522,24 @@ void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
       return;
    }
 
-   if (tok->type == SourceTokenC::TT_NAM && tok->data == "__FILE__")
+   // Then check for __FILE__ specifically.
+   if(tok->type == SourceTokenC::TT_NAM && tok->data == "__FILE__")
    {
-      out.push_back(SourceTokenC::create(pos,
-         pos.filename, SourceTokenC::TT_STR));
+      out.push_back(SourceTokenC::create(pos, pos.filename, SourceTokenC::TT_STR));
 
       return;
    }
 
-   if (tok->type == SourceTokenC::TT_NAM && tok->data == "__LINE__")
+   // And __LINE__.
+   if(tok->type == SourceTokenC::TT_NAM && tok->data == "__LINE__")
    {
       std::ostringstream oss; oss << pos.line;
-      out.push_back(SourceTokenC::create(pos,
-         oss.str(), SourceTokenC::TT_INT));
+      out.push_back(SourceTokenC::create(pos, oss.str(), SourceTokenC::TT_INT));
 
       return;
    }
 
+   // If it actually isn't any of those things, then consider the token expanded.
    out.push_back(tok);
 }
 
@@ -546,15 +551,19 @@ void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
 void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
    SourcePosition const &pos, std::string const &data)
 {
+   // Create a stream out of the macro data.
    SourceStream in(data, SourceStream::ST_C|SourceStream::STF_STRING);
 
-   try { for (;;)
+   // Read and expand tokens until EOF.
+   try { for(;;)
    {
+      // Read a token and set its position to the caller's
       SourceTokenC::Reference tok = SourceTokenC::create(&in); tok->pos = pos;
 
+      // And then expand the token, because it might be a macro invocation.
       expand(out, used, pos, tok, &in);
    }
-   } catch (SourceStream::EndOfStream const &) {}
+   } catch(SourceStream::EndOfStream const &) {}
 }
 
 //
@@ -565,26 +574,30 @@ void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
 void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
    SourcePosition const &pos, MacroData const &data, MacroArgs const &args)
 {
+   MacroArg::const_iterator tokEnd, tokItr;
+   MacroArg const *arg;
+
+   // Create a stream out of the macro data.
    SourceStream in(data.second, SourceStream::ST_C|SourceStream::STF_STRING);
 
-   try { for (;;)
+   // Read and expand tokens until EOF.
+   try { for(;;)
    {
+      // Read a token and set its position to the caller's
       SourceTokenC::Reference tok = SourceTokenC::create(&in); tok->pos = pos;
 
       // Check for argument.
-      MacroArg const *arg;
-      if (tok->type == SourceTokenC::TT_NAM &&
-         (arg = find_arg(args, data.first, tok->data)))
+      if(tok->type == SourceTokenC::TT_NAM && (arg = find_arg(args, data.first, tok->data)))
       {
-         for (MacroArg::const_iterator tokEnd = arg->end(),
-              tokItr = arg->begin(); tokItr != tokEnd; ++tokItr)
+         // Expand all of the argument's tokens.
+         for(tokEnd = arg->end(), tokItr = arg->begin(); tokItr != tokEnd; ++tokItr)
             expand(out, used, pos, *tokItr, &in);
 
          continue;
       }
 
       // Check for operator #.
-      if (tok->type == SourceTokenC::TT_HASH1)
+      if(tok->type == SourceTokenC::TT_HASH1)
       {
          try
          {
@@ -593,54 +606,61 @@ void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
             if (tok->type == SourceTokenC::TT_NAM)
                arg = find_arg(args, data.first, tok->data);
          }
-         catch (SourceStream::EndOfStream const &) {}
+         catch(SourceStream::EndOfStream const &) {}
 
-         if (!arg) ERROR_P("# must be used on arg");
+         if(!arg) ERROR_P("# must be used on arg");
 
+         // Make a string out of the tokens. TT_NONEs are used to preserve whitespace.
          out.push_back(SourceTokenC::tt_str(tok->pos, *arg));
 
          continue;
       }
 
       // Check for operator ##.
-      if (tok->type == SourceTokenC::TT_HASH2)
+      if(tok->type == SourceTokenC::TT_HASH2)
       {
-         if (out.empty())
-            ERROR_P("## must not come at beginning");
+         if(out.empty()) ERROR_P("## must not come at beginning");
 
          try
          {
             tok = SourceTokenC::create(&in);
          }
-         catch (SourceStream::EndOfStream const &)
+         catch(SourceStream::EndOfStream const &)
          {
             ERROR_P("## must not come at end");
          }
 
-         if (tok->type == SourceTokenC::TT_NAM &&
-            (arg = find_arg(args, data.first, tok->data)))
+         // Check for argument.
+         if(tok->type == SourceTokenC::TT_NAM && (arg = find_arg(args, data.first, tok->data)))
          {
+            // If the next token is an argument, we only want to join its first token.
             tok = SourceTokenC::create_join(out.back(), *arg->begin());
             out.pop_back();
+
+            // Expand the newly created token. It might be a macro name, now!
             expand(out, used, pos, tok, &in);
 
-            for (MacroArg::const_iterator tokEnd = arg->end(),
-                 tokItr = arg->begin()+1; tokItr != tokEnd; ++tokItr)
+            // The rest of the argument is then expanded as above.
+            for(tokEnd = arg->end(), tokItr = arg->begin() + 1; tokItr != tokEnd; ++tokItr)
                expand(out, used, pos, *tokItr, &in);
          }
          else
          {
+            // Otherwise, just join the two tokens.
             tok = SourceTokenC::create_join(out.back(), tok);
             out.pop_back();
+
+            // And then expand it.
             expand(out, used, pos, tok, &in);
          }
 
          continue;
       }
 
+      // If it's not any of those other things, then it needs to be expanded.
       expand(out, used, pos, tok, &in, &args, &data.first);
    }
-   } catch (SourceStream::EndOfStream const &) {}
+   } catch(SourceStream::EndOfStream const &) {}
 }
 
 //
@@ -651,11 +671,13 @@ void SourceTokenizerC::expandDefine(SourceTokenC *tok)
    MacroVec out;
    std::set<std::string> used;
 
+   // Invoke the macro expander, capturing the result in out.
    used.insert(tok->data);
    expand(out, used, tok->pos, defines[tok->data]);
    used.erase(tok->data);
 
-   for (MacroVec::iterator end = out.begin(), itr = out.end(); itr-- != end;)
+   // Push out onto the unget stack.
+   for(MacroVec::iterator end = out.begin(), itr = out.end(); itr-- != end;)
       ungetStack.push_back(*itr);
 }
 
@@ -669,13 +691,16 @@ void SourceTokenizerC::expandMacro(SourceTokenC *tok)
    MacroData const &data = macros[tok->data];
    std::set<std::string> used;
 
+   // Process the arguments, preserving whitespace in TT_NONEs.
    readArgs(args, inStack.back(), data, tok->pos);
 
+   // Invoke the macro expander, capturing the result in out.
    used.insert(tok->data);
    expand(out, used, tok->pos, data, args);
    used.erase(tok->data);
 
-   for (MacroVec::iterator end = out.begin(), itr = out.end(); itr-- != end;)
+   // Push out onto the unget stack.
+   for(MacroVec::iterator end = out.begin(), itr = out.end(); itr-- != end;)
       ungetStack.push_back(*itr);
 }
 
@@ -895,44 +920,56 @@ bool SourceTokenizerC::peekType
 //
 // SourceTokenizerC::readArgs
 //
-void SourceTokenizerC::readArgs(MacroArgs &args, SourceStream *in,
-   MacroData const &data, SourcePosition const &pos, MacroArgs const *altArgs,
-   MacroParm const *altParm)
+// Process function-like macro arguments, preserving whitespace in TT_NONEs.
+//
+void SourceTokenizerC::readArgs(MacroArgs &args, SourceStream *in, MacroData const &data,
+   SourcePosition const &pos, MacroArgs const *altArgs, MacroParm const *altParm)
 {
    MacroArg const *arg;
    MacroParm const &parm = data.first;
    int pdepth = 0;
 
-   if (parm.empty())
+   // If there are no arguments expected, then this is just a simple assertion.
+   if(parm.empty())
    {
       doAssert(SourceTokenC::create(in), SourceTokenC::TT_PAREN_C);
    }
-   else for (args.push_back(MacroArg());;)
+   // Otherwise, start reading args. Each arg being a vector of tokens.
+   // First thing is to create the first vector, though.
+   else for(args.push_back(MacroArg());;)
    {
+      // Convert each whitespace character into a TT_NONE token.
+      // These are used by operator # to add spaces.
       while (std::isspace(in->peek()))
       {
          in->get();
          args.back().push_back(SourceTokenC::tt_none());
       }
 
+      // Read the token.
       SourceTokenC::Reference tok = SourceTokenC::create(in);
 
-      if (tok->type == SourceTokenC::TT_PAREN_O) ++pdepth;
-      if (tok->type == SourceTokenC::TT_PAREN_C && !pdepth--) break;
+      // If it's a parenthesis, terminate on the close-parenthesis that matches
+      // the initial one that started the expansion.
+      if(tok->type == SourceTokenC::TT_PAREN_O) ++pdepth;
+      if(tok->type == SourceTokenC::TT_PAREN_C && !pdepth--) break;
 
       // A comma not in parentheses starts a new argument...
-      if (tok->type == SourceTokenC::TT_COMMA && !pdepth &&
+      if(tok->type == SourceTokenC::TT_COMMA && !pdepth &&
       // ... Unless we've reached the __VA_ARGS__ segment.
-          (args.size() < parm.size() || !parm.back().empty()))
+         (args.size() < parm.size() || !parm.back().empty()))
       {
-         args.push_back(MacroArg()); continue;
+         args.push_back(MacroArg());
+         continue;
       }
 
+      // If we're being called from a function-like macro expansion and we see
+      // one of its arguments, expand it.
       if(tok->type == SourceTokenC::TT_NAM && altArgs && altParm &&
          (arg = find_arg(*altArgs, *altParm, tok->data)))
       {
-         for (MacroArg::const_iterator tokEnd = arg->end(),
-              tokItr = arg->begin(); tokItr != tokEnd; ++tokItr)
+         for(MacroArg::const_iterator tokEnd = arg->end(),
+             tokItr = arg->begin(); tokItr != tokEnd; ++tokItr)
          {
             args.back().push_back(*tokItr);
          }
@@ -942,14 +979,15 @@ void SourceTokenizerC::readArgs(MacroArgs &args, SourceStream *in,
    }
 
    // Must not have empty args.
-   for (MacroArgs::iterator argsEnd = args.end(),
-        argsItr = args.begin(); argsItr != argsEnd; ++argsItr)
+   for(MacroArgs::iterator argsEnd = args.end(),
+       argsItr = args.begin(); argsItr != argsEnd; ++argsItr)
    {
-      if (argsItr->empty())
+      if(argsItr->empty())
          argsItr->push_back(SourceTokenC::tt_none());
    }
 
-   if (args.size() != parm.size())
+   // And of course, must have the right number of arguments.
+   if(args.size() != parm.size())
       ERROR_P("incorrect arg count for macro, expected %i got %i",
               (int)parm.size(), (int)args.size());
 }
