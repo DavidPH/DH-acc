@@ -59,12 +59,10 @@ public:
    //
    virtual bool canGetData() const
    {
-      VariableType::Reference type = expr->getType();
-
-      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+      if(VariableType::is_bt_function(expr->getType()->getReturn()->getBasicType()))
          return false;
 
-      return type->getBasicType() != VariableType::BT_STR;
+      return true;
    }
 
    //
@@ -204,24 +202,6 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
 
    if(VariableType::is_bt_function(type->getBasicType()))
       return expr->makeObjects(objects, dst);
-
-   if (expr->getType()->getBasicType() == VariableType::BT_STR)
-   {
-      VariableData::Pointer src =
-         VariableData::create_stack(type->getSize(pos));
-      VariableData::Pointer tmp =
-         VariableData::create_stack(expr->getType()->getSize(pos));
-
-      make_objects_memcpy_prep(objects, dst, src, pos);
-
-      expr->makeObjects(objects, tmp);
-      objects->addTokenPushZero();
-      objects->addToken(OCODE_NATIVE, objects->getValue(2), objects->getValue(15));
-
-      make_objects_memcpy_post(objects, dst, src, type, context, pos);
-
-      return;
-   }
 
    VariableData::Pointer src = getData();
 

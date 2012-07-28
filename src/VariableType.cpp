@@ -370,7 +370,7 @@ VariableType::VariableType(BasicType _basic)
       break;
 
    case BT_STR:
-      typeRet = get_bt_chr()->addQualifier(QUAL_CONST);
+      typeRet = get_bt_chr()->setQualifier(QUAL_CONST)->setStorage(STORE_STRING);
       break;
 
       // Reference types.
@@ -1411,10 +1411,9 @@ unsigned VariableType::get_cast(VariableType *dst, VariableType *src)
       if(is_bt_function(srcBT) && dstBT == BT_PTR)
          return get_cast(dst, src->getPointer());
 
-      // string->strptr
-      if(srcBT == BT_STR && dstBT == BT_PTR && dst->getReturn()->getQualifier(QUAL_CONST) &&
-         dst->getReturn()->getStoreType() == STORE_STRING)
-         return CAST_EXPLICIT|CAST_IMPLICIT|CAST_STATIC;
+      // string->pointer
+      if(srcBT == BT_STR && dstBT == BT_PTR)
+         return get_cast(dst, src->getReturn()->getPointer());
 
       // arithmetic<->arithmetic
       if (is_bt_arithmetic(srcBT) && is_bt_arithmetic(dstBT))

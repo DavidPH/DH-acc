@@ -54,20 +54,6 @@ public:
    }
 
    //
-   // ::canMakeObject
-   //
-   virtual bool canMakeObject() const
-   {
-      if (exprL->getType()->getBasicType() == VariableType::BT_STR)
-      {
-         return exprL->canMakeObject() && exprR->canMakeObject() &&
-                exprR->makeObject()->canResolve();
-      }
-      else
-         return false;
-   }
-
-   //
    // ::getData
    //
    virtual VariableData::Pointer getData() const
@@ -82,28 +68,6 @@ public:
    }
 
    virtual VariableType::Reference getType() const;
-
-   //
-   // ::makeObject
-   //
-   virtual ObjectExpression::Pointer makeObject() const
-   {
-      if (exprL->getType()->getBasicType() == VariableType::BT_STR)
-      {
-         std::string string = exprL->makeObject()->resolveString();
-         biguint     index  = exprR->makeObject()->resolveUNS();
-
-         if(index >= string.size())
-            return ObjectExpression::create_value_int(0, pos);
-
-         return ObjectExpression::create_value_int(string[index], pos);
-      }
-      else
-         ERROR_NP("invalid BT");
-   }
-
-private:
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };
 
 
@@ -124,12 +88,13 @@ SRCEXP_EXPRBIN_DEFN(array)
 
    // This allows C semantics for array access. Specifically that x[y] be the
    // same as *(x+y).
-   if (btL == VariableType::BT_PTR || btR == VariableType::BT_PTR ||
-      (btL == VariableType::BT_ARR && !exprL->canMakeObject()) ||
-      (btR == VariableType::BT_ARR && !exprR->canMakeObject()))
+   if(btL == VariableType::BT_PTR || btR == VariableType::BT_PTR ||
+      btL == VariableType::BT_STR || btR == VariableType::BT_STR ||
+     (btL == VariableType::BT_ARR && !exprL->canMakeObject()) ||
+     (btR == VariableType::BT_ARR && !exprR->canMakeObject()))
    {
-      return create_unary_dereference
-      (create_binary_add(exprL, exprR, context, pos), context, pos);
+      return create_unary_dereference(create_binary_add(exprL, exprR, context, pos),
+                                      context, pos);
    }
 
    return new SourceExpression_BinaryArray(exprL, exprR, context, pos);
@@ -143,9 +108,9 @@ SourceExpression_BinaryArray::SourceExpression_BinaryArray(SRCEXP_EXPRBIN_PARM)
 {
    VariableType::BasicType btL = exprL->getType()->getBasicType();
 
-   // Can only be done for BT_ARRAY or BT_STRING.
-   if (btL != VariableType::BT_ARR && btL != VariableType::BT_STR)
-      ERROR_NP("expected BT_ARRAY or BT_STRING, got: %s", make_string(btL).c_str());
+   // Can only be done for BT_ARR.
+   if(btL != VariableType::BT_ARR)
+      ERROR_NP("expected BT_ARR, got: %s", make_string(btL).c_str());
 }
 
 //
@@ -154,40 +119,6 @@ SourceExpression_BinaryArray::SourceExpression_BinaryArray(SRCEXP_EXPRBIN_PARM)
 VariableType::Reference SourceExpression_BinaryArray::getType() const
 {
    return exprL->getType()->getReturn();
-}
-
-//
-// SourceExpression_BinaryArray::virtual_makeObjects
-//
-void SourceExpression_BinaryArray::
-virtual_makeObjects(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   if (exprL->getType()->getBasicType() == VariableType::BT_STR)
-   {
-      VariableType::Reference type = getType();
-      bigsint typeSize = type->getSize(pos);
-      bigsint sizeL = exprL->getType()->getSize(pos);
-      bigsint sizeR = exprR->getType()->getSize(pos);
-
-      VariableData::Pointer src = VariableData::create_stack(typeSize);
-
-      make_objects_memcpy_prep(objects, dst, src, pos);
-
-      exprL->makeObjects(objects, VariableData::create_stack(sizeL));
-      exprR->makeObjects(objects, VariableData::create_stack(sizeR));
-
-      objects->setPosition(pos);
-
-      // 2 = arg count, 15 = native get_char
-      objects->addToken(OCODE_NATIVE, objects->getValue(2),
-                        objects->getValue(15));
-
-      make_objects_memcpy_post(objects, dst, src, type, context, pos);
-   }
-   else
-      ERROR_NP("invalid BT");
 }
 
 // EOF
