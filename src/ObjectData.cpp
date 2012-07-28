@@ -85,6 +85,30 @@ void odata_set_strings(std::vector<int> &strings, VariableType const *type)
       break;
 
    case VariableType::BT_PTR:
+      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+      {
+         odata_set_strings(strings, type->getReturn());
+         break;
+      }
+
+      switch(type->getReturn()->getStoreType())
+      {
+      case STORE_NONE:
+         strings.push_back(false);
+         strings.push_back(false);
+         break;
+
+      case STORE_STRING:
+         strings.push_back(true);
+         strings.push_back(false);
+         break;
+
+      default:
+         strings.push_back(false);
+         break;
+      }
+      break;
+
    case VariableType::BT_PTR_NUL:
       strings.push_back(false);
       break;
