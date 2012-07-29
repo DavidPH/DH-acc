@@ -112,6 +112,8 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
    // address for an offset.
    if(src->type == VariableData::MT_ARRAY || src->type == VariableData::MT_FARPTR)
    {
+      VariableType::Reference ptrType = VariableType::get_bt_chr()->setStorage(srcType)->getPointer();
+
       SourceExpression::Pointer offset;
 
       if(memberOffset) offset = create_value_uint(memberOffset, context, pos);
@@ -119,7 +121,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
       if(src->offsetExpr)
       {
          SourceExpression::Pointer base = create_value_cast_explicit(src->offsetExpr,
-            VariableType::get_bt_uns(), context, pos);
+            ptrType, context, pos);
 
          offset = offset ? create_binary_add(base, offset, context, pos) : base;
       }

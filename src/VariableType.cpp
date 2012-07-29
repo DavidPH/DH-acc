@@ -877,7 +877,7 @@ VariableType::Reference VariableType::getType
       ERROR_NP("incomplete type");
 
    for (size_t i = 0; i < names.size(); ++i)
-      if (names[i] == memName) return Reference(types[i]);
+      if(names[i] == memName) return types[i]->setStorage(this);
 
    ERROR_NP("no such member: %s", memName.c_str());
 }

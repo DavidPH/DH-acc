@@ -151,6 +151,10 @@ public:
    Reference setQualifier(unsigned quals);
    Reference setStorage(StoreType store);
    Reference setStorage(StoreType store, std::string const &storeArea);
+   Reference setStorage(VariableType const *type)
+   {
+      return setStorage(type->store, type->storeArea);
+   }
 
    // Type information.
    BasicType getBasicType() const {return basic;}

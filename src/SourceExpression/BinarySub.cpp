@@ -53,6 +53,15 @@ public:
       CONSTRUCTOR_TYPE_VARS();
       CONSTRUCTOR_ARRAY_DECAY();
 
+      if(btL == VariableType::BT_PTR && btR == VariableType::BT_PTR)
+      {
+         typeL = typeL->getReturn()->setStorage(STORE_STATIC)->getPointer();
+         typeR = typeR->getReturn()->setStorage(STORE_STATIC)->getPointer();
+
+         exprL = create_value_cast_explicit(exprL, typeL, context, pos);
+         exprR = create_value_cast_explicit(exprR, typeR, context, pos);
+      }
+
       // Type constraints.
       if (btL == VariableType::BT_PTR || btR == VariableType::BT_PTR)
       {
@@ -73,8 +82,13 @@ public:
 
       CONSTRUCTOR_POINTER_PREAMBLE();
 
-      if (btL == VariableType::BT_PTR && btR != VariableType::BT_PTR)
-         exprR = create_binary_mul(exprR, exprSize, context, pos);
+      docast = false;
+
+      if(btL == VariableType::BT_PTR && btR != VariableType::BT_PTR)
+      {
+         exprR = create_value_cast_implicit(exprR, VariableType::get_bt_uns(), context, pos);
+         if(retnSize != 1) exprR = create_binary_mul(exprR, exprSize, context, pos);
+      }
    }
 
    //
@@ -118,6 +132,45 @@ protected:
    //
    virtual void doSet(ObjectVector *objects, VariableData *data, VariableType *type, int)
    {
+      if(type->getBasicType() == VariableType::BT_PTR)
+      {
+         StoreType store = type->getReturn()->getStoreType();
+         ObjectExpression::Pointer address = data->address;
+
+         if(store == STORE_NONE || store == STORE_STRING)
+            address = objects->getValueAdd(address, 1);
+
+         switch(data->type)
+         {
+         case VariableData::MT_STATIC: objects->addToken(OCODE_SUB_STATIC_U, address); break;
+         case VariableData::MT_AUTO: objects->addToken(OCODE_SUB_AUTO_U, address); break;
+         case VariableData::MT_POINTER: objects->addToken(OCODE_SUB_PTR_U, address); break;
+         case VariableData::MT_REGISTER:
+            switch(data->sectionR)
+            {
+            case VariableData::SR_LOCAL: objects->addToken(OCODE_SUB_REG_U, address); break;
+            case VariableData::SR_MAP: objects->addToken(OCODE_SUB_MAPREG_U, address); break;
+            case VariableData::SR_WORLD: objects->addToken(OCODE_SUB_WLDREG_U, address); break;
+            case VariableData::SR_GLOBAL: objects->addToken(OCODE_SUB_GBLREG_U, address); break;
+            }
+            break;
+
+         case VariableData::MT_ARRAY:
+            switch(data->sectionA)
+            {
+            case VariableData::SA_MAP: objects->addToken(OCODE_SUB_MAPARR_U, address); break;
+            case VariableData::SA_WORLD: objects->addToken(OCODE_SUB_WLDARR_U, address); break;
+            case VariableData::SA_GLOBAL: objects->addToken(OCODE_SUB_GBLARR_U, address); break;
+            }
+            break;
+
+         default:
+            ERROR_NP("invalid MT");
+         }
+
+         return;
+      }
+
       DO_SET_SWITCHES(SUB);
    }
 };

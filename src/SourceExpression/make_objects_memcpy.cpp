@@ -236,6 +236,12 @@ static void make_objects_memcpy_post_part
          objects->addToken(OCODE_SET_TEMP, tmpI);
          objects->addToken(OCODE_SET_TEMP, tmpT);
 
+         if(set)
+         {
+            objects->addToken(OCODE_GET_IMM, objects->getValue(data->size));
+            objects->addToken(OCODE_ADD_TEMP_U, tmpI);
+         }
+
          if(set) for(i = data->size; i--;)
          {
             objects->addToken(OCODE_GET_TEMP, tmpT);
@@ -248,7 +254,7 @@ static void make_objects_memcpy_post_part
 
          if(get) for(i = 0; i < data->size; ++i)
          {
-            if(i) objects->addToken(OCODE_DEC_TEMP_U, tmpI);
+            if(i) objects->addToken(OCODE_INC_TEMP_U, tmpI);
 
             objects->addToken(OCODE_GET_TEMP, tmpT);
             objects->addToken(OCODE_GET_TEMP, tmpI);
