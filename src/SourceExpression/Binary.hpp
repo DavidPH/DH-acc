@@ -302,8 +302,10 @@ private:
    void doSetBase(ObjectVector *objects, VariableData *dst);
    void doSetBaseEmulated(ObjectVector *objects, VariableData *dst,
                           VariableData *src, VariableType *typeL);
-   void doSetBaseGet(ObjectVector *objects, VariableData *src, ObjectExpression *tmpA);
-   void doSetBaseSet(ObjectVector *objects, VariableData *src, ObjectExpression *tmpA);
+   void doSetBaseGet(ObjectVector *objects, VariableData *src,
+                     ObjectExpression *tmpA, ObjectExpression *tmpB);
+   void doSetBaseSet(ObjectVector *objects, VariableData *src,
+                     ObjectExpression *tmpA, ObjectExpression *tmpB);
 
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 };

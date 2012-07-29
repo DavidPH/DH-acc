@@ -35,6 +35,87 @@
 // Macros                                                                     |
 //
 
+//=========================================================
+// MT_FARPTR
+//
+
+//
+// FARPTR_PRE
+//
+#define FARPTR_PRE(N, CODEI, CODED) \
+   /* Select which OCODE to use. */ \
+   ocode = inc ? OCODE_##CODEI : OCODE_##CODED; \
+ \
+   /* Fetch address. */ \
+   farptrAddress(objects, tmp, src, tempA, tempB); \
+ \
+   /* For suffix, place result on stack before altering value. */ \
+   if(suf && dst->type != VariableData::MT_VOID) \
+      farptrGet(objects, N, tempA, tempB); \
+ \
+   /* Fetch value. */ \
+   farptrGet(objects, N, tempA, tempB);
+
+//
+// FARPRE_POST
+//
+#define FARPTR_POST(N) \
+   /* Store value. */ \
+   farptrSet(objects, N, tempA, tempB); \
+ \
+   /* For prefix, place result on stack after altering value. */ \
+   if(!suf && dst->type != VariableData::MT_VOID) \
+      farptrGet(objects, N, tempA, tempB);
+
+//
+// DO_L_FARPTR
+//
+#define DO_L_FARPTR(CODEG, CODEI, CODED) \
+   /* Fetch value. */ \
+   FARPTR_PRE(2, CODEI, CODED); \
+ \
+   /* Modify value. */ \
+   tempC = context->getTempVar(2); \
+   tempD = context->getTempVar(3); \
+ \
+   objects->addToken(OCODE_SET_TEMP, tempD); \
+   objects->addToken(OCODE_SET_TEMP, tempC); \
+ \
+   if(inc) objects->addToken(ocode, tempC); \
+   objects->addToken(OCODE_GET_TEMP, tempC); \
+   objects->addToken(OCODE_JMP_TRU, objects->getValue(labelEnd)); \
+   objects->addToken(ocode, tempD); \
+   objects->addLabel(labelEnd); \
+   if(!inc) objects->addToken(ocode, tempC); \
+ \
+   objects->addToken(OCODE_GET_TEMP, tempC); \
+   objects->addToken(OCODE_GET_TEMP, tempD); \
+ \
+   /* Store value. */ \
+   FARPTR_POST(2); \
+ \
+   break
+
+//
+// DO_P_FARPTR
+//
+#define DO_P_FARPTR(CODEG, CODEI, CODED) \
+   /* Fetch value. */ \
+   FARPTR_PRE(1, CODEI, CODED); \
+ \
+   /* Modify value. */ \
+   objects->addToken(OCODE_##CODEG, value); \
+   objects->addToken(ocode); \
+ \
+   /* Store value. */ \
+   FARPTR_POST(1); \
+ \
+   break
+
+//=========================================================
+// Other
+//
+
 //
 // DO_I_ADDR
 //
@@ -311,14 +392,12 @@ public:
 
 private:
    //
-   // ::doF
+   // ::doX
    //
-   void doF
-   (ObjectVector *objects, VariableData *dst, VariableData *src,
-    VariableData *tmp)
+   void doX(ObjectVector *objects, VariableData *dst, VariableData *src, VariableData *tmp)
    {
       ObjectExpression::Pointer addrL = src->address;
-      ObjectExpression::Pointer tempA;
+      ObjectExpression::Pointer tempA, tempB;
       ObjectExpression::Pointer value = objects->getValue(1.0);
       ObjectCode ocode;
 
@@ -329,6 +408,9 @@ private:
 
       case VariableData::MT_AUTO:
          DO_P_ADDR(GET_AUTO, ADD_AUTO_X, SUB_AUTO_X);
+
+      case VariableData::MT_FARPTR:
+         DO_P_FARPTR(GET_IMM, ADD_STK_X, SUB_STK_X);
 
       case VariableData::MT_POINTER:
          DO_P_POINTER(GET_PTR, ADD_PTR_X, SUB_PTR_X);
@@ -364,7 +446,6 @@ private:
       }
       break;
 
-      case VariableData::MT_FARPTR:
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
       case VariableData::MT_STRING:
@@ -382,7 +463,8 @@ private:
     VariableData *tmp)
    {
       ObjectExpression::Pointer addrL = src->address;
-      ObjectExpression::Pointer tempA;
+      ObjectExpression::Pointer tempA, tempB;
+      ObjectExpression::Pointer value = objects->getValue(1);
       ObjectCode ocode;
 
       switch (src->type)
@@ -392,6 +474,9 @@ private:
 
       case VariableData::MT_AUTO:
          DO_I_ADDR(GET_AUTO, INC_AUTO_I, DEC_AUTO_I);
+
+      case VariableData::MT_FARPTR:
+         DO_P_FARPTR(GET_IMM, ADD_STK_I, SUB_STK_I);
 
       case VariableData::MT_POINTER:
          DO_I_OFFSET(GET_PTR, INC_PTR_I, DEC_PTR_I);
@@ -427,7 +512,6 @@ private:
       }
       break;
 
-      case VariableData::MT_FARPTR:
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
       case VariableData::MT_STRING:
@@ -444,7 +528,7 @@ private:
    {
       ObjectExpression::Pointer addrL = src->address;
       ObjectExpression::Pointer addrH;
-      ObjectExpression::Pointer tempA;
+      ObjectExpression::Pointer tempA, tempB, tempC, tempD;
       ObjectExpression::Pointer wrapv = objects->getValue(inc ? 0 : 0xFFFFFFFF);
       ObjectCode ocode;
 
@@ -459,6 +543,9 @@ private:
 
       case VariableData::MT_AUTO:
          DO_LL_ADDR(GET_AUTO, INC_AUTO_I, DEC_AUTO_I);
+
+      case VariableData::MT_FARPTR:
+         DO_L_FARPTR(GET_IMM, INC_TEMP_I, INC_TEMP_I);
 
       case VariableData::MT_POINTER:
          DO_LL_POINTER(GET_PTR, INC_PTR_I, DEC_PTR_I);
@@ -494,7 +581,6 @@ private:
       }
       break;
 
-      case VariableData::MT_FARPTR:
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
       case VariableData::MT_STRING:
@@ -512,7 +598,7 @@ private:
    {
       StoreType store = type->getReturn()->getStoreType();
       ObjectExpression::Pointer addrL = src->address;
-      ObjectExpression::Pointer tempA;
+      ObjectExpression::Pointer tempA, tempB;
       ObjectCode ocode;
 
       if(store == STORE_NONE || store == STORE_STRING)
@@ -525,6 +611,9 @@ private:
 
       case VariableData::MT_AUTO:
          DO_P_ADDR(GET_AUTO, ADD_AUTO_U, SUB_AUTO_U);
+
+      case VariableData::MT_FARPTR:
+         DO_P_FARPTR(GET_IMM, ADD_STK_U, SUB_STK_U);
 
       case VariableData::MT_POINTER:
          DO_P_POINTER(GET_PTR, ADD_PTR_U, SUB_PTR_U);
@@ -560,13 +649,78 @@ private:
       }
       break;
 
-      case VariableData::MT_FARPTR:
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
       case VariableData::MT_STRING:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
          ERROR_NP("invalid MT");
+      }
+   }
+
+   //
+   // ::farptrAddress
+   //
+   void farptrAddress(ObjectVector *objects, VariableData *tmp, VariableData *src,
+      ObjectExpression::Pointer &tempA, ObjectExpression::Pointer &tempB)
+   {
+      // Temp vars to store address.
+      tempA = context->getTempVar(0);
+      tempB = context->getTempVar(1);
+
+      // Evaluate address.
+      if(src->offsetExpr)
+         src->offsetExpr->makeObjects(objects, tmp);
+      else
+      {
+         objects->addTokenPushZero();
+         objects->addTokenPushZero();
+      }
+
+      // Store address in temporaries.
+      objects->addToken(OCODE_SET_TEMP, tempB);
+      objects->addToken(OCODE_SET_TEMP, tempA);
+   }
+
+   //
+   // ::farptrGet
+   //
+   void farptrGet(ObjectVector *objects, int n, ObjectExpression *tempA,
+                  ObjectExpression *tempB)
+   {
+      for(int i = 0; i < n; ++i)
+      {
+         objects->addToken(OCODE_GET_TEMP, tempA);
+         objects->addToken(OCODE_GET_TEMP, tempB);
+
+         if(i)
+         {
+            objects->addToken(OCODE_GET_IMM, objects->getValue(i));
+            objects->addToken(OCODE_ADD_STK_U);
+         }
+
+         objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Getptr"));
+      }
+   }
+
+   //
+   // ::farptrSet
+   //
+   void farptrSet(ObjectVector *objects, int n, ObjectExpression *tempA,
+                  ObjectExpression *tempB)
+   {
+      for(int i = n; i--;)
+      {
+         objects->addToken(OCODE_GET_TEMP, tempA);
+         objects->addToken(OCODE_GET_TEMP, tempB);
+
+         if(i)
+         {
+            objects->addToken(OCODE_GET_IMM, objects->getValue(i));
+            objects->addToken(OCODE_ADD_STK_U);
+         }
+
+         objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Setptr"));
       }
    }
 
@@ -580,7 +734,8 @@ private:
       VariableType::BasicType bt   = type->getBasicType();
       VariableData::Pointer   src  = expr->getData();
       VariableData::Pointer   data = VariableData::create_stack(size);
-      VariableData::Pointer   tmp  = VariableData::create_stack(1);
+      VariableData::Pointer   tmp  = VariableData::
+         create_stack(src->type == VariableData::MT_FARPTR ? 2 : 1);
 
       if (dst->type != VariableData::MT_VOID)
          make_objects_memcpy_prep(objects, dst, data, pos);
@@ -603,7 +758,9 @@ private:
             doP(objects, dst, src, tmp, type, objects->getValue(value));
       }
       else if (VariableType::is_bt_fix(bt))
-         doF(objects, dst, src, tmp);
+      {
+         doX(objects, dst, src, tmp);
+      }
       else
          ERROR_NP("invalid BT");
 

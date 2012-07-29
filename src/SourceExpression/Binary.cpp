@@ -278,7 +278,7 @@ void SourceExpression_Binary::doSetBase(ObjectVector *objects,
       if (src->type == VariableData::MT_POINTER)
          objects->addToken(OCODE_GET_TEMP, tmpA);
 
-      doSetBaseGet(objects, src, NULL);
+      doSetBaseGet(objects, src, NULL, NULL);
 
       make_objects_memcpy_post(objects, dst, tmp, typeL, context, pos);
    }
@@ -291,7 +291,7 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
    VariableData *dst, VariableData *src, VariableType *typeL)
 {
    int tmpBase = 0;
-   ObjectExpression::Pointer tmpA;
+   ObjectExpression::Pointer tmpA, tmpB;
 
    VariableData::Pointer tmp = VariableData::create_stack(src->size);
 
@@ -299,21 +299,29 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
       make_objects_memcpy_prep(objects, dst, tmp, pos);
 
    // For addressed variables, acquire the address now.
-   if(src->type == VariableData::MT_POINTER || src->type == VariableData::MT_ARRAY)
+   if(src->type == VariableData::MT_ARRAY || src->type == VariableData::MT_FARPTR ||
+      src->type == VariableData::MT_POINTER)
    {
       src->offsetTemp = VariableData::create_stack
                      (src->offsetExpr->getType()->getSize(pos));
       src->offsetExpr->makeObjects(objects, src->offsetTemp);
+
+      if(src->type == VariableData::MT_FARPTR)
+      {
+         tmpB = context->getTempVar(tmpBase++);
+         objects->addToken(OCODE_SET_TEMP, tmpB);
+      }
 
       tmpA = context->getTempVar(tmpBase++);
       objects->addToken(OCODE_SET_TEMP, tmpA);
    }
 
    // Acquire exprL.
-   doSetBaseGet(objects, src, tmpA);
+   doSetBaseGet(objects, src, tmpA, tmpB);
 
    // Put address, if any, before exprR.
    if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
+   if(tmpB) objects->addToken(OCODE_GET_TEMP, tmpB);
 
    // Acquire exprR.
    if(docast)
@@ -321,7 +329,17 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
    else
       exprR->makeObjects(objects, tmp);
 
-   // Swap out exprR to set tmpA, if needed.
+   // Swap out exprR to get address, if needed.
+   if(tmpB)
+   {
+      if(tmp->size == 1)
+         objects->addToken(OCODE_STK_SWAP);
+      else
+         ERROR_NP("stub");
+
+      objects->addToken(OCODE_SET_TEMP, tmpB);
+   }
+
    if(tmpA)
    {
       if(tmp->size == 1)
@@ -339,16 +357,15 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
    // Evaluate.
    doGet(objects, typeL, tmpBase);
 
-   // Get address to set exprL.
-   if(src->type == VariableData::MT_POINTER)
-      objects->addToken(OCODE_GET_TEMP, tmpA);
-
    // Set exprL.
-   doSetBaseSet(objects, src, NULL);
+   if(src->type == VariableData::MT_ARRAY)
+      doSetBaseSet(objects, src, NULL, NULL);
+   else
+      doSetBaseSet(objects, src, tmpA, tmpB);
 
    if(dst->type != VariableData::MT_VOID)
    {
-      doSetBaseGet(objects, src, tmpA);
+      doSetBaseGet(objects, src, tmpA, tmpB);
 
       make_objects_memcpy_post(objects, dst, tmp, typeL, context, pos);
    }
@@ -358,7 +375,7 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
 // SourceExpression_Binary::doSetBaseGet
 //
 void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
-    VariableData *src, ObjectExpression *tmpA)
+    VariableData *src, ObjectExpression *tmpA, ObjectExpression *tmpB)
 {
    if(src->size != 1) ERROR_NP("stub");
 
@@ -366,6 +383,10 @@ void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
    {
    case VariableData::MT_AUTO:
       objects->addToken(OCODE_GET_AUTO, src->address); break;
+   case VariableData::MT_FARPTR:
+      if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
+      if(tmpB) objects->addToken(OCODE_GET_TEMP, tmpB);
+      objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Getptr")); break;
    case VariableData::MT_POINTER:
       if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
       objects->addToken(OCODE_GET_PTR, src->address); break;
@@ -404,7 +425,7 @@ void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
 // SourceExpression_Binary::doSetBaseSet
 //
 void SourceExpression_Binary::doSetBaseSet(ObjectVector *objects,
-   VariableData *src, ObjectExpression *tmpA)
+   VariableData *src, ObjectExpression *tmpA, ObjectExpression *tmpB)
 {
    if(src->size != 1) ERROR_NP("stub");
 
@@ -412,6 +433,10 @@ void SourceExpression_Binary::doSetBaseSet(ObjectVector *objects,
    {
    case VariableData::MT_AUTO:
       objects->addToken(OCODE_SET_AUTO, src->address); break;
+   case VariableData::MT_FARPTR:
+      if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
+      if(tmpB) objects->addToken(OCODE_GET_TEMP, tmpB);
+      objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Setptr")); break;
    case VariableData::MT_POINTER:
       if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
       objects->addToken(OCODE_SET_PTR, src->address); break;

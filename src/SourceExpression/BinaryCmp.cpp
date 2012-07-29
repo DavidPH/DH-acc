@@ -131,7 +131,8 @@ public:
       exprR->makeObjects(objects, tmp);
 
       if(inBT == VariableType::BT_INT_L || inBT == VariableType::BT_INT_LL ||
-         inBT == VariableType::BT_UNS_L || inBT == VariableType::BT_UNS_LL)
+         inBT == VariableType::BT_UNS_L || inBT == VariableType::BT_UNS_LL ||
+         (inBT == VariableType::BT_PTR && inType->getSize(pos) == 2))
          return makeObjectsL(objects, ocode, dst, src, type, inBT);
 
       if (ct < CMP_EQ && VariableType::is_bt_unsigned(inBT))
@@ -172,7 +173,7 @@ private:
 
          objects->addToken(OCODE_AND_STK_I);
       }
-      else if (ct == CMP_EQ)
+      else if(ct == CMP_NE)
       {
          // (j.lo != k.lo) | (j.hi != k.hi)
          objects->addToken(OCODE_GET_REG, tmpKl);
@@ -200,7 +201,7 @@ private:
          objects->addToken(OCODE_JMP_TRU, objects->getValue(labelLow));
 
          // The two high byes differ, so they determine the result.
-         if (inBT == VariableType::BT_INT_LL)
+         if(inBT == VariableType:: BT_INT_L || inBT == VariableType::BT_INT_LL)
          {
             objects->addToken(OCODE_GET_REG, tmpJh);
             objects->addToken(OCODE_GET_REG, tmpKh);

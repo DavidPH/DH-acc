@@ -215,6 +215,10 @@ bool SourceExpression_ValueCast::canMakeObject() const
       if(thisST == STORE_STATIC && exprST == STORE_AUTO)
          return false;
 
+      // Can't do compile-time auto*->far*.
+      if(thisST == STORE_NONE && exprST == STORE_AUTO)
+         return false;
+
       // Can't do compile-time string*->far*.
       if(thisST == STORE_NONE && exprST == STORE_STRING)
          return false;

@@ -214,28 +214,13 @@ static void make_objects_memcpy_post_part
    // MT_FARPTR
    //
    case VariableData::MT_FARPTR:
-      if(get && !set)
-      {
-         // A bit of a hack, but the only time this is already set is from
-         // UnaryDecInc. And only for getting.
-         if(!data->offsetTemp)
-         {
-            if(data->offsetExpr)
-               data->offsetExpr->makeObjects(objects, ptrStack);
-            else
-               objects->addTokenPushZero();
-         }
-      }
-      else
-      {
-         if(!data->offsetTemp)
-            data->offsetTemp = ptrStack;
+      if(!data->offsetTemp)
+         data->offsetTemp = ptrStack;
 
-         if(data->offsetTemp->type != VariableData::MT_STACK)
-            ERROR_P("offsetTemp not MT_STACK");
+      if(data->offsetTemp->type != VariableData::MT_STACK)
+         ERROR_P("offsetTemp not MT_STACK");
 
-         data->offsetExpr->makeObjects(objects, data->offsetTemp);
-      }
+      data->offsetExpr->makeObjects(objects, data->offsetTemp);
 
       // If only get or set and size is 1, only need one copy of the address.
       if(get^set && data->size == 1)
@@ -278,28 +263,13 @@ static void make_objects_memcpy_post_part
    // MT_POINTER
    //
    case VariableData::MT_POINTER:
-      if (get && !set)
-      {
-         // A bit of a hack, but the only time this is already set is from
-         // UnaryDecInc. And only for getting.
-         if (!data->offsetTemp)
-         {
-            if (data->offsetExpr)
-               data->offsetExpr->makeObjects(objects, ptrStack);
-            else
-               objects->addTokenPushZero();
-         }
-      }
-      else
-      {
-         if (!data->offsetTemp)
-            data->offsetTemp = ptrStack;
+      if(!data->offsetTemp)
+         data->offsetTemp = ptrStack;
 
-         if (data->offsetTemp->type != VariableData::MT_STACK)
-            ERROR_P("offsetTemp not MT_STACK");
+      if(data->offsetTemp->type != VariableData::MT_STACK)
+         ERROR_P("offsetTemp not MT_STACK");
 
-         data->offsetExpr->makeObjects(objects, data->offsetTemp);
-      }
+      data->offsetExpr->makeObjects(objects, data->offsetTemp);
 
       // If only get or set and size is 1, only need one copy of the address.
       if (get^set && data->size == 1)
