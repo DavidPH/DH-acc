@@ -436,7 +436,7 @@ void SourceExpression_Binary::doSetBaseSet(ObjectVector *objects,
    case VariableData::MT_FARPTR:
       if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
       if(tmpB) objects->addToken(OCODE_GET_TEMP, tmpB);
-      objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Setptr")); break;
+      objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Setptr")); break;
    case VariableData::MT_POINTER:
       if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
       objects->addToken(OCODE_SET_PTR, src->address); break;

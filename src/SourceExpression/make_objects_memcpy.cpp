@@ -225,7 +225,7 @@ static void make_objects_memcpy_post_part
       // If only get or set and size is 1, only need one copy of the address.
       if(get^set && data->size == 1)
       {
-         if(set) objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Setptr"));
+         if(set) objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Setptr"));
          if(get) objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Getptr"));
       }
       else
@@ -249,7 +249,7 @@ static void make_objects_memcpy_post_part
 
             if(i) objects->addToken(OCODE_DEC_TEMP_U, tmpI);
 
-            objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Setptr"));
+            objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Setptr"));
          }
 
          if(get) for(i = 0; i < data->size; ++i)

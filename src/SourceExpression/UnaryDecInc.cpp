@@ -720,7 +720,7 @@ private:
             objects->addToken(OCODE_ADD_STK_U);
          }
 
-         objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Setptr"));
+         objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Setptr"));
       }
    }
 
