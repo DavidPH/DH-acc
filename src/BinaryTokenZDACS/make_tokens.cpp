@@ -135,6 +135,11 @@ void BinaryTokenZDACS::make_tokens
       ObjectExpression::create_value_int
       (option_addr_stack, SourcePosition::builtin());
 
+   static ObjectExpression::Reference const func_Getptr =
+      ObjectExpression::create_value_symbol("__Getptr", SourcePosition::builtin());
+   static ObjectExpression::Reference const func_Setptr =
+      ObjectExpression::create_value_symbol("__Setptr", SourcePosition::builtin());
+
    static std::vector<std::string> const nolabels;
 
    std::vector<ObjectExpression::Pointer> args;
@@ -295,10 +300,22 @@ void BinaryTokenZDACS::make_tokens
          PUSH_TOKEN(BCODE_STRING_TAG);
       break;
 
+   case OCODE_GET_FARPTR:
+      PUSH_TOKEN_ADD_ARG0();
+      args.push_back(func_Getptr);
+      PUSH_TOKEN(BCODE_JMP_CAL_IMM);
+      break;
+
    CASE_ADDR_UNAOP(GET,,);
    CASE_REMAP_REGS(GET,,);
 
    // Variable Set
+   case OCODE_SET_FARPTR:
+      PUSH_TOKEN_ADD_ARG0();
+      args.push_back(func_Setptr);
+      PUSH_TOKEN(BCODE_JMP_CAL_NIL_IMM);
+      break;
+
    CASE_ADDR_BINOP(SET,,);
    CASE_REMAP_REGS(SET,,);
 

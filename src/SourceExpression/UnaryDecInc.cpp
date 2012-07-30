@@ -204,47 +204,80 @@
 //
 
 //
-// FARPTR_PRE
+// FARPTR_ADDRESS
 //
-#define FARPTR_PRE(CODEI,CODED,N,O) \
-   /* Select which OCODE to use. */ \
-   ocode = inc ? OCODE_##CODEI##_U : OCODE_##CODED##_U; \
+#define FARPTR_ADDRESS() \
+   tempA = context->getTempVar(0); \
+   tempB = context->getTempVar(1); \
    \
-   /* Fetch address. */ \
-   farptrAddress(objects, tmp, src, tempA, tempB); \
+   if(src->offsetExpr) \
+      src->offsetExpr->makeObjects(objects, tmp); \
+   else \
+   { \
+      objects->addTokenPushZero(); \
+      objects->addTokenPushZero(); \
+   } \
    \
-   /* For suffix, place result on stack before altering value. */ \
-   if(suf && dst->type != VariableData::MT_VOID) \
-      farptrGet(objects, N, O, tempA, tempB); \
-   \
-   /* Fetch value. */ \
-   farptrGet(objects, N, O, tempA, tempB);
+   objects->addToken(OCODE_SET_TEMP, tempB); \
+   objects->addToken(OCODE_SET_TEMP, tempA)
 
 //
-// FARPRE_POST
+// FARPTR_ADDRESS2
 //
-#define FARPTR_POST(N,O) \
-   /* Store value. */ \
-   farptrSet(objects, N, O, tempA, tempB); \
-   \
-   /* For prefix, place result on stack after altering value. */ \
-   if(!suf && dst->type != VariableData::MT_VOID) \
-      farptrGet(objects, N, O, tempA, tempB);
+#define FARPTR_ADDRESS2() \
+   addrH = objects->getValueAdd(addrL, 1); \
+   FARPTR_ADDRESS()
+
+//
+// FARPTR_FETCH
+//
+#define FARPTR_FETCH(MT,ADDR) \
+   objects->addToken(OCODE_GET_TEMP, tempA); \
+   objects->addToken(OCODE_GET_TEMP, tempB); \
+   objects->addToken(OCODE_GET_##MT, ADDR)
+
+//
+// FARPTR_GETRESULT
+//
+#define FARPTR_GETRESULT(MT,SUF) \
+   if((SUF) && dst->type != VariableData::MT_VOID) \
+   { objects->addToken(OCODE_GET_TEMP, tempC); }
+
+//
+// FARPTR_GETRESULT2
+//
+#define FARPTR_GETRESULT2(MT,SUF) \
+   if((SUF) && dst->type != VariableData::MT_VOID) \
+   { \
+      objects->addToken(OCODE_GET_TEMP, tempC); \
+      objects->addToken(OCODE_GET_TEMP, tempD); \
+   }
+
+//
+// FARPTR_STORE
+//
+#define FARPTR_STORE(MT,ADDR) \
+   objects->addToken(OCODE_GET_TEMP, tempA); \
+   objects->addToken(OCODE_GET_TEMP, tempB); \
+   objects->addToken(OCODE_SET_##MT, ADDR)
 
 //
 // DO_L_FARPTR
 //
-#define DO_L_FARPTR() \
+#define DO_L_FARPTR(MT) \
+   ocode = inc ? OCODE_INC_STK_U : OCODE_DEC_STK_U; \
+   \
+   FARPTR_ADDRESS2(); \
+   \
    /* Fetch value. */ \
-   FARPTR_PRE(INC_TEMP, DEC_TEMP, 2, 0); \
+   FARPTR_FETCH(MT, addrL); \
+   objects->addToken(OCODE_SET_TEMP, tempC = context->getTempVar(2)); \
+   FARPTR_FETCH(MT, addrH); \
+   objects->addToken(OCODE_SET_TEMP, tempD = context->getTempVar(3)); \
+   \
+   FARPTR_GETRESULT2(MT, suf); \
    \
    /* Modify value. */ \
-   tempC = context->getTempVar(2); \
-   tempD = context->getTempVar(3); \
-   \
-   objects->addToken(OCODE_SET_TEMP, tempD); \
-   objects->addToken(OCODE_SET_TEMP, tempC); \
-   \
    if(inc) objects->addToken(ocode, tempC); \
    objects->addToken(OCODE_GET_TEMP, tempC); \
    objects->addToken(OCODE_JMP_TRU, objects->getValue(labelEnd)); \
@@ -252,43 +285,69 @@
    objects->addLabel(labelEnd); \
    if(!inc) objects->addToken(ocode, tempC); \
    \
-   objects->addToken(OCODE_GET_TEMP, tempC); \
-   objects->addToken(OCODE_GET_TEMP, tempD); \
-   \
    /* Store value. */ \
-   FARPTR_POST(2, 0); \
+   objects->addToken(OCODE_GET_TEMP, tempC); \
+   FARPTR_STORE(MT, addrL); \
+   objects->addToken(OCODE_GET_TEMP, tempD); \
+   FARPTR_STORE(MT, addrH); \
+   \
+   FARPTR_GETRESULT2(MT, !suf); \
    \
    break
 
 //
 // DO_P_FARPTR
 //
-#define DO_P_FARPTR() \
+#define DO_P_FARPTR(MT, SUF) \
+   DO_OCODE_VALUE(STK, SUF); \
+   \
+   FARPTR_ADDRESS(); \
+   \
    /* Fetch value. */ \
-   FARPTR_PRE(ADD_STK, SUB_STK, 1, 0); \
+   FARPTR_FETCH(MT, addrL); \
+   objects->addToken(OCODE_SET_TEMP, tempC = context->getTempVar(2)); \
+   \
+   FARPTR_GETRESULT(MT, suf); \
    \
    /* Modify value. */ \
-   objects->addToken(OCODE_GET_IMM, value); \
-   objects->addToken(ocode); \
+   if(value) objects->addToken(OCODE_GET_IMM, value); \
+   objects->addToken(ocode, tempC); \
    \
    /* Store value. */ \
-   FARPTR_POST(1, 0); \
+   objects->addToken(OCODE_GET_TEMP, tempC); \
+   FARPTR_STORE(MT, addrL); \
+   \
+   FARPTR_GETRESULT(MT, !suf); \
    \
    break
 
 //
 // DO_PF_FARPTR
 //
-#define DO_PF_FARPTR() \
+#define DO_PF_FARPTR(MT) \
+   DO_OCODE_VALUE(STK, U); \
+   \
+   FARPTR_ADDRESS2(); \
+   \
    /* Fetch value. */ \
-   FARPTR_PRE(ADD_STK, SUB_STK, 2, 1); \
+   FARPTR_FETCH(MT, addrL); \
+   objects->addToken(OCODE_SET_TEMP, tempC = context->getTempVar(2)); \
+   FARPTR_FETCH(MT, addrH); \
+   objects->addToken(OCODE_SET_TEMP, tempD = context->getTempVar(3)); \
+   \
+   FARPTR_GETRESULT2(MT, suf); \
    \
    /* Modify value. */ \
-   objects->addToken(OCODE_GET_IMM, value); \
-   objects->addToken(ocode); \
+   if(value) objects->addToken(OCODE_GET_IMM, value); \
+   objects->addToken(ocode, tempD); \
    \
    /* Store value. */ \
-   FARPTR_POST(2, 1); \
+   objects->addToken(OCODE_GET_TEMP, tempC); \
+   FARPTR_STORE(MT, addrL); \
+   objects->addToken(OCODE_GET_TEMP, tempD); \
+   FARPTR_STORE(MT, addrH); \
+   \
+   FARPTR_GETRESULT2(MT, !suf); \
    \
    break
 
@@ -525,12 +584,10 @@ private:
    //
    // ::doI
    //
-   void doI
-   (ObjectVector *objects, VariableData *dst, VariableData *src,
-    VariableData *tmp)
+   void doI(ObjectVector *objects, VariableData *dst, VariableData *src, VariableData *tmp)
    {
       ObjectExpression::Pointer addrL = src->address;
-      ObjectExpression::Pointer tempA, tempB;
+      ObjectExpression::Pointer tempA, tempB, tempC;
       ObjectExpression::Pointer value;
       ObjectCode ocode;
 
@@ -547,7 +604,7 @@ private:
 
       case VariableData::MT_AUTO: DO_P_REGISTER(AUTO, I);
 
-      case VariableData::MT_FARPTR: DO_P_FARPTR();
+      case VariableData::MT_FARPTR: DO_P_FARPTR(FARPTR, I);
 
       case VariableData::MT_POINTER: DO_P_POINTER(PTR, I);
 
@@ -580,7 +637,6 @@ private:
       ObjectExpression::Pointer addrL = src->address;
       ObjectExpression::Pointer addrH;
       ObjectExpression::Pointer tempA, tempB, tempC, tempD;
-      ObjectExpression::Pointer wrapv = objects->getValue(inc ? 0 : 0xFFFFFFFF);
       ObjectCode ocode;
 
       std::string label = context->makeLabel();
@@ -600,7 +656,7 @@ private:
 
       case VariableData::MT_AUTO: DO_L_REGISTER(AUTO);
 
-      case VariableData::MT_FARPTR: DO_L_FARPTR();
+      case VariableData::MT_FARPTR: DO_L_FARPTR(FARPTR);
 
       case VariableData::MT_POINTER: DO_L_POINTER(PTR);
 
@@ -632,7 +688,7 @@ private:
             VariableData *tmp, ObjectExpression *value)
    {
       ObjectExpression::Pointer addrL = src->address;
-      ObjectExpression::Pointer tempA, tempB;
+      ObjectExpression::Pointer tempA, tempB, tempC;
       ObjectCode ocode;
 
       switch (src->type)
@@ -648,7 +704,7 @@ private:
 
       case VariableData::MT_AUTO: DO_P_REGISTER(AUTO, U);
 
-      case VariableData::MT_FARPTR: DO_P_FARPTR();
+      case VariableData::MT_FARPTR: DO_P_FARPTR(FARPTR, U);
 
       case VariableData::MT_POINTER: DO_P_POINTER(PTR, U);
 
@@ -697,7 +753,7 @@ private:
 
       case VariableData::MT_AUTO: DO_PF_REGISTER(AUTO);
 
-      case VariableData::MT_FARPTR: DO_PF_FARPTR();
+      case VariableData::MT_FARPTR: DO_PF_FARPTR(FARPTR);
 
       case VariableData::MT_POINTER: DO_PF_POINTER(PTR);
 
@@ -728,7 +784,7 @@ private:
    void doX(ObjectVector *objects, VariableData *dst, VariableData *src, VariableData *tmp)
    {
       ObjectExpression::Pointer addrL = src->address;
-      ObjectExpression::Pointer tempA, tempB;
+      ObjectExpression::Pointer tempA, tempB, tempC;
       ObjectExpression::Pointer value = objects->getValue(1.0);
       ObjectCode ocode;
 
@@ -745,7 +801,7 @@ private:
 
       case VariableData::MT_AUTO: DO_P_REGISTER(AUTO, X);
 
-      case VariableData::MT_FARPTR: DO_P_FARPTR();
+      case VariableData::MT_FARPTR: DO_P_FARPTR(FARPTR, X);
 
       case VariableData::MT_POINTER: DO_P_POINTER(PTR, X);
 
@@ -767,72 +823,6 @@ private:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
          ERROR_NP("invalid MT");
-      }
-   }
-
-   //
-   // ::farptrAddress
-   //
-   void farptrAddress(ObjectVector *objects, VariableData *tmp, VariableData *src,
-      ObjectExpression::Pointer &tempA, ObjectExpression::Pointer &tempB)
-   {
-      // Temp vars to store address.
-      tempA = context->getTempVar(0);
-      tempB = context->getTempVar(1);
-
-      // Evaluate address.
-      if(src->offsetExpr)
-         src->offsetExpr->makeObjects(objects, tmp);
-      else
-      {
-         objects->addTokenPushZero();
-         objects->addTokenPushZero();
-      }
-
-      // Store address in temporaries.
-      objects->addToken(OCODE_SET_TEMP, tempB);
-      objects->addToken(OCODE_SET_TEMP, tempA);
-   }
-
-   //
-   // ::farptrGet
-   //
-   void farptrGet(ObjectVector *objects, int n, int o, ObjectExpression *tempA,
-                  ObjectExpression *tempB)
-   {
-      for(int i = o; i < n; ++i)
-      {
-         objects->addToken(OCODE_GET_TEMP, tempA);
-         objects->addToken(OCODE_GET_TEMP, tempB);
-
-         if(i)
-         {
-            objects->addToken(OCODE_GET_IMM, objects->getValue(i));
-            objects->addToken(OCODE_ADD_STK_U);
-         }
-
-         objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Getptr"));
-      }
-   }
-
-   //
-   // ::farptrSet
-   //
-   void farptrSet(ObjectVector *objects, int n, int o, ObjectExpression *tempA,
-                  ObjectExpression *tempB)
-   {
-      for(int i = n; i-- != o;)
-      {
-         objects->addToken(OCODE_GET_TEMP, tempA);
-         objects->addToken(OCODE_GET_TEMP, tempB);
-
-         if(i)
-         {
-            objects->addToken(OCODE_GET_IMM, objects->getValue(i));
-            objects->addToken(OCODE_ADD_STK_U);
-         }
-
-         objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Setptr"));
       }
    }
 

@@ -96,7 +96,8 @@ public:
 
    static Pointer create_auto(bigsint size, ObjectExpression *address);
 
-   static Pointer create_farptr(bigsint size, SourceExpression *offset);
+   static Pointer create_farptr(bigsint size, ObjectExpression *address,
+                                SourceExpression *offset);
 
    static Pointer create_literal(bigsint size, ObjectExpression *value);
 

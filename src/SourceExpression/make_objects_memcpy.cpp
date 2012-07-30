@@ -225,8 +225,8 @@ static void make_objects_memcpy_post_part
       // If only get or set and size is 1, only need one copy of the address.
       if(get^set && data->size == 1)
       {
-         if(set) objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Setptr"));
-         if(get) objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Getptr"));
+         if(set) objects->addToken(OCODE_SET_FARPTR, data->address);
+         if(get) objects->addToken(OCODE_GET_FARPTR, data->address);
       }
       else
       {
@@ -236,30 +236,18 @@ static void make_objects_memcpy_post_part
          objects->addToken(OCODE_SET_TEMP, tmpI);
          objects->addToken(OCODE_SET_TEMP, tmpT);
 
-         if(set)
-         {
-            objects->addToken(OCODE_GET_IMM, objects->getValue(data->size));
-            objects->addToken(OCODE_ADD_TEMP_U, tmpI);
-         }
-
          if(set) for(i = data->size; i--;)
          {
             objects->addToken(OCODE_GET_TEMP, tmpT);
             objects->addToken(OCODE_GET_TEMP, tmpI);
-
-            if(i) objects->addToken(OCODE_DEC_TEMP_U, tmpI);
-
-            objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Setptr"));
+            objects->addToken(OCODE_SET_FARPTR, objects->getValueAdd(data->address, i));
          }
 
          if(get) for(i = 0; i < data->size; ++i)
          {
-            if(i) objects->addToken(OCODE_INC_TEMP_U, tmpI);
-
             objects->addToken(OCODE_GET_TEMP, tmpT);
             objects->addToken(OCODE_GET_TEMP, tmpI);
-
-            objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__Getptr"));
+            objects->addToken(OCODE_GET_FARPTR, objects->getValueAdd(data->address, i));
          }
       }
 

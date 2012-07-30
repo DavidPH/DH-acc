@@ -110,7 +110,6 @@ public:
       switch (data->type)
       {
       case VariableData::MT_ARRAY:
-      case VariableData::MT_FARPTR:
       case VariableData::MT_STRING:
          if (!data->offsetExpr)
             return ObjectExpression::create_value_uns(0, pos);
@@ -123,18 +122,19 @@ public:
          else
             return Super::makeObject();
 
+      case VariableData::MT_FARPTR:
+      case VariableData::MT_POINTER:
+         if(!data->offsetExpr)
+            return data->address;
+
+         return ObjectExpression::create_binary_add(data->address,
+                   data->offsetExpr->makeObject(), pos);
+
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
          break;
-
-      case VariableData::MT_POINTER:
-         if (!data->offsetExpr)
-            return data->address;
-
-         return ObjectExpression::create_binary_add
-                (data->address, data->offsetExpr->makeObject(), pos);
 
       case VariableData::MT_REGISTER:
       case VariableData::MT_STATIC:
@@ -174,24 +174,12 @@ private:
          break;
 
       case VariableData::MT_FARPTR:
+      case VariableData::MT_POINTER:
       case VariableData::MT_STRING:
          if (data->offsetExpr)
             data->offsetExpr->makeObjects(objects, dst);
          else
             create_value_data(getType(), context, pos)->makeObjects(objects, dst);
-         break;
-
-      case VariableData::MT_LITERAL:
-      case VariableData::MT_STACK:
-      case VariableData::MT_VOID:
-      case VariableData::MT_NONE:
-         ERROR_NP("invalid MT");
-
-      case VariableData::MT_POINTER:
-         if (data->offsetExpr)
-            data->offsetExpr->makeObjects(objects, dst);
-         else
-            objects->addTokenPushZero();
 
          if(!data->address->canResolve() || data->address->resolveUNS())
          {
@@ -200,6 +188,12 @@ private:
          }
 
          break;
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         ERROR_NP("invalid MT");
 
       case VariableData::MT_REGISTER:
       case VariableData::MT_STATIC:

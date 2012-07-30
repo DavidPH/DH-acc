@@ -104,9 +104,10 @@ create_auto(bigsint size, ObjectExpression *address)
 //
 // VariableData::create_farptr
 //
-VariableData::Pointer VariableData::create_farptr(bigsint size, SourceExpression *offset)
+VariableData::Pointer VariableData::create_farptr(bigsint size, ObjectExpression *address,
+                                                  SourceExpression *offset)
 {
-   return new VariableData(MT_FARPTR, size, NULL, offset);
+   return new VariableData(MT_FARPTR, size, address, offset);
 }
 
 //
