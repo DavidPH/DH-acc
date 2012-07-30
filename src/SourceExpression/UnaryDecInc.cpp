@@ -36,337 +36,468 @@
 //
 
 //=========================================================
+// Generics
+//
+
+//
+// DO_OCODE_VALUE
+//
+#define DO_OCODE_VALUE(MT,SUF) \
+   if(value) \
+      ocode = inc ? OCODE_ADD_##MT##_##SUF : OCODE_SUB_##MT##_##SUF; \
+   else \
+      ocode = inc ? OCODE_INC_##MT##_##SUF : OCODE_DEC_##MT##_##SUF
+
+//=========================================================
+// MT_ARRAY
+//
+
+//
+// ARRAY_ADDRESS
+//
+#define ARRAY_ADDRESS(TEMP) \
+   if(TEMP) tempA = context->getTempVar(0); \
+   \
+   if(src->offsetExpr) \
+      src->offsetExpr->makeObjects(objects, tmp); \
+   else \
+      objects->addTokenPushZero(); \
+   \
+   if(TEMP) objects->addToken(OCODE_SET_TEMP, tempA)
+
+//
+// ARRAY_FETCH_LO
+//
+#define ARRAY_FETCH_LO(MT) \
+   objects->addToken(OCODE_GET_TEMP, tempA); \
+   objects->addToken(OCODE_GET_##MT, addrL)
+
+//
+// ARRAY_GETRESULT_PRE
+//
+#define ARRAY_GETRESULT_PRE(MT) \
+   if(!suf && dst->type != VariableData::MT_VOID) \
+   { \
+      objects->addToken(OCODE_GET_TEMP, tempA); \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+   } \
+   else ((void)0)
+
+//
+// ARRAY_GETRESULT_SUF
+//
+#define ARRAY_GETRESULT_SUF(MT) \
+   if(suf && dst->type != VariableData::MT_VOID) \
+   { \
+      objects->addToken(OCODE_GET_TEMP, tempA); \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+   } \
+   else ((void)0)
+
+//
+// ARRAY_GETRESULT2_PRE
+//
+#define ARRAY_GETRESULT2_PRE(MT,DEC) \
+   if(!suf && dst->type != VariableData::MT_VOID) \
+   { \
+      if(DEC) objects->addToken(OCODE_DEC_TEMP_U, tempA); \
+      objects->addToken(OCODE_GET_TEMP, tempA); \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+      objects->addToken(OCODE_INC_TEMP_U, tempA); \
+      objects->addToken(OCODE_GET_TEMP, tempA); \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+   } \
+   else ((void)0)
+
+//
+// ARRAY_GETRESULT2_SUF
+//
+#define ARRAY_GETRESULT2_SUF(MT,INC) \
+   if(suf && dst->type != VariableData::MT_VOID) \
+   { \
+      objects->addToken(OCODE_GET_TEMP, tempA); \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+      objects->addToken(OCODE_INC_TEMP_U, tempA); \
+      objects->addToken(OCODE_GET_TEMP, tempA); \
+      if(!INC) objects->addToken(OCODE_DEC_TEMP_U, tempA); \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+   } \
+   else if(INC) \
+      objects->addToken(OCODE_INC_TEMP_U, tempA)
+
+//
+// ARRAY_MODIFY_LO
+//
+#define ARRAY_MODIFY_LO() \
+   objects->addToken(OCODE_GET_TEMP, tempA); \
+   objects->addToken(ocode, addrL)
+
+//
+// ARRAY_MODIFY_HI
+//
+#define ARRAY_MODIFY_HI() \
+   objects->addToken(OCODE_GET_TEMP, tempA); \
+   objects->addToken(OCODE_GET_IMM, objects->getValue(1)); \
+   objects->addToken(OCODE_ADD_STK_U); \
+   objects->addToken(ocode, addrL)
+
+//
+// DO_L_ARRAY
+//
+#define DO_L_ARRAY(MT) \
+   ARRAY_ADDRESS(true); \
+   \
+   ocode = inc ? OCODE_INC_##MT##_I : OCODE_DEC_##MT##_I; \
+   \
+   ARRAY_GETRESULT2_SUF(MT, false); \
+   \
+   if(inc) {ARRAY_MODIFY_LO();} \
+   ARRAY_FETCH_LO(MT); \
+   objects->addToken(OCODE_JMP_TRU, objects->getValue(labelEnd)); \
+   ARRAY_MODIFY_HI(); \
+   objects->addLabel(labelEnd); \
+   if(!inc) {ARRAY_MODIFY_LO();} \
+   \
+   ARRAY_GETRESULT2_PRE(MT, false); \
+   \
+   break
+
+//
+// DO_P_ARRAY
+//
+#define DO_P_ARRAY(MT,SUF) \
+   DO_OCODE_VALUE(MT, U); \
+   \
+   ARRAY_ADDRESS(dst->type != VariableData::MT_VOID); \
+   \
+   ARRAY_GETRESULT_SUF(MT); \
+   \
+   if(dst->type != VariableData::MT_VOID) \
+      objects->addToken(OCODE_GET_TEMP, tempA); \
+   if(value) objects->addToken(OCODE_GET_IMM, value); \
+   objects->addToken(ocode, addrL); \
+   \
+   ARRAY_GETRESULT_PRE(MT); \
+   \
+   break
+
+//
+// DO_PF_ARRAY
+//
+#define DO_PF_ARRAY(MT) \
+   DO_OCODE_VALUE(MT, U); \
+   \
+   ARRAY_ADDRESS(true); \
+   \
+   ARRAY_GETRESULT2_SUF(MT, true); \
+   \
+   objects->addToken(OCODE_GET_TEMP, tempA); \
+   if(value) objects->addToken(OCODE_GET_IMM, value); \
+   objects->addToken(ocode, addrL); \
+   \
+   ARRAY_GETRESULT2_PRE(MT, true); \
+   \
+   break
+
+//=========================================================
 // MT_FARPTR
 //
 
 //
 // FARPTR_PRE
 //
-#define FARPTR_PRE(N, CODEI, CODED) \
+#define FARPTR_PRE(CODEI,CODED,N,O) \
    /* Select which OCODE to use. */ \
-   ocode = inc ? OCODE_##CODEI : OCODE_##CODED; \
- \
+   ocode = inc ? OCODE_##CODEI##_U : OCODE_##CODED##_U; \
+   \
    /* Fetch address. */ \
    farptrAddress(objects, tmp, src, tempA, tempB); \
- \
+   \
    /* For suffix, place result on stack before altering value. */ \
    if(suf && dst->type != VariableData::MT_VOID) \
-      farptrGet(objects, N, tempA, tempB); \
- \
+      farptrGet(objects, N, O, tempA, tempB); \
+   \
    /* Fetch value. */ \
-   farptrGet(objects, N, tempA, tempB);
+   farptrGet(objects, N, O, tempA, tempB);
 
 //
 // FARPRE_POST
 //
-#define FARPTR_POST(N) \
+#define FARPTR_POST(N,O) \
    /* Store value. */ \
-   farptrSet(objects, N, tempA, tempB); \
- \
+   farptrSet(objects, N, O, tempA, tempB); \
+   \
    /* For prefix, place result on stack after altering value. */ \
    if(!suf && dst->type != VariableData::MT_VOID) \
-      farptrGet(objects, N, tempA, tempB);
+      farptrGet(objects, N, O, tempA, tempB);
 
 //
 // DO_L_FARPTR
 //
-#define DO_L_FARPTR(CODEG, CODEI, CODED) \
+#define DO_L_FARPTR() \
    /* Fetch value. */ \
-   FARPTR_PRE(2, CODEI, CODED); \
- \
+   FARPTR_PRE(INC_TEMP, DEC_TEMP, 2, 0); \
+   \
    /* Modify value. */ \
    tempC = context->getTempVar(2); \
    tempD = context->getTempVar(3); \
- \
+   \
    objects->addToken(OCODE_SET_TEMP, tempD); \
    objects->addToken(OCODE_SET_TEMP, tempC); \
- \
+   \
    if(inc) objects->addToken(ocode, tempC); \
    objects->addToken(OCODE_GET_TEMP, tempC); \
    objects->addToken(OCODE_JMP_TRU, objects->getValue(labelEnd)); \
    objects->addToken(ocode, tempD); \
    objects->addLabel(labelEnd); \
    if(!inc) objects->addToken(ocode, tempC); \
- \
+   \
    objects->addToken(OCODE_GET_TEMP, tempC); \
    objects->addToken(OCODE_GET_TEMP, tempD); \
- \
+   \
    /* Store value. */ \
-   FARPTR_POST(2); \
- \
+   FARPTR_POST(2, 0); \
+   \
    break
 
 //
 // DO_P_FARPTR
 //
-#define DO_P_FARPTR(CODEG, CODEI, CODED) \
+#define DO_P_FARPTR() \
    /* Fetch value. */ \
-   FARPTR_PRE(1, CODEI, CODED); \
- \
+   FARPTR_PRE(ADD_STK, SUB_STK, 1, 0); \
+   \
    /* Modify value. */ \
-   objects->addToken(OCODE_##CODEG, value); \
+   objects->addToken(OCODE_GET_IMM, value); \
    objects->addToken(ocode); \
- \
+   \
    /* Store value. */ \
-   FARPTR_POST(1); \
- \
+   FARPTR_POST(1, 0); \
+   \
+   break
+
+//
+// DO_PF_FARPTR
+//
+#define DO_PF_FARPTR() \
+   /* Fetch value. */ \
+   FARPTR_PRE(ADD_STK, SUB_STK, 2, 1); \
+   \
+   /* Modify value. */ \
+   objects->addToken(OCODE_GET_IMM, value); \
+   objects->addToken(ocode); \
+   \
+   /* Store value. */ \
+   FARPTR_POST(2, 1); \
+   \
    break
 
 //=========================================================
-// Other
+// MT_POINTER
 //
 
 //
-// DO_I_ADDR
+// POINTER_ADDRESS
 //
-#define DO_I_ADDR(CODEG, CODEI, CODED)          \
-ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
-                                                \
-if (suf && dst->type != VariableData::MT_VOID)  \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-                                                \
-objects->addToken(ocode, addrL);                \
-                                                \
-if (!suf && dst->type != VariableData::MT_VOID) \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-break
+#define POINTER_ADDRESS(TEMP) \
+   if(TEMP) tempA = context->getTempVar(0); \
+   \
+   if(src->offsetExpr) \
+      src->offsetExpr->makeObjects(objects, tmp); \
+   else \
+      objects->addTokenPushZero(); \
+   \
+   if(TEMP) objects->addToken(OCODE_SET_TEMP, tempA)
 
 //
-// DO_I_OFFSET
+// POINTER_ADDRESS2
 //
-#define DO_I_OFFSET(CODEG, CODEI, CODED)        \
-if (dst->type != VariableData::MT_VOID)         \
-   tempA = context->getTempVar(0);              \
-ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
-                                                \
-if (src->offsetExpr)                            \
-   src->offsetExpr->makeObjects(objects, tmp);  \
-else                                            \
-   objects->addTokenPushZero();                 \
-if (dst->type != VariableData::MT_VOID)         \
-   objects->addToken(OCODE_SET_TEMP, tempA);    \
-                                                \
-if (suf && dst->type != VariableData::MT_VOID)  \
-{                                               \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-}                                               \
-                                                \
-if (dst->type != VariableData::MT_VOID)         \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-objects->addToken(ocode, addrL);                \
-                                                \
-if (!suf && dst->type != VariableData::MT_VOID) \
-{                                               \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-}                                               \
-break
+#define POINTER_ADDRESS2(TEMP) \
+   addrH = objects->getValueAdd(addrL, 1); \
+   POINTER_ADDRESS(TEMP)
 
 //
-// DO_LL_ADDR
+// POINTER_FETCH
 //
-#define DO_LL_ADDR(CODEG, CODEI, CODED)         \
-addrH = objects->getValueAdd(addrL, 1);         \
-ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
-                                                \
-if (suf && dst->type != VariableData::MT_VOID)  \
-{                                               \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-   objects->addToken(OCODE_##CODEG, addrH);     \
-}                                               \
-                                                \
-objects->addToken(ocode, addrL);                \
-objects->addToken(OCODE_##CODEG, addrL);        \
-objects->addToken(OCODE_GET_IMM, wrapv);        \
-objects->addToken(OCODE_CMP_EQ_I);              \
-objects->addToken(OCODE_JMP_NIL, objEnd);       \
-objects->addToken(ocode, addrH);                \
-objects->addLabel(labelEnd);                    \
-                                                \
-if (!suf && dst->type != VariableData::MT_VOID) \
-{                                               \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-   objects->addToken(OCODE_##CODEG, addrH);     \
-}                                               \
-break
+#define POINTER_FETCH(MT, ADDR) \
+   objects->addToken(OCODE_GET_TEMP, tempA); \
+   objects->addToken(OCODE_GET_##MT, ADDR)
 
 //
-// DO_LL_OFFSET
+// POINTER_GETRESULT
 //
-#define DO_LL_OFFSET(CODEG, CODEI, CODED)       \
-addrH = addrL;                                  \
-tempA = context->getTempVar(0);                 \
-ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
-                                                \
-if (src->offsetExpr)                            \
-   src->offsetExpr->makeObjects(objects, tmp);  \
-else                                            \
-   objects->addTokenPushZero();                 \
-objects->addToken(OCODE_SET_TEMP, tempA);       \
-                                                \
-if (suf && dst->type != VariableData::MT_VOID)  \
-{                                               \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_GET_IMM, objects->getValue(1));\
-   objects->addToken(OCODE_ADD_STK_U);          \
-   objects->addToken(OCODE_##CODEG, addrH);     \
-}                                               \
-                                                \
-objects->addToken(OCODE_GET_TEMP, tempA);       \
-objects->addToken(ocode, addrL);                \
-objects->addToken(OCODE_GET_TEMP, tempA);       \
-objects->addToken(OCODE_##CODEG, addrL);        \
-objects->addToken(OCODE_GET_IMM, wrapv);        \
-objects->addToken(OCODE_CMP_EQ_I);              \
-objects->addToken(OCODE_JMP_NIL, objEnd);       \
-objects->addToken(OCODE_GET_TEMP, tempA);       \
-objects->addToken(OCODE_GET_IMM, objects->getValue(1));\
-objects->addToken(OCODE_ADD_STK_U);             \
-objects->addToken(ocode, addrH);                \
-objects->addLabel(labelEnd);                    \
-                                                \
-if (!suf && dst->type != VariableData::MT_VOID) \
-{                                               \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_GET_IMM, objects->getValue(1));\
-   objects->addToken(OCODE_ADD_STK_U);          \
-   objects->addToken(OCODE_##CODEG, addrH);     \
-}                                               \
-break
+#define POINTER_GETRESULT(MT,SUF) \
+   if((SUF) && dst->type != VariableData::MT_VOID) \
+   { POINTER_FETCH(MT, addrL); }
 
 //
-// DO_LL_POINTER
+// POINTER_GETRESULT2
 //
-#define DO_LL_POINTER(CODEG, CODEI, CODED)      \
-addrH = objects->getValueAdd(addrL, 1);         \
-tempA = context->getTempVar(0);                 \
-ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
-                                                \
-if (src->offsetExpr)                            \
-   src->offsetExpr->makeObjects(objects, tmp);  \
-else                                            \
-   objects->addTokenPushZero();                 \
-objects->addToken(OCODE_SET_TEMP, tempA);       \
-                                                \
-if (suf && dst->type != VariableData::MT_VOID)  \
-{                                               \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrH);     \
-}                                               \
-                                                \
-objects->addToken(OCODE_GET_TEMP, tempA);       \
-objects->addToken(ocode, addrL);                \
-objects->addToken(OCODE_GET_TEMP, tempA);       \
-objects->addToken(OCODE_##CODEG, addrL);        \
-objects->addToken(OCODE_GET_IMM, wrapv);        \
-objects->addToken(OCODE_CMP_EQ_I);              \
-objects->addToken(OCODE_JMP_NIL, objEnd);       \
-objects->addToken(OCODE_GET_TEMP, tempA);       \
-objects->addToken(ocode, addrH);                \
-objects->addLabel(labelEnd);                    \
-                                                \
-if (!suf && dst->type != VariableData::MT_VOID) \
-{                                               \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrH);     \
-}                                               \
-break
+#define POINTER_GETRESULT2(MT,SUF) \
+   if((SUF) && dst->type != VariableData::MT_VOID) \
+   { POINTER_FETCH(MT, addrL); POINTER_FETCH(MT, addrH); }
 
 //
-// DO_P_ADDR
+// POINTER_GETVALUE_PRE
 //
-#define DO_P_ADDR(CODEG, CODEI, CODED)          \
-ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
-                                                \
-if (suf && dst->type != VariableData::MT_VOID)  \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-                                                \
-objects->addToken(OCODE_GET_IMM, value);        \
-objects->addToken(ocode, addrL);                \
-                                                \
-if (!suf && dst->type != VariableData::MT_VOID) \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-break
+#define POINTER_GETVALUE_PRE() \
+   if(value && dst->type == VariableData::MT_VOID) \
+      objects->addToken(OCODE_GET_IMM, value)
 
 //
-// DO_P_OFFSET
+// POINTER_GETVALUE_POST
 //
-#define DO_P_OFFSET(CODEG, CODEI, CODED)        \
-if (dst->type != VariableData::MT_VOID)         \
-   tempA = context->getTempVar(0);              \
-ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
-                                                \
-if (src->offsetExpr)                            \
-   src->offsetExpr->makeObjects(objects, tmp);  \
-else                                            \
-   objects->addTokenPushZero();                 \
-if (dst->type != VariableData::MT_VOID)         \
-   objects->addToken(OCODE_SET_TEMP, tempA);    \
-                                                \
-if (suf && dst->type != VariableData::MT_VOID)  \
-{                                               \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-}                                               \
-                                                \
-if (dst->type != VariableData::MT_VOID)         \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-objects->addToken(OCODE_GET_IMM, value);        \
-objects->addToken(ocode, addrL);                \
-                                                \
-if (!suf && dst->type != VariableData::MT_VOID) \
-{                                               \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-}                                               \
-break
+#define POINTER_GETVALUE_POST() \
+   if(dst->type != VariableData::MT_VOID) \
+   { \
+      if(value) objects->addToken(OCODE_GET_IMM, value); \
+      objects->addToken(OCODE_GET_TEMP, tempA); \
+   }
+
+//
+// POINTER_MODIFY
+//
+#define POINTER_MODIFY(ADDR) \
+   objects->addToken(OCODE_GET_TEMP, tempA); \
+   objects->addToken(ocode, ADDR)
+
+//
+// DO_L_POINTER
+//
+#define DO_L_POINTER(MT) \
+   ocode = inc ? OCODE_INC_##MT##_I : OCODE_DEC_##MT##_I; \
+   \
+   POINTER_ADDRESS2(true); \
+   \
+   POINTER_GETRESULT2(MT, suf); \
+   \
+   if(inc) {POINTER_MODIFY(addrL);} \
+   POINTER_FETCH(MT, addrL); \
+   objects->addToken(OCODE_JMP_TRU, objects->getValue(labelEnd)); \
+   POINTER_MODIFY(addrH); \
+   objects->addLabel(labelEnd); \
+   if(!inc) {POINTER_MODIFY(addrL);} \
+   \
+   POINTER_GETRESULT2(MT, !suf); \
+   \
+   break
 
 //
 // DO_P_POINTER
 //
-#define DO_P_POINTER(CODEG, CODEI, CODED)       \
-if (dst->type != VariableData::MT_VOID)         \
-   tempA = context->getTempVar(0);              \
-ocode = inc ? OCODE_##CODEI : OCODE_##CODED;    \
-                                                \
-if (dst->type == VariableData::MT_VOID)         \
-   objects->addToken(OCODE_GET_IMM, value);     \
-                                                \
-if (src->offsetExpr)                            \
-   src->offsetExpr->makeObjects(objects, tmp);  \
-else                                            \
-   objects->addTokenPushZero();                 \
-if (dst->type != VariableData::MT_VOID)         \
-   objects->addToken(OCODE_SET_TEMP, tempA);    \
-                                                \
-if (suf && dst->type != VariableData::MT_VOID)  \
-{                                               \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-}                                               \
-                                                \
-if (dst->type != VariableData::MT_VOID)         \
-{                                               \
-   objects->addToken(OCODE_GET_IMM, value);     \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-}                                               \
-objects->addToken(ocode, addrL);                \
-                                                \
-if (!suf && dst->type != VariableData::MT_VOID) \
-{                                               \
-   objects->addToken(OCODE_GET_TEMP, tempA);    \
-   objects->addToken(OCODE_##CODEG, addrL);     \
-}                                               \
-break
+#define DO_P_POINTER(MT, SUF) \
+   DO_OCODE_VALUE(MT, SUF); \
+   \
+   POINTER_GETVALUE_PRE(); \
+   \
+   /* If we don't have to push the result, we only need one copy of the */ \
+   /* address, so don't bother with the temp. */ \
+   POINTER_ADDRESS(dst->type != VariableData::MT_VOID); \
+   \
+   POINTER_GETRESULT(MT, suf); \
+   \
+   POINTER_GETVALUE_POST(); \
+   objects->addToken(ocode, addrL); \
+   \
+   POINTER_GETRESULT(MT, !suf); \
+   \
+   break
+
+//
+// DO_PF_POINTER
+//
+#define DO_PF_POINTER(MT) \
+   DO_OCODE_VALUE(MT, U); \
+   \
+   POINTER_GETVALUE_PRE(); \
+   \
+   /* If we don't have to push the result, we only need one copy of the */ \
+   /* address, so don't bother with the temp. */ \
+   POINTER_ADDRESS2(dst->type != VariableData::MT_VOID); \
+   \
+   POINTER_GETRESULT2(MT, suf); \
+   \
+   POINTER_GETVALUE_POST(); \
+   objects->addToken(ocode, addrH); \
+   \
+   POINTER_GETRESULT2(MT, !suf); \
+   \
+   break
+
+//=========================================================
+// MT_REGISTER
+//
+
+//
+// DO_L_REGISTER
+//
+#define DO_L_REGISTER(MT) \
+   addrH = objects->getValueAdd(addrL, 1); \
+   ocode = inc ? OCODE_INC_##MT##_I : OCODE_DEC_##MT##_I; \
+   \
+   if(suf && dst->type != VariableData::MT_VOID) \
+   { \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+      objects->addToken(OCODE_GET_##MT, addrH); \
+   } \
+   \
+   if(inc) objects->addToken(ocode, addrL); \
+   objects->addToken(OCODE_GET_##MT, addrL); \
+   objects->addToken(OCODE_JMP_TRU, objects->getValue(labelEnd)); \
+   objects->addToken(ocode, addrH); \
+   objects->addLabel(labelEnd); \
+   if(!inc) objects->addToken(ocode, addrL); \
+   \
+   if(suf && dst->type != VariableData::MT_VOID) \
+   { \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+      objects->addToken(OCODE_GET_##MT, addrH); \
+   } \
+   \
+   break
+
+
+//
+// DO_P_REGISTER
+//
+#define DO_P_REGISTER(MT,SUF) \
+   DO_OCODE_VALUE(MT, SUF); \
+   \
+   if(suf && dst->type != VariableData::MT_VOID) \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+   \
+   if(value) objects->addToken(OCODE_GET_IMM, value); \
+   objects->addToken(ocode, addrL); \
+   \
+   if(!suf && dst->type != VariableData::MT_VOID) \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+   \
+   break
+
+//
+// DO_PF_REGISTER
+//
+#define DO_PF_REGISTER(MT) \
+   addrH = objects->getValueAdd(addrL, 1); \
+   \
+   DO_OCODE_VALUE(MT, U); \
+   \
+   if(suf && dst->type != VariableData::MT_VOID) \
+   { \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+      objects->addToken(OCODE_GET_##MT, addrH); \
+   } \
+   \
+   if(value) objects->addToken(OCODE_GET_IMM, value); \
+   objects->addToken(ocode, addrH); \
+   \
+   if(!suf && dst->type != VariableData::MT_VOID) \
+   { \
+      objects->addToken(OCODE_GET_##MT, addrL); \
+      objects->addToken(OCODE_GET_##MT, addrH); \
+   } \
+   \
+   break
 
 
 //----------------------------------------------------------------------------|
@@ -392,70 +523,6 @@ public:
 
 private:
    //
-   // ::doX
-   //
-   void doX(ObjectVector *objects, VariableData *dst, VariableData *src, VariableData *tmp)
-   {
-      ObjectExpression::Pointer addrL = src->address;
-      ObjectExpression::Pointer tempA, tempB;
-      ObjectExpression::Pointer value = objects->getValue(1.0);
-      ObjectCode ocode;
-
-      switch (src->type)
-      {
-      case VariableData::MT_STATIC:
-         DO_P_ADDR(GET_STATIC, ADD_STATIC_X, SUB_STATIC_X);
-
-      case VariableData::MT_AUTO:
-         DO_P_ADDR(GET_AUTO, ADD_AUTO_X, SUB_AUTO_X);
-
-      case VariableData::MT_FARPTR:
-         DO_P_FARPTR(GET_IMM, ADD_STK_X, SUB_STK_X);
-
-      case VariableData::MT_POINTER:
-         DO_P_POINTER(GET_PTR, ADD_PTR_X, SUB_PTR_X);
-
-      case VariableData::MT_REGISTER:
-         switch (src->sectionR)
-         {
-         case VariableData::SR_LOCAL:
-            DO_P_ADDR(GET_REG, ADD_REG_X, SUB_REG_X);
-
-         case VariableData::SR_MAP:
-            DO_P_ADDR(GET_MAPREG, ADD_MAPREG_X, SUB_MAPREG_X);
-
-         case VariableData::SR_WORLD:
-            DO_P_ADDR(GET_WLDREG, ADD_WLDREG_X, SUB_WLDREG_X);
-
-         case VariableData::SR_GLOBAL:
-            DO_P_ADDR(GET_GBLREG, ADD_GBLREG_X, SUB_GBLREG_X);
-      }
-      break;
-
-      case VariableData::MT_ARRAY:
-         switch(src->sectionA)
-         {
-         case VariableData::SA_MAP:
-            DO_P_OFFSET(GET_MAPARR, ADD_MAPARR_X, SUB_MAPARR_X);
-
-         case VariableData::SA_WORLD:
-            DO_P_OFFSET(GET_WLDARR, ADD_WLDARR_X, SUB_WLDARR_X);
-
-         case VariableData::SA_GLOBAL:
-            DO_P_OFFSET(GET_GBLARR, ADD_GBLARR_X, SUB_GBLARR_X);
-      }
-      break;
-
-      case VariableData::MT_LITERAL:
-      case VariableData::MT_STACK:
-      case VariableData::MT_STRING:
-      case VariableData::MT_VOID:
-      case VariableData::MT_NONE:
-         ERROR_NP("invalid MT");
-      }
-   }
-
-   //
    // ::doI
    //
    void doI
@@ -464,53 +531,37 @@ private:
    {
       ObjectExpression::Pointer addrL = src->address;
       ObjectExpression::Pointer tempA, tempB;
-      ObjectExpression::Pointer value = objects->getValue(1);
+      ObjectExpression::Pointer value;
       ObjectCode ocode;
 
       switch (src->type)
       {
-      case VariableData::MT_STATIC:
-         DO_I_ADDR(GET_STATIC, INC_STATIC_I, DEC_STATIC_I);
+      case VariableData::MT_ARRAY:
+         switch(src->sectionA)
+         {
+         case VariableData::SA_MAP:    DO_P_ARRAY(MAPARR, I);
+         case VariableData::SA_WORLD:  DO_P_ARRAY(WLDARR, I);
+         case VariableData::SA_GLOBAL: DO_P_ARRAY(GBLARR, I);
+      }
+      break;
 
-      case VariableData::MT_AUTO:
-         DO_I_ADDR(GET_AUTO, INC_AUTO_I, DEC_AUTO_I);
+      case VariableData::MT_AUTO: DO_P_REGISTER(AUTO, I);
 
-      case VariableData::MT_FARPTR:
-         DO_P_FARPTR(GET_IMM, ADD_STK_I, SUB_STK_I);
+      case VariableData::MT_FARPTR: DO_P_FARPTR();
 
-      case VariableData::MT_POINTER:
-         DO_I_OFFSET(GET_PTR, INC_PTR_I, DEC_PTR_I);
+      case VariableData::MT_POINTER: DO_P_POINTER(PTR, I);
 
       case VariableData::MT_REGISTER:
          switch (src->sectionR)
          {
-         case VariableData::SR_LOCAL:
-            DO_I_ADDR(GET_REG, INC_REG_I, DEC_REG_I);
-
-         case VariableData::SR_MAP:
-            DO_I_ADDR(GET_MAPREG, INC_MAPREG_I, DEC_MAPREG_I);
-
-         case VariableData::SR_WORLD:
-            DO_I_ADDR(GET_WLDREG, INC_WLDREG_I, DEC_WLDREG_I);
-
-         case VariableData::SR_GLOBAL:
-            DO_I_ADDR(GET_GBLREG, INC_GBLREG_I, DEC_GBLREG_I);
+         case VariableData::SR_LOCAL:  DO_P_REGISTER(REG, I);
+         case VariableData::SR_MAP:    DO_P_REGISTER(MAPREG, I);
+         case VariableData::SR_WORLD:  DO_P_REGISTER(WLDREG, I);
+         case VariableData::SR_GLOBAL: DO_P_REGISTER(GBLREG, I);
       }
       break;
 
-      case VariableData::MT_ARRAY:
-         switch(src->sectionA)
-         {
-         case VariableData::SA_MAP:
-            DO_I_OFFSET(GET_MAPARR, INC_MAPARR_I, DEC_MAPARR_I);
-
-         case VariableData::SA_WORLD:
-            DO_I_OFFSET(GET_WLDARR, INC_WLDARR_I, DEC_WLDARR_I);
-
-         case VariableData::SA_GLOBAL:
-            DO_I_OFFSET(GET_GBLARR, INC_GBLARR_I, DEC_GBLARR_I);
-      }
-      break;
+      case VariableData::MT_STATIC: DO_P_REGISTER(STATIC, I);
 
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
@@ -538,48 +589,32 @@ private:
 
       switch (src->type)
       {
-      case VariableData::MT_STATIC:
-         DO_LL_ADDR(GET_STATIC, INC_STATIC_I, DEC_STATIC_I);
+      case VariableData::MT_ARRAY:
+         switch(src->sectionA)
+         {
+         case VariableData::SA_MAP:    DO_L_ARRAY(MAPARR);
+         case VariableData::SA_WORLD:  DO_L_ARRAY(WLDARR);
+         case VariableData::SA_GLOBAL: DO_L_ARRAY(GBLARR);
+      }
+      break;
 
-      case VariableData::MT_AUTO:
-         DO_LL_ADDR(GET_AUTO, INC_AUTO_I, DEC_AUTO_I);
+      case VariableData::MT_AUTO: DO_L_REGISTER(AUTO);
 
-      case VariableData::MT_FARPTR:
-         DO_L_FARPTR(GET_IMM, INC_TEMP_I, INC_TEMP_I);
+      case VariableData::MT_FARPTR: DO_L_FARPTR();
 
-      case VariableData::MT_POINTER:
-         DO_LL_POINTER(GET_PTR, INC_PTR_I, DEC_PTR_I);
+      case VariableData::MT_POINTER: DO_L_POINTER(PTR);
 
       case VariableData::MT_REGISTER:
          switch (src->sectionR)
          {
-         case VariableData::SR_LOCAL:
-            DO_LL_ADDR(GET_REG, INC_REG_I, DEC_REG_I);
-
-         case VariableData::SR_MAP:
-            DO_LL_ADDR(GET_MAPREG, INC_MAPREG_I, DEC_MAPREG_I);
-
-         case VariableData::SR_WORLD:
-            DO_LL_ADDR(GET_WLDREG, INC_WLDREG_I, DEC_WLDREG_I);
-
-         case VariableData::SR_GLOBAL:
-            DO_LL_ADDR(GET_GBLREG, INC_GBLREG_I, DEC_GBLREG_I);
+         case VariableData::SR_LOCAL:  DO_L_REGISTER(REG);
+         case VariableData::SR_MAP:    DO_L_REGISTER(MAPREG);
+         case VariableData::SR_WORLD:  DO_L_REGISTER(WLDREG);
+         case VariableData::SR_GLOBAL: DO_L_REGISTER(GBLREG);
       }
       break;
 
-      case VariableData::MT_ARRAY:
-         switch(src->sectionA)
-         {
-         case VariableData::SA_MAP:
-            DO_LL_OFFSET(GET_MAPARR, INC_MAPARR_I, DEC_MAPARR_I);
-
-         case VariableData::SA_WORLD:
-            DO_LL_OFFSET(GET_WLDARR, INC_WLDARR_I, DEC_WLDARR_I);
-
-         case VariableData::SA_GLOBAL:
-            DO_LL_OFFSET(GET_GBLARR, INC_GBLARR_I, DEC_GBLARR_I);
-      }
-      break;
+      case VariableData::MT_STATIC: DO_L_REGISTER(STATIC);
 
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
@@ -594,60 +629,137 @@ private:
    // ::doP
    //
    void doP(ObjectVector *objects, VariableData *dst, VariableData *src,
-            VariableData *tmp, VariableType *type, ObjectExpression *value)
+            VariableData *tmp, ObjectExpression *value)
    {
-      StoreType store = type->getReturn()->getStoreType();
       ObjectExpression::Pointer addrL = src->address;
       ObjectExpression::Pointer tempA, tempB;
       ObjectCode ocode;
 
-      if(store == STORE_NONE || store == STORE_STRING)
-         addrL = objects->getValueAdd(addrL, 1);
-
       switch (src->type)
       {
-      case VariableData::MT_STATIC:
-         DO_P_ADDR(GET_STATIC, ADD_STATIC_U, SUB_STATIC_U);
+      case VariableData::MT_ARRAY:
+         switch(src->sectionA)
+         {
+         case VariableData::SA_MAP:    DO_P_ARRAY(MAPARR, U);
+         case VariableData::SA_WORLD:  DO_P_ARRAY(WLDARR, U);
+         case VariableData::SA_GLOBAL: DO_P_ARRAY(GBLARR, U);
+      }
+      break;
 
-      case VariableData::MT_AUTO:
-         DO_P_ADDR(GET_AUTO, ADD_AUTO_U, SUB_AUTO_U);
+      case VariableData::MT_AUTO: DO_P_REGISTER(AUTO, U);
 
-      case VariableData::MT_FARPTR:
-         DO_P_FARPTR(GET_IMM, ADD_STK_U, SUB_STK_U);
+      case VariableData::MT_FARPTR: DO_P_FARPTR();
 
-      case VariableData::MT_POINTER:
-         DO_P_POINTER(GET_PTR, ADD_PTR_U, SUB_PTR_U);
+      case VariableData::MT_POINTER: DO_P_POINTER(PTR, U);
 
       case VariableData::MT_REGISTER:
          switch (src->sectionR)
          {
-         case VariableData::SR_LOCAL:
-            DO_P_ADDR(GET_REG, ADD_REG_U, SUB_REG_U);
-
-         case VariableData::SR_MAP:
-            DO_P_ADDR(GET_MAPREG, ADD_MAPREG_U, SUB_MAPREG_U);
-
-         case VariableData::SR_WORLD:
-            DO_P_ADDR(GET_WLDREG, ADD_WLDREG_U, SUB_WLDREG_U);
-
-         case VariableData::SR_GLOBAL:
-            DO_P_ADDR(GET_GBLREG, ADD_GBLREG_U, SUB_GBLREG_U);
+         case VariableData::SR_LOCAL:  DO_P_REGISTER(REG, U);
+         case VariableData::SR_MAP:    DO_P_REGISTER(MAPREG, U);
+         case VariableData::SR_WORLD:  DO_P_REGISTER(WLDREG, U);
+         case VariableData::SR_GLOBAL: DO_P_REGISTER(GBLREG, U);
       }
       break;
 
+      case VariableData::MT_STATIC: DO_P_REGISTER(STATIC, U);
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_STRING:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         ERROR_NP("invalid MT");
+      }
+   }
+
+   //
+   // ::doPF
+   //
+   void doPF(ObjectVector *objects, VariableData *dst, VariableData *src,
+             VariableData *tmp, ObjectExpression *value)
+   {
+      ObjectExpression::Pointer addrL = src->address;
+      ObjectExpression::Pointer addrH;
+      ObjectExpression::Pointer tempA, tempB, tempC, tempD;
+      ObjectCode ocode;
+
+      switch(src->type)
+      {
       case VariableData::MT_ARRAY:
          switch(src->sectionA)
          {
-         case VariableData::SA_MAP:
-            DO_P_OFFSET(GET_MAPARR, ADD_MAPARR_U, SUB_MAPARR_U);
-
-         case VariableData::SA_WORLD:
-            DO_P_OFFSET(GET_WLDARR, ADD_WLDARR_U, SUB_WLDARR_U);
-
-         case VariableData::SA_GLOBAL:
-            DO_P_OFFSET(GET_GBLARR, ADD_GBLARR_U, SUB_GBLARR_U);
+         case VariableData::SA_MAP:    DO_PF_ARRAY(MAPARR);
+         case VariableData::SA_WORLD:  DO_PF_ARRAY(WLDARR);
+         case VariableData::SA_GLOBAL: DO_PF_ARRAY(GBLARR);
       }
       break;
+
+      case VariableData::MT_AUTO: DO_PF_REGISTER(AUTO);
+
+      case VariableData::MT_FARPTR: DO_PF_FARPTR();
+
+      case VariableData::MT_POINTER: DO_PF_POINTER(PTR);
+
+      case VariableData::MT_REGISTER:
+         switch (src->sectionR)
+         {
+         case VariableData::SR_LOCAL:  DO_PF_REGISTER(REG);
+         case VariableData::SR_MAP:    DO_PF_REGISTER(MAPREG);
+         case VariableData::SR_WORLD:  DO_PF_REGISTER(WLDREG);
+         case VariableData::SR_GLOBAL: DO_PF_REGISTER(GBLREG);
+      }
+      break;
+
+      case VariableData::MT_STATIC: DO_PF_REGISTER(STATIC);
+
+      case VariableData::MT_LITERAL:
+      case VariableData::MT_STACK:
+      case VariableData::MT_STRING:
+      case VariableData::MT_VOID:
+      case VariableData::MT_NONE:
+         ERROR_NP("invalid MT");
+      }
+   }
+
+   //
+   // ::doX
+   //
+   void doX(ObjectVector *objects, VariableData *dst, VariableData *src, VariableData *tmp)
+   {
+      ObjectExpression::Pointer addrL = src->address;
+      ObjectExpression::Pointer tempA, tempB;
+      ObjectExpression::Pointer value = objects->getValue(1.0);
+      ObjectCode ocode;
+
+      switch (src->type)
+      {
+      case VariableData::MT_ARRAY:
+         switch(src->sectionA)
+         {
+         case VariableData::SA_MAP:    DO_P_ARRAY(MAPARR, X);
+         case VariableData::SA_WORLD:  DO_P_ARRAY(WLDARR, X);
+         case VariableData::SA_GLOBAL: DO_P_ARRAY(GBLARR, X);
+      }
+      break;
+
+      case VariableData::MT_AUTO: DO_P_REGISTER(AUTO, X);
+
+      case VariableData::MT_FARPTR: DO_P_FARPTR();
+
+      case VariableData::MT_POINTER: DO_P_POINTER(PTR, X);
+
+      case VariableData::MT_REGISTER:
+         switch (src->sectionR)
+         {
+         case VariableData::SR_LOCAL:  DO_P_REGISTER(REG, X);
+         case VariableData::SR_MAP:    DO_P_REGISTER(MAPREG, X);
+         case VariableData::SR_WORLD:  DO_P_REGISTER(WLDREG, X);
+         case VariableData::SR_GLOBAL: DO_P_REGISTER(GBLREG, X);
+      }
+      break;
+
+      case VariableData::MT_STATIC: DO_P_REGISTER(STATIC, X);
 
       case VariableData::MT_LITERAL:
       case VariableData::MT_STACK:
@@ -685,10 +797,10 @@ private:
    //
    // ::farptrGet
    //
-   void farptrGet(ObjectVector *objects, int n, ObjectExpression *tempA,
+   void farptrGet(ObjectVector *objects, int n, int o, ObjectExpression *tempA,
                   ObjectExpression *tempB)
    {
-      for(int i = 0; i < n; ++i)
+      for(int i = o; i < n; ++i)
       {
          objects->addToken(OCODE_GET_TEMP, tempA);
          objects->addToken(OCODE_GET_TEMP, tempB);
@@ -706,10 +818,10 @@ private:
    //
    // ::farptrSet
    //
-   void farptrSet(ObjectVector *objects, int n, ObjectExpression *tempA,
+   void farptrSet(ObjectVector *objects, int n, int o, ObjectExpression *tempA,
                   ObjectExpression *tempB)
    {
-      for(int i = n; i--;)
+      for(int i = n; i-- != o;)
       {
          objects->addToken(OCODE_GET_TEMP, tempA);
          objects->addToken(OCODE_GET_TEMP, tempB);
@@ -752,10 +864,20 @@ private:
       else if (bt == VariableType::BT_PTR)
       {
          bigsint value = type->getReturn()->getSize(pos);
-         if(value == 1 && type->getSize(pos) == 1)
-            doI(objects, dst, src, tmp);
+         if(type->getSize(pos) == 1)
+         {
+            if(value == 1)
+               doP(objects, dst, src, tmp, NULL);
+            else
+               doP(objects, dst, src, tmp, objects->getValue(value));
+         }
          else
-            doP(objects, dst, src, tmp, type, objects->getValue(value));
+         {
+            if(value == 1)
+               doPF(objects, dst, src, tmp, NULL);
+            else
+               doPF(objects, dst, src, tmp, objects->getValue(value));
+         }
       }
       else if (VariableType::is_bt_fix(bt))
       {
