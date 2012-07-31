@@ -46,40 +46,125 @@ public:
    //
    // ::SourceExpression_ValueCast
    //
-   SourceExpression_ValueCast
-   (VariableType::CastType ct, SourceExpression *_expr, VariableType *_type,
-    SRCEXP_EXPR_PARM)
+   SourceExpression_ValueCast(VariableType::CastType cast, SourceExpression *_expr,
+                              VariableType *_type, SRCEXP_EXPR_PARM)
     : Super(SRCEXP_EXPR_PASS), expr(_expr), type(_type->getUnqualified())
    {
       VariableType::Reference exprType = expr->getType();
 
-      if (ct && !(VariableType::get_cast(type, exprType) & ct))
+      VariableType::BasicType exprBT = exprType->getBasicType();
+      VariableType::BasicType thisBT = type->getBasicType();
+
+      // array->pointer
+      if(thisBT == VariableType::BT_PTR && exprBT == VariableType::BT_ARR)
+      {
+         exprType = exprType->getReturn()->getPointer();
+
+         expr = create_unary_reference(expr, context, pos);
+         expr = create_value_cast_force(expr, exprType, context, pos);
+         exprType = expr->getType();
+         exprBT = exprType->getBasicType();
+      }
+
+      // function->pointer
+      if(thisBT == VariableType::BT_PTR && VariableType::is_bt_function(exprBT))
+      {
+         expr = create_unary_reference(expr, context, pos);
+         exprType = expr->getType();
+         exprBT = exprType->getBasicType();
+      }
+
+      if(VariableType::get_cast(type, exprType) > cast)
       {
          ERROR_NP("invalid cast: %s to %s",
                  make_string(exprType).c_str(), make_string(type).c_str());
-      }
-
-      VariableType::BasicType exprBT = exprType->getBasicType();
-
-      // Special case for casting an array to a pointer.
-      // Or for casting a function to a pointer.
-      if((exprBT == VariableType::BT_ARR || VariableType::is_bt_function(exprBT)) &&
-         type->getBasicType() == VariableType::BT_PTR)
-      {
-         exprRef = create_unary_reference(expr, context, pos);
       }
    }
 
    virtual bool canMakeObject() const;
 
-   virtual VariableType::Reference getType() const;
+   //
+   // ::getType
+   //
+   virtual VariableType::Reference getType() const {return type;}
 
-   virtual ObjectExpression::Pointer makeObject() const;
+   //
+   // ::makeObject
+   //
+   ObjectExpression::Pointer makeObject() const
+   {
+      return make_object_cast(expr->makeObject(), type, expr->getType(), pos);
+   }
 
 private:
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   //
+   // ::virtual_makeObjects
+   //
+   void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+   {
+      Super::recurse_makeObjects(objects, dst);
 
-   SourceExpression::Pointer expr, exprRef;
+      expr->makeObjectsCast(objects, dst, type);
+   }
+
+   SourceExpression::Pointer expr;
+   VariableType::Reference type;
+};
+
+//
+// SourceExpression_ValueCastQualifier
+//
+class SourceExpression_ValueCastQualifier : public SourceExpression
+{
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueCastQualifier, SourceExpression);
+
+public:
+   //
+   // ::SourceExpression_ValueCastQualifier
+   //
+   SourceExpression_ValueCastQualifier(SourceExpression *_expr, VariableType *_type,
+                                       SRCEXP_EXPR_PARM)
+    : Super(SRCEXP_EXPR_PASS), expr(_expr), type(_type->getUnqualified())
+   {
+      VariableType::Reference exprType = expr->getType();
+      VariableType::BasicType exprBT = exprType->getBasicType();
+      VariableType::BasicType thisBT = type->getBasicType();
+
+      if(exprBT != VariableType::BT_PTR || thisBT != VariableType::BT_PTR ||
+         exprType->getStoreType() != type->getStoreType() ||
+         exprType->getStoreArea() != type->getStoreArea() ||
+         exprType->getReturn()->getUnqualified() != type->getReturn()->getUnqualified())
+      {
+         ERROR_NP("invalid const_cast: %s to %s",
+                  make_string(exprType).c_str(), make_string(type).c_str());
+      }
+   }
+
+   //
+   // ::canMakeObject
+   //
+   virtual bool canMakeObject() const {return expr->canMakeObject();}
+
+   //
+   // ::getType
+   //
+   virtual VariableType::Reference getType() const {return type;}
+
+   //
+   // ::makeObject
+   //
+   virtual ObjectExpression::Pointer makeObject() const {return expr->makeObject();}
+
+private:
+   //
+   // ::virtual_makeObjects
+   //
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+   {
+      expr->makeObjects(objects, dst);
+   }
+
+   SourceExpression::Pointer expr;
    VariableType::Reference type;
 };
 
@@ -95,7 +180,10 @@ public:
    // ::SourceExpression_ValueCastRaw
    //
    SourceExpression_ValueCastRaw(SourceExpression *_expr, VariableType *_type,
-      SRCEXP_EXPR_PARM) : Super(SRCEXP_EXPR_PASS), expr(_expr), type(_type) {}
+                                 SRCEXP_EXPR_PARM)
+    : Super(SRCEXP_EXPR_PASS), expr(_expr), type(_type->getUnqualified())
+   {
+   }
 
    //
    // ::canMakeObject
@@ -145,8 +233,7 @@ private:
 //
 SRCEXP_EXPRVAL_DEFN(et, cast_explicit)
 {
-   return new SourceExpression_ValueCast
-   (VariableType::CAST_EXPLICIT, expr, type, context, pos);
+   return new SourceExpression_ValueCast(VariableType::CAST_FORCE, expr, type, context, pos);
 }
 
 //
@@ -154,8 +241,7 @@ SRCEXP_EXPRVAL_DEFN(et, cast_explicit)
 //
 SRCEXP_EXPRVAL_DEFN(et, cast_force)
 {
-   return new SourceExpression_ValueCast
-   (VariableType::CAST_FORCE, expr, type, context, pos);
+   return new SourceExpression_ValueCast(VariableType::CAST_NEVER, expr, type, context, pos);
 }
 
 //
@@ -163,8 +249,7 @@ SRCEXP_EXPRVAL_DEFN(et, cast_force)
 //
 SRCEXP_EXPRVAL_DEFN(et, cast_implicit)
 {
-   return new SourceExpression_ValueCast
-   (VariableType::CAST_IMPLICIT, expr, type, context, pos);
+   return new SourceExpression_ValueCast(VariableType::CAST_CONVE, expr, type, context, pos);
 }
 
 //
@@ -172,8 +257,7 @@ SRCEXP_EXPRVAL_DEFN(et, cast_implicit)
 //
 SRCEXP_EXPRVAL_DEFN(et, cast_qualifier)
 {
-   return new SourceExpression_ValueCast
-   (VariableType::CAST_QUALIFIER, expr, type, context, pos);
+   return new SourceExpression_ValueCastQualifier(expr, type, context, pos);
 }
 
 //
@@ -189,8 +273,7 @@ SRCEXP_EXPRVAL_DEFN(et, cast_raw)
 //
 SRCEXP_EXPRVAL_DEFN(et, cast_static)
 {
-   return new SourceExpression_ValueCast
-   (VariableType::CAST_STATIC, expr, type, context, pos);
+   return new SourceExpression_ValueCast(VariableType::CAST_CONVE, expr, type, context, pos);
 }
 
 //
@@ -205,8 +288,7 @@ bool SourceExpression_ValueCast::canMakeObject() const
    VariableType::BasicType thisBT = thisType->getBasicType();
 
    // Special pointer considerations.
-   if(thisBT == VariableType::BT_PTR &&
-      (exprBT == VariableType::BT_ARR || exprBT == VariableType::BT_PTR))
+   if(thisBT == VariableType::BT_PTR && exprBT == VariableType::BT_PTR)
    {
       StoreType exprST = exprType->getReturn()->getStoreType();
       StoreType thisST = thisType->getReturn()->getStoreType();
@@ -229,44 +311,7 @@ bool SourceExpression_ValueCast::canMakeObject() const
       thisType->getReturn()->getStoreType() == STORE_NONE)
       return false;
 
-   // Special cast.
-   if(exprRef) return exprRef->canMakeObject();
-
    return expr->canMakeObject();
-}
-
-//
-// SourceExpression_ValueCast::getType
-//
-VariableType::Reference SourceExpression_ValueCast::getType() const
-{
-   return type;
-}
-
-//
-// SourceExpression_ValueCast::makeObject
-//
-ObjectExpression::Pointer SourceExpression_ValueCast::makeObject() const
-{
-   // Special cast.
-   if(exprRef) return exprRef->makeObject();
-
-   return make_object_cast(expr->makeObject(), type, expr->getType(), pos);
-}
-
-//
-// SourceExpression_ValueCast::virtual_makeObjects
-//
-void SourceExpression_ValueCast::
-virtual_makeObjects(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   // Special cast.
-   if(exprRef)
-      exprRef->makeObjectsCast(objects, dst, type);
-   else
-      expr->makeObjectsCast(objects, dst, type);
 }
 
 // EOF

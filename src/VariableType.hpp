@@ -56,13 +56,12 @@ public:
    //
    enum CastType
    {
-      CAST_FORCE       = 0x00,
-      CAST_NONE        = 0x01,
-      CAST_EXPLICIT    = 0x02,
-      CAST_IMPLICIT    = 0x04,
-      CAST_QUALIFIER   = 0x08,
-      CAST_STATIC      = 0x10,
-      CAST_ANY         = 0x1F
+      CAST_EXACT,
+      CAST_POINT,
+      CAST_PROMO,
+      CAST_CONVE,
+      CAST_FORCE,
+      CAST_NEVER
    };
 
    //
@@ -241,8 +240,8 @@ public:
    static Reference get_bt_fun_sna(Vector const &types, VariableType *typeRet);
    static Reference get_bt_fun_snu(Vector const &types, VariableType *typeRet);
 
-   static unsigned get_cast(VariableType *dst, VariableType *src);
-   static unsigned get_cast(Vector const &dst, Vector const &src);
+   static CastType get_cast(VariableType *dst, VariableType *src, CastType exact = CAST_EXACT);
+   static CastType get_cast(Vector const &dst, Vector const &src);
 
    // Returns true if the given type is an arithmetic type.
    static bool is_bt_arithmetic(BasicType type);

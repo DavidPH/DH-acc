@@ -58,8 +58,8 @@ public:
          typeL = typeL->getReturn()->setStorage(STORE_STATIC)->getPointer();
          typeR = typeR->getReturn()->setStorage(STORE_STATIC)->getPointer();
 
-         exprL = create_value_cast_explicit(exprL, typeL, context, pos);
-         exprR = create_value_cast_explicit(exprR, typeR, context, pos);
+         exprL = create_value_cast_force(exprL, typeL, context, pos);
+         exprR = create_value_cast_force(exprR, typeR, context, pos);
       }
 
       // Type constraints.

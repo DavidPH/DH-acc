@@ -568,12 +568,13 @@ SourceFunction::Reference SourceContext::getFunction
 (std::string const &name, SourcePosition const &pos,
  VariableType::Vector const &types)
 {
-   unsigned cast, funcCount = 0;
+   VariableType::CastType cast, castBest = VariableType::CAST_NEVER;
+   unsigned funcCount = 0;
    std::vector<SourceFunction::Reference>::iterator func, funcItr, funcEnd = funcs.end();
 
    for(funcItr = funcs.begin(); funcItr != funcEnd; ++funcItr)
    {
-      if ((*funcItr)->var->getNameSource() != name) continue;
+      if((*funcItr)->var->getNameSource() != name) continue;
 
       if(types.size() < (*funcItr)->argsMin) continue;
       if(types.size() > (*funcItr)->argsMax) continue;
@@ -583,23 +584,28 @@ SourceFunction::Reference SourceContext::getFunction
       else
          cast = VariableType::get_cast((*funcItr)->types[types.size() - (*funcItr)->argsMin], types);
 
-      if (cast & VariableType::CAST_NONE)
-         return *funcItr;
+      if(cast > castBest) continue;
 
-      if (cast & VariableType::CAST_IMPLICIT)
+      if(cast < castBest)
       {
-         func = funcItr;
-         ++funcCount;
+         castBest = cast;
+         funcCount = 0;
       }
+
+      func = funcItr;
+      ++funcCount;
    }
 
-   if (funcCount == 1)
-      return *func;
+   if(castBest < VariableType::CAST_FORCE)
+   {
+      if(funcCount == 1)
+         return *func;
 
-   if (funcCount > 1)
-      ERROR_NP("ambiguous overload: %s", name.c_str());
+      if(funcCount > 1)
+         ERROR_NP("ambiguous overload: %s", name.c_str());
+   }
 
-   if (parent) return parent->getFunction(name, pos, types);
+   if(parent) return parent->getFunction(name, pos, types);
 
    ERROR_NP("no suitable overload: %s", name.c_str());
 }
