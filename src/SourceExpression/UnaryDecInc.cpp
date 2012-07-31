@@ -265,7 +265,7 @@
 // DO_L_FARPTR
 //
 #define DO_L_FARPTR(MT) \
-   ocode = inc ? OCODE_INC_STK_U : OCODE_DEC_STK_U; \
+   ocode = inc ? OCODE_INC_TEMP_U : OCODE_DEC_TEMP_U; \
    \
    FARPTR_ADDRESS2(); \
    \
@@ -299,7 +299,7 @@
 // DO_P_FARPTR
 //
 #define DO_P_FARPTR(MT, SUF) \
-   DO_OCODE_VALUE(STK, SUF); \
+   DO_OCODE_VALUE(TEMP, SUF); \
    \
    FARPTR_ADDRESS(); \
    \
@@ -325,7 +325,7 @@
 // DO_PF_FARPTR
 //
 #define DO_PF_FARPTR(MT) \
-   DO_OCODE_VALUE(STK, U); \
+   DO_OCODE_VALUE(TEMP, U); \
    \
    FARPTR_ADDRESS2(); \
    \
