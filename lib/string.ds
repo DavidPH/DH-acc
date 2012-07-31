@@ -120,9 +120,9 @@ __extfunc "C" char *strncpy(char *restrict s1, char const *restrict s2, size_t n
 {
    char *i = s1;
 
-   while(*s2 && n--) *i++ = *s2++;
+   for(; *s2 && n; --n) *i++ = *s2++;
 
-   *i = 0;
+   for(; n; --n) *i++ = 0;
 
    return s1;
 };
