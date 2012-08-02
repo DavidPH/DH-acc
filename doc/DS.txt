@@ -37,7 +37,7 @@ If
   # <if> expression
 
 -----------------------------------------------------------
-If-Def
+If-Defined
 -----------------------------------------------------------
 
   # <ifdef> identifier
@@ -45,7 +45,7 @@ If-Def
 Equivalent to # if defined identifier.
 
 -----------------------------------------------------------
-If-Not-Def
+If-Not-Defined
 -----------------------------------------------------------
 
   # <ifndef> identifier
@@ -83,7 +83,7 @@ Undefine
 
   # <undef> identifier
 
-Undefines a macro.
+Undefines an object-like or function-like macro.
 
 ===========================================================
 Miscellaneous
@@ -161,6 +161,8 @@ External Declarations
 
   extern-specifier:
     "ACS"
+    "C"
+    "C++"
     "DS"
 
 Forward-declares a function or variable. The extern-specifier is used to
@@ -200,8 +202,12 @@ Function Definitions
     ( function-name )
 
   function-arg-list:
+    function-arg
+    function-arg , function-arg-list
+
+  function-arg:
     type identifier(opt)
-    type identifier(opt) , function-arg-list
+    type identifier(opt) = assignment-expression
 
   script-type: one of
     <__closed> <__death> <__disconnect> <__enter> <__lightning>
@@ -343,10 +349,25 @@ Selection Expressions
 Type Information Expressions
 ===========================================================
 
-  typeinfo-expression
+  typeinfo-expression:
     <sizeof> prefix-expression
     <sizeof> ( type )
-    <__typestr> type
+    <__typestr> prefix-expression
+    <__typestr> ( type )
+
+-----------------------------------------------------------
+Type Size
+-----------------------------------------------------------
+
+Yields the number of bytes in the static type of the indicated expression or
+type.
+
+-----------------------------------------------------------
+Type String
+-----------------------------------------------------------
+
+Yields a string representing the static type of the indicated expression or
+type.
 
 ===========================================================
 Variable Declarations
@@ -447,7 +468,7 @@ Blocks
 Groups a series of expressions. If braces are used, a new compilation context is
 created. Otherwise the enclosing context is used directly.
 
-The result is a __block_t object. If the result is cast to void, the contained
+The result is a __block object. If the result is cast to void, the contained
 expressions are evaluated in the order they are written in. Otherwise, order of
 evaluation is unspecified.
 
@@ -612,77 +633,62 @@ Types
   type:
     bare-type
     ( type )
-
-  bare-type:
-    <__block> { block-list(opt) }
-    boolean-specifier
-    <decltype> prefix-expression
-    <enum> identifier
-    <enum> identifier(opt) { enum-list }
-    function-type-specifier function-args
-    identifier
-    <__label>
-    numeric-specifier
-    <__string>
-    structure-specifier identifier
-    structure-specifier identifier(opt) { structure-list(opt) }
     type storage-class
     type type-qualifier
     type *
     type [ expression ]
-    <typename> identifier
+
+  bare-type:
+    type-specifier
+    bare-type storage-class
+    bare-type type-qualifier
+    bare-type *
+    bare-type [ expression ]
+
+  type-specifier:
     <void>
+    <bool>
+    <char>
+    <short>
+    <int>
+    <long>
+    <float>
+    <double>
+    <signed>
+    <unsigned>
+    <_Bool>
+    <_Complex>
+    <_Imaginary>
+    <__softbool>
+    <__string>
+    <__label>
+    ::(opt) nested-name-specifier(opt) type-name
+    block-specifier
+    decltype-specifier
+    enum-specifier
+    function-type-specifier
+    structure-specifier
 
-  block-list:
-    type ; block-list(opt)
+  type-name:
+    class-name
+    enum-name
+    typedef-name
 
-  boolean-specifier: one of
-    <bool> <_Bool> <__boolsoft>
+  decltype-specifier:
+    <decltype> prefix-expression
 
-  enum-list:
-    enum-member
-    enum-member , enum-list(opt)
+===========================================================
+Type Qualifiers
+===========================================================
 
-  function-type-specifier: one of
-    <__asmfunc_t> <__func_t> <__lnspec_t> <__native_t> <__script_t>
+  type-qualifier:
+    <const>
+    <volatile>
+    <restrict>
 
-  numeric-specifier:
-    numeric-specifier-part numeric-specifier(opt)
-
-  structure-specifier: one of
-    <struct> <union>
-
-  structure-list:
-    type structure-name-list ; structure-list(opt)
-
-  type-qualifier: one of
-    <const> <restrict> <volatile>
-
-  enum-member:
-    identifier enum-initializer(opt)
-
-  numeric-specifier-part: one of
-    numeric-specifier-base numeric-specifier-sign numeric-specifier-size
-
-  structure-name-list:
-    identifier
-    identifier , structure-name-list
-
-  enum-initializer:
-    = assignment-expression
-
-  numeric-specifier-base: one of
-    <char> <double> <__fixed> <float> <int> <__real>
-
-  numeric-specifier-sign: one of
-    <signed> <unsigned>
-
-  numeric-specifier-size: one of
-    <long> <short>
-
-===============================================================================
+===========================================================
 Storage Classes
-===============================================================================
+===========================================================
 
   storage-class:
     store-type
@@ -693,6 +699,74 @@ Storage Classes
     <auto> <__autoregister> <__autoarray>
     <register> <__mapregister> <__worldregister> <__globalregister>
     <__maparray> <__worldarray> <__globalarray>
+    <__far> <__stringarray>
+
+===========================================================
+Block Specifier
+===========================================================
+
+  block-specifier:
+    <__block> { block-list(opt) }
+
+  block-list:
+    type ; block-list(opt)
+
+===========================================================
+Enum Specifier
+===========================================================
+
+  enum-specifier:
+    <enum> identifier
+    <enum> identifier(opt) { enum-list }
+
+  enum-list:
+    enum-member
+    enum-member , enum-list(opt)
+
+  enum-member:
+    identifier enum-initializer(opt)
+
+  enum-initializer:
+    = assignment-expression
+
+===========================================================
+Function Type Specifiers
+===========================================================
+
+  function-type-specifier:
+    function-type-name function-args
+
+  function-type-name:
+    <__asmfunc_t>
+    <__func_t>
+    <__lnspec_t>
+    <__native_t>
+    <__script_t>
+    <__snam_t>
+    <__snum_t>
+
+===========================================================
+Structure Specifiers
+===========================================================
+
+  structure-specifier:
+    structure-name identifier
+    structure-name identifier(opt) { structure-declaration-list(opt) }
+
+  structure-name:
+    <struct>
+    <union>
+
+  structure-declaration-list:
+    structure-declaration
+    structure-declaration-list structure-declaration
+
+  structure-declaration:
+    type structure-declaration-name-list ;
+
+  structure-declaration-name-list:
+    identifier
+    identifier , structure-declaration-name-list
 
 ###############################################################################
 EOF
