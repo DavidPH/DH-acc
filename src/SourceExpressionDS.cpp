@@ -136,6 +136,7 @@ void SourceExpressionDS::init()
    expr_keyword[  "reinterpret_cast"] = make_keyword_cast;
    expr_keyword[  "static_cast"]      = make_keyword_cast;
    expr_keyword["__force_cast"]       = make_keyword_cast;
+   expr_keyword["__store_cast"]       = make_keyword_cast;
 }
 
 //

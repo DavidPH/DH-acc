@@ -129,11 +129,13 @@ public:
       VariableType::Reference exprType = expr->getType();
       VariableType::BasicType exprBT = exprType->getBasicType();
       VariableType::BasicType thisBT = type->getBasicType();
+      VariableType::Reference exprRetn = exprType->getReturn();
+      VariableType::Reference thisRetn = type->getReturn();
 
       if(exprBT != VariableType::BT_PTR || thisBT != VariableType::BT_PTR ||
-         exprType->getStoreType() != type->getStoreType() ||
-         exprType->getStoreArea() != type->getStoreArea() ||
-         exprType->getReturn()->getUnqualified() != type->getReturn()->getUnqualified())
+         exprRetn->getStoreType() != thisRetn->getStoreType() ||
+         exprRetn->getStoreArea() != thisRetn->getStoreArea() ||
+         exprRetn->getUnqualified() != thisRetn->getUnqualified())
       {
          ERROR_NP("invalid const_cast: %s to %s",
                   make_string(exprType).c_str(), make_string(type).c_str());
@@ -223,6 +225,64 @@ private:
    VariableType::Reference type;
 };
 
+//
+// SourceExpression_ValueCastStorage
+//
+class SourceExpression_ValueCastStorage : public SourceExpression
+{
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueCastStorage, SourceExpression);
+
+public:
+   //
+   // ::SourceExpression_ValueCastStorage
+   //
+   SourceExpression_ValueCastStorage(SourceExpression *_expr, VariableType *_type,
+                                       SRCEXP_EXPR_PARM)
+    : Super(SRCEXP_EXPR_PASS), expr(_expr), type(_type->getUnqualified())
+   {
+      VariableType::Reference exprType = expr->getType();
+      VariableType::BasicType exprBT = exprType->getBasicType();
+      VariableType::BasicType thisBT = type->getBasicType();
+      VariableType::Reference exprRetn = exprType->getReturn();
+      VariableType::Reference thisRetn = type->getReturn();
+
+      if(exprBT != VariableType::BT_PTR || thisBT != VariableType::BT_PTR ||
+         exprRetn->getQualifiers() != thisRetn->getQualifiers() ||
+         exprRetn->getUnqualified() != thisRetn->getUnqualified())
+      {
+         ERROR_NP("invalid store_cast: %s to %s",
+                  make_string(exprType).c_str(), make_string(type).c_str());
+      }
+   }
+
+   //
+   // ::canMakeObject
+   //
+   virtual bool canMakeObject() const {return expr->canMakeObject();}
+
+   //
+   // ::getType
+   //
+   virtual VariableType::Reference getType() const {return type;}
+
+   //
+   // ::makeObject
+   //
+   virtual ObjectExpression::Pointer makeObject() const {return expr->makeObject();}
+
+private:
+   //
+   // ::virtual_makeObjects
+   //
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+   {
+      expr->makeObjects(objects, dst);
+   }
+
+   SourceExpression::Pointer expr;
+   VariableType::Reference type;
+};
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -274,6 +334,14 @@ SRCEXP_EXPRVAL_DEFN(et, cast_raw)
 SRCEXP_EXPRVAL_DEFN(et, cast_static)
 {
    return new SourceExpression_ValueCast(VariableType::CAST_CONVE, expr, type, context, pos);
+}
+
+//
+// SourceExpression::create_value_cast_storage
+//
+SRCEXP_EXPRVAL_DEFN(et, cast_storage)
+{
+   return new SourceExpression_ValueCastStorage(expr, type, context, pos);
 }
 
 //

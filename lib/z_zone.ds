@@ -377,7 +377,9 @@ __extfunc "C" void (Z_Init)(__string file, int line)
    zonebase_size = HEAPSIZE;
 
    // Align on cache boundary
-   zone = (memblock_t *)(((size_t)zonebase + CACHE_ALIGN - 1) & ~(CACHE_ALIGN - 1));
+   // davidph 08/03/12 FIXME: This causes invalid codegen.
+ //zone = (memblock_t *)(((uintptr_t)zonebase + (CACHE_ALIGN - 1)) & ~(CACHE_ALIGN - 1));
+   zone = zonebase;
 
    size = zonebase_size - ((char *)zone - (char *)zonebase);
 

@@ -218,7 +218,17 @@ private:
          ERROR_NP("expected pointer got %s", make_string(argType).c_str());
 
       argExpr->makeObjects(objects, VariableData::create_stack(argSize));
-      objects->addToken(OCODE_ACSP_NUM_HEX_U);
+
+      if(argSize == 1)
+         objects->addToken(OCODE_ACSP_NUM_HEX_U);
+      else
+      {
+         objects->addToken(OCODE_STK_SWAP);
+         objects->addToken(OCODE_ACSP_NUM_HEX_U);
+         makeChar(objects, '-');
+         objects->addToken(OCODE_ACSP_CHARACTER);
+         objects->addToken(OCODE_ACSP_NUM_HEX_U);
+      }
    }
 
    //

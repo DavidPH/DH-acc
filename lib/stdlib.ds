@@ -44,8 +44,8 @@
 #define EXITEND   (&exitarr[EXITSIZE])
 
 #define HEAPSIZE  (__LIBDS_HEAPSIZE * 1024 * 1024)
-#define HEAPBEGIN ((heapdata *)&heap[0])
-#define HEAPEND   ((heapdata *)&heap[HEAPSIZE])
+#define HEAPBEGIN ((heapdata static *)&heap[0])
+#define HEAPEND   ((heapdata static *)&heap[HEAPSIZE])
 
 
 //----------------------------------------------------------------------------|
@@ -72,7 +72,7 @@ __intvar __staticregister decltype(*exitarr) *exitptr = exitarr;
 
 
 __intvar static char[HEAPSIZE] heap;
-__intvar __staticregister heapdata *heapptr = HEAPBEGIN;
+__intvar __staticregister heapdata static *heapptr = HEAPBEGIN;
 
 
 __intvar __staticregister unsigned randval = 1;
@@ -225,11 +225,11 @@ __extfunc "C" void free(void *ptr)
 {
    if(!ptr) return;
 
-   heapdata *block = (heapdata *)ptr - 1;
+   heapdata static *block = __force_cast<heapdata static *>(ptr) - 1;
 
    block->used = 0;
 
-   if (block < heapptr) {heapptr = block;};
+   if(block < heapptr) heapptr = block;
 };
 
 //
@@ -239,14 +239,14 @@ __extfunc "C" void *malloc(size_t size)
 {
    if(!size) return NULL;
 
-   if(!heapptr) {heapptr = HEAPBEGIN;};
+   if(!heapptr) heapptr = HEAPBEGIN;
 
    while(true)
    {
       // Used block.
       if(heapptr->used)
       {
-         heapptr = (heapdata *)&heapptr->data[heapptr->size];
+         heapptr = (heapdata static *)&heapptr->data[heapptr->size];
          continue;
       };
 
@@ -256,11 +256,11 @@ __extfunc "C" void *malloc(size_t size)
          if (heapptr->size >= size)
          {
             heapptr->used = size;
-            return (void *)&heapptr->data;
+            return (void static *)&heapptr->data;
          }
          else
          {
-            heapptr = (heapdata *)&heapptr->data[heapptr->size];
+            heapptr = (heapdata static *)&heapptr->data[heapptr->size];
             continue;
          };
       };
@@ -268,15 +268,15 @@ __extfunc "C" void *malloc(size_t size)
       // No block.
 
       // Verify that there is sufficient space first.
-      if((heapdata *)&heapptr->data[size]+1 >= HEAPEND)
+      if((heapdata static *)&heapptr->data[size] + 1 >= HEAPEND)
          return NULL;
 
       heapptr->used = size;
       heapptr->size = size;
 
-      void *ptr = (void *)&heapptr->data;
+      void static *ptr = (void static *)&heapptr->data;
 
-      heapptr = (heapdata *)&heapptr->data[heapptr->size];
+      heapptr = (heapdata static *)&heapptr->data[heapptr->size];
 
       heapptr->used = 0;
       heapptr->size = 0;
@@ -298,7 +298,7 @@ __extfunc "C" void *realloc(void *ptr, size_t size)
 
    if(!size) {free(ptr); return NULL;};
 
-   heapdata *block = (heapdata *)ptr - 1;
+   heapdata static *block = __force_cast<heapdata static *>(ptr) - 1;
 
    // Enough size in current block.
    if(block->size >= size)
@@ -308,7 +308,7 @@ __extfunc "C" void *realloc(void *ptr, size_t size)
       return ptr;
    };
 
-   heapdata *nextblock = (heapdata *)&block->data[block->size];
+   heapdata static *nextblock = (heapdata static *)&block->data[block->size];
 
    // No next block, just resize current block. (If enough space.)
    if(nextblock->size == 0 && (heapdata *)&block->data[size]+1 < HEAPEND)
@@ -316,7 +316,7 @@ __extfunc "C" void *realloc(void *ptr, size_t size)
       block->size = size;
       block->used = size;
 
-      nextblock = (heapdata *)&block->data[block->size];
+      nextblock = (heapdata static *)&block->data[block->size];
 
       nextblock->size = 0;
       nextblock->used = 0;

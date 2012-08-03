@@ -363,6 +363,7 @@ public:
    SRCEXP_EXPRVAL_DECL(et, cast_qualifier);
    SRCEXP_EXPRVAL_DECL(et, cast_raw);
    SRCEXP_EXPRVAL_DECL(et, cast_static);
+   SRCEXP_EXPRVAL_DECL(et, cast_storage);
    SRCEXP_EXPRVAL_DECL( c, char);
    SRCEXP_EXPRVAL_DECL( s, char);
    SRCEXP_EXPRVAL_DECL(  , data);

@@ -113,7 +113,7 @@ void SourceExpression::make_objects_call_function
    }
 
    // For any return bytes we're handling, push them onto the stack.
-   if(retnSize) for(bigsint i = -retnSize; ++i;)
+   if(retnSize) for(bigsint i = -retnSize; i; ++i)
    {
       objects->addToken(OCODE_GET_IMM, objects->getValue(i));
       objects->addToken(OCODE_GET_WLDARR, objects->getValue(option_auto_array));
