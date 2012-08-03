@@ -290,7 +290,7 @@ static bool operator != (std::vector<T> const &l, std::vector<T> const &r)
 VariableType::VariableType()
  : next(this), prev(this), specnext(this), specprev(this),
    typeArr(NULL), typePtr(NULL), typeRet(this),
-   basic(BT_VOID), quals(0), store(STORE_STATIC), width(0),
+   basic(BT_VOID), quals(0), store(STORE_NONE), width(0),
    complete(true)
 {
    --refCount;
@@ -319,7 +319,7 @@ VariableType::VariableType(VariableType &type)
 VariableType::VariableType(BasicType _basic)
  : next(this), prev(this), specnext(this), specprev(this),
    typeArr(NULL), typePtr(NULL), typeRet(get_bt_void()),
-   basic(_basic), quals(0), store(STORE_STATIC), width(0),
+   basic(_basic), quals(0), store(STORE_NONE), width(0),
    complete(true)
 {
    switch (basic)
