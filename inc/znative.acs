@@ -88,6 +88,10 @@ __native ACS_NamedExecuteAlways(__string, int) -> bool @ 45;
 __native ACS_NamedExecuteAlways(__string, int, int) -> bool @ 45;
 __native ACS_NamedExecuteAlways(__string, int, int, int) -> bool @ 45;
 __native ACS_NamedExecuteAlways(__string, int, int, int, int) -> bool @ 45;
+__native int UniqueTID() @ 46;
+__native int UniqueTID(int) @ 46;
+__native int UniqueTID(int, int) @ 46;
+__native bool IsTIDUsed(int) @ 47;
 
 #endif//__HEADER__ZNATIVE_ACS__
 
