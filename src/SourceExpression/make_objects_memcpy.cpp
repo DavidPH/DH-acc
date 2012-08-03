@@ -510,7 +510,7 @@ static void make_objects_memcpy_post_part
       if(get)
       {
          if(data->size == 1)
-            objects->addToken(OCODE_NATIVE, objects->getValue(2), objects->getValue(15));
+               objects->addToken(OCODE_GET_STRPTR, data->address);
          else
          {
             ObjectExpression::Pointer tmpStr = context->getTempVar(0);
@@ -521,12 +521,10 @@ static void make_objects_memcpy_post_part
 
             for(i = 0; i < data->size; ++i)
             {
-               if(i) objects->addToken(OCODE_INC_TEMP_U, tmpOff);
-
                objects->addToken(OCODE_GET_TEMP, tmpStr);
                objects->addToken(OCODE_GET_TEMP, tmpOff);
 
-               objects->addToken(OCODE_NATIVE, objects->getValue(2), objects->getValue(15));
+               objects->addToken(OCODE_GET_STRPTR, objects->getValueAdd(data->address, i));
             }
          }
       }

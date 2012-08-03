@@ -135,6 +135,11 @@ void BinaryTokenZDACS::make_tokens
       ObjectExpression::create_value_int
       (option_addr_stack, SourcePosition::builtin());
 
+   static ObjectExpression::Reference const func_GetChar =
+      ObjectExpression::create_value_uns(15, SourcePosition::builtin());
+   static ObjectExpression::Reference const func_GetCharArgs =
+      ObjectExpression::create_value_uns(2, SourcePosition::builtin());
+
    static ObjectExpression::Reference const func_Getptr =
       ObjectExpression::create_value_symbol("__Getptr", SourcePosition::builtin());
    static ObjectExpression::Reference const func_Setptr =
@@ -304,6 +309,13 @@ void BinaryTokenZDACS::make_tokens
       PUSH_TOKEN_ADD_ARG0();
       args.push_back(func_Getptr);
       PUSH_TOKEN(BCODE_JMP_CAL_IMM);
+      break;
+
+   case OCODE_GET_STRPTR:
+      PUSH_TOKEN_ADD_ARG0();
+      args.push_back(func_GetCharArgs);
+      args.push_back(func_GetChar);
+      PUSH_TOKEN(BCODE_NATIVE);
       break;
 
    CASE_ADDR_UNAOP(GET,,);
