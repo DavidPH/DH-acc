@@ -32,18 +32,18 @@
 
 static std::string const store_name[] =
 {
-   "STORE_NONE",
-   "STORE_STATIC",
-   "STORE_AUTO",
-   "STORE_CONST",
-   "STORE_REGISTER",
-   "STORE_MAPREGISTER",
-   "STORE_WORLDREGISTER",
-   "STORE_GLOBALREGISTER",
-   "STORE_MAPARRAY",
-   "STORE_WORLDARRAY",
-   "STORE_GLOBALARRAY",
-   "STORE_STRING",
+   "far",
+   "near",
+   "auto",
+   "literal",
+   "register",
+   "mapregister",
+   "worldregister",
+   "globalregister",
+   "maparray",
+   "worldarray",
+   "globalarray",
+   "stringarray",
 };
 
 

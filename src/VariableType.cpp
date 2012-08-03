@@ -34,11 +34,9 @@
 // Static Prototypes                                                          |
 //
 
-static std::ostream &operator <<
-(std::ostream &out, VariableType const *type);
+static std::ostream &operator << (std::ostream &out, VariableType const *type);
 
-static std::ostream &operator <<
-(std::ostream &out, VariableType::BasicType basic);
+static std::ostream &operator << (std::ostream &out, VariableType::BasicType basic);
 
 
 //----------------------------------------------------------------------------|
@@ -48,63 +46,63 @@ static std::ostream &operator <<
 static std::string const basic_names[] =
 {
    // Void type.
-   "BT_VOID",
+   /* BT_VOID    */ "void",
 
    // Arithmetic types.
-   "BT_BIT_HRD",
-   "BT_BIT_SFT",
+   /* BT_BIT_HRD */ "bool",
+   /* BT_BIT_SFT */ "softbool",
 
-   "BT_CHR",
+   /* BT_CHR     */ "char",
 
-   "BT_CLX",
-   "BT_CLX_IM",
+   /* BT_CLX     */ "complex",
+   /* BT_CLX_IM  */ "imaginary",
 
-   "BT_FIX_HH",
-   "BT_FIX_H",
-   "BT_FIX",
-   "BT_FIX_L",
-   "BT_FIX_LL",
+   /* BT_FIX_HH  */ "short short fixed",
+   /* BT_FIX_H   */ "short fixed",
+   /* BT_FIX     */ "fixed",
+   /* BT_FIX_L   */ "long fixed",
+   /* BT_FIX_LL  */ "long long fixed",
 
-   "BT_FLT_HH",
-   "BT_FLT_H",
-   "BT_FLT",
-   "BT_FLT_L",
-   "BT_FLT_LL",
+   /* BT_FLT_HH  */ "short short float",
+   /* BT_FLT_H   */ "short float",
+   /* BT_FLT     */ "float",
+   /* BT_FLT_L   */ "double",
+   /* BT_FLT_LL  */ "long double",
 
-   "BT_INT_HH",
-   "BT_INT_H",
-   "BT_INT",
-   "BT_INT_L",
-   "BT_INT_LL",
+   /* BT_INT_HH  */ "signed char",
+   /* BT_INT_H   */ "short",
+   /* BT_INT     */ "int",
+   /* BT_INT_L   */ "long",
+   /* BT_INT_LL  */ "long long",
 
-   "BT_UNS_HH",
-   "BT_UNS_H",
-   "BT_UNS",
-   "BT_UNS_L",
-   "BT_UNS_LL",
+   /* BT_UNS_HH  */ "unsigned char",
+   /* BT_UNS_H   */ "unsigned short",
+   /* BT_UNS     */ "unsigned",
+   /* BT_UNS_L   */ "unsigned long",
+   /* BT_UNS_LL  */ "unsigned long long",
 
    // Special types.
-   "BT_LABEL",
-   "BT_STR",
+   /* BT_LABEL   */ "label",
+   /* BT_STR     */ "str",
 
    // Reference types.
-   "BT_ARR",
-   "BT_PTR",
-   "BT_PTR_NUL",
+   /* BT_ARR     */ "array",
+   /* BT_PTR     */ "pointer",
+   /* BT_PTR_NUL */ "nullptr_t",
 
    // Named types.
-   "BT_ENUM",
-   "BT_STRUCT",
-   "BT_UNION",
+   /* BT_ENUM    */ "enum",
+   /* BT_STRUCT  */ "struct",
+   /* BT_UNION   */ "union",
 
    // Anonymous types.
-   "BT_BLOCK",
-   "BT_FUN",
-   "BT_FUN_ASM",
-   "BT_FUN_LIN",
-   "BT_FUN_NAT",
-   "BT_FUN_SNA",
-   "BT_FUN_SNU",
+   /* BT_BLOCK   */ "block",
+   /* BT_FUN     */ "func_t",
+   /* BT_FUN_ASM */ "asmfunc_t",
+   /* BT_FUN_LIN */ "lnspec_t",
+   /* BT_FUN_NAT */ "native_t",
+   /* BT_FUN_SNA */ "snam_t",
+   /* BT_FUN_SNU */ "snum_t",
 };
 
 
@@ -154,6 +152,7 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
    case VariableType::BT_CLX:
    case VariableType::BT_CLX_IM:
       out << type->getBasicType() << ' ' << type->getTypes()[0]->getBasicType();
+      break;
 
       // Special types.
    case VariableType::BT_LABEL:
@@ -179,7 +178,7 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
    case VariableType::BT_ENUM:
    case VariableType::BT_STRUCT:
    case VariableType::BT_UNION:
-      out << type->getBasicType() << '{' << type->getName() << '}';
+      out << type->getBasicType() << ' ' << type->getName();
       break;
 
       // Anonymous types.
@@ -189,7 +188,7 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
    {
       VariableType::Vector const &types = type->getTypes();
 
-      for (size_t i = 0; i < types.size(); ++i)
+      for(size_t i = 0; i < types.size(); ++i)
          out << types[i] << ';';
    }
       out << '}';
@@ -202,31 +201,31 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
    case VariableType::BT_FUN_SNA:
    case VariableType::BT_FUN_SNU:
       out << type->getBasicType();
+      out << ' ' << type->getReturn();
       out << '(';
    {
       VariableType::Vector const &types = type->getTypes();
 
-      for (size_t i = 0; i < types.size(); ++i)
+      for(size_t i = 0; i < types.size(); ++i)
       {
          out << types[i];
          if (i+1 < types.size()) out << ',';
       }
    }
       out << ')';
-      out << "->(" << type->getReturn() << ')';
       break;
    }
 
-   if (type->getQualifier(VariableType::QUAL_CONST))
+   if(type->getQualifier(VariableType::QUAL_CONST))
       out << " const";
 
-   if (type->getQualifier(VariableType::QUAL_VOLATILE))
+   if(type->getQualifier(VariableType::QUAL_VOLATILE))
       out << " volatile";
 
-   if (type->getQualifier(VariableType::QUAL_RESTRICT))
+   if(type->getQualifier(VariableType::QUAL_RESTRICT))
       out << " restrict";
 
-   switch (type->getStoreType())
+   switch(type->getStoreType())
    {
    case STORE_NONE:
       break;
@@ -256,8 +255,7 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
 //
 // operator << <VariableType::BasicType>
 //
-static std::ostream &operator <<
-(std::ostream &out, VariableType::BasicType basic)
+static std::ostream &operator << (std::ostream &out, VariableType::BasicType basic)
 {
    return out << basic_names[basic];
 }
