@@ -317,16 +317,28 @@ operations have a differing number of arguments based on the msgtype.
 Consequently, that field must be a compile-time constant. Yield depends on
 operation.
   Supported conversion specifiers:
-    %F (__real)
+    %B (unsigned) binary (ACS b:)
+    %I (__fixed) (ACS f:)
     %K (int) keybind (ACS k:)
-    %L (__string) LANGUAGE-lump entry (ACS l:)
     %N (int) name (ACS n:)
-    %X (__fixed)
+    %S (__string) LANGUAGE-lump entry (ACS l:)
+    %a (double) hexadecimal lowercase
+    %A (double) hexadecimal uppercase
     %c (char)
+    %d (int)
+    %e (double)
+    %E (double)
+    %f (double)
+    %F (double)
+    %g (double)
+    %G (double)
     %i (int)
+    %o (unsigned) octal
     %p (void *) accepts extended-pointers
     %s (char *) accepts extended-pointers and __string
     %u (unsigned)
+    %x (unsigned) hexadecimal lowercase
+    %X (unsigned) hexadecimal uppercase
   Supported operations:
     __printf_bold -> void
     __printf_error -> void

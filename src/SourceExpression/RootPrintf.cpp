@@ -44,6 +44,33 @@ class SourceExpression_RootPrintf : public SourceExpression
 
 public:
    //
+   // FormatFlag
+   //
+   enum FormatFlag
+   {
+      FF_LEFT = 0x0001,
+      FF_SIGN = 0x0002,
+      FF_PADS = 0x0004,
+      FF_ALTF = 0x0008,
+      FF_PAD0 = 0x0010,
+   };
+
+   //
+   // FormatLength
+   //
+   enum FormatLength
+   {
+      FL_NONE,
+      FL_HH,
+      FL_H,
+      FL_L,
+      FL_LL,
+      FL_MAX,
+      FL_SIZE,
+      FL_DIFF,
+   };
+
+   //
    // PrintfType
    //
    enum PrintfType
@@ -56,6 +83,19 @@ public:
       PT_PRINT,
       PT_STRING
    };
+
+   //
+   // FormatData
+   //
+   struct FormatData
+   {
+      unsigned     flags;
+      bigsint      width;
+      bigsint      prec;
+      FormatLength len;
+      char         fmt;
+   };
+
 
    //
    // ::SourceExpression_RootPrintf
@@ -108,6 +148,214 @@ public:
    }
 
 private:
+   //
+   // ::doFormat
+   //
+   void doFormat(ObjectVector *objects, FormatData &data)
+   {
+      switch(data.fmt)
+      {
+      case 'B':
+         makeExpr(objects, VariableType::get_bt_uns());
+         objects->addToken(OCODE_ACSP_NUM_BIN_U);
+         break;
+
+      case 'I':
+         makeExpr(objects, VariableType::get_bt_fix());
+         objects->addToken(OCODE_ACSP_NUM_DEC_X);
+         break;
+
+      case 'K':
+         makeExpr(objects, VariableType::get_bt_str());
+         objects->addToken(OCODE_ACSP_KEYBIND);
+         break;
+
+      case 'S':
+         makeExpr(objects, VariableType::get_bt_int());
+         objects->addToken(OCODE_ACSP_STR_LOCALIZED);
+         break;
+
+      case 'N':
+         makeExpr(objects, VariableType::get_bt_int());
+         objects->addToken(OCODE_ACSP_PLAYER_NAME);
+         break;
+
+      case 'c':
+         makeExpr(objects, VariableType::get_bt_chr());
+         objects->addToken(OCODE_ACSP_CHARACTER);
+         break;
+
+      case 'd':
+      case 'i':
+         makeExpr(objects, VariableType::get_bt_int());
+         objects->addToken(OCODE_ACSP_NUM_DEC_I);
+         break;
+
+      case 'p':
+         doFormat_p(objects, data);
+         break;
+
+      case 's':
+         doFormat_s(objects, data);
+         break;
+
+      case 'u':
+         makeExpr(objects, VariableType::get_bt_uns());
+         objects->addToken(OCODE_ACSP_NUM_DEC_I);
+         break;
+
+      case 'x':
+      case 'X':
+         makeExpr(objects, VariableType::get_bt_uns());
+         objects->addToken(OCODE_ACSP_NUM_HEX_U);
+         break;
+
+      default:
+         ERROR_NP("unrecognized format char: %c", data.fmt);
+      }
+   }
+
+   //
+   // ::doFormat_p
+   //
+   void doFormat_p(ObjectVector *objects, FormatData &)
+   {
+      SourceExpression::Pointer argExpr = nextExpr();
+      VariableType::Reference   argType = argExpr->getType();
+      VariableType::BasicType   argBT   = argType->getBasicType();
+      bigsint                   argSize = argType->getSize(pos);
+
+      if(argBT == VariableType::BT_ARR)
+      {
+         argBT = VariableType::BT_PTR;
+         argType = argType->getReturn()->getPointer();
+         argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
+         argSize = argType->getSize(pos);
+      }
+
+      if(argType->getReturn()->getStoreType() == STORE_AUTO)
+      {
+         argType = argType->getReturn()->setStorage(STORE_STATIC)->getPointer();
+         argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
+      }
+
+      if(argBT != VariableType::BT_PTR)
+         ERROR_NP("expected pointer got %s", make_string(argType).c_str());
+
+      argExpr->makeObjects(objects, VariableData::create_stack(argSize));
+
+      if(argSize == 1)
+         objects->addToken(OCODE_ACSP_NUM_HEX_U);
+      else
+      {
+         objects->addToken(OCODE_STK_SWAP);
+         objects->addToken(OCODE_ACSP_NUM_HEX_U);
+         makeChar(objects, '-');
+         objects->addToken(OCODE_ACSP_CHARACTER);
+         objects->addToken(OCODE_ACSP_NUM_HEX_U);
+      }
+   }
+
+   //
+   // ::doFormat_s
+   //
+   void doFormat_s(ObjectVector *objects, FormatData &)
+   {
+      SourceExpression::Pointer argExpr = nextExpr();
+      VariableType::Reference   argType = argExpr->getType();
+      VariableType::BasicType   argBT   = argType->getBasicType();
+
+      VariableData::Pointer tmp =
+         VariableData::create_stack(argType->getSize(pos));
+
+      if(argBT == VariableType::BT_STR)
+      {
+         argExpr->makeObjects(objects, tmp);
+         objects->addToken(OCODE_ACSP_STR);
+         return;
+      }
+
+      if(argBT == VariableType::BT_ARR)
+      {
+         argBT = VariableType::BT_PTR;
+         argType = argType->getReturn()->getPointer();
+         argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
+      }
+
+      if (argBT != VariableType::BT_PTR)
+         ERROR_NP("expected pointer got %s", make_string(argType).c_str());
+
+      // Convert auto* to static*.
+      StoreType argStore = argType->getReturn()->getStoreType();
+      if (argStore == STORE_AUTO) argStore = STORE_STATIC;
+
+      argType = argType->getReturn();
+      argType = VariableType::get_bt_chr()
+                ->setQualifier(argType->getQualifiers())
+                ->setStorage(argStore, argType->getStoreArea())
+                ->getPointer();
+      argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
+
+      argExpr->makeObjects(objects, tmp);
+
+      switch (argType->getReturn()->getStoreType())
+      {
+      case STORE_STATIC:
+         makeInt(objects, option_addr_array);
+         objects->addToken(OCODE_ACSP_STR_GBLARR);
+         break;
+
+      case STORE_NONE:
+      case STORE_AUTO:
+      case STORE_CONST:
+      case STORE_STRING:
+         ERROR_NP("cannot %%s pointer");
+
+      case STORE_REGISTER:
+      case STORE_MAPREGISTER:
+      case STORE_WORLDREGISTER:
+      case STORE_GLOBALREGISTER:
+         ERROR_NP("cannot %%s register-pointer");
+
+      case STORE_MAPARRAY:
+         objects->addToken(OCODE_GET_IMM,
+            objects->getValue(argType->getReturn()->getStoreArea()));
+         objects->addToken(OCODE_ACSP_STR_MAPARR);
+         break;
+
+      case STORE_WORLDARRAY:
+         objects->addToken(OCODE_GET_IMM,
+            objects->getValue(argType->getReturn()->getStoreArea()));
+         objects->addToken(OCODE_ACSP_STR_WLDARR);
+         break;
+
+      case STORE_GLOBALARRAY:
+         objects->addToken(OCODE_GET_IMM,
+            objects->getValue(argType->getReturn()->getStoreArea()));
+         objects->addToken(OCODE_ACSP_STR_GBLARR);
+         break;
+      }
+   }
+
+   //
+   // ::doFormatLiteral
+   //
+   void doFormatLiteral(ObjectVector *objects, std::string &s)
+   {
+      if(s.size() == 1)
+      {
+         makeChar(objects, s[0]);
+         objects->addToken(OCODE_ACSP_CHARACTER);
+      }
+      else if(!s.empty())
+      {
+         makeString(objects, s);
+         objects->addToken(OCODE_ACSP_STR);
+      }
+
+      s.clear();
+   }
+
    //
    // ::init
    //
@@ -191,147 +439,6 @@ private:
    }
 
    //
-   // ::makeFormat_p
-   //
-   void makeFormat_p(ObjectVector *objects)
-   {
-      SourceExpression::Pointer argExpr = nextExpr();
-      VariableType::Reference   argType = argExpr->getType();
-      VariableType::BasicType   argBT   = argType->getBasicType();
-      bigsint                   argSize = argType->getSize(pos);
-
-      if (argBT == VariableType::BT_ARR)
-      {
-         argBT = VariableType::BT_PTR;
-         argType = argType->getReturn()->getPointer();
-         argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
-         argSize = argType->getSize(pos);
-      }
-
-      if (argType->getReturn()->getStoreType() == STORE_AUTO)
-      {
-         argType = argType->getReturn()->setStorage(STORE_STATIC)->getPointer();
-         argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
-      }
-
-      if (argBT != VariableType::BT_PTR)
-         ERROR_NP("expected pointer got %s", make_string(argType).c_str());
-
-      argExpr->makeObjects(objects, VariableData::create_stack(argSize));
-
-      if(argSize == 1)
-         objects->addToken(OCODE_ACSP_NUM_HEX_U);
-      else
-      {
-         objects->addToken(OCODE_STK_SWAP);
-         objects->addToken(OCODE_ACSP_NUM_HEX_U);
-         makeChar(objects, '-');
-         objects->addToken(OCODE_ACSP_CHARACTER);
-         objects->addToken(OCODE_ACSP_NUM_HEX_U);
-      }
-   }
-
-   //
-   // ::makeFormat_s
-   //
-   void makeFormat_s(ObjectVector *objects)
-   {
-      SourceExpression::Pointer argExpr = nextExpr();
-      VariableType::Reference   argType = argExpr->getType();
-      VariableType::BasicType   argBT   = argType->getBasicType();
-
-      VariableData::Pointer tmp =
-         VariableData::create_stack(argType->getSize(pos));
-
-      if (argBT == VariableType::BT_STR)
-      {
-         argExpr->makeObjects(objects, tmp);
-         objects->addToken(OCODE_ACSP_STR);
-         return;
-      }
-
-      if (argBT == VariableType::BT_ARR)
-      {
-         argBT = VariableType::BT_PTR;
-         argType = argType->getReturn()->getPointer();
-         argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
-      }
-
-      if (argBT != VariableType::BT_PTR)
-         ERROR_NP("expected pointer got %s", make_string(argType).c_str());
-
-      // Convert auto* to static*.
-      StoreType argStore = argType->getReturn()->getStoreType();
-      if (argStore == STORE_AUTO) argStore = STORE_STATIC;
-
-      argType = argType->getReturn();
-      argType = VariableType::get_bt_chr()
-                ->setQualifier(argType->getQualifiers())
-                ->setStorage(argStore, argType->getStoreArea())
-                ->getPointer();
-      argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
-
-      argExpr->makeObjects(objects, tmp);
-
-      switch (argType->getReturn()->getStoreType())
-      {
-      case STORE_STATIC:
-         makeInt(objects, option_addr_array);
-         objects->addToken(OCODE_ACSP_STR_GBLARR);
-         break;
-
-      case STORE_NONE:
-      case STORE_AUTO:
-      case STORE_CONST:
-      case STORE_STRING:
-         ERROR_NP("cannot %%s pointer");
-
-      case STORE_REGISTER:
-      case STORE_MAPREGISTER:
-      case STORE_WORLDREGISTER:
-      case STORE_GLOBALREGISTER:
-         ERROR_NP("cannot %%s register-pointer");
-
-      case STORE_MAPARRAY:
-         objects->addToken(OCODE_GET_IMM,
-            objects->getValue(argType->getReturn()->getStoreArea()));
-         objects->addToken(OCODE_ACSP_STR_MAPARR);
-         break;
-
-      case STORE_WORLDARRAY:
-         objects->addToken(OCODE_GET_IMM,
-            objects->getValue(argType->getReturn()->getStoreArea()));
-         objects->addToken(OCODE_ACSP_STR_WLDARR);
-         break;
-
-      case STORE_GLOBALARRAY:
-         objects->addToken(OCODE_GET_IMM,
-            objects->getValue(argType->getReturn()->getStoreArea()));
-         objects->addToken(OCODE_ACSP_STR_GBLARR);
-         break;
-      }
-   }
-
-   //
-   // ::makeFormatLiteral
-   //
-   void makeFormatLiteral(ObjectVector *objects, std::string &s)
-   {
-      if (s.size() == 1)
-      {
-         makeChar(objects, s[0]);
-         objects->addToken(OCODE_ACSP_CHARACTER);
-      }
-      else if (!s.empty())
-      {
-         makeString(objects, s);
-         objects->addToken(OCODE_ACSP_STR);
-      }
-
-      s.clear();
-   }
-
-   //
    // ::virtual_makeObjects
    //
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
@@ -351,67 +458,71 @@ private:
       // Start the print.
       objects->addToken(OCODE_ACSP_START);
 
-      for (char const *c = format.c_str(); *c; ++c)
+      for(char const *c = format.c_str(); *c;)
       {
-         if (*c == '%' && *++c != '%')
+         // If not a % (or if it's a %%), just add to output.
+         if(*c != '%' || *++c == '%')
          {
-            makeFormatLiteral(objects, string);
-
-            switch (*c)
-            {
-            case 'K':
-               makeExpr(objects, VariableType::get_bt_str());
-               objects->addToken(OCODE_ACSP_KEYBIND);
-               continue;
-
-            case 'L':
-               makeExpr(objects, VariableType::get_bt_int());
-               objects->addToken(OCODE_ACSP_STR_LOCALIZED);
-               continue;
-
-            case 'N':
-               makeExpr(objects, VariableType::get_bt_int());
-               objects->addToken(OCODE_ACSP_PLAYER_NAME);
-               continue;
-
-            case 'X':
-               makeExpr(objects, VariableType::get_bt_fix());
-               objects->addToken(OCODE_ACSP_NUM_DEC_X);
-               continue;
-
-            case 'c':
-               makeExpr(objects, VariableType::get_bt_chr());
-               objects->addToken(OCODE_ACSP_CHARACTER);
-               continue;
-
-            case 'd':
-            case 'i':
-               makeExpr(objects, VariableType::get_bt_int());
-               objects->addToken(OCODE_ACSP_NUM_DEC_I);
-               continue;
-
-            case 'p':
-               makeFormat_p(objects);
-               continue;
-
-            case 's':
-               makeFormat_s(objects);
-               continue;
-
-            case 'u':
-               makeExpr(objects, VariableType::get_bt_uns());
-               objects->addToken(OCODE_ACSP_NUM_DEC_I);
-               continue;
-
-            default:
-               ERROR_NP("unrecognized format char: %c", *c);
-            }
+            string += *c++;
+            continue;
          }
 
-         string += *c;
+         FormatData data;
+
+         // Otherwise, handle the current literal and start reading format.
+         doFormatLiteral(objects, string);
+
+         // Read flags, if any.
+         for(data.flags = 0; *c; ++c)
+         {
+            switch(*c)
+            {
+            case '-': data.flags |= FF_LEFT; continue;
+            case '+': data.flags |= FF_SIGN; continue;
+            case ' ': data.flags |= FF_PADS; continue;
+            case '#': data.flags |= FF_ALTF; continue;
+            case '0': data.flags |= FF_PAD0; continue;
+            }
+
+            break;
+         }
+
+         // Read field width, if any.
+         if(*c == '*')
+            data.width = -1, ++c;
+         else for(data.width = 0; std::isdigit(*c);)
+            data.width = (data.width * 10) + (*c++ - '0');
+
+         // Read precision, if any.
+         if(*c == '.')
+         {
+            if(*++c == '*')
+               data.prec = -1;
+            else for(data.prec = 0; std::isdigit(*c);)
+               data.prec = (data.prec * 10) + (*c++ - '0');
+         }
+         else
+            data.prec = 0;
+
+         // Read length modifier, if any.
+         switch(*c)
+         {
+         case 'h': data.len = *++c == 'h' ? ++c, FL_HH : FL_H; break;
+         case 'l': data.len = *++c == 'l' ? ++c, FL_LL : FL_L; break;
+         case 'j': ++c; data.len = FL_MAX; break;
+         case 'z': ++c; data.len = FL_SIZE; break;
+         case 't': ++c; data.len = FL_DIFF; break;
+         case 'L': ++c; data.len = FL_L; break;
+         default: data.len = FL_NONE; break;
+         }
+
+         // Read conversion specifier.
+         data.fmt = *c++;
+
+         doFormat(objects, data);
       }
 
-      makeFormatLiteral(objects, string);
+      doFormatLiteral(objects, string);
 
       // Print options.
       switch (printfType)
