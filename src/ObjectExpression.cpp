@@ -338,7 +338,31 @@ void ObjectExpression::set_address_count(bigsint addressCount)
 //
 void ObjectExpression::set_filename(std::string const &name)
 {
-   filename = filename_raw = name;
+   // Keep the original filename for reference later.
+   filename_raw = name;
+   filename.resize(2 + 16);
+
+   biguint hash = 0x0123456789ABCDEF;
+
+   // Start by basically copying a chunk of the filename into the hash.
+   // Use 7 for the shift because ASCII forever. Right, guys? ... Guys?
+   for(std::string::const_iterator itr = name.begin(), end = name.end(); itr != end; ++itr)
+      hash = (hash << 7) + static_cast<unsigned char>(*itr);
+
+   // Then actually do a hash of the name.
+   for(std::string::const_iterator itr = name.begin(), end = name.end(); itr != end; ++itr)
+      hash = hash * 5 + static_cast<unsigned char>(*itr);
+
+   // Then write out the hash as a 16-character hex.
+   std::string::iterator str = filename.begin();
+
+   // Start with 0x to prevent collisions with user-defined namespaces.
+   *str++ = '0';
+   *str++ = 'x';
+
+   // For the record, I also considered: (hash & 0xF)["0123456789ABCDEF"]
+   for(int i = 0; i < 16; ++i)
+      *str++ = "0123456789ABCDEF"[hash & 0xF], hash >>= 4;
 }
 
 //
