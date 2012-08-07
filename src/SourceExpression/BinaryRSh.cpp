@@ -40,8 +40,7 @@
 //
 class SourceExpression_BinaryRSh : public SourceExpression_Binary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryRSh,
-                                   SourceExpression_Binary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryRSh, SourceExpression_Binary);
 
 public:
    //
@@ -55,8 +54,7 @@ public:
 
       CONSTRAINT_INTEGER(">>");
 
-      exprR = create_value_cast_implicit
-         (exprR, VariableType::get_bt_uns(), context, pos);
+      exprR = create_value_cast_implicit(exprR, VariableType::get_bt_int(), context, pos);
    }
 
    //
@@ -81,7 +79,7 @@ protected:
    //
    virtual bool canDoSet(VariableData *data, VariableType *type) const
    {
-      if (VariableType::is_bt_unsigned(type->getBasicType()))
+      if(VariableType::is_bt_unsigned(type->getBasicType()))
          return false;
 
       CAN_SET_SWITCHES(RSH);
@@ -90,11 +88,8 @@ protected:
    //
    // ::doGet
    //
-   virtual void doGet(ObjectVector *objects, VariableType *type, int tmpBase)
+   virtual void doGet(ObjectVector *objects, VariableType *type, int)
    {
-      if (VariableType::is_bt_unsigned(type->getBasicType()))
-         return doGetU(objects, type, tmpBase);
-
       DO_GET_SWITCH(RSH);
    }
 
@@ -104,32 +99,6 @@ protected:
    virtual void doSet(ObjectVector *objects, VariableData *data, VariableType *type, int)
    {
       DO_SET_SWITCHES(RSH);
-   }
-
-private:
-   //
-   // ::doGetU
-   //
-   void doGetU(ObjectVector *objects, VariableType *, int tmpBase)
-   {
-      ObjectExpression::Pointer tmpS = context->getTempVar(tmpBase+0);
-
-      std::string label = context->makeLabel();
-      std::string labelEnd = label + "_end";
-
-      objects->addToken(OCODE_SET_TEMP, tmpS);
-      objects->addToken(OCODE_GET_TEMP, tmpS);
-      objects->addToken(OCODE_RSH_STK_I);
-      objects->addToken(OCODE_GET_TEMP, tmpS);
-      objects->addToken(OCODE_JMP_NIL, objects->getValue(labelEnd));
-      objects->addToken(OCODE_GET_IMM, objects->getValue(0x80000000));
-      objects->addToken(OCODE_DEC_TEMP_U, tmpS);
-      objects->addToken(OCODE_GET_TEMP, tmpS);
-      objects->addToken(OCODE_RSH_STK_I);
-      objects->addToken(OCODE_INV_STK_U);
-      objects->addToken(OCODE_AND_STK_U);
-
-      objects->addLabel(labelEnd);
    }
 };
 

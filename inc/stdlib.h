@@ -212,6 +212,8 @@ __function size_t wcstombs(char *restrict s, wchar_t const *restrict pwcs, size_
 __function int _Getptr(void const __far *p);
 __function void _Setptr(int v, void __far *p);
 
+__function unsigned _Ursh(unsigned u, int v);
+
 };
 
 #endif//__HEADER__STDLIB_H__

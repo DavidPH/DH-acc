@@ -145,6 +145,9 @@ void BinaryTokenZDACS::make_tokens
    static ObjectExpression::Reference const func_Setptr =
       ObjectExpression::create_value_symbol("__Setptr", SourcePosition::builtin());
 
+   static ObjectExpression::Reference const func_Ursh =
+      ObjectExpression::create_value_symbol("__Ursh", SourcePosition::builtin());
+
    static std::vector<std::string> const nolabels;
 
    std::vector<ObjectExpression::Pointer> args;
@@ -219,6 +222,11 @@ void BinaryTokenZDACS::make_tokens
    CASE_ADDR_BINOP(RSH, _X,);
    CASE_REMAP_REG2(RSH, _I,);
    CASE_REMAP_REG2(RSH, _X,);
+
+   case OCODE_RSH_STK_U:
+      args.push_back(func_Ursh);
+      PUSH_TOKEN(BCODE_JMP_CAL_IMM);
+      break;
 
    CASE_ADDR_BINOP(SUB, _I,);
    CASE_ADDR_BINOP(SUB, _U,);

@@ -713,5 +713,16 @@ __extfunc "C" void _Setptr(int v, void __far *p)
    };
 };
 
+//
+// _Ursh
+//
+__extfunc "C" unsigned _Ursh(unsigned u, int v)
+{
+   if(!v) return u;
+
+   *(int register *)&u >>= v;
+   return u & ~((int)0x80000000 >> --v);
+};
+
 // EOF
 
