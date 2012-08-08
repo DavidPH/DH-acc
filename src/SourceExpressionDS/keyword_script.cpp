@@ -293,8 +293,13 @@ static SourceExpression::Pointer make_script
 
    // scriptExpr
    if(!externDef)
+   {
+      if(in->peekType(SourceTokenC::TT_SEMICOLON))
+         WARN(tok->pos, "empty script definition, did you mean extern __script?");
+
       func->setBody(SourceExpressionDS::make_prefix(in, args.context),
                     args.types, tok->pos);
+   }
 
    return SourceExpression::create_value_function(func, context, tok->pos);
 }

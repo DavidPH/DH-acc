@@ -23,6 +23,7 @@
 
 #include "SourceException.hpp"
 
+#include "option.hpp"
 #include "SourcePosition.hpp"
 
 #include <cstdarg>
@@ -30,9 +31,29 @@
 
 
 //----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+#define POS pos.filename.c_str(), pos.line, pos.column
+#define POSSTR "%s:%li:%li"
+
+
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
+
+static option::option_data<bool> option_debug_error_pos
+('\0', "debug-error-pos", "debugging",
+ "If enabled, will print internal source of errors and warnings.", NULL, false);
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
+//
+// SourceException::error
+//
 void SourceException::error(char const *file, int line, char const *func,
    char const *name, SourcePosition const &pos, char const *fmt, ...)
 {
@@ -40,12 +61,12 @@ void SourceException::error(char const *file, int line, char const *func,
    size_t whatlen, whatprt;
    va_list whatarg;
 
-   if (name)
-      whatlen = std::snprintf(NULL, 0, "%s:%li:%li (%s:%i %s::%s): ",
-         pos.filename.c_str(), pos.line, pos.column, file, line, name, func);
+   if(!option_debug_error_pos.data)
+      whatlen = std::snprintf(NULL, 0, POSSTR": ", POS);
+   else if(name)
+      whatlen = std::snprintf(NULL, 0, POSSTR" (%s:%i %s::%s): ", POS, file, line, name, func);
    else
-      whatlen = std::snprintf(NULL, 0, "%s:%li:%li (%s:%i %s): ",
-         pos.filename.c_str(), pos.line, pos.column, file, line, func);
+      whatlen = std::snprintf(NULL, 0, POSSTR" (%s:%i %s): ", POS, file, line, func);
 
    va_start(whatarg, fmt);
 
@@ -55,20 +76,44 @@ void SourceException::error(char const *file, int line, char const *func,
 
    whatstr = new char[++whatlen];
 
-   if (name)
-      whatprt = std::snprintf(whatstr, whatlen, "%s:%li:%li (%s:%i %s::%s): ",
-         pos.filename.c_str(), pos.line, pos.column, file, line, name, func);
+   if(!option_debug_error_pos.data)
+      whatprt = std::snprintf(whatstr, whatlen, POSSTR": ", POS);
+   else if(name)
+      whatprt = std::snprintf(whatstr, whatlen, POSSTR" (%s:%i %s::%s): ", POS, file, line, name, func);
    else
-      whatprt = std::snprintf(whatstr, whatlen, "%s:%li:%li (%s:%i %s): ",
-         pos.filename.c_str(), pos.line, pos.column, file, line, func);
+      whatprt = std::snprintf(whatstr, whatlen, POSSTR" (%s:%i %s): ", POS, file, line, func);
 
    va_start(whatarg, fmt);
 
-   whatprt += std::vsnprintf(whatstr+whatprt, whatlen-whatprt, fmt, whatarg);
+   std::vsnprintf(whatstr+whatprt, whatlen-whatprt, fmt, whatarg);
 
    va_end(whatarg);
 
    throw SourceException(whatstr);
+}
+
+//
+// SourceException::warn
+//
+void SourceException::warn(char const *file, int line, char const *func,
+   char const *name, SourcePosition const &pos, char const *fmt, ...)
+{
+   va_list whatarg;
+
+   if(!option_debug_error_pos.data)
+      std::fprintf(stderr, "warning: "POSSTR": ", POS);
+   else if(name)
+      std::fprintf(stderr, "warning: "POSSTR" (%s:%i %s::%s): ", POS, file, line, name, func);
+   else
+      std::fprintf(stderr, "warning: "POSSTR" (%s:%i %s): ", POS, file, line, func);
+
+   va_start(whatarg, fmt);
+
+   std::vfprintf(stderr, fmt, whatarg);
+
+   va_end(whatarg);
+
+   std::fprintf(stderr, "\n");
 }
 
 // EOF

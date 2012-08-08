@@ -187,8 +187,13 @@ static SourceExpression::Pointer make_func
 
    // funcExpr
    if(!externDef)
+   {
+      if(in->peekType(SourceTokenC::TT_SEMICOLON))
+         WARN(tok->pos, "empty function definition, did you mean extern __function?");
+
       func->setBody(SourceExpressionDS::make_prefix(in, args.context),
                     args.types, tok->pos);
+   }
 
    return SourceExpression::create_value_function(func, context, tok->pos);
 }
