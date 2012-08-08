@@ -293,7 +293,8 @@ static SourceExpression::Pointer make_script
 
    // scriptExpr
    if(!externDef)
-      func->setBody(SourceExpressionDS::make_prefix(in, args.context), tok->pos);
+      func->setBody(SourceExpressionDS::make_prefix(in, args.context),
+                    args.types, tok->pos);
 
    return SourceExpression::create_value_function(func, context, tok->pos);
 }
@@ -306,7 +307,7 @@ static void mangle_types(VariableType::Vector const &types, std::string &name)
    name += "$";
    VariableType::Vector::const_iterator type;
    for (type = types.begin(); type != types.end(); ++type)
-      {name += '$'; (*type)->getNameMangled(name);}
+      {name += '$'; (*type)->getUnqualified()->getNameMangled(name);}
 }
 
 

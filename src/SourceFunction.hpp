@@ -51,21 +51,23 @@ class SourceFunction : public PlainCounter
 public:
    typedef std::vector<CounterPointer<SourceExpression> > ArgVec;
    typedef std::map<std::string, Reference> FuncMap;
+   typedef std::vector<CounterPointer<VariableType> > TypeVec;
 
 
    ~SourceFunction();
 
    // Sets the function's body, issuing an error if already set.
-   void setBody(SourceExpression *expr, SourcePosition const &pos);
+   void setBody(SourceExpression *expr, TypeVec const &argTypes, SourcePosition const &pos);
 
    CounterPointer<SourceExpression> body;
    CounterReference<SourceVariable> var;
    ArgVec args;
+   TypeVec argTypes;
 
    size_t argsMin, argsMax;
    // For overload detection. If there are fewer args than argsMax, but at least
    // as many as argsMin, use types[argc - argsMin] to resolve.
-   std::vector<CounterPointer<VariableType> > *types;
+   TypeVec *types;
 
 
    // Finds an already added function, or returns null.

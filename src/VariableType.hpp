@@ -134,9 +134,13 @@ public:
    //
    enum Qualifier
    {
-      QUAL_CONST    = 1,
-      QUAL_VOLATILE = 2,
-      QUAL_RESTRICT = 4
+      // General qualifiers.
+      QUAL_CONST    = 0x0001,
+      QUAL_VOLATILE = 0x0002,
+      QUAL_RESTRICT = 0x0004,
+
+      // BT_FUN qualifiers.
+      QUAL_AUTOCALL = 0x00010000,
    };
 
 

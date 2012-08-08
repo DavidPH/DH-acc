@@ -320,11 +320,14 @@ static inline int _main()
       SourceExpression::Pointer expr = itr->second->body;
       SourceContext::Reference context = expr->getContext();
       SourcePosition const &pos = expr->getPosition();
+      VariableType::Vector const &argTypes = itr->second->argTypes;
 
       // Function preamble.
       SourceExpression::Pointer exprRoot;
       if(VariableType::is_bt_script(type->getBasicType()))
          exprRoot = SourceExpression::create_root_script(type, context, pos);
+      else if(type->getBasicType() == VariableType::BT_FUN)
+         exprRoot = SourceExpression::create_root_function(type, argTypes, context, pos);
 
       // Function fallback return.
       SourceExpression::Pointer exprRetn;

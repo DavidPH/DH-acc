@@ -389,7 +389,8 @@ public:
    SRCEXP_EXPRVAL_DECL( v, variable);
 
    // Root expressions.
-   static Pointer create_root_delay(SourceExpression *expr, SRCEXP_EXPR_ARGS);
+   static Reference create_root_function(VariableType *type,
+      std::vector<CounterPointer<VariableType> > const &args, SRCEXP_EXPR_ARGS);
    static Pointer create_root_output(SourceExpression *expr, SRCEXP_EXPR_ARGS);
    static Pointer create_root_printf
    (std::string const &printfType, std::string const &format,

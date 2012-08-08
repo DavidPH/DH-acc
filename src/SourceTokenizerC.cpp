@@ -62,7 +62,6 @@ static option::option_call option_undef_handler
 
 SourceTokenizerC::DefMap SourceTokenizerC::defines_base;
 SourceTokenizerC::MacroMap SourceTokenizerC::macros_base;
-extern bool option_function_autoargs;
 extern bool option_script_autoargs;
 
 
@@ -178,9 +177,6 @@ SourceTokenizerC::SourceTokenizerC(SourceStream *_in)
    case TARGET_ZDoom:    addDefine("__TARGET_ZDoom__",    ""); break;
    case TARGET_UNKNOWN:  addDefine("__TARGET_UNKNOWN__",  ""); break;
    }
-
-   if (option_function_autoargs)
-      addDefine("__FUNCTION_AUTOARGS__", "");
 
    if (option_script_autoargs)
       addDefine("__SCRIPT_AUTOARGS__", "");

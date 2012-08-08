@@ -36,23 +36,6 @@
 
 
 //----------------------------------------------------------------------------|
-// Static Variables                                                           |
-//
-
-extern bool option_function_autoargs;
-static option::option_dptr<bool> option_function_autoargs_handlers
-('\0', "function-autoargs", "features",
- "Makes function args automatic variables.", NULL, &option_function_autoargs);
-
-
-//----------------------------------------------------------------------------|
-// Global Variables                                                           |
-//
-
-bool option_function_autoargs = false;
-
-
-//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -64,6 +47,8 @@ void SourceExpression::make_objects_call_function
  VariableType *type, SourceExpression *data, Vector const &args,
  SourceContext *context, SourcePosition const &pos)
 {
+   unsigned calltype = type->getQualifiers();
+
    FUNCTION_PREAMBLE
    FUNCTION_ARGS
 
@@ -85,7 +70,7 @@ void SourceExpression::make_objects_call_function
    }
 
    // ZDoom handles one of the return bytes for us.
-   if (target_type == TARGET_ZDoom && retnSize >= 1)
+   if(target_type == TARGET_ZDoom && retnSize >= 1)
       --retnSize;
 
    // Calculate total stack offset.
@@ -95,11 +80,11 @@ void SourceExpression::make_objects_call_function
    // Advance the stack-pointer.
    objects->addToken(OCODE_ADD_AUTPTR_IMM, ostack);
 
-   // For not ZDoom or specified auto args...
-   if (option_function_autoargs || target_type != TARGET_ZDoom)
+   // For autocall...
+   if(calltype & VariableType::QUAL_AUTOCALL)
    {
       // ... Place args in auto vars.
-      for (bigsint i = callSize; i--;)
+      for(bigsint i = callSize; i--;)
          objects->addToken(OCODE_SET_AUTO, objects->getValue(i));
    }
 

@@ -67,7 +67,6 @@ static option::option_dptr<bool> option_string_func_handle
 // Global Variables                                                           |
 //
 
-extern bool option_function_autoargs;
 bool option_function_mangle_types = true;
 bool option_string_func = true;
 
@@ -84,11 +83,6 @@ static SourceExpression::Pointer make_func
  LinkageSpecifier linkSpec, bool externDef)
 {
    SourceExpressionDS::ArgList args;
-
-   if (option_function_autoargs || target_type != TARGET_ZDoom)
-      args.store = STORE_AUTO;
-   else
-      args.store = STORE_REGISTER;
 
    if (!externDef)
       args.context = SourceContext::create(context, SourceContext::CT_FUNCTION);
@@ -193,7 +187,8 @@ static SourceExpression::Pointer make_func
 
    // funcExpr
    if(!externDef)
-      func->setBody(SourceExpressionDS::make_prefix(in, args.context), tok->pos);
+      func->setBody(SourceExpressionDS::make_prefix(in, args.context),
+                    args.types, tok->pos);
 
    return SourceExpression::create_value_function(func, context, tok->pos);
 }
@@ -206,7 +201,7 @@ static void mangle_types(VariableType::Vector const &types, std::string &name)
    name += "$";
    VariableType::Vector::const_iterator type;
    for (type = types.begin(); type != types.end(); ++type)
-      {name += '$'; (*type)->getNameMangled(name);}
+      {name += '$'; (*type)->getUnqualified()->getNameMangled(name);}
 }
 
 

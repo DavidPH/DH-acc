@@ -71,6 +71,9 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in,
    if (!in->peekType(SourceTokenC::TT_PAREN_C)) while (true)
    {
       args->types.push_back(make_type(in, context));
+      // If no storage, set to the provided default.
+      if(args->types.back()->getStoreType() == STORE_NONE)
+         args->types.back() = args->types.back()->setStorage(args->store);
       args->count += args->types.back()->getSize(pos);
 
       if (in->peekType(SourceTokenC::TT_NAM))
@@ -126,10 +129,11 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in,
       {
          VariableType::Pointer argType = args->types[i];
          std::string const &argName = args->names[i];
+         StoreType argStore = argType->getStoreType();
 
          std::string argNameObject = args->context->getLabel() + argName;
          SourceVariable::Pointer argVar = SourceVariable::create_variable
-            (argName, argType, argNameObject, args->store, pos);
+            (argName, argType, argNameObject, argStore, pos);
 
          args->context->addVar(argVar, false, false);
       }

@@ -82,11 +82,13 @@ SourceFunction::~SourceFunction()
 //
 // setBody
 //
-void SourceFunction::setBody(SourceExpression *expr, SourcePosition const &pos)
+void SourceFunction::setBody(SourceExpression *expr,
+   VariableType::Vector const &_argTypes, SourcePosition const &pos)
 {
    if(body) ERROR_P("redefined function");
 
    body = expr;
+   argTypes = _argTypes;
 }
 
 //
