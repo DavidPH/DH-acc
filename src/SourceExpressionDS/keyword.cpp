@@ -148,24 +148,33 @@ SRCEXPDS_KEYWORD_DEFN(for)
 {
    in->get(SourceTokenC::TT_PAREN_O);
 
+   // Read initializer.
    SourceContext::Reference contextInit =
       SourceContext::create(context, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprInit = make_expression(in, contextInit);
 
    in->get(SourceTokenC::TT_SEMICOLON);
 
+   // Read condition.
    SourceContext::Reference contextCond =
       SourceContext::create(contextInit, SourceContext::CT_BLOCK);
-   SourceExpression::Pointer exprCond = make_expression(in, contextCond);
+   SourceExpression::Pointer exprCond;
+
+   if(in->peekType(SourceTokenC::TT_SEMICOLON))
+      exprCond = create_value_int(1, contextCond, tok->pos);
+   else
+      exprCond = make_expression(in, contextCond);
 
    in->get(SourceTokenC::TT_SEMICOLON);
 
+   // Read iterator.
    SourceContext::Reference contextIter =
       SourceContext::create(contextCond, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprIter = make_expression(in, contextIter);
 
    in->get(SourceTokenC::TT_PAREN_C);
 
+   // Read body.
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_LOOP);
    SourceExpression::Pointer exprBody = make_expression(in, contextBody);
