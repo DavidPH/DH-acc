@@ -258,14 +258,14 @@ char SourceStream::get()
             break;
 
             #define IORDIGIT() switch (in->get()) {  \
-            case '0': curC <<= 4; curC |= 00; break; \
-            case '1': curC <<= 4; curC |= 01; break; \
-            case '2': curC <<= 4; curC |= 02; break; \
-            case '3': curC <<= 4; curC |= 03; break; \
-            case '4': curC <<= 4; curC |= 04; break; \
-            case '5': curC <<= 4; curC |= 05; break; \
-            case '6': curC <<= 4; curC |= 06; break; \
-            case '7': curC <<= 4; curC |= 07; break; \
+            case '0': curC <<= 3; curC |= 00; break; \
+            case '1': curC <<= 3; curC |= 01; break; \
+            case '2': curC <<= 3; curC |= 02; break; \
+            case '3': curC <<= 3; curC |= 03; break; \
+            case '4': curC <<= 3; curC |= 04; break; \
+            case '5': curC <<= 3; curC |= 05; break; \
+            case '6': curC <<= 3; curC |= 06; break; \
+            case '7': curC <<= 3; curC |= 07; break; \
             default: in->unget();             break; }
 
          case '0': case '1': case '2': case '3':
