@@ -436,11 +436,14 @@ void SourceTokenizerC::doCommand_include(SourceTokenC *)
 {
    SourceTokenC::Reference inc = getRaw();
    std::string filename;
+   unsigned flags = SourceStream::ST_C;
 
    if(inc->type == SourceTokenC::TT_STR)
       filename = inc->data;
    else if(inc->type == SourceTokenC::TT_CMP_LT)
    {
+      flags |= SourceStream::STF_NOUSER;
+
       for(char c; (c = inStack.back()->get()) != '>';)
       {
          if(c == '\n') ERROR(inc->pos, "unterminated include");
@@ -456,7 +459,7 @@ void SourceTokenizerC::doCommand_include(SourceTokenC *)
 
    try
    {
-      inStack.push_back(new SourceStream(filename, SourceStream::ST_C));
+      inStack.push_back(new SourceStream(filename, flags));
       ungetStack.push_back(static_cast<SourceTokenC::Reference>(
          new SourceTokenC(SourcePosition::builtin(), SourceTokenC::TT_ENDL)));
    }
