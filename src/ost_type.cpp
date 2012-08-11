@@ -32,17 +32,13 @@
 // Static Prototypes                                                          |
 //
 
-static int output_handler
-(char const *opt, int optf, int argc, char const *const *argv);
+static int output_handler(char const *opt, int optf, int argc, char const *const *argv);
+static int output_object(char const *opt, int optf, int argc, char const *const *argv);
 
-static int output_object
-(char const *opt, int optf, int argc, char const *const *argv);
+static int source_handler(char const *opt, int optf, int argc, char const *const *argv);
 
-static int source_handler
-(char const *opt, int optf, int argc, char const *const *argv);
-
-static int target_handler
-(char const *opt, int optf, int argc, char const *const *argv);
+static int target_handler(char const *opt, int optf, int argc, char const *const *argv);
+static int Target_ZDoom(char const *opt, int optf, int argc, char const *const *argv);
 
 
 //----------------------------------------------------------------------------|
@@ -61,6 +57,9 @@ static option::option_call option_source
 static option::option_call option_target
 ('\0', "target-type", "output", "Target engine.", NULL, target_handler);
 
+static option::option_call Option_Target_ZDoom
+('Z', NULL, "output", "Equal to --target-type=ZDoom.", NULL, Target_ZDoom);
+
 
 //----------------------------------------------------------------------------|
 // Global Variables                                                           |
@@ -78,8 +77,7 @@ TargetType target_type = TARGET_UNKNOWN;
 //
 // output_handler
 //
-static int output_handler
-(char const *opt, int optf, int argc, char const *const *argv)
+static int output_handler(char const *opt, int optf, int argc, char const *const *argv)
 {
    if (!argc) option::exception::error(opt, optf, "requires argument");
 
@@ -104,8 +102,7 @@ static int output_object(char const *, int, int, char const *const *)
    return 0;
 }
 
-static int source_handler
-(char const *opt, int optf, int argc, char const *const *argv)
+static int source_handler(char const *opt, int optf, int argc, char const *const *argv)
 {
    if (!argc) option::exception::error(opt, optf, "requires argument");
 
@@ -121,8 +118,7 @@ static int source_handler
    return 1;
 }
 
-static int target_handler
-(char const *opt, int optf, int argc, char const *const *argv)
+static int target_handler(char const *opt, int optf, int argc, char const *const *argv)
 {
    if (!argc) option::exception::error(opt, optf, "requires argument");
 
@@ -138,6 +134,13 @@ static int target_handler
       option::exception::error(opt, optf, "unrecognized type");
 
    return 1;
+}
+
+static int Target_ZDoom(char const *, int, int, char const *const *)
+{
+   target_type = TARGET_ZDoom;
+
+   return 0;
 }
 
 // EOF
