@@ -70,7 +70,7 @@ void SourceExpression::make_objects_call_function
    }
 
    // ZDoom handles one of the return bytes for us.
-   if(target_type == TARGET_ZDoom && retnSize >= 1)
+   if(retnSize >= 1)
       --retnSize;
 
    // Calculate total stack offset.

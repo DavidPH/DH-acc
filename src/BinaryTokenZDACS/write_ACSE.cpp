@@ -410,9 +410,9 @@ void BinaryTokenZDACS::write_ACSE_script_SNAM(std::ostream *, ObjectData_Script 
 void BinaryTokenZDACS::
 write_ACSE_script_SVCT(std::ostream *out, ObjectData_Script const &s)
 {
-   if (s.externDef) return;
-   if (s.varCount <= 10) return;
-   if (s.varCount <= 20 && target_type == TARGET_ZDoom) return;
+   if(s.externDef) return;
+   if(s.varCount <= 10) return;
+   if(s.varCount <= 20 && Target == TARGET_ZDoom) return;
 
    BinaryTokenACS::write_ACS0_16(out, s.number);
    BinaryTokenACS::write_ACS0_16(out, s.varCount);

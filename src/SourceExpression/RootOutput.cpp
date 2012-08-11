@@ -350,7 +350,7 @@ void SourceExpression_RootOutput::virtual_makeObjects
 
    doOut(objects, expr->getType());
 
-   if (target_type == TARGET_Hexen)
+   if(Target == TARGET_Hexen)
       objects->addToken(OCODE_ACSP_END);
    else
       objects->addToken(OCODE_ACSP_END_LOG);

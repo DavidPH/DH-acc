@@ -99,7 +99,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       tmp = VariableData::create_void(0);
       expr->makeObjects(objects, tmp);
    }
-   else if(retnSize == 1 && target_type == TARGET_ZDoom)
+   else if(retnSize == 1)
    {
       tmp = VariableData::create_stack(1);
       expr->makeObjects(objects, tmp);

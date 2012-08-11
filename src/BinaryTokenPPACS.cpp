@@ -220,7 +220,7 @@ write_all(std::ostream *out, std::vector<BinaryTokenPPACS> const &instructions)
 {
    BinaryTokenACS::output_prep(instructions);
 
-   switch (output_type)
+   switch(Output)
    {
    case OUTPUT_ACS0:
       BinaryTokenACS::output_ACS0(out, instructions);

@@ -140,7 +140,7 @@ void ObjectExpression::do_deferred_allocation()
    ObjectData_Array::generate_symbols();
 
    // For ACS+, all the following allocation is done by the linker.
-   if (output_type == OUTPUT_ACSP) return;
+   if(Output == OUTPUT_ACSP) return;
 
    ObjectData_Function::generate_symbols();
    ObjectData_Script::generate_symbols();

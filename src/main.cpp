@@ -300,14 +300,14 @@ static inline int _main()
    ObjectVector objects;
 
    // Default target.
-   if (target_type == TARGET_UNKNOWN)
-      target_type = TARGET_Hexen;
+   if(Target == TARGET_UNKNOWN)
+      Target = TARGET_Hexen;
 
    // Read source file(s).
    for (char const **iter = option::option_args::arg_vector,
                    **end  = option::option_args::arg_count+iter;
         iter != end; ++iter)
-      read_source(*iter, source_type, &objects);
+      read_source(*iter, Source, &objects);
 
    // Generate functions.
    for(SourceFunction::FuncMap::iterator itr = SourceFunction::FunctionTable.begin(),
@@ -350,7 +350,7 @@ static inline int _main()
    objects.addToken(OCODE_NOP);
 
    // If doing object output, don't process object data.
-   if (output_type == OUTPUT_object)
+   if(Output == OUTPUT_object)
    {
       std::ofstream ofs(option_out.data.c_str(),
                         std::ios_base::out|std::ios_base::binary);
@@ -425,12 +425,11 @@ static inline int _main()
    }
 
    // Default output.
-   if (output_type == OUTPUT_UNKNOWN) switch (target_type)
+   if(Output == OUTPUT_UNKNOWN) switch(Target)
    {
-   case TARGET_Eternity: output_type = OUTPUT_ACS0; break;
-   case TARGET_Hexen:    output_type = OUTPUT_ACS0; break;
-   case TARGET_HexPP:    output_type = OUTPUT_ACSP; break;
-   case TARGET_ZDoom:    output_type = OUTPUT_ACSE; break;
+   case TARGET_Eternity: Output = OUTPUT_ACSE; break;
+   case TARGET_Hexen:    Output = OUTPUT_ACS0; break;
+   case TARGET_ZDoom:    Output = OUTPUT_ACSE; break;
    case TARGET_UNKNOWN: break;
    }
 
@@ -438,7 +437,7 @@ static inline int _main()
    std::ofstream ofs(option_out.data.c_str(),
                      std::ios_base::out|std::ios_base::binary);
 
-   switch (target_type)
+   switch(Target)
    {
    case TARGET_Hexen:
    {
@@ -449,14 +448,6 @@ static inline int _main()
       break;
 
    case TARGET_Eternity:
-   case TARGET_HexPP:
-   {
-      std::vector<BinaryTokenPPACS> instructions;
-      BinaryTokenPPACS::make_tokens(objects, &instructions);
-      BinaryTokenPPACS::write_all(&ofs, instructions);
-   }
-      break;
-
    case TARGET_ZDoom:
    {
       std::vector<BinaryTokenZDACS> instructions;

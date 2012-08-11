@@ -83,7 +83,7 @@ template<typename T> void BinaryTokenACS::output_prep
    typename std::vector<T>::const_iterator instr;
    typename T::label_iterator label;
 
-   if (output_type == OUTPUT_ACSP) return;
+   if(Output == OUTPUT_ACSP) return;
 
    ObjectExpression::set_address_count(8);
 

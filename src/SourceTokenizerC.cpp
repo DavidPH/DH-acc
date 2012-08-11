@@ -169,11 +169,10 @@ SourceTokenizerC::SourceTokenizerC(SourceStream *_in)
  : defines(defines_base), macros(macros_base),
    canExpand(true)
 {
-   switch (target_type)
+   switch(Target)
    {
    case TARGET_Eternity: addDefine("__TARGET_Eternity__", ""); break;
    case TARGET_Hexen:    addDefine("__TARGET_Hexen__",    ""); break;
-   case TARGET_HexPP:    addDefine("__TARGET_HexPP__",    ""); break;
    case TARGET_ZDoom:    addDefine("__TARGET_ZDoom__",    ""); break;
    case TARGET_UNKNOWN:  addDefine("__TARGET_UNKNOWN__",  ""); break;
    }

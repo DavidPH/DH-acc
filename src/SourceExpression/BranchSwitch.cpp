@@ -114,7 +114,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    std::vector<bigsint>::iterator caseItr, caseEnd = cases.end();
 
    // Generate jump table.
-   if(cases.size() < 4 || target_type == TARGET_Hexen)
+   if(cases.size() < 4 || Target == TARGET_Hexen)
    {
       // Linear search via JMP_VAL.
 

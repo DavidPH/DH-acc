@@ -104,7 +104,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    }
 
    // Acquire new stack pointer.
-   if(target_type == TARGET_ZDoom)
+   if(Target != TARGET_Hexen)
       make_objects_auto_alloc(objects, context);
 
    // Automatic-variable arguments.

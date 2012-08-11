@@ -32,42 +32,49 @@
 // Static Prototypes                                                          |
 //
 
-static int output_handler(char const *opt, int optf, int argc, char const *const *argv);
-static int output_object(char const *opt, int optf, int argc, char const *const *argv);
+static TargetType GetTarget(char const *target);
 
-static int source_handler(char const *opt, int optf, int argc, char const *const *argv);
+static int OutputHandler(char const *opt, int optf, int argc, char const *const *argv);
+static int Output_object(char const *opt, int optf, int argc, char const *const *argv);
 
-static int target_handler(char const *opt, int optf, int argc, char const *const *argv);
+static int SourceHandler(char const *opt, int optf, int argc, char const *const *argv);
+
+static int TargetHandler(char const *opt, int optf, int argc, char const *const *argv);
 static int Target_ZDoom(char const *opt, int optf, int argc, char const *const *argv);
+
+static int TuneHandler(char const *opt, int optf, int argc, char const *const *argv);
 
 
 //----------------------------------------------------------------------------|
 // Static Variables                                                           |
 //
 
-static option::option_call option_output
-('\0', "output-type", "output", "Output type.", NULL, output_handler);
+static option::option_call option_Output
+('\0', "output-type", "output", "Output type.", NULL, OutputHandler);
 
-static option::option_call option_output_object
-('c', NULL, "output", "Equal to --output-type=object.", NULL, output_object);
+static option::option_call option_Output_object
+('c', NULL, "output", "Equal to --output-type=object.", NULL, Output_object);
 
-static option::option_call option_source
-('\0', "source-type", "input", "Source file type.", NULL, source_handler);
+static option::option_call option_Source
+('\0', "source-type", "input", "Source file type.", NULL, SourceHandler);
 
-static option::option_call option_target
-('\0', "target-type", "output", "Target engine.", NULL, target_handler);
+static option::option_call option_Target
+('\0', "target-type", "output", "Target engine.", NULL, TargetHandler);
 
-static option::option_call Option_Target_ZDoom
+static option::option_call option_Target_ZDoom
 ('Z', NULL, "output", "Equal to --target-type=ZDoom.", NULL, Target_ZDoom);
+
+static option::option_call option_Tune
+('\0', "tune-type", "output", "Tune codegen for given target.", NULL, TuneHandler);
 
 
 //----------------------------------------------------------------------------|
 // Global Variables                                                           |
 //
 
-OutputType output_type = OUTPUT_UNKNOWN;
-SourceType source_type = SOURCE_UNKNOWN;
-TargetType target_type = TARGET_UNKNOWN;
+OutputType Output = OUTPUT_UNKNOWN;
+SourceType Source = SOURCE_UNKNOWN;
+TargetType Target = TARGET_UNKNOWN, Tune = TARGET_UNKNOWN;
 
 
 //----------------------------------------------------------------------------|
@@ -75,72 +82,111 @@ TargetType target_type = TARGET_UNKNOWN;
 //
 
 //
-// output_handler
+// GetTarget
 //
-static int output_handler(char const *opt, int optf, int argc, char const *const *argv)
+static TargetType GetTarget(char const *target)
 {
-   if (!argc) option::exception::error(opt, optf, "requires argument");
+   if(!strcmp(target, "Eternity"))
+      return TARGET_Eternity;
+   else if(!strcmp(target, "Hexen"))
+      return TARGET_Hexen;
+   else if(!strcmp(target, "ZDoom"))
+      return TARGET_ZDoom;
+   else
+      return TARGET_UNKNOWN;
+}
 
-   if (!strcmp(argv[0], "ACS0"))
-      output_type = OUTPUT_ACS0;
-   else if (!strcmp(argv[0], "ACSE"))
-      output_type = OUTPUT_ACSE;
-   else if (!strcmp(argv[0], "ACS+"))
-      output_type = OUTPUT_ACSP;
-   else if (!strcmp(argv[0], "object"))
-      output_type = OUTPUT_object;
+//
+// OutputHandler
+//
+static int OutputHandler(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if(!argc) option::exception::error(opt, optf, "requires argument");
+
+   if(!strcmp(argv[0], "ACS0"))
+      Output = OUTPUT_ACS0;
+   else if(!strcmp(argv[0], "ACSE"))
+      Output = OUTPUT_ACSE;
+   else if(!strcmp(argv[0], "ACS+"))
+      Output = OUTPUT_ACSP;
+   else if(!strcmp(argv[0], "object"))
+      Output = OUTPUT_object;
    else
       option::exception::error(opt, optf, "unrecognized type");
 
    return 1;
 }
 
-static int output_object(char const *, int, int, char const *const *)
+//
+// Output_object
+//
+static int Output_object(char const *, int, int, char const *const *)
 {
-   output_type = OUTPUT_object;
+   Output = OUTPUT_object;
 
    return 0;
 }
 
-static int source_handler(char const *opt, int optf, int argc, char const *const *argv)
+//
+// SourceHandler
+//
+static int SourceHandler(char const *opt, int optf, int argc, char const *const *argv)
 {
-   if (!argc) option::exception::error(opt, optf, "requires argument");
+   if(!argc) option::exception::error(opt, optf, "requires argument");
 
-   if (!strcmp(argv[0], "ASMPLX"))
-      source_type = SOURCE_ASMPLX;
-   else if (!strcmp(argv[0], "DS"))
-      source_type = SOURCE_DS;
-   else if (!strcmp(argv[0], "object"))
-      source_type = SOURCE_object;
+   if(!strcmp(argv[0], "ASMPLX"))
+      Source = SOURCE_ASMPLX;
+   else if(!strcmp(argv[0], "DS"))
+      Source = SOURCE_DS;
+   else if(!strcmp(argv[0], "object"))
+      Source = SOURCE_object;
    else
       option::exception::error(opt, optf, "unrecognized type");
 
    return 1;
 }
 
-static int target_handler(char const *opt, int optf, int argc, char const *const *argv)
+//
+// TargetHandler
+//
+static int TargetHandler(char const *opt, int optf, int argc, char const *const *argv)
 {
-   if (!argc) option::exception::error(opt, optf, "requires argument");
+   if(!argc) option::exception::error(opt, optf, "requires argument");
 
-   if (!strcmp(argv[0], "Eternity"))
-      target_type = TARGET_Eternity;
-   else if (!strcmp(argv[0], "Hexen"))
-      target_type = TARGET_Hexen;
-   else if (!strcmp(argv[0], "Hex++"))
-      target_type = TARGET_HexPP;
-   else if (!strcmp(argv[0], "ZDoom"))
-      target_type = TARGET_ZDoom;
-   else
+   if((Target = GetTarget(argv[0])) == TARGET_UNKNOWN)
       option::exception::error(opt, optf, "unrecognized type");
 
    return 1;
 }
 
+//
+// Target_ZDoom
+//
 static int Target_ZDoom(char const *, int, int, char const *const *)
 {
-   target_type = TARGET_ZDoom;
+   // Make -ZZ be --tune=ZDoom.
+   if(Target == TARGET_ZDoom)
+      Tune = TARGET_ZDoom;
+   else
+      Target = TARGET_ZDoom;
 
    return 0;
+}
+
+//
+// TuneHandler
+//
+static int TuneHandler(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if(!argc) option::exception::error(opt, optf, "requires argument");
+
+   // Make empty argument reset to no tune.
+   if(!*argv[0])
+      Tune = TARGET_UNKNOWN;
+   else if((Tune = GetTarget(argv[0])) == TARGET_UNKNOWN)
+      option::exception::error(opt, optf, "unrecognized type");
+
+   return 1;
 }
 
 // EOF

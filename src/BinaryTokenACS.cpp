@@ -242,7 +242,7 @@ write_all(std::ostream *out, std::vector<BinaryTokenACS> const &instructions)
 {
    output_prep(instructions);
 
-   switch (output_type)
+   switch(Output)
    {
    case OUTPUT_ACS0:
       output_ACS0(out, instructions);

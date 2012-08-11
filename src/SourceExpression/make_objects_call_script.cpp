@@ -151,7 +151,7 @@ void SourceExpression::make_objects_call_script
    objects->addToken(OCODE_SET_AUTPTR);
 
    // ZDoom handles one of the return bytes for us.
-   if(target_type == TARGET_ZDoom && retnSize >= 1)
+   if(retnSize >= 1)
       --retnSize;
 
    // For any return bytes we're handling, push them onto the stack.

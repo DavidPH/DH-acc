@@ -64,10 +64,7 @@ std::string const &make_string(StoreType store)
 //
 StoreType store_staticregister()
 {
-   if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
-      return STORE_MAPREGISTER;
-
-   return STORE_STATIC;
+   return STORE_MAPREGISTER;
 }
 
 //
@@ -75,10 +72,7 @@ StoreType store_staticregister()
 //
 StoreType store_staticarray()
 {
-   if (target_type == TARGET_ZDoom)
-      return STORE_MAPARRAY;
-
-   return STORE_STATIC;
+   return STORE_MAPARRAY;
 }
 
 //
@@ -86,10 +80,7 @@ StoreType store_staticarray()
 //
 StoreType store_autoregister()
 {
-   if (target_type == TARGET_Hexen || target_type == TARGET_ZDoom)
-      return STORE_REGISTER;
-
-   return STORE_AUTO;
+   return STORE_REGISTER;
 }
 
 //
@@ -97,7 +88,7 @@ StoreType store_autoregister()
 //
 StoreType store_autoarray()
 {
-   if (target_type == TARGET_Hexen)
+   if(Target == TARGET_Hexen)
       return STORE_REGISTER;
 
    return STORE_AUTO;

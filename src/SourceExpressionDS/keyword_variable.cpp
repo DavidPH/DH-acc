@@ -366,14 +366,14 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
       switch (store.type)
       {
       case STORE_MAPREGISTER:
-         if (!initObj || target_type != TARGET_ZDoom)
+         if(!initObj || Target == TARGET_Hexen)
             goto case_static;
 
          ObjectData_Register::ini_map(nameObj, initObj);
          break;
 
       case STORE_MAPARRAY:
-         if (!initObj || target_type != TARGET_ZDoom)
+         if(!initObj)
             goto case_array;
 
          if (ObjectData_Array::ini_map(nameObj, initObj))
