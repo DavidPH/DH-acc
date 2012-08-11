@@ -501,6 +501,7 @@ private:
 
 extern int  option_auto_array;
 extern int  option_auto_stack_size;
+extern bool option_near_pointers;
 
 #endif//HPP_SourceExpression_
 

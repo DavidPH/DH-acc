@@ -573,28 +573,37 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
    else
       type = context->getVariableType(tok->data, tok->pos);
 
+   // And now the tricky bit. Need to make it so that a type without an explicit
+   // storage made into a pointer will default to near if requested.
+   if(option_near_pointers && type->getStoreType() == STORE_NONE)
+      type = type->setStorage(STORE_CONST);
+
    // Suffix modifiers.
-   while (true) switch (in->peek()->type)
+   for(;;) switch(in->peek()->type)
    {
    case SourceTokenC::TT_NAM:
-      if (in->peek()->data == "const")
+      if(in->peek()->data == "const")
          do_qualifier(&type, VariableType::QUAL_CONST, in);
 
-      else if (in->peek()->data == "volatile")
+      else if(in->peek()->data == "volatile")
          do_qualifier(&type, VariableType::QUAL_VOLATILE, in);
 
-      else if (in->peek()->data == "restrict")
+      else if(in->peek()->data == "restrict")
          do_qualifier(&type, VariableType::QUAL_RESTRICT, in);
 
-      else if (is_store(in->peek()->data))
+      else if(is_store(in->peek()->data))
          do_storage(&type, in, context);
 
       else
-         return static_cast<VariableType::Reference>(type);
+         goto case_default;
 
       break;
 
    case SourceTokenC::TT_MUL:
+      // Making a pointer without explicit storage, set to near.
+      if(type->getStoreType() == STORE_CONST)
+         type = type->setStorage(STORE_STATIC);
+
       in->get(SourceTokenC::TT_MUL);
       type = type->getPointer();
       break;
@@ -685,6 +694,11 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
       break;
 
    default:
+   case_default:
+      // Not making a pointer, set to far.
+      if(type->getStoreType() == STORE_CONST)
+         type = type->setStorage(STORE_NONE);
+
       return static_cast<VariableType::Reference>(type);
    }
 }

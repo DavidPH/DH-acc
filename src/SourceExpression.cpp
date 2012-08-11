@@ -47,6 +47,10 @@ option::option_dptr<int> option_auto_stack_part_handler
  "Sets the size of each thread's automatic variable stack. Use 0 to disable "
  "per-thread stack pointers. 8192 by default.", NULL, &option_auto_stack_size);
 
+option::option_dptr<bool> option_near_pointers_handler
+('\0', "near-pointers", "features",
+ "Use near pointers by default.", NULL, &option_near_pointers);
+
 
 //----------------------------------------------------------------------------|
 // Global Variables                                                           |
@@ -54,6 +58,7 @@ option::option_dptr<int> option_auto_stack_part_handler
 
 int option_auto_array = 0;
 int option_auto_stack_size = 8192;
+bool option_near_pointers = false;
 
 
 //----------------------------------------------------------------------------|
