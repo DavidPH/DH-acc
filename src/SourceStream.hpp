@@ -58,7 +58,8 @@ public:
 
       ST_MASK = 0xFF,
 
-      STF_STRING = 0x100
+      STF_STRING = 0x0100,
+      STF_NOUSER = 0x0200,
    };
 
 
@@ -83,12 +84,20 @@ public:
    void unget(char const c);
 
 
+   static void AddIncludeDir(std::string const &dir);
+   static void AddIncludeDirSys(std::string const &dir);
+   static void AddIncludeDirUser(std::string const &dir);
+
+   static void Init(char const *arg0);
+
    static bool is_HWS(char c);
+
+   static void PopIncludeDir();
 
 private:
    int oldC, curC, newC;
    std::istream *in;
-   std::string filename;
+   std::string filename, pathname;
    std::stack<char> ungetStack;
 
    long countColumn;
@@ -106,6 +115,8 @@ private:
    bool doCommentASM : 1; // ;
    bool doCommentC   : 1; // /* */
    bool doCommentCPP : 1; // //
+
+   bool doInclude : 1; // Manages autoInclude.
 
    bool doPadEOF : 1; // Pads EOF with a linefeed.
 

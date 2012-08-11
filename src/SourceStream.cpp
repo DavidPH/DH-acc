@@ -33,17 +33,156 @@
 
 
 //----------------------------------------------------------------------------|
+// Static Prototypes                                                          |
+//
+
+static int AddIncludeDirUser(char const *opt, int optf, int argc, char const *const *argv);
+static int AddIncludeDirSys(char const *opt, int optf, int argc, char const *const *argv);
+
+
+//----------------------------------------------------------------------------|
 // Static Variables                                                           |
 //
 
-static option::option_data<std::vector<std::string> > option_include_dir
+static option::option_call option_include_dir
 ('i', "include-dir", "input",
  "Specifies a directory to search for includes in.", NULL,
- std::vector<std::string>(1));
+ AddIncludeDirUser);
+
+static option::option_call option_system_include_dir
+('I', "system-include-dir", "input",
+ "Specifies a directory to search for system includes in.", NULL,
+ AddIncludeDirSys);
 
 static option::option_data<int> option_tab_columns
 ('\0', "tab-columns", "input",
  "How many columns a tab counts for in error reporting.", NULL, 1);
+
+// Used to push and pop directories due to inclusion.
+static std::vector<std::string> autoIncludes;
+
+// Used to track user-specified directories.
+static std::vector<std::string> userIncludes;
+
+// Used to track system directories.
+static std::vector<std::string> sysIncludes;
+
+
+//----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+//
+// AddIncludeDirUser
+//
+static int AddIncludeDirUser(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if(!argc) option::exception::error(opt, optf, "requires argument");
+
+   SourceStream::AddIncludeDirUser(argv[0]);
+
+   return 1;
+}
+
+//
+// AddIncludeDirSys
+//
+static int AddIncludeDirSys(char const *opt, int optf, int argc, char const *const *argv)
+{
+   if(!argc) option::exception::error(opt, optf, "requires argument");
+
+   SourceStream::AddIncludeDirSys(argv[0]);
+
+   return 1;
+}
+
+//
+// GetPathSep
+//
+// Determines what path separator is in use for a given path.
+// For POSIX (read: sane) systems, this is a constant.
+//
+static char GetPathSep(std::string const &path)
+{
+   #if defined (__WIN32__)
+   for(std::string::const_iterator itr = path.begin(), end = path.end(); itr != end; ++itr)
+      if(*itr == '/' || *itr == '\\')
+         return *itr;
+
+   return '\\';
+   #else
+   (void)path;
+   return '/';
+   #endif
+}
+
+//
+// NormalizePath
+//
+static void NormalizePath(std::string &path)
+{
+   #if defined(__WIN32__)
+   char const pathSep = GetPathSep(path);
+
+   for(std::string::iterator itr = path.begin(), end = path.end(); itr != end; ++itr)
+      if(*itr == '/' || *itr == '\\')
+         *itr = pathSep;
+   #else
+   // POSIX paths are inherently "normal", having only one representation.
+   (void)path;
+   #endif
+}
+
+//
+// DirectoryPath
+//
+static void DirectoryPath(std::string &path)
+{
+   char const pathSep = GetPathSep(path);
+   std::string::size_type indexSep = path.find_last_of(pathSep);
+   if(indexSep != std::string::npos)
+      path.resize(indexSep);
+}
+
+//
+// TerminatePath
+//
+static void TerminatePath(std::string &path)
+{
+   char const pathSep = GetPathSep(path);
+
+   if(*path.rbegin() != pathSep)
+      path += pathSep;
+}
+
+//
+// AppendPath
+//
+static void AppendPath(std::vector<std::string> &includes, std::string const &dir)
+{
+   // Don't try to append an empty name.
+   if(dir.empty()) return;
+
+   includes.push_back(dir);
+   NormalizePath(includes.back());
+   TerminatePath(includes.back());
+}
+
+//
+// TryOpenFile
+//
+static std::istream *TryOpenFile(std::string const &filename)
+{
+   std::istream *in = new std::ifstream(filename.c_str());
+
+   if(!*in)
+   {
+      delete in;
+      return NULL;
+   }
+   else
+      return in;
+}
 
 
 //----------------------------------------------------------------------------|
@@ -54,26 +193,28 @@ static option::option_data<int> option_tab_columns
 // SourceStream::SourceStream
 //
 SourceStream::SourceStream(std::string const &_filename, unsigned type)
- :
-oldC(-2), curC(-2), newC(-2),
-in(NULL),
-filename(_filename),
+ : oldC(-2), curC(-2), newC(-2),
+   in(NULL),
+   filename(_filename),
+   pathname(),
 
-countColumn(0),
-countLine(1),
+   countColumn(0),
+   countLine(1),
 
-depthComment(0),
+   depthComment(0),
 
-inComment(false),
+   inComment(false),
 
-inEOF(false),
+   inEOF(false),
 
-inQuoteDouble(false),
-inQuoteSingle(false),
+   inQuoteDouble(false),
+   inQuoteSingle(false),
 
-doPadEOF(true)
+   doInclude(false),
+
+   doPadEOF(true)
 {
-   switch (type & ST_MASK)
+   switch(type & ST_MASK)
    {
    case ST_ASMPLX:
       doCommentASM = true;
@@ -94,34 +235,89 @@ doPadEOF(true)
       break;
    }
 
-   if (type & STF_STRING)
+   // String stream.
+   if(type & STF_STRING)
    {
       doPadEOF = false;
       in = new std::istringstream(filename);
       filename = "string";
+
+      return;
    }
 
-   if (!in)
+   std::vector<std::string>::iterator dir, end;
+
+   // Try the string as-is.
+   if(!in)
+      in = TryOpenFile(pathname = filename);
+
+   // Automatic include directories.
+   if(!in && !(type & STF_NOUSER))
    {
-      std::vector<std::string>::iterator dir;
-      for (dir  = option_include_dir.data.begin();
-           dir != option_include_dir.data.end() && !in; ++dir)
-      {
-         in = new std::ifstream((*dir + filename).c_str());
-
-         if (!*in)
-         {
-            delete in;
-            in = NULL;
-         }
-      }
+      // Search auto includes backwards.
+      for(dir = autoIncludes.end(), end = autoIncludes.begin(); dir-- != end;)
+         if((in = TryOpenFile(pathname = *dir + filename))) break;
    }
 
-   if (!in) throw std::exception();
+   // User-specified include directories.
+   if(!in && !(type & STF_NOUSER))
+   {
+      for(dir = userIncludes.begin(), end = userIncludes.end(); dir != end; ++dir)
+         if((in = TryOpenFile(pathname = *dir + filename))) break;
+   }
+
+   // System include directories.
+   if(!in)
+   {
+      for(dir = sysIncludes.begin(), end = sysIncludes.end(); dir != end; ++dir)
+         if((in = TryOpenFile(pathname = *dir + filename))) break;
+   }
+
+   if(!in) throw std::exception();
+
+   NormalizePath(pathname);
+   DirectoryPath(pathname);
+
+   if(!pathname.empty())
+   {
+      doInclude = true;
+      AddIncludeDir(pathname);
+   }
 }
+
+//
+// SourceStream::~SourceStream
+//
 SourceStream::~SourceStream()
 {
+   if(doInclude)
+      PopIncludeDir();
+
    delete in;
+}
+
+//
+// SourceStream::AddIncludeDir
+//
+void SourceStream::AddIncludeDir(std::string const &dir)
+{
+   AppendPath(autoIncludes, dir);
+}
+
+//
+// SourceStream::AddIncludeDirSys
+//
+void SourceStream::AddIncludeDirSys(std::string const &dir)
+{
+   AppendPath(sysIncludes, dir);
+}
+
+//
+// SourceStream::AddIncludeDirUser
+//
+void SourceStream::AddIncludeDirUser(std::string const &dir)
+{
+   AppendPath(userIncludes, dir);
 }
 
 //
@@ -337,6 +533,25 @@ long SourceStream::getLineCount() const
    return countLine;
 }
 
+//
+// SourceStream::Init
+//
+void SourceStream::Init(char const *arg0)
+{
+   std::string exepath = arg0;
+   NormalizePath(exepath);
+   DirectoryPath(exepath);
+
+   if(!exepath.empty())
+      TerminatePath(exepath);
+
+   char pathSep[4] = "..";
+   pathSep[2] = GetPathSep(exepath);
+
+   for(int i = 4; i--; exepath += pathSep)
+      AddIncludeDirSys(exepath + "inc");
+}
+
 bool SourceStream::is_HWS(char c)
 {
    return c == ' ' || c == '\t';
@@ -350,6 +565,14 @@ bool SourceStream::isInComment() const
 bool SourceStream::isInQuote() const
 {
    return inQuoteDouble || inQuoteSingle;
+}
+
+//
+// SourceStream::PopIncludeDir
+//
+void SourceStream::PopIncludeDir()
+{
+   autoIncludes.pop_back();
 }
 
 bool SourceStream::skipHWS()

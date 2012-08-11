@@ -268,6 +268,7 @@ static inline void _init(int argc, char const *const *argv)
    BinaryTokenZDACS::init();
    SourceContext::init();
    SourceExpressionDS::init();
+   SourceStream::Init(argc ? argv[0] : "");
 
    option::help_program = argv[0];
 
