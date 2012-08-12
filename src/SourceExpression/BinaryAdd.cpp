@@ -70,13 +70,13 @@ public:
       {
          // Pointer constraints.
          if (btL == VariableType::BT_PTR && btR == VariableType::BT_PTR)
-            ERROR_NP("pointer + pointer");
+            Error_NP("pointer + pointer");
 
          if (btL == VariableType::BT_PTR && !VariableType::is_bt_integer(btR))
-            ERROR_NP("pointer + non-integer");
+            Error_NP("pointer + non-integer");
 
          if (!VariableType::is_bt_integer(btL) && btR == VariableType::BT_PTR)
-            ERROR_NP("non-integer + pointer");
+            Error_NP("non-integer + pointer");
       }
       else
       {
@@ -84,7 +84,7 @@ public:
       }
 
       if(assign && !VariableType::is_bt_arithmetic(btR))
-         ERROR_NP("X += non-arithmetic");
+         Error_NP("X += non-arithmetic");
 
       CONSTRUCTOR_POINTER_PREAMBLE();
 
@@ -202,7 +202,7 @@ protected:
             break;
 
          default:
-            ERROR_NP("invalid MT");
+            Error_NP("invalid MT");
          }
 
          return;

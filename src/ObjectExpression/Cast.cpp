@@ -196,7 +196,7 @@ private:
          return;
       }
 
-      ERROR_NP("cannot write ACS+");
+      Error_NP("cannot write ACS+");
    }
 
    ExpressionType dstType;

@@ -55,7 +55,7 @@ static void make_objects_literal
    case VariableType::BT_FLT_LL:
    case VariableType::BT_UNION:
    case VariableType::BT_FUN_ASM:
-      ERROR_P("bad BT: %s", make_string(type->getBasicType()).c_str());
+      Error_P("bad BT: %s", make_string(type->getBasicType()).c_str());
 
    case VariableType::BT_CLX:
    case VariableType::BT_CLX_IM:
@@ -67,7 +67,7 @@ static void make_objects_literal
       VariableType::Vector const &types = type->getTypes();
 
       if (elems.size() != types.size())
-         ERROR_P("incorrect elem count");
+         Error_P("incorrect elem count");
 
       for (size_t i = 0; i < elems.size(); ++i)
          make_objects_literal(objects, elems[i], types[i], pos);
@@ -152,7 +152,7 @@ static void make_objects_literal
       VariableType::Reference types = type->getReturn();
 
       if (elems.size() != static_cast<size_t>(type->getWidth()))
-         ERROR_P("incorrect elem count");
+         Error_P("incorrect elem count");
 
       for (size_t i = 0; i < elems.size(); ++i)
          make_objects_literal(objects, elems[i], types, pos);
@@ -198,7 +198,7 @@ static void make_objects_memcpy_post_part
    // MT_LITERAL
    //
    case VariableData::MT_LITERAL:
-      if (set) ERROR_P("MT_LITERAL as dst");
+      if (set) Error_P("MT_LITERAL as dst");
       if (get) make_objects_literal(objects, data->address, type, pos);
       break;
 
@@ -206,8 +206,8 @@ static void make_objects_memcpy_post_part
    // MT_NONE
    //
    case VariableData::MT_NONE:
-      if (set) ERROR_P("MT_NONE as dst");
-      if (get) ERROR_P("MT_NONE as src");
+      if (set) Error_P("MT_NONE as dst");
+      if (get) Error_P("MT_NONE as src");
       break;
 
    //
@@ -218,7 +218,7 @@ static void make_objects_memcpy_post_part
          data->offsetTemp = ptrStack;
 
       if(data->offsetTemp->type != VariableData::MT_STACK)
-         ERROR_P("offsetTemp not MT_STACK");
+         Error_P("offsetTemp not MT_STACK");
 
       data->offsetExpr->makeObjects(objects, data->offsetTemp);
 
@@ -261,7 +261,7 @@ static void make_objects_memcpy_post_part
          data->offsetTemp = ptrStack;
 
       if(data->offsetTemp->type != VariableData::MT_STACK)
-         ERROR_P("offsetTemp not MT_STACK");
+         Error_P("offsetTemp not MT_STACK");
 
       data->offsetExpr->makeObjects(objects, data->offsetTemp);
 
@@ -359,7 +359,7 @@ static void make_objects_memcpy_post_part
          data->offsetTemp = ptrStack;
 
       if (data->offsetTemp->type != VariableData::MT_STACK)
-         ERROR_P("offsetTemp not MT_STACK");
+         Error_P("offsetTemp not MT_STACK");
 
       // If only get or set and size is 1, only need one copy of the address.
       // Furthermore, that one copy has already been setup by prep.
@@ -476,7 +476,7 @@ static void make_objects_memcpy_post_part
       // Already on stack, no need to do anything.
 
       // But if asked to dup, that can only be done for single-byte values.
-      if (get && set) ERROR_P("MT_STACK as dup");
+      if (get && set) Error_P("MT_STACK as dup");
 
       break;
 
@@ -501,11 +501,11 @@ static void make_objects_memcpy_post_part
          data->offsetTemp = ptrStack;
 
       if(data->offsetTemp->type != VariableData::MT_STACK)
-         ERROR_P("offsetTemp not MT_STACK");
+         Error_P("offsetTemp not MT_STACK");
 
       data->offsetExpr->makeObjects(objects, data->offsetTemp);
 
-      if(set) ERROR_P("MT_STRING as dst");
+      if(set) Error_P("MT_STRING as dst");
 
       if(get)
       {
@@ -538,7 +538,7 @@ static void make_objects_memcpy_post_part
       if (set) for (i = data->size; i--;)
          objects->addToken(OCODE_STK_DROP);
 
-      if (get) ERROR_P("MT_VOID as src");
+      if (get) Error_P("MT_VOID as src");
 
       break;
    }
@@ -590,10 +590,10 @@ void SourceExpression::make_objects_memcpy_prep
       break;
 
    case VariableData::MT_LITERAL:
-      ERROR_P("MT_LITERAL as dst");
+      Error_P("MT_LITERAL as dst");
 
    case VariableData::MT_NONE:
-      ERROR_P("MT_NONE as dst");
+      Error_P("MT_NONE as dst");
 
    case VariableData::MT_ARRAY:
       if (!dst->offsetTemp)
@@ -605,7 +605,7 @@ void SourceExpression::make_objects_memcpy_prep
          objects->addTokenPushZero();
 
       if (dst->offsetTemp->type != VariableData::MT_STACK)
-         ERROR_P("offsetTemp not MT_STACK");
+         Error_P("offsetTemp not MT_STACK");
 
       break;
    }
@@ -625,10 +625,10 @@ void SourceExpression::make_objects_memcpy_prep
       break;
 
    case VariableData::MT_NONE:
-      ERROR_P("MT_NONE as src");
+      Error_P("MT_NONE as src");
 
    case VariableData::MT_VOID:
-      ERROR_P("MT_VOID as src");
+      Error_P("MT_VOID as src");
    }
 }
 

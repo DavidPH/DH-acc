@@ -85,7 +85,7 @@ SourceFunction::~SourceFunction()
 void SourceFunction::setBody(SourceExpression *expr,
    VariableType::Vector const &_argTypes, SourcePosition const &pos)
 {
-   if(body) ERROR_P("redefined function");
+   if(body) Error_P("redefined function");
 
    body = expr;
    argTypes = _argTypes;
@@ -128,13 +128,13 @@ SourceFunction::Reference SourceFunction::FindFunction(SourceVariable *var, ArgV
    {
       // Check for redefined defaults.
       for(ArgVec::const_iterator itr = args.begin(), end = args.end(); itr != end; ++itr)
-         if(*itr) ERROR(var->getPosition(), "redefined defaults");
+         if(*itr) Error(var->getPosition(), "redefined defaults");
 
       Reference func = funcp->second;
 
       // Check type.
       //if(func->var->getType() != var->getType())
-      //   ERROR(var->getPosition(), "wrong type");
+      //   Error(var->getPosition(), "wrong type");
 
       return func;
    }

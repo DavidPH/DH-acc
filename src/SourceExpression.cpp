@@ -276,7 +276,7 @@ get_promoted_type(VariableType *_type1, VariableType *_type2,
 //
 VariableData::Pointer SourceExpression::getData() const
 {
-   ERROR_NP("expected lvalue");
+   Error_NP("expected lvalue");
 }
 
 //
@@ -284,7 +284,7 @@ VariableData::Pointer SourceExpression::getData() const
 //
 CounterReference<SourceFunction> SourceExpression::getFunction() const
 {
-   ERROR_NP("expected function designator");
+   Error_NP("expected function designator");
 }
 
 //
@@ -589,7 +589,7 @@ SourceExpression::Pointer SourceExpression::makeExpressionFunction(
    if(bt == VariableType::BT_PTR && VariableType::is_bt_function(type->getReturn()->getBasicType()))
       return create_unary_dereference(this, context, pos);
 
-   ERROR_NP("expected function designator");
+   Error_NP("expected function designator");
 }
 
 //
@@ -600,7 +600,7 @@ ObjectExpression::Pointer SourceExpression::makeObject() const
    VariableData::Pointer src = getData();
 
    if(src->type != VariableData::MT_LITERAL)
-      ERROR_NP("expected constant");
+      Error_NP("expected constant");
 
    return src->address;
 }
@@ -640,7 +640,7 @@ void SourceExpression::makeObjectsBase(ObjectVector *objects, VariableData *)
    if(!labels.empty())
    {
       if(evaluated)
-         ERROR_NP("multiple-evaluation of labeled expression");
+         Error_NP("multiple-evaluation of labeled expression");
 
       objects->addLabel(labels);
    }

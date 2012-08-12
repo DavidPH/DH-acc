@@ -76,7 +76,7 @@ bool SourceExpression_Binary::canMakeObject() const
 //
 void SourceExpression_Binary::doGet(ObjectVector *, VariableType *, int)
 {
-   ERROR_NP("stub");
+   Error_NP("stub");
 }
 
 //
@@ -210,7 +210,7 @@ void SourceExpression_Binary::doGetBaseILB(ObjectVector *objects,
 //
 void SourceExpression_Binary::doSet(ObjectVector *, VariableData *, VariableType *, int)
 {
-   ERROR_NP("stub");
+   Error_NP("stub");
 }
 
 //
@@ -335,7 +335,7 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
       if(tmp->size == 1)
          objects->addToken(OCODE_STK_SWAP);
       else
-         ERROR_NP("stub");
+         Error_NP("stub");
 
       objects->addToken(OCODE_SET_TEMP, tmpB);
    }
@@ -345,7 +345,7 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
       if(tmp->size == 1)
          objects->addToken(OCODE_STK_SWAP);
       else
-         ERROR_NP("stub");
+         Error_NP("stub");
 
       objects->addToken(OCODE_SET_TEMP, tmpA);
    }
@@ -377,7 +377,7 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
 void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
     VariableData *src, ObjectExpression *tmpA, ObjectExpression *tmpB)
 {
-   if(src->size != 1) ERROR_NP("stub");
+   if(src->size != 1) Error_NP("stub");
 
    switch (src->type)
    {
@@ -417,7 +417,7 @@ void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
       break;
    case VariableData::MT_STATIC:
       objects->addToken(OCODE_GET_STATIC, src->address); break;
-   default: ERROR_NP("src->type");
+   default: Error_NP("src->type");
    }
 }
 
@@ -427,7 +427,7 @@ void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
 void SourceExpression_Binary::doSetBaseSet(ObjectVector *objects,
    VariableData *src, ObjectExpression *tmpA, ObjectExpression *tmpB)
 {
-   if(src->size != 1) ERROR_NP("stub");
+   if(src->size != 1) Error_NP("stub");
 
    switch (src->type)
    {
@@ -471,7 +471,7 @@ void SourceExpression_Binary::doSetBaseSet(ObjectVector *objects,
       break;
    case VariableData::MT_STATIC:
       objects->addToken(OCODE_SET_STATIC, src->address); break;
-   default: ERROR_NP("src->type");
+   default: Error_NP("src->type");
    }
 }
 

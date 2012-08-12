@@ -355,7 +355,7 @@ char SourceStream::get()
       if (curC == '\n')
       {
          if(isInQuote())
-            ERROR(SourcePosition(filename, countLine, countColumn), "unterminated string");
+            Error(SourcePosition(filename, countLine, countColumn), "unterminated string");
 
          inComment = false;
          countColumn = 0;
@@ -508,7 +508,7 @@ char SourceStream::get()
             #undef IORDIGIT
 
          default:
-            ERROR(SourcePosition(filename, countLine, countColumn),
+            Error(SourcePosition(filename, countLine, countColumn),
                   "unknown escape character '\\%c'", _newC);
          }
       }

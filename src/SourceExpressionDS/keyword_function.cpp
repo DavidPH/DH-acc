@@ -95,7 +95,7 @@ static SourceExpression::Pointer make_func
    if(args.name.empty())
    {
       linkSpec = LINKAGE_INTERN;
-      if(externDef) ERROR(tok->pos, "extern anonymous");
+      if(externDef) Error(tok->pos, "extern anonymous");
    }
 
    // funcNameObj
@@ -189,7 +189,7 @@ static SourceExpression::Pointer make_func
    if(!externDef)
    {
       if(in->peekType(SourceTokenC::TT_SEMICOLON))
-         WARN(tok->pos, "empty function definition, did you mean extern __function?");
+         Warn(tok->pos, "empty function definition, did you mean extern __function?");
 
       func->setBody(SourceExpressionDS::make_prefix(in, args.context),
                     args.types, tok->pos);

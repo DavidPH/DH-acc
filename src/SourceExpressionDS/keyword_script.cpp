@@ -110,7 +110,7 @@ static ObjectData_Script::ScriptFlag make_script_flag(SourceTokenizerC *in)
    if (tok->data == "__net")        return ObjectData_Script::SF_NET;
    if (tok->data == "__clientside") return ObjectData_Script::SF_CLIENTSIDE;
 
-   ERROR(tok->pos, "invalid script-flag: %s", tok->data.c_str());
+   Error(tok->pos, "invalid script-flag: %s", tok->data.c_str());
 }
 
 //
@@ -130,7 +130,7 @@ static ObjectData_Script::ScriptType make_script_type(SourceTokenizerC *in)
    if (tok->data == "__disconnect") return ObjectData_Script::ST_DISCONNECT;
    if (tok->data == "__return")     return ObjectData_Script::ST_RETURN;
 
-   ERROR(tok->pos, "invalid script-type: %s", tok->data.c_str());
+   Error(tok->pos, "invalid script-type: %s", tok->data.c_str());
 }
 
 //
@@ -197,7 +197,7 @@ static SourceExpression::Pointer make_script
    if(args.name.empty())
    {
       linkSpec = LINKAGE_INTERN;
-      if(externDef) ERROR(tok->pos, "extern anonymous");
+      if(externDef) Error(tok->pos, "extern anonymous");
    }
 
    // scriptNameObj
@@ -295,7 +295,7 @@ static SourceExpression::Pointer make_script
    if(!externDef)
    {
       if(in->peekType(SourceTokenC::TT_SEMICOLON))
-         WARN(tok->pos, "empty script definition, did you mean extern __script?");
+         Warn(tok->pos, "empty script definition, did you mean extern __script?");
 
       func->setBody(SourceExpressionDS::make_prefix(in, args.context),
                     args.types, tok->pos);

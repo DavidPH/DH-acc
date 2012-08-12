@@ -60,7 +60,7 @@ void SourceExpression::make_objects_call
          (objects, dst, func, type, expr->makeObject(), args, context, pos);
       }
       else
-         ERROR_P("non-constant asmfunc");
+         Error_P("non-constant asmfunc");
       break;
 
    case VariableType::BT_FUN_LIN:
@@ -70,7 +70,7 @@ void SourceExpression::make_objects_call
          (objects, dst, func, type, expr->makeObject(), args, context, pos);
       }
       else
-         ERROR_P("non-constant linespec");
+         Error_P("non-constant linespec");
       break;
 
    case VariableType::BT_FUN_NAT:
@@ -80,7 +80,7 @@ void SourceExpression::make_objects_call
          (objects, dst, func, type, expr->makeObject(), args, context, pos);
       }
       else
-         ERROR_P("non-constant native");
+         Error_P("non-constant native");
       break;
 
    case VariableType::BT_FUN_SNA:
@@ -89,7 +89,7 @@ void SourceExpression::make_objects_call
       break;
 
    default:
-      ERROR_P("attempt to call uncallable");
+      Error_P("attempt to call uncallable");
    }
 }
 

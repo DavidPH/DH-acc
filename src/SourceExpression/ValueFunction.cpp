@@ -106,7 +106,7 @@ public:
       if(func)
          return func->var->getType();
 
-      ERROR_NP("designator has no type");
+      Error_NP("designator has no type");
    }
 
    //

@@ -85,7 +85,7 @@ SRCEXPDS_KEYWORD_DEFN(cast)
    if(tok->data == "__store_cast")
       return create_value_cast_storage(expr, type, context, tok->pos);
 
-   ERROR(tok->pos, "unknown cast: %s", tok->data.c_str());
+   Error(tok->pos, "unknown cast: %s", tok->data.c_str());
 }
 
 //

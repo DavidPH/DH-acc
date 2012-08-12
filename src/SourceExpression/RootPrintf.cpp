@@ -122,7 +122,7 @@ public:
       else if (type == "__printf_string")
          printfType = PT_STRING;
       else
-         ERROR_NP("unrecognized printfType: %s", type.c_str());
+         Error_NP("unrecognized printfType: %s", type.c_str());
    }
 
    //
@@ -144,7 +144,7 @@ public:
          return VariableType::get_bt_str();
       }
 
-      ERROR_NP("unrecognized printfType");
+      Error_NP("unrecognized printfType");
    }
 
 private:
@@ -211,7 +211,7 @@ private:
          break;
 
       default:
-         ERROR_NP("unrecognized format char: %c", data.fmt);
+         Error_NP("unrecognized format char: %c", data.fmt);
       }
    }
 
@@ -240,7 +240,7 @@ private:
       }
 
       if(argBT != VariableType::BT_PTR)
-         ERROR_NP("expected pointer got %s", make_string(argType).c_str());
+         Error_NP("expected pointer got %s", make_string(argType).c_str());
 
       argExpr->makeObjects(objects, VariableData::create_stack(argSize));
 
@@ -283,7 +283,7 @@ private:
       }
 
       if (argBT != VariableType::BT_PTR)
-         ERROR_NP("expected pointer got %s", make_string(argType).c_str());
+         Error_NP("expected pointer got %s", make_string(argType).c_str());
 
       // Convert auto* to static*.
       StoreType argStore = argType->getReturn()->getStoreType();
@@ -309,13 +309,13 @@ private:
       case STORE_AUTO:
       case STORE_CONST:
       case STORE_STRING:
-         ERROR_NP("cannot %%s pointer");
+         Error_NP("cannot %%s pointer");
 
       case STORE_REGISTER:
       case STORE_MAPREGISTER:
       case STORE_WORLDREGISTER:
       case STORE_GLOBALREGISTER:
-         ERROR_NP("cannot %%s register-pointer");
+         Error_NP("cannot %%s register-pointer");
 
       case STORE_MAPARRAY:
          objects->addToken(OCODE_GET_IMM,
@@ -425,7 +425,7 @@ private:
    //
    SourceExpression::Pointer nextExpr()
    {
-      if (!*expr) ERROR_NP("insufficient arguments");
+      if (!*expr) Error_NP("insufficient arguments");
 
       return *expr++;
    }
@@ -572,7 +572,7 @@ private:
             break;
 
          default:
-            ERROR_NP("unrecognized hud msgtype");
+            Error_NP("unrecognized hud msgtype");
          }
       }
          break;

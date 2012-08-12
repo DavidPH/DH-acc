@@ -57,7 +57,7 @@ void SourceExpression::make_objects_call_asmfunc
    for (size_t i = 0; i < callTypes.size(); ++i)
    {
       if (!callTypes[i])
-         ERROR_P("variadic");
+         Error_P("variadic");
 
       callSize += callTypes[i]->getSize(pos);
 
@@ -69,10 +69,10 @@ void SourceExpression::make_objects_call_asmfunc
          arg = func->args[i];
 
       if(!arg)
-         ERROR_P("bad count");
+         Error_P("bad count");
 
       if (arg->getType() != callTypes[i])
-         ERROR(arg->pos, "bad type");
+         Error(arg->pos, "bad type");
 
       immediate = immediate && arg->canMakeObject();
    }
@@ -94,7 +94,7 @@ void SourceExpression::make_objects_call_asmfunc
    else
    {
       if (ocode.ocode == OCODE_NONE)
-         ERROR_P("no ocode");
+         Error_P("no ocode");
 
       for(size_t i = 0; i < callTypes.size(); ++i)
       {

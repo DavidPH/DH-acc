@@ -110,7 +110,7 @@ SourceExpression_BinaryArray::SourceExpression_BinaryArray(SRCEXP_EXPRBIN_PARM)
 
    // Can only be done for BT_ARR.
    if(btL != VariableType::BT_ARR)
-      ERROR_NP("expected BT_ARR, got: %s", make_string(btL).c_str());
+      Error_NP("expected BT_ARR, got: %s", make_string(btL).c_str());
 }
 
 //

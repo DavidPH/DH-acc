@@ -47,13 +47,13 @@
 
 #define FUNCTION_ARGS                                   \
    if (callTypes.size() < args.size())                  \
-      ERROR_P("bad count");                             \
+      Error_P("bad count");                             \
                                                         \
    /* Evaluate the arguments. */                        \
    for (size_t i = 0; i < callTypes.size(); ++i)        \
    {                                                    \
       if (!callTypes[i])                                \
-         ERROR_P("variadic");                           \
+         Error_P("variadic");                           \
                                                         \
       callSize += callTypes[i]->getSize(pos);           \
                                                         \
@@ -64,7 +64,7 @@
          arg = func->args[i];                           \
                                                         \
       if(!arg)                                          \
-         ERROR_P("bad count");                          \
+         Error_P("bad count");                          \
                                                         \
       VariableType::Reference argType = arg->getType(); \
       bigsint argSize = argType->getSize(pos);          \
@@ -72,7 +72,7 @@
          VariableData::create_stack(argSize);           \
                                                         \
       if (argType != callTypes[i])                      \
-         ERROR(args[i]->pos, "bad type");               \
+         Error(args[i]->pos, "bad type");               \
                                                         \
       arg->makeObjects(objects, argDst);                \
    }                                                    \

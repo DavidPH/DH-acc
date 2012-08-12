@@ -83,7 +83,7 @@ private:
             sizeAuto += size;
          }
          else
-            ERROR_NP("unexpected argument storage");
+            Error_NP("unexpected argument storage");
 
          sizeAll += size;
       }

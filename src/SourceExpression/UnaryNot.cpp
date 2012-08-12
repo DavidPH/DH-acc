@@ -111,7 +111,7 @@ void SourceExpression_UnaryNot::virtual_makeObjects
       break;
 
    default:
-      ERROR_NP("invalid BT: %s", make_string(type->getBasicType()).c_str());
+      Error_NP("invalid BT: %s", make_string(type->getBasicType()).c_str());
    }
 
    make_objects_memcpy_post(objects, dst, src, type, context, pos);

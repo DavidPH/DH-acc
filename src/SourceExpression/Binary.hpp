@@ -83,20 +83,20 @@ SourceExpression::Pointer exprSize =                      \
 //
 #define CONSTRAINT_ARITHMETIC(OPER)           \
 if (!VariableType::is_bt_arithmetic(btL))     \
-   ERROR_N(pos, "non-arithmetic " OPER " X"); \
+   Error_N(pos, "non-arithmetic " OPER " X"); \
                                               \
 if (!VariableType::is_bt_arithmetic(btR))     \
-   ERROR_N(pos, "X " OPER " non-arithmetic");
+   Error_N(pos, "X " OPER " non-arithmetic");
 
 //
 // CONSTRAINT_INTEGER
 //
 #define CONSTRAINT_INTEGER(OPER)           \
 if (!VariableType::is_bt_integer(btL))     \
-   ERROR_N(pos, "non-integer " OPER " X"); \
+   Error_N(pos, "non-integer " OPER " X"); \
                                            \
 if (!VariableType::is_bt_integer(btR))     \
-   ERROR_N(pos, "X " OPER " non-integer");
+   Error_N(pos, "X " OPER " non-integer");
 
 //
 // DO_GET_CASES
@@ -120,7 +120,7 @@ case VariableType::BT_UNS: objects->addToken(OCODE_##OP##_STK_U); break;    \
                                                                             \
 case VariableType::BT_PTR: objects->addToken(OCODE_##OP##_STK_U); break;    \
                                                                             \
-default: ERROR_NP("invalid BT: %s", make_string(type->getBasicType()).c_str())
+default: Error_NP("invalid BT: %s", make_string(type->getBasicType()).c_str())
 
 //
 // DO_GET_SWITCH
@@ -150,7 +150,7 @@ case VariableType::BT_UNS: objects->addToken(OCODE_##OP##_##MT##_U, data->addres
  \
 case VariableType::BT_PTR: objects->addToken(OCODE_##OP##_##MT##_U, data->address); break; \
  \
-default: ERROR_NP("invalid BT: %s", make_string(type->getBasicType()).c_str())
+default: Error_NP("invalid BT: %s", make_string(type->getBasicType()).c_str())
 
 //
 // DO_SET_SWITCH
@@ -179,7 +179,7 @@ case VariableData::MT_ARRAY: \
    case VariableData::SA_WORLD: DO_SET_SWITCH(OP, WLDARR); break; \
    case VariableData::SA_GLOBAL: DO_SET_SWITCH(OP, GBLARR); break; \
    } break; \
-default: ERROR_NP("invalid MT"); }
+default: Error_NP("invalid MT"); }
 
 //
 // CAN_SET_CASES

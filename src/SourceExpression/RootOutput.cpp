@@ -168,7 +168,7 @@ void SourceExpression_RootOutput::doOut
    case VariableType::BT_FLT:
    case VariableType::BT_FLT_L:
    case VariableType::BT_FLT_LL:
-      ERROR_NP("unsupported BT: %s", make_string(bt).c_str());
+      Error_NP("unsupported BT: %s", make_string(bt).c_str());
 
    case VariableType::BT_INT_HH:
       objects->addToken(OCODE_ACSP_NUM_DEC_I);

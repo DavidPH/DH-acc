@@ -36,35 +36,35 @@
 //
 // ERROR
 //
-#define ERROR(POS,...) \
+#define Error(POS,...) \
 SourceException::error \
 (__FILE__, __LINE__, __func__, NULL, POS, __VA_ARGS__)
-#define ERROR_N(POS,...) \
+#define Error_N(POS,...) \
 SourceException::error   \
 (__FILE__, __LINE__, __func__, getClassName(), POS, __VA_ARGS__)
-#define ERROR_NP(...)  \
+#define Error_NP(...)  \
 SourceException::error \
 (__FILE__, __LINE__, __func__, getClassName(), pos, __VA_ARGS__)
-#define ERROR_Np(...)  \
+#define Error_Np(...)  \
 SourceException::error \
 (__FILE__, __LINE__, __func__, getClassName(), SourcePosition::none(), __VA_ARGS__)
-#define ERROR_P(...)   \
+#define Error_P(...)   \
 SourceException::error \
 (__FILE__, __LINE__, __func__, NULL, pos, __VA_ARGS__)
-#define ERROR_p(...)   \
+#define Error_p(...)   \
 SourceException::error \
 (__FILE__, __LINE__, __func__, NULL, SourcePosition::none(), __VA_ARGS__)
 
 //
 // WARN
 //
-#define WARN(POS,...) \
+#define Warn(POS,...) \
 SourceException::warn(__FILE__, __LINE__, __func__, NULL, POS, __VA_ARGS__)
-#define WARN_N(POS,...) \
+#define Warn_N(POS,...) \
 SourceException::warn(__FILE__, __LINE__, __func__, getClassName(), POS, __VA_ARGS__)
-#define WARN_NP(...) \
+#define Warn_NP(...) \
 SourceException::warn(__FILE__, __LINE__, __func__, getClassName(), pos, __VA_ARGS__)
-#define WARN_P(...) \
+#define Warn_P(...) \
 SourceException::warn(__FILE__, __LINE__, __func__, NULL, pos, __VA_ARGS__)
 
 

@@ -162,7 +162,7 @@ void SourceExpression_UnarySub::virtual_makeObjects
       break;
 
    default:
-      ERROR_NP("invalid BT");
+      Error_NP("invalid BT");
    }
 
    make_objects_memcpy_post(objects, dst, src, type, context, pos);

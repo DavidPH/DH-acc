@@ -234,7 +234,7 @@ SRCEXPDS_EXPR_DEF1(primary)
 SRCEXPDS_EXPR_DEF2(primary)
 {
    (void)in; (void)context; (void)expr;
-   ERROR_p("stub");
+   Error_p("stub");
 }
 
 //
@@ -332,7 +332,7 @@ SRCEXPDS_EXPR_DEF1(prefix)
       case VariableData::MT_STACK:
       case VariableData::MT_STRING:
       case VariableData::MT_VOID:
-         ERROR(tok->pos, "invalid MT for @");
+         Error(tok->pos, "invalid MT for @");
 
       case VariableData::MT_ARRAY:
          addr = data->address;
@@ -365,7 +365,7 @@ SRCEXPDS_EXPR_DEF1(prefix)
 SRCEXPDS_EXPR_DEF2(prefix)
 {
    (void)in; (void)context; (void)expr;
-   ERROR_p("stub");
+   Error_p("stub");
 }
 
 //
@@ -560,7 +560,7 @@ LinkageSpecifier SourceExpressionDS::make_linkspec(SourceTokenizerC *in)
    else if (linkSpecTok->data == "DS")
       return LINKAGE_DS;
    else
-      ERROR(linkSpecTok->pos, "unknown linkage specifier '%s'",
+      Error(linkSpecTok->pos, "unknown linkage specifier '%s'",
             linkSpecTok->data.c_str());
 }
 

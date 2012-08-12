@@ -160,9 +160,9 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
       tok = in->get();
    }
 
-   if(typeShort && typeLong) ERROR(tok->pos, "short long");
-   if(typeShort > 2) ERROR(tok->pos, "short short short");
-   if(typeLong  > 2) ERROR(tok->pos, "long long long");
+   if(typeShort && typeLong) Error(tok->pos, "short long");
+   if(typeShort > 2) Error(tok->pos, "short short short");
+   if(typeLong  > 2) Error(tok->pos, "long long long");
 
    // Default to int. Except for _Complex or _Imaginary, then default to double.
    if(!typeBase) typeBase = typeCmplx ? TYPE_BASE_DOUBLE : TYPE_BASE_INT;
@@ -172,8 +172,8 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
    switch (typeBase)
    {
    case TYPE_BASE_CHAR:
-      if(typeLong)  ERROR(tok->pos, "long char");
-      if(typeShort) ERROR(tok->pos, "short char");
+      if(typeLong)  Error(tok->pos, "long char");
+      if(typeShort) Error(tok->pos, "short char");
 
       if(typeSign < 0) {bt = VariableType::BT_INT_HH; break;}
       if(typeSign > 0) {bt = VariableType::BT_UNS_HH; break;}
@@ -200,8 +200,8 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
    case TYPE_BASE_DOUBLE:
       ++typeLong;
    case TYPE_BASE_FLOAT:
-      if(typeSign > 0) ERROR(tok->pos, "unsigned float");
-      if(typeSign < 0) ERROR(tok->pos, "signed float");
+      if(typeSign > 0) Error(tok->pos, "unsigned float");
+      if(typeSign < 0) Error(tok->pos, "signed float");
 
       if(typeShort == 2) {bt = VariableType::BT_FLT_HH; break;}
       if(typeShort == 1) {bt = VariableType::BT_FLT_H;  break;}
@@ -210,8 +210,8 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
       bt = VariableType::BT_FLT; break;
 
    case TYPE_BASE_FIXED:
-      if(typeSign > 0) ERROR(tok->pos, "unsigned fixed");
-      if(typeSign < 0) ERROR(tok->pos, "signed fixed");
+      if(typeSign > 0) Error(tok->pos, "unsigned fixed");
+      if(typeSign < 0) Error(tok->pos, "signed fixed");
 
       if(typeShort == 2) {bt = VariableType::BT_FIX_HH; break;}
       if(typeShort == 1) {bt = VariableType::BT_FIX_H;  break;}
@@ -220,8 +220,8 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
       bt = VariableType::BT_FIX; break;
 
    case TYPE_BASE_REAL:
-      if(typeSign > 0) ERROR(tok->pos, "unsigned real");
-      if(typeSign < 0) ERROR(tok->pos, "signed real");
+      if(typeSign > 0) Error(tok->pos, "unsigned real");
+      if(typeSign < 0) Error(tok->pos, "signed real");
 
       if(typeShort == 2) {bt = VariableType::BT_FIX_HH; break;}
       if(typeShort == 1) {bt = VariableType::BT_FIX_H;  break;}

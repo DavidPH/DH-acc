@@ -60,7 +60,7 @@ void SourceExpression::make_objects_call_linespec
       case 3: ocode = OCODE_ACS_SPECIAL_EXEC3; break;
       case 4: ocode = OCODE_ACS_SPECIAL_EXEC4; break;
       case 5: ocode = OCODE_ACS_SPECIAL_EXEC5; break;
-      default: ERROR_P("bad call-size");
+      default: Error_P("bad call-size");
       }
    }
    else if (retnSize == 1)
@@ -73,11 +73,11 @@ void SourceExpression::make_objects_call_linespec
       case 3: objects->addTokenPushZero();
       case 4: objects->addTokenPushZero();
       case 5: ocode = OCODE_ACSE_SPECIAL_EXEC5_RETN1; break;
-      default: ERROR_P("bad call-size");
+      default: Error_P("bad call-size");
       }
    }
    else
-      ERROR_P("bad return-size");
+      Error_P("bad return-size");
 
    objects->addToken(ocode, ospec);
 

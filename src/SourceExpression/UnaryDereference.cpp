@@ -116,7 +116,7 @@ public:
          }
 
       case STORE_CONST:
-         ERROR_NP("STORE_CONST");
+         Error_NP("STORE_CONST");
 
       case STORE_REGISTER:
          sectionR = VariableData::SR_LOCAL;

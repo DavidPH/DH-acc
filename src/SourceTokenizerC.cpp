@@ -254,7 +254,7 @@ void SourceTokenizerC::addSkip(bool skip)
 void SourceTokenizerC::doAssert(SourceTokenC *tok, SourceTokenC::TokenType type)
 {
    if (tok->type != type)
-      ERROR(tok->pos, "expected %s got %s", make_string(type).c_str(),
+      Error(tok->pos, "expected %s got %s", make_string(type).c_str(),
             make_string(tok->type).c_str());
 }
 
@@ -264,7 +264,7 @@ void SourceTokenizerC::doAssert(SourceTokenC *tok, SourceTokenC::TokenType type)
 void SourceTokenizerC::doAssert(SourceTokenC *tok, std::string const &data)
 {
    if (tok->data != data)
-      ERROR(tok->pos, "expected %s got %s", data.c_str(), tok->data.c_str());
+      Error(tok->pos, "expected %s got %s", data.c_str(), tok->data.c_str());
 }
 
 //
@@ -285,7 +285,7 @@ void SourceTokenizerC::doCommand()
    else if (tok->data == "include") doCommand_include(tok);
    else if (tok->data == "undef")   doCommand_undef(tok);
 
-   else ERROR(tok->pos, "unknown command: %s", tok->data.c_str());
+   else Error(tok->pos, "unknown command: %s", tok->data.c_str());
 }
 
 //
@@ -350,7 +350,7 @@ void SourceTokenizerC::doCommand_else(SourceTokenC *tok)
    doAssert(peekRaw(), SourceTokenC::TT_ENDL);
 
    if (skipStack.empty())
-      ERROR(tok->pos, "unmatched #else");
+      Error(tok->pos, "unmatched #else");
 
    skipStack.back() = unskipStack.back();
    unskipStack.back() = true; // If it wasn't, it is now.
@@ -362,7 +362,7 @@ void SourceTokenizerC::doCommand_else(SourceTokenC *tok)
 void SourceTokenizerC::doCommand_elif(SourceTokenC *tok)
 {
    if (skipStack.empty())
-      ERROR(tok->pos, "unmatched #elif");
+      Error(tok->pos, "unmatched #elif");
 
    bool ifResult = !!getExpr()->resolveINT();
    doAssert(peekRaw(), SourceTokenC::TT_ENDL);
@@ -379,7 +379,7 @@ void SourceTokenizerC::doCommand_endif(SourceTokenC *tok)
    doAssert(peekRaw(), SourceTokenC::TT_ENDL);
 
    if (skipStack.empty())
-      ERROR(tok->pos, "unmatched #endif");
+      Error(tok->pos, "unmatched #endif");
 
    remSkip();
 }
@@ -394,7 +394,7 @@ void SourceTokenizerC::doCommand_error(SourceTokenC *)
 
    if (isSkip()) return;
 
-   ERROR(msg->pos, "#error %s", msg->data.c_str());
+   Error(msg->pos, "#error %s", msg->data.c_str());
 }
 
 //
@@ -445,12 +445,12 @@ void SourceTokenizerC::doCommand_include(SourceTokenC *)
 
       for(char c; (c = inStack.back()->get()) != '>';)
       {
-         if(c == '\n') ERROR(inc->pos, "unterminated include");
+         if(c == '\n') Error(inc->pos, "unterminated include");
          filename += c;
       }
    }
    else
-      ERROR(inc->pos, "expected TT_STR or TT_CMP_LT");
+      Error(inc->pos, "expected TT_STR or TT_CMP_LT");
 
    doAssert(peekRaw(), SourceTokenC::TT_ENDL);
 
@@ -464,7 +464,7 @@ void SourceTokenizerC::doCommand_include(SourceTokenC *)
    }
    catch (std::exception const &)
    {
-      ERROR(inc->pos, "file not found: %s", filename.c_str());
+      Error(inc->pos, "file not found: %s", filename.c_str());
    }
 }
 
@@ -606,7 +606,7 @@ void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
          }
          catch(SourceStream::EndOfStream const &) {}
 
-         if(!arg) ERROR_P("# must be used on arg");
+         if(!arg) Error_P("# must be used on arg");
 
          // Make a string out of the tokens. TT_NONEs are used to preserve whitespace.
          out.push_back(SourceTokenC::tt_str(tok->pos, *arg));
@@ -617,7 +617,7 @@ void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
       // Check for operator ##.
       if(tok->type == SourceTokenC::TT_HASH2)
       {
-         if(out.empty()) ERROR_P("## must not come at beginning");
+         if(out.empty()) Error_P("## must not come at beginning");
 
          try
          {
@@ -625,7 +625,7 @@ void SourceTokenizerC::expand(MacroVec &out, std::set<std::string> &used,
          }
          catch(SourceStream::EndOfStream const &)
          {
-            ERROR_P("## must not come at end");
+            Error_P("## must not come at end");
          }
 
          // Check for argument.
@@ -986,7 +986,7 @@ void SourceTokenizerC::readArgs(MacroArgs &args, SourceStream *in, MacroData con
 
    // And of course, must have the right number of arguments.
    if(args.size() != parm.size())
-      ERROR_P("incorrect arg count for macro, expected %i got %i",
+      Error_P("incorrect arg count for macro, expected %i got %i",
               (int)parm.size(), (int)args.size());
 }
 

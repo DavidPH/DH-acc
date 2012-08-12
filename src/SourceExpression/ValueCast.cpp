@@ -76,7 +76,7 @@ public:
 
       if(VariableType::get_cast(type, exprType) > cast)
       {
-         ERROR_NP("invalid cast: %s to %s",
+         Error_NP("invalid cast: %s to %s",
                  make_string(exprType).c_str(), make_string(type).c_str());
       }
    }
@@ -137,7 +137,7 @@ public:
          exprRetn->getStoreArea() != thisRetn->getStoreArea() ||
          exprRetn->getUnqualified() != thisRetn->getUnqualified())
       {
-         ERROR_NP("invalid const_cast: %s to %s",
+         Error_NP("invalid const_cast: %s to %s",
                   make_string(exprType).c_str(), make_string(type).c_str());
       }
    }
@@ -250,7 +250,7 @@ public:
          exprRetn->getQualifiers() != thisRetn->getQualifiers() ||
          exprRetn->getUnqualified() != thisRetn->getUnqualified())
       {
-         ERROR_NP("invalid store_cast: %s to %s",
+         Error_NP("invalid store_cast: %s to %s",
                   make_string(exprType).c_str(), make_string(type).c_str());
       }
    }

@@ -53,7 +53,7 @@ SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name()
 	}
 	else if (c <= 0x20 || c >= 0x7F)
 	{
-      ERROR(_position, "invalid statement type");
+      Error(_position, "invalid statement type");
 	}
 	else
 	{
@@ -63,7 +63,7 @@ SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name()
 
 	// Read name.
 	if (!isalpha(c) && c != '_')
-      ERROR(_position, "missing statement name");
+      Error(_position, "missing statement name");
 
 	while (isalnum(c) || c == '_')
 	{
@@ -78,7 +78,7 @@ SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name()
 
 	// Check for and skip HWS after name.
 	if (!in->skipHWS())
-      ERROR(_position, "statement name not followed by HWS");
+      Error(_position, "statement name not followed by HWS");
 
 	// Read expression list.
 	while (true)
@@ -94,7 +94,7 @@ SourceTokenASMPLX::SourceTokenASMPLX(SourceStream * const in) : _data(), _name()
 		if (c == ',') continue;
 		if (c == '\n') break;
 
-      ERROR(_position, "invalid expression");
+      Error(_position, "invalid expression");
 	}
 }
 
@@ -106,19 +106,19 @@ bigsint SourceTokenASMPLX::char_to_int(char c, bigsint base, SourcePosition cons
 		if (c >= '0' && c <= '1')
 			return c - '0';
 		else
-         ERROR(position, "invalid bin number");
+         Error(position, "invalid bin number");
 
 	case 8:
 		if (c >= '0' && c <= '7')
 			return c - '0';
 		else
-         ERROR(position, "invalid oct number");
+         Error(position, "invalid oct number");
 
 	case 10:
 		if (c >= '0' && c <= '9')
 			return c - '0';
 		else
-         ERROR(position, "invalid dec number");
+         Error(position, "invalid dec number");
 
 	case 16:
 		if (c >= '0' && c <= '9')
@@ -126,10 +126,10 @@ bigsint SourceTokenASMPLX::char_to_int(char c, bigsint base, SourcePosition cons
 		else if (c >= 'A' && c <= 'F')
 			return (c - 'A') + 10;
 		else
-         ERROR(position, "invalid hex number");
+         Error(position, "invalid hex number");
 
 	default:
-      ERROR(position, "invalid base number");
+      Error(position, "invalid base number");
 	}
 }
 
@@ -169,7 +169,7 @@ ObjectExpression::Pointer SourceTokenASMPLX::make_expression(std::string const &
 		case '+': return ObjectExpression::create_unary_add(make_expression(expr.substr(1), position), position);
 		case '-': return ObjectExpression::create_unary_sub(make_expression(expr.substr(1), position), position);
 
-      default: ERROR(position, "unknown prefix operator");
+      default: Error(position, "unknown prefix operator");
 		}
 	}
 	else
@@ -199,7 +199,7 @@ ObjectExpression::Pointer SourceTokenASMPLX::make_expression(std::string const &
 		case '&': return ObjectExpression::create_binary_and(make_expression(exprL, position), make_expression(exprR, position), position);
 		case '|': return ObjectExpression::create_binary_ior(make_expression(exprL, position), make_expression(exprR, position), position);
 		case '^': return ObjectExpression::create_binary_xor(make_expression(exprL, position), make_expression(exprR, position), position);
-      default: ERROR(position, "unknown operator");
+      default: Error(position, "unknown operator");
 		}
 	}
 }
@@ -264,7 +264,7 @@ void SourceTokenASMPLX::read_tokens(SourceStream * const in, std::vector<SourceT
 	if (idstring != "ASMPLX")
 	{
       SourcePosition pos(in->getFilename(), in->getLineCount(), in->getColumn());
-      ERROR_P("bad idstring");
+      Error_P("bad idstring");
 	}
 
 	while (true)
@@ -282,7 +282,7 @@ bigsint SourceTokenASMPLX::string_to_base(std::string const & s, SourcePosition 
 	if (s.empty() || s == "0") return -1;
 
 	if (s.size() < 2 || s[0] != '0')
-      ERROR(position, "invalid number");
+      Error(position, "invalid number");
 
 	switch (s[1])
 	{
@@ -291,7 +291,7 @@ bigsint SourceTokenASMPLX::string_to_base(std::string const & s, SourcePosition 
 	case 'd': return 10;
 	case 'x': return 16;
 
-   default: ERROR(position, "invalid base");
+   default: Error(position, "invalid base");
 	}
 }
 bigsint SourceTokenASMPLX::string_to_int(std::string const & s, SourcePosition const & position)

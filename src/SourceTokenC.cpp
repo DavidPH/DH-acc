@@ -208,7 +208,7 @@ SourceTokenC::Reference SourceTokenC::create_join(SourceTokenC const *l,
                                                   SourceTokenC const *r)
 {
    if (l->type != TT_NAM || r->type != TT_NAM)
-      ERROR(l->pos, "TODO:can only join TT_NAM");
+      Error(l->pos, "TODO:can only join TT_NAM");
 
    Reference tok(new SourceTokenC(*l));
    tok->data += r->data;
@@ -522,7 +522,7 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
       return;
    }
 
-   ERROR(token->pos, "unexpected character '%c' (%i)", c, static_cast<int>(c));
+   Error(token->pos, "unexpected character '%c' (%i)", c, static_cast<int>(c));
 }
 
 //

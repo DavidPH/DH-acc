@@ -43,7 +43,7 @@ ObjectExpression_Binary::ObjectExpression_Binary(OBJEXP_EXPRBIN_PARM)
       return;
 
    if(typeL != typeR)
-      ERROR_NP("type mismatch: %s %s", make_string(typeL).c_str(), make_string(typeR).c_str());
+      Error_NP("type mismatch: %s %s", make_string(typeL).c_str(), make_string(typeR).c_str());
 }
 
 //

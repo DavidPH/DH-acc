@@ -193,7 +193,7 @@ private:
       case VariableData::MT_STACK:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_NP("invalid MT");
+         Error_NP("invalid MT");
 
       case VariableData::MT_REGISTER:
       case VariableData::MT_STATIC:

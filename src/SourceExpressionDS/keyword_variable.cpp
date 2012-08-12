@@ -73,7 +73,7 @@ static SourceExpression::Pointer add_var(SourceContext *context,
          context->addVar(var, externDef, externVis);
 
       if (addr)
-         ERROR_P("cannot have offset for store-type %s",
+         Error_P("cannot have offset for store-type %s",
             make_string(store.type).c_str());
 
       break;
@@ -81,7 +81,7 @@ static SourceExpression::Pointer add_var(SourceContext *context,
 
    default:
       if (store.area)
-         ERROR_P("cannot have store-area for store-type %s",
+         Error_P("cannot have store-area for store-type %s",
             make_string(store.type).c_str());
 
       if (addr)
@@ -148,7 +148,7 @@ static VariableType::Reference get_array_length(std::vector<bigsint> const &len,
       return static_cast<VariableType::Reference>(type);
 
    if (static_cast<biguint>(depth) >= len.size())
-      ERROR_p("err");
+      Error_p("err");
 
    if (type->getWidth())
       return get_array_length(len, depth, type->getReturn())
@@ -318,7 +318,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
             VariableType::Reference initSrcType = initSrc->getType();
 
             if (initSrcType->getBasicType() != VariableType::BT_BLOCK)
-               ERROR_P("expected BT_BLOCK");
+               Error_P("expected BT_BLOCK");
 
             type = get_void(type, initSrcType);
 
@@ -334,7 +334,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
          VariableType::Reference initSrcType = initSrc->getType();
 
          if (initSrcType->getBasicType() != VariableType::BT_BLOCK)
-            ERROR_P("expected BT_BLOCK");
+            Error_P("expected BT_BLOCK");
 
          type = get_array_length(type, initSrcType);
 

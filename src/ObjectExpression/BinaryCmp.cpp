@@ -159,10 +159,10 @@ private:
       case ET_OCS:
       case ET_ARR:
       case ET_MAP:
-         ERROR_NP("bad ET");
+         Error_NP("bad ET");
       }
 
-      ERROR_NP("bad ET");
+      Error_NP("bad ET");
    }
 
    CmpType ct;

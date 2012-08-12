@@ -721,7 +721,7 @@ void VariableType::getNameMangled(std::string &out) const
 bigsint VariableType::getSize(SourcePosition const &pos) const
 {
    if (!complete)
-      ERROR_NP("incomplete type");
+      Error_NP("incomplete type");
 
    switch (basic)
    {
@@ -811,7 +811,7 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
       return 1;
    }
 
-   ERROR_NP("invalid type");
+   Error_NP("invalid type");
 }
 
 //===================================================================
@@ -851,7 +851,7 @@ bigsint VariableType::getOffset
 (std::string const &memName, SourcePosition const &pos)
 {
    if (!complete)
-      ERROR_NP("incomplete type");
+      Error_NP("incomplete type");
 
    if (basic == BT_UNION) return 0;
 
@@ -862,7 +862,7 @@ bigsint VariableType::getOffset
       offset += types[i]->getSize(pos);
    }
 
-   ERROR_NP("no such member: %s", memName.c_str());
+   Error_NP("no such member: %s", memName.c_str());
 }
 
 //
@@ -872,12 +872,12 @@ VariableType::Reference VariableType::getType
 (std::string const &memName, SourcePosition const &pos)
 {
    if (!complete)
-      ERROR_NP("incomplete type");
+      Error_NP("incomplete type");
 
    for (size_t i = 0; i < names.size(); ++i)
       if(names[i] == memName) return types[i]->setStorage(this);
 
-   ERROR_NP("no such member: %s", memName.c_str());
+   Error_NP("no such member: %s", memName.c_str());
 }
 
 //===================================================================

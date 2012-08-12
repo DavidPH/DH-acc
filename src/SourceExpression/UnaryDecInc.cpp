@@ -625,7 +625,7 @@ private:
       case VariableData::MT_STRING:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_NP("invalid MT");
+         Error_NP("invalid MT");
       }
    }
 
@@ -677,7 +677,7 @@ private:
       case VariableData::MT_STRING:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_NP("invalid MT");
+         Error_NP("invalid MT");
       }
    }
 
@@ -725,7 +725,7 @@ private:
       case VariableData::MT_STRING:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_NP("invalid MT");
+         Error_NP("invalid MT");
       }
    }
 
@@ -774,7 +774,7 @@ private:
       case VariableData::MT_STRING:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_NP("invalid MT");
+         Error_NP("invalid MT");
       }
    }
 
@@ -822,7 +822,7 @@ private:
       case VariableData::MT_STRING:
       case VariableData::MT_VOID:
       case VariableData::MT_NONE:
-         ERROR_NP("invalid MT");
+         Error_NP("invalid MT");
       }
    }
 
@@ -874,7 +874,7 @@ private:
          doX(objects, dst, src, tmp);
       }
       else
-         ERROR_NP("invalid BT");
+         Error_NP("invalid BT");
 
       if (dst->type != VariableData::MT_VOID)
          make_objects_memcpy_post(objects, dst, data, type, context, pos);

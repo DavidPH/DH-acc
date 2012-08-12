@@ -63,7 +63,7 @@ SRCEXPDS_KEYWORD_DEFN(extern)
          externFunc = expr_extern.find(externToken->data);
 
          if (externFunc == expr_extern.end())
-            ERROR(externToken->pos, "unknown extern type %s",
+            Error(externToken->pos, "unknown extern type %s",
                   externToken->data.c_str());
 
          exprs.push_back(externFunc->second(in, externToken, context, linkSpec));
@@ -82,7 +82,7 @@ SRCEXPDS_KEYWORD_DEFN(extern)
       externFunc = expr_extern.find(externToken->data);
 
       if (externFunc == expr_extern.end())
-         ERROR(externToken->pos, "unknown extern type %s",
+         Error(externToken->pos, "unknown extern type %s",
                externToken->data.c_str());
 
       return externFunc->second(in, externToken, context, linkSpec);

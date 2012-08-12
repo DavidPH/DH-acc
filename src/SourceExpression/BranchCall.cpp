@@ -83,14 +83,14 @@ SourceExpression_BranchCall::SourceExpression_BranchCall
    }
 
    if(!VariableType::is_bt_function(type->getBasicType()))
-      ERROR_NP("expected function type");
+      Error_NP("expected function type");
 
    VariableType::Vector const &types = type->getTypes();
 
    for (size_t i = 0; i < types.size(); ++i)
    {
       if (!types[i])
-         ERROR_NP("variadic call");
+         Error_NP("variadic call");
 
       // The legality of this will be determined by make_objects_call.
       if (i >= args.size())

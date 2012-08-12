@@ -64,7 +64,7 @@ void BinaryTokenACS::make_tokens
 
    case OCODE_NONE:
    default:
-      ERROR_P("unknown OCODE: %s", make_string(object->code));
+      Error_P("unknown OCODE: %s", make_string(object->code));
    }
    }
 }

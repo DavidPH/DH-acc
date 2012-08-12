@@ -35,7 +35,7 @@
 // Macros                                                                     |
 //
 
-#define BAD_CAST() ERROR_P("bad cast: %s to %s", \
+#define BAD_CAST() Error_P("bad cast: %s to %s", \
    make_string(srcType).c_str(), make_string(dstType).c_str())
 
 
@@ -200,7 +200,7 @@ static ObjectExpression::Reference MakeObject(VariableType *type, SourcePosition
       return ObjectExpression::create_value_map(elems, names, pos);
    }
 
-   ERROR_P("unknown BT");
+   Error_P("unknown BT");
 }
 
 

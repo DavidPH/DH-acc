@@ -181,7 +181,7 @@ get_symbol(std::string const &symbol, SourcePosition const &pos)
    ObjectExpression::Pointer value = get_symbol_null(symbol);
 
    if (!value)
-      ERROR_P("unknown symbol: %s", symbol.c_str());
+      Error_P("unknown symbol: %s", symbol.c_str());
 
    return value;
 }
@@ -208,7 +208,7 @@ ObjectExpression::ExpressionType ObjectExpression::get_symbol_type
       symbol_type_table.find(symbol);
 
    if (typeIt == symbol_type_table.end())
-      ERROR_P("unknown symbol: %s", symbol.c_str());
+      Error_P("unknown symbol: %s", symbol.c_str());
 
    return typeIt->second;
 }
@@ -230,7 +230,7 @@ void ObjectExpression::iter_library
 //
 bigreal ObjectExpression::resolveFIX() const
 {
-   ERROR_NP("cannot resolve fixed for %s", make_string(getType()).c_str());
+   Error_NP("cannot resolve fixed for %s", make_string(getType()).c_str());
 }
 
 //
@@ -238,7 +238,7 @@ bigreal ObjectExpression::resolveFIX() const
 //
 bigreal ObjectExpression::resolveFLT() const
 {
-   ERROR_NP("cannot resolve float for %s", make_string(getType()).c_str());
+   Error_NP("cannot resolve float for %s", make_string(getType()).c_str());
 }
 
 //
@@ -246,7 +246,7 @@ bigreal ObjectExpression::resolveFLT() const
 //
 bigsint ObjectExpression::resolveINT() const
 {
-   ERROR_NP("cannot resolve integer for %s", make_string(getType()).c_str());
+   Error_NP("cannot resolve integer for %s", make_string(getType()).c_str());
 }
 
 //
@@ -254,7 +254,7 @@ bigsint ObjectExpression::resolveINT() const
 //
 biguint ObjectExpression::resolveUNS() const
 {
-   ERROR_NP("cannot resolve unsigned for %s", make_string(getType()).c_str());
+   Error_NP("cannot resolve unsigned for %s", make_string(getType()).c_str());
 }
 
 //
@@ -262,7 +262,7 @@ biguint ObjectExpression::resolveUNS() const
 //
 ObjectCodeSet ObjectExpression::resolveOCS() const
 {
-   ERROR_NP("cannot resolve object-code for %s", make_string(getType()).c_str());
+   Error_NP("cannot resolve object-code for %s", make_string(getType()).c_str());
 }
 
 //
@@ -270,7 +270,7 @@ ObjectCodeSet ObjectExpression::resolveOCS() const
 //
 ObjectExpression::Reference ObjectExpression::resolveARR(biguint index) const
 {
-   ERROR_NP("cannot resolve array element: %u", static_cast<unsigned int>(index));
+   Error_NP("cannot resolve array element: %u", static_cast<unsigned int>(index));
 }
 
 //
@@ -278,7 +278,7 @@ ObjectExpression::Reference ObjectExpression::resolveARR(biguint index) const
 //
 ObjectExpression::Reference ObjectExpression::resolveMAP(std::string const &name) const
 {
-   ERROR_NP("cannot resolve struct element: '%s'", name.c_str());
+   Error_NP("cannot resolve struct element: '%s'", name.c_str());
 }
 
 //
@@ -289,16 +289,16 @@ biguint ObjectExpression::resolveBinary() const
    switch(getType())
    {
    case ET_FIX: return static_cast<bigsint>(resolveFIX() * 65536.0);
-   case ET_FLT: ERROR_NP("TODO");
+   case ET_FLT: Error_NP("TODO");
    case ET_INT: return resolveINT();
    case ET_UNS: return resolveUNS();
-   case ET_OCS: ERROR_NP("cannot resolve raw bits of ET_OCS");
+   case ET_OCS: Error_NP("cannot resolve raw bits of ET_OCS");
 
-   case ET_ARR: ERROR_NP("cannot resolve raw bits of ET_ARR");
-   case ET_MAP: ERROR_NP("cannot resolve raw bits of ET_MAP");
+   case ET_ARR: Error_NP("cannot resolve raw bits of ET_ARR");
+   case ET_MAP: Error_NP("cannot resolve raw bits of ET_MAP");
    }
 
-   ERROR_NP("invalid ET");
+   Error_NP("invalid ET");
 }
 
 //
@@ -306,7 +306,7 @@ biguint ObjectExpression::resolveBinary() const
 //
 std::string ObjectExpression::resolveSymbol() const
 {
-   ERROR_NP("cannot resolve symbol");
+   Error_NP("cannot resolve symbol");
 }
 
 //
@@ -320,7 +320,7 @@ std::string ObjectExpression::resolveString() const
    string = ObjectData_String::find(symbol);
 
    if(!string)
-      ERROR_NP("cannot resolve string");
+      Error_NP("cannot resolve string");
 
    return string->string;
 }
@@ -392,7 +392,7 @@ void ObjectExpression::writeACSP(std::ostream *out) const
 //
 void ObjectExpression::writeACSPLong(std::ostream *) const
 {
-   ERROR_NP("cannot write ACS+");
+   Error_NP("cannot write ACS+");
 }
 
 //

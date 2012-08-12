@@ -113,7 +113,7 @@ SRCEXP_EXPRVAL_DEFN(c, char)
 SRCEXP_EXPRVAL_DEFN(s, char)
 {
    if (value.size() != 1)
-      ERROR_P("invalid length for character literal");
+      Error_P("invalid length for character literal");
 
    return create_value_char(value[0], context, pos);
 }
@@ -254,7 +254,7 @@ SourceExpression_ValueVariable(SourceVariable *_var, SRCEXP_EXPR_PARM)
                                  var(_var)
 {
    if (!_var->getType()->getComplete())
-      ERROR_NP("incomplete type");
+      Error_NP("incomplete type");
 }
 
 //

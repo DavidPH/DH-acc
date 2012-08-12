@@ -98,7 +98,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    for (size_t i = 0; i < callTypes.size(); ++i)
    {
       if (!callTypes[i])
-         ERROR_NP("variadic script");
+         Error_NP("variadic script");
 
       callSize += callTypes[i]->getSize(pos);
    }

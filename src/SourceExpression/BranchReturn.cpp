@@ -146,7 +146,7 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
       break;
 
    default:
-      ERROR_NP("invalid CT");
+      Error_NP("invalid CT");
    }
 }
 

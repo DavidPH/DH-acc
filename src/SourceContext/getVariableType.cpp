@@ -42,7 +42,7 @@ VariableType::Reference SourceContext::getVariableType
    VariableType::Pointer type = getVariableTypeNull(name);
 
    if (!type)
-      ERROR_NP("no such type: %s", name.c_str());
+      Error_NP("no such type: %s", name.c_str());
 
    return static_cast<VariableType::Reference>(type);
 }
@@ -77,7 +77,7 @@ VariableType::Reference SourceContext::getVariableType_enum
       if (block)
 	 {
          if (type->getComplete())
-            ERROR_NP("enum redefined: %s", name.c_str());
+            Error_NP("enum redefined: %s", name.c_str());
          else
             type->makeComplete();
       }
@@ -142,7 +142,7 @@ VariableType::Reference SourceContext::getVariableType_struct
    VariableType::Reference type = getVariableType_struct(name, pos);
 
    if (type->getComplete())
-      ERROR_NP("struct redefined: %s", name.c_str());
+      Error_NP("struct redefined: %s", name.c_str());
 
    type->makeComplete(names, types);
 
@@ -157,7 +157,7 @@ VariableType::Reference SourceContext::getVariableType_typedef
 {
    for (size_t i = 0; i < typedefNames.size(); ++i)
       if (typedefNames[i] == name)
-         ERROR_NP("typedef redefined: %s", name.c_str());
+         Error_NP("typedef redefined: %s", name.c_str());
 
    typedefNames.push_back(name);
    typedefTypes.push_back(static_cast<VariableType::Reference>(type));
@@ -211,7 +211,7 @@ VariableType::Reference SourceContext::getVariableType_union
    VariableType::Reference type = getVariableType_union(name, pos);
 
    if (type->getComplete())
-      ERROR_NP("union redefined: %s", name.c_str());
+      Error_NP("union redefined: %s", name.c_str());
 
    type->makeComplete(names, types);
 

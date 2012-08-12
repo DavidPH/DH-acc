@@ -85,7 +85,7 @@ EXPR_DEFN(Primary)
    SourceTokenC::Reference tok = getExpand(); switch (tok->type)
    {
    default: unget(tok);
-      ERROR(tok->pos, "unexpected token: %s", make_string(tok->type).c_str());
+      Error(tok->pos, "unexpected token: %s", make_string(tok->type).c_str());
 
    case SourceTokenC::TT_NAM:
       if (tok->data == "defined")

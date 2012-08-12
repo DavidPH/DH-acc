@@ -201,7 +201,7 @@ addLabelCase(bigsint value, SourcePosition const &pos)
       if (cases.find(value) == cases.end() || !cases[value])
          cases[value] = true;
       else
-         ERROR_NP("case redefined: %lli", static_cast<long long int>(value));
+         Error_NP("case redefined: %lli", static_cast<long long int>(value));
 
       return getLabelCase(value, pos);
    }
@@ -209,7 +209,7 @@ addLabelCase(bigsint value, SourcePosition const &pos)
    if (inheritLocals && parent)
       return parent->addLabelCase(value, pos);
 
-   ERROR_NP("not CT_SWITCH");
+   Error_NP("not CT_SWITCH");
 }
 
 //
@@ -222,7 +222,7 @@ std::string SourceContext::addLabelCaseDefault(SourcePosition const &pos)
       if (!caseDefault)
          caseDefault = true;
       else
-         ERROR_NP("case default redefined");
+         Error_NP("case default redefined");
 
       return getLabelCaseDefault(pos);
    }
@@ -230,7 +230,7 @@ std::string SourceContext::addLabelCaseDefault(SourcePosition const &pos)
    if (inheritLocals && parent)
       return parent->addLabelCaseDefault(pos);
 
-   ERROR_NP("not CT_SWITCH");
+   Error_NP("not CT_SWITCH");
 }
 
 //
@@ -467,7 +467,7 @@ std::vector<bigsint> SourceContext::getCases(SourcePosition const &pos) const
            iter != cases.end(); ++iter)
       {
          if (!iter->second)
-            ERROR_NP
+            Error_NP
             ("case undefined: %lli", static_cast<long long int>(iter->first));
 
          casev[i++] = iter->first;
@@ -480,7 +480,7 @@ std::vector<bigsint> SourceContext::getCases(SourcePosition const &pos) const
    if (inheritLocals && parent)
       return parent->getCases(pos);
 
-   ERROR_NP("not CT_SWITCH");
+   Error_NP("not CT_SWITCH");
 }
 
 //
@@ -491,7 +491,7 @@ SourceContext::Reference SourceContext::getContext(std::string const &name,
 {
    SourceContext::Pointer context = getContextNull(name);
 
-   if(!context) ERROR_NP("no such context '%s'", name.c_str());
+   if(!context) Error_NP("no such context '%s'", name.c_str());
 
    return static_cast<Reference>(context);
 }
@@ -544,7 +544,7 @@ int SourceContext::getCount(StoreType store) const
          return countRegister;
    }
 
-   ERROR_Np("invalid store");
+   Error_Np("invalid store");
 }
 
 //
@@ -558,7 +558,7 @@ SourceFunction::Reference SourceContext::getFunction
 
    if (parent) return parent->getFunction(name, pos);
 
-   ERROR_NP("no suitable function");
+   Error_NP("no suitable function");
 }
 
 //
@@ -602,12 +602,12 @@ SourceFunction::Reference SourceContext::getFunction
          return *func;
 
       if(funcCount > 1)
-         ERROR_NP("ambiguous overload: %s", name.c_str());
+         Error_NP("ambiguous overload: %s", name.c_str());
    }
 
    if(parent) return parent->getFunction(name, pos, types);
 
-   ERROR_NP("no suitable overload: %s", name.c_str());
+   Error_NP("no suitable overload: %s", name.c_str());
 }
 
 //
@@ -632,7 +632,7 @@ std::string SourceContext::getLabelBreak(SourcePosition const &pos) const
    if (inheritLocals && parent)
       return parent->getLabelBreak(pos);
 
-   ERROR_NP("not break CT");
+   Error_NP("not break CT");
 }
 
 //
@@ -657,7 +657,7 @@ getLabelCase(bigsint value, SourcePosition const &pos)
    if (inheritLocals && parent)
       return parent->getLabelCase(value, pos);
 
-   ERROR_NP("not CT_SWITCH");
+   Error_NP("not CT_SWITCH");
 }
 
 //
@@ -672,7 +672,7 @@ getLabelCaseDefault(SourcePosition const &pos) const
    if (inheritLocals && parent)
       return parent->getLabelCaseDefault(pos);
 
-   ERROR_NP("not CT_SWITCH");
+   Error_NP("not CT_SWITCH");
 }
 
 //
@@ -687,7 +687,7 @@ getLabelContinue(SourcePosition const &pos) const
    if (inheritLocals && parent)
       return parent->getLabelContinue(pos);
 
-   ERROR_NP("not CT_LOOP");
+   Error_NP("not CT_LOOP");
 }
 
 //
@@ -741,7 +741,7 @@ int SourceContext::getLimit(StoreType store) const
       return limitRegister;
    }
 
-   ERROR_Np("invalid store");
+   Error_Np("invalid store");
 }
 
 //
@@ -773,7 +773,7 @@ ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
 
    if (!var)
    {
-      if (i > 9) ERROR_Np("temp var out of range: %u", i);
+      if (i > 9) Error_Np("temp var out of range: %u", i);
 
       if (i >= tempVars.size())
          tempVars.resize(i+1);
@@ -860,7 +860,7 @@ SourceVariable::Pointer SourceContext::getVariable
    if (parent)
       return parent->getVariable(name, pos, canLocal && inheritLocals);
 
-   ERROR_NP("no such variable: %s", name.c_str());
+   Error_NP("no such variable: %s", name.c_str());
 }
 
 //

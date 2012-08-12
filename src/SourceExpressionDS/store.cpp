@@ -151,7 +151,7 @@ StoreType SourceExpressionDS::make_store(SourceTokenizerC *in,
    if(typeTok->data == "__stringarray")
       return STORE_STRING;
 
-   ERROR(typeTok->pos, "unknown storage class '%s'", typeTok->data.c_str());
+   Error(typeTok->pos, "unknown storage class '%s'", typeTok->data.c_str());
 }
 
 // EOF

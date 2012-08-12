@@ -99,7 +99,7 @@ bigsint get_bigsint(std::string const &value, SourcePosition const &pos)
       int i = char_to_int(c);
 
       if(i > base)
-         ERROR_P("character out of range");
+         Error_P("character out of range");
 
       if(i < 0)
       {
@@ -108,7 +108,7 @@ bigsint get_bigsint(std::string const &value, SourcePosition const &pos)
             c == 'H' || c == 'h')   // short
             break;
 
-         ERROR_P("character out of range");
+         Error_P("character out of range");
       }
 
       val *= base;
