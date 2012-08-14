@@ -87,6 +87,13 @@ public:
             return;
       }
 
+      // pointer->auto pointer
+      if(thisBT == VariableType::BT_PTR && exprBT == VariableType::BT_PTR &&
+         type->getReturn()->getStoreType() == STORE_AUTO)
+      {
+         type = type->getReturn()->setStorage(exprType->getReturn())->getPointer();
+      }
+
       if(VariableType::get_cast(type, exprType) > cast)
       {
          Error_NP("invalid cast: %s to %s",
