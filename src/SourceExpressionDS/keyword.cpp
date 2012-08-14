@@ -191,17 +191,13 @@ SRCEXPDS_KEYWORD_DEFN(goto)
 
    std::string label;
 
-   if (gotoToken->data == "case")
+   if(gotoToken->data == "case")
    {
-      if (in->peekType(SourceTokenC::TT_NAM, "default"))
-      {
-         in->get(SourceTokenC::TT_NAM);
-         label = context->getLabelCaseDefault(tok->pos);
-      }
-      else
-         label = context->getLabelCase(make_expression(in, context)
-            ->makeObject()->resolveINT(), tok->pos);
+      label = context->getLabelCase(make_expression(in, context)
+              ->makeObject()->resolveINT(), tok->pos);
    }
+   else if(gotoToken->data == "default")
+      label = context->getLabelCaseDefault(tok->pos);
    else
       label = context->getLabelGoto(gotoToken->data, gotoToken->pos);
 

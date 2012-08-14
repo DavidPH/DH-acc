@@ -201,6 +201,26 @@ SRCEXPDS_EXPR_DEF1(primary)
    case SourceTokenC::TT_STR:
       return create_value_string(tok->data, context, tok->pos);
 
+   case SourceTokenC::TT_AN2:
+   {
+      SourceTokenC::Reference gotoToken = in->get(SourceTokenC::TT_NAM);
+
+      std::string label;
+
+      if(gotoToken->data == "case")
+      {
+         label = context->getLabelCase(make_expression(in, context)
+                 ->makeObject()->resolveINT(), tok->pos);
+      }
+      else if(gotoToken->data == "default")
+         label = context->getLabelCaseDefault(tok->pos);
+      else
+         label = context->getLabelGoto(gotoToken->data, gotoToken->pos);
+
+      return create_value_variable(SourceVariable::create_literal(
+         VariableType::get_bt_label(), label, gotoToken->pos), context, tok->pos);
+   }
+
    case SourceTokenC::TT_PAREN_O:
    {
       SourceExpression::Pointer expr = make_expression(in, context);

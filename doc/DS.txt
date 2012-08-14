@@ -261,8 +261,8 @@ Jump Expressions
     <break> identifier(opt)
     <continue> identifier(opt)
     <goto> identifier
-    <goto> <case> <default>
     <goto> <case> expression
+    <goto> <default>
     <__goto_dyn> expression
     <return> expression(opt)
 
@@ -461,6 +461,9 @@ Primary Expressions
     character-literal
     numeric-literal
     string-literal
+    && identifier
+    && <case> expression
+    && <default>
     ( expression )
     { statement-list(opt) }
     [ statement-list(opt) ]
