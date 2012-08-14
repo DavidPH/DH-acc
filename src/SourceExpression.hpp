@@ -338,8 +338,10 @@ public:
    SRCEXP_EXPRBRA_DECL(b, and);
    SRCEXP_EXPRBRA_DECL(b, and_eq);
    SRCEXP_EXPRBRA_DECL(0, break);
+   SRCEXP_EXPRBRA_DECL(s, break);
    SRCEXP_EXPRBRA_DECL(a, call);
    SRCEXP_EXPRBRA_DECL(0, continue);
+   SRCEXP_EXPRBRA_DECL(s, continue);
    SRCEXP_EXPRBRA_DECL(2, do);
    SRCEXP_EXPRBRA_DECL(4, for);
    SRCEXP_EXPRBRA_DECL(u, goto);

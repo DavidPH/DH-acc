@@ -646,6 +646,21 @@ std::string SourceContext::getLabelBreak(SourcePosition const &pos) const
 }
 
 //
+// SourceContext::getLabelBreak
+//
+std::string SourceContext::getLabelBreak(std::string const &name,
+                                         SourcePosition const &pos) const
+{
+   if((typeContext == CT_LOOP || typeContext == CT_SWITCH) && label == name)
+      return getLabel() + "_break";
+
+   if(inheritLocals)
+      return parent->getLabelBreak(name, pos);
+
+   Error_NP("cannot find break target '%s'", name.c_str());
+}
+
+//
 // SourceContext::getLabelCase
 //
 std::string SourceContext::
@@ -698,6 +713,21 @@ getLabelContinue(SourcePosition const &pos) const
       return parent->getLabelContinue(pos);
 
    Error_NP("not CT_LOOP");
+}
+
+//
+// SourceContext::getLabelContinue
+//
+std::string SourceContext::getLabelContinue(std::string const &name,
+                                            SourcePosition const &pos) const
+{
+   if(typeContext == CT_LOOP && label == name)
+      return getLabel() + "_continue";
+
+   if(inheritLocals)
+      return parent->getLabelContinue(name, pos);
+
+   Error_NP("cannot find continue target '%s'", name.c_str());
 }
 
 //

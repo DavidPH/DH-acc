@@ -68,12 +68,30 @@ SRCEXP_EXPRBRA_DEFN(0, break)
 }
 
 //
+// SourceExpression::create_branch_break
+//
+SRCEXP_EXPRBRA_DEFN(s, break)
+{
+   return new SourceExpression_BranchGoto(context->getLabelBreak(value, pos),
+                                          context, pos);
+}
+
+//
 // SourceExpression::create_branch_continue
 //
 SRCEXP_EXPRBRA_DEFN(0, continue)
 {
    return new SourceExpression_BranchGoto
       (context->getLabelContinue(pos), context, pos);
+}
+
+//
+// SourceExpression::create_branch_continue
+//
+SRCEXP_EXPRBRA_DEFN(s, continue)
+{
+   return new SourceExpression_BranchGoto(context->getLabelContinue(value, pos),
+                                          context, pos);
 }
 
 //

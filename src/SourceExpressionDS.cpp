@@ -611,7 +611,7 @@ SourceExpression::Pointer SourceExpressionDS::make_statement(
          expr->addLabel(context->addLabelCase(value, tok->pos));
          return expr;
       }
-      else if (in->peekType(SourceTokenC::TT_COLON))
+      else if(in->peekType(SourceTokenC::TT_COLON) && !is_keyword(tok->data))
       {
          in->get(SourceTokenC::TT_COLON);
          expr = make_statement(in, context);

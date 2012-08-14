@@ -52,9 +52,10 @@ bool SourceExpressionDS::is_keyword(std::string const &data)
 //
 SRCEXPDS_KEYWORD_DEFN(break)
 {
-   (void)in;
-
-   return create_branch_break(context, tok->pos);
+   if(in->peekType(SourceTokenC::TT_NAM))
+      return create_branch_break(in->get()->data, context, tok->pos);
+   else
+      return create_branch_break(context, tok->pos);
 }
 
 //
@@ -116,9 +117,10 @@ SRCEXPDS_KEYWORD_DEFN(constexpr)
 //
 SRCEXPDS_KEYWORD_DEFN(continue)
 {
-   (void)in;
-
-   return create_branch_continue(context, tok->pos);
+   if(in->peekType(SourceTokenC::TT_NAM))
+      return create_branch_continue(in->get()->data, context, tok->pos);
+   else
+      return create_branch_continue(context, tok->pos);
 }
 
 //
@@ -126,19 +128,32 @@ SRCEXPDS_KEYWORD_DEFN(continue)
 //
 SRCEXPDS_KEYWORD_DEFN(do)
 {
-   SourceContext::Reference contextBody =
+   // Create a context for the entire loop.
+   SourceContext::Reference contextLoop =
       SourceContext::create(context, SourceContext::CT_LOOP);
+
+   // Check for named loop.
+   if(in->peekType(SourceTokenC::TT_COLON))
+   {
+      in->get();
+      contextLoop->setLabel(in->get(SourceTokenC::TT_NAM)->data);
+   }
+
+   // Read body.
+   SourceContext::Reference contextBody =
+      SourceContext::create(contextLoop, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprBody = make_prefix(in, contextBody);
 
    in->get(SourceTokenC::TT_NAM, "while");
 
+   // Read condition.
    in->get(SourceTokenC::TT_PAREN_O);
    SourceContext::Reference contextCond =
       SourceContext::create(contextBody, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprCond = make_expression(in, contextCond);
    in->get(SourceTokenC::TT_PAREN_C);
 
-   return create_branch_do(exprCond, exprBody, contextCond, tok->pos);
+   return create_branch_do(exprCond, exprBody, contextLoop, tok->pos);
 }
 
 //
@@ -146,11 +161,22 @@ SRCEXPDS_KEYWORD_DEFN(do)
 //
 SRCEXPDS_KEYWORD_DEFN(for)
 {
+   // Create a context for the entire loop.
+   SourceContext::Reference contextLoop =
+      SourceContext::create(context, SourceContext::CT_LOOP);
+
+   // Check for named loop.
+   if(in->peekType(SourceTokenC::TT_COLON))
+   {
+      in->get();
+      contextLoop->setLabel(in->get(SourceTokenC::TT_NAM)->data);
+   }
+
    in->get(SourceTokenC::TT_PAREN_O);
 
    // Read initializer.
    SourceContext::Reference contextInit =
-      SourceContext::create(context, SourceContext::CT_BLOCK);
+      SourceContext::create(contextLoop, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprInit = make_expression(in, contextInit);
 
    in->get(SourceTokenC::TT_SEMICOLON);
@@ -176,10 +202,10 @@ SRCEXPDS_KEYWORD_DEFN(for)
 
    // Read body.
    SourceContext::Reference contextBody =
-      SourceContext::create(contextCond, SourceContext::CT_LOOP);
+      SourceContext::create(contextCond, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprBody = make_expression(in, contextBody);
 
-   return create_branch_for(exprCond, exprBody, exprIter, exprInit, contextBody, tok->pos);
+   return create_branch_for(exprCond, exprBody, exprIter, exprInit, contextLoop, tok->pos);
 }
 
 //
@@ -407,17 +433,30 @@ SRCEXPDS_KEYWORD_DEFN(sizeof)
 //
 SRCEXPDS_KEYWORD_DEFN(switch)
 {
+   // Create a context for the entire switch.
+   SourceContext::Reference contextSwitch =
+      SourceContext::create(context, SourceContext::CT_SWITCH);
+
+   // Check for named switch.
+   if(in->peekType(SourceTokenC::TT_COLON))
+   {
+      in->get();
+      contextSwitch->setLabel(in->get(SourceTokenC::TT_NAM)->data);
+   }
+
+   // Read condition.
    in->get(SourceTokenC::TT_PAREN_O);
    SourceContext::Reference contextCond =
-      SourceContext::create(context, SourceContext::CT_BLOCK);
+      SourceContext::create(contextSwitch, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprCond = make_expression(in, contextCond);
    in->get(SourceTokenC::TT_PAREN_C);
 
+   // Read body.
    SourceContext::Reference contextBody =
-      SourceContext::create(contextCond, SourceContext::CT_SWITCH);
+      SourceContext::create(contextCond, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprBody = make_expression(in, contextBody);
 
-   return create_branch_switch(exprCond, exprBody, contextBody, tok->pos);
+   return create_branch_switch(exprCond, exprBody, contextSwitch, tok->pos);
 }
 
 //
@@ -452,17 +491,30 @@ SRCEXPDS_KEYWORD_DEFN(typestr)
 //
 SRCEXPDS_KEYWORD_DEFN(while)
 {
+   // Create a context for the entire loop.
+   SourceContext::Reference contextLoop =
+      SourceContext::create(context, SourceContext::CT_LOOP);
+
+   // Check for named loop.
+   if(in->peekType(SourceTokenC::TT_COLON))
+   {
+      in->get();
+      contextLoop->setLabel(in->get(SourceTokenC::TT_NAM)->data);
+   }
+
+   // Read condition.
    in->get(SourceTokenC::TT_PAREN_O);
    SourceContext::Reference contextCond =
-      SourceContext::create(context, SourceContext::CT_BLOCK);
+      SourceContext::create(contextLoop, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprCond = make_expression(in, contextCond);
    in->get(SourceTokenC::TT_PAREN_C);
 
+   // Read body.
    SourceContext::Reference contextBody =
-      SourceContext::create(contextCond, SourceContext::CT_LOOP);
+      SourceContext::create(contextCond, SourceContext::CT_BLOCK);
    SourceExpression::Pointer exprBody = make_expression(in, contextBody);
 
-   return create_branch_while(exprCond, exprBody, contextBody, tok->pos);
+   return create_branch_while(exprCond, exprBody, contextLoop, tok->pos);
 }
 
 // EOF

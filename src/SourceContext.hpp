@@ -85,9 +85,11 @@ public:
 
    std::string getLabel() const;
    std::string getLabelBreak(SourcePosition const & position) const;
+   std::string getLabelBreak(std::string const &name, SourcePosition const &pos) const;
    std::string getLabelCase(bigsint value, SourcePosition const & position);
    std::string getLabelCaseDefault(SourcePosition const & position) const;
    std::string getLabelContinue(SourcePosition const & position) const;
+   std::string getLabelContinue(std::string const &name, SourcePosition const &pos) const;
    std::string getLabelGoto(std::string const &name, SourcePosition const &position) const;
    std::string getLabelNamespace() const;
 
@@ -141,6 +143,8 @@ public:
    int isFunction(std::string const &name) const;
 
    std::string makeLabel();
+
+   void setLabel(std::string const &_label) {label = _label;}
 
    void setReturnType(VariableType *type);
 
