@@ -37,6 +37,17 @@
 
 
 //----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+#ifdef __WIN32__
+#define PRI_LL "%I64i"
+#else
+#define PRI_LL "%lli"
+#endif
+
+
+//----------------------------------------------------------------------------|
 // Static Variables                                                           |
 //
 
@@ -201,7 +212,7 @@ addLabelCase(bigsint value, SourcePosition const &pos)
       if (cases.find(value) == cases.end() || !cases[value])
          cases[value] = true;
       else
-         Error_NP("case redefined: %lli", static_cast<long long int>(value));
+         Error_NP("case redefined: "PRI_LL, static_cast<long long int>(value));
 
       return getLabelCase(value, pos);
    }
@@ -467,8 +478,7 @@ std::vector<bigsint> SourceContext::getCases(SourcePosition const &pos) const
            iter != cases.end(); ++iter)
       {
          if (!iter->second)
-            Error_NP
-            ("case undefined: %lli", static_cast<long long int>(iter->first));
+            Error_NP("case undefined: "PRI_LL, static_cast<long long int>(iter->first));
 
          casev[i++] = iter->first;
       }
