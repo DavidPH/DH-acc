@@ -187,7 +187,13 @@ SRCEXPDS_KEYWORD_DEFN(for)
 //
 SRCEXPDS_KEYWORD_DEFN(goto)
 {
-   SourceTokenC::Reference gotoToken = in->get(SourceTokenC::TT_NAM);
+   SourceTokenC::Reference gotoToken = in->get();
+
+   if(gotoToken->type == SourceTokenC::TT_MUL)
+      return create_branch_goto(make_expression(in, context), context, tok->pos);
+
+   if(gotoToken->type != SourceTokenC::TT_NAM)
+      Error(gotoToken->pos, "expected TT_MUL or TT_NAM");
 
    std::string label;
 
@@ -202,14 +208,6 @@ SRCEXPDS_KEYWORD_DEFN(goto)
       label = context->getLabelGoto(gotoToken->data, gotoToken->pos);
 
    return create_branch_goto(label, context, tok->pos);
-}
-
-//
-// SourceExpressionDS::make_keyword_goto_dyn
-//
-SRCEXPDS_KEYWORD_DEFN(goto_dyn)
-{
-   return create_branch_goto(make_expression(in, context), context, tok->pos);
 }
 
 //

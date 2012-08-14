@@ -108,7 +108,6 @@ void SourceExpressionDS::init()
    expr_keyword[  "for"]      = make_keyword_for;
    expr_keyword["__function"] = make_keyword_function;
    expr_keyword[  "goto"]     = make_keyword_goto;
-   expr_keyword["__goto_dyn"] = make_keyword_goto_dyn;
    expr_keyword[  "if"]       = make_keyword_if;
    expr_keyword["__intern"]   = make_keyword_extern;
    expr_keyword["__intfunc"]  = make_keyword_function;

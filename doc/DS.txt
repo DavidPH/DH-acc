@@ -263,7 +263,7 @@ Jump Expressions
     <goto> identifier
     <goto> <case> expression
     <goto> <default>
-    <__goto_dyn> expression
+    <goto> * expression
     <return> expression(opt)
 
 -----------------------------------------------------------
