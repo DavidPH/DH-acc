@@ -55,6 +55,8 @@ public:
       VariableType::BasicType exprBT = exprType->getBasicType();
       VariableType::BasicType thisBT = type->getBasicType();
 
+      ObjectExpression::Pointer obj;
+
       // array->pointer
       if(thisBT == VariableType::BT_PTR && exprBT == VariableType::BT_ARR)
       {
@@ -72,6 +74,17 @@ public:
          expr = create_unary_reference(expr, context, pos);
          exprType = expr->getType();
          exprBT = exprType->getBasicType();
+      }
+
+      // 0->pointer
+      if(thisBT == VariableType::BT_PTR && VariableType::is_bt_integer(exprBT) &&
+         expr->canMakeObject() && (obj = expr->makeObject())->canResolve())
+      {
+         if(obj->getType() == ObjectExpression::ET_INT && obj->resolveINT() == 0)
+            return;
+
+         if(obj->getType() == ObjectExpression::ET_UNS && obj->resolveUNS() == 0)
+            return;
       }
 
       if(VariableType::get_cast(type, exprType) > cast)
