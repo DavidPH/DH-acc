@@ -31,6 +31,11 @@
 #include <sstream>
 #include <vector>
 
+#ifdef __WIN32__
+#define CINTERFACE
+#include <windows.h>
+#endif
+
 
 //----------------------------------------------------------------------------|
 // Static Prototypes                                                          |
@@ -538,7 +543,24 @@ long SourceStream::getLineCount() const
 //
 void SourceStream::Init(char const *arg0)
 {
+   #if defined(__WIN32__)
+   // Don't try to be cute.
+   //   Signed, Management
+   (void)arg0;
+
+   TCHAR buffer[MAX_PATH+1];
+   DWORD size = MAX_PATH+1;
+   DWORD len = GetModuleFileName(NULL, buffer, size);
+
+   // 0 means failure, size means buffer too small.
+   if(len == 0 || len == size)
+      return;
+
+   std::string exepath = buffer;
+   #else
    std::string exepath = arg0;
+   #endif
+
    NormalizePath(exepath);
    DirectoryPath(exepath);
 
