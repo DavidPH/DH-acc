@@ -75,10 +75,28 @@ void SourceExpression::make_objects_call_function
 
    // Calculate total stack offset.
    ObjectExpression::Pointer ostack =
-      objects->getValueAdd(context->getLimit(STORE_AUTO), retnSize);
+      objects->getValueAdd(context->getLimit(STORE_AUTO), vaSize);
 
    // Advance the stack-pointer.
    objects->addToken(OCODE_ADD_AUTPTR_IMM, ostack);
+
+   // Set variadic arguments.
+   if(variadic && vaSize)
+   {
+      // Store behind the callee's automatic variables.
+      bigsint base = -vaSize;
+
+      // Copy each argument separately in order to get byte-order right.
+      for(size_t arg = args.size(); --arg >= callTypes.size() || !callTypes[arg];)
+      {
+         bigsint argSize = args[arg]->getType()->getSize(pos);
+
+         for(bigsint i = argSize; i--;)
+            objects->addToken(OCODE_SET_AUTO, objects->getValue(base + i));
+
+         base += argSize;
+      }
+   }
 
    // For autocall...
    if(calltype & VariableType::QUAL_AUTOCALL)

@@ -89,8 +89,7 @@ SourceExpression_BranchCall::SourceExpression_BranchCall
 
    for (size_t i = 0; i < types.size(); ++i)
    {
-      if (!types[i])
-         Error_NP("variadic call");
+      if(!types[i]) break;
 
       // The legality of this will be determined by make_objects_call.
       if (i >= args.size())

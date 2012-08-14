@@ -35,6 +35,9 @@
    VariableType::Vector const &callTypes = type->getTypes(); \
    bigsint callSize = 0;                                     \
                                                              \
+   bool variadic = !callTypes.empty() && !callTypes.back(); \
+   bigsint vaSize = 0; \
+   \
    VariableType::Reference retnType = type->getReturn();     \
    bigsint retnSize = retnType->getSize(pos);                \
                                                              \
@@ -46,33 +49,27 @@
    make_objects_memcpy_prep(objects, dst, src, pos);
 
 #define FUNCTION_ARGS                                   \
-   if (callTypes.size() < args.size())                  \
-      Error_P("bad count");                             \
+   if(callTypes.size() < args.size() && !variadic) \
+      Error_P("too many arguments"); \
                                                         \
    /* Evaluate the arguments. */                        \
-   for (size_t i = 0; i < callTypes.size(); ++i)        \
+   for(size_t i = 0; i < callTypes.size() || i < args.size(); ++i) \
    {                                                    \
-      if (!callTypes[i])                                \
-         Error_P("variadic");                           \
-                                                        \
-      callSize += callTypes[i]->getSize(pos);           \
-                                                        \
       SourceExpression::Pointer arg;                    \
       if(i < args.size())                               \
          arg = args[i];                                 \
       else if(func)                                     \
          arg = func->args[i];                           \
                                                         \
-      if(!arg)                                          \
-         Error_P("bad count");                          \
+      if(!arg) Error_P("too few arguments"); \
                                                         \
       VariableType::Reference argType = arg->getType(); \
       bigsint argSize = argType->getSize(pos);          \
-      VariableData::Pointer argDst =                    \
-         VariableData::create_stack(argSize);           \
-                                                        \
-      if (argType != callTypes[i])                      \
-         Error(args[i]->pos, "bad type");               \
+      VariableData::Pointer argDst = VariableData::create_stack(argSize); \
+      \
+      callSize += argSize; \
+      if(i >= callTypes.size() || !callTypes[i]) \
+         vaSize += argSize; \
                                                         \
       arg->makeObjects(objects, argDst);                \
    }                                                    \
