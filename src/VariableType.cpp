@@ -208,8 +208,12 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
 
       for(size_t i = 0; i < types.size(); ++i)
       {
-         out << types[i];
-         if (i+1 < types.size()) out << ',';
+         if(types[i])
+            out << types[i];
+         else
+            out << "...";
+
+         if(i+1 < types.size()) out << ',';
       }
    }
       out << ')';
@@ -635,12 +639,16 @@ void VariableType::getNameMangled(std::string &out) const
 
    #define TYPE0 types[0]->getNameMangled(out)
 
-   #define TYPES                             \
-   for (size_t i = 0; i < types.size(); ++i) \
-   {                                         \
-      types[i]->getNameMangled(out);         \
-      if (i+1 < types.size()) out += ':';    \
-   }
+   #define TYPES \
+      for(size_t i = 0; i < types.size(); ++i) \
+      { \
+         if(types[i]) \
+            types[i]->getNameMangled(out); \
+         else \
+            out += "..."; \
+         \
+         if(i+1 < types.size()) out += ':'; \
+      }
 
    #define WIDTH {std::ostringstream oss; oss << width; out += oss.str();}
 
@@ -1256,7 +1264,7 @@ VariableType::Reference VariableType::get_bt_anonymous
    // Parameters and return are unqualified.
    if (basic != BT_BLOCK)
       for (Vector::iterator iter = types.begin(); iter != types.end(); ++iter)
-         *iter = (*iter)->getUnqualified();
+         if(*iter) *iter = (*iter)->getUnqualified();
 
    typeRet = typeRet->getUnqualified();
 
@@ -1596,7 +1604,7 @@ VariableType::CastType VariableType::get_cast(Vector const &dst, Vector const &s
 
    Vector::const_iterator dstItr = dst.begin(), srcItr = src.begin();
    Vector::const_iterator dstEnd = dst.end();
-   while(dstItr != dstEnd)
+   while(dstItr != dstEnd && *dstItr && *srcItr)
       cast = std::max(get_cast(*dstItr++, *srcItr++), cast);
 
    return cast;
@@ -1743,6 +1751,11 @@ bool VariableType::is_bt_unsigned(BasicType type)
 //
 std::string make_string(VariableType const *type)
 {
+   static std::string const nullname = "...";
+
+   if(!type)
+      return nullname;
+
    std::ostringstream name;
 
    name << type;

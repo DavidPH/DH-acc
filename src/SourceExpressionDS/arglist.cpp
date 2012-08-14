@@ -70,6 +70,14 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in,
    SourcePosition const pos = in->get(SourceTokenC::TT_PAREN_O)->pos;
    if (!in->peekType(SourceTokenC::TT_PAREN_C)) while (true)
    {
+      // ... means variadic, which is marked by a null type.
+      if(in->peekType(SourceTokenC::TT_DOT3))
+      {
+         in->get();
+         args->types.push_back(NULL);
+         break;
+      }
+
       args->types.push_back(make_type(in, context));
       // If no storage, set to the provided default.
       if(args->types.back()->getStoreType() == STORE_NONE)
@@ -98,8 +106,8 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in,
    in->get(SourceTokenC::TT_PAREN_C);
 
    // (void) should be read as (), unless the void is named or defaulted.
-   if (args->types.size() == 1 && args->names[0].empty() && !args->args[0] &&
-       args->types[0]->getBasicType() == VariableType::BT_VOID)
+   if(args->types.size() == 1 && args->names[0].empty() && !args->args[0] &&
+      args->types[0] && args->types[0]->getBasicType() == VariableType::BT_VOID)
    {
       args->types.clear();
       args->names.clear();
@@ -128,6 +136,8 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in,
       for (size_t i = 0; i < args->types.size(); ++i)
       {
          VariableType::Pointer argType = args->types[i];
+         if(!argType) break;
+
          std::string const &argName = args->names[i];
          StoreType argStore = argType->getStoreType();
 

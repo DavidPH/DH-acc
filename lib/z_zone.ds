@@ -300,7 +300,7 @@ __intfunc void (Z_IDCheck)(bool err, __string errmsg, memblock_t *block,
 __intfunc void (Z_OpenLogFile)()
 {
 #if defined(ZONEFILE) && !defined(ZONEFILE_FAKE)
- //zonelog = fopen("zonelog.txt", "w");
+   zonelog = fopen("zonelog.txt", "w");
 #endif
 };
 
@@ -309,14 +309,13 @@ __intfunc void (Z_CloseLogFile)()
 #if defined(ZONEFILE) && !defined(ZONEFILE_FAKE)
    if(zonelog)
    {
-    //fputs("Closing zone log", zonelog);
-    //fclose(zonelog);
+      fputs("Closing zone log", zonelog);
+      fclose(zonelog);
       zonelog = NULL;
    };
 #endif
 };
 
-#if 0
 __intfunc void (Z_LogPrintf)(__string msg, ...)
 {
 #if defined(ZONEFILE) && !defined(ZONEFILE_FAKE)
@@ -332,14 +331,13 @@ __intfunc void (Z_LogPrintf)(__string msg, ...)
    };
 #endif
 };
-#endif
 
 __intfunc void (Z_LogPuts)(__string msg)
 {
 #if defined(ZONEFILE) && !defined(ZONEFILE_FAKE)
    if(zonelog)
    {
-    //fputs(msg, zonelog);
+      fputs(msg, zonelog);
    };
 #endif
 };

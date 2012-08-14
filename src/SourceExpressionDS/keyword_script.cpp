@@ -311,8 +311,14 @@ static void mangle_types(VariableType::Vector const &types, std::string &name)
 {
    name += "$";
    VariableType::Vector::const_iterator type;
-   for (type = types.begin(); type != types.end(); ++type)
-      {name += '$'; (*type)->getUnqualified()->getNameMangled(name);}
+   for(type = types.begin(); type != types.end(); ++type)
+   {
+      name += '$';
+      if(*type)
+         (*type)->getUnqualified()->getNameMangled(name);
+      else
+         name += "...";
+   }
 }
 
 
