@@ -180,7 +180,7 @@ void SourceExpression_Binary::doGetBaseILAS(ObjectVector *objects,
    objects->addToken(OCODE_JMP_NIL, objects->getValue(labelEnd));
 
    objects->addLabel(labelOvr);
-   objects->addToken(OCODE_INC_TEMP_I, tmpH);
+   objects->addToken(add ? OCODE_INC_TEMP_I : OCODE_DEC_TEMP_I, tmpH);
    objects->addLabel(labelEnd);
    objects->addToken(OCODE_GET_TEMP, tmpL);
    objects->addToken(OCODE_GET_TEMP, tmpH);

@@ -507,7 +507,7 @@
    objects->addLabel(labelEnd); \
    if(!inc) objects->addToken(ocode, addrL); \
    \
-   if(suf && dst->type != VariableData::MT_VOID) \
+   if(!suf && dst->type != VariableData::MT_VOID) \
    { \
       objects->addToken(OCODE_GET_##MT, addrL); \
       objects->addToken(OCODE_GET_##MT, addrH); \
