@@ -595,37 +595,39 @@ private:
             nextExpr(VariableType::get_bt_int())->makeObject();
          bigsint msgtype = msgtypeObj->resolveINT();
 
-         objects->addToken(OCODE_GET_IMM, msgtypeObj);
-         makeExpr(objects, VariableType::get_bt_int());
-         makeExpr(objects, VariableType::get_bt_int());
-         makeExpr(objects, VariableType::get_bt_fix());
-         makeExpr(objects, VariableType::get_bt_fix());
-         makeExpr(objects, VariableType::get_bt_fix());
+         objects->addToken(OCODE_GET_IMM, msgtypeObj);  // type
+         makeExpr(objects, VariableType::get_bt_int()); // id
+         makeExpr(objects, VariableType::get_bt_int()); // color
+         makeExpr(objects, VariableType::get_bt_fix()); // x
+         makeExpr(objects, VariableType::get_bt_fix()); // y
+         makeExpr(objects, VariableType::get_bt_fix()); // holdTime
 
          objects->addToken(OCODE_ACSP_END_OPT);
 
-         switch (static_cast<int>(msgtype & 0xFFFF))
+         switch(static_cast<int>(msgtype & 0xFFF))
          {
-         case 0:
+         case 0: // PLAIN
             break;
 
-         case 1:
-            makeExpr(objects, VariableType::get_bt_fix());
+         case 1: // FADEOUT
+            makeExpr(objects, VariableType::get_bt_fix()); // fadeTime
             break;
 
-         case 2:
-            makeExpr(objects, VariableType::get_bt_fix());
-            makeExpr(objects, VariableType::get_bt_fix());
+         case 2: // TYPEON
+            makeExpr(objects, VariableType::get_bt_fix()); // typeTime
+            makeExpr(objects, VariableType::get_bt_fix()); // fadeTime
             break;
 
-         case 3:
-            makeExpr(objects, VariableType::get_bt_fix());
-            makeExpr(objects, VariableType::get_bt_fix());
+         case 3: // FADEINOUT
+            makeExpr(objects, VariableType::get_bt_fix()); // inTime
+            makeExpr(objects, VariableType::get_bt_fix()); // outTime
             break;
 
          default:
             Error_NP("unrecognized hud msgtype");
          }
+
+         if(*expr) makeExpr(objects, VariableType::get_bt_fix()); // alpha
       }
          break;
       }
@@ -660,6 +662,17 @@ private:
       case PT_STRING:
          objects->addToken(OCODE_ACSP_END_STR);
          break;
+      }
+
+      // If there are any remaining expressions, evaluate them for side effects.
+      if(*expr)
+      {
+         int i = 0;
+
+         for(; *expr; ++i) makeExpr(objects, VariableType::get_bt_void());
+
+         // And then whine at the user.
+         Warn_NP("%i unused arguments", i);
       }
 
       make_objects_memcpy_post(objects, dst, src, type, context, pos);
