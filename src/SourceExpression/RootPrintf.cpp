@@ -206,8 +206,7 @@ private:
 
       case 'x':
       case 'X':
-         makeExpr(objects, VariableType::get_bt_uns());
-         objects->addToken(OCODE_ACSP_NUM_HEX_U);
+         doFormat_x(objects, data);
          break;
 
       default:
@@ -338,6 +337,37 @@ private:
    }
 
    //
+   // ::doFormat_x
+   //
+   void doFormat_x(ObjectVector *objects, FormatData &data)
+   {
+      switch(data.len)
+      {
+      case FL_L:
+      case FL_LL:
+      case FL_MAX:
+         makeExpr(objects, VariableType::get_bt_uns_ll());
+         makeData(objects, data);
+         objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Print_lx"));
+         break;
+
+      default:
+         if(data.flags || data.width || data.prec || data.fmt == 'x')
+         {
+            makeExpr(objects, VariableType::get_bt_uns());
+            makeData(objects, data);
+            objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Print_x"));
+         }
+         else
+         {
+            makeExpr(objects, VariableType::get_bt_uns());
+            objects->addToken(OCODE_ACSP_NUM_HEX_U);
+         }
+         break;
+      }
+   }
+
+   //
    // ::doFormatLiteral
    //
    void doFormatLiteral(ObjectVector *objects, std::string &s)
@@ -375,6 +405,28 @@ private:
          VariableData::create_stack(type->getSize(pos));
 
       create_value_char(c, context, pos)->makeObjects(objects, tmp);
+   }
+
+   //
+   // ::makeData
+   //
+   // Pushes data members to the stack for an extended print call.
+   //
+   void makeData(ObjectVector *objects, FormatData &data)
+   {
+      makeInt(objects, data.flags);
+
+      if(data.width == -1)
+         makeExpr(objects, VariableType::get_bt_int());
+      else
+         makeInt(objects, data.width);
+
+      if(data.prec == -1)
+         makeExpr(objects, VariableType::get_bt_int());
+      else
+         makeInt(objects, data.prec);
+
+      makeInt(objects, data.fmt);
    }
 
    //
@@ -497,7 +549,7 @@ private:
          if(*c == '.')
          {
             if(*++c == '*')
-               data.prec = -1;
+               data.prec = -1, ++c;
             else for(data.prec = 0; std::isdigit(*c);)
                data.prec = (data.prec * 10) + (*c++ - '0');
          }

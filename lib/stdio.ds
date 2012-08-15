@@ -1,0 +1,616 @@
+//-----------------------------------------------------------------------------
+//
+// Copyright(C) 2012 David Hill
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+//-----------------------------------------------------------------------------
+//
+// Input/output.
+//
+//-----------------------------------------------------------------------------
+
+#include <stdio.h>
+
+#include <stdarg.h>
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+__extvar "C" static FILE[FOPEN_MAX] _Stream;
+
+
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
+
+//=========================================================
+// Operations on files.
+//
+
+//
+// remove
+//
+__extfunc "C" int remove(char const *filename)
+{
+   return EOF;
+};
+
+//
+// rename
+//
+__extfunc "C" int rename(char const *oldname, char const *newname)
+{
+   return EOF;
+};
+
+//
+// tmpfile
+//
+__extfunc "C" FILE *tmpfile()
+{
+   return NULL;
+};
+
+//
+// tmpnam
+//
+__extfunc "C" char *tmpnam(char *s)
+{
+   return NULL;
+};
+
+//=========================================================
+// File access functions.
+//
+
+//
+// fclose
+//
+__extfunc "C" int fclose(FILE *stream)
+{
+   return EOF;
+};
+
+//
+// fflush
+//
+__extfunc "C" int fflush(FILE *stream)
+{
+   return EOF;
+};
+
+//
+// fopen
+//
+__extfunc "C" FILE *fopen(char const *restrict filename, char const *restrict mode)
+{
+   return NULL;
+};
+
+//
+// freopen
+//
+__extfunc "C" FILE *freopen(char const *restrict filename, char const *restrict mode,
+                            FILE *restrict stream)
+{
+   return NULL;
+};
+
+//
+// setbuf
+//
+__extfunc "C" void setbuf(FILE *restrict stream, char *restrict buf)
+{
+   if(buf)
+      setvbuf(stream, buf, _IOFBF, BUFSIZ)
+   else
+      setvbuf(stream, NULL, _IONBF, 0);
+};
+
+//
+// setvbuf
+//
+__extfunc "C" int setvbuf(FILE *restrict stream, char *restrict buf, int mode, size_t size)
+{
+   return EOF;
+};
+
+//=========================================================
+// Formatted input/output functions.
+//
+
+//
+// fprintf
+//
+__extfunc "C" int fprintf(FILE *restrict stream, char const *restrict format, ...)
+{
+   int ret;
+   va_list ap;
+
+   va_start(ap, format);
+   ret = vfprintf(stream, format, ap);
+   va_end(ap);
+
+   return ret;
+};
+
+//
+// fscanf
+//
+__extfunc "C" int fscanf(FILE *restrict stream, char const *restrict format, ...)
+{
+   int ret;
+   va_list ap;
+
+   va_start(ap, format);
+   ret = vfscanf(stream, format, ap);
+   va_end(ap);
+
+   return ret;
+};
+
+//
+// printf
+//
+__extfunc "C" int printf(char const *restrict format, ...)
+{
+   int ret;
+   va_list ap;
+
+   va_start(ap, format);
+   ret = vfprintf(stdout, format, ap);
+   va_end(ap);
+
+   return ret;
+};
+
+//
+// scanf
+//
+__extfunc "C" int scanf(char const *restrict format, ...)
+{
+   int ret;
+   va_list ap;
+
+   va_start(ap, format);
+   ret = vfscanf(stdin, format, ap);
+   va_end(ap);
+
+   return ret;
+};
+
+//
+// snprintf
+//
+__extfunc "C" int snprintf(char *restrict s, size_t n, char const *restrict format, ...)
+{
+   int ret;
+   va_list ap;
+
+   va_start(ap, format);
+   ret = vsnprintf(s, n, format, ap);
+   va_end(ap);
+
+   return ret;
+};
+
+//
+// sprintf
+//
+__extfunc "C" int sprintf(char *restrict s, char const *restrict format, ...)
+{
+   int ret;
+   va_list ap;
+
+   va_start(ap, format);
+   ret = vsprintf(s, format, ap);
+   va_end(ap);
+
+   return ret;
+};
+
+//
+// sscanf
+//
+__extfunc "C" int sscanf(char const *restrict s, char const *restrict format, ...)
+{
+   int ret;
+   va_list ap;
+
+   va_start(ap, format);
+   ret = vsscanf(s, format, ap);
+   va_end(ap);
+
+   return ret;
+};
+
+//
+// vfprintf
+//
+__extfunc "C" int vfprintf(FILE *restrict stream, char const *restrict format, va_list arg)
+{
+   return EOF;
+};
+
+//
+// vfscanf
+//
+__extfunc "C" int vfscanf(FILE *restrict stream, char const *restrict format, va_list arg)
+{
+   return EOF;
+};
+
+//
+// vprintf
+//
+__extfunc "C" int vprintf(char const *restrict format, va_list arg)
+{
+   return vfprintf(stdout, format, arg);
+};
+
+//
+// vscanf
+//
+__extfunc "C" int vscanf(char const *restrict format, va_list arg)
+{
+   return vfscanf(stdin, format, arg);
+};
+
+//
+// vsnprintf
+//
+__extfunc "C" int vsnprintf(char *restrict s, size_t n, char const *restrict format, va_list arg)
+{
+   return EOF;
+};
+
+//
+// vsprintf
+//
+__extfunc "C" int vsprintf(char *restrict s, char const *restrict format, va_list arg)
+{
+   return EOF;
+};
+
+//
+// vsscanf
+//
+__extfunc "C" int vsscanf(char const *restrict s, char const *restrict format, va_list arg)
+{
+   return EOF;
+};
+
+//=========================================================
+// Character input/output functions.
+//
+
+//
+// fgetc
+//
+__extfunc "C" int fgetc(FILE *stream)
+{
+   return EOF;
+};
+
+//
+// fgets
+//
+__extfunc "C" char *fgets(char *restrict s, size_t n, FILE *restrict stream)
+{
+   return NULL;
+};
+
+//
+// fputc
+//
+__extfunc "C" int fputc(int c, FILE *stream)
+{
+   return EOF;
+};
+
+//
+// getc
+//
+__extfunc "C" int getc(FILE *stream)
+{
+   return fgetc(stream);
+};
+
+//
+// getchar
+//
+__extfunc "C" int getchar()
+{
+   return fgetc(stdin);
+};
+
+//
+// gets
+//
+__extfunc "C" char *gets(char *s)
+{
+   return NULL;
+};
+
+//
+// putc
+//
+__extfunc "C" int putc(int c, FILE *stream)
+{
+   return fputc(c, stream);
+};
+
+//
+// putchar
+//
+__extfunc "C" int putchar(int c)
+{
+   return fputc(c, stdout);
+};
+
+//
+// puts
+//
+__extfunc "C" int puts(char const *s)
+{
+   return EOF;
+};
+
+//
+// ungetc
+//
+__extfunc "C" int ungetc(int c, FILE *stream)
+{
+   return EOF;
+};
+
+//=========================================================
+// Direct input/output functions.
+//
+
+//
+// fread
+//
+__extfunc "C" size_t fread(void *restrict ptr, size_t size, size_t nmemb,
+                           FILE *restrict stream)
+{
+   return 0;
+};
+
+//
+// fwrite
+//
+__extfunc "C" size_t fwrite(void const *restrict ptr, size_t size, size_t nmemb,
+                            FILE *restrict stream)
+{
+   return 0;
+};
+
+//=========================================================
+// File positioning functions.
+//
+
+//
+// fgetpos
+//
+__extfunc "C" int fgetpos(FILE *restrict stream, fpos_t *restrict pos)
+{
+   return EOF;
+};
+
+//
+// fseek
+//
+__extfunc "C" int fseek(FILE *stream, long int offset, int whence)
+{
+   return EOF;
+};
+
+//
+// fsetpos
+//
+__extfunc "C" int fsetpos(FILE *restrict stream, fpos_t const *restrict pos)
+{
+   return EOF;
+};
+
+//
+// ftell
+//
+__extfunc "C" long int ftell(FILE *stream)
+{
+   return -1L;
+};
+
+//
+// rewind
+//
+__extfunc "C" void rewind(FILE *stream)
+{
+};
+
+//=========================================================
+// Error-handling functions,
+//
+
+//
+// clearerr
+//
+__extfunc "C" void clearerr(FILE *stream)
+{
+};
+
+//
+// feof
+//
+__extfunc "C" int feof(FILE *stream)
+{
+   return true;
+};
+
+//
+// ferror
+//
+__extfunc "C" int ferror(FILE *stream)
+{
+   return false;
+};
+
+//
+// perror
+//
+__extfunc "C" void perror(char const *s)
+{
+};
+
+//=========================================================
+// Implementation extensions
+//
+
+#define HEXCHARL "0123456789abcdef"
+#define HEXCHARU "0123456789ABCDEF"
+
+__asmfunc void PrintStatic(char const static *, int) @ __ocode(ACSP_STR_GBLARR);
+__asmfunc void PrintString(__string) @ __ocode(ACSP_STR);
+__asmfunc void PrintChar(char) @ __ocode(ACSP_CHARACTER);
+
+//
+// FormatFlag
+//
+enum FormatFlag
+{
+   FF_LEFT = 0x0001,
+   FF_SIGN = 0x0002,
+   FF_PADS = 0x0004,
+   FF_ALTF = 0x0008,
+   FF_PAD0 = 0x0010,
+};
+
+//
+// FormatLength
+//
+enum FormatLength
+{
+   FL_NONE,
+   FL_HH,
+   FL_H,
+   FL_L,
+   FL_LL,
+   FL_MAX,
+   FL_SIZE,
+   FL_DIFF,
+};
+
+//
+// _Print_x
+//
+__extfunc "C" int _Print_x(unsigned x, int flags, int width, int prec, char fmt)
+{
+   return _Print_lx(x, flags, width, prec, fmt);
+};
+
+//
+// _Print_lx
+//
+__extfunc "C" int _Print_lx(unsigned long x, int flags, int width, int prec, char fmt)
+{
+   constexpr int register *xp = (int register *)&x;
+
+   // Don't need reentrancy.
+   static char[17] s;
+
+   // Make the entire 16-character string.
+   if(fmt == 'X')
+   {
+      s[ 0] = HEXCHARU[(xp[1] >> 28) & 0xF];
+      s[ 1] = HEXCHARU[(xp[1] >> 24) & 0xF];
+      s[ 2] = HEXCHARU[(xp[1] >> 20) & 0xF];
+      s[ 3] = HEXCHARU[(xp[1] >> 16) & 0xF];
+      s[ 4] = HEXCHARU[(xp[1] >> 12) & 0xF];
+      s[ 5] = HEXCHARU[(xp[1] >>  8) & 0xF];
+      s[ 6] = HEXCHARU[(xp[1] >>  4) & 0xF];
+      s[ 7] = HEXCHARU[(xp[1]      ) & 0xF];
+      s[ 8] = HEXCHARU[(xp[0] >> 28) & 0xF];
+      s[ 9] = HEXCHARU[(xp[0] >> 24) & 0xF];
+      s[10] = HEXCHARU[(xp[0] >> 20) & 0xF];
+      s[11] = HEXCHARU[(xp[0] >> 16) & 0xF];
+      s[12] = HEXCHARU[(xp[0] >> 12) & 0xF];
+      s[13] = HEXCHARU[(xp[0] >>  8) & 0xF];
+      s[14] = HEXCHARU[(xp[0] >>  4) & 0xF];
+      s[15] = HEXCHARU[(xp[0]      ) & 0xF];
+   }
+   else
+   {
+      s[ 0] = HEXCHARL[(xp[1] >> 28) & 0xF];
+      s[ 1] = HEXCHARL[(xp[1] >> 24) & 0xF];
+      s[ 2] = HEXCHARL[(xp[1] >> 20) & 0xF];
+      s[ 3] = HEXCHARL[(xp[1] >> 16) & 0xF];
+      s[ 4] = HEXCHARL[(xp[1] >> 12) & 0xF];
+      s[ 5] = HEXCHARL[(xp[1] >>  8) & 0xF];
+      s[ 6] = HEXCHARL[(xp[1] >>  4) & 0xF];
+      s[ 7] = HEXCHARL[(xp[1]      ) & 0xF];
+      s[ 8] = HEXCHARL[(xp[0] >> 28) & 0xF];
+      s[ 9] = HEXCHARL[(xp[0] >> 24) & 0xF];
+      s[10] = HEXCHARL[(xp[0] >> 20) & 0xF];
+      s[11] = HEXCHARL[(xp[0] >> 16) & 0xF];
+      s[12] = HEXCHARL[(xp[0] >> 12) & 0xF];
+      s[13] = HEXCHARL[(xp[0] >>  8) & 0xF];
+      s[14] = HEXCHARL[(xp[0] >>  4) & 0xF];
+      s[15] = HEXCHARL[(xp[0]      ) & 0xF];
+   };
+   s[16] = 0;
+
+   int len = 16, ret;
+   char __near *itr;
+   char padc = (flags & FF_PAD0 || prec) ? ' ' : '0';
+
+   // Determine portion of base string to use.
+   if(prec < 1) prec = 1;
+   for(itr = s; *itr == '0' && len > prec; --len, ++itr);
+
+   // Alternate format means prefix with 0x/0X if non-zero.
+   if(flags & FF_ALTF && x)
+   {
+      PrintChar('0');
+      PrintChar(fmt);
+      ret = 2;
+   }
+   else
+      ret = 0;
+
+   // If right-justified, pad width now.
+   if(!(flags & FF_LEFT))
+   {
+      // Specifically, pad it to max(len, prec).
+      int i = width - (len < prec ? prec : len);
+
+      if(i > 0) for(; i--; ++len) PrintChar(padc);
+   };
+
+   // Pad to precision.
+   for(; len < prec; ++len) PrintChar('0');
+   PrintStatic(itr, @*itr);
+
+   // If left-justified, pad width now.
+   if(flags & FF_LEFT) for(; len < width; ++len) PrintChar(padc);
+
+   // Return number of characters written.
+   return ret + len;
+};
+
+// EOF
+

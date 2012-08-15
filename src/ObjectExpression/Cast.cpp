@@ -120,7 +120,8 @@ public:
    //
    virtual bigsint resolveINT() const
    {
-      if(dstType == ET_INT) switch(srcType)
+      // HACK! Allow INT for UNS.
+      if(dstType == ET_INT || dstType == ET_UNS) switch(srcType)
       {
       case ET_FIX: return static_cast<bigsint>(expr->resolveFIX());
       case ET_FLT: return static_cast<bigsint>(expr->resolveFLT());
