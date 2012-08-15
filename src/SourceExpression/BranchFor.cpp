@@ -43,18 +43,97 @@ class SourceExpression_BranchFor : public SourceExpression
                                    SourceExpression);
 
 public:
-   SourceExpression_BranchFor
-   (SourceExpression *exprCond, SourceExpression *exprBody,
-    SourceExpression *exprIter, SourceExpression *exprInit,
-    SRCEXP_EXPR_ARGS);
+   //
+   // ::SourceExpression_BranchFor
+   //
+   SourceExpression_BranchFor(SourceExpression *_exprCond,
+      SourceExpression *_exprBody, SourceExpression *_exprIter,
+      SourceExpression *_exprInit, bool _postCond, SRCEXP_EXPR_PARM)
+    : Super(SRCEXP_EXPR_PASS), exprCond(_exprCond), exprBody(_exprBody),
+      exprIter(_exprIter), exprInit(_exprInit), postCond(_postCond)
+   {
+      VariableType::Reference type = VariableType::get_bt_bit_sft();
+
+      if(exprCond) exprCond = create_value_cast_implicit(exprCond, type, context, pos);
+
+      type = VariableType::get_bt_void();
+
+      if(exprBody) exprBody = create_value_cast_implicit(exprBody, type, context, pos);
+
+      if(exprIter) exprIter = create_value_cast_implicit(exprIter, type, context, pos);
+      if(exprInit) exprInit = create_value_cast_implicit(exprInit, type, context, pos);
+   }
 
 private:
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   //
+   // ::virtual_makeObjects
+   //
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+   {
+      Super::recurse_makeObjects(objects, dst);
 
-   SourceExpression::Pointer exprCond;
-   SourceExpression::Pointer exprBody;
-   SourceExpression::Pointer exprIter;
-   SourceExpression::Pointer exprInit;
+      bigsint               sizeCond = exprCond->getType()->getSize(pos);
+      VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
+      VariableData::Pointer sink     = VariableData::create_void(0);
+
+      ObjectExpression::Pointer objCond;
+      bigsint                   retCond;
+
+      // Check for condition constant.
+      if(exprCond->canMakeObject())
+      {
+         // And make sure it can actually be resolved...
+         if((objCond = exprCond->makeObject())->canResolve())
+            retCond = objCond->resolveINT();
+         else
+            objCond = NULL;
+      }
+
+      // Jump targets.
+      std::string label = context->makeLabel();
+      std::string labelCond = label + "_cond";
+      std::string labelBody = label + "_body";
+
+      // Loop initializer, if any.
+      if(exprInit) exprInit->makeObjects(objects, sink);
+
+      // For pre-loop condition, need to jump to the condition.
+      objects->setPosition(pos);
+      if(!postCond)
+      {
+         // But if the condition is known to be true, just keep going.
+         if(!objCond || !retCond)
+            objects->addToken(OCODE_JMP_IMM, objects->getValue(labelCond));
+      }
+
+      // Loop body.
+      objects->addLabel(labelBody);
+      exprBody->makeObjects(objects, sink);
+
+      // Loop iterator, if any.
+      objects->addLabel(context->getLabelContinue(pos));
+      if(exprIter) exprIter->makeObjects(objects, sink);
+
+      // Loop condition.
+      objects->addLabel(labelCond);
+      if(objCond)
+      {
+         if(retCond)
+            objects->addToken(OCODE_JMP_IMM, objects->getValue(labelBody));
+      }
+      else
+      {
+         exprCond->makeObjects(objects, destCond);
+         objects->setPosition(pos);
+         objects->addToken(OCODE_JMP_TRU, objects->getValue(labelBody));
+      }
+
+      objects->addLabel(context->getLabelBreak(pos));
+   }
+
+   SourceExpression::Pointer exprCond, exprBody, exprIter, exprInit;
+
+   bool postCond : 1;
 };
 
 
@@ -63,74 +142,30 @@ private:
 //
 
 //
+// SourceExpression::create_branch_do
+//
+SRCEXP_EXPRBRA_DEFN(2, do)
+{
+   return new SourceExpression_BranchFor(exprCond, exprBody, NULL, NULL, true,
+                                         context, pos);
+}
+
+//
 // SourceExpression::create_branch_for
 //
 SRCEXP_EXPRBRA_DEFN(4, for)
 {
-   return new SourceExpression_BranchFor
-      (exprCond, exprBody, exprIter, exprInit, context, pos);
+   return new SourceExpression_BranchFor(exprCond, exprBody, exprIter,
+                                         exprInit, false, context, pos);
 }
 
 //
-// SourceExpression_BranchFor::SourceExpression_BranchFor
+// SourceExpression::create_branch_while
 //
-SourceExpression_BranchFor::
-SourceExpression_BranchFor
-(SourceExpression *_exprCond, SourceExpression *_exprBody,
- SourceExpression *_exprIter, SourceExpression *_exprInit,
- SRCEXP_EXPR_PARM)
- : Super(SRCEXP_EXPR_PASS),
-   exprCond(_exprCond), exprBody(_exprBody),
-   exprIter(_exprIter), exprInit(_exprInit)
+SRCEXP_EXPRBRA_DEFN(2, while)
 {
-   {
-      VariableType::Reference type = VariableType::get_bt_bit_sft();
-
-      exprCond = create_value_cast_implicit(exprCond, type, context, pos);
-   }
-
-   {
-      VariableType::Reference type = VariableType::get_bt_void();
-
-      exprBody = create_value_cast_implicit(exprBody, type, context, pos);
-      exprIter = create_value_cast_implicit(exprIter, type, context, pos);
-      exprInit = create_value_cast_implicit(exprInit, type, context, pos);
-   }
-}
-
-
-//
-// SourceExpression_BranchFor::virtual_makeObjects
-//
-void SourceExpression_BranchFor::
-virtual_makeObjects(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   bigsint               sizeCond = exprCond->getType()->getSize(pos);
-   VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
-   VariableData::Pointer sink     = VariableData::create_void(0);
-
-   std::string label = context->makeLabel();
-   std::string labelCond = label + "_cond";
-   std::string labelBody = label + "_body";
-
-   exprInit->makeObjects(objects, sink);
-   objects->setPosition(pos);
-   objects->addToken(OCODE_JMP_IMM, objects->getValue(labelCond));
-
-   objects->addLabel(labelBody);
-   exprBody->makeObjects(objects, sink);
-
-   objects->addLabel(context->getLabelContinue(pos));
-   exprIter->makeObjects(objects, sink);
-
-   objects->addLabel(labelCond);
-   exprCond->makeObjects(objects, destCond);
-   objects->setPosition(pos);
-   objects->addToken(OCODE_JMP_TRU, objects->getValue(labelBody));
-
-   objects->addLabel(context->getLabelBreak(pos));
+   return new SourceExpression_BranchFor(exprCond, exprBody, NULL, NULL, false,
+                                         context, pos);
 }
 
 // EOF

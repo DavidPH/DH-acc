@@ -136,6 +136,19 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    bigsint               sizeCond = exprCond->getType()->getSize(pos);
    VariableData::Pointer destCond = VariableData::create_stack(sizeCond);
 
+   ObjectExpression::Pointer objCond;
+
+   // If the condition is known at compile-time, do the branch now.
+   if(exprCond->canMakeObject() && (objCond = exprCond->makeObject())->canResolve())
+   {
+      if(objCond->resolveINT())
+         exprBody->makeObjects(objects, dst);
+      else if(exprElse)
+         exprElse->makeObjects(objects, dst);
+
+      return;
+   }
+
    std::string label = context->makeLabel();
    std::string labelBody = label + "_body";
    std::string labelElse = label + "_else";
