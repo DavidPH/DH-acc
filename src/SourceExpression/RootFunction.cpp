@@ -54,15 +54,13 @@ private:
 
       bigsint sizeAuto = 0, sizeReg = 0, sizeAll = 0;
 
-      // TODO: Variadic functions.
-      if(!args.empty() && !args.back())
-         return;
-
       // If necessary, move any of the passed arguments.
       // TODO: QUAL_AUTOCALL
       for(VariableType::Vector::iterator itr = args.begin(),
           end = args.end(); itr != end; ++itr)
       {
+         if(!*itr) break;
+
          StoreType store = (*itr)->getStoreType();
          bigsint   size  = (*itr)->getSize(pos);
 
