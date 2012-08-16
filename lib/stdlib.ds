@@ -21,9 +21,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "stdlib.h"
+#include <stdlib.h>
 
-#include "string.h"
+#include <inttypes.h>
+#include <string.h>
 
 
 //----------------------------------------------------------------------------|
@@ -91,7 +92,8 @@ __intvar __staticregister unsigned randval = 1;
 //
 __extfunc "C" double atof(char const *nptr)
 {
-   //return 0;
+   double f;
+   return f;
 };
 
 //
@@ -123,8 +125,9 @@ __extfunc "C" long long atoll(char const *nptr)
 //
 __extfunc "C" double strtod(char const *restrict nptr, char **restrict endptr)
 {
+   double f;
    if(endptr) *endptr = NULL;
-   //return 0;
+   return f;
 };
 
 //
@@ -141,8 +144,9 @@ __extfunc "C" float strtof(char const *restrict nptr, char **restrict endptr)
 //
 __extfunc "C" long double strtold(char const *restrict nptr, char **restrict endptr)
 {
+   long double f;
    if(endptr) *endptr = NULL;
-   //return 0;
+   return f;
 };
 
 //
@@ -164,6 +168,16 @@ __extfunc "C" long long strtoll(char const *restrict nptr, char **restrict endpt
 };
 
 //
+// strtoimax
+//
+__extfunc "C" intmax_t strtoimax(char const *restrict nptr,
+                                 char **restrict endptr, int base)
+{
+   if(endptr) *endptr = NULL;
+   return 0;
+};
+
+//
 // strtoul
 //
 __extfunc "C" unsigned long strtoul(char const *restrict nptr, char **restrict endptr)
@@ -176,6 +190,36 @@ __extfunc "C" unsigned long strtoul(char const *restrict nptr, char **restrict e
 // strtoull
 //
 __extfunc "C" unsigned long long strtoull(char const *restrict nptr, char **restrict endptr)
+{
+   if(endptr) *endptr = NULL;
+   return 0;
+};
+
+//
+// strtoumax
+//
+__extfunc "C" uintmax_t strtoumax(char const *restrict nptr,
+                                  char **restrict endptr, int base)
+{
+   if(endptr) *endptr = NULL;
+   return 0;
+};
+
+//
+// wcstoimax
+//
+__extfunc "C" intmax_t wcstoimax(wchar_t const *restrict nptr,
+                                 wchar_t **restrict endptr, int base)
+{
+   if(endptr) *endptr = NULL;
+   return 0;
+};
+
+//
+// wcstoumax
+//
+__extfunc "C" uintmax_t wcstoumax(wchar_t const *restrict nptr,
+                                  wchar_t **restrict endptr, int base)
 {
    if(endptr) *endptr = NULL;
    return 0;
@@ -496,6 +540,14 @@ __extfunc "C" long long llabs(long long int j)
 };
 
 //
+// imaxabs
+//
+__extfunc "C" intmax_t imaxabs(intmax_t j)
+{
+   return j < 0 ? -j : j;
+};
+
+//
 // div
 //
 // "operator /"
@@ -542,6 +594,16 @@ __extfunc "C" lldiv_t lldiv(long long int numer, long long int denom)
    d.rem  = numer;
 #endif
    return d;
+};
+
+//
+// imaxdiv
+//
+// "operator /"
+//
+__extfunc "C" imaxdiv_t imaxdiv(intmax_t numer, intmax_t denom)
+{
+   return {};
 };
 
 //===================================================================
