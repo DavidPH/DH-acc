@@ -231,6 +231,21 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
       return obj;
    }
 
+   // string->array
+   if(srcBT == VariableType::BT_STR && dstBT == VariableType::BT_ARR)
+   {
+      std::string srcStr = src->resolveString();
+
+      ObjectExpression::Vector srcVec(srcStr.size());
+
+      std::string::iterator srcStrItr = srcStr.begin(), srcStrEnd = srcStr.end();
+      ObjectExpression::Vector::iterator srcVecItr = srcVec.begin();
+      while(srcStrItr != srcStrEnd)
+         *srcVecItr++ = ObjectExpression::create_value_int(*srcStrItr++, pos);
+
+      return ObjectExpression::create_value_arr(srcVec, pos);
+   }
+
    // String-to-far*.
    if(srcBT == VariableType::BT_STR && dstBT == VariableType::BT_PTR &&
       dstType->getReturn()->getStoreType() == STORE_NONE)

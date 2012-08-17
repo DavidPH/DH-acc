@@ -1422,6 +1422,10 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
       if(is_bt_function(srcBT) && dstBT == BT_PTR)
          return get_cast(dst, src->getPointer(), exact);
 
+      // string->array
+      if(srcBT == BT_STR && dstBT == BT_ARR && dst->getReturn()->getBasicType() == BT_CHR)
+         return CAST_FORCE;
+
       // string->integer
       if(srcBT == BT_STR && is_bt_integer(dstBT))
          return CAST_FORCE;

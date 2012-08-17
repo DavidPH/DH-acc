@@ -305,9 +305,6 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
       in->get(SourceTokenC::TT_EQUALS);
       initSrc = SourceExpressionDS::make_assignment(in, context);
 
-      if (initSrc->canMakeObject())
-         initObj = initSrc->makeObject();
-
       // Automatic type.
       if (is_void(type))
       {
@@ -329,14 +326,25 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
                         addr, externDef, meta);
       }
       // Initializer-determined array length.
-      else if (is_array_length_zero(type))
+      else if(is_array_length_zero(type))
       {
          VariableType::Reference initSrcType = initSrc->getType();
 
-         if (initSrcType->getBasicType() != VariableType::BT_BLOCK)
-            Error_P("expected BT_BLOCK");
+         if(initSrcType->getBasicType() == VariableType::BT_BLOCK)
+         {
+            type = get_array_length(type, initSrcType);
+         }
+         else if(initSrcType->getBasicType() == VariableType::BT_STR)
+         {
+            std::string initStr = initSrc->makeObject()->resolveString();
+            type = type->getReturn()->getArray(initStr.size());
 
-         type = get_array_length(type, initSrcType);
+            initSrcType = initSrcType->getReturn()->getArray(initStr.size());
+            initSrc = SourceExpression::
+               create_value_cast_force(initSrc, initSrcType, context, pos);
+         }
+         else
+            Error_P("expected block or string");
 
          expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
                         addr, externDef, meta);
@@ -358,6 +366,10 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
          expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
                         addr, externDef, meta);
       }
+
+      // Generate initObj here in case one of the above rules alters initSrc.
+      if(initSrc->canMakeObject())
+         initObj = initSrc->makeObject();
 
       // Generate expression to set variable.
       SourceExpression::Pointer exprSet = SourceExpression::
