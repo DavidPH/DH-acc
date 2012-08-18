@@ -378,33 +378,38 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
 void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
     VariableData *src, ObjectExpression *tmpA, ObjectExpression *tmpB)
 {
-   if(src->size != 1) Error_NP("stub");
-
-   switch (src->type)
+   for(bigsint i = 0; i < src->size; ++i) switch(src->type)
    {
    case VariableData::MT_AUTO:
-      objects->addToken(OCODE_GET_AUTO, src->address); break;
+      objects->addToken(OCODE_GET_AUTO, objects->getValueAdd(src->address, i)); break;
+
    case VariableData::MT_FARPTR:
+      if(i && (!tmpA || ! tmpB)) Error_NP("stub");
       if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
       if(tmpB) objects->addToken(OCODE_GET_TEMP, tmpB);
-      objects->addToken(OCODE_GET_FARPTR, src->address); break;
+      objects->addToken(OCODE_GET_FARPTR, objects->getValueAdd(src->address, i)); break;
+
    case VariableData::MT_POINTER:
+      if(i && !tmpA) Error_NP("stub");
       if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
-      objects->addToken(OCODE_GET_PTR, src->address); break;
+      objects->addToken(OCODE_GET_PTR, objects->getValueAdd(src->address, i)); break;
+
    case VariableData::MT_REGISTER:
       switch (src->sectionR)
       {
       case VariableData::SR_LOCAL:
-         objects->addToken(OCODE_GET_REG, src->address); break;
+         objects->addToken(OCODE_GET_REG, objects->getValueAdd(src->address, i)); break;
       case VariableData::SR_MAP:
-         objects->addToken(OCODE_GET_MAPREG, src->address); break;
+         objects->addToken(OCODE_GET_MAPREG, objects->getValueAdd(src->address, i)); break;
       case VariableData::SR_WORLD:
-         objects->addToken(OCODE_GET_WLDREG, src->address); break;
+         objects->addToken(OCODE_GET_WLDREG, objects->getValueAdd(src->address, i)); break;
       case VariableData::SR_GLOBAL:
-         objects->addToken(OCODE_GET_GBLREG, src->address); break;
+         objects->addToken(OCODE_GET_GBLREG, objects->getValueAdd(src->address, i)); break;
       }
       break;
+
    case VariableData::MT_ARRAY:
+      if(i) Error_NP("stub");
       if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
       switch (src->sectionA)
       {
@@ -416,8 +421,10 @@ void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
          objects->addToken(OCODE_GET_GBLARR, src->address); break;
       }
       break;
+
    case VariableData::MT_STATIC:
-      objects->addToken(OCODE_GET_STATIC, src->address); break;
+      objects->addToken(OCODE_GET_STATIC, objects->getValueAdd(src->address, i)); break;
+
    default: Error_NP("src->type");
    }
 }
@@ -428,33 +435,38 @@ void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
 void SourceExpression_Binary::doSetBaseSet(ObjectVector *objects,
    VariableData *src, ObjectExpression *tmpA, ObjectExpression *tmpB)
 {
-   if(src->size != 1) Error_NP("stub");
-
-   switch (src->type)
+   for(bigsint i = src->size; i--;) switch(src->type)
    {
    case VariableData::MT_AUTO:
-      objects->addToken(OCODE_SET_AUTO, src->address); break;
+      objects->addToken(OCODE_SET_AUTO, objects->getValueAdd(src->address, i)); break;
+
    case VariableData::MT_FARPTR:
+      if(i && (!tmpA || !tmpB)) Error_NP("stub");
       if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
       if(tmpB) objects->addToken(OCODE_GET_TEMP, tmpB);
-      objects->addToken(OCODE_SET_FARPTR, src->address); break;
+      objects->addToken(OCODE_SET_FARPTR, objects->getValueAdd(src->address, i)); break;
+
    case VariableData::MT_POINTER:
+      if(i && !tmpA) Error_NP("stub");
       if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
-      objects->addToken(OCODE_SET_PTR, src->address); break;
+      objects->addToken(OCODE_SET_PTR, objects->getValueAdd(src->address, i)); break;
+
    case VariableData::MT_REGISTER:
       switch (src->sectionR)
       {
       case VariableData::SR_LOCAL:
-         objects->addToken(OCODE_SET_REG, src->address); break;
+         objects->addToken(OCODE_SET_REG, objects->getValueAdd(src->address, i)); break;
       case VariableData::SR_MAP:
-         objects->addToken(OCODE_SET_MAPREG, src->address); break;
+         objects->addToken(OCODE_SET_MAPREG, objects->getValueAdd(src->address, i)); break;
       case VariableData::SR_WORLD:
-         objects->addToken(OCODE_SET_WLDREG, src->address); break;
+         objects->addToken(OCODE_SET_WLDREG, objects->getValueAdd(src->address, i)); break;
       case VariableData::SR_GLOBAL:
-         objects->addToken(OCODE_SET_GBLREG, src->address); break;
+         objects->addToken(OCODE_SET_GBLREG, objects->getValueAdd(src->address, i)); break;
       }
       break;
+
    case VariableData::MT_ARRAY:
+      if(i) Error_NP("stub");
       if(tmpA)
       {
          objects->addToken(OCODE_GET_TEMP, tmpA);
@@ -470,8 +482,10 @@ void SourceExpression_Binary::doSetBaseSet(ObjectVector *objects,
          objects->addToken(OCODE_SET_GBLARR, src->address); break;
       }
       break;
+
    case VariableData::MT_STATIC:
-      objects->addToken(OCODE_SET_STATIC, src->address); break;
+      objects->addToken(OCODE_SET_STATIC, objects->getValueAdd(src->address, i)); break;
+
    default: Error_NP("src->type");
    }
 }

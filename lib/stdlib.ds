@@ -860,31 +860,104 @@ __extfunc "C" _UdivL_t _UdivL(unsigned long numer, unsigned long denom)
 {
    _UdivL_t d = {0; numer;};
 
-   unsigned long mask = 1;
+   unsigned long mask;
+
+   constexpr unsigned register *denomp = (unsigned register *)&denom;
+   constexpr   signed register *maskp  = (  signed register *)&mask;
+   constexpr unsigned register *quotp  = (unsigned register *)&d.quot;
 
    // Don't go into an infinite loop. That's uncool.
-   if(!denom) return d;
+   // Also do an early return if denom is larger than numer.
+   if(!denom || denom > numer) return d;
 
-   // It would suffice to make denom >= numer, but that test
-   // is more complex and will fail if denom has its MSB set.
-   while(!(denom & (1UL << 63)))
+   // Need to adjust denom so that it's as far left as possible.
+   // But long shifts are kinda slow, so do shifting as a series of large shifts.
+   if(!denomp[1])
    {
-      denom = denom << 1;
-      mask = mask << 1;
+      // The first case can be simplified by just swapping the bytes.
+      denomp[1] = denomp[0];
+      denomp[0] = 0;
+
+      // And initializing mask now.
+      mask = 1UL << 32;
+   }
+   else
+      mask = 1UL;
+
+   // Then the remaining tests are just half as many bits each time.
+   if(!(denomp[1] & 0xFFFF0000))
+   {
+      denom <<= 16;
+      mask <<= 16;
+   };
+   if(!(denomp[1] & 0xFF000000))
+   {
+      denom <<= 8;
+      mask <<= 8;
+   };
+   if(!(denomp[1] & 0xF0000000))
+   {
+      denom <<= 4;
+      mask <<= 4;
+   };
+   if(!(denomp[1] & 0xC0000000))
+   {
+      denom <<= 2;
+      mask <<= 2;
+   };
+   if(!(denomp[1] & 0x80000000))
+   {
+      denom <<= 1;
+      mask <<= 1;
    };
 
    // Now add up the powers of two (of denom) that "fit" into numer.
-   while(mask && d.rem)
-   {
-      if(d.rem >= denom)
-      {
-         d.quot = d.quot + mask;
-         d.rem = d.rem - denom;
-      };
+   #define DIVCHK(N) \
+      if(d.rem >= denom) \
+      { \
+         quotp[N] |= maskp[N]; \
+         d.rem += -denom; \
+      }
 
-      denom = denom >> 1;
-      mask = mask >> 1;
+   // First iteration of division, handled specially to avoid unsigned rsh.
+   #define DIVCHK_STRT(N) \
+      if(maskp[N] == 0x80000000) \
+      { \
+         DIVCHK(N); \
+         \
+         denom >>= 1; \
+         maskp[N] = 0x40000000; \
+      }
+
+   // Main loop for the half.
+   #define DIVCHK_LOOP(N) \
+      while(maskp[N] && d.rem) \
+      { \
+         DIVCHK(N); \
+         \
+         denom >>= 1; \
+         maskp[N] >>= 1; \
+      }
+
+   #define DIVCHK_FULL(N) \
+      DIVCHK_STRT(N); \
+      DIVCHK_LOOP(N)
+
+   // First half of the division, if mask is large enough.
+   if(maskp[1])
+   {
+      DIVCHK_FULL(1);
+
+      // Transfer the last bit to the low byte.
+      maskp[0] = 0x80000000;
    };
+
+   DIVCHK_FULL(0);
+
+   #undef DIVCHK_FULL
+   #undef DIVCHK_LOOP
+   #undef DIVCHK_STRT
+   #undef DIVCHK
 
    return d;
 };
