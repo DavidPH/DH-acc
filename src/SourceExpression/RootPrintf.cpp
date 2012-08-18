@@ -200,8 +200,7 @@ private:
          break;
 
       case 'u':
-         makeExpr(objects, VariableType::get_bt_uns());
-         objects->addToken(OCODE_ACSP_NUM_DEC_I);
+         doFormat_u(objects, data);
          break;
 
       case 'x':
@@ -345,6 +344,29 @@ private:
          objects->addToken(OCODE_GET_IMM,
             objects->getValue(argType->getReturn()->getStoreArea()));
          objects->addToken(OCODE_ACSP_STR_GBLARR);
+         break;
+      }
+   }
+
+   //
+   // ::doFormat_u
+   //
+   void doFormat_u(ObjectVector *objects, FormatData &data)
+   {
+      switch(data.len)
+      {
+      case FL_L:
+      case FL_LL:
+      case FL_MAX:
+         makeData(objects, data);
+         makeExpr(objects, VariableType::get_bt_uns_ll());
+         objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Print_lu"));
+         break;
+
+      default:
+         makeData(objects, data);
+         makeExpr(objects, VariableType::get_bt_uns());
+         objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Print_u"));
          break;
       }
    }

@@ -36,9 +36,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "z_zone.h"
+#include <z_zone.h>
 
-#include "string.h"
+#include <stdio.h>
+#include <string.h>
 
 //----------------------------------------------------------------------------|
 // Macros                                                                     |
@@ -72,6 +73,10 @@
 // while the game is running (this is EXTREMELY slow).
 // haleyjd 01/27/09: made independent of INSTRUMENTED
 //#define CHECKHEAP
+
+// Uncomment this to automatically invoke Z_PrintStats.
+// davidph 08/18/12: made independent of INSTRUMENTED
+//#define ZONESTATS
 
 // Uncomment this to perform id checks on zone blocks,
 // to detect corrupted and illegally freed blocks
@@ -138,10 +143,15 @@
 #ifdef INSTRUMENTED
 #  define INSTRUMENT(a) a
 #  define INSTRUMENT_IF(opt, a, b) if((opt)) (a) else (b)
-#  define Z_PrintStats() (Z_PrintStats)()
 #else
 #  define INSTRUMENT(a)
 #  define INSTRUMENT_IF(opt, a, b)
+#endif
+
+// Automatic stat printing.
+#ifdef ZONESTATS
+#  define Z_PrintStats() (Z_PrintStats)()
+#else
 #  define Z_PrintStats()
 #endif
 
@@ -1335,18 +1345,20 @@ __extfunc "C" void (Z_PrintStats)()
                                virtual_memory;
 
    zonef(
-      "%u\t%u%%\tstatic\n"
-      "%u\t%u%%\tpurgable\n"
-      "%u\t%u%%\tfree\n"
-      "%u\t%u%%\tfragmentary\n"
-      "%u\t%u%%\tvirtual\n"
-      "%u\t100%%\ttotal\n",
+      "%9u  %3u%%  static\n"
+      "%9u  %3u%%  purgable\n"
+      "%9u  %3u%%  free\n"
+      "%9u  %3u%%  fragmentary\n"
+      "%9u  %3u%%  virtual\n"
+      "%9u  100%%  total\n",
       active_memory,   active_memory*100/total_memory,
       purgable_memory, purgable_memory*100/total_memory,
       free_memory,     free_memory*100/total_memory,
       inactive_memory, inactive_memory*100/total_memory,
       virtual_memory,  virtual_memory*100/total_memory,
       total_memory);
+   #else
+   zonef("Z_PrintStats: not instrumented");
    #endif
 };
 

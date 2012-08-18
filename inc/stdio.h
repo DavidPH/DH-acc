@@ -322,6 +322,12 @@ __function void perror(char const *s);
 // %s
 __function int _Print_s(int flags, int width, int prec, char fmt, char const __far *s);
 
+// %u
+__function int _Print_u(int flags, int width, int prec, char fmt, unsigned u);
+
+// %lu
+__function int _Print_lu(int flags, int width, int prec, char fmt, unsigned long u);
+
 // %x
 __function int _Print_x(int flags, int width, int prec, char fmt, unsigned x);
 
