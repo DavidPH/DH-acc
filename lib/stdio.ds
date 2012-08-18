@@ -24,6 +24,7 @@
 #include <stdio.h>
 
 #include <stdarg.h>
+#include <stdlib.h>
 
 
 //----------------------------------------------------------------------------|
@@ -516,17 +517,58 @@ enum FormatLength
 };
 
 //
+// _Print_s
+//
+__extfunc "C" int _Print_s(int flags, int width, int prec, char fmt, char const __far *s)
+{
+   char const __far *itr;
+   int len = 0;
+
+   if(prec <= 0) prec = 0x7FFFFFFF;
+
+   if(flags & FF_LEFT || !width)
+   {
+      // Write string.
+      for(itr = s; *itr && len < prec; ++itr, ++len)
+         PrintChar(*itr);
+
+      // Pad field.
+      for(; len < width; ++len)
+         PrintChar(' ');
+   }
+   else
+   {
+      // Count string length.
+      for(itr = s; *itr && len < prec; ++itr, ++len);
+
+      // Pad field.
+      for(; len < width; ++len)
+         PrintChar(' ');
+
+      // Write string.
+      for(len = 0, itr = s; *itr && len < prec; ++itr, ++len)
+         PrintChar(*itr);
+
+      // Pad length.
+      if(len < width)
+         len = width;
+   };
+
+   return len;
+};
+
+//
 // _Print_x
 //
-__extfunc "C" int _Print_x(unsigned x, int flags, int width, int prec, char fmt)
+__extfunc "C" int _Print_x(int flags, int width, int prec, char fmt, unsigned x)
 {
-   return _Print_lx(x, flags, width, prec, fmt);
+   return _Print_lx(flags, width, prec, fmt, x);
 };
 
 //
 // _Print_lx
 //
-__extfunc "C" int _Print_lx(unsigned long x, int flags, int width, int prec, char fmt)
+__extfunc "C" int _Print_lx(int flags, int width, int prec, char fmt, unsigned long x)
 {
    constexpr int register *xp = (int register *)&x;
 

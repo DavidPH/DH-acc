@@ -258,7 +258,7 @@ private:
    //
    // ::doFormat_s
    //
-   void doFormat_s(ObjectVector *objects, FormatData &)
+   void doFormat_s(ObjectVector *objects, FormatData &data)
    {
       SourceExpression::Pointer argExpr = nextExpr();
       VariableType::Reference   argType = argExpr->getType();
@@ -288,12 +288,25 @@ private:
       StoreType argStore = argType->getReturn()->getStoreType();
       if (argStore == STORE_AUTO) argStore = STORE_STATIC;
 
+      // For string* or custom print rules, cast to far*.
+      if(data.flags || data.width || data.prec || argStore == STORE_STRING)
+         argStore = STORE_NONE;
+
       argType = argType->getReturn();
       argType = VariableType::get_bt_chr()
                 ->setQualifier(argType->getQualifiers())
                 ->setStorage(argStore, argType->getStoreArea())
                 ->getPointer();
       argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
+
+      // Special handling for far*.
+      if(argStore == STORE_NONE)
+      {
+         makeData(objects, data);
+         argExpr->makeObjects(objects, tmp);
+         objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Print_s"));
+         return;
+      }
 
       argExpr->makeObjects(objects, tmp);
 
@@ -346,16 +359,16 @@ private:
       case FL_L:
       case FL_LL:
       case FL_MAX:
-         makeExpr(objects, VariableType::get_bt_uns_ll());
          makeData(objects, data);
+         makeExpr(objects, VariableType::get_bt_uns_ll());
          objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Print_lx"));
          break;
 
       default:
          if(data.flags || data.width || data.prec || data.fmt == 'x')
          {
-            makeExpr(objects, VariableType::get_bt_uns());
             makeData(objects, data);
+            makeExpr(objects, VariableType::get_bt_uns());
             objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Print_x"));
          }
          else
