@@ -482,12 +482,38 @@ __extfunc "C" void perror(char const *s)
 // Implementation extensions
 //
 
-#define HEXCHARL "0123456789abcdef"
-#define HEXCHARU "0123456789ABCDEF"
-
 __asmfunc void PrintStatic(char const static *, int) @ __ocode(ACSP_STR_GBLARR);
 __asmfunc void PrintString(__string) @ __ocode(ACSP_STR);
 __asmfunc void PrintChar(char) @ __ocode(ACSP_CHARACTER);
+
+#define PrintNum_Pre() \
+   if(width < 0) {width = -width; flags |= FF_LEFT;}; \
+   \
+   if(prec < 0) prec = 0; \
+   \
+   char padc = (flags & FF_PAD0 && !prec) ? '0' : ' '; \
+   \
+   if(prec < 1) prec = 1;
+
+#define PrintNum_End() \
+   /* If right-justified, pad width now. */ \
+   if(!(flags & FF_LEFT)) \
+   { \
+      /* Specifically, pad it to max(len, prec). */ \
+      int i = width - (len < prec ? prec : len); \
+      \
+      if(i > 0) for(; i--; ++ret) PrintChar(padc); \
+   }; \
+   \
+   /* Pad to precision and print number. */ \
+   for(; len < prec; ++len) PrintChar('0'); \
+   PrintStatic(base, @*base); \
+   \
+   /* If left-justified, pad width now. */ \
+   if(flags & FF_LEFT) for(; len < width; ++len) PrintChar(padc); \
+   \
+   /* Return number of characters written. */ \
+   return len + ret;
 
 //
 // FormatFlag
@@ -514,6 +540,49 @@ enum FormatLength
    FL_MAX,
    FL_SIZE,
    FL_DIFF,
+};
+
+#define PrintNumO(N) \
+   static char[(N)+1] s; \
+   \
+   char __near *base = s+(N); \
+   \
+   while(o) \
+   { \
+      *--base = ((int)o & 07) + '0'; \
+      o >>= 3; \
+   }; \
+   \
+   int len = s+(N) - base, ret = 0; \
+   \
+   /* Alternate format means increase precision just enough to have a leading 0. */ \
+   if(flags & FF_ALTF) \
+   { \
+      if(len >= prec) prec = len+1; \
+   };
+
+//
+// _Print_o
+//
+__extfunc "C" int _Print_l(int flags, int width, int prec, char fmt, unsigned o)
+{
+   PrintNum_Pre();
+
+   PrintNumO(11);
+
+   PrintNum_End();
+};
+
+//
+// _Print_lo
+//
+__extfunc "C" int _Print_lo(int flags, int width, int prec, char fmt, unsigned long o)
+{
+   PrintNum_Pre();
+
+   PrintNumO(22);
+
+   PrintNum_End();
 };
 
 //
@@ -570,6 +639,8 @@ __extfunc "C" int _Print_u(int flags, int width, int prec, char fmt, unsigned u)
 //
 __extfunc "C" int _Print_lu(int flags, int width, int prec, char fmt, unsigned long u)
 {
+   PrintNum_Pre();
+
    static char[21] s;
 
    char __near *base = s+20;
@@ -582,37 +653,49 @@ __extfunc "C" int _Print_lu(int flags, int width, int prec, char fmt, unsigned l
       *--base = (int)ud.rem + '0';
    };
 
-   int len = s+20 - base;
-   char padc = (flags & FF_PAD0 && !prec) ? '0' : ' ';
+   int len = s+20 - base, ret = 0;
 
-   if(prec < 1) prec = 1;
-
-   // If right-justified, pad width now.
-   if(!(flags & FF_LEFT))
-   {
-      // Specifically, pad it to max(len, prec).
-      int i = width - (len < prec ? prec : len);
-
-      if(i > 0) for(; i--;) PrintChar(padc);
-   };
-
-   // Pad to precision and print number.
-   for(; len < prec; ++len) PrintChar('0');
-   PrintStatic(base, @*base);
-
-   // If left-justified, pad width now.
-   if(flags & FF_LEFT) for(; len < width; ++len) PrintChar(padc);
-
-   // Return number of characters written.
-   return len < width ? width : len;
+   PrintNum_End();
 };
+
+#define HEXCHARL "0123456789abcdef"
+#define HEXCHARU "0123456789ABCDEF"
+
+#define PrintNumX(N) \
+   static char[(N)+1] s; \
+   \
+   char __near *base = s+(N); \
+   \
+   __string hexchar = fmt == 'X' ? HEXCHARU : HEXCHARL; \
+   \
+   while(x) \
+   { \
+      *--base = hexchar[(int)x & 0xF]; \
+      x >>= 4; \
+   }; \
+   \
+   int len = s+(N) - base, ret = 0; \
+   \
+   /* Alternate format means prefix with 0x/0X if non-zero. */ \
+   if(flags & FF_ALTF && x) \
+   { \
+      PrintChar('0'); \
+      PrintChar(fmt); \
+      ret = 2; \
+   } \
+   else \
+      ret = 0;
 
 //
 // _Print_x
 //
 __extfunc "C" int _Print_x(int flags, int width, int prec, char fmt, unsigned x)
 {
-   return _Print_lx(flags, width, prec, fmt, x);
+   PrintNum_Pre();
+
+   PrintNumX(8);
+
+   PrintNum_End();
 };
 
 //
@@ -620,88 +703,11 @@ __extfunc "C" int _Print_x(int flags, int width, int prec, char fmt, unsigned x)
 //
 __extfunc "C" int _Print_lx(int flags, int width, int prec, char fmt, unsigned long x)
 {
-   constexpr int register *xp = (int register *)&x;
+   PrintNum_Pre();
 
-   // Don't need reentrancy.
-   static char[17] s;
+   PrintNumX(16);
 
-   // Make the entire 16-character string.
-   if(fmt == 'X')
-   {
-      s[ 0] = HEXCHARU[(xp[1] >> 28) & 0xF];
-      s[ 1] = HEXCHARU[(xp[1] >> 24) & 0xF];
-      s[ 2] = HEXCHARU[(xp[1] >> 20) & 0xF];
-      s[ 3] = HEXCHARU[(xp[1] >> 16) & 0xF];
-      s[ 4] = HEXCHARU[(xp[1] >> 12) & 0xF];
-      s[ 5] = HEXCHARU[(xp[1] >>  8) & 0xF];
-      s[ 6] = HEXCHARU[(xp[1] >>  4) & 0xF];
-      s[ 7] = HEXCHARU[(xp[1]      ) & 0xF];
-      s[ 8] = HEXCHARU[(xp[0] >> 28) & 0xF];
-      s[ 9] = HEXCHARU[(xp[0] >> 24) & 0xF];
-      s[10] = HEXCHARU[(xp[0] >> 20) & 0xF];
-      s[11] = HEXCHARU[(xp[0] >> 16) & 0xF];
-      s[12] = HEXCHARU[(xp[0] >> 12) & 0xF];
-      s[13] = HEXCHARU[(xp[0] >>  8) & 0xF];
-      s[14] = HEXCHARU[(xp[0] >>  4) & 0xF];
-      s[15] = HEXCHARU[(xp[0]      ) & 0xF];
-   }
-   else
-   {
-      s[ 0] = HEXCHARL[(xp[1] >> 28) & 0xF];
-      s[ 1] = HEXCHARL[(xp[1] >> 24) & 0xF];
-      s[ 2] = HEXCHARL[(xp[1] >> 20) & 0xF];
-      s[ 3] = HEXCHARL[(xp[1] >> 16) & 0xF];
-      s[ 4] = HEXCHARL[(xp[1] >> 12) & 0xF];
-      s[ 5] = HEXCHARL[(xp[1] >>  8) & 0xF];
-      s[ 6] = HEXCHARL[(xp[1] >>  4) & 0xF];
-      s[ 7] = HEXCHARL[(xp[1]      ) & 0xF];
-      s[ 8] = HEXCHARL[(xp[0] >> 28) & 0xF];
-      s[ 9] = HEXCHARL[(xp[0] >> 24) & 0xF];
-      s[10] = HEXCHARL[(xp[0] >> 20) & 0xF];
-      s[11] = HEXCHARL[(xp[0] >> 16) & 0xF];
-      s[12] = HEXCHARL[(xp[0] >> 12) & 0xF];
-      s[13] = HEXCHARL[(xp[0] >>  8) & 0xF];
-      s[14] = HEXCHARL[(xp[0] >>  4) & 0xF];
-      s[15] = HEXCHARL[(xp[0]      ) & 0xF];
-   };
-   s[16] = 0;
-
-   int len = 16, ret;
-   char __near *itr;
-   char padc = (flags & FF_PAD0 && !prec) ? '0' : ' ';
-
-   // Determine portion of base string to use.
-   if(prec < 1) prec = 1;
-   for(itr = s; *itr == '0' && len > prec; --len, ++itr);
-
-   // Alternate format means prefix with 0x/0X if non-zero.
-   if(flags & FF_ALTF && x)
-   {
-      PrintChar('0');
-      PrintChar(fmt);
-      ret = 2;
-   }
-   else
-      ret = 0;
-
-   // If right-justified, pad width now.
-   if(!(flags & FF_LEFT))
-   {
-      // Specifically, pad it to max(len, prec).
-      int i = width - (len < prec ? prec : len);
-
-      if(i > 0) for(; i--; ++len) PrintChar(padc);
-   };
-
-   // Pad to precision.
-   for(; len < prec; ++len) PrintChar('0');
-   PrintStatic(itr, @*itr);
-
-   // If left-justified, pad width now.
-   if(flags & FF_LEFT) for(; len < width; ++len) PrintChar(padc);
-
-   // Return number of characters written.
-   return ret + len;
+   PrintNum_End();
 };
 
 // EOF

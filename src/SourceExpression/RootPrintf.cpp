@@ -191,6 +191,10 @@ private:
          objects->addToken(OCODE_ACSP_NUM_DEC_I);
          break;
 
+      case 'o':
+         doFormat_o(objects, data);
+         break;
+
       case 'p':
          doFormat_p(objects, data);
          break;
@@ -210,6 +214,29 @@ private:
 
       default:
          Error_NP("unrecognized format char: %c", data.fmt);
+      }
+   }
+
+   //
+   // ::doFormat_o
+   //
+   void doFormat_o(ObjectVector *objects, FormatData &data)
+   {
+      switch(data.len)
+      {
+      case FL_L:
+      case FL_LL:
+      case FL_MAX:
+         makeData(objects, data);
+         makeExpr(objects, VariableType::get_bt_uns_ll());
+         objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Print_lo"));
+         break;
+
+      default:
+         makeData(objects, data);
+         makeExpr(objects, VariableType::get_bt_uns());
+         objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Print_o"));
+         break;
       }
    }
 

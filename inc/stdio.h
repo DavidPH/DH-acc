@@ -319,6 +319,12 @@ __function void perror(char const *s);
 // Implementation extensions.
 //
 
+// %o
+__function int _Print_o(int flags, int width, int prec, char fmt, unsigned o);
+
+// %lo
+__function int _Print_lo(int flags, int width, int prec, char fmt, unsigned long o);
+
 // %s
 __function int _Print_s(int flags, int width, int prec, char fmt, char const __far *s);
 
