@@ -39,8 +39,7 @@
 //
 class SourceExpression_BinaryLSh : public SourceExpression_Binary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryLSh,
-                                   SourceExpression_Binary);
+   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_BinaryLSh, SourceExpression_Binary);
 
 public:
    //
@@ -53,6 +52,9 @@ public:
       CONSTRUCTOR_ARRAY_DECAY();
 
       CONSTRAINT_INTEGER("<<");
+
+      docast = false;
+      exprR = create_value_cast_implicit(exprR, VariableType::get_bt_int(), context, pos);
    }
 
    //
@@ -61,6 +63,14 @@ public:
    virtual bool canMakeObject() const
    {
       return false;
+   }
+
+   //
+   // ::getType
+   //
+   VariableType::Reference getType() const
+   {
+      return exprL->getType();
    }
 
 protected:
@@ -77,7 +87,19 @@ protected:
    //
    virtual void doGet(ObjectVector *objects, VariableType *type, int)
    {
-      DO_GET_SWITCH(LSH);
+      switch(type->getBasicType())
+      {
+         DO_GET_CASES(LSH);
+
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+         objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__UlshL"));
+         objects->addToken(OCODE_GET_IMM,     objects->getValue(-1));
+         objects->addToken(OCODE_GET_WLDARR,  objects->getValue(option_auto_array));
+         break;
+      }
    }
 
    //

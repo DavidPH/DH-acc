@@ -24,6 +24,7 @@
 #include <stdlib.h>
 
 #include <inttypes.h>
+#include <stdio.h>
 #include <string.h>
 
 
@@ -568,13 +569,39 @@ __extfunc "C" div_t div(int numer, int denom)
 __extfunc "C" ldiv_t ldiv(long int numer, long int denom)
 {
    ldiv_t d;
-#if 0
-   d.quot = numer / denom;
-   d.rem  = numer % denom;
-#else
-   d.quot = 0;
-   d.rem  = numer;
-#endif
+   _UdivL_t ud;
+
+   if(numer < 0)
+   {
+      if(denom < 0)
+      {
+         ud = _UdivL(-numer, -denom);
+         d.quot = ud.quot;
+         d.rem  = -ud.rem;
+      }
+      else
+      {
+         ud = _UdivL(-numer, denom);
+         d.quot = -ud.quot;
+         d.rem  = -ud.rem;
+      };
+   }
+   else
+   {
+      if(denom < 0)
+      {
+         ud = _UdivL(numer, -denom);
+         d.quot = -ud.quot;
+         d.rem  = ud.rem;
+      }
+      else
+      {
+         ud = _UdivL(numer, denom);
+         d.quot = ud.quot;
+         d.rem  = ud.rem;
+      };
+   };
+
    return d;
 };
 
@@ -585,15 +612,7 @@ __extfunc "C" ldiv_t ldiv(long int numer, long int denom)
 //
 __extfunc "C" lldiv_t lldiv(long long int numer, long long int denom)
 {
-   lldiv_t d;
-#if 0
-   d.quot = numer / denom;
-   d.rem  = numer % denom;
-#else
-   d.quot = 0;
-   d.rem  = numer;
-#endif
-   return d;
+   return reinterpret_cast<lldiv_t>(ldiv(numer, denom));
 };
 
 //
@@ -776,6 +795,30 @@ __extfunc "C" void _Setptr(int v, void __far *p)
 };
 
 //
+// _UlshL
+//
+__extfunc "C" unsigned long _UlshL(unsigned long u, int v)
+{
+   if(!v) return u;
+
+   constexpr unsigned register *up = (unsigned register *)&u;
+
+   if(v < 32)
+   {
+      up[1] <<= v;
+      up[1] |= up[0] >> (32 - v);
+      up[0] <<= v;
+   }
+   else
+   {
+      up[1] = up[0] << (v - 32);
+      up[0] = 0;
+   };
+
+   return u;
+};
+
+//
 // _Ursh
 //
 __extfunc "C" unsigned _Ursh(unsigned u, int v)
@@ -784,6 +827,66 @@ __extfunc "C" unsigned _Ursh(unsigned u, int v)
 
    *(int register *)&u >>= v;
    return u & ~((int)0x80000000 >> --v);
+};
+
+//
+// _UrshL
+//
+__extfunc "C" unsigned long _UrshL(unsigned long u, int v)
+{
+   if(!v) return u;
+
+   constexpr unsigned register *up = (unsigned register *)&u;
+
+   if(v < 32)
+   {
+      up[0] >>= v;
+      up[0] |= up[1] << (32 - v);
+      up[1] >>= v;
+   }
+   else
+   {
+      up[0] = up[1] >> (v - 32);
+      up[1] = 0;
+   };
+
+   return u;
+};
+
+//
+// _UdivL
+//
+__extfunc "C" _UdivL_t _UdivL(unsigned long numer, unsigned long denom)
+{
+   _UdivL_t d = {0; numer;};
+
+   unsigned long mask = 1;
+
+   // Don't go into an infinite loop. That's uncool.
+   if(!denom) return d;
+
+   // It would suffice to make denom >= numer, but that test
+   // is more complex and will fail if denom has its MSB set.
+   while(!(denom & (1UL << 63)))
+   {
+      denom = denom << 1;
+      mask = mask << 1;
+   };
+
+   // Now add up the powers of two (of denom) that "fit" into numer.
+   while(mask && d.rem)
+   {
+      if(d.rem >= denom)
+      {
+         d.quot = d.quot + mask;
+         d.rem = d.rem - denom;
+      };
+
+      denom = denom >> 1;
+      mask = mask >> 1;
+   };
+
+   return d;
 };
 
 // EOF

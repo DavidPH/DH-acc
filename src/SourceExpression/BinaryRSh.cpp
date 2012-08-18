@@ -54,6 +54,7 @@ public:
 
       CONSTRAINT_INTEGER(">>");
 
+      docast = false;
       exprR = create_value_cast_implicit(exprR, VariableType::get_bt_int(), context, pos);
    }
 
@@ -90,7 +91,19 @@ protected:
    //
    virtual void doGet(ObjectVector *objects, VariableType *type, int)
    {
-      DO_GET_SWITCH(RSH);
+      switch(type->getBasicType())
+      {
+         DO_GET_CASES(RSH);
+
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+         objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__UrshL"));
+         objects->addToken(OCODE_GET_IMM,     objects->getValue(-1));
+         objects->addToken(OCODE_GET_WLDARR,  objects->getValue(option_auto_array));
+         break;
+      }
    }
 
    //

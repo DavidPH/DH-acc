@@ -80,7 +80,30 @@ protected:
    //
    virtual void doGet(ObjectVector *objects, VariableType *type, int)
    {
-      DO_GET_SWITCH(DIV);
+      switch(type->getBasicType())
+      {
+         DO_GET_CASES(DIV);
+
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+         objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("_ldiv"));
+
+         objects->addToken(OCODE_GET_IMM,    objects->getValue(-4));
+         objects->addToken(OCODE_GET_WLDARR, objects->getValue(option_auto_array));
+         objects->addToken(OCODE_GET_IMM,    objects->getValue(-3));
+         objects->addToken(OCODE_GET_WLDARR, objects->getValue(option_auto_array));
+         break;
+
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+         objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__UdivL"));
+
+         objects->addToken(OCODE_GET_IMM,    objects->getValue(-4));
+         objects->addToken(OCODE_GET_WLDARR, objects->getValue(option_auto_array));
+         objects->addToken(OCODE_GET_IMM,    objects->getValue(-3));
+         objects->addToken(OCODE_GET_WLDARR, objects->getValue(option_auto_array));
+         break;
+      }
    }
 
    //

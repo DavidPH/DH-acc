@@ -72,28 +72,37 @@ __library("libDS");
 //
 // div_t
 //
-struct div_t
+typedef struct _Idiv_t
 {
    int quot;
    int rem;
-};
+} div_t;
 
 //
 // ldiv_t
 //
-struct ldiv_t
+typedef struct _IdivL_t
 {
    long int quot;
    long int rem;
-};
+} ldiv_t;
 
 //
 // lldiv_t
 //
-struct lldiv_t
+typedef struct _IdivLL_t
 {
    long long int quot;
    long long int rem;
+} lldiv_t;
+
+//
+// _UdivL_t
+//
+struct _UdivL_t
+{
+   unsigned long int quot;
+   unsigned long int rem;
 };
 
 //
@@ -212,7 +221,12 @@ __function size_t wcstombs(char *restrict s, wchar_t const *restrict pwcs, size_
 __function int _Getptr(void const __far *p);
 __function void _Setptr(int v, void __far *p);
 
+__function unsigned long _UlshL(unsigned long u, int v);
+
 __function unsigned _Ursh(unsigned u, int v);
+__function unsigned long _UrshL(unsigned long u, int v);
+
+__function struct _UdivL_t _UdivL(unsigned long numer, unsigned long denom);
 
 };
 
