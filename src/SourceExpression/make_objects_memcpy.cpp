@@ -80,11 +80,9 @@ static void make_objects_literal
    case VariableType::BT_INT_HH:
    case VariableType::BT_INT_H:
    case VariableType::BT_INT:
-   case VariableType::BT_INT_L:
    case VariableType::BT_UNS_HH:
    case VariableType::BT_UNS_H:
    case VariableType::BT_UNS:
-   case VariableType::BT_UNS_L:
    case VariableType::BT_LABEL:
    case VariableType::BT_PTR_NUL:
    case VariableType::BT_ENUM:
@@ -106,7 +104,9 @@ static void make_objects_literal
       objects->addToken(OCODE_GET_FUNCP, elem);
       break;
 
+   case VariableType::BT_INT_L:
    case VariableType::BT_INT_LL:
+   case VariableType::BT_UNS_L:
    case VariableType::BT_UNS_LL:
       objects->addToken(OCODE_GET_IMM, elem);
       objects->addToken(OCODE_GET_IMM, ObjectExpression::
