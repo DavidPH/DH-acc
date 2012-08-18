@@ -115,10 +115,8 @@ void SourceExpression_Binary::doGetBase(ObjectVector *objects,
 // SourceExpression_Binary::doGetBaseILLAS
 //
 void SourceExpression_Binary::doGetBaseILAS(ObjectVector *objects,
-   VariableType *type, int tmpBase, bool add)
+   VariableType *, int tmpBase, bool add)
 {
-   VariableData::Pointer tmp = VariableData::create_stack(type->getSize(pos));
-
    std::string label = context->makeLabel();
    std::string labelCmp = label + "_cmp";
    std::string labelEnd = label + "_end";
@@ -128,12 +126,6 @@ void SourceExpression_Binary::doGetBaseILAS(ObjectVector *objects,
    ObjectExpression::Pointer tmpL = context->getTempVar(tmpBase+0);
    ObjectExpression::Pointer tmpH = context->getTempVar(tmpBase+1);
    ObjectExpression::Pointer tmpI = context->getTempVar(tmpBase+2);
-
-   create_value_cast_implicit(exprR, type, context, pos)
-   ->makeObjects(objects, tmp);
-
-   create_value_cast_implicit(exprL, type, context, pos)
-   ->makeObjects(objects, tmp);
 
    objects->addToken(OCODE_SET_TEMP, tmpH);
    objects->addToken(OCODE_SET_TEMP, tmpL);
@@ -147,7 +139,16 @@ void SourceExpression_Binary::doGetBaseILAS(ObjectVector *objects,
    }
    else
    {
+      objects->addToken(OCODE_GET_TEMP,   tmpH);
+      objects->addToken(OCODE_STK_SWAP);
+      objects->addToken(OCODE_SET_TEMP,   tmpH);
       objects->addToken(OCODE_SUB_TEMP_I, tmpH);
+
+      objects->addToken(OCODE_GET_TEMP,   tmpL);
+      objects->addToken(OCODE_STK_SWAP);
+      objects->addToken(OCODE_SET_TEMP,   tmpL);
+      objects->addToken(OCODE_GET_TEMP,   tmpL);
+      objects->addToken(OCODE_SET_TEMP,   tmpI);
       objects->addToken(OCODE_SUB_TEMP_I, tmpL);
    }
 
