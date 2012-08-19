@@ -626,12 +626,31 @@ __extfunc "C" int _Print_s(int flags, int width, int prec, char fmt, char const 
    return len;
 };
 
+#define PrintNumU(N,T,D) \
+   static char[(N)+1] s; \
+   \
+   char __near *base = s+(N); \
+   T ud; \
+   \
+   while(u) \
+   { \
+      ud = D(u, 10); \
+      u = ud.quot; \
+      *--base = (int)ud.rem + '0'; \
+   }; \
+   \
+   int len = s+(N) - base, ret = 0;
+
 //
 // _Print_u
 //
 __extfunc "C" int _Print_u(int flags, int width, int prec, char fmt, unsigned u)
 {
-   return _Print_lu(flags, width, prec, fmt, u);
+   PrintNum_Pre();
+
+   PrintNumU(10, _Udiv_t, _Udiv);
+
+   PrintNum_End();
 };
 
 //
@@ -641,19 +660,7 @@ __extfunc "C" int _Print_lu(int flags, int width, int prec, char fmt, unsigned l
 {
    PrintNum_Pre();
 
-   static char[21] s;
-
-   char __near *base = s+20;
-   _UdivL_t ud;
-
-   while(u)
-   {
-      ud = _UdivL(u, 10);
-      u = ud.quot;
-      *--base = (int)ud.rem + '0';
-   };
-
-   int len = s+20 - base, ret = 0;
+   PrintNumU(20, _UdivL_t, _UdivL);
 
    PrintNum_End();
 };

@@ -97,6 +97,15 @@ typedef struct _IdivLL_t
 } lldiv_t;
 
 //
+// _Udiv_t
+//
+struct _Udiv_t
+{
+   unsigned int quot;
+   unsigned int rem;
+};
+
+//
 // _UdivL_t
 //
 struct _UdivL_t
@@ -223,9 +232,13 @@ __function void _Setptr(int v, void __far *p);
 
 __function unsigned long _UlshL(unsigned long u, int v);
 
+__function unsigned long _Umul32(unsigned l, unsigned r);
+__function unsigned long _UmulL(unsigned long l, unsigned long r);
+
 __function unsigned _Ursh(unsigned u, int v);
 __function unsigned long _UrshL(unsigned long u, int v);
 
+__function struct _Udiv_t _Udiv(unsigned numer, unsigned denom);
 __function struct _UdivL_t _UdivL(unsigned long numer, unsigned long denom);
 
 };

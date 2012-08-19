@@ -27,6 +27,7 @@
 #include "../ObjectToken.hpp"
 #include "../ObjectVector.hpp"
 #include "../SourceException.hpp"
+#include "../SourceExpression.hpp"
 
 #include "../BinaryTokenACS/make_tokens.hpp"
 
@@ -131,6 +132,12 @@ void BinaryTokenZDACS::make_tokens
       ObjectExpression::create_value_int
       (option_addr_array, SourcePosition::builtin());
 
+   static ObjectExpression::Reference const indexAuto =
+      ObjectExpression::create_value_int(option_auto_array, SourcePosition::builtin());
+
+   static ObjectExpression::Reference const indexRet1 =
+      ObjectExpression::create_value_int(-1, SourcePosition::builtin());
+
    static ObjectExpression::Pointer const indexStack =
       ObjectExpression::create_value_int
       (option_addr_stack, SourcePosition::builtin());
@@ -145,6 +152,8 @@ void BinaryTokenZDACS::make_tokens
    static ObjectExpression::Reference const func_Setptr =
       ObjectExpression::create_value_symbol("__Setptr", SourcePosition::builtin());
 
+   static ObjectExpression::Reference const func_Udiv =
+      ObjectExpression::create_value_symbol("__Udiv", SourcePosition::builtin());
    static ObjectExpression::Reference const func_Ursh =
       ObjectExpression::create_value_symbol("__Ursh", SourcePosition::builtin());
 
@@ -188,6 +197,11 @@ void BinaryTokenZDACS::make_tokens
    CASE_ADDR_BINOP(DIV, _I,);
    CASE_REMAP_REGS(DIV, _I,);
 
+   case OCODE_DIV_STK_U:
+      args.push_back(func_Udiv);
+      PUSH_TOKEN(BCODE_JMP_CAL_IMM);
+      break;
+
    CASE_ADDR_UNAOP(INC, _I,);
    CASE_ADDR_UNAOP(INC, _U,);
    CASE_REMAP_REGS(INC, _I,);
@@ -211,6 +225,15 @@ void BinaryTokenZDACS::make_tokens
    CASE_ADDR_BINOP(MOD, _X,);
    CASE_REMAP_REGS(MOD, _I,);
    CASE_REMAP_REGS(MOD, _X,);
+
+   case OCODE_MOD_STK_U:
+      args.push_back(func_Udiv);
+      PUSH_TOKEN(BCODE_JMP_CAL_NIL_IMM);
+      args.push_back(indexRet1);
+      PUSH_TOKEN(BCODE_GET_IMM);
+      args.push_back(indexAuto);
+      PUSH_TOKEN(BCODE_GET_WLDARR);
+      break;
 
    CASE_REMAP(MUL_STK_X, MUL_STK_X);
    CASE_ADDR_BINOP(MUL, _I,);

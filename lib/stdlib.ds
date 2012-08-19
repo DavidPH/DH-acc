@@ -819,6 +819,50 @@ __extfunc "C" unsigned long _UlshL(unsigned long u, int v)
 };
 
 //
+// _Umul32
+//
+__extfunc "C" unsigned long _Umul32(unsigned l, unsigned r)
+{
+   short s0, s1, s2, s3;
+   int i0, i1, i2, i3;
+
+   s0 = (int)l >> 16 & 0xFFFF;
+   s1 = l & 0xFFFF;
+   s2 = (int)r >> 16 & 0xFFFF;
+   s3 = r & 0xFFFF;
+
+   i0 = s0 * s2;
+   i1 = s0 * s3;
+   i2 = s1 * s2;
+   i3 = s1 * s3;
+
+   return ((long)i0 << 32) + ((long)i1 << 16) + ((long)i2 << 16) + i3;
+};
+
+//
+// _UmulL
+//
+__extfunc "C" unsigned long _UmulL(unsigned long l, unsigned long r)
+{
+   constexpr int register *lp = (int register *)&l;
+   constexpr int register *rp = (int register *)&r;
+
+   constexpr int register *i0 = lp+1;
+   constexpr int register *i1 = lp+0;
+   constexpr int register *i2 = rp+1;
+   constexpr int register *i3 = rp+0;
+
+   long /*l0, */l1, l2, l3;
+
+ //l0 = _Umul32(*i0, *i2);
+   l1 = _Umul32(*i0, *i3);
+   l2 = _Umul32(*i1, *i2);
+   l3 = _Umul32(*i1, *i3);
+
+   return /*(l0 << 64) + */(l1 << 32) + (l2 << 32) + l3;
+};
+
+//
 // _Ursh
 //
 __extfunc "C" unsigned _Ursh(unsigned u, int v)
@@ -851,6 +895,82 @@ __extfunc "C" unsigned long _UrshL(unsigned long u, int v)
    };
 
    return u;
+};
+
+//
+// _Udiv
+//
+__extfunc "C" _Udiv_t _Udiv(unsigned numer, unsigned denom)
+{
+   _Udiv_t d = {0; numer;};
+
+   int mask = 1;
+
+   // Need to adjust denom so that it's as far left as possible.
+   // But long shifts are kinda slow, so do shifting as a series of large shifts.
+   if(!(denom & 0xFFFF0000))
+   {
+      denom <<= 16;
+      mask <<= 16;
+   };
+   if(!(denom & 0xFF000000))
+   {
+      denom <<= 8;
+      mask <<= 8;
+   };
+   if(!(denom & 0xF0000000))
+   {
+      denom <<= 4;
+      mask <<= 4;
+   };
+   if(!(denom & 0xC0000000))
+   {
+      denom <<= 2;
+      mask <<= 2;
+   };
+   if(!(denom & 0x80000000))
+   {
+      denom <<= 1;
+      mask <<= 1;
+   };
+
+   // Now add up the powers of two (of denom) that "fit" into numer.
+
+   #define DIVCHK(T) \
+      if((T)d.rem >= (T)denom) \
+      { \
+         d.quot |= mask; \
+         d.rem -= denom; \
+      }
+
+   // First iteration of division, handled specially to avoid unsigned rsh.
+   if(mask == 0x80000000)
+   {
+      DIVCHK(unsigned);
+
+      denom >>= 1;
+      mask = 0x40000000;
+   }
+   else if(denom & 0x80000000)
+   {
+      DIVCHK(unsigned);
+
+      denom >>= 1;
+      mask >>= 1;
+   };
+
+   // Main loop.
+   while(mask)
+   {
+      DIVCHK(int);
+
+      *(int auto *)&denom >>= 1;
+      mask >>= 1;
+   };
+
+   #undef DIVCHK
+
+   return d;
 };
 
 //
