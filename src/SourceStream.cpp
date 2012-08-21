@@ -226,8 +226,8 @@ SourceStream::SourceStream(std::string const &_filename, unsigned type)
       doCommentC   = false;
       doCommentCPP = false;
 
-      doQuoteDouble = false;
-      doQuoteSingle = false;
+      doQuoteDouble = true;
+      doQuoteSingle = true;
       break;
 
    case ST_C:

@@ -23,6 +23,7 @@
 
 #include "SourceExpressionASM.hpp"
 
+#include "ObjectData.hpp"
 #include "ObjectExpression.hpp"
 #include "ObjectVector.hpp"
 #include "SourceContext.hpp"
@@ -136,7 +137,7 @@ SourceExpression::Pointer SourceExpressionASM::CreateValueInteger(
    {
       int i = CharToInt(c);
 
-      if(0 >= i || i >= base)
+      if(0 > i || i >= base)
          Error_P("character out of range");
 
       val = val * base + i;
@@ -329,6 +330,60 @@ SourceExpression::Pointer SourceExpressionASM::MakeStatement(
       Labels.push_back(in->get(SourceTokenASM::TT_STR)->data);
       break;
 
+   case SourceTokenASM::TT_NOTLOG:
+      tok = in->get(SourceTokenASM::TT_STR);
+
+      if(tok->data == "FUNCTION")
+      {
+         std::string name = in->get(SourceTokenASM::TT_STR)->data;
+         in->get(SourceTokenASM::TT_COMMA);
+         std::string label = in->get(SourceTokenASM::TT_STR)->data;
+         in->get(SourceTokenASM::TT_COMMA);
+         bigsint retCount = Make_Expression(in, context)->makeObject()->resolveINT();
+         in->get(SourceTokenASM::TT_COMMA);
+         bigsint argCount = Make_Expression(in, context)->makeObject()->resolveINT();
+         in->get(SourceTokenASM::TT_COMMA);
+         bigsint varCount = Make_Expression(in, context)->makeObject()->resolveINT();
+
+         ObjectData_Function::Add(name, label, argCount, retCount, varCount);
+      }
+      else if(tok->data == "SCRIPT")
+      {
+         std::string name = in->get(SourceTokenASM::TT_STR)->data;
+         in->get(SourceTokenASM::TT_COMMA);
+         std::string label = in->get(SourceTokenASM::TT_STR)->data;
+         in->get(SourceTokenASM::TT_COMMA);
+         bigsint retCount = Make_Expression(in, context)->makeObject()->resolveINT();
+         in->get(SourceTokenASM::TT_COMMA);
+         bigsint argCount = Make_Expression(in, context)->makeObject()->resolveINT();
+         in->get(SourceTokenASM::TT_COMMA);
+         bigsint varCount = Make_Expression(in, context)->makeObject()->resolveINT();
+
+         in->get(SourceTokenASM::TT_COMMA);
+         bigsint stype = Make_Expression(in, context)->makeObject()->resolveINT();
+         in->get(SourceTokenASM::TT_COMMA);
+         bigsint flags = Make_Expression(in, context)->makeObject()->resolveINT();
+         in->get(SourceTokenASM::TT_COMMA);
+         bigsint number = Make_Expression(in, context)->makeObject()->resolveINT();
+         in->get(SourceTokenASM::TT_COMMA);
+         std::string string = in->get(SourceTokenASM::TT_STR)->data;
+
+         ObjectData_Script::Add(name, label, (ObjectData_Script::ScriptType)stype,
+                                flags, argCount, varCount, true, number, string);
+      }
+      else if(tok->data == "STRING")
+      {
+         std::string name = in->get(SourceTokenASM::TT_STR)->data;
+         in->get(SourceTokenASM::TT_COMMA);
+         std::string string = in->get(SourceTokenASM::TT_STR)->data;
+
+         ObjectData_String::Add(name, string);
+      }
+      else
+        Error(tok->pos, "unrecognized command '%s'", tok->data.c_str());
+
+      break;
+
    default:
       break;
    }
@@ -392,7 +447,7 @@ void SourceExpressionASM::MakeStatements(SourceTokenizerASM *in, Vector *exprs,
 //
 // SourceExpressionASM::virtual_makeObjects
 //
-void SourceExpressionASM::virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+void SourceExpressionASM::virtual_makeObjects(ObjectVector *objects, VariableData *)
 {
    ObjectExpression::Vector objs;
 

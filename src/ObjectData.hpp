@@ -160,6 +160,9 @@ struct ObjectData_Function
    (std::string const &name, std::string const &label, bigsint argCount,
     bigsint retCount, SourceContext *context);
 
+   static bool Add(std::string const &name, std::string const &label,
+      bigsint argCount, bigsint retCount, bigsint varCount);
+
    static void generate_symbols();
 
    static void iterate(IterFunc iterFunc, std::ostream *out);
@@ -274,6 +277,10 @@ struct ObjectData_Script
       ScriptType stype, bigsint flags, bigsint argCount, SourceContext *context,
       bool externVis, bigsint number, std::string const &string);
 
+   static bool Add(std::string const &name, std::string const &label,
+      ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount,
+      bool externVis, bigsint number, std::string const &string);
+
    static void generate_symbols();
 
    static void iterate(IterFunc iterFunc, std::ostream *out);
@@ -332,6 +339,8 @@ struct ObjectData_String
 
    // Returns the new string's name.
    static std::string const &add(std::string const &string);
+
+   static void Add(std::string const &name, std::string const &string);
 
    static ObjectData_String const *find(std::string const &symbol);
 

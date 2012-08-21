@@ -82,6 +82,38 @@ bool ObjectData_Function::add
 }
 
 //
+// ObjectData_Function::Add
+//
+bool ObjectData_Function::Add(std::string const &name, std::string const &label,
+   bigsint argCount, bigsint retCount, bigsint varCount)
+{
+   ObjectData_Function &data = function_table[name];
+
+   if(data.name != name)
+   {
+      data.label     = label;
+      data.name      = name;
+      data.argCount  = argCount;
+      data.number    = -1;
+      data.retCount  = retCount;
+      data.varCount  = varCount;
+      data.context   = NULL;
+      data.externDef = varCount == -1;
+
+      ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
+
+      return true;
+   }
+   else if(data.externDef && varCount != -1)
+   {
+      data.varCount  = varCount;
+      data.externDef = false;
+   }
+
+   return false;
+}
+
+//
 // ObjectData_Function::generate_symbols
 //
 void ObjectData_Function::generate_symbols()

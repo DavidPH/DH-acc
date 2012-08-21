@@ -83,6 +83,21 @@ std::string const &ObjectData_String::add(std::string const &string)
 }
 
 //
+// ObjectData_String::Add
+//
+void ObjectData_String::Add(std::string const &name, std::string const &string)
+{
+   ObjectData_String &data = string_table[string];
+
+   if(data.string.empty())
+      data.string = string + '\0';
+
+   data.names.push_back(name);
+
+   ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
+}
+
+//
 // ObjectData_String::find
 //
 ObjectData_String const *ObjectData_String::find(std::string const &symbol)

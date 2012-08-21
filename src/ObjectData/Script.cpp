@@ -129,6 +129,43 @@ bool ObjectData_Script::add(std::string const &name, std::string const &label,
 }
 
 //
+// ObjectData_Script::Add
+//
+bool ObjectData_Script::Add(std::string const &name, std::string const &label,
+   ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount,
+   bool externVis, bigsint number, std::string const &string)
+{
+   ObjectData_Script &data = script_table[name];
+
+   if(data.name != name)
+   {
+      data.label     = label;
+      data.name      = name;
+      data.string    = string;
+      data.stype     = stype;
+      data.argCount  = argCount;
+      data.flags     = flags;
+      data.number    = number;
+      data.varCount  = varCount;
+      data.context   = NULL;
+      data.externDef = varCount == -1;
+      data.externVis = externVis;
+
+      ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
+
+      return true;
+   }
+   else if(data.externDef && varCount != -1)
+   {
+      data.string    = string;
+      data.number    = number;
+      data.externDef = false;
+   }
+
+   return false;
+}
+
+//
 // ObjectData_Script::generate_symbols
 //
 void ObjectData_Script::generate_symbols()
