@@ -32,11 +32,13 @@
 #include "ost_type.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
+#include "SourceExpressionASM.hpp"
 #include "SourceExpressionDS.hpp"
 #include "SourceFunction.hpp"
 #include "SourceStream.hpp"
 #include "SourceVariable.hpp"
-#include "SourceTokenASMPLX.hpp"
+#include "SourceTokenASM.hpp"
+#include "SourceTokenizer.hpp"
 #include "SourceTokenizerC.hpp"
 #include "VariableData.hpp"
 #include "VariableType.hpp"
@@ -108,10 +110,9 @@ static SourceType divine_source_type(std::string const &name)
        buf[2] == 'D' && buf[3] == 'S')
       return SOURCE_DS;
 
-   // ASMPLX source?
-   if (buf[0] == 'A' && buf[1] == 'S' && buf[2] == 'M' &&
-       buf[3] == 'P' && buf[4] == 'L' && buf[5] == 'X' && buf[6] == '\n')
-      return SOURCE_ASMPLX;
+   // ASM source?
+   if(buf[0] == 'A' && buf[1] == 'C' && buf[2] == 'S' && buf[3] == 'A')
+      return SOURCE_ASM;
 
    // object source?
    if (buf[0] == 'o' && buf[1] == 'b' && buf[2] == 'j' &&
@@ -131,9 +132,9 @@ static SourceType divine_source_type(std::string const &name)
    if (suf[0] == 'd' && suf[1] == 's' && suf[2] == '\0')
       return SOURCE_DS;
 
-   // ASMPLX source?
+   // ASM source?
    if (suf[0] == 'a' && suf[1] == 's' && suf[2] == 'm' && suf[3] == '\0')
-      return SOURCE_ASMPLX;
+      return SOURCE_ASM;
 
    // object source?
    if (suf[0] == 'o' && suf[1] == 'b' && suf[2] == 'j' && suf[3] == '\0')
@@ -203,13 +204,15 @@ static void read_source(std::string const &name, SourceType type,
 
    switch (type)
    {
-   case SOURCE_ASMPLX:
+   case SOURCE_ASM:
    {
-      SourceStream in(name, SourceStream::ST_ASMPLX);
+      SourceStream in(name, SourceStream::ST_ASM);
+      SourceTokenizerASM tokenizer(&in);
 
-      std::vector<SourceTokenASMPLX> tokens;
-      SourceTokenASMPLX::read_tokens(&in, &tokens);
-      SourceTokenASMPLX::make_objects(tokens, objects);
+      SourceExpression::Pointer expressions =
+         SourceExpressionASM::MakeStatements(&tokenizer);
+
+      expressions->makeObjects(objects, VariableData::create_void(0));
    }
       break;
 

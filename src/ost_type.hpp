@@ -47,7 +47,7 @@ enum OutputType
 //
 enum SourceType
 {
-	SOURCE_ASMPLX,
+	SOURCE_ASM,
 	SOURCE_DS,
 	SOURCE_object,
 

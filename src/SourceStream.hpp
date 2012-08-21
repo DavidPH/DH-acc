@@ -53,7 +53,7 @@ public:
 
    enum SourceType
    {
-      ST_ASMPLX,
+      ST_ASM,
       ST_C,
 
       ST_MASK = 0xFF,

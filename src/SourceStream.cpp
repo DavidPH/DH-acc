@@ -221,7 +221,7 @@ SourceStream::SourceStream(std::string const &_filename, unsigned type)
 {
    switch(type & ST_MASK)
    {
-   case ST_ASMPLX:
+   case ST_ASM:
       doCommentASM = true;
       doCommentC   = false;
       doCommentCPP = false;

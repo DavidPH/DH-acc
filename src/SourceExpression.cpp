@@ -89,6 +89,16 @@ void SourceExpression::addLabel(std::string const &_label)
 }
 
 //
+// SourceExpression::addLabel
+//
+void SourceExpression::addLabel(std::vector<std::string> const &label)
+{
+   std::vector<std::string>::const_iterator itr, end;
+   for(itr = label.begin(), end = label.end(); itr != end; ++itr)
+      addLabel(*itr);
+}
+
+//
 // SourceExpression::canGetData
 //
 bool SourceExpression::canGetData() const

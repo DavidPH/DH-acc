@@ -134,8 +134,8 @@ static int SourceHandler(char const *opt, int optf, int argc, char const *const 
 {
    if(!argc) option::exception::error(opt, optf, "requires argument");
 
-   if(!strcmp(argv[0], "ASMPLX"))
-      Source = SOURCE_ASMPLX;
+   if(!strcmp(argv[0], "ASM"))
+      Source = SOURCE_ASM;
    else if(!strcmp(argv[0], "DS"))
       Source = SOURCE_DS;
    else if(!strcmp(argv[0], "object"))

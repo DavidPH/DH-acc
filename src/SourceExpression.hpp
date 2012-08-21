@@ -262,6 +262,7 @@ public:
 
 
    void addLabel(std::string const &label);
+   void addLabel(std::vector<std::string> const &label);
 
    virtual bool canGetData() const;
    virtual bool canGetFunction() const {return false;}

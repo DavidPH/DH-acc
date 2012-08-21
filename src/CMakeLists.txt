@@ -114,6 +114,7 @@ add_executable(DH-acc
    SourceExpression/ValueMember.cpp
    SourceExpression/ValueStackptr.cpp
    SourceExpression/ValueVariable.cpp
+   SourceExpressionASM.cpp
    SourceExpressionDS.cpp
    SourceExpressionDS/arglist.cpp
    SourceExpressionDS/create_value_number.cpp
@@ -127,7 +128,7 @@ add_executable(DH-acc
    SourceFunction.cpp
    SourcePosition.cpp
    SourceStream.cpp
-   SourceTokenASMPLX.cpp
+   SourceTokenASM.cpp
    SourceTokenC.cpp
    SourceTokenizerC.cpp
    SourceTokenizerC/getExpr.cpp
