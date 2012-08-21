@@ -240,7 +240,7 @@ static SourceExpression::Pointer make_script
    if(scriptString.empty()) scriptString = scriptNameObj;
 
    // scriptLabel
-   std::string scriptLabel = scriptNameObj + "_label";
+   std::string scriptLabel = scriptNameObj + "::$label";
 
    // __func__
    if (!externDef && option_string_func)

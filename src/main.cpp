@@ -236,7 +236,7 @@ static void read_source(std::string const &name, SourceType type,
       {
          bigsint mainNumber = option_named_scripts ? -2 : -1;
          std::string mainName = SourceContext::global_context->makeLabel() + "main";
-         std::string mainLabel = mainName + "_label";
+         std::string mainLabel = mainName + "::$label";
 
          ObjectData_Script::ScriptType mainType = ObjectData_Script::ST_OPEN;
 
@@ -343,7 +343,7 @@ static inline int _main()
       }
 
       // Do codegen.
-      objects.addLabel(itr->second->var->getNameObject() + "_label");
+      objects.addLabel(itr->second->var->getNameObject() + "::$label");
 
       if(exprRoot) exprRoot->makeObjects(&objects, VariableData::create_void(0));
       expr->makeObjects(&objects, VariableData::create_void(0));

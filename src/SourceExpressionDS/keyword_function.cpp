@@ -135,7 +135,7 @@ static SourceExpression::Pointer make_func
    }
 
    // funcLabel
-   std::string funcLabel = funcNameObj + "_label";
+   std::string funcLabel = funcNameObj + "::$label";
 
    // __func__
    if (!externDef && option_string_func)
