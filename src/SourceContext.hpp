@@ -141,6 +141,8 @@ public:
    bool hasLabelCaseDefault() const;
 
    int isFunction(std::string const &name) const;
+   bool isVariable(std::string const &name) const;
+   bool isVariable(std::string const &name, bool canLocal) const;
 
    std::string makeLabel();
 

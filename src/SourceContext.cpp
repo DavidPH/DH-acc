@@ -934,6 +934,44 @@ int SourceContext::isFunction(std::string const &name) const
 }
 
 //
+// SourceContext::isVariable
+//
+bool SourceContext::isVariable(std::string const &name) const
+{
+   return isVariable(name, true);
+}
+
+//
+// SourceContext::isVariable
+//
+bool SourceContext::isVariable(std::string const &name, bool canLocal) const
+{
+   for(size_t i = varNames.size(); i--;)
+   {
+      if(varNames[i] == name)
+      {
+         switch(varVars[i]->getStoreType())
+         {
+         default:
+            return true;
+
+         case STORE_AUTO:
+         case STORE_REGISTER:
+            if(canLocal)
+               return true;
+
+            break;
+         }
+      }
+   }
+
+   if(parent)
+      return parent->isVariable(name, canLocal && inheritLocals);
+
+   return false;
+}
+
+//
 // SourceContext::makeLabel
 //
 std::string SourceContext::makeLabel()

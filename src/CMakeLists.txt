@@ -115,6 +115,11 @@ add_executable(DH-acc
    SourceExpression/ValueStackptr.cpp
    SourceExpression/ValueVariable.cpp
    SourceExpressionASM.cpp
+   SourceExpressionC.cpp
+   SourceExpressionC/ParseDeclaration.cpp
+   SourceExpressionC/ParseExpression.cpp
+   SourceExpressionC/ParseNumber.cpp
+   SourceExpressionC/ParseStatement.cpp
    SourceExpressionDS.cpp
    SourceExpressionDS/arglist.cpp
    SourceExpressionDS/create_value_number.cpp

@@ -58,6 +58,34 @@ public:
 
    void addDefine(std::string const &name) {addDefine(name, "");}
 
+   //
+   // ::dropType
+   //
+   bool dropType(SourceTokenC::TokenType type)
+   {
+      if(peekType(type))
+      {
+         get();
+         return true;
+      }
+      else
+         return false;
+   }
+
+   //
+   // ::dropType
+   //
+   bool dropType(SourceTokenC::TokenType type, std::string const &data)
+   {
+      if(peekType(type, data))
+      {
+         get();
+         return true;
+      }
+      else
+         return false;
+   }
+
    SourceTokenC::Reference get();
    SourceTokenC::Reference get(SourceTokenC::TokenType type);
    SourceTokenC::Reference get(SourceTokenC::TokenType type,

@@ -136,6 +136,8 @@ static int SourceHandler(char const *opt, int optf, int argc, char const *const 
 
    if(!strcmp(argv[0], "ASM"))
       Source = SOURCE_ASM;
+   else if(!strcmp(argv[0], "C"))
+      Source = SOURCE_C;
    else if(!strcmp(argv[0], "DS"))
       Source = SOURCE_DS;
    else if(!strcmp(argv[0], "object"))

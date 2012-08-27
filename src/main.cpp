@@ -33,6 +33,7 @@
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "SourceExpressionASM.hpp"
+#include "SourceExpressionC.hpp"
 #include "SourceExpressionDS.hpp"
 #include "SourceFunction.hpp"
 #include "SourceStream.hpp"
@@ -128,6 +129,10 @@ static SourceType divine_source_type(std::string const &name)
 
    suf = name.c_str() + sufIndex + 1;
 
+   // C source?
+   if(suf[0] == 'c' && suf[1] == '\0')
+      return SOURCE_C;
+
    // DS source?
    if (suf[0] == 'd' && suf[1] == 's' && suf[2] == '\0')
       return SOURCE_DS;
@@ -214,6 +219,40 @@ static void read_source(std::string const &name, SourceType type,
 
       expressions->makeObjects(objects, VariableData::create_void(0));
    }
+      break;
+
+   case SOURCE_C:
+      {
+         SourceStream in(name, SourceStream::ST_C);
+
+         SourceTokenizerC tokenizer(&in);
+         tokenizer.addDefine("__LANG_C__");
+
+         SourceExpression::Pointer src = SourceExpressionC::
+            ParseTranslationUnit(&tokenizer, SourceContext::global_context);
+
+         bool mainGen;
+         if(!option_init_code.handled)
+            mainGen = !src->canMakeObject();
+         else
+            mainGen = option_init_code.data;
+
+         if(mainGen)
+         {
+            bigsint mainNumber = option_named_scripts ? -2 : -1;
+            std::string mainName = SourceContext::global_context->makeLabel() + "main";
+            std::string mainLabel = mainName + "::$label";
+
+            ObjectData_Script::ScriptType mainType = ObjectData_Script::ST_OPEN;
+
+            ObjectData_Script::add(mainName, mainLabel, mainType, 0, 0,
+               SourceContext::global_context, false, mainNumber, mainName);
+
+            objects->addLabel(mainLabel);
+            src->makeObjects(objects, VariableData::create_void(0));
+            objects->addToken(OCODE_ACS_SCRIPT_TERMINATE);
+         }
+      }
       break;
 
    case SOURCE_DS:

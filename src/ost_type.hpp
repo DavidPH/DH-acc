@@ -34,12 +34,12 @@
 //
 enum OutputType
 {
-	OUTPUT_ACS0,
-	OUTPUT_ACSE,
-	OUTPUT_ACSP,
-	OUTPUT_object,
+   OUTPUT_ACS0,
+   OUTPUT_ACSE,
+   OUTPUT_ACSP,
+   OUTPUT_object,
 
-	OUTPUT_UNKNOWN
+   OUTPUT_UNKNOWN
 };
 
 //
@@ -47,11 +47,12 @@ enum OutputType
 //
 enum SourceType
 {
-	SOURCE_ASM,
-	SOURCE_DS,
-	SOURCE_object,
+   SOURCE_ASM,
+   SOURCE_C,
+   SOURCE_DS,
+   SOURCE_object,
 
-	SOURCE_UNKNOWN
+   SOURCE_UNKNOWN
 };
 
 //
@@ -59,11 +60,11 @@ enum SourceType
 //
 enum TargetType
 {
-	TARGET_Eternity,
-	TARGET_Hexen,
-	TARGET_ZDoom,
+   TARGET_Eternity,
+   TARGET_Hexen,
+   TARGET_ZDoom,
 
-	TARGET_UNKNOWN
+   TARGET_UNKNOWN
 };
 
 

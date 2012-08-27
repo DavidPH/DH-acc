@@ -261,7 +261,15 @@ public:
    typedef std::vector<Pointer> Vector;
 
 
-   void addLabel(std::string const &label);
+   //
+   // ::addLabel
+   //
+   Reference addLabel(std::string const &label)
+   {
+      labels.push_back(label);
+      return static_cast<Reference>(this);
+   }
+
    void addLabel(std::vector<std::string> const &label);
 
    virtual bool canGetData() const;
@@ -402,6 +410,8 @@ public:
 
    static CounterReference<VariableType> get_promoted_type
    (VariableType *type1, VariableType *type2, SourcePosition const &position);
+
+   static int ParseNumber(char c);
 
 protected:
    SourceExpression(SRCEXP_EXPR_ARGS);
