@@ -86,6 +86,43 @@ SRCEXPC_PARSE_DEFN_HALF(Primary)
       Error(tok->pos, "unexpected token %s", make_string(tok->type).c_str());
 
    case SourceTokenC::TT_NAM:
+      // _Generic ( assignment-expression , generic-assoc-list )
+      if(tok->data == "_Generic")
+      {
+         in->get(SourceTokenC::TT_PAREN_O);
+
+         VariableType::Reference typeControl = ParseAssignment(in, context)->getType();
+
+         SourceExpression::Pointer exprControl, exprDefault;
+
+         in->get(SourceTokenC::TT_COMMA);
+
+         do
+         {
+            if(in->dropType(SourceTokenC::TT_NAM, "default"))
+            {
+               in->get(SourceTokenC::TT_COLON);
+               exprDefault = ParseAssignment(in, context);
+               continue;
+            }
+
+            VariableType::Reference type = ParseType(in, context);
+            in->get(SourceTokenC::TT_COLON);
+            SourceExpression::Pointer expr = ParseAssignment(in, context);
+
+            if(type->getUnqualified() == expr->getType()->getUnqualified())
+               exprControl = expr;
+         }
+         while(in->dropType(SourceTokenC::TT_COMMA));
+
+         in->get(SourceTokenC::TT_PAREN_C);
+
+         if(!exprControl) exprControl = exprDefault;
+         if(!exprControl) Error(tok->pos, "no suitable generic");
+
+         return exprControl;
+      }
+
       if(context->isVariable(tok->data))
       {
          return create_value_variable(context->getVariable(tok->data, tok->pos),
@@ -195,6 +232,14 @@ SRCEXPC_PARSE_DEFN_HALF(Prefix)
             type = ParsePrefix(in, context)->getType();
 
          return create_value_uint(type->getSize(tok->pos), context, tok->pos);
+      }
+      else if(tok->data == "_Alignof")
+      {
+         in->get(SourceTokenC::TT_PAREN_O);
+         ParseType(in, context);
+         in->get(SourceTokenC::TT_PAREN_C);
+
+         return create_value_uint(1, context, tok->pos);
       }
       else goto def;
    }
