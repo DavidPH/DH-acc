@@ -361,6 +361,16 @@ SRCEXPC_PARSE_DEFN_HALF(ExternalDeclaration)
    if(in->peekType(SourceTokenC::TT_NAM, "_Static_assert"))
       return ParseStaticAssert(in, context);
 
+   // library-declaration:
+   //   __library ( string-literal ) ;
+   if(in->dropType(SourceTokenC::TT_NAM, "__library"))
+   {
+      in->get(SourceTokenC::TT_PAREN_O);
+      ObjectExpression::set_library(in->get(SourceTokenC::TT_STR)->data);
+      in->get(SourceTokenC::TT_PAREN_C);
+      in->get(SourceTokenC::TT_SEMICOLON);
+   }
+
    DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
    spec.external = true;
 

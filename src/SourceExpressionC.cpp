@@ -438,13 +438,8 @@ void SourceExpressionC::ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_AR
 
       if(!in->dropType(SourceTokenC::TT_PAREN_C))
       {
-         // ( void )
-         if(in->peekType(SourceTokenC::TT_NAM, "void"))
-         {
-            in->get();
-         }
          // ( identifier-list )
-         else if(!IsDeclaration(in, context))
+         if(!IsDeclaration(in, context))
          {
             Error(in->peek()->pos, "stub");
          }
@@ -477,6 +472,10 @@ void SourceExpressionC::ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_AR
             // Change array-of-T to pointer-to-T.
             if(param.back().decl.type->getBasicType() == VariableType::BT_ARR)
                param.back().decl.type = param.back().decl.type->getReturn()->getPointer();
+
+            // ( void )
+            if(param.back().decl.type->getBasicType() == VariableType::BT_VOID && param.size() == 1)
+               break;
 
             types.push_back(param.back().decl.type);
          }

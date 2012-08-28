@@ -44,6 +44,17 @@ __library("libDS");
 #define NULL nullptr
 #endif
 
+//
+// __function
+//
+#ifndef __function
+# ifdef __LANG_DS__
+#  define __function __function
+# else
+#  define __function
+# endif
+#endif
+
 
 //----------------------------------------------------------------------------|
 // Types                                                                      |
@@ -62,8 +73,10 @@ typedef unsigned size_t;
 // Global Functions                                                           |
 //
 
+#if defined(__LANG_DS__) || defined(__cplusplus)
 extern "C"
 {
+#endif
 
 //
 // Copying functions.
@@ -154,7 +167,9 @@ __function char *strerror(int errnum);
 // Finds the length of a null-terminated string.
 __function size_t strlen(char const *s);
 
+#if defined(__LANG_DS__) || defined(__cplusplus)
 };
+#endif
 
 #endif//__HEADER__STRING_H__
 

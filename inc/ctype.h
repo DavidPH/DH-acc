@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------
 
 #ifndef __HEADER__CTYPE_H__
-#define __HEADER__CTYPE_H__ #
+#define __HEADER__CTYPE_H__
 
 #ifndef __LIBDS_NOLIB
 # ifdef __LIBDS_PARTS
@@ -34,11 +34,29 @@ __library("libDS");
 
 
 //----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+//
+// __function
+//
+#ifndef __function
+# ifdef __LANG_DS__
+#  define __function __function
+# else
+#  define __function
+# endif
+#endif
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
+#if defined(__LANG_DS__) || defined(__cplusplus)
 extern "C"
 {
+#endif
 
 //
 // Character classification functions.
@@ -90,7 +108,9 @@ __function int tolower(int c);
 // To uppercase.
 __function int toupper(int c);
 
+#if defined(__LANG_DS__) || defined(__cplusplus)
 };
+#endif
 
 #endif//__HEADER__CTYPE_H__
 
