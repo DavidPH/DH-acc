@@ -24,6 +24,7 @@
 #include "../SourceExpressionC.hpp"
 
 #include "../ObjectData.hpp"
+#include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceFunction.hpp"
@@ -45,6 +46,9 @@ bool SourceExpressionC::IsDeclaration(SRCEXPC_PARSE_ARG1)
    SourceTokenC::Reference tok = in->peek();
 
    if(tok->type != SourceTokenC::TT_NAM) return false;
+
+   // static_assert-declaration
+   if(tok->data == "_Static_assert") return true;
 
    // storage-class-specifier
    if(tok->data == "typedef")  return true;
@@ -232,11 +236,38 @@ SRCEXPC_PARSE_DEFN_EXT(Typedef, DeclarationSpecifiers const &spec)
 }
 
 //
+// SourceExpressionC::ParseStaticAssert
+//
+SRCEXPC_PARSE_DEFN_HALF(StaticAssert)
+{
+   // _Static_assert ( constant-expression , string-literal )
+
+   SourcePosition pos = in->get(SourceTokenC::TT_NAM, "_Static_assert")->pos;
+
+   in->get(SourceTokenC::TT_PAREN_O);
+
+   bigsint i = ParseConditional(in, context)->makeObject()->resolveINT();
+
+   in->get(SourceTokenC::TT_COMMA);
+
+   std::string s = in->get(SourceTokenC::TT_STR)->data;
+
+   in->get(SourceTokenC::TT_PAREN_C);
+
+   if(!i) Error_P("static assertion failed: %s", s.c_str());
+
+   return create_value_data(context, pos);
+}
+
+//
 // SourceExpressionC::ParseDeclaration
 //
 SRCEXPC_PARSE_DEFN_HALF(Declaration)
 {
    SourcePosition pos = in->peek()->pos;
+
+   if(in->peekType(SourceTokenC::TT_NAM, "_Static_assert"))
+      return ParseStaticAssert(in, context);
 
    DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
 
@@ -326,6 +357,9 @@ SRCEXPC_PARSE_DEFN_EXT(Function, DeclarationSpecifiers const &spec, Declarator &
 SRCEXPC_PARSE_DEFN_HALF(ExternalDeclaration)
 {
    SourcePosition pos = in->peek()->pos;
+
+   if(in->peekType(SourceTokenC::TT_NAM, "_Static_assert"))
+      return ParseStaticAssert(in, context);
 
    DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
    spec.external = true;
