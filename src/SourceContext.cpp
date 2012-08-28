@@ -992,6 +992,89 @@ std::string SourceContext::makeLabelShort()
 }
 
 //
+// SourceContext::makeNameObj
+//
+std::string SourceContext::makeNameObj(std::string const &nameSrc,
+                                       LinkageSpecifier linkage)
+{
+   std::string nameObj;
+
+   switch(linkage)
+   {
+   case LINKAGE_INTERN:
+      nameObj = getLabel() + nameSrc;
+      break;
+
+   case LINKAGE_ACS:
+      nameObj = nameSrc;
+      break;
+
+   case LINKAGE_C:
+      nameObj = "_" + nameSrc;
+      break;
+
+   case LINKAGE_CPP:
+   case LINKAGE_DS:
+      nameObj = getLabelNamespace() + nameSrc;
+      break;
+   }
+
+   return nameObj;
+}
+
+//
+// SourceContext::makeNameObj
+//
+std::string SourceContext::makeNameObj(std::string const &nameSrc,
+   LinkageSpecifier linkage, VariableType::Vector const &types)
+{
+   std::string nameObj;
+
+   switch(linkage)
+   {
+   case LINKAGE_INTERN:
+      nameObj = nameSrc.empty() ? makeLabel() : getLabel() + nameSrc;
+      mangleNameObj(nameObj, types);
+      break;
+
+   case LINKAGE_ACS:
+      nameObj = nameSrc;
+      break;
+
+   case LINKAGE_C:
+      nameObj = "_" + nameSrc;
+      break;
+
+   case LINKAGE_CPP:
+   case LINKAGE_DS:
+      nameObj = getLabelNamespace() + nameSrc;
+      mangleNameObj(nameObj, types);
+      break;
+   }
+
+   return nameObj;
+}
+
+//
+// SourceContext::mangleNameObj
+//
+void SourceContext::mangleNameObj(std::string &nameObj, VariableType::Vector const &types)
+{
+   nameObj += "$";
+
+   for(VariableType::Vector::const_iterator type = types.begin(),
+       end = types.end(); type != end; ++type)
+   {
+      nameObj += '$';
+
+      if(*type)
+         (*type)->getUnqualified()->getNameMangled(nameObj);
+      else
+         nameObj += "...";
+   }
+}
+
+//
 // SourceContext::setReturnType
 //
 void SourceContext::setReturnType(VariableType *type)

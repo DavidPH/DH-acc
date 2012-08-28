@@ -26,6 +26,7 @@
 
 #include "bignum.hpp"
 #include "Counter.hpp"
+#include "LinkSpec.hpp"
 #include "StoreType.hpp"
 
 #include <map>
@@ -146,6 +147,13 @@ public:
 
    std::string makeLabel();
 
+   // Does name mangling for variable identifiers.
+   std::string makeNameObj(std::string const &nameSrc, LinkageSpecifier linkage);
+
+   // Does name mangling for function identifiers.
+   std::string makeNameObj(std::string const &nameSrc, LinkageSpecifier linkage,
+                           std::vector<CounterPointer<VariableType> > const &types);
+
    void setLabel(std::string const &_label) {label = _label;}
 
    void setReturnType(VariableType *type);
@@ -177,6 +185,8 @@ private:
    CounterPointer<VariableType> getVariableType_union(std::string const & name);
 
    std::string makeLabelShort();
+
+   void mangleNameObj(std::string &nameObj, std::vector<CounterPointer<VariableType> > const &types);
 
    std::map<bigsint, bool> cases;
 

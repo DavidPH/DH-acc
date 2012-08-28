@@ -25,6 +25,7 @@
 #define HPP_SourceExpressionC_
 
 #include "SourceExpression.hpp"
+#include "VariableType.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -117,14 +118,6 @@ public:
    struct Parameter;
 
    //
-   // ::FunctionSpec
-   //
-   enum FunctionSpec
-   {
-      FS_INLINE = 0x00000001,
-   };
-
-   //
    // ::StorageClass
    //
    // Used to store storage-class-specifier.
@@ -140,17 +133,47 @@ public:
    };
 
    //
-   // ::DeclarationSpecifiers
+   // DeclarationSpecifiers
    //
    // Used to store both declaration-specifiers and specifier-qualifier-list.
    //
    struct DeclarationSpecifiers
    {
-      DeclarationSpecifiers();
+      //
+      // DeclarationSpecifiers
+      //
+      DeclarationSpecifiers() : storage(SC_NONE), external(false),
+         functionInline(false)
+      {
+      }
+
+      //
+      // hasFunctionSpecifier
+      //
+      // Checks if this has any function-specifier.
+      //
+      bool hasFunctionSpecifier() const
+      {
+         return functionInline;
+      }
+
+      //
+      // isSpecifierQualifier
+      //
+      // Checks that this is a specifier-qualifier-list.
+      //
+      bool isSpecifierQualifier() const
+      {
+         return !storage && !hasFunctionSpecifier();
+      }
 
       CounterPointer<VariableType> type;
-      StorageClass sc;
-      unsigned fs;
+      StorageClass storage;
+
+      bool external : 1; // external-declaration
+
+      // function-specifier
+      bool functionInline : 1;
    };
 
    //
@@ -210,9 +233,11 @@ public:
    SRCEXPC_PARSE_DECL(Statement);
 
    SRCEXPC_PARSE_DECL_EXT(Initializer, CounterPointer<VariableType> &type);
+   SRCEXPC_PARSE_DECL_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &decl);
    SRCEXPC_PARSE_DECL_EXT(Typedef, DeclarationSpecifiers const &spec);
    SRCEXPC_PARSE_DECL(Declaration);
 
+   SRCEXPC_PARSE_DECL_EXT(Function, DeclarationSpecifiers const &spec, Declarator &decl);
    SRCEXPC_PARSE_DECL(ExternalDeclaration);
    SRCEXPC_PARSE_DECL(TranslationUnit);
 

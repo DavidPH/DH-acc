@@ -37,13 +37,6 @@
 //
 
 //
-// SourceExpressionC::DeclarationSpecifiers::DeclarationSpecifiers
-//
-SourceExpressionC::DeclarationSpecifiers::DeclarationSpecifiers() : sc(SC_NONE), fs(0)
-{
-}
-
-//
 // SourceExpressionC::IsDeclarator
 //
 bool SourceExpressionC::IsDeclarator(SRCEXPC_PARSE_ARG1)
@@ -138,8 +131,8 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
       #define DO_SC(DATA,SC) \
          if(tok->data == DATA) \
          { \
-            if(spec.sc) Error(tok->pos, "multiple storage-class-specifier"); \
-            spec.sc = SC; \
+            if(spec.storage) Error(tok->pos, "multiple storage-class-specifier"); \
+            spec.storage = SC; \
             continue; \
          }
 
@@ -214,11 +207,11 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
       #define DO_FS(DATA,FS) \
          if(tok->data == DATA) \
          { \
-            spec.fs |= FS; \
+            spec.FS = true; \
             continue; \
          }
 
-      DO_FS("inline", FS_INLINE);
+      DO_FS("inline", functionInline);
 
       #undef DO_FS
 
@@ -509,8 +502,7 @@ VariableType::Reference SourceExpressionC::ParseType(SRCEXPC_PARSE_ARG1)
    // specifier-qualifier-list
    DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
 
-   if(spec.sc) Error_P("unexpected storage-class-specifier");
-   if(spec.fs) Error_P("unexpected function-specifier");
+   if(!spec.isSpecifierQualifier()) Error_P("expected specifier-qualifier-list");
 
    // abstract-declarator(opt)
    if(IsDeclarator(in, context))

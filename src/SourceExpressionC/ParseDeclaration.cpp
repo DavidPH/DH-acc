@@ -23,10 +23,13 @@
 
 #include "../SourceExpressionC.hpp"
 
+#include "../ObjectData.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
+#include "../SourceFunction.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceTokenizerC.hpp"
+#include "../SourceVariable.hpp"
 #include "../VariableType.hpp"
 
 
@@ -61,13 +64,152 @@ bool SourceExpressionC::IsDeclaration(SRCEXPC_PARSE_ARG1)
 }
 
 //
+// SourceExpressionC::ParseInitializer
+//
+SRCEXPC_PARSE_DEFN_EXT(Initializer, VariableType::Pointer &type)
+{
+   if(in->dropType(SourceTokenC::TT_BRACE_O))
+   {
+      Error(in->peek()->pos, "stub");
+   }
+   else
+      return ParseAssignment(in, context);
+}
+
+//
+// SourceExpressionC::ParseVariable
+//
+SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &decl)
+{
+   SourcePosition pos = in->peek()->pos;
+
+   // Determine linkage.
+   LinkageSpecifier linkage;
+
+   if(spec.storage == SC_EXTERN || (spec.storage == SC_NONE && spec.external))
+      linkage = LINKAGE_C;
+   else
+      linkage = LINKAGE_INTERN;
+
+   // Determine storage.
+   StoreType store;
+   if(spec.storage == SC_NONE)
+      store = spec.external ? STORE_STATIC : STORE_AUTO;
+   else if(spec.storage == SC_AUTO)
+      store = STORE_AUTO;
+   else if(spec.storage == SC_REGISTER)
+      store = STORE_REGISTER;
+   else
+      store = STORE_STATIC;
+
+   // Function prototype.
+   if(decl.type->getBasicType() == VariableType::BT_FUN)
+   {
+      if(spec.storage == SC_AUTO || spec.storage == SC_REGISTER)
+         Error_P("auto or register in function prototype");
+
+      // Determine parameters.
+      bigsint returnSize = decl.type->getReturn()->getSize(pos);
+      bigsint paramSize = 0;
+      VariableType::Vector const &paramTypes = decl.type->getTypes();
+      for(VariableType::Vector::const_iterator param = paramTypes.begin(),
+          end = paramTypes.end(); param != end && *param; ++param)
+      {
+         paramSize += (*param)->getSize(pos);
+      }
+
+      std::string nameObj = context->makeNameObj(decl.name, linkage, paramTypes);
+      std::string label = nameObj + "::$label";
+
+      ObjectData_Function::add(nameObj, label, paramSize, returnSize, NULL);
+
+      SourceFunction::Reference func = SourceFunction::FindFunction(
+         SourceVariable::create_constant(decl.name, decl.type, nameObj, pos));
+
+      context->addFunction(func);
+
+      return create_value_function(func, context, pos);
+   }
+
+   std::string nameObj = context->makeNameObj(decl.name, LINKAGE_INTERN);
+
+   // Variable definition with initializer.
+   if(in->dropType(SourceTokenC::TT_EQUALS))
+   {
+      SourceExpression::Pointer init = ParseInitializer(decl.type, in, context);
+
+      SourceVariable::Pointer var = SourceVariable::create_variable(decl.name,
+         decl.type, nameObj, store, pos);
+
+      context->addVar(var, false, linkage != LINKAGE_INTERN);
+
+      SourceExpression::Pointer expr = create_value_variable(var, context, pos);
+
+      expr = create_binary_assign_const(expr, init, context, pos);
+
+      if(store != STORE_AUTO && store != STORE_REGISTER)
+      {
+         // if(!isInit) isInit = true, expr = init;
+
+         std::string             isInitName = nameObj + "::$isInit";
+         VariableType::Reference isInitType = VariableType::get_bt_bit_hrd();
+
+         SourceExpression::Pointer isInitExpr;
+
+         if(store == STORE_STATIC        || store == STORE_MAPREGISTER ||
+            store == STORE_WORLDREGISTER || store == STORE_GLOBALREGISTER)
+         {
+            // Create an extra variable to store isInit.
+
+            SourceVariable::Pointer isInitVar  = SourceVariable::create_variable("",
+               isInitType, isInitName, store, pos);
+
+            context->addVar(isInitVar, false, false);
+
+            isInitExpr = create_value_variable(isInitVar, context, pos);
+         }
+         else
+         {
+            // For array storages, use the null index for isInit.
+
+            isInitType = isInitType->setStorage(store, nameObj)->getPointer();
+
+            isInitExpr = create_value_int(0, context, pos);
+            isInitExpr = create_value_cast_explicit(isInitExpr, isInitType, context, pos);
+            isInitExpr = create_unary_dereference(isInitExpr, context, pos);
+         }
+
+         SourceExpression::Pointer isInitNot = create_branch_not(isInitExpr, context, pos);
+         SourceExpression::Pointer isInitSet = create_binary_assign(isInitExpr,
+            create_value_int(1, context, pos), context, pos);
+
+         expr = create_binary_pair(isInitSet, expr, context, pos);
+         expr = create_branch_if(isInitNot, expr, context, pos);
+      }
+
+      return expr;
+   }
+   // Variable declaration or definition.
+   else
+   {
+      SourceVariable::Pointer var = SourceVariable::create_variable(decl.name,
+         decl.type, nameObj, store, pos);
+
+      context->addVar(var, spec.storage == SC_EXTERN, linkage != LINKAGE_INTERN);
+
+      return create_value_variable(var, context, pos);
+   }
+}
+
+//
 // SourceExpressionC::ParseTypedef
 //
 SRCEXPC_PARSE_DEFN_EXT(Typedef, DeclarationSpecifiers const &spec)
 {
    SourcePosition pos = in->peek()->pos;
 
-   if(spec.fs) Error_P("function-specifier with typedef");
+   if(spec.hasFunctionSpecifier())
+      Error_P("typedef with function-specifier");
 
    // A typedef must include at least one declarator.
    if(in->peekType(SourceTokenC::TT_SEMICOLON))
@@ -98,27 +240,84 @@ SRCEXPC_PARSE_DEFN_HALF(Declaration)
 
    DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
 
-   switch(spec.sc)
+   if(spec.storage == SC_TYPEDEF)
+      return ParseTypedef(spec, in, context);
+
+   // Parse variable declarations and function prototypes.
+
+   Vector exprs;
+
+   do
    {
-   case SC_TYPEDEF: return ParseTypedef(spec, in, context);
+      Declarator decl = ParseDeclarator(spec.type, in, context);
 
-   case SC_NONE:
-      Error_P("stub");
+      exprs.push_back(ParseVariable(spec, decl, in, context));
+   }
+   while(in->dropType(SourceTokenC::TT_COMMA));
 
-   case SC_EXTERN:
-      Error_P("stub");
+   in->get(SourceTokenC::TT_SEMICOLON);
 
-   case SC_STATIC:
-      Error_P("stub");
+   return create_value_block(exprs, context, pos);
+}
 
-   case SC_AUTO:
-      Error_P("stub");
+//
+// SourceExpressionC::ParseFunction
+//
+SRCEXPC_PARSE_DEFN_EXT(Function, DeclarationSpecifiers const &spec, Declarator &decl)
+{
+   SourcePosition pos = in->peek()->pos;
 
-   case SC_REGISTER:
-      Error_P("stub");
+   if(spec.functionInline)
+      Error_P("inline not yet supported");
+
+   LinkageSpecifier linkage = spec.storage == SC_STATIC ? LINKAGE_INTERN : LINKAGE_C;
+
+   SourceContext::Reference funcContext = SourceContext::create(context,
+      SourceContext::CT_FUNCTION);
+
+   // Set return type of context.
+   funcContext->setReturnType(decl.type->getReturn());
+
+   // Add parameters.
+   bigsint returnSize = decl.type->getReturn()->getSize(pos);
+   bigsint paramSize = 0;
+   VariableType::Vector paramTypes;
+   for(std::vector<Parameter>::const_iterator param = decl.param.begin(),
+       end = decl.param.end(); param != end; ++param)
+   {
+      VariableType::Pointer type = param->decl.type;
+
+      std::string const &nameSrc = param->decl.name;
+      std::string nameObj = funcContext->makeNameObj(nameSrc, LINKAGE_INTERN);
+
+      StoreType store = param->spec.storage == SC_REGISTER ? STORE_REGISTER : STORE_AUTO;
+
+      funcContext->addVar(SourceVariable::create_variable(nameSrc, type, nameObj,
+         store, pos), false, false);
+
+      paramSize += type->getSize(pos);
+      paramTypes.push_back(type->setStorage(store));
    }
 
-   Error_P("internal error");
+   // nameObj
+   std::string nameObj = context->makeNameObj(decl.name, linkage, paramTypes);
+   std::string label = nameObj + "::$label";
+
+   // __func__
+   funcContext->addVar(SourceVariable::create_constant("__func__",
+      VariableType::get_bt_str(), ObjectData_String::add(decl.name), pos), false, false);
+
+   ObjectData_Function::add(nameObj, label, paramSize, returnSize, funcContext);
+
+   SourceFunction::Reference func = SourceFunction::FindFunction(
+      SourceVariable::create_constant(decl.name, decl.type, nameObj, pos));
+
+   context->addFunction(func);
+
+   // funcExpr
+   func->setBody(ParseStatement(in, funcContext), paramTypes, pos);
+
+   return create_value_function(func, context, pos);
 }
 
 //
@@ -129,26 +328,38 @@ SRCEXPC_PARSE_DEFN_HALF(ExternalDeclaration)
    SourcePosition pos = in->peek()->pos;
 
    DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
+   spec.external = true;
 
-   switch(spec.sc)
-   {
-   case SC_TYPEDEF: return ParseTypedef(spec, in, context);
+   if(spec.storage == SC_TYPEDEF)
+      return ParseTypedef(spec, in, context);
 
-   case SC_NONE:
-      Error_P("stub");
-
-   case SC_EXTERN:
-      Error_P("stub");
-
-   case SC_STATIC:
-      Error_P("stub");
-
-   case SC_AUTO:
-   case SC_REGISTER:
+   if(spec.storage == SC_AUTO || spec.storage == SC_REGISTER)
       Error_P("auto or register in external-declaration");
+
+   Declarator decl = ParseDeclarator(spec.type, in, context);
+
+   if(decl.type->getBasicType() == VariableType::BT_FUN &&
+      in->peekType(SourceTokenC::TT_BRACE_O))
+   {
+      return ParseFunction(spec, decl, in, context);
    }
 
-   Error_P("internal error");
+   // Parse variable declarations and function prototypes.
+
+   Vector exprs;
+
+   exprs.push_back(ParseVariable(spec, decl, in, context));
+
+   while(in->dropType(SourceTokenC::TT_COMMA))
+   {
+      decl = ParseDeclarator(spec.type, in, context);
+
+      exprs.push_back(ParseVariable(spec, decl, in, context));
+   }
+
+   in->get(SourceTokenC::TT_SEMICOLON);
+
+   return create_value_block(exprs, context, pos);
 }
 
 // EOF

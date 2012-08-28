@@ -74,6 +74,7 @@ public:
    static Pointer FindFunction(std::string const &name);
 
    // Finds an already added function, or creates one.
+   static Reference FindFunction(SourceVariable *var);
    static Reference FindFunction(SourceVariable *var, ArgVec const &args);
 
    static FuncMap FunctionTable;

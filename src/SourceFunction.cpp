@@ -107,6 +107,15 @@ SourceFunction::Pointer SourceFunction::FindFunction(std::string const &name)
 //
 // SourceFunction::FindFunction
 //
+SourceFunction::Reference SourceFunction::FindFunction(SourceVariable *var)
+{
+   ArgVec args(var->getType()->getTypes().size());
+   return FindFunction(var, args);
+}
+
+//
+// SourceFunction::FindFunction
+//
 SourceFunction::Reference SourceFunction::FindFunction(SourceVariable *var, ArgVec const &args)
 {
    std::string const &name = var->getNameObject();
