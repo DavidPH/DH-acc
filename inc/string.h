@@ -41,7 +41,11 @@ __library("libDS");
 // NULL
 //
 #ifndef NULL
-#define NULL nullptr
+# ifdef __LANG_C__
+#  define NULL ((void *)0)
+# else
+#  define NULL nullptr
+# endif
 #endif
 
 //
