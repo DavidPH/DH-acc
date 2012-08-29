@@ -98,6 +98,10 @@ bool SourceExpressionC::IsType(SRCEXPC_PARSE_ARG1)
    if(tok->data == "_Imaginary") return true;
    if(tok->data == "_Bool")      return true;
 
+   if(tok->data == "_Fract")     return true;
+   if(tok->data == "_Accum")     return true;
+   if(tok->data == "_Sat")       return true;
+
    if(tok->data == "__string")   return true;
 
    // struct-or-union-specifier
@@ -257,6 +261,9 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
       // C types.
       BASE_VOID = 1, BASE_CHAR, BASE_INT, BASE_FLT, BASE_DBL, BASE_BOOL,
 
+      // Embedded C types.
+      BASE_FRACT, BASE_ACCUM,
+
       // ACS types.
       BASE_STR,
    };
@@ -268,6 +275,8 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
    int numShrt = 0;
    int numSign = 0;
    int numUnsi = 0;
+
+   int numSat  = 0;
 
    Qualifier quals;
 
@@ -314,6 +323,9 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
       DO_BASE("double",  BASE_DBL);
       DO_BASE("_Bool",   BASE_BOOL);
 
+      DO_BASE("_Fract",  BASE_FRACT);
+      DO_BASE("_Accum",  BASE_ACCUM);
+
       DO_BASE("__string", BASE_STR);
 
       #undef DO_BASE
@@ -324,6 +336,8 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
       if(tok->data == "short")      { ++numShrt; continue; }
       if(tok->data == "signed")     { ++numSign; continue; }
       if(tok->data == "unsigned")   { ++numUnsi; continue; }
+
+      if(tok->data == "_Sat")       { ++numSat;  continue; }
 
       if(tok->data == "struct" || tok->data == "union")
       {
@@ -393,6 +407,8 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
 
       if(numBase == BASE_DBL) { numBase = BASE_FLT; ++numLong; }
 
+      if(numSat) Error_P("sat unsupported");
+
       if(numCplx && numImag) Error_P("complex imaginary");
       if(numLong && numShrt) Error_P("long short");
       if(numSign && numUnsi) Error_P("signed unsigned");
@@ -407,14 +423,14 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
       switch(numBase)
       {
       case BASE_VOID:
-         if(numCplx || numImag || numLong || numShrt || numSign || numUnsi)
+         if(numCplx || numImag || numLong || numShrt || numSign || numUnsi || numSat)
             Error_P("invalid void type specification");
 
          bt = VariableType::BT_VOID;
          break;
 
       case BASE_CHAR:
-         if(numCplx || numImag || numLong || numShrt)
+         if(numCplx || numImag || numLong || numShrt || numSat)
             Error_P("invalid char type specification");
 
               if(numSign) bt = VariableType::BT_INT_HH;
@@ -425,7 +441,7 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
 
       default:
       case BASE_INT:
-         if(numCplx || numImag)
+         if(numCplx || numImag || numSat)
             Error_P("invalid int type specification");
 
          if(numUnsi)
@@ -446,7 +462,7 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
          break;
 
       case BASE_FLT:
-         if(numShrt || numSign || numUnsi)
+         if(numShrt || numSign || numUnsi || numSat)
             Error_P("invalid float type specification");
 
               if(numLong == 2) bt = VariableType::BT_FLT_LL;
@@ -456,14 +472,58 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
          break;
 
       case BASE_BOOL:
-         if(numCplx || numImag || numLong || numShrt || numSign || numUnsi)
+         if(numCplx || numImag || numLong || numShrt || numSign || numUnsi || numSat)
             Error_P("invalid bool type specification");
 
          bt = VariableType::BT_BIT_HRD;
          break;
 
+      case BASE_FRACT:
+         Error_P("fract not supported");
+
+         #if 0
+         if(numUnsi)
+         {
+                 if(numLong == 2) bt = VariableType::BT_ANG_LL;
+            else if(numLong == 1) bt = VariableType::BT_ANG_L;
+            else if(numShrt == 1) bt = VariableType::BT_ANG_H;
+            else                  bt = VariableType::BT_ANG;
+         }
+         else
+         {
+                 if(numLong == 2) bt = VariableType::BT_FRA_LL;
+            else if(numLong == 1) bt = VariableType::BT_FRA_L;
+            else if(numShrt == 1) bt = VariableType::BT_FRA_H;
+            else                  bt = VariableType::BT_FRA;
+         }
+         #endif
+
+         break;
+
+      case BASE_ACCUM:
+         if(numUnsi)
+         {
+            Error_P("unsigned accum not supported");
+
+            #if 0
+                 if(numLong == 2) bt = VariableType::BT_ACC_LL;
+            else if(numLong == 1) bt = VariableType::BT_ACC_L;
+            else if(numShrt == 1) bt = VariableType::BT_ACC_H;
+            else                  bt = VariableType::BT_ACC;
+            #endif
+         }
+         else
+         {
+                 if(numLong == 2) bt = VariableType::BT_FIX_LL;
+            else if(numLong == 1) bt = VariableType::BT_FIX_L;
+            else if(numShrt == 1) bt = VariableType::BT_FIX_H;
+            else                  bt = VariableType::BT_FIX;
+         }
+
+         break;
+
       case BASE_STR:
-         if(numCplx || numImag || numLong || numShrt || numSign || numUnsi)
+         if(numCplx || numImag || numLong || numShrt || numSign || numUnsi || numSat)
             Error_P("invalid string type specification");
 
          bt = VariableType::BT_STR;
@@ -474,7 +534,7 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
       else if(numImag) spec.type = VariableType::get_bt_clx_im(bt);
       else             spec.type = VariableType::get_bt(bt);
    }
-   else if(numBase || numCplx || numImag || numLong || numShrt || numSign || numUnsi)
+   else if(numBase || numCplx || numImag || numLong || numShrt || numSign || numUnsi || numSat)
    {
       Error_P("invalid declaration type specification");
    }
