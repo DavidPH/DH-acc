@@ -62,6 +62,24 @@ private:
 // Static Functions                                                           |
 //
 
+static SourceExpression::Pointer CreateFIX(bigsint data, VariableType *type, SRCEXP_EXPR_ARGS)
+{
+   ObjectExpression::Pointer varData = ObjectExpression::create_value_fix(data, pos);
+
+   SourceVariable::Pointer var = SourceVariable::create_literal(type, varData, pos);
+
+   return SourceExpression::create_value_variable(var, context, pos);
+}
+
+static SourceExpression::Pointer CreateFLT(bigsint data, VariableType *type, SRCEXP_EXPR_ARGS)
+{
+   ObjectExpression::Pointer varData = ObjectExpression::create_value_flt(data, pos);
+
+   SourceVariable::Pointer var = SourceVariable::create_literal(type, varData, pos);
+
+   return SourceExpression::create_value_variable(var, context, pos);
+}
+
 static SourceExpression::Pointer create_int
 (bigsint data, VariableType *varType, SRCEXP_EXPR_ARGS)
 {
@@ -92,6 +110,86 @@ static SourceExpression::Pointer create_uns(
 //
 
 //
+// SourceExpression::create_value_acc_hh
+//
+SRCEXP_EXPRVAL_DEFN(r, acc_hh)
+{
+   return CreateFIX(value, VariableType::get_bt_acc_hh(), context, pos);
+}
+
+//
+// SourceExpression::create_value_acc_h
+//
+SRCEXP_EXPRVAL_DEFN(r, acc_h)
+{
+   return CreateFIX(value, VariableType::get_bt_acc_h(), context, pos);
+}
+
+//
+// SourceExpression::create_value_acc
+//
+SRCEXP_EXPRVAL_DEFN(r, acc)
+{
+   return CreateFIX(value, VariableType::get_bt_acc(), context, pos);
+}
+
+//
+// SourceExpression::create_value_acc_l
+//
+SRCEXP_EXPRVAL_DEFN(r, acc_l)
+{
+   return CreateFIX(value, VariableType::get_bt_acc_l(), context, pos);
+}
+
+//
+// SourceExpression::create_value_acc_ll
+//
+SRCEXP_EXPRVAL_DEFN(r, acc_ll)
+{
+   return CreateFIX(value, VariableType::get_bt_acc_ll(), context, pos);
+}
+
+//
+// SourceExpression::create_value_ang_hh
+//
+SRCEXP_EXPRVAL_DEFN(r, ang_hh)
+{
+   return CreateFIX(value, VariableType::get_bt_ang_hh(), context, pos);
+}
+
+//
+// SourceExpression::create_value_ang_h
+//
+SRCEXP_EXPRVAL_DEFN(r, ang_h)
+{
+   return CreateFIX(value, VariableType::get_bt_ang_h(), context, pos);
+}
+
+//
+// SourceExpression::create_value_ang
+//
+SRCEXP_EXPRVAL_DEFN(r, ang)
+{
+   return CreateFIX(value, VariableType::get_bt_ang(), context, pos);
+}
+
+//
+// SourceExpression::create_value_ang_l
+//
+SRCEXP_EXPRVAL_DEFN(r, ang_l)
+{
+   return CreateFIX(value, VariableType::get_bt_ang_l(), context, pos);
+}
+
+//
+// SourceExpression::create_value_ang_ll
+//
+SRCEXP_EXPRVAL_DEFN(r, ang_ll)
+{
+   return CreateFIX(value, VariableType::get_bt_ang_ll(), context, pos);
+}
+
+//
 // SourceExpression::create_value_char
 //
 SRCEXP_EXPRVAL_DEFN(c, char)
@@ -116,6 +214,126 @@ SRCEXP_EXPRVAL_DEFN(s, char)
       Error_P("invalid length for character literal");
 
    return create_value_char(value[0], context, pos);
+}
+
+//
+// SourceExpression::create_value_fix_hh
+//
+SRCEXP_EXPRVAL_DEFN(r, fix_hh)
+{
+   return CreateFIX(value, VariableType::get_bt_fix_hh(), context, pos);
+}
+
+//
+// SourceExpression::create_value_fix_h
+//
+SRCEXP_EXPRVAL_DEFN(r, fix_h)
+{
+   return CreateFIX(value, VariableType::get_bt_fix_h(), context, pos);
+}
+
+//
+// SourceExpression::create_value_fix
+//
+SRCEXP_EXPRVAL_DEFN(r, fix)
+{
+   return CreateFIX(value, VariableType::get_bt_fix(), context, pos);
+}
+
+//
+// SourceExpression::create_value_fix_l
+//
+SRCEXP_EXPRVAL_DEFN(r, fix_l)
+{
+   return CreateFIX(value, VariableType::get_bt_fix_l(), context, pos);
+}
+
+//
+// SourceExpression::create_value_fix_ll
+//
+SRCEXP_EXPRVAL_DEFN(r, fix_ll)
+{
+   return CreateFIX(value, VariableType::get_bt_fix_ll(), context, pos);
+}
+
+//
+// SourceExpression::create_value_flt_hh
+//
+SRCEXP_EXPRVAL_DEFN(r, flt_hh)
+{
+   return CreateFLT(value, VariableType::get_bt_flt_hh(), context, pos);
+}
+
+//
+// SourceExpression::create_value_flt_h
+//
+SRCEXP_EXPRVAL_DEFN(r, flt_h)
+{
+   return CreateFLT(value, VariableType::get_bt_flt_h(), context, pos);
+}
+
+//
+// SourceExpression::create_value_flt
+//
+SRCEXP_EXPRVAL_DEFN(r, flt)
+{
+   return CreateFLT(value, VariableType::get_bt_flt(), context, pos);
+}
+
+//
+// SourceExpression::create_value_flt_l
+//
+SRCEXP_EXPRVAL_DEFN(r, flt_l)
+{
+   return CreateFLT(value, VariableType::get_bt_flt_l(), context, pos);
+}
+
+//
+// SourceExpression::create_value_flt_ll
+//
+SRCEXP_EXPRVAL_DEFN(r, flt_ll)
+{
+   return CreateFLT(value, VariableType::get_bt_flt_ll(), context, pos);
+}
+
+//
+// SourceExpression::create_value_fra_hh
+//
+SRCEXP_EXPRVAL_DEFN(r, fra_hh)
+{
+   return CreateFIX(value, VariableType::get_bt_fra_hh(), context, pos);
+}
+
+//
+// SourceExpression::create_value_fra_h
+//
+SRCEXP_EXPRVAL_DEFN(r, fra_h)
+{
+   return CreateFIX(value, VariableType::get_bt_fra_h(), context, pos);
+}
+
+//
+// SourceExpression::create_value_fra
+//
+SRCEXP_EXPRVAL_DEFN(r, fra)
+{
+   return CreateFIX(value, VariableType::get_bt_fra(), context, pos);
+}
+
+//
+// SourceExpression::create_value_fra_l
+//
+SRCEXP_EXPRVAL_DEFN(r, fra_l)
+{
+   return CreateFIX(value, VariableType::get_bt_fra_l(), context, pos);
+}
+
+//
+// SourceExpression::create_value_fra_ll
+//
+SRCEXP_EXPRVAL_DEFN(r, fra_ll)
+{
+   return CreateFIX(value, VariableType::get_bt_fra_ll(), context, pos);
 }
 
 //

@@ -141,7 +141,7 @@ SRCEXPC_PARSE_DEFN_HALF(Primary)
       return create_value_char(tok->data, context, tok->pos);
 
    case SourceTokenC::TT_FLT:
-      return create_value_real(tok->data, context, tok->pos);
+      return ParseFloat(tok->data, context, tok->pos);
 
    case SourceTokenC::TT_INT:
       return ParseInt(tok->data, context, tok->pos);

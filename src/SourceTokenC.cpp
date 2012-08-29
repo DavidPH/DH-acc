@@ -282,6 +282,8 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
       in->unget(c); token->type = TT_COLON;  return;
 
    case '.':
+      if(std::isdigit(in->peek())) {in->unget(c); break;}
+
       c = in->get();
       if (c == '.') { c = in->get();
          if (c == '.') {token->type = TT_DOT3;   return;}
@@ -360,147 +362,45 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
       return;
    }
 
-   // Number.
-   if (isdigit(c) || c == '.')
+   // pp-number
+   if(std::isdigit(c) || c == '.')
    {
       token->type = TT_INT;
 
-      bool foundDot = false;
-      bool foundExp = false;
+      in->unget(c);
 
-      int base = 10;
-
-      if (c == '0')
+      for(;;)
       {
-         char cPeek = in->get();
-         in->unget(cPeek);
-
-         if (cPeek == 'x' || cPeek == 'X')
-            base = 16;
-         else if (cPeek == 'b' || cPeek == 'B')
-            base = 2;
-         else
-            base = 8;
-
-         if (base != 8)
+         // e sign
+         // E sign
+         // p sign
+         // P sign
+         if(in->peek() == '+' || in->peek() == '-')
          {
-            token->data += c;
-            c = in->get();
-         }
-      }
+            if(c == 'E' || c == 'e' || c == 'P' || c != 'p')
+               token->data += c = in->get();
+            else
+               break;
 
-      // Numeric part.
-      while (true)
-      {
-         token->data += c;
-         c = in->get();
-
-         // Fractional component.
-         if (c == '.' && !foundDot)
-         {
-            foundDot = true;
             token->type = TT_FLT;
-
-            // Float literals can start with 0 and are still decimal.
-            if (base == 8) base = 10;
 
             continue;
          }
 
-         // Exponent.
-         if (!foundExp &&
-            ((base ==  8 && (c == 'E' || c == 'e')) ||
-             (base == 10 && (c == 'E' || c == 'e')) ||
-             (base == 16 && (c == 'P' || c == 'p'))))
-         {
-            foundExp = true;
-            token->type = TT_FLT;
+         c = in->peek();
 
-            // Float literals can start with 0 and are still decimal.
-            if (base == 8) base = 10;
+         // Check for floating-constant indicators.
+         if(c == '.') token->type = TT_FLT;
+         if(c == 'P' || c == 'p') token->type = TT_FLT;
+         if((c == 'E' || c == 'e') && token->data[1] != 'x') token->type = TT_FLT;
 
-            // The exponent for a hex-float is decimal.
-            if (base == 16) base = 10;
-
-            token->data += c;
-            c = in->get();
-
-            // Allow an optional sign.
-            if (c == '+' || c == '-') continue;
-
-            // This intentionally falls through to the digit checks.
-         }
-
-         if ('0' <= c && c <= '1' && base >=  2) continue;
-         if ('2' <= c && c <= '7' && base >=  8) continue;
-         if ('8' <= c && c <= '9' && base >=  8) continue;
-         if ('A' <= c && c <= 'F' && base >= 16) continue;
-         if ('a' <= c && c <= 'f' && base >= 16) continue;
-
-         break;
-      }
-
-      // Check for suffix.
-      if (token->type == TT_FLT)
-      {
-         if (c == 'F' || c == 'f' || c == 'L' || c == 'l')
-            token->data += c;
-         else
-            in->unget(c);
-      }
-      else
-      {
-         bool foundU = false;
-         bool foundL = false;
-
-         in->unget(c);
-
-         while (true)
-         {
-            c = in->get();
-
-            if ((c == 'U' || c == 'u') && !foundU)
-            {
-               foundU = true;
-               token->data += c;
-
-               continue;
-            }
-
-            if ((c == 'L' || c == 'l') && !foundL)
-            {
-               foundL = true;
-               token->data += c;
-
-               char oldc = c;
-               c = in->get();
-
-               // LL or ll
-               if (c == oldc) token->data += c;
-               else in->unget(c);
-
-               continue;
-            }
-
-            if ((c == 'H' || c == 'h') && !foundL)
-            {
-               foundL = true;
-               token->data += c;
-
-               char oldc = c;
-               c = in->get();
-
-               // HH or hh
-               if (c == oldc) token->data += c;
-               else in->unget(c);
-
-               continue;
-            }
-
+         // digit
+         // identifier-nondigit
+         // .
+         if(!std::isdigit(c) && !std::isalpha(c) && c != '_' && c != '.')
             break;
-         }
 
-         in->unget(c);
+         token->data += in->get();
       }
 
       return;

@@ -231,6 +231,7 @@ public:
    static DeclarationSpecifiers ParseDeclarationSpecifiers(SRCEXPC_PARSE_ARG1);
    static Declarator ParseDeclarator(VariableType *typeBase, SRCEXPC_PARSE_ARG1);
    static void ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_ARG1);
+   static SourceExpression::Pointer ParseFloat(std::string const &value, SRCEXP_EXPR_ARGS);
    static SourceExpression::Pointer ParseInt(std::string const &value, SRCEXP_EXPR_ARGS);
    static Qualifier ParseQualifier(SRCEXPC_PARSE_ARG1);
    static CounterReference<VariableType> ParseType(SRCEXPC_PARSE_ARG1);

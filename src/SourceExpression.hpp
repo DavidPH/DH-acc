@@ -367,6 +367,16 @@ public:
    SRCEXP_EXPRBRA_DECL(b, xor_eq);
 
    // Values.
+   SRCEXP_EXPRVAL_DECL( r, acc_hh);
+   SRCEXP_EXPRVAL_DECL( r, acc_h);
+   SRCEXP_EXPRVAL_DECL( r, acc);
+   SRCEXP_EXPRVAL_DECL( r, acc_l);
+   SRCEXP_EXPRVAL_DECL( r, acc_ll);
+   SRCEXP_EXPRVAL_DECL( r, ang_hh);
+   SRCEXP_EXPRVAL_DECL( r, ang_h);
+   SRCEXP_EXPRVAL_DECL( r, ang);
+   SRCEXP_EXPRVAL_DECL( r, ang_l);
+   SRCEXP_EXPRVAL_DECL( r, ang_ll);
    SRCEXP_EXPRVAL_DECL( a, block);
    SRCEXP_EXPRVAL_DECL(et, cast_explicit);
    SRCEXP_EXPRVAL_DECL(et, cast_force);
@@ -382,6 +392,21 @@ public:
    SRCEXP_EXPRVAL_DECL( t, data_garbage);
    SRCEXP_EXPRVAL_DECL( f, function);
    SRCEXP_EXPRVAL_DECL( s, function);
+   SRCEXP_EXPRVAL_DECL( r, fix_hh);
+   SRCEXP_EXPRVAL_DECL( r, fix_h);
+   SRCEXP_EXPRVAL_DECL( r, fix);
+   SRCEXP_EXPRVAL_DECL( r, fix_l);
+   SRCEXP_EXPRVAL_DECL( r, fix_ll);
+   SRCEXP_EXPRVAL_DECL( r, flt_hh);
+   SRCEXP_EXPRVAL_DECL( r, flt_h);
+   SRCEXP_EXPRVAL_DECL( r, flt);
+   SRCEXP_EXPRVAL_DECL( r, flt_l);
+   SRCEXP_EXPRVAL_DECL( r, flt_ll);
+   SRCEXP_EXPRVAL_DECL( r, fra_hh);
+   SRCEXP_EXPRVAL_DECL( r, fra_h);
+   SRCEXP_EXPRVAL_DECL( r, fra);
+   SRCEXP_EXPRVAL_DECL( r, fra_l);
+   SRCEXP_EXPRVAL_DECL( r, fra_ll);
    SRCEXP_EXPRVAL_DECL( i, int);
    SRCEXP_EXPRVAL_DECL( i, llong);
    SRCEXP_EXPRVAL_DECL( i, long);
