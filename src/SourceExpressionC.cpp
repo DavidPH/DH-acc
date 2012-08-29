@@ -29,6 +29,7 @@
 #include "SourceStream.hpp"
 #include "SourceTokenC.hpp"
 #include "SourceTokenizerC.hpp"
+#include "SourceVariable.hpp"
 #include "VariableType.hpp"
 
 
@@ -48,6 +49,28 @@ bool SourceExpressionC::IsDeclarator(SRCEXPC_PARSE_ARG1)
    if(tok->type == SourceTokenC::TT_PAREN_O) return true;
 
    if(tok->type == SourceTokenC::TT_NAM && !IsType(in, context)) return true;
+
+   return false;
+}
+
+//
+// SourceExpressionC::IsQualifier
+//
+bool SourceExpressionC::IsQualifier(SRCEXPC_PARSE_ARG1)
+{
+   SourceTokenC::Reference tok = in->peek();
+
+   if(tok->type != SourceTokenC::TT_NAM) return false;
+
+   // type-qualifier
+   if(tok->data == "const")    return true;
+   if(tok->data == "restrict") return true;
+   if(tok->data == "volatile") return true;
+
+   // address-space-name
+   if(tok->data == "__far")   return true;
+   if(tok->data == "__near")  return true;
+   if(tok->data == "__local") return true;
 
    return false;
 }
@@ -75,6 +98,8 @@ bool SourceExpressionC::IsType(SRCEXPC_PARSE_ARG1)
    if(tok->data == "_Imaginary") return true;
    if(tok->data == "_Bool")      return true;
 
+   if(tok->data == "__string")   return true;
+
    // struct-or-union-specifier
    if(tok->data == "struct") return true;
    if(tok->data == "union")  return true;
@@ -86,11 +111,134 @@ bool SourceExpressionC::IsType(SRCEXPC_PARSE_ARG1)
    if(context->getVariableTypeNull(tok->data)) return true;
 
    // type-qualifier
-   if(tok->data == "const")    return true;
-   if(tok->data == "restrict") return true;
-   if(tok->data == "volatile") return true;
+   if(IsQualifier(in, context)) return true;
 
    return false;
+}
+
+//
+// SourceExpressionC::ParseEnum
+//
+VariableType::Reference SourceExpressionC::ParseEnum(SRCEXPC_PARSE_ARG1)
+{
+   SourcePosition pos = in->get(SourceTokenC::TT_NAM, "enum")->pos;
+
+   // enum identifier(opt) { enumerator-list }
+   // enum identifier(opt) { enumerator-list , }
+   // enum identifier
+
+   std::string name;
+   if(in->peekType(SourceTokenC::TT_NAM))
+      name = in->get()->data;
+   else if(!in->peekType(SourceTokenC::TT_BRACE_O))
+      Error_P("expected identifier or {");
+
+   if(!in->peekType(SourceTokenC::TT_BRACE_O))
+      return context->getVariableType_enum(name, false, pos);
+
+   in->get(SourceTokenC::TT_BRACE_O);
+
+   bigsint enumVal = 0;
+
+   VariableType::Reference enumType = context->getVariableType_enum(name, true, pos);
+
+   while(!in->peekType(SourceTokenC::TT_BRACE_C))
+   {
+      SourceTokenC::Reference enumTok = in->get(SourceTokenC::TT_NAM);
+
+      if(in->dropType(SourceTokenC::TT_EQUALS))
+         enumVal = ParseConditional(in, context)->makeObject()->resolveINT();
+
+      ObjectExpression::Pointer enumObj =
+         ObjectExpression::create_value_int(enumVal++, enumTok->pos);
+
+      context->addVar(SourceVariable::create_constant(enumTok->data, enumType,
+         enumObj, enumTok->pos), false, true);
+
+      if(!in->dropType(SourceTokenC::TT_COMMA))
+         break;
+   }
+
+   in->get(SourceTokenC::TT_BRACE_C);
+
+   return enumType;
+}
+
+//
+// SourceExpressionC::ParseStruct
+//
+VariableType::Reference SourceExpressionC::ParseStruct(SRCEXPC_PARSE_ARG1)
+{
+   SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
+   SourcePosition const &pos = tok->pos;
+
+   bool isStruct;
+
+   if(tok->data == "struct")
+      isStruct = true;
+   else if(tok->data == "union")
+      isStruct = false;
+   else
+      Error_P("expected struct-or-union");
+
+   std::string name;
+   if(in->peekType(SourceTokenC::TT_NAM))
+      name = in->get()->data;
+   else if(!in->peekType(SourceTokenC::TT_BRACE_O))
+      Error_P("expected identifier or {");
+
+   if(!in->peekType(SourceTokenC::TT_BRACE_O))
+   {
+      if(isStruct)
+         return context->getVariableType_struct(name, pos);
+      else
+         return context->getVariableType_union(name, pos);
+   }
+
+   VariableType::VecStr names;
+   VariableType::Vector types;
+
+   in->get(SourceTokenC::TT_BRACE_O);
+
+   do
+   {
+      // static_assert-declaration
+      if(in->peekType(SourceTokenC::TT_NAM, "_Static_assert"))
+      {
+         ParseStaticAssert(in, context);
+         continue;
+      }
+
+      // specifier-qualifier-list struct-declarator-list(opt) ;
+
+      // specifier-qualifier-list
+      DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
+      if(!spec.isSpecifierQualifier())
+         Error_P("expected specifier-qualifier-list");
+
+      // struct-declarator-list(opt)
+      if(!in->peekType(SourceTokenC::TT_SEMICOLON)) do
+      {
+         Declarator decl = ParseDeclarator(spec.type, in, context);
+         if(decl.name.empty())
+            Error_P("expected declarator");
+
+         names.push_back(decl.name);
+         types.push_back(decl.type);
+      }
+      while(in->dropType(SourceTokenC::TT_COMMA));
+
+      // ;
+      in->get(SourceTokenC::TT_SEMICOLON);
+   }
+   while(!in->peekType(SourceTokenC::TT_BRACE_C));
+
+   in->get(SourceTokenC::TT_BRACE_C);
+
+   if(isStruct)
+      return context->getVariableType_struct(name, names, types, pos);
+   else
+      return context->getVariableType_union(name, names, types, pos);
 }
 
 //
@@ -108,6 +256,9 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
    {
       // C types.
       BASE_VOID = 1, BASE_CHAR, BASE_INT, BASE_FLT, BASE_DBL, BASE_BOOL,
+
+      // ACS types.
+      BASE_STR,
    };
 
    int numBase = 0;
@@ -118,11 +269,11 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
    int numSign = 0;
    int numUnsi = 0;
 
-   unsigned quals = 0;
+   Qualifier quals;
 
-   for(; in->peekType(SourceTokenC::TT_NAM); in->get())
+   while(in->peekType(SourceTokenC::TT_NAM))
    {
-      SourceTokenC::Reference tok = in->peek();
+      SourceTokenC::Reference tok = in->get();
 
       //
       // storage-class-specifier
@@ -163,6 +314,8 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
       DO_BASE("double",  BASE_DBL);
       DO_BASE("_Bool",   BASE_BOOL);
 
+      DO_BASE("__string", BASE_STR);
+
       #undef DO_BASE
 
       if(tok->data == "_Complex")   { ++numCplx; continue; }
@@ -172,9 +325,21 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
       if(tok->data == "signed")     { ++numSign; continue; }
       if(tok->data == "unsigned")   { ++numUnsi; continue; }
 
-      if(tok->data == "struct") Error(tok->pos, "stub");
-      if(tok->data == "union")  Error(tok->pos, "stub");
-      if(tok->data == "enum")   Error(tok->pos, "stub");
+      if(tok->data == "struct" || tok->data == "union")
+      {
+         if(spec.type) Error(tok->pos, "multiple type-specifier (struct-or-union-specifier)");
+         in->unget(tok);
+         spec.type = ParseStruct(in, context);
+         continue;
+      }
+
+      if(tok->data == "enum")
+      {
+         if(spec.type) Error(tok->pos, "multiple type-specifier (enum-specifier)");
+         in->unget(tok);
+         spec.type = ParseEnum(in, context);
+         continue;
+      }
 
       if((type = context->getVariableTypeNull(tok->data)))
       {
@@ -187,18 +352,21 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
       // type-qualifier
       //
 
-      #define DO_QUAL(DATA,QUAL) \
-         if(tok->data == DATA) \
-         { \
-            quals |= VariableType::QUAL; \
-            continue; \
-         }
+      in->unget(tok);
 
-      DO_QUAL("const",    QUAL_CONST);
-      DO_QUAL("restrict", QUAL_RESTRICT);
-      DO_QUAL("volatile", QUAL_VOLATILE);
+      if(IsQualifier(in, context))
+      {
+         Qualifier qual = ParseQualifier(in, context);
 
-      #undef DO_QUAL
+         if(qual.store)
+            quals.storeType = qual.storeType, quals.storeArea = qual.storeArea;
+         else
+            quals.quals |= qual.quals;
+
+         continue;
+      }
+
+      in->get();
 
       //
       // function-specifier
@@ -215,6 +383,7 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
 
       #undef DO_FS
 
+      in->unget(tok);
       break;
    }
 
@@ -292,6 +461,13 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
 
          bt = VariableType::BT_BIT_HRD;
          break;
+
+      case BASE_STR:
+         if(numCplx || numImag || numLong || numShrt || numSign || numUnsi)
+            Error_P("invalid string type specification");
+
+         bt = VariableType::BT_STR;
+         break;
       }
 
            if(numCplx) spec.type = VariableType::get_bt_clx(bt);
@@ -303,7 +479,8 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
       Error_P("invalid declaration type specification");
    }
 
-   spec.type = spec.type->setQualifier(quals);
+   spec.type = spec.type->setQualifier(quals.quals)
+                        ->setStorage(quals.storeType, quals.storeArea);
 
    return spec;
 }
@@ -320,33 +497,22 @@ SourceExpressionC::Declarator SourceExpressionC::ParseDeclarator(
 
    // * type-qualifier-list(opt)
    // * type-qualifier-list(opt) pointer
-   for(;; in->get())
+   for(;;)
    {
-      if(in->peekType(SourceTokenC::TT_MUL))
-      {
+      if(in->dropType(SourceTokenC::TT_MUL))
          decl.type = decl.type->getPointer();
-         continue;
-      }
 
-      if(in->peekType(SourceTokenC::TT_NAM, "const"))
+      else if(IsQualifier(in, context))
       {
-         decl.type = decl.type->addQualifier(VariableType::QUAL_CONST);
-         continue;
-      }
+         Qualifier qual = ParseQualifier(in, context);
 
-      if(in->peekType(SourceTokenC::TT_NAM, "restrict"))
-      {
-         decl.type = decl.type->addQualifier(VariableType::QUAL_RESTRICT);
-         continue;
+         if(qual.store)
+            decl.type = decl.type->setStorage(qual.storeType, qual.storeArea);
+         else
+            decl.type = decl.type->addQualifier(qual.quals);
       }
-
-      if(in->peekType(SourceTokenC::TT_NAM, "volatile"))
-      {
-         decl.type = decl.type->addQualifier(VariableType::QUAL_VOLATILE);
-         continue;
-      }
-
-      break;
+      else
+         break;
    }
 
    // direct-declarator
@@ -382,8 +548,6 @@ SourceExpressionC::Declarator SourceExpressionC::ParseDeclarator(
          in->unget(tok);
       }
    }
-   else if(!in->peekType(SourceTokenC::TT_BRACK_O))
-      Error(in->peek()->pos, "expected direct-declarator");
 
    // [ assignment-expression ]
    // ( parameter-type-list )
@@ -489,6 +653,36 @@ void SourceExpressionC::ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_AR
       decl.type = VariableType::get_bt_fun(types, decl.type);
       decl.param = param;
    }
+}
+
+//
+// SourceExpressionC::ParseQualifier
+//
+SourceExpressionC::Qualifier SourceExpressionC::ParseQualifier(SRCEXPC_PARSE_ARG1)
+{
+   // type-qualifier
+
+   if(in->dropType(SourceTokenC::TT_NAM, "const"))
+      return VariableType::QUAL_CONST;
+
+   if(in->dropType(SourceTokenC::TT_NAM, "restrict"))
+      return VariableType::QUAL_RESTRICT;
+
+   if(in->dropType(SourceTokenC::TT_NAM, "volatile"))
+      return VariableType::QUAL_VOLATILE;
+
+   // address-space-name
+
+   if(in->dropType(SourceTokenC::TT_NAM, "__far"))
+      return STORE_NONE;
+
+   if(in->dropType(SourceTokenC::TT_NAM, "__near"))
+      return STORE_STATIC;
+
+   if(in->dropType(SourceTokenC::TT_NAM, "__local"))
+      return STORE_AUTO;
+
+   Error(in->peek()->pos, "expected type-qualifier");
 }
 
 //

@@ -240,6 +240,17 @@
 #define SCNxMAX    "llx"
 #define SCNxPTR     "lx"
 
+//
+// __function
+//
+#ifndef __function
+# ifdef __LANG_DS__
+#  define __function __function
+# else
+#  define __function
+# endif
+#endif
+
 
 //----------------------------------------------------------------------------|
 // Types                                                                      |
@@ -248,11 +259,11 @@
 //
 // imaxdiv_t
 //
-struct imaxdiv_t
+typedef struct _IdivMAX_t
 {
    intmax_t quot;
    intmax_t rem;
-};
+} imaxdiv_t;
 
 //
 // wchar_t
@@ -269,8 +280,10 @@ typedef char wchar_t;
 // Global Functions                                                           |
 //
 
+#if defined(__LANG_DS__) || defined(__cplusplus)
 extern "C"
 {
+#endif
 
 //
 // Functions for greatest-width integer types.
@@ -290,7 +303,9 @@ __function uintmax_t strtoumax(char const *restrict nptr, char **restrict endptr
 __function intmax_t wcstoimax(wchar_t const *restrict nptr, wchar_t **restrict endptr, int base);
 __function uintmax_t wcstoumax(wchar_t const *restrict nptr, wchar_t **restrict endptr, int base);
 
+#if defined(__LANG_DS__) || defined(__cplusplus)
 };
+#endif
 
 #endif//__HEADER__INTTYPES_H__
 

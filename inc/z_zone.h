@@ -43,11 +43,38 @@ __library("libDS");
 # endif
 #endif
 
-#include "stdlib.h"
 
-// ZONE MEMORY
+//----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
 
+//
+// __function
+//
+#ifndef __function
+# ifdef __LANG_DS__
+#  define __function __function
+# else
+#  define __function
+# endif
+#endif
+
+
+//----------------------------------------------------------------------------|
+// Types                                                                      |
+//
+
+//
+// size_t
+//
+#ifndef __HAVE_SIZE_T
+#define __HAVE_SIZE_T 1
+typedef unsigned int size_t;
+#endif
+
+//
 // PU - purge tags.
+//
 enum
 {
    PU_FREE,     // block is free
@@ -72,8 +99,15 @@ enum
 
 #define PU_PURGELEVEL PU_CACHE        /* First purgable tag's level */
 
+
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
+
+#if defined(__LANG_DS__) || defined(__cplusplus)
 extern "C"
 {
+#endif
 
 __function void  (Z_Close)(__string, int);
 __function void  (Z_Init)(__string, int);
@@ -122,7 +156,9 @@ __function void Z_PrintStats(); // killough 8/23/98
 __function void Z_PrintZoneHeap();
 __function void Z_DumpCore();
 
+#if defined(__LANG_DS__) || defined(__cplusplus)
 };
+#endif
 
 #endif//__HEADER__Z_ZONE_H__
 

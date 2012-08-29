@@ -43,6 +43,9 @@ bool SourceExpressionDS::is_store(std::string const &data)
    if(data == "__near")
       return true;
 
+   if(data == "__local")
+      return true;
+
    if (data == "static")
       return true;
 
@@ -108,6 +111,9 @@ StoreType SourceExpressionDS::make_store(SourceTokenizerC *in,
 
    if(typeTok->data == "__near")
       return STORE_STATIC;
+
+   if(typeTok->data == "__local")
+      return STORE_AUTO;
 
    if (typeTok->data == "static")
       return STORE_STATIC;

@@ -240,7 +240,7 @@ SRCEXPC_PARSE_DEFN_EXT(Typedef, DeclarationSpecifiers const &spec)
 //
 SRCEXPC_PARSE_DEFN_HALF(StaticAssert)
 {
-   // _Static_assert ( constant-expression , string-literal )
+   // _Static_assert ( constant-expression , string-literal ) ;
 
    SourcePosition pos = in->get(SourceTokenC::TT_NAM, "_Static_assert")->pos;
 
@@ -253,6 +253,8 @@ SRCEXPC_PARSE_DEFN_HALF(StaticAssert)
    std::string s = in->get(SourceTokenC::TT_STR)->data;
 
    in->get(SourceTokenC::TT_PAREN_C);
+
+   in->get(SourceTokenC::TT_SEMICOLON);
 
    if(!i) Error_P("static assertion failed: %s", s.c_str());
 
@@ -270,6 +272,9 @@ SRCEXPC_PARSE_DEFN_HALF(Declaration)
       return ParseStaticAssert(in, context);
 
    DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
+
+   if(spec.storage == SC_NONE && in->dropType(SourceTokenC::TT_SEMICOLON))
+      return create_value_data(context, pos);
 
    if(spec.storage == SC_TYPEDEF)
       return ParseTypedef(spec, in, context);
@@ -373,6 +378,9 @@ SRCEXPC_PARSE_DEFN_HALF(ExternalDeclaration)
 
    DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
    spec.external = true;
+
+   if(spec.storage == SC_NONE && in->dropType(SourceTokenC::TT_SEMICOLON))
+      return create_value_data(context, pos);
 
    if(spec.storage == SC_TYPEDEF)
       return ParseTypedef(spec, in, context);

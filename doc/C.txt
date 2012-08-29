@@ -5,6 +5,8 @@ C Language Implementation
 This file describes DH-acc's support for the C programming language. In general,
 an attempt is made to conform to the C11 specification.
 
+In addition, extensions from Embedded C are in use.
+
 ===============================================================================
 Implementation-Defined Behavior
 ===============================================================================

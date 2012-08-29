@@ -32,7 +32,7 @@
 //
 // va_arg
 //
-#define va_arg(ap, T) (*--*(T __near *auto *)&(ap))
+#define va_arg(ap, T) (*--*(T __near *__local *)&(ap))
 
 //
 // va_copy
@@ -47,7 +47,7 @@
 //
 // va_start
 //
-#define va_start(ap, parmN) ((void)((ap) = (void auto *)0))
+#define va_start(ap, parmN) ((void)((ap) = (void __local *)0))
 
 
 //----------------------------------------------------------------------------|

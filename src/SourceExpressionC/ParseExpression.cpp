@@ -379,7 +379,7 @@ SRCEXPC_PARSE_DEF1(Assignment)
    #define CASB(TOK,EXP) case SourceTokenC::TT_##TOK##_EQ:
    #define CASE(TOK,EXP) case SourceTokenC::TT_##TOK##_EQ:
 
-   SourceExpression::Pointer expr = ParsePrefix(in, context);
+   SourceExpression::Pointer expr = ParseCast(in, context);
 
    switch(in->peek()->type)
    {

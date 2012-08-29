@@ -64,6 +64,17 @@ __library("libDS");
 //
 #define RAND_MAX 32767
 
+//
+// __function
+//
+#ifndef __function
+# ifdef __LANG_DS__
+#  define __function __function
+# else
+#  define __function
+# endif
+#endif
+
 
 //----------------------------------------------------------------------------|
 // Types                                                                      |
@@ -135,8 +146,10 @@ typedef char wchar_t;
 // Global Functions                                                           |
 //
 
+#if defined(__LANG_DS__) || defined(__cplusplus)
 extern "C"
 {
+#endif
 
 //
 // Numeric conversion functions.
@@ -180,7 +193,11 @@ __function void *realloc(void *ptr, size_t size);
 //
 
 __function void abort();
+#ifdef __LANG_DS__
 __function int atexit(__func_t() -> void func);
+#else
+__function int atexit(void (*func)(void));
+#endif
 __function void exit(int status);
 __function void _Exit(int status);
 __function char *getenv(char const *name);
@@ -190,11 +207,19 @@ __function int system(char const *string);
 // Searching and sorting utilities.
 //
 
+#ifdef __LANG_DS__
 __function void *bsearch(void const *key, void const *base, size_t nmemb, size_t size,
                          __func_t(void const *, void const *) -> int compar);
 
 __function void qsort(void *base, size_t nmemb, size_t size,
                       __func_t(void const *, void const *) -> int compar);
+#else
+__function void *bsearch(void const *key, void const *base, size_t nmemb, size_t size,
+                         int (*compar)(void const *, void const *));
+
+__function void qsort(void *base, size_t nmemb, size_t size,
+                      int (*compar)(void const *, void const *));
+#endif
 
 //
 // Integer arithmetic functions.
@@ -241,7 +266,9 @@ __function unsigned long _UrshL(unsigned long u, int v);
 __function struct _Udiv_t _Udiv(unsigned numer, unsigned denom);
 __function struct _UdivL_t _UdivL(unsigned long numer, unsigned long denom);
 
+#if defined(__LANG_DS__) || defined(__cplusplus)
 };
+#endif
 
 #endif//__HEADER__STDLIB_H__
 

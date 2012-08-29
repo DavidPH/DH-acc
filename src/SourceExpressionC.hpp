@@ -201,15 +201,38 @@ public:
       Declarator            decl;
    };
 
+   //
+   // Qualifier
+   //
+   // Stores a type-qualifier.
+   //
+   struct Qualifier
+   {
+      Qualifier() : quals(0), storeType(STORE_NONE), store(false) {}
+      Qualifier(unsigned _quals) : quals(_quals), storeType(STORE_NONE), store(false) {}
+      Qualifier(StoreType _storeType) : quals(0), storeType(_storeType), store(true) {}
+      Qualifier(StoreType _storeType, std::string const &_storeArea)
+       : quals(0), storeType(_storeType), storeArea(_storeArea), store(true) {}
+
+      unsigned    quals;
+      StoreType   storeType;
+      std::string storeArea;
+      bool        store : 1;
+   };
+
 
    static bool IsDeclaration(SRCEXPC_PARSE_ARG1);
    static bool IsDeclarator(SRCEXPC_PARSE_ARG1);
+   static bool IsQualifier(SRCEXPC_PARSE_ARG1);
    static bool IsType(SRCEXPC_PARSE_ARG1);
 
+   static CounterReference<VariableType> ParseEnum(SRCEXPC_PARSE_ARG1);
+   static CounterReference<VariableType> ParseStruct(SRCEXPC_PARSE_ARG1);
    static DeclarationSpecifiers ParseDeclarationSpecifiers(SRCEXPC_PARSE_ARG1);
    static Declarator ParseDeclarator(VariableType *typeBase, SRCEXPC_PARSE_ARG1);
    static void ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_ARG1);
    static SourceExpression::Pointer ParseInt(std::string const &value, SRCEXP_EXPR_ARGS);
+   static Qualifier ParseQualifier(SRCEXPC_PARSE_ARG1);
    static CounterReference<VariableType> ParseType(SRCEXPC_PARSE_ARG1);
 
    SRCEXPC_PARSE_DECL(Primary);

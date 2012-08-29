@@ -139,7 +139,7 @@ SRCEXPC_PARSE_DEFN_HALF(Statement)
       {
          // Create a context for the entire loop.
          SourceContext::Reference contextLoop = SourceContext::
-            create(context, SourceContext::CT_SWITCH);
+            create(context, SourceContext::CT_LOOP);
 
          // (
          in->get(SourceTokenC::TT_PAREN_O);

@@ -95,6 +95,17 @@ __library("libDS");
 #define stdin  (&_Stream[1])
 #define stdout (&_Stream[2])
 
+//
+// __function
+//
+#ifndef __function
+# ifdef __LANG_DS__
+#  define __function __function
+# else
+#  define __function
+# endif
+#endif
+
 
 //----------------------------------------------------------------------------|
 // Types                                                                      |
@@ -136,15 +147,21 @@ typedef void __near *va_list;
 // Global Variables                                                           |
 //
 
-extern "C" __variable static FILE[] _Stream;
+#ifdef __LANG_DS__
+__variable static FILE[] _Stream;
+#else
+extern FILE _Stream[];
+#endif
 
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
+#if defined(__LANG_DS__) || defined(__cplusplus)
 extern "C"
 {
+#endif
 
 //
 // Operations on files.
@@ -340,7 +357,9 @@ __function int _Print_x(int flags, int width, int prec, char fmt, unsigned x);
 // %lx
 __function int _Print_lx(int flags, int width, int prec, char fmt, unsigned long x);
 
+#if defined(__LANG_DS__) || defined(__cplusplus)
 };
+#endif
 
 #endif//__HEADER__STDIO_H__
 
