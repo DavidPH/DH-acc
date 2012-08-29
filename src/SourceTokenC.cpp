@@ -377,7 +377,7 @@ void SourceTokenC::read_token(SourceStream *in, SourceTokenC *token)
          // P sign
          if(in->peek() == '+' || in->peek() == '-')
          {
-            if(c == 'E' || c == 'e' || c == 'P' || c != 'p')
+            if(c == 'E' || c == 'e' || c == 'P' || c == 'p')
                token->data += c = in->get();
             else
                break;

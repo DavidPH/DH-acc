@@ -150,12 +150,6 @@ public:
 
    static void init();
 
-   static SourceExpression::Pointer create_value_float
-   (std::string const &value, SRCEXP_EXPR_ARGS);
-
-   static SourceExpression::Pointer create_value_integer
-   (std::string const &value, SRCEXP_EXPR_ARGS);
-
    static bool is_keyword(std::string const &data);
 
    static bool is_store(std::string const &data);

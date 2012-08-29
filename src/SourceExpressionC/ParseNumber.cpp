@@ -23,7 +23,17 @@
 
 #include "../SourceExpressionC.hpp"
 
+#include "../option.hpp"
 #include "../SourceException.hpp"
+
+
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
+//
+
+static option::option_data<bool> option_fixed_constants('\0', "fixed-constants",
+ "features", "Makes unsuffixed floating-constants be fixed-constants. On by default.",
+ NULL, true);
 
 
 //----------------------------------------------------------------------------|
@@ -126,7 +136,13 @@ SourceExpression::Pointer SourceExpressionC::ParseFloat(std::string const &value
    }
 
    // Process suffix part.
-   if(!sufF && !sufK && !sufR) ++sufF, ++sufL;
+   if(!sufF && !sufK && !sufR)
+   {
+      if(option_fixed_constants.data && !sufH && !sufL && !sufU)
+         ++sufK;
+      else
+         ++sufF, ++sufL;
+   }
 
    if(sufF > 1) Error_P("floating-constant: FF");
    if(sufH > 2) Error_P("floating-constant: HHH");

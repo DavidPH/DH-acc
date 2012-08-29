@@ -26,6 +26,7 @@
 #include "ObjectExpression.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
+#include "SourceExpressionC.hpp"
 #include "SourceFunction.hpp"
 #include "SourceStream.hpp"
 #include "SourceTokenizerC.hpp"
@@ -192,10 +193,10 @@ SRCEXPDS_EXPR_DEF1(primary)
       return create_value_char(tok->data, context, tok->pos);
 
    case SourceTokenC::TT_FLT:
-      return create_value_real(tok->data, context, tok->pos);
+      return SourceExpressionC::ParseFloat(tok->data, context, tok->pos);
 
    case SourceTokenC::TT_INT:
-      return create_value_integer(tok->data, context, tok->pos);
+      return SourceExpressionC::ParseInt(tok->data, context, tok->pos);
 
    case SourceTokenC::TT_STR:
       return create_value_string(tok->data, context, tok->pos);
