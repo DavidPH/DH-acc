@@ -407,8 +407,6 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
 
       if(numBase == BASE_DBL) { numBase = BASE_FLT; ++numLong; }
 
-      if(numSat) Error_P("sat unsupported");
-
       if(numCplx && numImag) Error_P("complex imaginary");
       if(numLong && numShrt) Error_P("long short");
       if(numSign && numUnsi) Error_P("signed unsigned");
@@ -479,9 +477,6 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
          break;
 
       case BASE_FRACT:
-         Error_P("fract not supported");
-
-         #if 0
          if(numUnsi)
          {
                  if(numLong == 2) bt = VariableType::BT_ANG_LL;
@@ -496,21 +491,16 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
             else if(numShrt == 1) bt = VariableType::BT_FRA_H;
             else                  bt = VariableType::BT_FRA;
          }
-         #endif
 
          break;
 
       case BASE_ACCUM:
          if(numUnsi)
          {
-            Error_P("unsigned accum not supported");
-
-            #if 0
                  if(numLong == 2) bt = VariableType::BT_ACC_LL;
             else if(numLong == 1) bt = VariableType::BT_ACC_L;
             else if(numShrt == 1) bt = VariableType::BT_ACC_H;
             else                  bt = VariableType::BT_ACC;
-            #endif
          }
          else
          {
@@ -532,6 +522,7 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
 
            if(numCplx) spec.type = VariableType::get_bt_clx(bt);
       else if(numImag) spec.type = VariableType::get_bt_clx_im(bt);
+      else if(numSat ) spec.type = VariableType::get_bt_sat(bt);
       else             spec.type = VariableType::get_bt(bt);
    }
    else if(numBase || numCplx || numImag || numLong || numShrt || numSign || numUnsi || numSat)

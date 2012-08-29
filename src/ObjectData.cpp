@@ -44,28 +44,43 @@ void odata_set_strings(std::vector<int> &strings, VariableType const *type)
    case VariableType::BT_BIT_HRD:
    case VariableType::BT_BIT_SFT:
    case VariableType::BT_CHR:
+   case VariableType::BT_ACC_HH:
+   case VariableType::BT_ACC_H:
+   case VariableType::BT_ACC:
+   case VariableType::BT_ANG_HH:
+   case VariableType::BT_ANG_H:
+   case VariableType::BT_ANG:
+   case VariableType::BT_ANG_L:
+   case VariableType::BT_ANG_LL:
    case VariableType::BT_FIX_HH:
    case VariableType::BT_FIX_H:
    case VariableType::BT_FIX:
-   case VariableType::BT_FIX_L:
-   case VariableType::BT_FIX_LL:
    case VariableType::BT_FLT_HH:
    case VariableType::BT_FLT_H:
    case VariableType::BT_FLT:
+   case VariableType::BT_FRA_HH:
+   case VariableType::BT_FRA_H:
+   case VariableType::BT_FRA:
+   case VariableType::BT_FRA_L:
+   case VariableType::BT_FRA_LL:
    case VariableType::BT_INT_HH:
    case VariableType::BT_INT_H:
    case VariableType::BT_INT:
-   case VariableType::BT_INT_L:
    case VariableType::BT_UNS_HH:
    case VariableType::BT_UNS_H:
    case VariableType::BT_UNS:
-   case VariableType::BT_UNS_L:
       strings.push_back(false);
       break;
 
+   case VariableType::BT_ACC_L:
+   case VariableType::BT_ACC_LL:
+   case VariableType::BT_FIX_L:
+   case VariableType::BT_FIX_LL:
    case VariableType::BT_FLT_L:
    case VariableType::BT_FLT_LL:
+   case VariableType::BT_INT_L:
    case VariableType::BT_INT_LL:
+   case VariableType::BT_UNS_L:
    case VariableType::BT_UNS_LL:
       strings.push_back(false);
       strings.push_back(false);
@@ -119,6 +134,7 @@ void odata_set_strings(std::vector<int> &strings, VariableType const *type)
 
    case VariableType::BT_CLX:
    case VariableType::BT_CLX_IM:
+   case VariableType::BT_SAT:
    case VariableType::BT_STRUCT:
    case VariableType::BT_BLOCK:
       for (VariableType::Vector::const_iterator end = type->getTypes().end(),

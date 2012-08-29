@@ -48,17 +48,35 @@ static void make_objects_literal
    switch (type->getBasicType())
    {
    case VariableType::BT_VOID:
+   case VariableType::BT_ACC_HH:
+   case VariableType::BT_ACC_H:
+   case VariableType::BT_ACC:
+   case VariableType::BT_ACC_L:
+   case VariableType::BT_ACC_LL:
+   case VariableType::BT_ANG_HH:
+   case VariableType::BT_ANG_H:
+   case VariableType::BT_ANG:
+   case VariableType::BT_ANG_L:
+   case VariableType::BT_ANG_LL:
+   case VariableType::BT_FIX_L:
+   case VariableType::BT_FIX_LL:
    case VariableType::BT_FLT_HH:
    case VariableType::BT_FLT_H:
    case VariableType::BT_FLT:
    case VariableType::BT_FLT_L:
    case VariableType::BT_FLT_LL:
+   case VariableType::BT_FRA_HH:
+   case VariableType::BT_FRA_H:
+   case VariableType::BT_FRA:
+   case VariableType::BT_FRA_L:
+   case VariableType::BT_FRA_LL:
    case VariableType::BT_UNION:
    case VariableType::BT_FUN_ASM:
       Error_P("bad BT: %s", make_string(type->getBasicType()).c_str());
 
    case VariableType::BT_CLX:
    case VariableType::BT_CLX_IM:
+   case VariableType::BT_SAT:
    case VariableType::BT_BLOCK:
    case VariableType::BT_STRUCT:
    {
@@ -95,8 +113,6 @@ static void make_objects_literal
    case VariableType::BT_FIX_HH:
    case VariableType::BT_FIX_H:
    case VariableType::BT_FIX:
-   case VariableType::BT_FIX_L:
-   case VariableType::BT_FIX_LL:
       objects->addToken(OCODE_GET_IMM, elem);
       break;
 

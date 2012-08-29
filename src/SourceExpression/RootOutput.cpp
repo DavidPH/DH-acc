@@ -138,6 +138,26 @@ void SourceExpression_RootOutput::doOut
       doChar(objects, '}');
       break;
 
+   case VariableType::BT_SAT:
+      doChar(objects, "S{");
+      doOut(objects, type->getTypes()[0]);
+      doChar(objects, '}');
+      break;
+
+   case VariableType::BT_ACC_HH:
+   case VariableType::BT_ACC_H:
+   case VariableType::BT_ACC:
+   case VariableType::BT_ACC_L:
+   case VariableType::BT_ACC_LL:
+      Error_NP("unsupported BT: %s", make_string(bt).c_str());
+
+   case VariableType::BT_ANG_HH:
+   case VariableType::BT_ANG_H:
+   case VariableType::BT_ANG:
+   case VariableType::BT_ANG_L:
+   case VariableType::BT_ANG_LL:
+      Error_NP("unsupported BT: %s", make_string(bt).c_str());
+
    case VariableType::BT_FIX_HH:
       objects->addToken(OCODE_ACSP_NUM_DEC_X);
       doChar(objects, "XHH");
@@ -154,20 +174,21 @@ void SourceExpression_RootOutput::doOut
       break;
 
    case VariableType::BT_FIX_L:
-      objects->addToken(OCODE_ACSP_NUM_DEC_X);
-      doChar(objects, "XL");
-      break;
-
    case VariableType::BT_FIX_LL:
-      objects->addToken(OCODE_ACSP_NUM_DEC_X);
-      doChar(objects, "XLL");
-      break;
+      Error_NP("unsupported BT: %s", make_string(bt).c_str());
 
    case VariableType::BT_FLT_HH:
    case VariableType::BT_FLT_H:
    case VariableType::BT_FLT:
    case VariableType::BT_FLT_L:
    case VariableType::BT_FLT_LL:
+      Error_NP("unsupported BT: %s", make_string(bt).c_str());
+
+   case VariableType::BT_FRA_HH:
+   case VariableType::BT_FRA_H:
+   case VariableType::BT_FRA:
+   case VariableType::BT_FRA_L:
+   case VariableType::BT_FRA_LL:
       Error_NP("unsupported BT: %s", make_string(bt).c_str());
 
    case VariableType::BT_INT_HH:

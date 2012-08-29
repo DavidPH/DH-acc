@@ -57,17 +57,37 @@ static std::string const basic_names[] =
    /* BT_CLX     */ "complex",
    /* BT_CLX_IM  */ "imaginary",
 
-   /* BT_FIX_HH  */ "short short fixed",
-   /* BT_FIX_H   */ "short fixed",
-   /* BT_FIX     */ "fixed",
-   /* BT_FIX_L   */ "long fixed",
-   /* BT_FIX_LL  */ "long long fixed",
+   /* BT_SAT     */ "sat",
+
+   /* BT_ACC_HH  */ "unsigned short short accum",
+   /* BT_ACC_H   */ "unsigned short accum",
+   /* BT_ACC     */ "unsigned accum",
+   /* BT_ACC_L   */ "unsigned long accum",
+   /* BT_ACC_LL  */ "unsigned long long accum",
+
+   /* BT_ANG_HH  */ "unsigned short short fract",
+   /* BT_ANG_H   */ "unsigned short fract",
+   /* BT_ANG     */ "unsigned fract",
+   /* BT_ANG_L   */ "unsigned long fract",
+   /* BT_ANG_LL  */ "unsigned long long fract",
+
+   /* BT_FIX_HH  */ "short short accum",
+   /* BT_FIX_H   */ "short accum",
+   /* BT_FIX     */ "accum",
+   /* BT_FIX_L   */ "long accum",
+   /* BT_FIX_LL  */ "long long accum",
 
    /* BT_FLT_HH  */ "short short float",
    /* BT_FLT_H   */ "short float",
    /* BT_FLT     */ "float",
    /* BT_FLT_L   */ "double",
    /* BT_FLT_LL  */ "long double",
+
+   /* BT_FRA_HH  */ "short short fract",
+   /* BT_FRA_H   */ "short fract",
+   /* BT_FRA     */ "fract",
+   /* BT_FRA_L   */ "long fract",
+   /* BT_FRA_LL  */ "long long fract",
 
    /* BT_INT_HH  */ "signed char",
    /* BT_INT_H   */ "short",
@@ -126,6 +146,16 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
    case VariableType::BT_BIT_HRD:
    case VariableType::BT_BIT_SFT:
    case VariableType::BT_CHR:
+   case VariableType::BT_ACC_HH:
+   case VariableType::BT_ACC_H:
+   case VariableType::BT_ACC:
+   case VariableType::BT_ACC_L:
+   case VariableType::BT_ACC_LL:
+   case VariableType::BT_ANG_HH:
+   case VariableType::BT_ANG_H:
+   case VariableType::BT_ANG:
+   case VariableType::BT_ANG_L:
+   case VariableType::BT_ANG_LL:
    case VariableType::BT_FIX_HH:
    case VariableType::BT_FIX_H:
    case VariableType::BT_FIX:
@@ -135,6 +165,11 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
    case VariableType::BT_FLT_H:
    case VariableType::BT_FLT:
    case VariableType::BT_FLT_L:
+   case VariableType::BT_FRA_HH:
+   case VariableType::BT_FRA_H:
+   case VariableType::BT_FRA:
+   case VariableType::BT_FRA_L:
+   case VariableType::BT_FRA_LL:
    case VariableType::BT_FLT_LL:
    case VariableType::BT_INT_HH:
    case VariableType::BT_INT_H:
@@ -151,6 +186,7 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
 
    case VariableType::BT_CLX:
    case VariableType::BT_CLX_IM:
+   case VariableType::BT_SAT:
       out << type->getBasicType() << ' ' << type->getTypes()[0]->getBasicType();
       break;
 
@@ -334,6 +370,16 @@ VariableType::VariableType(BasicType _basic)
    case BT_BIT_HRD:
    case BT_BIT_SFT:
    case BT_CHR:
+   case BT_ACC_HH:
+   case BT_ACC_H:
+   case BT_ACC:
+   case BT_ACC_L:
+   case BT_ACC_LL:
+   case BT_ANG_HH:
+   case BT_ANG_H:
+   case BT_ANG:
+   case BT_ANG_L:
+   case BT_ANG_LL:
    case BT_FIX_HH:
    case BT_FIX_H:
    case BT_FIX:
@@ -344,6 +390,11 @@ VariableType::VariableType(BasicType _basic)
    case BT_FLT:
    case BT_FLT_L:
    case BT_FLT_LL:
+   case BT_FRA_HH:
+   case BT_FRA_H:
+   case BT_FRA:
+   case BT_FRA_L:
+   case BT_FRA_LL:
    case BT_INT_HH:
    case BT_INT_H:
    case BT_INT:
@@ -354,6 +405,11 @@ VariableType::VariableType(BasicType _basic)
    case BT_UNS:
    case BT_UNS_L:
    case BT_UNS_LL:
+      break;
+
+   case BT_SAT:
+      types.resize(width = 1);
+      names.push_back("");
       break;
 
    case BT_CLX:
@@ -425,6 +481,17 @@ VariableType::~VariableType()
    case BT_CHR:
    case BT_CLX:
    case BT_CLX_IM:
+   case BT_SAT:
+   case BT_ACC_HH:
+   case BT_ACC_H:
+   case BT_ACC:
+   case BT_ACC_L:
+   case BT_ACC_LL:
+   case BT_ANG_HH:
+   case BT_ANG_H:
+   case BT_ANG:
+   case BT_ANG_L:
+   case BT_ANG_LL:
    case BT_FIX_HH:
    case BT_FIX_H:
    case BT_FIX:
@@ -435,6 +502,11 @@ VariableType::~VariableType()
    case BT_FLT:
    case BT_FLT_L:
    case BT_FLT_LL:
+   case BT_FRA_HH:
+   case BT_FRA_H:
+   case BT_FRA:
+   case BT_FRA_L:
+   case BT_FRA_LL:
    case BT_INT_HH:
    case BT_INT_H:
    case BT_INT:
@@ -654,6 +726,11 @@ void VariableType::getNameMangled(std::string &out) const
 
    switch (basic)
    {
+   case BT_ANG_HH:   out += "AHH"; break;
+   case BT_ANG_H:    out += "AH"; break;
+   case BT_ANG:      out += 'A'; break;
+   case BT_ANG_L:    out += "AL"; break;
+   case BT_ANG_LL:   out += "ALL"; break;
    case BT_ARR:      out += "A{"; RETRN; out += "}:["; WIDTH; out += ']'; break;
    case BT_BLOCK:    out += "B{"; TYPES; out += '}'; break;
    case BT_BIT_HRD:  out += 'B'; break;
@@ -678,11 +755,22 @@ void VariableType::getNameMangled(std::string &out) const
    case BT_INT_L:    out += "IL"; break;
    case BT_INT_LL:   out += "ILL"; break;
    case BT_CLX_IM:   out += "I{"; TYPE0; out += '}'; break;
+   case BT_ACC_HH:   out += "KHH"; break;
+   case BT_ACC_H:    out += "KH"; break;
+   case BT_ACC:      out += 'K'; break;
+   case BT_ACC_L:    out += "KL"; break;
+   case BT_ACC_LL:   out += "KLL"; break;
    case BT_LABEL:    out += "LABEL"; break;
    case BT_PTR:      out += "P{"; RETRN; out += '}'; break;
    case BT_PTR_NUL:  out += "PN"; break;
+   case BT_FRA_HH:   out += "RHH"; break;
+   case BT_FRA_H:    out += "RH"; break;
+   case BT_FRA:      out += 'R'; break;
+   case BT_FRA_L:    out += "RL"; break;
+   case BT_FRA_LL:   out += "RLL"; break;
    case BT_STR:      out += 'S'; break;
    case BT_STRUCT:   out += "S("; out += name; out += ')'; break;
+   case BT_SAT:      out += "S{"; TYPE0; out += '}'; break;
    case BT_UNS_HH:   out += "UHH"; break;
    case BT_UNS_H:    out += "UH"; break;
    case BT_UNS:      out += 'U'; break;
@@ -739,14 +827,25 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
    case BT_BIT_HRD:
    case BT_BIT_SFT:
    case BT_CHR:
+   case BT_ACC_HH:
+   case BT_ACC_H:
+   case BT_ACC:
+   case BT_ANG_HH:
+   case BT_ANG_H:
+   case BT_ANG:
+   case BT_ANG_L:
+   case BT_ANG_LL:
    case BT_FIX_HH:
    case BT_FIX_H:
    case BT_FIX:
-   case BT_FIX_L:
-   case BT_FIX_LL:
    case BT_FLT_HH:
    case BT_FLT_H:
    case BT_FLT:
+   case BT_FRA_HH:
+   case BT_FRA_H:
+   case BT_FRA:
+   case BT_FRA_L:
+   case BT_FRA_LL:
    case BT_INT_HH:
    case BT_INT_H:
    case BT_INT:
@@ -764,8 +863,13 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
 
    case BT_CLX:
    case BT_CLX_IM:
+   case BT_SAT:
       return typeRet->getSize(pos) * width;
 
+   case BT_ACC_L:
+   case BT_ACC_LL:
+   case BT_FIX_L:
+   case BT_FIX_LL:
    case BT_FLT_L:
    case BT_FLT_LL:
    case BT_INT_L:
@@ -907,6 +1011,18 @@ VariableType::Reference VariableType::get_bt(BasicType bt)
 
    case BT_CHR: return get_bt_chr();
 
+   case BT_ACC_HH: return get_bt_acc_hh();
+   case BT_ACC_H:  return get_bt_acc_h();
+   case BT_ACC:    return get_bt_acc();
+   case BT_ACC_L:  return get_bt_acc_l();
+   case BT_ACC_LL: return get_bt_acc_ll();
+
+   case BT_ANG_HH: return get_bt_ang_hh();
+   case BT_ANG_H:  return get_bt_ang_h();
+   case BT_ANG:    return get_bt_ang();
+   case BT_ANG_L:  return get_bt_ang_l();
+   case BT_ANG_LL: return get_bt_ang_ll();
+
    case BT_FIX_HH: return get_bt_fix_hh();
    case BT_FIX_H:  return get_bt_fix_h();
    case BT_FIX:    return get_bt_fix();
@@ -918,6 +1034,12 @@ VariableType::Reference VariableType::get_bt(BasicType bt)
    case BT_FLT:    return get_bt_flt();
    case BT_FLT_L:  return get_bt_flt_l();
    case BT_FLT_LL: return get_bt_flt_ll();
+
+   case BT_FRA_HH: return get_bt_fra_hh();
+   case BT_FRA_H:  return get_bt_fra_h();
+   case BT_FRA:    return get_bt_fra();
+   case BT_FRA_L:  return get_bt_fra_l();
+   case BT_FRA_LL: return get_bt_fra_ll();
 
    case BT_INT_HH: return get_bt_int_hh();
    case BT_INT_H:  return get_bt_int_h();
@@ -983,7 +1105,7 @@ VariableType::Reference VariableType::get_bt_chr()
 //
 VariableType::Reference VariableType::get_bt_clx(BasicType bt)
 {
-   static Pointer types[10]; return get_bt_complex(types, bt, BT_CLX);
+   static Pointer types[25]; return get_bt_complex(types, bt, BT_CLX);
 }
 
 //
@@ -991,38 +1113,171 @@ VariableType::Reference VariableType::get_bt_clx(BasicType bt)
 //
 VariableType::Reference VariableType::get_bt_clx_im(BasicType bt)
 {
-   static Pointer types[10]; return get_bt_complex(types, bt, BT_CLX_IM);
+   static Pointer types[25]; return get_bt_complex(types, bt, BT_CLX_IM);
 }
 
 //
 // VariableType::get_bt_complex
 //
-VariableType::Reference VariableType::get_bt_complex(Pointer *types, BasicType bt,
+VariableType::Reference VariableType::get_bt_complex(Pointer *type, BasicType bt,
                                                      BasicType clx)
 {
    switch(bt)
    {
-   case BT_FIX_HH: types = types+0; break;
-   case BT_FIX_H:  types = types+1; break;
-   case BT_FIX:    types = types+2; break;
-   case BT_FIX_L:  types = types+3; break;
-   case BT_FIX_LL: types = types+4; break;
-   case BT_FLT_HH: types = types+5; break;
-   case BT_FLT_H:  types = types+6; break;
-   case BT_FLT:    types = types+7; break;
-   case BT_FLT_L:  types = types+8; break;
-   case BT_FLT_LL: types = types+9; break;
+   case BT_ACC_HH: type +=  0; break;
+   case BT_ACC_H:  type +=  1; break;
+   case BT_ACC:    type +=  2; break;
+   case BT_ACC_L:  type +=  3; break;
+   case BT_ACC_LL: type +=  4; break;
+   case BT_ANG_HH: type +=  5; break;
+   case BT_ANG_H:  type +=  6; break;
+   case BT_ANG:    type +=  7; break;
+   case BT_ANG_L:  type +=  8; break;
+   case BT_ANG_LL: type +=  9; break;
+   case BT_FIX_HH: type += 10; break;
+   case BT_FIX_H:  type += 11; break;
+   case BT_FIX:    type += 12; break;
+   case BT_FIX_L:  type += 13; break;
+   case BT_FIX_LL: type += 14; break;
+   case BT_FLT_HH: type += 15; break;
+   case BT_FLT_H:  type += 16; break;
+   case BT_FLT:    type += 17; break;
+   case BT_FLT_L:  type += 18; break;
+   case BT_FLT_LL: type += 19; break;
+   case BT_FRA_HH: type += 20; break;
+   case BT_FRA_H:  type += 21; break;
+   case BT_FRA:    type += 22; break;
+   case BT_FRA_L:  type += 23; break;
+   case BT_FRA_LL: type += 24; break;
    default: return get_bt_void();
    }
 
-   if(!*types)
+   if(!*type)
    {
-      (*types = new VariableType(clx))->types[0] = get_bt(bt);
+      (*type = new VariableType(clx))->types[0] = get_bt(bt);
 
-      if(clx == BT_CLX) (*types)->types[1] = get_bt_clx_im(bt);
+      if(clx == BT_CLX) (*type)->types[1] = get_bt_clx_im(bt);
    }
 
-   return static_cast<Reference>(*types);
+   return static_cast<Reference>(*type);
+}
+
+//
+// VariableType::get_bt_sat
+//
+VariableType::Reference VariableType::get_bt_sat(BasicType bt)
+{
+   static Pointer types[20];
+   Pointer *type;
+
+   switch(bt)
+   {
+   case BT_ACC_HH: type = types +  0; break;
+   case BT_ACC_H:  type = types +  1; break;
+   case BT_ACC:    type = types +  2; break;
+   case BT_ACC_L:  type = types +  3; break;
+   case BT_ACC_LL: type = types +  4; break;
+   case BT_ANG_HH: type = types +  5; break;
+   case BT_ANG_H:  type = types +  6; break;
+   case BT_ANG:    type = types +  7; break;
+   case BT_ANG_L:  type = types +  8; break;
+   case BT_ANG_LL: type = types +  9; break;
+   case BT_FIX_HH: type = types + 10; break;
+   case BT_FIX_H:  type = types + 11; break;
+   case BT_FIX:    type = types + 12; break;
+   case BT_FIX_L:  type = types + 13; break;
+   case BT_FIX_LL: type = types + 14; break;
+   case BT_FRA_HH: type = types + 15; break;
+   case BT_FRA_H:  type = types + 17; break;
+   case BT_FRA:    type = types + 18; break;
+   case BT_FRA_L:  type = types + 19; break;
+   case BT_FRA_LL: type = types + 20; break;
+   default: return get_bt_void();
+   }
+
+   if(!*type) (*type = new VariableType(BT_SAT))->types[0] = get_bt(bt);
+
+   return static_cast<Reference>(*type);
+}
+
+//
+// VariableType::get_bt_acc_hh
+//
+VariableType::Reference VariableType::get_bt_acc_hh()
+{
+   static Reference type(new VariableType(BT_ACC_HH)); return type;
+}
+
+//
+// VariableType::get_bt_acc_h
+//
+VariableType::Reference VariableType::get_bt_acc_h()
+{
+   static Reference type(new VariableType(BT_ACC_H)); return type;
+}
+
+//
+// VariableType::get_bt_acc
+//
+VariableType::Reference VariableType::get_bt_acc()
+{
+   static Reference type(new VariableType(BT_ACC)); return type;
+}
+
+//
+// VariableType::get_bt_acc_l
+//
+VariableType::Reference VariableType::get_bt_acc_l()
+{
+   static Reference type(new VariableType(BT_ACC_L)); return type;
+}
+
+//
+// VariableType::get_bt_acc_ll
+//
+VariableType::Reference VariableType::get_bt_acc_ll()
+{
+   static Reference type(new VariableType(BT_ACC_LL)); return type;
+}
+
+//
+// VariableType::get_bt_ang_hh
+//
+VariableType::Reference VariableType::get_bt_ang_hh()
+{
+   static Reference type(new VariableType(BT_ANG_HH)); return type;
+}
+
+//
+// VariableType::get_bt_ang_h
+//
+VariableType::Reference VariableType::get_bt_ang_h()
+{
+   static Reference type(new VariableType(BT_ANG_H)); return type;
+}
+
+//
+// VariableType::get_bt_ang
+//
+VariableType::Reference VariableType::get_bt_ang()
+{
+   static Reference type(new VariableType(BT_ANG)); return type;
+}
+
+//
+// VariableType::get_bt_ang_l
+//
+VariableType::Reference VariableType::get_bt_ang_l()
+{
+   static Reference type(new VariableType(BT_ANG_L)); return type;
+}
+
+//
+// VariableType::get_bt_ang_ll
+//
+VariableType::Reference VariableType::get_bt_ang_ll()
+{
+   static Reference type(new VariableType(BT_ANG_LL)); return type;
 }
 
 //
@@ -1103,6 +1358,46 @@ VariableType::Reference VariableType::get_bt_flt_l()
 VariableType::Reference VariableType::get_bt_flt_ll()
 {
    static Reference type(new VariableType(BT_FLT_LL)); return type;
+}
+
+//
+// VariableType::get_bt_fra_hh
+//
+VariableType::Reference VariableType::get_bt_fra_hh()
+{
+   static Reference type(new VariableType(BT_FRA_HH)); return type;
+}
+
+//
+// VariableType::get_bt_fra_h
+//
+VariableType::Reference VariableType::get_bt_fra_h()
+{
+   static Reference type(new VariableType(BT_FRA_H)); return type;
+}
+
+//
+// VariableType::get_bt_fra
+//
+VariableType::Reference VariableType::get_bt_fra()
+{
+   static Reference type(new VariableType(BT_FRA)); return type;
+}
+
+//
+// VariableType::get_bt_fra_l
+//
+VariableType::Reference VariableType::get_bt_fra_l()
+{
+   static Reference type(new VariableType(BT_FRA_L)); return type;
+}
+
+//
+// VariableType::get_bt_fra_ll
+//
+VariableType::Reference VariableType::get_bt_fra_ll()
+{
+   static Reference type(new VariableType(BT_FRA_LL)); return type;
 }
 
 //
@@ -1505,6 +1800,16 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
    case BT_BIT_HRD:
    case BT_BIT_SFT:
    case BT_CHR:
+   case BT_ACC_HH:
+   case BT_ACC_H:
+   case BT_ACC:
+   case BT_ACC_L:
+   case BT_ACC_LL:
+   case BT_ANG_HH:
+   case BT_ANG_H:
+   case BT_ANG:
+   case BT_ANG_L:
+   case BT_ANG_LL:
    case BT_FIX_HH:
    case BT_FIX_H:
    case BT_FIX:
@@ -1515,6 +1820,11 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
    case BT_FLT:
    case BT_FLT_L:
    case BT_FLT_LL:
+   case BT_FRA_HH:
+   case BT_FRA_H:
+   case BT_FRA:
+   case BT_FRA_L:
+   case BT_FRA_LL:
    case BT_INT_HH:
    case BT_INT_H:
    case BT_INT:
@@ -1534,6 +1844,7 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
 
    case BT_CLX:
    case BT_CLX_IM:
+   case BT_SAT:
       return get_cast(dst->types[0], src->types[0], exact);
 
    case BT_ENUM:
@@ -1624,6 +1935,16 @@ bool VariableType::is_bt_arithmetic(BasicType type)
    case BT_BIT_HRD:
    case BT_BIT_SFT:
    case BT_CHR:
+   case BT_ACC_HH:
+   case BT_ACC_H:
+   case BT_ACC:
+   case BT_ACC_L:
+   case BT_ACC_LL:
+   case BT_ANG_HH:
+   case BT_ANG_H:
+   case BT_ANG:
+   case BT_ANG_L:
+   case BT_ANG_LL:
    case BT_FIX_HH:
    case BT_FIX_H:
    case BT_FIX:
@@ -1634,6 +1955,11 @@ bool VariableType::is_bt_arithmetic(BasicType type)
    case BT_FLT:
    case BT_FLT_L:
    case BT_FLT_LL:
+   case BT_FRA_HH:
+   case BT_FRA_H:
+   case BT_FRA:
+   case BT_FRA_L:
+   case BT_FRA_LL:
    case BT_INT_HH:
    case BT_INT_H:
    case BT_INT:
@@ -1658,11 +1984,26 @@ bool VariableType::is_bt_fix(BasicType type)
 {
    switch (type)
    {
+   case BT_ACC_HH:
+   case BT_ACC_H:
+   case BT_ACC:
+   case BT_ACC_L:
+   case BT_ACC_LL:
+   case BT_ANG_HH:
+   case BT_ANG_H:
+   case BT_ANG:
+   case BT_ANG_L:
+   case BT_ANG_LL:
    case BT_FIX_HH:
    case BT_FIX_H:
    case BT_FIX:
    case BT_FIX_L:
    case BT_FIX_LL:
+   case BT_FRA_HH:
+   case BT_FRA_H:
+   case BT_FRA:
+   case BT_FRA_L:
+   case BT_FRA_LL:
       return true;
 
    default:

@@ -99,13 +99,29 @@ static ObjectExpression::ExpressionType GetET(VariableType const *type)
 
    case VariableType::BT_CLX:
    case VariableType::BT_CLX_IM:
+   case VariableType::BT_SAT:
       return ObjectExpression::ET_MAP;
 
+   case VariableType::BT_ACC_HH:
+   case VariableType::BT_ACC_H:
+   case VariableType::BT_ACC:
+   case VariableType::BT_ACC_L:
+   case VariableType::BT_ACC_LL:
+   case VariableType::BT_ANG_HH:
+   case VariableType::BT_ANG_H:
+   case VariableType::BT_ANG:
+   case VariableType::BT_ANG_L:
+   case VariableType::BT_ANG_LL:
    case VariableType::BT_FIX_HH:
    case VariableType::BT_FIX_H:
    case VariableType::BT_FIX:
    case VariableType::BT_FIX_L:
    case VariableType::BT_FIX_LL:
+   case VariableType::BT_FRA_HH:
+   case VariableType::BT_FRA_H:
+   case VariableType::BT_FRA:
+   case VariableType::BT_FRA_L:
+   case VariableType::BT_FRA_LL:
       return ObjectExpression::ET_FIX;
 
    case VariableType::BT_FLT_HH:

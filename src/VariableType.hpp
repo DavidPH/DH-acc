@@ -81,6 +81,20 @@ public:
       BT_CLX,    // complex
       BT_CLX_IM, // imaginary
 
+      BT_SAT,
+
+      BT_ACC_HH,
+      BT_ACC_H,
+      BT_ACC,
+      BT_ACC_L,
+      BT_ACC_LL,
+
+      BT_ANG_HH,
+      BT_ANG_H,
+      BT_ANG,
+      BT_ANG_L,
+      BT_ANG_LL,
+
       BT_FIX_HH,
       BT_FIX_H,
       BT_FIX,
@@ -92,6 +106,12 @@ public:
       BT_FLT,
       BT_FLT_L,
       BT_FLT_LL,
+
+      BT_FRA_HH,
+      BT_FRA_H,
+      BT_FRA,
+      BT_FRA_L,
+      BT_FRA_LL,
 
       BT_INT_HH,
       BT_INT_H,
@@ -199,6 +219,20 @@ public:
    static Reference get_bt_clx(BasicType bt);
    static Reference get_bt_clx_im(BasicType bt);
 
+   static Reference get_bt_sat(BasicType bt);
+
+   static Reference get_bt_acc_hh();
+   static Reference get_bt_acc_h();
+   static Reference get_bt_acc();
+   static Reference get_bt_acc_l();
+   static Reference get_bt_acc_ll();
+
+   static Reference get_bt_ang_hh();
+   static Reference get_bt_ang_h();
+   static Reference get_bt_ang();
+   static Reference get_bt_ang_l();
+   static Reference get_bt_ang_ll();
+
    static Reference get_bt_fix_hh();
    static Reference get_bt_fix_h();
    static Reference get_bt_fix();
@@ -210,6 +244,12 @@ public:
    static Reference get_bt_flt();
    static Reference get_bt_flt_l();
    static Reference get_bt_flt_ll();
+
+   static Reference get_bt_fra_hh();
+   static Reference get_bt_fra_h();
+   static Reference get_bt_fra();
+   static Reference get_bt_fra_l();
+   static Reference get_bt_fra_ll();
 
    static Reference get_bt_int_hh();
    static Reference get_bt_int_h();
