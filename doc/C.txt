@@ -731,14 +731,51 @@ Implementation Extensions
 ===============================================================================
 
 ===========================================================
-Library Declaration
+Primary Expression
 ===========================================================
 
-  library-declaration:
-    <__library> ( string-literal ) ;
+  primary-expression:
+    identifier
+    constant
+    string-literal
+    ( expression )
+    generic-selection
+    printf-expression
 
-A library declaration indicates the name of a file that will be needed by the
-final output.
+===========================================================
+Printf Expression
+===========================================================
+
+  printf-expression:
+    <__printf> ( string-literal )
+    <__printf> ( string-literal , argument-expression-list )
+    <__printf> ( printf-specifier , string-literal )
+    <__printf> ( printf-specifier , string-literal , argument-expression-list )
+
+  printf-specifier:
+    <print>
+    <__print>
+    <__print__>
+    <bold>
+    <__bold>
+    <__bold__>
+    <hud>
+    <__hud>
+    <__hud__>
+    <hud_bold>
+    <__hud_bold>
+    <__hud_bold__>
+    <log>
+    <__log>
+    <__log__>
+    <string>
+    <__string>
+    <__string__>
+
+Performs a compile-time checked formatted print. Syntax of the format string is
+as described for fprintf, with the exception of %n which is not available.
+
+If no printf-specifier is given, the behavior is as if print was given.
 
 ===========================================================
 External Declaration
@@ -748,6 +785,16 @@ External Declaration
     function-definition
     declaration
     library-declaration
+
+===========================================================
+Library Declaration
+===========================================================
+
+  library-declaration:
+    <__library> ( string-literal ) ;
+
+A library declaration indicates the name of a file that will be needed by the
+final output.
 
 ###############################################################################
 EOF

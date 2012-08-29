@@ -123,6 +123,60 @@ SRCEXPC_PARSE_DEFN_HALF(Primary)
          return exprControl;
       }
 
+      // printf-expression
+
+      // __printf ( printf-specifier , string-literal )
+      // __printf ( printf-specifier , string-literal , expression-list )
+      // __printf ( string-literal )
+      // __printf ( string-literal , expression-list )
+      if(tok->data == "__printf")
+      {
+         // (
+         in->get(SourceTokenC::TT_PAREN_O);
+
+         // printf-specifier ,
+         std::string type;
+         if(in->peekType(SourceTokenC::TT_NAM))
+         {
+            type = in->get()->data;
+            in->get(SourceTokenC::TT_COMMA);
+
+            if(type == "print" || type == "__print" || type == "__print__")
+               type = "__printf_print";
+
+            else if(type == "bold" || type == "__bold" || type == "__bold__")
+               type = "__printf_bold";
+
+            else if(type == "hud" || type == "__hud" || type == "__hud__")
+               type = "__printf_hud";
+
+            else if(type == "hud_bold" || type == "__hud_bold" || type == "__hud_bold__")
+               type = "__printf_hud_bold";
+
+            else if(type == "log" || type == "__log" || type == "__log__")
+               type = "__printf_log";
+
+            else if(type == "string" || type == "__string" || type == "__string__")
+               type = "__printf_string";
+
+            else
+               Error(tok->pos, "unrecognized printf-specifier '%s'", type.c_str());
+         }
+
+         // string-literal
+         std::string format = in->get(SourceTokenC::TT_STR)->data;
+
+         // expression-list
+         Vector exprs;
+         while(in->dropType(SourceTokenC::TT_COMMA))
+            exprs.push_back(ParseAssignment(in, context));
+
+         // )
+         in->get(SourceTokenC::TT_PAREN_C);
+
+         return create_root_printf(type, format, exprs, context, tok->pos);
+      }
+
       if(context->isVariable(tok->data))
       {
          return create_value_variable(context->getVariable(tok->data, tok->pos),
