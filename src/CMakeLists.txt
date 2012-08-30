@@ -116,6 +116,7 @@ add_executable(DH-acc
    SourceExpression/ValueVariable.cpp
    SourceExpressionASM.cpp
    SourceExpressionC.cpp
+   SourceExpressionC/ParseAttribute.cpp
    SourceExpressionC/ParseDeclaration.cpp
    SourceExpressionC/ParseExpression.cpp
    SourceExpressionC/ParseNumber.cpp

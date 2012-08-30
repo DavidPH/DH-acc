@@ -24,6 +24,7 @@
 #ifndef HPP_SourceExpressionC_
 #define HPP_SourceExpressionC_
 
+#include "ObjectData.hpp"
 #include "SourceExpression.hpp"
 #include "VariableType.hpp"
 
@@ -177,7 +178,26 @@ public:
    };
 
    //
-   // ::Declarator
+   // FunctionAttributes
+   //
+   struct FunctionAttributes
+   {
+      typedef ObjectData_Script::ScriptType ScriptType;
+
+      FunctionAttributes()
+       : scriptAddr(-1), scriptFlag(0), scriptType(ObjectData_Script::ST_CLOSED), script(false)
+      {
+      }
+
+      std::string scriptName;
+      bigsint     scriptAddr;
+      bigsint     scriptFlag;
+      ScriptType  scriptType;
+      bool        script : 1;
+   };
+
+   //
+   // Declarator
    //
    // Used for both declarator and abstract-declarator.
    //
@@ -188,6 +208,9 @@ public:
 
       // parameter-type-list
       std::vector<Parameter> param;
+
+      // function-attributes
+      FunctionAttributes funcAttr;
    };
 
    //
@@ -225,6 +248,10 @@ public:
    static bool IsDeclarator(SRCEXPC_PARSE_ARG1);
    static bool IsQualifier(SRCEXPC_PARSE_ARG1);
    static bool IsType(SRCEXPC_PARSE_ARG1);
+
+   // Attributes.
+   static void ParseAttributeScript(FunctionAttributes &funcAttr, SRCEXPC_PARSE_ARG1);
+   static FunctionAttributes ParseFunctionAttributes(SRCEXPC_PARSE_ARG1);
 
    static CounterReference<VariableType> ParseEnum(SRCEXPC_PARSE_ARG1);
    static CounterReference<VariableType> ParseStruct(SRCEXPC_PARSE_ARG1);

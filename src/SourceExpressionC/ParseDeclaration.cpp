@@ -107,7 +107,7 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
       store = STORE_STATIC;
 
    // Function prototype.
-   if(decl.type->getBasicType() == VariableType::BT_FUN)
+   if(VariableType::is_bt_function(decl.type->getBasicType()))
    {
       if(spec.storage == SC_AUTO || spec.storage == SC_REGISTER)
          Error_P("auto or register in function prototype");
@@ -125,7 +125,16 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
       std::string nameObj = context->makeNameObj(decl.name, linkage, paramTypes);
       std::string label = nameObj + "::$label";
 
-      ObjectData_Function::add(nameObj, label, paramSize, returnSize, NULL);
+      if(decl.funcAttr.script)
+      {
+         if(decl.funcAttr.scriptName.empty()) decl.funcAttr.scriptName = nameObj;
+
+         ObjectData_Script::add(nameObj, label, decl.funcAttr.scriptType,
+            decl.funcAttr.scriptFlag, paramSize, NULL, linkage != LINKAGE_INTERN,
+            decl.funcAttr.scriptAddr, decl.funcAttr.scriptName);
+      }
+      else
+         ObjectData_Function::add(nameObj, label, paramSize, returnSize, NULL);
 
       SourceFunction::Reference func = SourceFunction::FindFunction(
          SourceVariable::create_constant(decl.name, decl.type, nameObj, pos));
@@ -309,7 +318,7 @@ SRCEXPC_PARSE_DEFN_EXT(Function, DeclarationSpecifiers const &spec, Declarator &
    LinkageSpecifier linkage = spec.storage == SC_STATIC ? LINKAGE_INTERN : LINKAGE_C;
 
    SourceContext::Reference funcContext = SourceContext::create(context,
-      SourceContext::CT_FUNCTION);
+      decl.funcAttr.script ? SourceContext::CT_SCRIPT : SourceContext::CT_FUNCTION);
 
    // Set return type of context.
    funcContext->setReturnType(decl.type->getReturn());
@@ -343,7 +352,16 @@ SRCEXPC_PARSE_DEFN_EXT(Function, DeclarationSpecifiers const &spec, Declarator &
    funcContext->addVar(SourceVariable::create_constant("__func__",
       VariableType::get_bt_str(), ObjectData_String::add(decl.name), pos), false, false);
 
-   ObjectData_Function::add(nameObj, label, paramSize, returnSize, funcContext);
+   if(decl.funcAttr.script)
+   {
+      if(decl.funcAttr.scriptName.empty()) decl.funcAttr.scriptName = nameObj;
+
+      ObjectData_Script::add(nameObj, label, decl.funcAttr.scriptType,
+         decl.funcAttr.scriptFlag, paramSize, funcContext, linkage != LINKAGE_INTERN,
+         decl.funcAttr.scriptAddr, decl.funcAttr.scriptName);
+   }
+   else
+      ObjectData_Function::add(nameObj, label, paramSize, returnSize, funcContext);
 
    SourceFunction::Reference func = SourceFunction::FindFunction(
       SourceVariable::create_constant(decl.name, decl.type, nameObj, pos));
@@ -390,7 +408,7 @@ SRCEXPC_PARSE_DEFN_HALF(ExternalDeclaration)
 
    Declarator decl = ParseDeclarator(spec.type, in, context);
 
-   if(decl.type->getBasicType() == VariableType::BT_FUN &&
+   if(VariableType::is_bt_function(decl.type->getBasicType()) &&
       in->peekType(SourceTokenC::TT_BRACE_O))
    {
       return ParseFunction(spec, decl, in, context);

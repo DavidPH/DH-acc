@@ -731,6 +731,78 @@ Implementation Extensions
 ===============================================================================
 
 ===========================================================
+Script Attribute
+===========================================================
+
+  script-attribute:
+    script-attribute-name
+    script-attribute-name ( script-type script-flag-list(opt) )
+    script-attribute-name ( script-type script-flag-list(opt) , integer-constant )
+    script-attribute-name ( script-type script-flag-list(opt) , string-literal )
+
+  script-attribute-name:
+    <script>
+    <__script>
+    <__script__>
+
+  script-type:
+    <closed>
+    <__closed>
+    <__closed__>
+    <open>
+    <__open>
+    <__open__>
+    <respawn>
+    <death>
+    <__death>
+    <__death__>
+    <enter>
+    <__enter>
+    <__enter_>
+    <lightning>
+    <__lightning>
+    <__lightning__>
+    <unloading>
+    <__unloading>
+    <__unloading__>
+    <disconnect>
+    <__disconnect>
+    <__disconnect__>
+    <return>
+    <__return>
+    <__return__>
+
+  script-flag-list:
+    | script-flag
+    script-flag-list | script-flag
+
+  script-flag:
+    <net>
+    <__net>
+    <__net__>
+    <clientside>
+    <__clientside>
+    <__clientside__>
+
+===========================================================
+Function Attributes
+===========================================================
+
+  function-attributes-lists:
+    function-attributes
+    function-attributes-lists function-attributes
+
+  function-attributes:
+    <__attribute__> ( ( function-attribute-list(opt) ) )
+
+  function-attribute-list:
+    function-attribute
+    function-attribute-list , function-attribute
+
+  function-attribute:
+    script-attribute
+
+===========================================================
 Primary Expression
 ===========================================================
 

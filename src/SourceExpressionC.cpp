@@ -699,10 +699,22 @@ void SourceExpressionC::ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_AR
          in->get(SourceTokenC::TT_PAREN_C);
       }
 
+      FunctionAttributes funcAttr = ParseFunctionAttributes(in, context);
+
       ParseDeclaratorSuffix(decl, in, context);
 
-      decl.type = VariableType::get_bt_fun(types, decl.type);
+      if(funcAttr.script)
+      {
+         if(funcAttr.scriptAddr == -2)
+            decl.type = VariableType::get_bt_fun_sna(types, decl.type);
+         else
+            decl.type = VariableType::get_bt_fun_snu(types, decl.type);
+      }
+      else
+         decl.type = VariableType::get_bt_fun(types, decl.type);
+
       decl.param = param;
+      decl.funcAttr = funcAttr;
    }
 }
 
