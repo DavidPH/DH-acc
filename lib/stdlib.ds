@@ -489,26 +489,28 @@ __extfunc "C" void *bsearch(void const *key, void const *base, size_t nmemb, siz
 // qsort
 //
 __extfunc "C" void qsort(void *base, size_t nmemb, size_t size,
-                         __func_t(void const *, void const *) -> int compar)
+                         __func_t int(void const *, void const *) compar)
 {
    char *itr = (char *)base;
    char *end = (char *)base + nmemb*size;
 
+   // Gnome sort!
    while(itr != end)
    {
-      // If iter >= iter+1...
-      if(compar(itr, itr+size) >= 0)
+      // If itr > itr+1...
+      if(compar(itr, itr+size) > 0)
       {
          // Swap the two elements.
          memswp(itr, itr+size, size);
 
          // Reset the iterator.
          if(itr != base) itr -= size;
-
-         continue;
+      }
+      else
+      {
+         // Advance the iterator.
+         itr += size;
       };
-
-      itr += size;
    };
 };
 
