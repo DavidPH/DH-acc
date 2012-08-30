@@ -132,17 +132,13 @@ virtual_makeObjects(ObjectVector *objects, VariableData *dst)
 
       break;
 
-   case SourceContext::CT_NAMESPACE:
-      objects->addToken(OCODE_ACS_SCRIPT_TERMINATE);
-      break;
-
    case SourceContext::CT_SCRIPT:
       make_objects_auto_free(objects, context);
 
-      if (retnSize != 0)
-         objects->addToken(OCODE_ACSE_SCRIPT_SETRETURN);
+      if(retnSize != 0)
+         objects->addToken(OCODE_SET_SCRRET);
 
-      objects->addToken(OCODE_ACS_SCRIPT_TERMINATE);
+      objects->addToken(OCODE_JMP_RET_SCR);
       break;
 
    default:

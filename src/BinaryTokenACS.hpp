@@ -54,8 +54,8 @@ public:
    {
       #define BINTOKACS_BCODES                  \
       BCODE_NOP                          =   0, \
-      BCODE_SCRIPT_TERMINATE             =   1, \
-      BCODE_SCRIPT_SUSPEND               =   2, \
+      BCODE_JMP_RET_SCR                  =   1, \
+      BCODE_JMP_HLT                      =   2, \
       BCODE_GET_IMM                      =   3, \
       BCODE_SPECIAL_EXEC1                =   4, \
       BCODE_SPECIAL_EXEC2                =   5, \
@@ -122,7 +122,7 @@ public:
       BCODE_STAG_SET_TEXTURE_FLOOR_IMM   =  66, \
       BCODE_STAG_SET_TEXTURE_CEILING     =  67, \
       BCODE_STAG_SET_TEXTURE_CEILING_IMM =  68, \
-      BCODE_SCRIPT_RESTART               =  69, \
+      BCODE_JMP_RST                      =  69, \
       BCODE_LOGAND_STK                   =  70, \
       BCODE_LOGIOR_STK                   =  71, \
       BCODE_AND_STK                      =  72, \

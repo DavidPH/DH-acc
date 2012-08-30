@@ -165,6 +165,7 @@ void BinaryTokenZDACS::init()
    DO_INIT(SET_MAPARR, 1);
    DO_INIT(SET_WLDARR, 1);
    DO_INIT(SET_GBLARR, 1);
+   DO_INIT(SET_SCRRET, 0);
 
    // Miscellaneous
    DO_INIT(NATIVE, 2);
@@ -239,7 +240,6 @@ void BinaryTokenZDACS::init()
    DO_INIT(SCREEN_GET_HEIGHT,                  0);
    DO_INIT(SCREEN_GET_WIDTH,                   0);
    DO_INIT(SCREEN_SET_HUDSIZE,                 0);
-   DO_INIT(SCRIPT_SETRETURN,                   0);
    DO_INIT(SOUND_AMBIENTLOCAL,                 0);
    DO_INIT(SOUND_THING,                        0);
    DO_INIT(SPAWN_POINT,                        0);

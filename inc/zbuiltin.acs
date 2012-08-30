@@ -125,7 +125,7 @@ __asmfunc CreateTranslationStart(int transnumber) @ __ocode(ACSE_TRANSLATION_STA
 __asmfunc CreateTranslationPalette(int a, int b, int c, int d) @ __ocode(ACSE_TRANSLATION_PALETTE);
 __asmfunc CreateTranslationRGB(int a, int b, int r1, int g1, int b1, int r2, int g2, int b2) @ __ocode(ACSE_TRANSLATION_RGB);
 __asmfunc CreateTranslationEnd() @ __ocode(ACSE_TRANSLATION_END);
-__asmfunc SetResultValue(int) @ __ocode(ACSE_SCRIPT_SETRETURN);
+__asmfunc SetResultValue(int) @ __ocode(SET_SCRRET);
 
 // Players
 __asmfunc CheckPlayerCamera(int) -> int @ __ocode(ACSE_PLAYER_GET_CAMERA);
@@ -178,7 +178,7 @@ __asmfunc StrLen(__string) -> int @ __ocode(ACSE_STRING_GET_LENGTH);
 __asmfunc Delay(int) @ __ocode(ACS_WAIT_TICS, ACS_WAIT_TICS_IMM);
 __asmfunc PolyWait(int) @ __ocode(ACS_WAIT_POLYOBJECT, ACS_WAIT_POLYOBJECT_IMM);
 __asmfunc ScriptWait(int) @ __ocode(ACS_WAIT_SCRIPT, ACS_WAIT_SCRIPT_IMM);
-__asmfunc Suspend() @ __ocode(ACS_SCRIPT_SUSPEND);
+__asmfunc Suspend() @ __ocode(JMP_HLT);
 __asmfunc TagWait(int) @ __ocode(ACS_WAIT_STAG, ACS_WAIT_STAG_IMM);
 
 #endif//__HEADER__ZBUILTIN_ACS__

@@ -629,28 +629,17 @@ SourceExpression::Pointer SourceExpressionDS::make_statement(
 //
 // SourceExpressionDS::make_statements
 //
-SourceExpression::Pointer SourceExpressionDS::make_statements
-(SourceTokenizerC *in)
+SourceExpression::Pointer SourceExpressionDS::make_statements(SourceTokenizerC *in)
 {
    SourceContext::Reference context(SourceContext::global_context);
-   VariableType::Reference retnType = VariableType::get_bt_void();
-
-   // If at EOF, return now.
-   try {in->peek();} catch (SourceStream::EndOfStream const &)
-   {return create_value_data(retnType, context, SourcePosition::builtin());}
-
-   Vector::iterator block;
-
-   SourceTokenC::Reference tok = in->peek();
-
+   SourcePosition pos;
    Vector exprs;
+
+   try {pos = in->peek()->pos;} catch(SourceStream::EndOfStream const &) {}
 
    make_statements(in, &exprs, context);
 
-   exprs.push_back(create_branch_return
-      (create_value_data(retnType, context, tok->pos), context, tok->pos));
-
-   return create_value_block(exprs, context, tok->pos);
+   return create_value_block(exprs, context, pos);
 }
 
 //

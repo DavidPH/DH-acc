@@ -202,23 +202,22 @@ static void dump_static_debug(std::ostream *out, ObjectData_Static const &s)
 static void read_source(std::string const &name, SourceType type,
                         ObjectVector *objects)
 {
+   SourceExpression::Pointer src;
+
    ObjectExpression::set_filename(name);
 
-   if (type == SOURCE_UNKNOWN)
+   if(type == SOURCE_UNKNOWN)
       type = divine_source_type(name);
 
-   switch (type)
+   switch(type)
    {
    case SOURCE_ASM:
-   {
-      SourceStream in(name, SourceStream::ST_ASM);
-      SourceTokenizerASM tokenizer(&in);
+      {
+         SourceStream in(name, SourceStream::ST_ASM);
+         SourceTokenizerASM tokenizer(&in);
 
-      SourceExpression::Pointer expressions =
-         SourceExpressionASM::MakeStatements(&tokenizer);
-
-      expressions->makeObjects(objects, VariableData::create_void(0));
-   }
+         src = SourceExpressionASM::MakeStatements(&tokenizer);
+      }
       break;
 
    case SOURCE_C:
@@ -228,50 +227,41 @@ static void read_source(std::string const &name, SourceType type,
          SourceTokenizerC tokenizer(&in);
          tokenizer.addDefine("__LANG_C__");
 
-         SourceExpression::Pointer src = SourceExpressionC::
-            ParseTranslationUnit(&tokenizer, SourceContext::global_context);
-
-         bool mainGen;
-         if(!option_init_code.handled)
-            mainGen = !src->canMakeObject();
-         else
-            mainGen = option_init_code.data;
-
-         if(mainGen)
-         {
-            bigsint mainNumber = option_named_scripts ? -2 : -1;
-            std::string mainName = SourceContext::global_context->makeLabel() + "main";
-            std::string mainLabel = mainName + "::$label";
-
-            ObjectData_Script::ScriptType mainType = ObjectData_Script::ST_OPEN;
-
-            ObjectData_Script::add(mainName, mainLabel, mainType, 0, 0,
-               SourceContext::global_context, false, mainNumber, mainName);
-
-            objects->addLabel(mainLabel);
-            src->makeObjects(objects, VariableData::create_void(0));
-            objects->addToken(OCODE_ACS_SCRIPT_TERMINATE);
-         }
+         src = SourceExpressionC::ParseTranslationUnit(&tokenizer, SourceContext::global_context);
       }
       break;
 
    case SOURCE_DS:
+      {
+         SourceStream in(name, SourceStream::ST_C);
+
+         SourceTokenizerC tokenizer(&in);
+         tokenizer.addDefine("__LANG_DS__");
+
+         src = SourceExpressionDS::make_statements(&tokenizer);
+      }
+      break;
+
+   case SOURCE_object:
+      {
+         std::ifstream in(name.c_str(), std::ios_base::in|std::ios_base::binary);
+         ObjectExpression::read_objects(&in, objects);
+      }
+      break;
+
+   default:
+      throw "Unknown source type.";
+   }
+
+   if(src)
    {
-      SourceStream in(name, SourceStream::ST_C);
-
-      SourceTokenizerC tokenizer(&in);
-      tokenizer.addDefine("__LANG_DS__");
-
-      SourceExpression::Pointer expressions =
-         SourceExpressionDS::make_statements(&tokenizer);
-
       bool mainGen;
-      if (!option_init_code.handled)
-         mainGen = !expressions->canMakeObject();
+      if(!option_init_code.handled)
+         mainGen = type != SOURCE_ASM && !src->canMakeObject();
       else
          mainGen = option_init_code.data;
 
-      if (mainGen)
+      if(mainGen)
       {
          bigsint mainNumber = option_named_scripts ? -2 : -1;
          std::string mainName = SourceContext::global_context->makeLabel() + "main";
@@ -279,24 +269,14 @@ static void read_source(std::string const &name, SourceType type,
 
          ObjectData_Script::ScriptType mainType = ObjectData_Script::ST_OPEN;
 
-         expressions->addLabel(mainLabel);
          ObjectData_Script::add(mainName, mainLabel, mainType, 0, 0,
             SourceContext::global_context, false, mainNumber, mainName);
+
+         objects->addLabel(mainLabel);
       }
 
-      expressions->makeObjects(objects, VariableData::create_void(0));
-   }
-      break;
-
-   case SOURCE_object:
-   {
-      std::ifstream in(name.c_str(), std::ios_base::in|std::ios_base::binary);
-      ObjectExpression::read_objects(&in, objects);
-   }
-      break;
-
-   default:
-      throw "Unknown source type.";
+      src->makeObjects(objects, VariableData::create_void(0));
+      objects->addToken(OCODE_JMP_RET_SCR);
    }
 }
 

@@ -186,7 +186,7 @@ public:
       BCODE_SCREEN_SET_HUDSIZE                 = 254,
       BCODE_GAME_GET_CVAR                      = 255,
       BCODE_JMP_TAB                            = 256,
-      BCODE_SCRIPT_SETRETURN                   = 257,
+      BCODE_SET_SCRRET                         = 257,
       BCODE_LINE_GET_OFFSETY                   = 258,
       BCODE_MTAG_GET_FLOORZ                    = 259,
       BCODE_MTAG_GET_ANGLE                     = 260,

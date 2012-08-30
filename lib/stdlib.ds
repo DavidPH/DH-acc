@@ -393,7 +393,7 @@ __extfunc "C" void abort()
    *(int *)NULL = 0xDEADC0DE; // Flag abort.
    __printf<__printf_log>("Aborted.");
    (__linespec() @ 243)();
-   (__asmfunc() @ __ocode(ACS_SCRIPT_TERMINATE))();
+   (__asmfunc() @ __ocode(JMP_RET_SCR))();
    #else
    __printf<__printf_error>("Aborted.");
    #endif
@@ -436,7 +436,7 @@ __extfunc "C" void _Exit(int status)
       (__linespec(int) @ 243)(status >> 1);
    };
 
-   (__asmfunc() @ __ocode(ACS_SCRIPT_TERMINATE))();
+   (__asmfunc() @ __ocode(JMP_RET_SCR))();
 };
 
 //

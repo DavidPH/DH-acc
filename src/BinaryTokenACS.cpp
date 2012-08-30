@@ -120,10 +120,13 @@ void BinaryTokenACS::init(int *argCounts)
    DO_INIT(LOGIOR_STK, 0);
 
    // Jumps
-   DO_INIT(JMP_IMM, 1);
-   DO_INIT(JMP_NIL, 1);
-   DO_INIT(JMP_TRU, 1);
-   DO_INIT(JMP_VAL, 2);
+   DO_INIT(JMP_HLT,     0);
+   DO_INIT(JMP_IMM,     1);
+   DO_INIT(JMP_NIL,     1);
+   DO_INIT(JMP_RET_SCR, 0);
+   DO_INIT(JMP_RST,     0);
+   DO_INIT(JMP_TRU,     1);
+   DO_INIT(JMP_VAL,     2);
 
    // Stack-ops
    DO_INIT(STK_DROP, 0);
@@ -153,9 +156,6 @@ void BinaryTokenACS::init(int *argCounts)
    DO_INIT(LTAG_SET_TEXTURE,             0);
    DO_INIT(MISC_RANDOM,                  0);
    DO_INIT(MISC_RANDOM_IMM,              2);
-   DO_INIT(SCRIPT_RESTART,               0);
-   DO_INIT(SCRIPT_SUSPEND,               0);
-   DO_INIT(SCRIPT_TERMINATE,             0);
    DO_INIT(SOUND_AMBIENT,                0);
    DO_INIT(SOUND_SECTOR,                 0);
    DO_INIT(SOUND_SEQUENCE,               0);
