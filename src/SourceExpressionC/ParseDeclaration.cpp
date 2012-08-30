@@ -70,11 +70,141 @@ bool SourceExpressionC::IsDeclaration(SRCEXPC_PARSE_ARG1)
 //
 // SourceExpressionC::ParseInitializer
 //
-SRCEXPC_PARSE_DEFN_EXT(Initializer, VariableType::Pointer &type)
+SRCEXPC_PARSE_DEFN_EXT(Initializer, VariableType::Pointer &type, bool root)
 {
+   SourcePosition pos = in->peek()->pos;
+
    if(in->dropType(SourceTokenC::TT_BRACE_O))
    {
-      Error(in->peek()->pos, "stub");
+      // Bracketed array initializer.
+      if(type->getBasicType() == VariableType::BT_ARR)
+      {
+         VariableType::Pointer subType = type->getReturn();
+         biguint index = 0;
+         Vector  exprs;
+
+         do
+         {
+            if(in->dropType(SourceTokenC::TT_BRACK_O))
+            {
+               index = ParseConditional(in, context)->makeObject()->resolveUNS();
+               in->get(SourceTokenC::TT_BRACK_C);
+               in->get(SourceTokenC::TT_EQUALS);
+            }
+
+            if(index >= exprs.size())
+               exprs.resize(index+1, create_value_data(subType, context, pos));
+
+            exprs[index++] = ParseInitializer(subType, false, in, context);
+         }
+         while(in->dropType(SourceTokenC::TT_COMMA) && !in->peekType(SourceTokenC::TT_BRACE_C));
+
+         in->get(SourceTokenC::TT_BRACE_C);
+
+         if(!type->getWidth()) type = type->getReturn()->getArray(exprs.size());
+
+         return create_value_block(exprs, context, pos);
+      }
+
+      // Bracketed struct initializer.
+      if(type->getBasicType() == VariableType::BT_STRUCT)
+      {
+         VariableType::Vector const &types = type->getTypes();
+         biguint index = 0;
+         Vector  exprs(types.size());
+
+         // Preload the initializer with default values.
+         for(biguint i = types.size(); i--;)
+           exprs[i] = create_value_data(types[i], context, pos);
+
+         do
+         {
+            if(in->dropType(SourceTokenC::TT_DOT))
+            {
+               SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
+               index = type->getIndex(tok->data, tok->pos);
+               in->get(SourceTokenC::TT_EQUALS);
+            }
+
+            if(index < types.size())
+            {
+               VariableType::Pointer subType = types[index];
+               exprs[index++] = ParseInitializer(subType, false, in, context);
+            }
+            else
+            {
+               VariableType::Pointer subType = VariableType::get_bt_void();
+               exprs.push_back(ParseInitializer(subType, false, in, context));
+            }
+         }
+         while(in->dropType(SourceTokenC::TT_COMMA) && !in->peekType(SourceTokenC::TT_BRACE_C));
+
+         in->get(SourceTokenC::TT_BRACE_C);
+
+         return create_value_block(exprs, context, pos);
+      }
+
+      // Bracketed union initializer.
+      if(type->getBasicType() == VariableType::BT_UNION)
+      {
+         Error_P("stub");
+      }
+
+      // Bracketed scalar initializer.
+      SourceExpression::Pointer expr = ParseAssignment(in, context);
+      in->dropType(SourceTokenC::TT_COMMA);
+      in->get(SourceTokenC::TT_BRACE_C);
+      return expr;
+   }
+   else if(!root)
+   {
+      // Unbracketed array initializer.
+      if(type->getBasicType() == VariableType::BT_ARR)
+      {
+         VariableType::Pointer subType = type->getReturn();
+         bigsint width = type->getWidth();
+         Vector  exprs;
+
+         if(width) do
+         {
+            exprs.push_back(ParseInitializer(subType, false, in, context));
+         }
+         while(--width && in->dropType(SourceTokenC::TT_COMMA) &&
+                         !in->peekType(SourceTokenC::TT_BRACE_C));
+
+         return create_value_block(exprs, context, pos);
+      }
+
+      // Unbracketed struct initializer.
+      if(type->getBasicType() == VariableType::BT_STRUCT)
+      {
+         VariableType::Vector const &types = type->getTypes();
+         biguint index = 0;
+         Vector  exprs(types.size());
+
+         // Preload the initializer with default values.
+         for(biguint i = types.size(); i--;)
+           exprs[i] = create_value_data(types[i], context, pos);
+
+         if(!types.empty()) do
+         {
+            VariableType::Pointer subType = types[index];
+            exprs[index++] = ParseInitializer(subType, false, in, context);
+         }
+         while(index < types.size() && in->dropType(SourceTokenC::TT_COMMA) &&
+                                      !in->peekType(SourceTokenC::TT_BRACE_C));
+
+         return create_value_block(exprs, context, pos);
+      }
+
+      // Unbracketed union initializer.
+      if(type->getBasicType() == VariableType::BT_UNION)
+      {
+         Error_P("stub");
+      }
+
+      // Unbracketed scalar initializer.
+      return ParseAssignment(in, context);
    }
    else
       return ParseAssignment(in, context);
@@ -149,7 +279,7 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
    // Variable definition with initializer.
    if(in->dropType(SourceTokenC::TT_EQUALS))
    {
-      SourceExpression::Pointer init = ParseInitializer(decl.type, in, context);
+      SourceExpression::Pointer init = ParseInitializer(decl.type, true, in, context);
 
       SourceVariable::Pointer var = SourceVariable::create_variable(decl.name,
          decl.type, nameObj, store, pos);

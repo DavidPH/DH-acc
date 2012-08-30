@@ -283,7 +283,7 @@ public:
 
    SRCEXPC_PARSE_DECL(Statement);
 
-   SRCEXPC_PARSE_DECL_EXT(Initializer, CounterPointer<VariableType> &type);
+   SRCEXPC_PARSE_DECL_EXT(Initializer, CounterPointer<VariableType> &type, bool root);
    SRCEXPC_PARSE_DECL_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &decl);
    SRCEXPC_PARSE_DECL_EXT(Typedef, DeclarationSpecifiers const &spec);
    SRCEXPC_PARSE_DECL(StaticAssert);

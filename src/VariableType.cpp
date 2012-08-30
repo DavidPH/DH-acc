@@ -957,6 +957,20 @@ void VariableType::makeComplete(VecStr const &_names, Vector const &_types)
 //
 
 //
+// VariableType::getIndex
+//
+biguint VariableType::getIndex(std::string const &memName, SourcePosition const &pos)
+{
+   if(!complete)
+      Error_NP("incomplete type");
+
+   for(biguint i = 0; i < names.size(); ++i)
+      if(names[i] == memName) return i;
+
+   Error_NP("no such member: %s", memName.c_str());
+}
+
+//
 // VariableType::getOffset
 //
 bigsint VariableType::getOffset

@@ -200,6 +200,7 @@ public:
    void makeComplete(VecStr const &names, Vector const &types);
 
    // Member information.
+   biguint getIndex(std::string const &memName, SourcePosition const &pos);
    bigsint getOffset(std::string const &name, SourcePosition const &position);
    Reference getType(std::string const &name, SourcePosition const &position);
 
