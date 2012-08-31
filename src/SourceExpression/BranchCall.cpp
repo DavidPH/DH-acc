@@ -87,15 +87,59 @@ SourceExpression_BranchCall::SourceExpression_BranchCall
 
    VariableType::Vector const &types = type->getTypes();
 
-   for (size_t i = 0; i < types.size(); ++i)
+   for(size_t i = 0; i < types.size() && i < args.size(); ++i)
    {
-      if(!types[i]) break;
+      if(i < types.size() && types[i])
+         args[i] = create_value_cast_implicit(args[i], types[i], context, pos);
+      else
+      {
+         // Default argument promotions.
+         VariableType::Reference argType = args[i]->getType();
 
-      // The legality of this will be determined by make_objects_call.
-      if (i >= args.size())
-         break;
+         switch(argType->getBasicType())
+         {
+            // float becomes double.
+         case VariableType::BT_FLT:
+            argType = VariableType::get_bt_flt_l();
+            break;
 
-      args[i] = create_value_cast_implicit(args[i], types[i], context, pos);
+            // Integer promotions.
+         case VariableType::BT_BIT_HRD:
+         case VariableType::BT_BIT_SFT:
+         case VariableType::BT_CHR:
+         case VariableType::BT_INT_HH:
+         case VariableType::BT_INT_H:
+            argType = VariableType::get_bt_int();
+            break;
+
+         case VariableType::BT_UNS_HH:
+         case VariableType::BT_UNS_H:
+            argType = VariableType::get_bt_uns();
+            break;
+
+            // T[] becomes T *.
+         case VariableType::BT_ARR:
+            argType = argType->getReturn()->getPointer();
+            // T __local * becomes T *.
+            // T __near * becomes T *.
+         case VariableType::BT_PTR:
+            if(argType->getReturn()->getStoreType() == STORE_AUTO ||
+               argType->getReturn()->getStoreType() == STORE_STATIC)
+            {
+               if(option_near_pointers)
+                  argType = argType->getReturn()->setStorage(STORE_STATIC)->getPointer();
+               else
+                  argType = argType->getReturn()->setStorage(STORE_NONE)->getPointer();
+            }
+            break;
+
+            // Everything else remains unchanged.
+         default:
+            break;
+         }
+
+         args[i] = create_value_cast_implicit(args[i], argType, context, pos);
+      }
    }
 }
 
