@@ -288,7 +288,10 @@ public:
    //
    // ::makeObject
    //
-   virtual ObjectExpression::Pointer makeObject() const {return expr->makeObject();}
+   virtual ObjectExpression::Pointer makeObject() const
+   {
+      return make_object_cast(expr->makeObject(), type, expr->getType(), pos);
+   }
 
 private:
    //
@@ -296,7 +299,9 @@ private:
    //
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
    {
-      expr->makeObjects(objects, dst);
+      Super::recurse_makeObjects(objects, dst);
+
+      expr->makeObjectsCast(objects, dst, type);
    }
 
    SourceExpression::Pointer expr;
