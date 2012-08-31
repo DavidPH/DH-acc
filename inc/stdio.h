@@ -124,6 +124,12 @@ typedef unsigned int size_t;
 //
 typedef struct _FILE
 {
+   #ifdef __LANG_DS__
+   char[BUFSIZ] buf;
+   #else
+   char buf[BUFSIZ];
+   #endif
+   unsigned bufpos;
    unsigned flags;
 } FILE;
 
