@@ -118,13 +118,30 @@ bool SourceExpression::canMakeObject() const
 //
 VariableType::Reference SourceExpression::
 get_promoted_type(VariableType *_type1, VariableType *_type2,
-                  SourcePosition const &)
+                  SourcePosition const &pos)
 {
    VariableType::Reference type1(_type1);
    VariableType::Reference type2(_type2);
 
    VariableType::BasicType bt1 = type1->getBasicType();
    VariableType::BasicType bt2 = type2->getBasicType();
+
+   // Do special promotion for block types.
+   if(bt1 == VariableType::BT_BLOCK)
+   {
+      if(type1->getTypes().empty())
+         return VariableType::get_bt_void();
+
+      return get_promoted_type(type1->getTypes().back(), type2, pos);
+   }
+
+   if(bt2 == VariableType::BT_BLOCK)
+   {
+      if(type2->getTypes().empty())
+         return VariableType::get_bt_void();
+
+      return get_promoted_type(type1, type2->getTypes().back(), pos);
+   }
 
    // Arrays have special promotion.
    if (bt1 == VariableType::BT_ARR && bt2 == VariableType::BT_ARR)
@@ -258,8 +275,8 @@ get_promoted_type(VariableType *_type1, VariableType *_type2,
    if (bt1 == VariableType::BT_CHR) return type1;
    if (bt2 == VariableType::BT_CHR) return type2;
 
-   if (bt1 == VariableType::BT_ENUM) return VariableType::get_bt_int();
-   if (bt2 == VariableType::BT_ENUM) return VariableType::get_bt_int();
+   if(bt1 == VariableType::BT_ENUM) return type1;
+   if(bt2 == VariableType::BT_ENUM) return type2;
 
    if (bt1 == VariableType::BT_STR) return type1;
    if (bt2 == VariableType::BT_STR) return type2;
