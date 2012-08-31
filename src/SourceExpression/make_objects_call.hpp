@@ -61,7 +61,13 @@
       else if(func)                                     \
          arg = func->args[i];                           \
                                                         \
-      if(!arg) Error_P("too few arguments"); \
+      if(!arg) \
+      { \
+         if(i >= callTypes.size() || !callTypes[i]) \
+            break; \
+      \
+         Error_P("too few arguments"); \
+      } \
                                                         \
       VariableType::Reference argType = arg->getType(); \
       bigsint argSize = argType->getSize(pos);          \
