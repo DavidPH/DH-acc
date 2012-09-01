@@ -123,6 +123,11 @@ public:
          printfType = PT_STRING;
       else
          Error_NP("unrecognized printfType: %s", type.c_str());
+
+      if(format.empty() || format[format.size()-1] != '\n')
+         Warn_NP("__printf format not newline-terminated");
+      else
+         format.resize(format.size()-1);
    }
 
    //

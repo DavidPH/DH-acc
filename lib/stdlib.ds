@@ -389,14 +389,10 @@ __extfunc "C" void *realloc(void *ptr, size_t size)
 //
 __extfunc "C" void abort()
 {
-   #if defined(__TARGET_ZDoom__)
    *(int *)NULL = 0xDEADC0DE; // Flag abort.
-   __printf<__printf_log>("Aborted.");
+   __printf<__printf_log>("Aborted.\n");
    (__linespec() @ 243)();
    (__asmfunc() @ __ocode(JMP_RET_SCR))();
-   #else
-   __printf<__printf_error>("Aborted.");
-   #endif
 };
 
 //

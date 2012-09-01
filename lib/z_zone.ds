@@ -189,7 +189,7 @@
 #     define Z_OpenLogFile()
 #     define Z_CloseLogFile()
 #     define Z_LogPrintf(...)  zonef          (__VA_ARGS__)
-#     define Z_LogPuts(a)      zonef          ("%s", a)
+#     define Z_LogPuts(a)      zonef          ("%s\n", a)
 #  else
 #     define Z_OpenLogFile()  (Z_OpenLogFile) ()
 #     define Z_CloseLogFile() (Z_CloseLogFile)()
@@ -526,7 +526,7 @@ allocated:
    {
       if(!blockbytag[PU_CACHE])
       {
-         zonef("Z_Malloc: Failure trying to allocate %u bytes\nSource: %s:%d", size, file, line);
+         zonef("Z_Malloc: Failure trying to allocate %u bytes\nSource: %s:%d\n", size, file, line);
          abort();
       };
       Z_FreeTags(PU_CACHE, PU_CACHE);
@@ -1123,9 +1123,9 @@ __extfunc "C" void (Z_CheckHeap)(__string file, int line)
           (memblock_t *)((char *)block + HEADER_SIZE + block->size) != block->next) ||
          block->next->prev != block || block->prev->next != block)
       {
-         zonef("Z_CheckHeap: Block size does not touch the next block\nSource: %s:%d"
+         zonef("Z_CheckHeap: Block size does not touch the next block\nSource: %s:%d\n"
 #ifdef INSTRUMENTED
-               "\nSource of offending block: %s:%d"
+               "Source of offending block: %s:%d\n"
                , file, line, block->file, block->line
 #else
                , file, line
@@ -1359,7 +1359,7 @@ __extfunc "C" void (Z_PrintStats)()
       virtual_memory,  virtual_memory*100/total_memory,
       total_memory);
    #else
-   zonef("Z_PrintStats: not instrumented");
+   zonef("Z_PrintStats: not instrumented\n");
    #endif
 };
 
