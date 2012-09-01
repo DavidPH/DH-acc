@@ -83,6 +83,10 @@ public:
    CounterReference<SourceFunction> getFunction
    (std::string const &name, SourcePosition const &pos,
     std::vector<CounterPointer<VariableType> > const &types);
+   CounterReference<SourceFunction> getFunction(std::string const &name,
+      SourcePosition const &pos,
+      std::vector<CounterPointer<VariableType> > const &types,
+      std::vector<CounterPointer<ObjectExpression> > const &objs);
 
    std::string getLabel() const;
    std::string getLabelBreak(SourcePosition const & position) const;

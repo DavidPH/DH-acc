@@ -597,7 +597,18 @@ void SourceExpression::make_objects_auto_save(ObjectVector *objects, SourceConte
 // SourceExpression::makeExpressionFunction
 //
 SourceExpression::Pointer SourceExpression::makeExpressionFunction(
-   VariableType::Vector const &)
+   VariableType::Vector const &types)
+{
+   ObjectExpression::Vector objs(types.size());
+
+   return makeExpressionFunction(types, objs);
+}
+
+//
+// SourceExpression::makeExpressionFunction
+//
+SourceExpression::Pointer SourceExpression::makeExpressionFunction(
+   VariableType::Vector const &, ObjectExpression::Vector const &)
 {
    VariableType::Reference type = getType();
    VariableType::BasicType bt   = type->getBasicType();
@@ -622,6 +633,14 @@ ObjectExpression::Pointer SourceExpression::makeObject() const
       Error_NP("expected constant");
 
    return src->address;
+}
+
+//
+// SourceExpression::makeObjectPartial
+//
+ObjectExpression::Pointer SourceExpression::makeObjectPartial() const
+{
+   return canMakeObject() ? makeObject() : NULL;
 }
 
 //

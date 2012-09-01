@@ -559,9 +559,20 @@ SourceFunction::Reference SourceContext::getFunction
 //
 // SourceContext::getFunction
 //
-SourceFunction::Reference SourceContext::getFunction
-(std::string const &name, SourcePosition const &pos,
- VariableType::Vector const &types)
+SourceFunction::Reference SourceContext::getFunction(std::string const &name,
+   SourcePosition const &pos, VariableType::Vector const &types)
+{
+   ObjectExpression::Vector objs(types.size());
+
+   return getFunction(name, pos, types, objs);
+}
+
+//
+// SourceContext::getFunction
+//
+SourceFunction::Reference SourceContext::getFunction(std::string const &name,
+   SourcePosition const &pos, VariableType::Vector const &types,
+   ObjectExpression::Vector const &objs)
 {
    VariableType::CastType cast, castBest = VariableType::CAST_NEVER;
    unsigned funcCount = 0;
@@ -575,9 +586,9 @@ SourceFunction::Reference SourceContext::getFunction
       if(types.size() > (*funcItr)->argsMax) continue;
 
       if(types.size() == (*funcItr)->argsMax)
-         cast = VariableType::get_cast((*funcItr)->var->getType()->getTypes(), types);
+         cast = VariableType::get_cast((*funcItr)->var->getType()->getTypes(), types, objs);
       else
-         cast = VariableType::get_cast((*funcItr)->types[types.size() - (*funcItr)->argsMin], types);
+         cast = VariableType::get_cast((*funcItr)->types[types.size() - (*funcItr)->argsMin], types, objs);
 
       if(cast > castBest) continue;
 

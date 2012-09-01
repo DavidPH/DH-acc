@@ -290,17 +290,19 @@ case SourceTokenC::TT_PAREN_O:
 
       Vector args;
       VariableType::Vector types;
+      ObjectExpression::Vector objs;
 
       if (!in->peekType(SourceTokenC::TT_PAREN_C)) while (true)
       {
          args.push_back(make_assignment(in, contextCall));
          types.push_back(args.back()->getType()->getUnqualified());
+         objs.push_back(args.back()->makeObjectPartial());
 
          if (!in->peekType(SourceTokenC::TT_COMMA)) break; in->get();
       }
       in->get(SourceTokenC::TT_PAREN_C);
 
-      expr = expr->makeExpressionFunction(types);
+      expr = expr->makeExpressionFunction(types, objs);
       expr = create_branch_call(expr, args, contextCall, tok->pos);
    }
    break;

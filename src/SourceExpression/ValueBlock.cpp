@@ -73,6 +73,22 @@ public:
       return ObjectExpression::create_value_arr(elems, pos);
    }
 
+   //
+   // makeObjectPartial
+   //
+   virtual ObjectExpression::Pointer makeObjectPartial() const
+   {
+      ObjectExpression::Vector elems;
+
+      for(Vector::const_iterator itr = expressions.begin(),
+          end = expressions.end(); itr != end; ++itr)
+      {
+         elems.push_back((*itr)->makeObjectPartial());
+      }
+
+      return ObjectExpression::create_value_arr(elems, pos);
+   }
+
 private:
    void makeVoid(ObjectVector *objects) const;
 

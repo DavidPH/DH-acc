@@ -36,6 +36,7 @@
 // Types                                                                      |
 //
 
+class ObjectExpression;
 class SourcePosition;
 
 //
@@ -48,6 +49,7 @@ class VariableType : PlainCounter
    MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(VariableType, PlainCounter);
 
 public:
+   typedef std::vector<CounterPointer<ObjectExpression> > VecObj;
    typedef std::vector<std::string> VecStr;
    typedef std::vector<Pointer> Vector;
 
@@ -285,8 +287,10 @@ public:
    static Reference get_bt_fun_sna(Vector const &types, VariableType *typeRet);
    static Reference get_bt_fun_snu(Vector const &types, VariableType *typeRet);
 
-   static CastType get_cast(VariableType *dst, VariableType *src, CastType exact = CAST_EXACT);
+   static CastType get_cast(VariableType *dst, VariableType *src,
+      ObjectExpression *srcObj = NULL, CastType exact = CAST_EXACT);
    static CastType get_cast(Vector const &dst, Vector const &src);
+   static CastType get_cast(Vector const &dst, Vector const &src, VecObj const &srcObj);
 
    // Returns true if the given type is an arithmetic type.
    static bool is_bt_arithmetic(BasicType type);

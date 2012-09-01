@@ -23,7 +23,7 @@
 
 #include "VariableType.hpp"
 
-#include "option.hpp"
+#include "ObjectExpression.hpp"
 #include "SourceException.hpp"
 
 #include <algorithm>
@@ -1707,10 +1707,12 @@ VariableType::Reference VariableType::get_bt_fun_snu(Vector const &types, Variab
 // VariableType::get_cast
 //
 VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *src,
-                                              CastType exact)
+   ObjectExpression *srcObj, CastType exact)
 {
    if(dst == src || dst->getUnqualified() == src->getUnqualified())
       return exact;
+
+   if(srcObj && !srcObj->canResolve()) srcObj = NULL;
 
    BasicType dstBT = dst->getBasicType();
    BasicType srcBT = src->getBasicType();
@@ -1719,11 +1721,25 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
    {
       // array->pointer
       if(srcBT == BT_ARR && dstBT == BT_PTR)
-         return get_cast(dst, src->getReturn()->getPointer(), CAST_POINT);
+         return get_cast(dst, src->getReturn()->getPointer(), NULL, CAST_POINT);
+
+      // integer->pointer
+      if(is_bt_integer(srcBT) && dstBT == BT_PTR)
+      {
+         if(srcObj && !srcObj->resolveINT())
+            return CAST_PROMO;
+
+         return CAST_FORCE;
+      }
 
       // integer->string
       if(is_bt_integer(srcBT) && dstBT == BT_STR)
+      {
+         if(srcObj && !srcObj->resolveINT())
+            return CAST_PROMO;
+
          return CAST_FORCE;
+      }
 
       // nullptr->pointer
       if(srcBT == BT_PTR_NUL && dstBT == BT_PTR)
@@ -1747,7 +1763,7 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
 
       // function->pointer
       if(is_bt_function(srcBT) && dstBT == BT_PTR)
-         return get_cast(dst, src->getPointer(), exact);
+         return get_cast(dst, src->getPointer(), NULL, exact);
 
       // string->array
       if(srcBT == BT_STR && dstBT == BT_ARR && dst->getReturn()->getBasicType() == BT_CHR)
@@ -1759,7 +1775,7 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
 
       // string->pointer
       if(srcBT == BT_STR && dstBT == BT_PTR)
-         return get_cast(dst, src->getReturn()->getPointer(), CAST_POINT);
+         return get_cast(dst, src->getReturn()->getPointer(), NULL, CAST_POINT);
 
       // arithmetic->arithmetic
       // FIXME: Some arithmetic->arithmetic is CAST_CONVE.
@@ -1770,41 +1786,47 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
       if(is_bt_arithmetic(srcBT) && dstBT == BT_ENUM)
          return CAST_FORCE;
 
-      // block->array
-      if(srcBT == BT_BLOCK && dstBT == BT_ARR)
+      // block->
+      if(srcBT == BT_BLOCK)
       {
          CastType cast = exact;
 
+         VecObj srcObjVec;
+         if(srcObj)
+            srcObj->expandOnce(&srcObjVec);
+         else
+            srcObjVec.resize(src->types.size());
+
+         VecObj::const_iterator srcObjItr = srcObjVec.begin();
          Vector::const_iterator srcItr = src->types.begin(), srcEnd = src->types.end();
-         Reference              dstItr = dst->getReturn();
 
-         while(srcItr != srcEnd)
-            cast = std::max(get_cast(dstItr, *srcItr++), cast);
+         // ->array
+         if(dstBT == BT_ARR)
+         {
+            Reference dstItr = dst->getReturn();
 
-         return cast;
-      }
+            while(srcItr != srcEnd)
+               cast = std::max(get_cast(dstItr, *srcItr++, *srcObjItr++), cast);
 
-      // block->struct
-      if(srcBT == BT_BLOCK && dstBT == BT_STRUCT)
-      {
-         CastType cast = exact;
+            return cast;
+         }
 
-         Vector::const_iterator srcItr = src->types.begin(), srcEnd = src->types.end();
-         Vector::const_iterator dstItr = dst->types.begin(), dstEnd = dst->types.end();
+         // ->struct
+         if(dstBT == BT_STRUCT)
+         {
+            Vector::const_iterator dstItr = dst->types.begin(), dstEnd = dst->types.end();
 
-         while(dstItr != dstEnd && srcItr != srcEnd)
-            cast = std::max(get_cast(*dstItr++, *srcItr++), cast);
+            while(dstItr != dstEnd && srcItr != srcEnd)
+               cast = std::max(get_cast(*dstItr++, *srcItr++, *srcObjItr++), cast);
 
-         return cast;
-      }
+            return cast;
+         }
 
-      // block->*
-      if(srcBT == BT_BLOCK && dstBT != BT_BLOCK)
-      {
+         // ->*
          if(src->types.empty())
             return CAST_CONVE;
          else
-            return get_cast(dst, src->types.back(), CAST_PROMO);
+            return get_cast(dst, src->types.back(), srcObjVec.back(), CAST_PROMO);
       }
 
       // enum->int
@@ -1817,10 +1839,6 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
 
       // function->function
       if(is_bt_function(srcBT) && is_bt_function(dstBT))
-         return CAST_FORCE;
-
-      // int->pointer
-      if(is_bt_integer(srcBT) && dstBT == BT_PTR)
          return CAST_FORCE;
 
       // pointer->int
@@ -1900,7 +1918,7 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
    case BT_CLX:
    case BT_CLX_IM:
    case BT_SAT:
-      return get_cast(dst->types[0], src->types[0], exact);
+      return get_cast(dst->types[0], src->types[0], NULL, exact);
 
    case BT_ENUM:
       return CAST_FORCE;
@@ -1926,11 +1944,11 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
          if(dstST == STORE_FAR && srcST != STORE_REGISTER &&
             srcST != STORE_MAPREGISTER && srcST != STORE_WORLDREGISTER &&
             srcST != STORE_GLOBALREGISTER && srcST != STORE_MAPARRAY)
-            return get_cast(dst, srcR->setStorage(STORE_FAR)->getPointer(), CAST_POINT);
+            return get_cast(dst, srcR->setStorage(STORE_FAR)->getPointer(), NULL, CAST_POINT);
 
          // Also for auto pointer to static pointer.
          if(srcST == STORE_AUTO && dstST == STORE_STATIC)
-            return get_cast(dst, srcR->setStorage(STORE_STATIC)->getPointer(), CAST_POINT);
+            return get_cast(dst, srcR->setStorage(STORE_STATIC)->getPointer(), NULL, CAST_POINT);
 
          // And by explicit I mean reinterpret. Changing storage is NOT COOL.
          return CAST_NEVER;
@@ -1968,14 +1986,27 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
 //
 VariableType::CastType VariableType::get_cast(Vector const &dst, Vector const &src)
 {
+   VecObj srcObj(src.size());
+
+   return get_cast(dst, src, srcObj);
+}
+
+//
+// VariableType::get_cast
+//
+VariableType::CastType VariableType::get_cast(Vector const &dst, Vector const &src,
+                                              VecObj const &srcObj)
+{
    if(dst.size() != src.size()) return CAST_NEVER;
 
    CastType cast = CAST_EXACT;
 
-   Vector::const_iterator dstItr = dst.begin(), srcItr = src.begin();
-   Vector::const_iterator dstEnd = dst.end();
-   while(dstItr != dstEnd && *dstItr && *srcItr)
-      cast = std::max(get_cast(*dstItr++, *srcItr++), cast);
+   VecObj::const_iterator srcObjItr = srcObj.begin();
+   Vector::const_iterator srcItr = src.begin(), srcEnd = src.end();
+   Vector::const_iterator dstItr = dst.begin();
+
+   while(srcItr != srcEnd && *dstItr)
+      cast = std::max(get_cast(*dstItr++, *srcItr++, *srcObjItr++), cast);
 
    return cast;
 }

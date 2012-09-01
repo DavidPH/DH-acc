@@ -23,6 +23,7 @@
 
 #include "../SourceExpression.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceFunction.hpp"
@@ -112,13 +113,13 @@ public:
    //
    // ::makeExpressionFunction
    //
-   virtual SourceExpression::Pointer makeExpressionFunction
-   (VariableType::Vector const &types)
+   virtual SourceExpression::Pointer makeExpressionFunction(
+      VariableType::Vector const &types, ObjectExpression::Vector const &objs)
    {
       if(func)
          return this;
 
-      return create_value_function(context->getFunction(name, pos, types), context, pos);
+      return create_value_function(context->getFunction(name, pos, types, objs), context, pos);
    }
 
 private:

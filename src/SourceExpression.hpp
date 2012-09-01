@@ -287,10 +287,14 @@ public:
 
    virtual CounterReference<VariableType> getType() const;
 
-   virtual SourceExpression::Pointer makeExpressionFunction
-   (std::vector<CounterPointer<VariableType> > const &types);
+   SourceExpression::Pointer makeExpressionFunction(
+      std::vector<CounterPointer<VariableType> > const &types);
+   virtual SourceExpression::Pointer makeExpressionFunction(
+      std::vector<CounterPointer<VariableType> > const &types,
+      std::vector<CounterPointer<ObjectExpression> > const &objs);
 
    virtual CounterPointer<ObjectExpression> makeObject() const;
+   virtual CounterPointer<ObjectExpression> makeObjectPartial() const;
 
    void makeObjects(ObjectVector *objects, VariableData *dst);
 
