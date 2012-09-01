@@ -302,6 +302,39 @@ SRCEXPDS_KEYWORD_DEFN(linespec)
 }
 
 //
+// SourceExpressionDS::make_keyword_literal
+//
+SRCEXPDS_KEYWORD_DEFN(literal)
+{
+   (void)in;
+
+   ObjectExpression::Pointer obj;
+   SourceVariable::Pointer var;
+   VariableType::Pointer type;
+
+   if(tok->data == "true")
+   {
+      obj = ObjectExpression::create_value_int(1, tok->pos);
+      type = VariableType::get_bt_bit_hrd();
+   }
+   else if(tok->data == "false")
+   {
+      obj = ObjectExpression::create_value_int(0, tok->pos);
+      type = VariableType::get_bt_bit_hrd();
+   }
+   else if(tok->data == "nullptr")
+   {
+      obj = ObjectExpression::create_value_uns(0, tok->pos);
+      type = VariableType::get_bt_ptr_nul();
+   }
+   else
+      Error(tok->pos, "unknown keyword literal '%s'", tok->data.c_str());
+
+   var = SourceVariable::create_literal(type, obj, tok->pos);
+   return create_value_variable(var, context, tok->pos);
+}
+
+//
 // SourceExpressionDS::make_keyword_namespace
 //
 SRCEXPDS_KEYWORD_DEFN(namespace)

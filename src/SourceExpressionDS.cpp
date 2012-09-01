@@ -106,6 +106,7 @@ void SourceExpressionDS::init()
    expr_keyword["__extfunc"]  = make_keyword_function;
    expr_keyword["__extscript"]= make_keyword_script;
    expr_keyword["__extvar"]   = make_keyword_variable;
+   expr_keyword[  "false"]    = make_keyword_literal;
    expr_keyword[  "for"]      = make_keyword_for;
    expr_keyword["__function"] = make_keyword_function;
    expr_keyword[  "goto"]     = make_keyword_goto;
@@ -118,6 +119,7 @@ void SourceExpressionDS::init()
    expr_keyword["__linespec"] = make_keyword_linespec;
    expr_keyword[  "namespace"]= make_keyword_namespace;
    expr_keyword["__native"]   = make_keyword_linespec;
+   expr_keyword[  "nullptr"]  = make_keyword_literal;
    expr_keyword["__ocode"]    = make_keyword_ocode;
    expr_keyword["__output"]   = make_keyword_output;
    expr_keyword["__printf"]   = make_keyword_printf;
@@ -126,6 +128,7 @@ void SourceExpressionDS::init()
    expr_keyword[  "sizeof"]   = make_keyword_sizeof;
    expr_keyword[  "switch"]   = make_keyword_switch;
    expr_keyword["__symbol"]   = make_keyword_symbol;
+   expr_keyword[  "true"]     = make_keyword_literal;
    expr_keyword["__typestr"]  = make_keyword_typestr;
    expr_keyword["__variable"] = make_keyword_variable;
    expr_keyword[  "while"]    = make_keyword_while;
