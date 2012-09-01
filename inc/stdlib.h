@@ -56,7 +56,7 @@ __library("libDS");
 // NULL
 //
 #ifndef NULL
-#define NULL nullptr
+#define NULL 0
 #endif
 
 //

@@ -33,11 +33,7 @@
 // NULL
 //
 #ifndef NULL
-# ifdef __LANG_C__
-#  define NULL 0
-# else
-#  define NULL nullptr
-# endif
+#define NULL 0
 #endif
 
 //
