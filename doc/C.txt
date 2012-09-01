@@ -819,10 +819,8 @@ Printf Expression
 ===========================================================
 
   printf-expression:
-    <__printf> ( string-literal )
-    <__printf> ( string-literal , argument-expression-list )
-    <__printf> ( printf-specifier , string-literal )
-    <__printf> ( printf-specifier , string-literal , argument-expression-list )
+    <__printf> printf-specifier(opt) ( string-literal )
+    <__printf> printf-specifier(opt) ( string-literal , argument-expression-list )
 
   printf-specifier:
     <print>

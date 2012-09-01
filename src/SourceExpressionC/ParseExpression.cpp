@@ -125,21 +125,15 @@ SRCEXPC_PARSE_DEFN_HALF(Primary)
 
       // printf-expression
 
-      // __printf ( printf-specifier , string-literal )
-      // __printf ( printf-specifier , string-literal , expression-list )
-      // __printf ( string-literal )
-      // __printf ( string-literal , expression-list )
+      // __printf printf-specifier(opt) ( string-literal )
+      // __printf printf-specifier(opt) ( string-literal , expression-list )
       if(tok->data == "__printf")
       {
-         // (
-         in->get(SourceTokenC::TT_PAREN_O);
-
-         // printf-specifier ,
+         // printf-specifier
          std::string type;
          if(in->peekType(SourceTokenC::TT_NAM))
          {
             type = in->get()->data;
-            in->get(SourceTokenC::TT_COMMA);
 
             if(type == "print" || type == "__print" || type == "__print__")
                type = "__printf_print";
@@ -163,10 +157,13 @@ SRCEXPC_PARSE_DEFN_HALF(Primary)
                Error(tok->pos, "unrecognized printf-specifier '%s'", type.c_str());
          }
 
+         // (
+         in->get(SourceTokenC::TT_PAREN_O);
+
          // string-literal
          std::string format = in->get(SourceTokenC::TT_STR)->data;
 
-         // expression-list
+         // argument-expression-list
          Vector exprs;
          while(in->dropType(SourceTokenC::TT_COMMA))
             exprs.push_back(ParseAssignment(in, context));
