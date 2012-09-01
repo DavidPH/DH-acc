@@ -40,8 +40,8 @@
 #define TYPE_BASE_INT    2
 #define TYPE_BASE_FLOAT  3
 #define TYPE_BASE_DOUBLE 4
-#define TYPE_BASE_FIXED  5
-#define TYPE_BASE_REAL   6
+#define TYPE_BASE_FRACT  5
+#define TYPE_BASE_ACCUM  6
 
 
 //----------------------------------------------------------------------------|
@@ -103,7 +103,8 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
 
    if(tok->data != "char"     && tok->data != "int"      &&
       tok->data != "float"    && tok->data != "double"   &&
-      tok->data != "__real"   && tok->data != "__fixed"  &&
+      tok->data != "_Fract"   && tok->data != "_Accum"   &&
+      tok->data != "_Sat"     && tok->data != "__fixed"  &&
       tok->data != "short"    && tok->data != "long"     &&
       tok->data != "signed"   && tok->data != "unsigned" &&
       tok->data != "_Complex" && tok->data != "_Imaginary")
@@ -112,6 +113,7 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
    int typeBase  = 0;
    int typeCmplx = 0;
    int typeLong  = 0;
+   int typeSat   = 0;
    int typeShort = 0;
    int typeSign  = 0;
 
@@ -129,11 +131,14 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
       else if (tok->data == "double" && !typeBase)
          typeBase = TYPE_BASE_DOUBLE;
 
-      else if (tok->data == "__fixed" && !typeBase)
-         typeBase = TYPE_BASE_FIXED;
+      else if(tok->data == "_Fract" && !typeBase)
+         typeBase = TYPE_BASE_FRACT;
 
-      else if (tok->data == "__real" && !typeBase)
-         typeBase = TYPE_BASE_REAL;
+      else if((tok->data == "_Accum" || tok->data == "__fixed") && !typeBase)
+         typeBase = TYPE_BASE_ACCUM;
+
+      else if(tok->data == "_Sat" && !typeSat)
+         typeSat = 1;
 
       else if(tok->data == "_Complex" && !typeCmplx)
          typeCmplx = 2;
@@ -160,12 +165,13 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
       tok = in->get();
    }
 
+   // Default to int.
+   if(!typeBase) typeBase = TYPE_BASE_INT;
+   if(typeBase == TYPE_BASE_DOUBLE) typeBase = TYPE_BASE_FLOAT, ++typeLong;
+
    if(typeShort && typeLong) Error(tok->pos, "short long");
    if(typeShort > 2) Error(tok->pos, "short short short");
    if(typeLong  > 2) Error(tok->pos, "long long long");
-
-   // Default to int. Except for _Complex or _Imaginary, then default to double.
-   if(!typeBase) typeBase = typeCmplx ? TYPE_BASE_DOUBLE : TYPE_BASE_INT;
 
    VariableType::BasicType bt;
 
@@ -197,8 +203,6 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
          bt = VariableType::BT_INT; break;
       }
 
-   case TYPE_BASE_DOUBLE:
-      ++typeLong;
    case TYPE_BASE_FLOAT:
       if(typeSign > 0) Error(tok->pos, "unsigned float");
       if(typeSign < 0) Error(tok->pos, "signed float");
@@ -209,26 +213,45 @@ static VariableType::Pointer make_basic(SourceTokenC::Reference tok, SourceToken
       if(typeLong  == 2) {bt = VariableType::BT_FLT_LL; break;}
       bt = VariableType::BT_FLT; break;
 
-   case TYPE_BASE_FIXED:
-      if(typeSign > 0) Error(tok->pos, "unsigned fixed");
-      if(typeSign < 0) Error(tok->pos, "signed fixed");
+   case TYPE_BASE_ACCUM:
+      if(typeSign > 0)
+      {
+         if(typeShort == 2) {bt = VariableType::BT_ACC_HH; break;}
+         if(typeShort == 1) {bt = VariableType::BT_ACC_H;  break;}
+         if(typeLong  == 1) {bt = VariableType::BT_ACC_L;  break;}
+         if(typeLong  == 2) {bt = VariableType::BT_ACC_LL; break;}
+         bt = VariableType::BT_ACC; break;
+      }
+      else
+      {
+         if(typeShort == 2) {bt = VariableType::BT_FIX_HH; break;}
+         if(typeShort == 1) {bt = VariableType::BT_FIX_H;  break;}
+         if(typeLong  == 1) {bt = VariableType::BT_FIX_L;  break;}
+         if(typeLong  == 2) {bt = VariableType::BT_FIX_LL; break;}
+         bt = VariableType::BT_FIX; break;
+      }
 
-      if(typeShort == 2) {bt = VariableType::BT_FIX_HH; break;}
-      if(typeShort == 1) {bt = VariableType::BT_FIX_H;  break;}
-      if(typeLong  == 1) {bt = VariableType::BT_FIX_L;  break;}
-      if(typeLong  == 2) {bt = VariableType::BT_FIX_LL; break;}
-      bt = VariableType::BT_FIX; break;
-
-   case TYPE_BASE_REAL:
-      if(typeSign > 0) Error(tok->pos, "unsigned real");
-      if(typeSign < 0) Error(tok->pos, "signed real");
-
-      if(typeShort == 2) {bt = VariableType::BT_FIX_HH; break;}
-      if(typeShort == 1) {bt = VariableType::BT_FIX_H;  break;}
-      if(typeLong  == 1) {bt = VariableType::BT_FIX_L;  break;}
-      if(typeLong  == 2) {bt = VariableType::BT_FIX_LL; break;}
-      bt = VariableType::BT_FIX; break;
+   case TYPE_BASE_FRACT:
+      if(typeSign > 0)
+      {
+         if(typeShort == 2) {bt = VariableType::BT_ANG_HH; break;}
+         if(typeShort == 1) {bt = VariableType::BT_ANG_H;  break;}
+         if(typeLong  == 1) {bt = VariableType::BT_ANG_L;  break;}
+         if(typeLong  == 2) {bt = VariableType::BT_ANG_LL; break;}
+         bt = VariableType::BT_ANG; break;
+      }
+      else
+      {
+         if(typeShort == 2) {bt = VariableType::BT_FRA_HH; break;}
+         if(typeShort == 1) {bt = VariableType::BT_FRA_H;  break;}
+         if(typeLong  == 1) {bt = VariableType::BT_FRA_L;  break;}
+         if(typeLong  == 2) {bt = VariableType::BT_FRA_LL; break;}
+         bt = VariableType::BT_FRA; break;
+      }
    }
+
+   if(typeSat)
+      return VariableType::get_bt_sat(bt);
 
    switch(typeCmplx)
    {
@@ -356,7 +379,8 @@ bool SourceExpressionDS::is_type(SourceTokenizerC *in, SourceTokenC *_tok,
 
       if(tok->data == "char"     || tok->data == "int"      ||
          tok->data == "float"    || tok->data == "double"   ||
-         tok->data == "__real"   || tok->data == "__fixed"  ||
+         tok->data == "_Fract"   || tok->data == "_Accum"   ||
+         tok->data == "_Sat"     || tok->data == "__fixed"  ||
          tok->data == "short"    || tok->data == "long"     ||
          tok->data == "signed"   || tok->data == "unsigned" ||
          tok->data == "_Complex" || tok->data == "_Imaginary")
