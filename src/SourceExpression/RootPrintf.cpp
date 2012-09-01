@@ -166,6 +166,7 @@ private:
          break;
 
       case 'I':
+         Warn_NP("%%I specifier is deprecated; use %%k instead");
          makeExpr(objects, VariableType::get_bt_fix());
          objects->addToken(OCODE_ACSP_NUM_DEC_X);
          break;
@@ -194,6 +195,11 @@ private:
       case 'i':
          makeExpr(objects, VariableType::get_bt_int());
          objects->addToken(OCODE_ACSP_NUM_DEC_I);
+         break;
+
+      case 'k':
+         makeExpr(objects, VariableType::get_bt_fix());
+         objects->addToken(OCODE_ACSP_NUM_DEC_X);
          break;
 
       case 'o':
