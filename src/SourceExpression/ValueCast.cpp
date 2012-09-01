@@ -391,17 +391,17 @@ bool SourceExpression_ValueCast::canMakeObject() const
          return false;
 
       // Can't do compile-time auto*->far*.
-      if(thisST == STORE_NONE && exprST == STORE_AUTO)
+      if(thisST == STORE_FAR && exprST == STORE_AUTO)
          return false;
 
       // Can't do compile-time string*->far*.
-      if(thisST == STORE_NONE && exprST == STORE_STRING)
+      if(thisST == STORE_FAR && exprST == STORE_STRING)
          return false;
    }
 
    // Can't do compile-time __string->far*.
    if(thisBT == VariableType::BT_PTR && exprBT == VariableType::BT_STR &&
-      thisType->getReturn()->getStoreType() == STORE_NONE)
+      thisType->getReturn()->getStoreType() == STORE_FAR)
       return false;
 
    return expr->canMakeObject();

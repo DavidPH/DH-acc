@@ -737,7 +737,7 @@ SourceExpressionC::Qualifier SourceExpressionC::ParseQualifier(SRCEXPC_PARSE_ARG
    // address-space-name
 
    if(in->dropType(SourceTokenC::TT_NAM, "__far"))
-      return STORE_NONE;
+      return STORE_FAR;
 
    if(in->dropType(SourceTokenC::TT_NAM, "__near"))
       return STORE_STATIC;

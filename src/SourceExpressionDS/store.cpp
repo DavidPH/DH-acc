@@ -107,7 +107,7 @@ StoreType SourceExpressionDS::make_store(SourceTokenizerC *in,
    }
 
    if(typeTok->data == "__far")
-      return STORE_NONE;
+      return STORE_FAR;
 
    if(typeTok->data == "__near")
       return STORE_STATIC;

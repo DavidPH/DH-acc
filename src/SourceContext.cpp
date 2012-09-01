@@ -161,6 +161,7 @@ void SourceContext::addCount(int count, StoreType store)
    switch (store)
    {
    case STORE_NONE:
+   case STORE_FAR:
    case STORE_STATIC:
    case STORE_CONST:
    case STORE_MAPREGISTER:
@@ -260,16 +261,7 @@ void SourceContext::addLimit(int limit, StoreType store)
 {
    switch (store)
    {
-   case STORE_NONE:
-   case STORE_STATIC:
-   case STORE_CONST:
-   case STORE_MAPREGISTER:
-   case STORE_WORLDREGISTER:
-   case STORE_GLOBALREGISTER:
-   case STORE_MAPARRAY:
-   case STORE_WORLDARRAY:
-   case STORE_GLOBALARRAY:
-   case STORE_STRING:
+   default:
       break;
 
    case STORE_AUTO:
@@ -310,6 +302,7 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis)
    switch (store)
    {
    case STORE_NONE:
+   case STORE_FAR:
    case STORE_CONST:
    case STORE_STRING:
       break;
@@ -375,6 +368,7 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis,
    switch (store)
    {
    case STORE_NONE:
+   case STORE_FAR:
    case STORE_CONST:
    case STORE_STRING:
       break;
@@ -529,16 +523,7 @@ int SourceContext::getCount(StoreType store) const
 {
    switch (store)
    {
-   case STORE_NONE:
-   case STORE_STATIC:
-   case STORE_CONST:
-   case STORE_MAPREGISTER:
-   case STORE_WORLDREGISTER:
-   case STORE_GLOBALREGISTER:
-   case STORE_MAPARRAY:
-   case STORE_WORLDARRAY:
-   case STORE_GLOBALARRAY:
-   case STORE_STRING:
+   default:
       return 0;
 
    case STORE_AUTO:
@@ -762,16 +747,7 @@ int SourceContext::getLimit(StoreType store) const
 {
    switch (store)
    {
-   case STORE_NONE:
-   case STORE_STATIC:
-   case STORE_CONST:
-   case STORE_MAPREGISTER:
-   case STORE_WORLDREGISTER:
-   case STORE_GLOBALREGISTER:
-   case STORE_MAPARRAY:
-   case STORE_WORLDARRAY:
-   case STORE_GLOBALARRAY:
-   case STORE_STRING:
+   default:
       return 0;
 
    case STORE_AUTO:
@@ -875,16 +851,7 @@ SourceVariable::Pointer SourceContext::getVariable
       {
          switch (varVars[i]->getStoreType())
          {
-         case STORE_NONE:
-         case STORE_STATIC:
-         case STORE_CONST:
-         case STORE_MAPREGISTER:
-         case STORE_WORLDREGISTER:
-         case STORE_GLOBALREGISTER:
-         case STORE_MAPARRAY:
-         case STORE_WORLDARRAY:
-         case STORE_GLOBALARRAY:
-         case STORE_STRING:
+         default:
             return varVars[i];
 
          case STORE_AUTO:

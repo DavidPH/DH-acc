@@ -32,6 +32,7 @@
 
 static std::string const store_name[] =
 {
+   "",
    "far",
    "near",
    "auto",

@@ -59,6 +59,9 @@ SourceVariable::SourceVariable(std::string const &_nameSrc, VariableType *_type,
    switch (store)
    {
    case STORE_NONE:
+      Error_NP("no-storage variable");
+
+   case STORE_FAR:
       Error_NP("far-storage variable");
 
    case STORE_MAPARRAY:
@@ -101,6 +104,9 @@ VariableData::Pointer SourceVariable::getData() const
    {
    case STORE_NONE:
       Error_NP("STORE_NONE");
+
+   case STORE_FAR:
+      Error_NP("STORE_FAR");
 
    case STORE_STATIC:
       return VariableData::create_static(size, address);

@@ -108,7 +108,7 @@ void odata_set_strings(std::vector<int> &strings, VariableType const *type)
 
       switch(type->getReturn()->getStoreType())
       {
-      case STORE_NONE:
+      case STORE_FAR:
          strings.push_back(false);
          strings.push_back(false);
          break;

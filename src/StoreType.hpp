@@ -37,6 +37,7 @@
 enum StoreType
 {
    STORE_NONE,
+   STORE_FAR,
    STORE_STATIC,
    STORE_AUTO,
    STORE_CONST,

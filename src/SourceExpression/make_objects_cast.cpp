@@ -264,7 +264,7 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
 
    // String-to-far*.
    if(srcBT == VariableType::BT_STR && dstBT == VariableType::BT_PTR &&
-      dstType->getReturn()->getStoreType() == STORE_NONE)
+      dstType->getReturn()->getStoreType() == STORE_FAR)
    {
       BAD_CAST();
    }
@@ -291,7 +291,7 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
    {
       // OK, so for the purposes of this block there are three types of pointers.
       // A "near" pointer is basically an old-style, storage-specific pointer.
-      // A "far" pointer is a STORE_NONE pointer. And a "string" pointer is a
+      // A "far" pointer is a STORE_FAR pointer. And a "string" pointer is a
       // STORE_STRING pointer (surprisingly enough).
 
       StoreType dstST = dstType->getReturn()->getStoreType();
@@ -309,11 +309,11 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
       ObjectExpression::Reference objMask = ObjectExpression::create_value_uns(0xFFFFFFFF, pos);
 
       // Cast from far to near is pure truncation!
-      if(srcST == STORE_NONE && dstNear)
+      if(srcST == STORE_FAR && dstNear)
          return ObjectExpression::create_binary_and(obj, objMask, pos);
 
       // Casting from near to far.
-      if(srcNear && dstST == STORE_NONE)
+      if(srcNear && dstST == STORE_FAR)
       {
          biguint ptrBase;
 
@@ -510,7 +510,7 @@ void SourceExpression::make_objects_memcpy_cast
 
    // String-to-far*.
    if(srcBT == VariableType::BT_STR && dstBT == VariableType::BT_PTR &&
-      dstType->getReturn()->getStoreType() == STORE_NONE)
+      dstType->getReturn()->getStoreType() == STORE_FAR)
    {
       tmpStr = context->getTempVar(0);
 
@@ -531,7 +531,7 @@ void SourceExpression::make_objects_memcpy_cast
 
    // Far*-to-string.
    if(dstBT == VariableType::BT_STR && srcBT == VariableType::BT_PTR &&
-      srcType->getReturn()->getStoreType() == STORE_NONE)
+      srcType->getReturn()->getStoreType() == STORE_FAR)
    {
       objects->addToken(OCODE_GET_IMM,  objects->getValue(0xC0000000));
       objects->addToken(OCODE_AND_STK_U);
@@ -572,7 +572,7 @@ void SourceExpression::make_objects_memcpy_cast
          goto cast_done;
 
       // Cast from far to near is pure truncation!
-      if(srcST == STORE_NONE && dstNear)
+      if(srcST == STORE_FAR && dstNear)
       {
          objects->addToken(OCODE_STK_SWAP);
          objects->addToken(OCODE_STK_DROP);
@@ -580,7 +580,7 @@ void SourceExpression::make_objects_memcpy_cast
       }
 
       // Near to far.
-      if(srcNear && dstST == STORE_NONE)
+      if(srcNear && dstST == STORE_FAR)
       {
          switch(srcST)
          {
@@ -624,7 +624,7 @@ void SourceExpression::make_objects_memcpy_cast
       }
 
       // String to far.
-      if(srcST == STORE_STRING && dstST == STORE_NONE)
+      if(srcST == STORE_STRING && dstST == STORE_FAR)
       {
          label = context->makeLabel();
 
@@ -663,7 +663,7 @@ void SourceExpression::make_objects_memcpy_cast
       }
 
       // Far to string.
-      if(srcST == STORE_NONE && dstST == STORE_STRING)
+      if(srcST == STORE_FAR && dstST == STORE_STRING)
       {
          tmpStr = context->getTempVar(0);
          tmpOff = context->getTempVar(1);

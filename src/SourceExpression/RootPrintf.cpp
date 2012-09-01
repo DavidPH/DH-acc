@@ -316,7 +316,7 @@ private:
 
       // For string* or custom print rules, cast to far*.
       if(data.flags || data.width || data.prec || argStore == STORE_STRING)
-         argStore = STORE_NONE;
+         argStore = STORE_FAR;
 
       argType = argType->getReturn();
       argType = VariableType::get_bt_chr()
@@ -326,7 +326,7 @@ private:
       argExpr = create_value_cast_implicit(argExpr, argType, context, pos);
 
       // Special handling for far*.
-      if(argStore == STORE_NONE)
+      if(argStore == STORE_FAR)
       {
          makeData(objects, data);
          argExpr->makeObjects(objects, tmp);
@@ -344,6 +344,7 @@ private:
          break;
 
       case STORE_NONE:
+      case STORE_FAR:
       case STORE_AUTO:
       case STORE_CONST:
       case STORE_STRING:

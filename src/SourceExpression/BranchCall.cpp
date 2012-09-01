@@ -129,7 +129,7 @@ SourceExpression_BranchCall::SourceExpression_BranchCall
                if(option_near_pointers)
                   argType = argType->getReturn()->setStorage(STORE_STATIC)->getPointer();
                else
-                  argType = argType->getReturn()->setStorage(STORE_NONE)->getPointer();
+                  argType = argType->getReturn()->setStorage(STORE_FAR)->getPointer();
             }
             break;
 

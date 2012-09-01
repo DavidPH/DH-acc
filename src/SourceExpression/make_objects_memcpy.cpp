@@ -138,7 +138,7 @@ static void make_objects_literal
 
       switch(type->getReturn()->getStoreType())
       {
-      case STORE_NONE:
+      case STORE_FAR:
          objects->addToken(OCODE_GET_IMM, ObjectExpression::
             create_binary_rsh(elem, objects->getValue(32), pos));
          objects->addToken(OCODE_GET_IMM, elem);

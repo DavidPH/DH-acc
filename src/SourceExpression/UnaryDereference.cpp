@@ -86,6 +86,9 @@ public:
       switch (type->getStoreType())
       {
       case STORE_NONE:
+         Error_NP("STORE_NONE");
+
+      case STORE_FAR:
          address = ObjectExpression::create_value_int(0, pos);
          return VariableData::create_farptr(size, address, expr);
 

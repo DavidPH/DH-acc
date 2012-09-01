@@ -127,6 +127,13 @@ static std::string const basic_names[] =
 
 
 //----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+extern bool option_near_pointers;
+
+
+//----------------------------------------------------------------------------|
 // Static Functions                                                           |
 //
 
@@ -270,6 +277,7 @@ static std::ostream &operator << (std::ostream &out, VariableType const *type)
    case STORE_NONE:
       break;
 
+   case STORE_FAR:
    case STORE_STATIC:
    case STORE_AUTO:
    case STORE_CONST:
@@ -616,6 +624,15 @@ VariableType::Reference VariableType::getPointer()
 {
    if (typePtr) return static_cast<Reference>(typePtr);
 
+   // Pointers shall not have no storage.
+   if(store == STORE_NONE)
+   {
+      if(option_near_pointers)
+         return setStorage(STORE_STATIC)->getPointer();
+      else
+         return setStorage(STORE_FAR)->getPointer();
+   }
+
    typePtr = new VariableType(BT_PTR);
 
    typePtr->typeRet = Reference(this);
@@ -792,6 +809,7 @@ void VariableType::getNameMangled(std::string &out) const
    switch (store)
    {
    case STORE_NONE: break;
+   case STORE_FAR:            out += "sF"; break;
    case STORE_STATIC:         out += "sS"; break;
    case STORE_AUTO:           out += "sA"; break;
    case STORE_CONST:          out += "sC"; break;
@@ -885,7 +903,7 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
       if(is_bt_function(typeRet->basic))
          return typeRet->getSize(pos);
 
-      if(typeRet->store == STORE_NONE || typeRet->store == STORE_STRING)
+      if(typeRet->store == STORE_FAR || typeRet->store == STORE_STRING)
          return 2;
 
       return 1;
@@ -1882,10 +1900,10 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
 
          // Implicit conversion to far pointer is OK.
          // As long as it's from a type supported for far pointers, of course.
-         if(dstST == STORE_NONE && srcST != STORE_REGISTER &&
+         if(dstST == STORE_FAR && srcST != STORE_REGISTER &&
             srcST != STORE_MAPREGISTER && srcST != STORE_WORLDREGISTER &&
             srcST != STORE_GLOBALREGISTER && srcST != STORE_MAPARRAY)
-            return get_cast(dst, srcR->setStorage(STORE_NONE)->getPointer(), CAST_POINT);
+            return get_cast(dst, srcR->setStorage(STORE_FAR)->getPointer(), CAST_POINT);
 
          // Also for auto pointer to static pointer.
          if(srcST == STORE_AUTO && dstST == STORE_STATIC)

@@ -137,7 +137,7 @@ protected:
          StoreType store = type->getReturn()->getStoreType();
          ObjectExpression::Pointer address = data->address;
 
-         if(store == STORE_NONE || store == STORE_STRING)
+         if(store == STORE_FAR || store == STORE_STRING)
             address = objects->getValueAdd(address, 1);
 
          switch(data->type)
