@@ -79,14 +79,20 @@ SourceExpression::Pointer SourceExpressionC::ParseFloat(std::string const &value
 
    // Parse fractional part, if any.
    bigreal valF = 0;
-   if(*str == '.') for(++str; *str; ++str)
+   if(*str == '.')
    {
-      int i = ParseNumber(*str);
+      for(++str; *str; ++str)
+      {
+         int i = ParseNumber(*str);
 
-      if(0 > i || i >= base) break;
+         if(0 > i || i >= base) break;
+      }
 
-      valF += i;
-      valF /= base;
+      for(char const *s = str; *--s != '.';)
+      {
+         valF += ParseNumber(*s);
+         valF /= base;
+      }
    }
 
    // Parse exponent part, if any.
