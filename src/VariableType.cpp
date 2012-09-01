@@ -1770,10 +1770,33 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
       if(is_bt_arithmetic(srcBT) && dstBT == BT_ENUM)
          return CAST_FORCE;
 
-      // block->array,struct
-      // FIXME: Need to check constituent types.
-      if(srcBT == BT_BLOCK && (dstBT == BT_ARR || dstBT == BT_STRUCT))
-         return CAST_CONVE;
+      // block->array
+      if(srcBT == BT_BLOCK && dstBT == BT_ARR)
+      {
+         CastType cast = exact;
+
+         Vector::const_iterator srcItr = src->types.begin(), srcEnd = src->types.end();
+         Reference              dstItr = dst->getReturn();
+
+         while(srcItr != srcEnd)
+            cast = std::max(get_cast(dstItr, *srcItr++), cast);
+
+         return cast;
+      }
+
+      // block->struct
+      if(srcBT == BT_BLOCK && dstBT == BT_STRUCT)
+      {
+         CastType cast = exact;
+
+         Vector::const_iterator srcItr = src->types.begin(), srcEnd = src->types.end();
+         Vector::const_iterator dstItr = dst->types.begin(), dstEnd = dst->types.end();
+
+         while(dstItr != dstEnd && srcItr != srcEnd)
+            cast = std::max(get_cast(*dstItr++, *srcItr++), cast);
+
+         return cast;
+      }
 
       // block->*
       if(srcBT == BT_BLOCK && dstBT != BT_BLOCK)
@@ -1872,7 +1895,7 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
    case BT_UNS_LL:
    case BT_VOID:
       // Should have been handled by the previous equality test...
-      return exact ? CAST_EXACT : CAST_PROMO;
+      return exact;
 
    case BT_CLX:
    case BT_CLX_IM:
@@ -1889,7 +1912,7 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
 
       // Should have been handled by the previous equality test...
       if(srcR == dstR)
-         return exact ? CAST_EXACT : CAST_POINT;
+         return exact;
 
       // Altering storage qualifiers must be explicit. (Not even const_cast.)
       if(srcR->getStoreType() != dstR->getStoreType() ||
