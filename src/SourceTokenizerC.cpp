@@ -318,8 +318,10 @@ void SourceTokenizerC::doCommand_define(SourceTokenC *)
          arg = getRaw();
       }
 
+      inStack.back()->disableQuote();
       for (char c; (c = inStack.back()->get()) != '\n';)
          data.second += c;
+      inStack.back()->enableQuote();
 
       inStack.back()->unget('\n');
 
@@ -331,8 +333,10 @@ void SourceTokenizerC::doCommand_define(SourceTokenC *)
    {
       std::string data;
 
+      inStack.back()->disableQuote();
       for (char c; (c = inStack.back()->get()) != '\n';)
          data += c;
+      inStack.back()->enableQuote();
 
       inStack.back()->unget('\n');
 

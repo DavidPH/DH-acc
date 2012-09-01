@@ -67,6 +67,10 @@ public:
    SourceStream(std::string const &filename, unsigned type);
    ~SourceStream();
 
+   void disableQuote() {doQuoteDouble = false; doQuoteSingle = false;}
+
+   void enableQuote() {doQuoteDouble = true; doQuoteSingle = true;}
+
    char get();
 
    long getColumn() const;
