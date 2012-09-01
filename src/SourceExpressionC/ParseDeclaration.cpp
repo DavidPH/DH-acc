@@ -74,6 +74,26 @@ SRCEXPC_PARSE_DEFN_EXT(Initializer, VariableType::Pointer &type, bool root)
 {
    SourcePosition pos = in->peek()->pos;
 
+   // char[] = ""
+   if(in->peekType(SourceTokenC::TT_STR) &&
+      type->getBasicType() == VariableType::BT_ARR &&
+      type->getReturn()->getBasicType() == VariableType::BT_CHR)
+   {
+      std::string data = in->get()->data; data += '\0';
+
+      VariableType::Pointer subType = type->getReturn();
+      Vector  exprs;
+
+      for(std::string::iterator itr = data.begin(), end = data.end(); itr != end; ++itr)
+      {
+         exprs.push_back(create_value_char(*itr, context, pos));
+      }
+
+      if(!type->getWidth()) type = type->getReturn()->getArray(exprs.size());
+
+      return create_value_block(exprs, context, pos);
+   }
+
    if(in->dropType(SourceTokenC::TT_BRACE_O))
    {
       // Bracketed array initializer.
