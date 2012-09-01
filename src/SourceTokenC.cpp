@@ -190,8 +190,19 @@ static void dequote(std::string &out, std::string const &in)
       out += "\\\"";
       break;
 
+   case '\n':
+      out += "\\n";
+      break;
+
    default:
-      out += *itr;
+      if(*itr < 0x20)
+      {
+         out += "\\x";
+         out += "0123456789ABCDEF"[*itr / 16 % 16];
+         out += "0123456789ABCDEF"[*itr      % 16];
+      }
+      else
+         out += *itr;
       break;
    }
 }
