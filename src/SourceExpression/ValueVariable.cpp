@@ -62,7 +62,7 @@ private:
 // Static Functions                                                           |
 //
 
-static SourceExpression::Pointer CreateFIX(bigsint data, VariableType *type, SRCEXP_EXPR_ARGS)
+static SourceExpression::Pointer CreateFIX(bigreal data, VariableType *type, SRCEXP_EXPR_ARGS)
 {
    ObjectExpression::Pointer varData = ObjectExpression::create_value_fix(data, pos);
 
@@ -71,7 +71,7 @@ static SourceExpression::Pointer CreateFIX(bigsint data, VariableType *type, SRC
    return SourceExpression::create_value_variable(var, context, pos);
 }
 
-static SourceExpression::Pointer CreateFLT(bigsint data, VariableType *type, SRCEXP_EXPR_ARGS)
+static SourceExpression::Pointer CreateFLT(bigreal data, VariableType *type, SRCEXP_EXPR_ARGS)
 {
    ObjectExpression::Pointer varData = ObjectExpression::create_value_flt(data, pos);
 
