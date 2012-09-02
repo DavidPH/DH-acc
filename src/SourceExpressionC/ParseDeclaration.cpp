@@ -275,7 +275,15 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
       std::string nameObj = context->makeNameObj(decl.name, linkage, paramTypes);
       std::string label = nameObj + "::$label";
 
-      if(decl.funcAttr.script)
+      ObjectExpression::Pointer obj;
+
+      if(decl.funcAttr.asmfun)
+         obj = ObjectExpression::create_value_ocs(decl.funcAttr.asmfunCode, pos);
+
+      else if(decl.funcAttr.lnspec || decl.funcAttr.native)
+         obj = ObjectExpression::create_value_int(decl.funcAttr.scriptAddr, pos);
+
+      else if(decl.funcAttr.script)
       {
          if(decl.funcAttr.scriptName.empty()) decl.funcAttr.scriptName = nameObj;
 
@@ -286,8 +294,11 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
       else
          ObjectData_Function::add(nameObj, label, paramSize, returnSize, NULL);
 
-      SourceFunction::Reference func = SourceFunction::FindFunction(
-         SourceVariable::create_constant(decl.name, decl.type, nameObj, pos));
+      SourceVariable::Pointer var;
+      if(obj) var = SourceVariable::create_constant(decl.name, decl.type,     obj, pos);
+      else    var = SourceVariable::create_constant(decl.name, decl.type, nameObj, pos);
+
+      SourceFunction::Reference func = SourceFunction::FindFunction(var);
 
       context->addFunction(func);
 

@@ -24,6 +24,7 @@
 #ifndef HPP_SourceExpressionC_
 #define HPP_SourceExpressionC_
 
+#include "ObjectCode.hpp"
 #include "ObjectData.hpp"
 #include "SourceExpression.hpp"
 #include "VariableType.hpp"
@@ -185,15 +186,20 @@ public:
       typedef ObjectData_Script::ScriptType ScriptType;
 
       FunctionAttributes()
-       : scriptAddr(-1), scriptFlag(0), scriptType(ObjectData_Script::ST_CLOSED), script(false)
+       : scriptAddr(-1), scriptFlag(0), scriptType(ObjectData_Script::ST_CLOSED),
+         asmfun(false), lnspec(false), native(false), script(false)
       {
       }
 
-      std::string scriptName;
-      bigsint     scriptAddr;
-      bigsint     scriptFlag;
-      ScriptType  scriptType;
-      bool        script : 1;
+      ObjectCodeSet asmfunCode;
+      std::string   scriptName;
+      bigsint       scriptAddr;
+      bigsint       scriptFlag;
+      ScriptType    scriptType;
+      bool          asmfun : 1;
+      bool          lnspec : 1;
+      bool          native : 1;
+      bool          script : 1;
    };
 
    //
@@ -250,6 +256,9 @@ public:
    static bool IsType(SRCEXPC_PARSE_ARG1);
 
    // Attributes.
+   static void ParseAttributeAsmfunc(FunctionAttributes &funcAttr, SRCEXPC_PARSE_ARG1);
+   static void ParseAttributeLinespec(FunctionAttributes &funcAttr, SRCEXPC_PARSE_ARG1);
+   static void ParseAttributeNative(FunctionAttributes &funcAttr, SRCEXPC_PARSE_ARG1);
    static void ParseAttributeScript(FunctionAttributes &funcAttr, SRCEXPC_PARSE_ARG1);
    static FunctionAttributes ParseFunctionAttributes(SRCEXPC_PARSE_ARG1);
 

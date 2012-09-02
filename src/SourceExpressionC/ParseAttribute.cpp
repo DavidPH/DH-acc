@@ -35,6 +35,57 @@
 //
 
 //
+// SourceExpressionC::ParseAttributeAsmfunc
+//
+void SourceExpressionC::ParseAttributeAsmfunc(FunctionAttributes &funcAttr, SRCEXPC_PARSE_ARG1)
+{
+   funcAttr.asmfun = true;
+
+   if(!in->dropType(SourceTokenC::TT_PAREN_O)) return;
+
+   SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
+   funcAttr.asmfunCode.ocode = ocode_get_code(tok->data, tok->pos);
+
+   if(in->dropType(SourceTokenC::TT_COMMA))
+   {
+      tok = in->get(SourceTokenC::TT_NAM);
+      funcAttr.asmfunCode.ocode_imm = ocode_get_code(tok->data, tok->pos);
+   }
+
+   in->get(SourceTokenC::TT_PAREN_C);
+}
+
+//
+// SourceExpressionC::ParseAttributeLinespec
+//
+void SourceExpressionC::ParseAttributeLinespec(FunctionAttributes &funcAttr, SRCEXPC_PARSE_ARG1)
+{
+   funcAttr.lnspec = true;
+
+   if(!in->dropType(SourceTokenC::TT_PAREN_O)) return;
+
+   SourceTokenC::Reference tok = in->get(SourceTokenC::TT_INT);
+   funcAttr.scriptAddr = ParseInt(tok->data, context, tok->pos)->makeObject()->resolveINT();
+
+   in->get(SourceTokenC::TT_PAREN_C);
+}
+
+//
+// SourceExpressionC::ParseAttributeNative
+//
+void SourceExpressionC::ParseAttributeNative(FunctionAttributes &funcAttr, SRCEXPC_PARSE_ARG1)
+{
+   funcAttr.native = true;
+
+   if(!in->dropType(SourceTokenC::TT_PAREN_O)) return;
+
+   SourceTokenC::Reference tok = in->get(SourceTokenC::TT_INT);
+   funcAttr.scriptAddr = ParseInt(tok->data, context, tok->pos)->makeObject()->resolveINT();
+
+   in->get(SourceTokenC::TT_PAREN_C);
+}
+
+//
 // SourceExpressionC::ParseAttributeScript
 //
 void SourceExpressionC::ParseAttributeScript(FunctionAttributes &funcAttr, SRCEXPC_PARSE_ARG1)
@@ -127,6 +178,15 @@ SourceExpressionC::FunctionAttributes SourceExpressionC::ParseFunctionAttributes
       if(!in->peekType(SourceTokenC::TT_PAREN_C)) do
       {
          SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
+
+         if(tok->data == "asmfunc" || tok->data == "__asmfunc" || tok->data == "__asmfunc__")
+            {ParseAttributeAsmfunc(funcAttr, in, context); continue;}
+
+         if(tok->data == "linespec" || tok->data == "__linespec" || tok->data == "__linespec__")
+            {ParseAttributeLinespec(funcAttr, in, context); continue;}
+
+         if(tok->data == "native" || tok->data == "__native" || tok->data == "__native__")
+            {ParseAttributeNative(funcAttr, in, context); continue;}
 
          if(tok->data == "script" || tok->data == "__script" || tok->data == "__script__")
             {ParseAttributeScript(funcAttr, in, context); continue;}

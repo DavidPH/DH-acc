@@ -703,7 +703,13 @@ void SourceExpressionC::ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_AR
 
       ParseDeclaratorSuffix(decl, in, context);
 
-      if(funcAttr.script)
+      if(funcAttr.asmfun)
+         decl.type = VariableType::get_bt_fun_asm(types, decl.type);
+      else if(funcAttr.lnspec)
+         decl.type = VariableType::get_bt_fun_lin(types, decl.type);
+      else if(funcAttr.native)
+         decl.type = VariableType::get_bt_fun_nat(types, decl.type);
+      else if(funcAttr.script)
       {
          if(funcAttr.scriptAddr == -2)
             decl.type = VariableType::get_bt_fun_sna(types, decl.type);

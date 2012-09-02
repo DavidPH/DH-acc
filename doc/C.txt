@@ -731,6 +731,46 @@ Implementation Extensions
 ===============================================================================
 
 ===========================================================
+Asmfunc Attribute
+===========================================================
+
+  asmfunc-attribute:
+    asmfunc-attribute-name
+    asmfunc-attribute-name ( identifier )
+    asmfunc-attribute-name ( identifier , identifier )
+
+  asmfunc-attribute-name:
+    <asmfunc>
+    <__asmfunc>
+    <__asmfunc__>
+
+===========================================================
+Linespec Attribute
+===========================================================
+
+  linespec-attribute:
+    linespec-attribute-name
+    linespec-attribute-name ( integer-constant )
+
+  linespec-attribute-name:
+    <linespec>
+    <__linespec>
+    <__linespec__>
+
+===========================================================
+Native Attribute
+===========================================================
+
+  native-attribute:
+    native-attribute-name
+    native-attribute-name ( integer-constant )
+
+  native-attribute-name:
+    <native>
+    <__native>
+    <__native__>
+
+===========================================================
 Script Attribute
 ===========================================================
 
@@ -800,6 +840,9 @@ Function Attributes
     function-attribute-list , function-attribute
 
   function-attribute:
+    asmfunc-attribute
+    linespec-attribute
+    native-attribute
     script-attribute
 
 ===========================================================
