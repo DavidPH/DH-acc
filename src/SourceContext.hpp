@@ -70,8 +70,8 @@ public:
    std::string addLabelCaseDefault(SourcePosition const & position);
    std::string addLabelGoto(std::string const &name, SourcePosition const &position);
 
-   void addVar(SourceVariable *var, bool externDef, bool externVis);
-   void addVar(SourceVariable *var, bool externDef, bool externVis, bigsint address);
+   void addVar(SourceVariable *var, LinkageSpecifier linkSpec, bool externDef);
+   void addVar(SourceVariable *var, LinkageSpecifier linkSpec, bool externDef, bigsint address);
 
    std::vector<bigsint> getCases(SourcePosition const & position) const;
 

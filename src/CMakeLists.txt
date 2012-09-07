@@ -14,9 +14,11 @@ add_executable(DH-acc
    BinaryTokenZDACS/make_tokens.cpp
    BinaryTokenZDACS/output.cpp
    BinaryTokenZDACS/write_ACSE.cpp
+   LinkSpec.cpp
    ObjectCode.cpp
    ObjectData.cpp
    ObjectData/Array.cpp
+   ObjectData/ArrayVar.cpp
    ObjectData/Auto.cpp
    ObjectData/Function.cpp
    ObjectData/Register.cpp

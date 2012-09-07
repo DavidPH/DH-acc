@@ -26,6 +26,7 @@
 
 #include "bignum.hpp"
 #include "Counter.hpp"
+#include "LinkSpec.hpp"
 
 #include <istream>
 #include <ostream>
@@ -49,60 +50,78 @@ struct ObjectData_Array
    typedef void (*IterFunc)(std::ostream *, ObjectData_Array const &);
 
 
+   std::vector<CounterPointer<ObjectExpression> > init;
    std::vector<int> strings;
    std::string name;
    bigsint number;
    bigsint size;
-   CounterPointer<ObjectExpression> init;
+   LinkageSpecifier linkage;
    bool externDef;
-   bool externVis;
-   bool meta;
 
 
-   static void add_map
-   (std::string const &name, VariableType const *type, bool externDef,
-    bool externVis);
+   static void AddMap(std::string const &name, LinkageSpecifier linkage,
+                      bool externDef, bigsint number = -1);
+   static void AddWorld(std::string const &name, LinkageSpecifier linkage,
+                        bool externDef, bigsint number = -1);
+   static void AddGlobal(std::string const &name, LinkageSpecifier linkage,
+                         bool externDef, bigsint number = -1);
 
-   static void add_map
-   (std::string const &name, VariableType const *type, bool externDef,
-    bool externVis, bigsint number);
+   static void GenerateSymbols();
 
-   static void add_world
-   (std::string const &name, VariableType const *type, bool externDef,
-    bool externVis);
+   static void IterateMap(IterFunc iterFunc, std::ostream *out);
+   static void IterateWorld(IterFunc iterFunc, std::ostream *out);
+   static void IterateGlobal(IterFunc iterFunc, std::ostream *out);
 
-   static void add_world
-   (std::string const &name, VariableType const *type, bool externDef,
-    bool externVis, bigsint number);
+   static void ReadObjects(std::istream *in);
 
-   static void add_global
-   (std::string const &name, VariableType const *type, bool externDef,
-    bool externVis);
+   static void WriteObjects(std::ostream *out);
+};
 
-   static void add_global
-   (std::string const &name, VariableType const *type, bool externDef,
-    bool externVis, bigsint number);
+//
+// ObjectData_ArrayVar
+//
+struct ObjectData_ArrayVar
+{
+   typedef void (*IterFunc)(std::ostream *, ObjectData_ArrayVar const &);
 
-   static void generate_symbols();
 
-   static bool ini_map(std::string const &name, ObjectExpression *ini);
+   std::vector<CounterPointer<ObjectExpression> > init;
+   std::vector<int> strings;
+   std::string array;
+   std::string name;
+   bigsint number;
+   bigsint size;
+   LinkageSpecifier linkage;
+   bool externDef;
 
-   static void iterate_map(IterFunc iterFunc, std::ostream *out);
-   static void iterate_world(IterFunc iterFunc, std::ostream *out);
-   static void iterate_global(IterFunc iterFunc, std::ostream *out);
 
-   static bool meta_map(std::string const &name);
-   static void meta_map(std::string const &name, bool meta);
+   static void AddMap(std::string const &array, std::string const &name,
+      VariableType const *type, LinkageSpecifier linkage, bool externDef,
+      bigsint number = -1);
+   static void AddWorld(std::string const &array, std::string const &name,
+      VariableType const *type, LinkageSpecifier linkage, bool externDef,
+      bigsint number = -1);
+   static void AddGlobal(std::string const &array, std::string const &name,
+      VariableType const *type, LinkageSpecifier linkage, bool externDef,
+      bigsint number = -1);
 
-   static bool meta_world(std::string const &name);
-   static void meta_world(std::string const &name, bool meta);
+   // Gets the name of the associated Array.
+   static std::string const &ArrayMap(std::string const &name);
+   static std::string const &ArrayWorld(std::string const &name);
+   static std::string const &ArrayGlobal(std::string const &name);
 
-   static bool meta_global(std::string const &name);
-   static void meta_global(std::string const &name, bool meta);
+   static void GenerateSymbols();
 
-   static void read_objects(std::istream *in);
+   static bool InitMap(std::string const &name, VariableType const *type,
+                       ObjectExpression *init);
 
-   static void write_objects(std::ostream *out);
+   static void IterateMap(IterFunc iterFunc, std::ostream *out);
+   static void IterateWorld(IterFunc iterFunc, std::ostream *out);
+   static void IterateGlobal(IterFunc iterFunc, std::ostream *out);
+
+   static void ReadObjects(std::istream *in);
+
+   static void WriteObjects(std::ostream *out);
 };
 
 //
@@ -368,6 +387,7 @@ extern bool option_named_scripts;
 void odata_set_strings(std::vector<int> &strings, VariableType const *type);
 
 extern void override_object(ObjectData_Array    *out, ObjectData_Array    const *in);
+extern void override_object(ObjectData_ArrayVar *out, ObjectData_Array    const *in);
 extern void override_object(ObjectData_Auto     *out, ObjectData_Auto     const *in);
 extern void override_object(ObjectData_Function *out, ObjectData_Function const *in);
 extern void override_object(ObjectData_Register *out, ObjectData_Register const *in);
@@ -376,6 +396,7 @@ extern void override_object(ObjectData_Static   *out, ObjectData_Static   const 
 extern void override_object(ObjectData_String   *out, ObjectData_String   const *in);
 
 extern void read_object(std::istream *in, ObjectData_Array    *out);
+extern void read_object(std::istream *in, ObjectData_ArrayVar *out);
 extern void read_object(std::istream *in, ObjectData_Auto     *out);
 extern void read_object(std::istream *in, ObjectData_Function *out);
 extern void read_object(std::istream *in, ObjectData_Register *out);
@@ -385,6 +406,7 @@ extern void read_object(std::istream *in, ObjectData_String   *out);
 extern void read_object(std::istream *in, ObjectData_Script::ScriptType *out);
 
 extern void write_object(std::ostream *out, ObjectData_Array    const *in);
+extern void write_object(std::ostream *out, ObjectData_ArrayVar const *in);
 extern void write_object(std::ostream *out, ObjectData_Auto     const *in);
 extern void write_object(std::ostream *out, ObjectData_Function const *in);
 extern void write_object(std::ostream *out, ObjectData_Register const *in);

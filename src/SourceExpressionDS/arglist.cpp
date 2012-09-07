@@ -145,7 +145,7 @@ void SourceExpressionDS::make_arglist(SourceTokenizerC *in,
          SourceVariable::Pointer argVar = SourceVariable::create_variable
             (argName, argType, argNameObject, argStore, pos);
 
-         args->context->addVar(argVar, false, false);
+         args->context->addVar(argVar, LINKAGE_INTERN, false);
       }
    }
 }

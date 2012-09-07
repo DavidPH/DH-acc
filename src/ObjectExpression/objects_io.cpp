@@ -145,7 +145,8 @@ void ObjectExpression::read_objects(std::istream *in, ObjectVector *objects)
    read_object(in, &symbol_table);
    read_object(in, &symbol_type_table);
 
-   ObjectData_Array::read_objects(in);
+   ObjectData_Array::ReadObjects(in);
+   ObjectData_ArrayVar::ReadObjects(in);
    ObjectData_Auto::read_objects(in);
    ObjectData_Function::read_objects(in);
    ObjectData_Register::read_objects(in);
@@ -169,7 +170,8 @@ void ObjectExpression::write_objects
    write_object(out, &symbol_table);
    write_object(out, &symbol_type_table);
 
-   ObjectData_Array::write_objects(out);
+   ObjectData_Array::WriteObjects(out);
+   ObjectData_ArrayVar::WriteObjects(out);
    ObjectData_Auto::write_objects(out);
    ObjectData_Function::write_objects(out);
    ObjectData_Register::write_objects(out);

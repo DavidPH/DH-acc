@@ -157,7 +157,7 @@ VariableType::Reference SourceExpressionC::ParseEnum(SRCEXPC_PARSE_ARG1)
          ObjectExpression::create_value_int(enumVal++, enumTok->pos);
 
       context->addVar(SourceVariable::create_constant(enumTok->data, enumType,
-         enumObj, enumTok->pos), false, true);
+         enumObj, enumTok->pos), LINKAGE_C, false);
 
       if(!in->dropType(SourceTokenC::TT_COMMA))
          break;

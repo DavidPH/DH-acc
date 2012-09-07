@@ -107,7 +107,7 @@ SRCEXPDS_KEYWORD_DEFN(constexpr)
    SourceVariable::Pointer var = SourceVariable::create_constant
       (name, type, data->makeObject(), tok->pos);
 
-   context->addVar(var, false, false);
+   context->addVar(var, LINKAGE_INTERN, false);
 
    return create_value_variable(var, context, tok->pos);
 }

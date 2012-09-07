@@ -134,10 +134,11 @@ void ObjectExpression::add_symbol
 //
 void ObjectExpression::do_deferred_allocation()
 {
+   ObjectData_ArrayVar::GenerateSymbols();
    ObjectData_Auto::generate_symbols();
    ObjectData_Register::generate_symbols();
-   // Array must be after Register.
-   ObjectData_Array::generate_symbols();
+   // Array must be after Register and ArrayVar.
+   ObjectData_Array::GenerateSymbols();
 
    // For ACS+, all the following allocation is done by the linker.
    if(Output == OUTPUT_ACSP) return;

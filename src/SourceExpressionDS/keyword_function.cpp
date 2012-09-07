@@ -167,7 +167,7 @@ static SourceExpression::Pointer make_func
       SourceVariable::Pointer funcFuncVar = SourceVariable::create_constant
          ("__func__", VariableType::get_bt_str(), funcFunc, tok->pos);
 
-      args.context->addVar(funcFuncVar, false, false);
+      args.context->addVar(funcFuncVar, LINKAGE_INTERN, false);
    }
 
    // funcVarType

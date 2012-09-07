@@ -390,11 +390,11 @@ static inline int _main()
    if (option_maparray_list_debug.handled)
    {
       if (option_maparray_list_debug.data == "-")
-         ObjectData_Array::iterate_map(dump_array_debug, &std::cout);
+         ObjectData_Array::IterateMap(dump_array_debug, &std::cout);
       else
       {
          std::ofstream ofs(option_maparray_list_debug.data.c_str());
-         ObjectData_Array::iterate_map(dump_array_debug, &ofs);
+         ObjectData_Array::IterateMap(dump_array_debug, &ofs);
       }
    }
 

@@ -68,20 +68,20 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
       iter->writeACS0(out);
 
    // AIMP - Map Array Imports
-   ObjectData_Array::iterate_map(write_ACSE_array_AIMP_counter, &chunkout);
+   ObjectData_Array::IterateMap(write_ACSE_array_AIMP_counter, &chunkout);
    write_ACSE_counter(&chunkout);
-   ObjectData_Array::iterate_map(write_ACSE_array_AIMP, &chunkout);
+   ObjectData_Array::IterateMap(write_ACSE_array_AIMP, &chunkout);
    write_ACSE_chunk(out, &chunkout, "AIMP");
 
    // AINI - Map Array Initialization
-   ObjectData_Array::iterate_map(write_ACSE_array_AINI, out);
+   ObjectData_Array::IterateMap(write_ACSE_array_AINI, out);
 
    // ARAY - Map Array Declarations
-   ObjectData_Array::iterate_map(write_ACSE_array_ARAY, &chunkout);
+   ObjectData_Array::IterateMap(write_ACSE_array_ARAY, &chunkout);
    write_ACSE_chunk(out, &chunkout, "ARAY");
 
    // ASTR - Map Array Strings
-   ObjectData_Array::iterate_map(write_ACSE_array_ASTR, &chunkout);
+   ObjectData_Array::IterateMap(write_ACSE_array_ASTR, &chunkout);
    write_ACSE_chunk(out, &chunkout, "ASTR");
 
    // FNAM - Function Names
@@ -99,7 +99,7 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
 
    // MEXP - Map Register Exports
    ObjectData_Register::iterate_map(write_ACSE_register_MEXP, NULL);
-   ObjectData_Array   ::iterate_map(write_ACSE_array_MEXP,    NULL);
+   ObjectData_Array   ::IterateMap(write_ACSE_array_MEXP,    NULL);
    write_ACSE_stringtable(&chunkout, false);
    write_ACSE_chunk(out, &chunkout, "MEXP");
 

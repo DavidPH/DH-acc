@@ -315,7 +315,7 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
       SourceVariable::Pointer var = SourceVariable::create_variable(decl.name,
          decl.type, nameObj, store, pos);
 
-      context->addVar(var, false, linkage != LINKAGE_INTERN);
+      context->addVar(var, linkage, false);
 
       SourceExpression::Pointer expr = create_value_variable(var, context, pos);
 
@@ -338,7 +338,7 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
             SourceVariable::Pointer isInitVar  = SourceVariable::create_variable("",
                isInitType, isInitName, store, pos);
 
-            context->addVar(isInitVar, false, false);
+            context->addVar(isInitVar, LINKAGE_INTERN, false);
 
             isInitExpr = create_value_variable(isInitVar, context, pos);
          }
@@ -369,7 +369,7 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
       SourceVariable::Pointer var = SourceVariable::create_variable(decl.name,
          decl.type, nameObj, store, pos);
 
-      context->addVar(var, spec.storage == SC_EXTERN, linkage != LINKAGE_INTERN);
+      context->addVar(var, linkage, spec.storage == SC_EXTERN);
 
       return create_value_variable(var, context, pos);
    }
@@ -499,7 +499,7 @@ SRCEXPC_PARSE_DEFN_EXT(Function, DeclarationSpecifiers const &spec, Declarator &
       StoreType store = param->spec.storage == SC_REGISTER ? STORE_REGISTER : STORE_AUTO;
 
       funcContext->addVar(SourceVariable::create_variable(nameSrc, type, nameObj,
-         store, pos), false, false);
+         store, pos), LINKAGE_INTERN, false);
 
       paramSize += type->getSize(pos);
       paramTypes.push_back(type->setStorage(store));
@@ -511,7 +511,8 @@ SRCEXPC_PARSE_DEFN_EXT(Function, DeclarationSpecifiers const &spec, Declarator &
 
    // __func__
    funcContext->addVar(SourceVariable::create_constant("__func__",
-      VariableType::get_bt_str(), ObjectData_String::add(decl.name), pos), false, false);
+      VariableType::get_bt_str(), ObjectData_String::add(decl.name), pos),
+      LINKAGE_INTERN, false);
 
    if(decl.funcAttr.script)
    {

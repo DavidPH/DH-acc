@@ -54,63 +54,57 @@ struct StoreData
 //
 static SourceExpression::Pointer add_var(SourceContext *context,
    LinkageSpecifier linkSpec, SourcePosition const &pos,
-   std::string const &nameSrc, std::string const &nameObj, VariableType *type,
-   StoreData store, ObjectExpression *addr, bool externDef, bool &meta)
+   std::string const &nameSrc, std::string &nameObj, VariableType *type,
+   StoreData store, ObjectExpression *addr, bool externDef,
+   SourceVariable::Pointer &var)
 {
-   bool externVis = linkSpec != LINKAGE_INTERN;
+   if(store.type == STORE_MAPARRAY || store.type == STORE_WORLDARRAY ||
+      store.type == STORE_GLOBALARRAY)
+   {
+      std::string nameArr = nameObj; nameObj += "$var";
+      var = SourceVariable::create_variable(nameSrc, type, nameObj, store.type, pos);
+      var->setNameArr(nameArr);
+   }
+   else
+      var = SourceVariable::create_variable(nameSrc, type, nameObj, store.type, pos);
 
-   SourceVariable::Pointer var = SourceVariable::create_variable(
-      nameSrc, type, nameObj, store.type, pos);
-
-   switch (store.type)
+   switch(store.type)
    {
    case STORE_MAPARRAY:
-   case STORE_WORLDARRAY:
-   case STORE_GLOBALARRAY:
-      if (store.area)
-         context->addVar(var, externDef, externVis, store.area->resolveUNS());
+      if(store.area)
+         ObjectData_Array::AddMap(var->nameArr, linkSpec, externDef, store.area->resolveUNS());
       else
-         context->addVar(var, externDef, externVis);
+         ObjectData_Array::AddMap(var->nameArr, linkSpec, externDef);
 
-      if (addr)
-         Error_P("cannot have offset for store-type %s",
-            make_string(store.type).c_str());
+      goto case_addvar;
 
-      break;
+   case STORE_WORLDARRAY:
+      if(store.area)
+         ObjectData_Array::AddWorld(var->nameArr, linkSpec, externDef, store.area->resolveUNS());
+      else
+         ObjectData_Array::AddWorld(var->nameArr, linkSpec, externDef);
 
+      goto case_addvar;
+
+   case STORE_GLOBALARRAY:
+      if(store.area)
+         ObjectData_Array::AddGlobal(var->nameArr, linkSpec, externDef, store.area->resolveUNS());
+      else
+         ObjectData_Array::AddGlobal(var->nameArr, linkSpec, externDef);
+
+      goto case_addvar;
 
    default:
-      if (store.area)
+      if(store.area)
          Error_P("cannot have store-area for store-type %s",
             make_string(store.type).c_str());
 
-      if (addr)
-         context->addVar(var, externDef, externVis, addr->resolveUNS());
+   case_addvar:
+      if(addr)
+         context->addVar(var, linkSpec, externDef, addr->resolveUNS());
       else
-         context->addVar(var, externDef, externVis);
+         context->addVar(var, linkSpec, externDef);
 
-      break;
-   }
-
-   // Determine if metadata can be used.
-   switch (store.type)
-   {
-   case STORE_MAPARRAY:
-      if (linkSpec == LINKAGE_ACS)
-         ObjectData_Array::meta_map(nameObj, meta=false);
-      break;
-
-   case STORE_WORLDARRAY:
-      if (linkSpec == LINKAGE_ACS)
-         ObjectData_Array::meta_world(nameObj, meta=false);
-      break;
-
-   case STORE_GLOBALARRAY:
-      if (linkSpec == LINKAGE_ACS)
-         ObjectData_Array::meta_global(nameObj, meta=false);
-      break;
-
-   default:
       break;
    }
 
@@ -256,6 +250,8 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
    std::string const &nameSrc, VariableType::Reference type, StoreData store,
    bool externDef)
 {
+   SourceVariable::Pointer var;
+
    ObjectExpression::Pointer addr;
    if (in->peekType(SourceTokenC::TT_AT))
    {
@@ -285,13 +281,11 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
       break;
    }
 
-   bool meta = true;
-
    // Generate expression (unless final type is determined later).
    SourceExpression::Pointer expr;
    if(!is_array_length_zero(type) && !is_void(type) && !is_autoptr(type))
       expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
-                     addr, externDef, meta);
+                     addr, externDef, var);
 
    // Variable initialization. (But not for external declaration.)
    if (!externDef && in->peekType(SourceTokenC::TT_EQUALS))
@@ -323,7 +317,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
          }
 
          expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
-                        addr, externDef, meta);
+                        addr, externDef, var);
       }
       // Initializer-determined array length.
       else if(is_array_length_zero(type))
@@ -347,7 +341,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
             Error_P("expected block or string");
 
          expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
-                        addr, externDef, meta);
+                        addr, externDef, var);
       }
       // Initializer-determined storage.
       else if(is_autoptr(type))
@@ -364,7 +358,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
          }
 
          expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
-                        addr, externDef, meta);
+                        addr, externDef, var);
       }
 
       // Generate initObj here in case one of the above rules alters initSrc.
@@ -382,28 +376,34 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
             goto case_static;
 
          ObjectData_Register::ini_map(nameObj, initObj);
+
          break;
 
       case STORE_MAPARRAY:
          if(!initObj)
             goto case_array;
 
-         if (ObjectData_Array::ini_map(nameObj, initObj))
-            break;
+         if(ObjectData_ArrayVar::InitMap(nameObj, type, initObj))
+            goto case_array;
+
+         break;
 
       case STORE_WORLDARRAY:
       case STORE_GLOBALARRAY:
       case_array:
-         if (!meta)
-            goto case_set;
+         {
+            // Generate source/object name
+            std::string initNameObj = nameObj + "$init";
 
-         // Generate expression. *(bool __maparray(...) *)0
-         initExpr = SourceExpression::create_value_int(0, context, pos);
-         initExpr = SourceExpression::create_value_cast_explicit
-            (initExpr, initType->setStorage(store.type, nameObj)->getPointer(),
-             context, pos);
-         initExpr = SourceExpression::create_unary_dereference
-            (initExpr, context, pos);
+            // Generate variable.
+            SourceVariable::Pointer initVar = SourceVariable::create_variable(
+               initNameObj, initType, initNameObj, store.type, pos);
+            initVar->nameArr = var->nameArr;
+            context->addVar(initVar, LINKAGE_INTERN, false);
+
+            // Generate expression.
+            initExpr = SourceExpression::create_value_variable(initVar, context, pos);
+         }
 
          goto case_init;
 
@@ -418,7 +418,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
          // Generate variable.
          SourceVariable::Pointer initVar = SourceVariable::create_variable
             (initNameSrc, initType, initNameObj, store.type, pos);
-         context->addVar(initVar, false, false);
+         context->addVar(initVar, LINKAGE_INTERN, false);
 
          // Generate expression.
          initExpr = SourceExpression::
@@ -454,7 +454,6 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
          break;
 
       default:
-      case_set:
          expr = exprSet;
          break;
       }
@@ -463,7 +462,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
    // If not done yet, add var now.
    if (!expr)
       expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
-                     addr, externDef, meta);
+                     addr, externDef, var);
 
    return expr;
 }

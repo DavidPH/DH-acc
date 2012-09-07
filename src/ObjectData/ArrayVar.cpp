@@ -17,7 +17,7 @@
 //
 //-----------------------------------------------------------------------------
 //
-// Object-level registerarray data.
+// Object-level array-storage variable data.
 //
 //-----------------------------------------------------------------------------
 
@@ -25,8 +25,6 @@
 
 #include "../ObjectExpression.hpp"
 #include "../object_io.hpp"
-#include "../option.hpp"
-#include "../SourceExpression.hpp"
 #include "../VariableType.hpp"
 
 #include <map>
@@ -36,30 +34,15 @@
 // Types                                                                      |
 //
 
-typedef std::map<std::string, ObjectData_Array> ArrayTable;
-typedef ArrayTable::iterator ArrayIter;
+typedef std::map<std::string, ObjectData_ArrayVar> ArrayVarTable;
+typedef ArrayVarTable::iterator ArrayVarIter;
 
 
 //----------------------------------------------------------------------------|
 // Static Variables                                                           |
 //
 
-static option::option_dptr<int> option_addr_array_handler
-('\0', "addr-array", "features",
- "Selects which global array to use for addressable variables. 0 by default.",
- NULL, &option_addr_array);
-
-static ArrayTable MapTable, WorldTable, GlobalTable;
-
-static std::set<bigsint> used;
-
-
-//----------------------------------------------------------------------------|
-// Global Variables                                                           |
-//
-
-int option_addr_array = 0;
-extern bool option_named_scripts;
+static ArrayVarTable MapTable, WorldTable, GlobalTable;
 
 
 //----------------------------------------------------------------------------|
@@ -69,16 +52,20 @@ extern bool option_named_scripts;
 //
 // Add
 //
-static void Add(ArrayTable &table, std::string const &name,
-                LinkageSpecifier linkage, bool externDef, bigsint number)
+static void Add(ArrayVarTable &table, std::string const &array,
+   std::string const &name, VariableType const *type, LinkageSpecifier linkage,
+   bool externDef, bigsint number)
 {
-   ObjectData_Array &data = table[name];
+   ObjectData_ArrayVar &data = table[name];
 
    if(data.name != name)
    {
+      odata_set_strings(data.strings, type);
+
+      data.array     = array;
       data.name      = name;
       data.number    = number;
-      data.size      = 0;
+      data.size      = type->getSize(SourcePosition::none());
       data.linkage   = linkage;
       data.externDef = externDef;
 
@@ -87,33 +74,38 @@ static void Add(ArrayTable &table, std::string const &name,
    else if(data.externDef && !externDef)
    {
       data.number    = number;
+      data.size      = type->getSize(SourcePosition::none());
       data.externDef = externDef;
    }
 }
 
 //
-// CountRegister
-//
-static void CountRegister(std::ostream *, ObjectData_Register const &r)
-{
-   for(bigsint i = r.size; i--;)
-      used.insert(r.number + i);
-}
-
-//
 // GenerateNumber
 //
-static void GenerateNumber(ArrayTable &table, ObjectData_Array &data)
+static void GenerateNumber(ArrayVarTable &table, ObjectData_ArrayVar &data)
 {
-   ArrayIter itr, end = table.end();
-   bigsint index = 0;
+   ArrayVarIter itr, end = table.end();
+   bigsint index = 1, limit, itrI, itrL;
 
 begin:
    for(itr = table.begin(); itr != end; ++itr)
    {
-      if(used.count(index) || index == itr->second.number)
+      if(itr->second.number < 0) continue;
+
+      // Only variables in the same array can collide.
+      if(itr->second.array != data.array) continue;
+
+      limit = index + data.size;
+
+      itrI = itr->second.number;
+      itrL = itrI + itr->second.size;
+      if(itrI == itrL) ++itrL;
+
+      // If either end of itr's range is in range, try again.
+      if((itrI >= index && limit > itrI) ||
+         (itrL >  index && limit > itrL))
       {
-         ++index;
+         index = itrL;
          goto begin;
       }
    }
@@ -122,47 +114,11 @@ begin:
 }
 
 //
-// GenerateSize
-//
-static void GenerateSize(ArrayTable &table, ObjectData_ArrayVar const &v)
-{
-   ObjectData_Array &data = table[v.array];
-   bigsint size = v.number + v.size;
-
-   if(data.size < size)
-      data.size = size;
-}
-
-//
-// GenerateSizeMap
-//
-static void GenerateSizeMap(std::ostream *, ObjectData_ArrayVar const &v)
-{
-   GenerateSize(MapTable, v);
-}
-
-//
-// GenerateSizeWorld
-//
-static void GenerateSizeWorld(std::ostream *, ObjectData_ArrayVar const &v)
-{
-   GenerateSize(WorldTable, v);
-}
-
-//
-// GenerateSizeGlobal
-//
-static void GenerateSizeGlobal(std::ostream *, ObjectData_ArrayVar const &v)
-{
-   GenerateSize(GlobalTable, v);
-}
-
-//
 // GenerateSymbols
 //
-static void GenerateSymbols(ArrayTable &table)
+static void GenerateSymbols(ArrayVarTable &table)
 {
-   ArrayIter itr, end = table.end();
+   ArrayVarIter itr, end = table.end();
    ObjectExpression::Pointer obj;
 
    for(itr = table.begin(); itr != end; ++itr)
@@ -179,10 +135,10 @@ static void GenerateSymbols(ArrayTable &table)
 //
 // Iterate
 //
-static void Iterate(ArrayTable &table, ObjectData_Array::IterFunc iterFunc,
-                    std::ostream *out)
+static void Iterate(ArrayVarTable &table,
+   ObjectData_ArrayVar::IterFunc iterFunc, std::ostream *out)
 {
-   for(ArrayIter itr = table.begin(), end = table.end(); itr != end; ++itr)
+   for(ArrayVarIter itr = table.begin(), end = table.end(); itr != end; ++itr)
       iterFunc(out, itr->second);
 }
 
@@ -192,82 +148,108 @@ static void Iterate(ArrayTable &table, ObjectData_Array::IterFunc iterFunc,
 //
 
 //
-// ObjectData_Array::AddMap
+// ObjectData_ArrayVar::AddMap
 //
-void ObjectData_Array::AddMap(std::string const &name,
+void ObjectData_ArrayVar::AddMap(std::string const &array,
+   std::string const &name, VariableType const *type,
    LinkageSpecifier linkage, bool externDef, bigsint number)
 {
-   Add(MapTable, name, linkage, externDef, number);
+   Add(MapTable, array, name, type, linkage, externDef, number);
 }
 
 //
-// ObjectData_Array::AddWorld
+// ObjectData_ArrayVar::AddWorld
 //
-void ObjectData_Array::AddWorld(std::string const &name,
+void ObjectData_ArrayVar::AddWorld(std::string const &array,
+   std::string const &name, VariableType const *type,
    LinkageSpecifier linkage, bool externDef, bigsint number)
 {
-   Add(WorldTable, name, linkage, externDef, number);
+   Add(WorldTable, array, name, type, linkage, externDef, number);
 }
 
 //
-// ObjectData_Array::AddGlobal
+// ObjectData_ArrayVar::AddGlobal
 //
-void ObjectData_Array::AddGlobal(std::string const &name,
+void ObjectData_ArrayVar::AddGlobal(std::string const &array,
+   std::string const &name, VariableType const *type,
    LinkageSpecifier linkage, bool externDef, bigsint number)
 {
-   Add(GlobalTable, name, linkage, externDef, number);
+   Add(GlobalTable, array, name, type, linkage, externDef, number);
 }
 
 //
-// ObjectData_Array::GenerateSymbols
+// ObjectData_ArrayVar::ArrayMap
 //
-void ObjectData_Array::GenerateSymbols()
+std::string const &ObjectData_ArrayVar::ArrayMap(std::string const &name)
 {
-   ObjectData_Register::iterate_map(CountRegister, NULL);
+   return MapTable[name].array;
+}
+
+//
+// ObjectData_ArrayVar::ArrayWorld
+//
+std::string const &ObjectData_ArrayVar::ArrayWorld(std::string const &name)
+{
+   return WorldTable[name].array;
+}
+
+//
+// ObjectData_ArrayVar::ArrayGlobal
+//
+std::string const &ObjectData_ArrayVar::ArrayGlobal(std::string const &name)
+{
+   return GlobalTable[name].array;
+}
+
+//
+// ObjectData_ArrayVar::GenerateSymbols
+//
+void ObjectData_ArrayVar::GenerateSymbols()
+{
    ::GenerateSymbols(MapTable);
-
-   used.clear(); used.insert(option_auto_array);
    ::GenerateSymbols(WorldTable);
-
-   used.clear(); used.insert(option_addr_array);
    ::GenerateSymbols(GlobalTable);
-
-   used.clear();
-
-   // Set sizes.
-   ObjectData_ArrayVar::IterateMap(GenerateSizeMap, NULL);
-   ObjectData_ArrayVar::IterateMap(GenerateSizeWorld, NULL);
-   ObjectData_ArrayVar::IterateMap(GenerateSizeGlobal, NULL);
 }
 
 //
-// ObjectData_Array::IterateMap
+// ObjectData_ArrayVar::InitMap
 //
-void ObjectData_Array::IterateMap(IterFunc iterFunc, std::ostream *out)
+bool ObjectData_ArrayVar::InitMap(std::string const &name,
+   VariableType const *type, ObjectExpression *init)
+{
+   // TODO
+
+   return false;
+}
+
+//
+// ObjectData_ArrayVar::IterateMap
+//
+void ObjectData_ArrayVar::IterateMap(IterFunc iterFunc, std::ostream *out)
 {
    Iterate(MapTable, iterFunc, out);
 }
 
 //
-// ObjectData_Array::IterateWorld
+// ObjectData_ArrayVar::IterateWorld
 //
-void ObjectData_Array::IterateWorld(IterFunc iterFunc, std::ostream *out)
+void ObjectData_ArrayVar::IterateWorld(IterFunc iterFunc, std::ostream *out)
 {
    Iterate(WorldTable, iterFunc, out);
 }
 
 //
-// ObjectData_Array::IterateGlobal
+// ObjectData_ArrayVar::IterateGlobal
 //
-void ObjectData_Array::IterateGlobal(IterFunc iterFunc, std::ostream *out)
+void ObjectData_ArrayVar::IterateGlobal(IterFunc iterFunc, std::ostream *out)
 {
    Iterate(GlobalTable, iterFunc, out);
 }
 
 //
-// ObjectData_Array::ReadObjects
+// ObjectData_ArrayVar::ReadObjects
 //
-void ObjectData_Array::ReadObjects(std::istream *in)
+void ObjectData_ArrayVar::ReadObjects(std::istream *in)
 {
    read_object(in, &MapTable);
    read_object(in, &WorldTable);
@@ -275,9 +257,9 @@ void ObjectData_Array::ReadObjects(std::istream *in)
 }
 
 //
-// ObjectData_Array::WriteObjects
+// ObjectData_ArrayVar::WriteObjects
 //
-void ObjectData_Array::WriteObjects(std::ostream *out)
+void ObjectData_ArrayVar::WriteObjects(std::ostream *out)
 {
    write_object(out, &MapTable);
    write_object(out, &WorldTable);
@@ -285,11 +267,11 @@ void ObjectData_Array::WriteObjects(std::ostream *out)
 }
 
 //
-// override_object<ObjectData_Array>
+// override_object<ObjectData_ArrayVar>
 //
-void override_object(ObjectData_Array *out, ObjectData_Array const *in)
+void override_object(ObjectData_ArrayVar *out, ObjectData_ArrayVar const *in)
 {
-   if (out->externDef && !in->externDef)
+   if(out->externDef && !in->externDef)
    {
       out->number    = in->number;
       out->size      = in->size;
@@ -298,12 +280,13 @@ void override_object(ObjectData_Array *out, ObjectData_Array const *in)
 }
 
 //
-// read_object<ObjectData_Array>
+// read_object<ObjectData_ArrayVar>
 //
-void read_object(std::istream *in, ObjectData_Array *out)
+void read_object(std::istream *in, ObjectData_ArrayVar *out)
 {
    read_object(in, &out->init);
    read_object(in, &out->strings);
+   read_object(in, &out->array);
    read_object(in, &out->name);
    read_object(in, &out->number);
    read_object(in, &out->size);
@@ -312,12 +295,13 @@ void read_object(std::istream *in, ObjectData_Array *out)
 }
 
 //
-// write_object<ObjectData_Array>
+// write_object<ObjectData_ArrayVar>
 //
-void write_object(std::ostream *out, ObjectData_Array const *in)
+void write_object(std::ostream *out, ObjectData_ArrayVar const *in)
 {
    write_object(out, &in->init);
    write_object(out, &in->strings);
+   write_object(out, &in->array);
    write_object(out, &in->name);
    write_object(out, &in->number);
    write_object(out, &in->size);

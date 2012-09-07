@@ -266,9 +266,9 @@ void SourceContext::addLimit(int limit, StoreType store)
 //
 // SourceContext::addVar
 //
-void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis)
+void SourceContext::addVar(SourceVariable *var, LinkageSpecifier linkSpec, bool externDef)
 {
-   #define PARM nameObj, type, externDef, externVis
+   #define PARM nameObj, type, externDef, linkSpec != LINKAGE_INTERN
 
    std::string const &nameObj = var->getNameObject();
    SourcePosition const &pos = var->getPosition();
@@ -313,15 +313,15 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis)
       break;
 
    case STORE_MAPARRAY:
-      ObjectData_Array::add_map(PARM);
+      ObjectData_ArrayVar::AddMap(var->nameArr, nameObj, type, linkSpec, externDef);
       break;
 
    case STORE_WORLDARRAY:
-      ObjectData_Array::add_world(PARM);
+      ObjectData_ArrayVar::AddWorld(var->nameArr, nameObj, type, linkSpec, externDef);
       break;
 
    case STORE_GLOBALARRAY:
-      ObjectData_Array::add_global(PARM);
+      ObjectData_ArrayVar::AddGlobal(var->nameArr, nameObj, type, linkSpec, externDef);
       break;
    }
 
@@ -331,10 +331,10 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis)
 //
 // SourceContext::addVar
 //
-void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis,
-                           bigsint address)
+void SourceContext::addVar(SourceVariable *var, LinkageSpecifier linkSpec,
+                           bool externDef, bigsint address)
 {
-   #define PARM nameObj, type, externDef, externVis, address
+   #define PARM nameObj, type, externDef, linkSpec != LINKAGE_INTERN, address
 
    std::string const &nameObj = var->getNameObject();
    SourcePosition const &pos = var->getPosition();
@@ -379,15 +379,15 @@ void SourceContext::addVar(SourceVariable *var, bool externDef, bool externVis,
       break;
 
    case STORE_MAPARRAY:
-      ObjectData_Array::add_map(PARM);
+      ObjectData_ArrayVar::AddMap(var->nameArr, nameObj, type, linkSpec, externDef, address);
       break;
 
    case STORE_WORLDARRAY:
-      ObjectData_Array::add_world(PARM);
+      ObjectData_ArrayVar::AddWorld(var->nameArr, nameObj, type, linkSpec, externDef, address);
       break;
 
    case STORE_GLOBALARRAY:
-      ObjectData_Array::add_global(PARM);
+      ObjectData_ArrayVar::AddGlobal(var->nameArr, nameObj, type, linkSpec, externDef, address);
       break;
    }
 
@@ -790,7 +790,7 @@ ObjectExpression::Pointer SourceContext::getTempVar(unsigned i)
       var = SourceVariable::create_variable(nameSrc, type, nameObj, store, pos);
 
       tempVars[i] = var;
-      addVar(var, false, false, getLimit(store));
+      addVar(var, LINKAGE_INTERN, false, getLimit(store));
       addLimit(getLimit(store) + type->getSize(pos), store);
    }
 

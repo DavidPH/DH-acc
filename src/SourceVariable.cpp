@@ -134,23 +134,23 @@ VariableData::Pointer SourceVariable::getData() const
          (size, VariableData::SR_GLOBAL, address);
 
    case STORE_MAPARRAY:
-      if (ObjectData_Array::meta_map(nameObj))
-         arrbase = SourceExpression::create_value_uint
-            (1, SourceContext::global_context, pos);
+      address = ObjectExpression::create_value_symbol(nameArr, pos);
+      arrbase = SourceExpression::create_value_variable(create_literal(
+         VariableType::get_bt_uns(), nameObj, pos), SourceContext::global_context, pos);
 
       return VariableData::create_array(size, VariableData::SA_MAP, address, arrbase);
 
    case STORE_WORLDARRAY:
-      if (ObjectData_Array::meta_world(nameObj))
-         arrbase = SourceExpression::create_value_uint
-            (1, SourceContext::global_context, pos);
+      address = ObjectExpression::create_value_symbol(nameArr, pos);
+      arrbase = SourceExpression::create_value_variable(create_literal(
+         VariableType::get_bt_uns(), nameObj, pos), SourceContext::global_context, pos);
 
       return VariableData::create_array(size, VariableData::SA_WORLD, address, arrbase);
 
    case STORE_GLOBALARRAY:
-      if (ObjectData_Array::meta_global(nameObj))
-         arrbase = SourceExpression::create_value_uint
-            (1, SourceContext::global_context, pos);
+      address = ObjectExpression::create_value_symbol(nameArr, pos);
+      arrbase = SourceExpression::create_value_variable(create_literal(
+         VariableType::get_bt_uns(), nameObj, pos), SourceContext::global_context, pos);
 
       return VariableData::create_array(size, VariableData::SA_GLOBAL, address, arrbase);
 
@@ -159,6 +159,15 @@ VariableData::Pointer SourceVariable::getData() const
    }
 
    Error_NP("invalid store");
+}
+
+//
+// SourceVariable::setNameArr
+//
+void SourceVariable::setNameArr(std::string const &_nameArr)
+{
+   nameArr = _nameArr;
+   type = type->setStorage(store, nameArr);
 }
 
 // EOF

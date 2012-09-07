@@ -110,7 +110,7 @@ void BinaryTokenZDACS::write_ACSE_array_ARAY
    if (a.externDef) return;
 
    BinaryTokenACS::write_ACS0_32(out, a.number);
-   BinaryTokenACS::write_ACS0_32(out, a.size + a.meta);
+   BinaryTokenACS::write_ACS0_32(out, a.size);
 }
 
 //
@@ -122,7 +122,7 @@ void BinaryTokenZDACS::write_ACSE_array_AIMP
    if (!a.externDef) return;
 
    BinaryTokenACS::write_ACS0_32(out, a.number);
-   BinaryTokenACS::write_ACS0_32(out, a.size + a.meta);
+   BinaryTokenACS::write_ACS0_32(out, a.size);
    *out << a.name << '\0';
 }
 
@@ -144,16 +144,14 @@ void BinaryTokenZDACS::write_ACSE_array_AINI
 (std::ostream *out, ObjectData_Array const &a)
 {
    if (a.externDef) return;
-   if (!a.init) return;
+   if(a.init.empty()) return;
 
    *out << 'A' << 'I' << 'N' << 'I';
-   BinaryTokenACS::write_ACS0_32(out, (a.size + a.meta + 1) * 4);
+   BinaryTokenACS::write_ACS0_32(out, (a.size + 1) * 4);
    BinaryTokenACS::write_ACS0_32(out, a.number);
 
-   ObjectExpression::Vector init;
-   a.init->expand(&init);
+   ObjectExpression::Vector const &init = a.init;
 
-   if (a.meta) BinaryTokenACS::write_ACS0_32(out, 1);
    for (size_t i = 0, end = a.size; i != end; ++i)
    {
       if (i < init.size())
@@ -170,7 +168,7 @@ void BinaryTokenZDACS::write_ACSE_array_ASTR
 (std::ostream *out, ObjectData_Array const &a)
 {
    if (a.externDef) return;
-   if (!a.init) return;
+   if(a.init.empty()) return;
 
    for (size_t i = a.strings.size(); i--;)
       if (a.strings[i])
@@ -186,7 +184,7 @@ void BinaryTokenZDACS::write_ACSE_array_ASTR
 void BinaryTokenZDACS::write_ACSE_array_MEXP
 (std::ostream *, ObjectData_Array const &a)
 {
-   if (a.externDef || !a.externVis) return;
+   if(a.externDef || a.linkage == LINKAGE_INTERN) return;
 
    SetTempString(a.number, a.name);
 }

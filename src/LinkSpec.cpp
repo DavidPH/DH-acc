@@ -21,35 +21,30 @@
 //
 //-----------------------------------------------------------------------------
 
-#ifndef HPP_LinkSpec_
-#define HPP_LinkSpec_
+#include "LinkSpec.hpp"
 
-#include <iostream>
-
-
-//----------------------------------------------------------------------------|
-// Types                                                                      |
-//
-
-//
-// LinkageSpecifier
-//
-enum LinkageSpecifier
-{
-   LINKAGE_INTERN,
-   LINKAGE_ACS,
-   LINKAGE_C,
-   LINKAGE_CPP,
-   LINKAGE_DS,
-};
+#include "object_io.hpp"
 
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
-void read_object(std::istream *in, LinkageSpecifier *out);
-void write_object(std::ostream *out, LinkageSpecifier const *in);
+//
+//
+//
+void read_object(std::istream *in, LinkageSpecifier *out)
+{
+   *out = static_cast<LinkageSpecifier>(read_object_int(in));
 
-#endif//HPP_LinkSpec_
+   if(*out > LINKAGE_DS)
+      *out = LINKAGE_DS;
+}
+
+void write_object(std::ostream *out, LinkageSpecifier const *in)
+{
+   write_object_int(out, static_cast<bigsint>(*in));
+}
+
+//EOF
 

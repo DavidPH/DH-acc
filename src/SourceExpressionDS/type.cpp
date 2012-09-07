@@ -507,7 +507,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
                ObjectExpression::create_value_int(enumVal++, enumTok->pos);
 
             context->addVar(SourceVariable::create_constant
-               (enumTok->data, type, enumObj, enumTok->pos), false, true);
+               (enumTok->data, type, enumObj, enumTok->pos), LINKAGE_C, false);
 
             if (!in->peekType(SourceTokenC::TT_COMMA))
                break;

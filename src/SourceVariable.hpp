@@ -62,6 +62,10 @@ public:
 
    CounterReference<VariableType> const &getType() const {return type;}
 
+   void setNameArr(std::string const &nameArr);
+
+   std::string nameArr;
+
 
    static Pointer create_constant(std::string const &nameSrc,
       VariableType *type, ObjectExpression *expr, SourcePosition const &pos)
