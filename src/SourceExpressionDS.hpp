@@ -206,6 +206,7 @@ private:
    SRCEXPDS_EXTERN_DECL(script);
    SRCEXPDS_EXTERN_DECL(variable);
 
+   SRCEXPDS_KEYWORD_DECL(address_space);
    SRCEXPDS_KEYWORD_DECL(break);
    SRCEXPDS_KEYWORD_DECL(cast);
    SRCEXPDS_KEYWORD_DECL(constexpr);

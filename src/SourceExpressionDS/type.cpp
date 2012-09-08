@@ -49,6 +49,18 @@
 //
 
 //
+// DoAddressSpace
+//
+static void DoAddressSpace(VariableType::Pointer *type, SourceTokenizerC *in,
+   SourceContext *context)
+{
+   SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
+   SourceContext::AddressSpace const &addr = context->getAddressSpace(tok->data, tok->pos);
+
+   *type = (*type)->setStorage(addr.store, addr.array);
+}
+
+//
 // do_qualifier
 //
 static void do_qualifier
@@ -613,6 +625,9 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
       else if(is_store(in->peek()->data))
          do_storage(&type, in, context);
 
+      else if(context->isAddressSpace(in->peek()->data))
+         DoAddressSpace(&type, in, context);
+
       else
          goto case_default;
 
@@ -671,6 +686,10 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
       // specifiers, then the point is lost.
       //
       // In short, I don't like it, but I'll do it anyway.
+      //
+      // Addendum 2012/09/08: Wow, I sure am whiny. C's declarator syntax is
+      // perfectly logical and consistent. Eat it, Past Self. That said, DS
+      // doesn't have declarators, so the index reversal is a little weird.
       //
       if (true)
       {

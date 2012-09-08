@@ -42,6 +42,7 @@ struct StoreData
 {
    StoreType type;
    ObjectExpression::Pointer area;
+   std::string name;
 };
 
 
@@ -55,58 +56,34 @@ struct StoreData
 static SourceExpression::Pointer add_var(SourceContext *context,
    LinkageSpecifier linkSpec, SourcePosition const &pos,
    std::string const &nameSrc, std::string &nameObj, VariableType *type,
-   StoreData store, ObjectExpression *addr, bool externDef,
+   StoreData const &store, ObjectExpression *addr, bool externDef,
    SourceVariable::Pointer &var)
 {
-   if(store.type == STORE_MAPARRAY || store.type == STORE_WORLDARRAY ||
-      store.type == STORE_GLOBALARRAY)
+   if(store.name.empty() && (store.type == STORE_MAPARRAY ||
+      store.type == STORE_WORLDARRAY || store.type == STORE_GLOBALARRAY))
    {
       std::string nameArr = nameObj; nameObj += "$var";
-      var = SourceVariable::create_variable(nameSrc, type, nameObj, store.type, pos);
-      var->setNameArr(nameArr);
+
+      bigsint number = store.area ? store.area->resolveINT() : -1;
+
+      if(store.type == STORE_MAPARRAY)
+         ObjectData_Array::AddMap(nameArr, linkSpec, externDef, number);
+
+      else if(store.type == STORE_WORLDARRAY)
+         ObjectData_Array::AddWorld(nameArr, linkSpec, externDef, number);
+
+      else if(store.type == STORE_GLOBALARRAY)
+         ObjectData_Array::AddGlobal(nameArr, linkSpec, externDef, number);
+
+      var = SourceVariable::create_variable(nameSrc, type, nameObj, nameArr, store.type, pos);
    }
    else
-      var = SourceVariable::create_variable(nameSrc, type, nameObj, store.type, pos);
+      var = SourceVariable::create_variable(nameSrc, type, nameObj, store.name, store.type, pos);
 
-   switch(store.type)
-   {
-   case STORE_MAPARRAY:
-      if(store.area)
-         ObjectData_Array::AddMap(var->nameArr, linkSpec, externDef, store.area->resolveUNS());
-      else
-         ObjectData_Array::AddMap(var->nameArr, linkSpec, externDef);
-
-      goto case_addvar;
-
-   case STORE_WORLDARRAY:
-      if(store.area)
-         ObjectData_Array::AddWorld(var->nameArr, linkSpec, externDef, store.area->resolveUNS());
-      else
-         ObjectData_Array::AddWorld(var->nameArr, linkSpec, externDef);
-
-      goto case_addvar;
-
-   case STORE_GLOBALARRAY:
-      if(store.area)
-         ObjectData_Array::AddGlobal(var->nameArr, linkSpec, externDef, store.area->resolveUNS());
-      else
-         ObjectData_Array::AddGlobal(var->nameArr, linkSpec, externDef);
-
-      goto case_addvar;
-
-   default:
-      if(store.area)
-         Error_P("cannot have store-area for store-type %s",
-            make_string(store.type).c_str());
-
-   case_addvar:
-      if(addr)
-         context->addVar(var, linkSpec, externDef, addr->resolveUNS());
-      else
-         context->addVar(var, linkSpec, externDef);
-
-      break;
-   }
+   if(addr)
+      context->addVar(var, linkSpec, externDef, addr->resolveUNS());
+   else
+      context->addVar(var, linkSpec, externDef);
 
    return SourceExpression::create_value_variable(var, context, pos);
 }
@@ -247,8 +224,8 @@ static bool is_void(VariableType const *type)
 //
 static SourceExpression::Pointer make_var(SourceTokenizerC *in,
    SourceContext *context, LinkageSpecifier linkSpec, SourcePosition const &pos,
-   std::string const &nameSrc, VariableType::Reference type, StoreData store,
-   bool externDef)
+   std::string const &nameSrc, VariableType::Reference type,
+   StoreData const &store, bool externDef)
 {
    SourceVariable::Pointer var;
 
@@ -383,7 +360,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
          if(!initObj)
             goto case_array;
 
-         if(ObjectData_ArrayVar::InitMap(nameObj, type, initObj))
+         if(!ObjectData_ArrayVar::InitMap(nameObj, type, initObj))
             goto case_array;
 
          break;
@@ -397,8 +374,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
 
             // Generate variable.
             SourceVariable::Pointer initVar = SourceVariable::create_variable(
-               initNameObj, initType, initNameObj, store.type, pos);
-            initVar->nameArr = var->nameArr;
+               initNameObj, initType, initNameObj, var->nameArr, store.type, pos);
             context->addVar(initVar, LINKAGE_INTERN, false);
 
             // Generate expression.
@@ -472,7 +448,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
 //
 static SourceExpression::Pointer make_var(SourceTokenizerC *in,
    SourceContext *context, LinkageSpecifier linkSpec, SourcePosition const &pos,
-   VariableType::Reference type, StoreData store, bool externDef)
+   VariableType::Reference type, StoreData const &store, bool externDef)
 {
    // If not followed by an identifier, then don't try to read any names.
    // (This is needed for standalone struct definitions.)
@@ -506,7 +482,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
 //
 static SourceExpression::Pointer make_var(SourceTokenizerC *in,
    SourceContext *context, LinkageSpecifier linkSpec, SourcePosition const &pos,
-   StoreData store, bool externDef)
+   StoreData &store, bool externDef)
 {
    // Read variable type.
    VariableType::Reference type = SourceExpressionDS::make_type(in, context);
@@ -542,7 +518,16 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
 {
    // Read storage class.
    StoreData store;
-   store.type = SourceExpressionDS::make_store(in, context, &store.area);
+
+   if(in->peekType(SourceTokenC::TT_NAM) && context->isAddressSpace(in->peek()->data))
+   {
+      SourceTokenC::Reference tok = in->get();
+      SourceContext::AddressSpace const &addr = context->getAddressSpace(tok->data, tok->pos);
+      store.type = addr.store;
+      store.name = addr.array;
+   }
+   else
+      store.type = SourceExpressionDS::make_store(in, context, &store.area);
 
    if (linkCheck && (store.type == STORE_AUTO || store.type == STORE_REGISTER))
       linkSpec = LINKAGE_INTERN;
@@ -621,7 +606,7 @@ SRCEXPDS_KEYWORD_DEFN(variable_store)
 SRCEXPDS_KEYWORD_DEFN(variable_type)
 {
    LinkageSpecifier linkSpec;
-   StoreData store = {STORE_CONST, NULL};
+   StoreData store = {STORE_CONST, NULL, ""};
 
    in->unget(tok);
 

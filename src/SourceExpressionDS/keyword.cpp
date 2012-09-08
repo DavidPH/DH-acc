@@ -24,6 +24,7 @@
 #include "../SourceExpressionDS.hpp"
 
 #include "../ObjectCode.hpp"
+#include "../ObjectData.hpp"
 #include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
@@ -45,6 +46,74 @@
 bool SourceExpressionDS::is_keyword(std::string const &data)
 {
    return expr_keyword.find(data) != expr_keyword.end();
+}
+
+//
+// SourceExpressionDS::make_keyword_address_space
+//
+// address_space-declaration:
+//   <__address_space> address_space-extern(opt) storage-class identifier
+//   <__address_space_decl> address_space-extern(opt) storage-class identifier
+//
+// address_space-extern:
+//   <extern>
+//   <extern> string-literal
+//   <static>
+//
+SRCEXPDS_KEYWORD_DEFN(address_space)
+{
+   SourcePosition pos = in->peek()->pos;
+
+   bool externDef = tok->data == "__address_space_decl";
+
+   SourceContext::AddressSpace addr;
+
+   // address_space-extern(opt)
+   LinkageSpecifier linkage;
+   if(in->peekType(SourceTokenC::TT_NAM, "extern"))
+   {
+      if(in->peekType(SourceTokenC::TT_STR))
+         linkage = make_linkspec(in);
+      else
+         linkage = LINKAGE_DS;
+   }
+   else if(in->peekType(SourceTokenC::TT_NAM, "static"))
+      linkage = LINKAGE_INTERN;
+   else
+      linkage = LINKAGE_DS;
+
+   // storage-class
+   ObjectExpression::Pointer area;
+   addr.store = make_store(in, context, &area);
+
+   // identifier
+   std::string nameSrc = in->get(SourceTokenC::TT_NAM)->data;
+   addr.array = context->makeNameObj(nameSrc, linkage);
+
+   // Create or declare the array.
+   bigsint number = area ? area->resolveINT() : -1;
+   switch(addr.store)
+   {
+   case STORE_MAPARRAY:
+      ObjectData_Array::AddMap(addr.array, linkage, externDef, number);
+      break;
+
+   case STORE_WORLDARRAY:
+      ObjectData_Array::AddWorld(addr.array, linkage, externDef, number);
+      break;
+
+   case STORE_GLOBALARRAY:
+      ObjectData_Array::AddGlobal(addr.array, linkage, externDef, number);
+      break;
+
+   default:
+      Error_P("expected array storage-class");
+   }
+
+   // Add the address space to the context.
+   context->addAddressSpace(nameSrc, addr);
+
+   return create_value_data(context, pos);
 }
 
 //

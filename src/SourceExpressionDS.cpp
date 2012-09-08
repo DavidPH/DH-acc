@@ -96,6 +96,8 @@ void SourceExpressionDS::init()
    expr_extern["__script"]   = make_extern_script;
    expr_extern["__variable"] = make_extern_variable;
 
+   expr_keyword["__address_space"]      = make_keyword_address_space;
+   expr_keyword["__address_space_decl"] = make_keyword_address_space;
    expr_keyword["__asmfunc"]  = make_keyword_linespec;
    expr_keyword[  "break"]    = make_keyword_break;
    expr_keyword[  "const"]    = make_keyword_constexpr;
@@ -157,7 +159,7 @@ SRCEXPDS_EXPR_DEF1(primary)
       if (is_keyword(tok->data))
          return expr_keyword[tok->data](in, tok, context);
 
-      if (is_store(tok->data))
+      if(context->isAddressSpace(tok->data) || is_store(tok->data))
          return make_keyword_variable_store(in, tok, context);
 
    case SourceTokenC::TT_COLON2:

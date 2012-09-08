@@ -110,6 +110,7 @@ Keywords
 ===============================================================================
 
   keyword-expression:
+    address_space-declaration
     cast-expression
     extern-expression
     function-expression
@@ -121,6 +122,19 @@ Keywords
     sizeof-expression
     typeinfo-expression
     variable-expression
+
+===========================================================
+Address_Space Declaration
+===========================================================
+
+  address_space-declaration:
+    <__address_space> address_space-extern(opt) storage-class identifier
+    <__address_space_decl> address_space-extern(opt) storage-class identifier
+
+  address_space-extern:
+    <extern>
+    <extern> string-literal
+    <static>
 
 ===========================================================
 Cast Expressions
