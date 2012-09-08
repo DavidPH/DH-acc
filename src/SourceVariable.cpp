@@ -51,10 +51,10 @@ SourceVariable::SourceVariable(std::string const &_nameSrc, VariableType *_type,
 // SourceVariable::SourceVariable
 //
 SourceVariable::SourceVariable(std::string const &_nameSrc, VariableType *_type,
-   std::string const &_nameObj, ObjectExpression *_expr, StoreType _store,
-   SourcePosition const &_pos)
- : pos(_pos), nameObj(_nameObj), nameSrc(_nameSrc), expr(_expr), type(_type),
-   store(_store)
+   std::string const &_nameObj, ObjectExpression *_expr,
+   std::string const &_nameArr, StoreType _store, SourcePosition const &_pos)
+ : nameArr(_nameArr), pos(_pos), nameObj(_nameObj), nameSrc(_nameSrc),
+   expr(_expr), type(_type), store(_store)
 {
    switch (store)
    {
@@ -67,7 +67,7 @@ SourceVariable::SourceVariable(std::string const &_nameSrc, VariableType *_type,
    case STORE_MAPARRAY:
    case STORE_WORLDARRAY:
    case STORE_GLOBALARRAY:
-      type = type->setStorage(store, nameObj);
+      type = type->setStorage(store, nameArr);
       break;
 
    case STORE_STRING:

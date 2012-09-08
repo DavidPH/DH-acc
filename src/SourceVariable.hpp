@@ -95,13 +95,20 @@ public:
       VariableType *type, std::string const &nameObj, StoreType store,
       SourcePosition const &pos)
    {
-      return new SourceVariable(nameSrc, type, nameObj, NULL, store, pos);
+      return new SourceVariable(nameSrc, type, nameObj, NULL, nameObj, store, pos);
+   }
+
+   static Pointer create_variable(std::string const &nameSrc, VariableType *type,
+      std::string const &nameObj, std::string const &nameArr, StoreType store,
+      SourcePosition const &pos)
+   {
+      return new SourceVariable(nameSrc, type, nameObj, NULL, nameArr, store, pos);
    }
 
    static Pointer create_variable(VariableType *type, ObjectExpression *expr,
       StoreType store, SourcePosition const &pos)
    {
-      return new SourceVariable("", type, "", expr, store, pos);
+      return new SourceVariable("", type, "", expr, "", store, pos);
    }
 
 private:
@@ -110,8 +117,8 @@ private:
       SourcePosition const &pos);
 
    SourceVariable(std::string const &nameSrc, VariableType *type,
-      std::string const &nameObj, ObjectExpression *expr, StoreType store,
-      SourcePosition const &pos);
+      std::string const &nameObj, ObjectExpression *expr,
+      std::string const &nameArr, StoreType store, SourcePosition const &pos);
 
    ~SourceVariable();
 

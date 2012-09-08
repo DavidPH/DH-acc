@@ -133,6 +133,15 @@ SourceContext::~SourceContext()
 }
 
 //
+// SourceContext::addAddressSpace
+//
+void SourceContext::addAddressSpace(std::string const &name, AddressSpace const &addr)
+{
+   addrNames.push_back(name);
+   addrAddrs.push_back(addr);
+}
+
+//
 // SourceContext::addCount
 //
 void SourceContext::addCount(int count, StoreType store)
@@ -435,6 +444,20 @@ SourceVariable::Pointer SourceContext::findTempVar(unsigned i)
    if (inheritLocals) return parent->findTempVar(i);
 
    return NULL;
+}
+
+//
+// SourceContext::getAddressSpace
+//
+SourceContext::AddressSpace const &SourceContext::getAddressSpace(
+   std::string const &name, SourcePosition const &pos) const
+{
+   for(size_t i = addrNames.size(); i--;)
+      if(addrNames[i] == name) return addrAddrs[i];
+
+   if(parent) return parent->getAddressSpace(name, pos);
+
+   Error_NP("no such address-space '%s'", name.c_str());
 }
 
 //
@@ -874,6 +897,19 @@ bool SourceContext::hasLabelCaseDefault() const
 void SourceContext::init()
 {
    global_context = new SourceContext;
+}
+
+//
+// SourceContext::isAddressSpace
+//
+bool SourceContext::isAddressSpace(std::string const &name) const
+{
+   for(size_t i = addrNames.size(); i--;)
+      if(addrNames[i] == name) return true;
+
+   if(parent) return parent->isAddressSpace(name);
+
+   return false;
 }
 
 //

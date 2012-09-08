@@ -849,12 +849,7 @@ Function Attributes
 Primary Expression
 ===========================================================
 
-  primary-expression:
-    identifier
-    constant
-    string-literal
-    ( expression )
-    generic-selection
+  primary-expression: add
     printf-expression
 
 ===========================================================
@@ -891,12 +886,52 @@ as described for fprintf, with the exception of %n which is not available.
 If no printf-specifier is given, the behavior is as if print was given.
 
 ===========================================================
+Declaration
+===========================================================
+
+  declaration: add
+    address_space-declaration
+
+===========================================================
+Address_Space Declaration
+===========================================================
+
+  address_space-declaration:
+    <__address_space> storage-class-specifier(opt) address_space-specifier
+      identifier address_space-expression(opt) ;
+
+  address_space-specifier:
+    <__maparray>
+    <__worldarray>
+    <__globalarray>
+
+  address_space-expression:
+    = constant-expression
+
+Constraints:
+  The storage class specifier, if provided, shall be either extern or static.
+
+  The result of a constant expression in an address_space expression shall not
+  be negative.
+
+Semantics:
+  Declares or defines an address space for use as an address space name.
+
+  If the storage class specifier is extern and there is no address_space
+  expression, the declaration is a forward declaration. Otherwise it defines a
+  new address space.
+
+  If an address space definition has no address_space expression, it is assigned
+  one automatically.
+
+  Address spaces have the same linkage as objects. If an address space and an
+  object in the same scope have the same name, the behavior is undefined.
+
+===========================================================
 External Declaration
 ===========================================================
 
-  external-declaration:
-    function-definition
-    declaration
+  external-declaration: add
     library-declaration
 
 ===========================================================

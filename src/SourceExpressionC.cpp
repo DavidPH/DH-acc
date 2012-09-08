@@ -72,6 +72,8 @@ bool SourceExpressionC::IsQualifier(SRCEXPC_PARSE_ARG1)
    if(tok->data == "__near")  return true;
    if(tok->data == "__local") return true;
 
+   if(context->isAddressSpace(tok->data)) return true;
+
    return false;
 }
 
@@ -750,6 +752,25 @@ SourceExpressionC::Qualifier SourceExpressionC::ParseQualifier(SRCEXPC_PARSE_ARG
 
    if(in->dropType(SourceTokenC::TT_NAM, "__local"))
       return STORE_AUTO;
+
+   if(in->dropType(SourceTokenC::TT_NAM, "__localregister"))
+      return STORE_REGISTER;
+
+   if(in->dropType(SourceTokenC::TT_NAM, "__mapregister"))
+      return STORE_MAPREGISTER;
+
+   if(in->dropType(SourceTokenC::TT_NAM, "__worldregister"))
+      return STORE_WORLDREGISTER;
+
+   if(in->dropType(SourceTokenC::TT_NAM, "__globalregister"))
+      return STORE_GLOBALREGISTER;
+
+   if(in->peekType(SourceTokenC::TT_NAM) && context->isAddressSpace(in->peek()->data))
+   {
+      SourceTokenC::Reference tok = in->get();
+      SourceContext::AddressSpace const &addr = context->getAddressSpace(tok->data, tok->pos);
+      return Qualifier(addr.store, addr.array);
+   }
 
    Error(in->peek()->pos, "expected type-qualifier");
 }

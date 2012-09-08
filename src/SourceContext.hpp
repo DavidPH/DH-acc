@@ -63,6 +63,17 @@ public:
       CT_SWITCH
    };
 
+   //
+   // AddressSpace
+   //
+   struct AddressSpace
+   {
+      std::string array;
+      StoreType   store;
+   };
+
+
+   void addAddressSpace(std::string const &name, AddressSpace const &addr);
 
    void addFunction(SourceFunction *func);
 
@@ -72,6 +83,8 @@ public:
 
    void addVar(SourceVariable *var, LinkageSpecifier linkSpec, bool externDef);
    void addVar(SourceVariable *var, LinkageSpecifier linkSpec, bool externDef, bigsint address);
+
+   AddressSpace const &getAddressSpace(std::string const &name, SourcePosition const &pos) const;
 
    std::vector<bigsint> getCases(SourcePosition const & position) const;
 
@@ -145,6 +158,8 @@ public:
 
    bool hasLabelCaseDefault() const;
 
+
+   bool isAddressSpace(std::string const &name) const;
    int isFunction(std::string const &name) const;
    bool isVariable(std::string const &name) const;
    bool isVariable(std::string const &name, bool canLocal) const;
@@ -195,6 +210,9 @@ private:
    std::map<bigsint, bool> cases;
 
    std::set<SourceContext *> children;
+
+   std::vector<std::string> addrNames;
+   std::vector<AddressSpace> addrAddrs;
 
    std::vector<std::string> enumNames;
    std::vector<CounterReference<VariableType> > enumTypes;

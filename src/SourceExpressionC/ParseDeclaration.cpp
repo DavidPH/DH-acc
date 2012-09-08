@@ -68,6 +68,81 @@ bool SourceExpressionC::IsDeclaration(SRCEXPC_PARSE_ARG1)
 }
 
 //
+// SourceExpressionC::ParseAddressSpace
+//
+// address_space-declaration:
+//   <__address_space> storage-class-specifier(opt) address_space-specifier
+//     identifier address_space-expression(opt) ;
+//
+SRCEXPC_PARSE_DEFN_HALF(AddressSpace)
+{
+   SourceContext::AddressSpace addr;
+
+   // <__address_space>
+   SourcePosition pos = in->get(SourceTokenC::TT_NAM, "__address_space")->pos;
+
+   // storage-class-specifier(opt)
+   StorageClass storage;
+   if(in->dropType(SourceTokenC::TT_NAM, "extern"))
+      storage = SC_EXTERN;
+   else if(in->dropType(SourceTokenC::TT_NAM, "static"))
+      storage = SC_STATIC;
+   else
+      storage = SC_NONE;
+
+   LinkageSpecifier linkage = storage == SC_STATIC ? LINKAGE_INTERN : LINKAGE_C;
+
+   // address_space-specifier
+   if(in->dropType(SourceTokenC::TT_NAM, "__maparray"))
+      addr.store = STORE_MAPARRAY;
+   else if(in->dropType(SourceTokenC::TT_NAM, "__worldarray"))
+      addr.store = STORE_WORLDARRAY;
+   else if(in->dropType(SourceTokenC::TT_NAM, "__globalarray"))
+      addr.store = STORE_GLOBALARRAY;
+   else
+      Error(in->peek()->pos, "expected address-space-specifier");
+
+   // identifier
+   std::string nameSrc = in->get(SourceTokenC::TT_NAM)->data;
+
+   addr.array = context->makeNameObj(nameSrc, linkage);
+
+   // address_space-expression(opt)
+   bigsint number;
+   if(in->dropType(SourceTokenC::TT_EQUALS))
+      number = ParseConditional(in, context)->makeObject()->resolveINT();
+   else
+      number = -1;
+
+   // ;
+   in->get(SourceTokenC::TT_SEMICOLON);
+
+   bool externDef = storage == SC_EXTERN && number == -1;
+
+   switch(addr.store)
+   {
+   case STORE_MAPARRAY:
+      ObjectData_Array::AddMap(addr.array, linkage, externDef, number);
+      break;
+
+   case STORE_WORLDARRAY:
+      ObjectData_Array::AddWorld(addr.array, linkage, externDef, number);
+      break;
+
+   case STORE_GLOBALARRAY:
+      ObjectData_Array::AddGlobal(addr.array, linkage, externDef, number);
+      break;
+
+   default:
+      Error_P("unexpected address-space-specifier");
+   }
+
+   context->addAddressSpace(nameSrc, addr);
+
+   return create_value_data(context, pos);
+}
+
+//
 // SourceExpressionC::ParseInitializer
 //
 SRCEXPC_PARSE_DEFN_EXT(Initializer, VariableType::Pointer &type, bool root)
@@ -246,15 +321,20 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
       linkage = LINKAGE_INTERN;
 
    // Determine storage.
-   StoreType store;
-   if(spec.storage == SC_NONE)
-      store = spec.external ? STORE_STATIC : STORE_AUTO;
-   else if(spec.storage == SC_AUTO)
-      store = STORE_AUTO;
-   else if(spec.storage == SC_REGISTER)
-      store = STORE_REGISTER;
-   else
-      store = STORE_STATIC;
+   std::string nameArr = decl.type->getStoreArea();
+   StoreType store = decl.type->getStoreType();
+
+   if(store == STORE_NONE)
+   {
+      if(spec.storage == SC_NONE)
+         store = spec.external ? STORE_STATIC : STORE_AUTO;
+      else if(spec.storage == SC_AUTO)
+         store = STORE_AUTO;
+      else if(spec.storage == SC_REGISTER)
+         store = STORE_REGISTER;
+      else
+         store = STORE_STATIC;
+   }
 
    // Function prototype.
    if(VariableType::is_bt_function(decl.type->getBasicType()))
@@ -313,7 +393,9 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
       SourceExpression::Pointer init = ParseInitializer(decl.type, true, in, context);
 
       SourceVariable::Pointer var = SourceVariable::create_variable(decl.name,
-         decl.type, nameObj, store, pos);
+         decl.type, nameObj, nameArr, store, pos);
+
+      if(!nameArr.empty()) var->setNameArr(nameArr);
 
       context->addVar(var, linkage, false);
 
@@ -330,28 +412,16 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
 
          SourceExpression::Pointer isInitExpr;
 
-         if(store == STORE_STATIC        || store == STORE_MAPREGISTER ||
-            store == STORE_WORLDREGISTER || store == STORE_GLOBALREGISTER)
-         {
-            // Create an extra variable to store isInit.
+         // Create an extra variable to store isInit.
 
-            SourceVariable::Pointer isInitVar  = SourceVariable::create_variable("",
-               isInitType, isInitName, store, pos);
+         SourceVariable::Pointer isInitVar  = SourceVariable::create_variable(
+            isInitName, isInitType, isInitName, nameArr, store, pos);
 
-            context->addVar(isInitVar, LINKAGE_INTERN, false);
+         context->addVar(isInitVar, LINKAGE_INTERN, false);
 
-            isInitExpr = create_value_variable(isInitVar, context, pos);
-         }
-         else
-         {
-            // For array storages, use the null index for isInit.
+         isInitExpr = create_value_variable(isInitVar, context, pos);
 
-            isInitType = isInitType->setStorage(store, nameObj)->getPointer();
-
-            isInitExpr = create_value_int(0, context, pos);
-            isInitExpr = create_value_cast_explicit(isInitExpr, isInitType, context, pos);
-            isInitExpr = create_unary_dereference(isInitExpr, context, pos);
-         }
+         // Create expressions using isInit.
 
          SourceExpression::Pointer isInitNot = create_branch_not(isInitExpr, context, pos);
          SourceExpression::Pointer isInitSet = create_binary_assign(isInitExpr,
@@ -367,7 +437,7 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
    else
    {
       SourceVariable::Pointer var = SourceVariable::create_variable(decl.name,
-         decl.type, nameObj, store, pos);
+         decl.type, nameObj, nameArr, store, pos);
 
       context->addVar(var, linkage, spec.storage == SC_EXTERN);
 
@@ -440,6 +510,9 @@ SRCEXPC_PARSE_DEFN_HALF(Declaration)
 
    if(in->peekType(SourceTokenC::TT_NAM, "_Static_assert"))
       return ParseStaticAssert(in, context);
+
+   if(in->peekType(SourceTokenC::TT_NAM, "__address_space"))
+      return ParseAddressSpace(in, context);
 
    DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
 
@@ -545,6 +618,9 @@ SRCEXPC_PARSE_DEFN_HALF(ExternalDeclaration)
 
    if(in->peekType(SourceTokenC::TT_NAM, "_Static_assert"))
       return ParseStaticAssert(in, context);
+
+   if(in->peekType(SourceTokenC::TT_NAM, "__address_space"))
+      return ParseAddressSpace(in, context);
 
    // library-declaration:
    //   __library ( string-literal ) ;
