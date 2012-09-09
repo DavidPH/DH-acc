@@ -522,6 +522,19 @@ SRCEXPC_PARSE_DEFN_HALF(Declaration)
    if(spec.storage == SC_TYPEDEF)
       return ParseTypedef(spec, in, context);
 
+   // struct-or-union-specifier identifier ;
+   if((spec.type->getBasicType() == VariableType::BT_STRUCT ||
+       spec.type->getBasicType() == VariableType::BT_UNION) &&
+      in->dropType(SourceTokenC::TT_SEMICOLON))
+   {
+      if(spec.type->getBasicType() == VariableType::BT_STRUCT)
+         context->addVariableType_struct(spec.type->getName());
+      else
+         context->addVariableType_union(spec.type->getName());
+
+      return create_value_data(context, pos);
+   }
+
    // Parse variable declarations and function prototypes.
 
    Vector exprs;

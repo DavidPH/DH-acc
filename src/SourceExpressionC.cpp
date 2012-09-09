@@ -200,6 +200,13 @@ VariableType::Reference SourceExpressionC::ParseStruct(SRCEXPC_PARSE_ARG1)
       else
          return context->getVariableType_union(name, pos);
    }
+   else if(!name.empty())
+   {
+      if(isStruct)
+         context->addVariableType_struct(name);
+      else
+         context->addVariableType_union(name);
+   }
 
    VariableType::VecStr names;
    VariableType::Vector types;

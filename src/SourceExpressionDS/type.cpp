@@ -326,10 +326,20 @@ VariableType::Reference make_struct(bool isUnion, SourceTokenizerC *in,
       name = tok->data;
       pos  = tok->pos;
 
-      if (isUnion)
-         context->getVariableType_union(name, pos);
+      if(in->peekType(SourceTokenC::TT_BRACE_O))
+      {
+         if(isUnion)
+            context->addVariableType_union(name);
+         else
+            context->addVariableType_struct(name);
+      }
       else
-         context->getVariableType_struct(name, pos);
+      {
+         if(isUnion)
+            context->getVariableType_union(name, pos);
+         else
+            context->getVariableType_struct(name, pos);
+      }
    }
    else
       pos = in->peek(SourceTokenC::TT_BRACE_O)->pos;

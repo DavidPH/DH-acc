@@ -84,6 +84,10 @@ public:
    void addVar(SourceVariable *var, LinkageSpecifier linkSpec, bool externDef);
    void addVar(SourceVariable *var, LinkageSpecifier linkSpec, bool externDef, bigsint address);
 
+   void addVariableType_struct(std::string const &name);
+
+   void addVariableType_union(std::string const &name);
+
    AddressSpace const &getAddressSpace(std::string const &name, SourcePosition const &pos) const;
 
    std::vector<bigsint> getCases(SourcePosition const & position) const;

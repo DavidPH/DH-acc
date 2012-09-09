@@ -34,6 +34,38 @@
 //
 
 //
+// SourceContext::addVariableType_struct
+//
+void SourceContext::addVariableType_struct(std::string const &name)
+{
+   if(name.empty()) return;
+
+   for(size_t i = 0; i < structNames.size(); ++i)
+      if(structNames[i] == name) return;
+
+   VariableType::Reference type = VariableType::get_bt_struct(name);
+
+   structNames.push_back(name);
+   structTypes.push_back(type);
+}
+
+//
+// SourceContext::addVariableType_union
+//
+void SourceContext::addVariableType_union(std::string const &name)
+{
+   if(name.empty()) return;
+
+   for(size_t i = 0; i < unionNames.size(); ++i)
+      if(unionNames[i] == name) return;
+
+   VariableType::Reference type = VariableType::get_bt_union(name);
+
+   unionNames.push_back(name);
+   unionTypes.push_back(type);
+}
+
+//
 // SourceContext::getVariableType
 //
 VariableType::Reference SourceContext::getVariableType
@@ -135,18 +167,29 @@ VariableType::Reference SourceContext::getVariableType_struct
 //
 // SourceContext::getVariableType_struct
 //
-VariableType::Reference SourceContext::getVariableType_struct
-(std::string const &name, VariableType::VecStr const &names,
- VariableType::Vector const &types, SourcePosition const &pos)
+VariableType::Reference SourceContext::getVariableType_struct(
+   std::string const &name, VariableType::VecStr const &names,
+   VariableType::Vector const &types, SourcePosition const &pos)
 {
-   VariableType::Reference type = getVariableType_struct(name, pos);
+   VariableType::Pointer type;
 
-   if (type->getComplete())
-      Error_NP("struct redefined: %s", name.c_str());
+   if(!name.empty()) for(size_t i = 0; i < structNames.size(); ++i)
+      if(structNames[i] == name) {type = structTypes[i]; break;}
+
+   if(!type)
+   {
+      type = VariableType::get_bt_struct(name.empty() ? makeLabel() : name);
+
+      structNames.push_back(name);
+      structTypes.push_back(static_cast<VariableType::Reference>(type));
+   }
+
+   if(type->getComplete())
+      Error_NP("struct %s redefined", name.c_str());
 
    type->makeComplete(names, types);
 
-   return type;
+   return static_cast<VariableType::Reference>(type);
 }
 
 //
@@ -222,14 +265,25 @@ VariableType::Reference SourceContext::getVariableType_union
 (std::string const &name, VariableType::VecStr const &names,
  VariableType::Vector const &types, SourcePosition const &pos)
 {
-   VariableType::Reference type = getVariableType_union(name, pos);
+   VariableType::Pointer type;
 
-   if (type->getComplete())
-      Error_NP("union redefined: %s", name.c_str());
+   if(!name.empty()) for(size_t i = 0; i < unionNames.size(); ++i)
+      if(unionNames[i] == name) {type = unionTypes[i]; break;}
+
+   if(!type)
+   {
+      type = VariableType::get_bt_union(name.empty() ? makeLabel() : name);
+
+      unionNames.push_back(name);
+      unionTypes.push_back(static_cast<VariableType::Reference>(type));
+   }
+
+   if(type->getComplete())
+      Error_NP("union %s redefined", name.c_str());
 
    type->makeComplete(names, types);
 
-   return type;
+   return static_cast<VariableType::Reference>(type);
 }
 
 //
