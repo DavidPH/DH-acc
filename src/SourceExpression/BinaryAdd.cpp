@@ -136,6 +136,9 @@ protected:
    //
    virtual bool canDoSet(VariableData *data, VariableType *type) const
    {
+      if(type->getBasicType() == VariableType::BT_PTR && data->type == VariableData::MT_FARPTR)
+         return true;
+
       CAN_SET_SWITCHES(ADD);
    }
 
@@ -167,7 +170,7 @@ protected:
    //
    // ::doSet
    //
-   virtual void doSet(ObjectVector *objects, VariableData *data, VariableType *type, int)
+   virtual void doSet(ObjectVector *objects, VariableData *data, VariableType *type, int tmpBase)
    {
       if(type->getBasicType() == VariableType::BT_PTR)
       {
@@ -179,6 +182,26 @@ protected:
 
          switch(data->type)
          {
+         case VariableData::MT_FARPTR:
+            {
+               ObjectExpression::Pointer tmpA = context->getTempVar(tmpBase+0);
+               ObjectExpression::Pointer tmpB = context->getTempVar(tmpBase+1);
+
+               objects->addToken(OCODE_SET_TEMP,   tmpB);
+               objects->addToken(OCODE_SET_TEMP,   tmpA);
+
+               objects->addToken(OCODE_GET_TEMP,   tmpA);
+               objects->addToken(OCODE_GET_TEMP,   tmpB);
+               objects->addToken(OCODE_GET_FARPTR, address);
+
+               objects->addToken(OCODE_ADD_STK_U);
+
+               objects->addToken(OCODE_GET_TEMP,   tmpA);
+               objects->addToken(OCODE_GET_TEMP,   tmpB);
+               objects->addToken(OCODE_SET_FARPTR, address);
+            }
+            break;
+
          case VariableData::MT_STATIC: objects->addToken(OCODE_ADD_STATIC_U, address); break;
          case VariableData::MT_AUTO: objects->addToken(OCODE_ADD_AUTO_U, address); break;
          case VariableData::MT_POINTER: objects->addToken(OCODE_ADD_PTR_U, address); break;

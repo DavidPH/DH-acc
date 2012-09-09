@@ -231,7 +231,7 @@ void SourceExpression_Binary::doSetBase(ObjectVector *objects,
    }
 
    int tmpBase = 0;
-   ObjectExpression::Pointer tmpA;
+   ObjectExpression::Pointer tmpA, tmpB;
 
    VariableData::Pointer tmp = VariableData::create_stack(src->size);
 
@@ -270,16 +270,34 @@ void SourceExpression_Binary::doSetBase(ObjectVector *objects,
          objects->addToken(OCODE_GET_TEMP, tmpA);
       }
    }
+   // MT_FARPTR addressing.
+   else if(src->type == VariableData::MT_FARPTR)
+   {
+      src->offsetTemp = VariableData::create_stack(src->offsetExpr->getType()->getSize(pos));
+      src->offsetExpr->makeObjects(objects, src->offsetTemp);
+
+      // Extra address for get.
+      if(dst->type != VariableData::MT_VOID)
+      {
+         tmpA = context->getTempVar(tmpBase++);
+         tmpB = context->getTempVar(tmpBase++);
+         objects->addToken(OCODE_SET_TEMP, tmpB);
+         objects->addToken(OCODE_SET_TEMP, tmpA);
+         objects->addToken(OCODE_GET_TEMP, tmpA);
+         objects->addToken(OCODE_GET_TEMP, tmpB);
+      }
+   }
 
    doSet(objects, src, typeL, tmpBase);
 
    if (dst->type != VariableData::MT_VOID)
    {
-      // MT_POINTER addressing.
-      if (src->type == VariableData::MT_POINTER)
-         objects->addToken(OCODE_GET_TEMP, tmpA);
+      // MT_ARRAY addressing.
+      if(src->type == VariableData::MT_ARRAY)
+         doSetBaseGet(objects, src, NULL, NULL);
+      else
+         doSetBaseGet(objects, src, tmpA, tmpB);
 
-      doSetBaseGet(objects, src, NULL, NULL);
 
       make_objects_memcpy_post(objects, dst, tmp, typeL, context, pos);
    }
