@@ -98,7 +98,7 @@ SRCEXPC_PARSE_DEFN_HALF(Statement)
       {
          // Create a context for the entire loop.
          SourceContext::Reference contextLoop = SourceContext::
-            create(context, SourceContext::CT_SWITCH);
+            create(context, SourceContext::CT_LOOP);
 
          // ( expression )
          in->get(SourceTokenC::TT_PAREN_O);
@@ -116,7 +116,7 @@ SRCEXPC_PARSE_DEFN_HALF(Statement)
       {
          // Create a context for the entire loop.
          SourceContext::Reference contextLoop = SourceContext::
-            create(context, SourceContext::CT_SWITCH);
+            create(context, SourceContext::CT_LOOP);
 
          // statement
          SourceExpression::Pointer exprBody = ParseStatement(in, contextLoop);
@@ -185,7 +185,7 @@ SRCEXPC_PARSE_DEFN_HALF(Statement)
          in->get(SourceTokenC::TT_PAREN_C);
 
          // statement
-         SourceExpression::Pointer exprBody = ParseExpression(in, contextLoop);
+         SourceExpression::Pointer exprBody = ParseStatement(in, contextLoop);
 
          return create_branch_for(exprCond, exprBody, exprIter, exprInit, contextLoop, tok->pos);
       }
