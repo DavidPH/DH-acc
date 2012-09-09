@@ -114,7 +114,7 @@ bool SourceExpressionC::IsType(SRCEXPC_PARSE_ARG1)
    if(tok->data == "enum") return true;
 
    // typedef-name
-   if(context->getVariableTypeNull(tok->data)) return true;
+   if(context->isVariableType_typedef(tok->data)) return true;
 
    // type-qualifier
    if(IsQualifier(in, context)) return true;
@@ -341,6 +341,7 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
 
       if(tok->data == "_Sat")       { ++numSat;  continue; }
 
+      // struct-or-union-specifier
       if(tok->data == "struct" || tok->data == "union")
       {
          if(spec.type) Error(tok->pos, "multiple type-specifier (struct-or-union-specifier)");
@@ -349,6 +350,7 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
          continue;
       }
 
+      // enum-specifier
       if(tok->data == "enum")
       {
          if(spec.type) Error(tok->pos, "multiple type-specifier (enum-specifier)");
@@ -357,10 +359,11 @@ SourceExpressionC::DeclarationSpecifiers SourceExpressionC::
          continue;
       }
 
-      if((type = context->getVariableTypeNull(tok->data)))
+      // typedef-name
+      if(context->isVariableType_typedef(tok->data))
       {
          if(spec.type) Error(tok->pos, "multiple type-specifier (typedef-name)");
-         spec.type = type;
+         spec.type = context->getVariableType_typedef(tok->data, tok->pos);
          continue;
       }
 

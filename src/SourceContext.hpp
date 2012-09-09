@@ -140,6 +140,10 @@ public:
     std::vector<CounterPointer<VariableType> > const &types,
     SourcePosition const &position);
 
+   // typedef-name
+   CounterReference<VariableType> getVariableType_typedef(
+      std::string const &name, SourcePosition const &pos);
+
    // typedef
    CounterReference<VariableType> getVariableType_typedef
    (std::string const &name, VariableType *type, SourcePosition const &position);
@@ -163,6 +167,7 @@ public:
    int isFunction(std::string const &name) const;
    bool isVariable(std::string const &name) const;
    bool isVariable(std::string const &name, bool canLocal) const;
+   bool isVariableType_typedef(std::string const &name) const;
 
    std::string makeLabel();
 

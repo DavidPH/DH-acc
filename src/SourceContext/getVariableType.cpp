@@ -152,6 +152,20 @@ VariableType::Reference SourceContext::getVariableType_struct
 //
 // SourceContext::getVariableType_typedef
 //
+VariableType::Reference SourceContext::getVariableType_typedef(
+   std::string const &name, SourcePosition const &pos)
+{
+   for(size_t i = 0; i < typedefNames.size(); ++i)
+      if(typedefNames[i] == name) return typedefTypes[i];
+
+   if(parent) return parent->getVariableType_typedef(name, pos);
+
+   Error_NP("expected typedef-name");
+}
+
+//
+// SourceContext::getVariableType_typedef
+//
 VariableType::Reference SourceContext::getVariableType_typedef
 (std::string const &name, VariableType *type, SourcePosition const &pos)
 {
@@ -247,6 +261,19 @@ VariableType::Pointer SourceContext::getVariableTypeNull
    if (parent) return parent->getVariableTypeNull(name);
 
    return NULL;
+}
+
+//
+// SourceContext::isVariableType_typedef
+//
+bool SourceContext::isVariableType_typedef(std::string const &name) const
+{
+   for(size_t i = 0; i < typedefNames.size(); ++i)
+      if(typedefNames[i] == name) return true;
+
+   if(parent) return parent->isVariableType_typedef(name);
+
+   return false;
 }
 
 // EOF
