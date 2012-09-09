@@ -285,6 +285,13 @@ void SourceTokenizerC::doCommand()
    else if (tok->data == "include") doCommand_include(tok);
    else if (tok->data == "undef")   doCommand_undef(tok);
 
+   else if(isSkip())
+   {
+      while(tok->type != SourceTokenC::TT_ENDL)
+         tok = getRaw();
+
+      unget(tok);
+   }
    else Error(tok->pos, "unknown command: %s", tok->data.c_str());
 }
 
