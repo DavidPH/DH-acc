@@ -294,9 +294,12 @@ public:
 
    SRCEXPC_PARSE_DECL(AddressSpace);
    SRCEXPC_PARSE_DECL_EXT(Initializer, CounterPointer<VariableType> &type, bool root);
-   SRCEXPC_PARSE_DECL_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &decl);
-   SRCEXPC_PARSE_DECL_EXT(Typedef, DeclarationSpecifiers const &spec);
+   SRCEXPC_PARSE_DECL_EXT(InitDeclarator, DeclarationSpecifiers const &spec);
+   SRCEXPC_PARSE_DECL_EXT(InitDeclarator, DeclarationSpecifiers const &spec, Declarator &decl);
+   SRCEXPC_PARSE_DECL(Library);
    SRCEXPC_PARSE_DECL(StaticAssert);
+   SRCEXPC_PARSE_DECL_EXT(Typedef, DeclarationSpecifiers const &spec);
+   SRCEXPC_PARSE_DECL_EXT(Declaration, bool external);
    SRCEXPC_PARSE_DECL(Declaration);
 
    SRCEXPC_PARSE_DECL_EXT(Function, DeclarationSpecifiers const &spec, Declarator &decl);

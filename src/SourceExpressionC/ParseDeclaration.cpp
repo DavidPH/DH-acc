@@ -306,9 +306,18 @@ SRCEXPC_PARSE_DEFN_EXT(Initializer, VariableType::Pointer &type, bool root)
 }
 
 //
-// SourceExpressionC::ParseVariable
+// SourceExpressionC::ParseInitDeclarator
 //
-SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &decl)
+SRCEXPC_PARSE_DEFN_EXT(InitDeclarator, DeclarationSpecifiers const &spec)
+{
+   Declarator decl = ParseDeclarator(spec.type, in, context);
+   return ParseInitDeclarator(spec, decl, in, context);
+}
+
+//
+// SourceExpressionC::ParseInitDeclarator
+//
+SRCEXPC_PARSE_DEFN_EXT(InitDeclarator, DeclarationSpecifiers const &spec, Declarator &decl)
 {
    SourcePosition pos = in->peek()->pos;
 
@@ -446,30 +455,18 @@ SRCEXPC_PARSE_DEFN_EXT(Variable, DeclarationSpecifiers const &spec, Declarator &
 }
 
 //
-// SourceExpressionC::ParseTypedef
+// SourceExpressionC::ParseLibrary
 //
-SRCEXPC_PARSE_DEFN_EXT(Typedef, DeclarationSpecifiers const &spec)
+// library-declaration:
+//   <__library> ( string-literal ) ;
+//
+SRCEXPC_PARSE_DEFN_HALF(Library)
 {
-   SourcePosition pos = in->peek()->pos;
+   SourcePosition pos = in->get(SourceTokenC::TT_NAM, "__library")->pos;
 
-   if(spec.hasFunctionSpecifier())
-      Error_P("typedef with function-specifier");
-
-   // A typedef must include at least one declarator.
-   if(in->peekType(SourceTokenC::TT_SEMICOLON))
-      Error_P("expected declarator");
-
-   // Read a series of declarators as typedefs.
-   do
-   {
-      Declarator decl = ParseDeclarator(spec.type, in, context);
-
-      if(decl.name.empty()) Error_P("expected declarator");
-
-      context->getVariableType_typedef(decl.name, decl.type, pos);
-   }
-   while(in->dropType(SourceTokenC::TT_COMMA));
-
+   in->get(SourceTokenC::TT_PAREN_O);
+   ObjectExpression::set_library(in->get(SourceTokenC::TT_STR)->data);
+   in->get(SourceTokenC::TT_PAREN_C);
    in->get(SourceTokenC::TT_SEMICOLON);
 
    return create_value_data(context, pos);
@@ -502,54 +499,114 @@ SRCEXPC_PARSE_DEFN_HALF(StaticAssert)
 }
 
 //
-// SourceExpressionC::ParseDeclaration
+// SourceExpressionC::ParseTypedef
 //
-SRCEXPC_PARSE_DEFN_HALF(Declaration)
+SRCEXPC_PARSE_DEFN_EXT(Typedef, DeclarationSpecifiers const &spec)
 {
    SourcePosition pos = in->peek()->pos;
 
-   if(in->peekType(SourceTokenC::TT_NAM, "_Static_assert"))
-      return ParseStaticAssert(in, context);
+   if(spec.hasFunctionSpecifier())
+      Error_P("typedef with function-specifier");
 
-   if(in->peekType(SourceTokenC::TT_NAM, "__address_space"))
-      return ParseAddressSpace(in, context);
+   // A typedef must include at least one declarator.
+   if(in->peekType(SourceTokenC::TT_SEMICOLON))
+      Error_P("expected declarator");
 
-   DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
-
-   if(spec.storage == SC_NONE && in->dropType(SourceTokenC::TT_SEMICOLON))
-      return create_value_data(context, pos);
-
-   if(spec.storage == SC_TYPEDEF)
-      return ParseTypedef(spec, in, context);
-
-   // struct-or-union-specifier identifier ;
-   if((spec.type->getBasicType() == VariableType::BT_STRUCT ||
-       spec.type->getBasicType() == VariableType::BT_UNION) &&
-      in->dropType(SourceTokenC::TT_SEMICOLON))
-   {
-      if(spec.type->getBasicType() == VariableType::BT_STRUCT)
-         context->addVariableType_struct(spec.type->getName());
-      else
-         context->addVariableType_union(spec.type->getName());
-
-      return create_value_data(context, pos);
-   }
-
-   // Parse variable declarations and function prototypes.
-
-   Vector exprs;
-
+   // Read a series of declarators as typedefs.
    do
    {
       Declarator decl = ParseDeclarator(spec.type, in, context);
 
-      exprs.push_back(ParseVariable(spec, decl, in, context));
+      if(decl.name.empty()) Error_P("expected declarator");
+
+      context->getVariableType_typedef(decl.name, decl.type, pos);
    }
    while(in->dropType(SourceTokenC::TT_COMMA));
 
    in->get(SourceTokenC::TT_SEMICOLON);
 
+   return create_value_data(context, pos);
+}
+
+//
+// SourceExpressionC::ParseDeclaration
+//
+SRCEXPC_PARSE_DEFN_EXT(Declaration, bool external)
+{
+   SourcePosition pos = in->peek()->pos;
+
+   // static_assert-declaration
+   if(in->peekType(SourceTokenC::TT_NAM, "_Static_assert"))
+      return ParseStaticAssert(in, context);
+
+   // address_space-declaration
+   if(in->peekType(SourceTokenC::TT_NAM, "__address_space"))
+      return ParseAddressSpace(in, context);
+
+   // library-declaration
+   if(external && in->peekType(SourceTokenC::TT_NAM, "__library"))
+      return ParseLibrary(in, context);
+
+   // declaration-specifiers
+   DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
+   spec.external = external;
+
+   // declaration-specifiers ;
+   if(spec.storage == SC_NONE && in->dropType(SourceTokenC::TT_SEMICOLON))
+   {
+      // struct-or-union-specifier identifier ;
+      if(!spec.type->getName().empty())
+      {
+         if(spec.type->getBasicType() == VariableType::BT_STRUCT)
+            context->addVariableType_struct(spec.type->getName());
+         else if(spec.type->getBasicType() == VariableType::BT_UNION)
+            context->addVariableType_union(spec.type->getName());
+      }
+
+      return create_value_data(context, pos);
+   }
+
+   // typedef
+   if(spec.storage == SC_TYPEDEF)
+      return ParseTypedef(spec, in, context);
+
+   // Constraint.
+   if(spec.external && (spec.storage == SC_AUTO || spec.storage == SC_REGISTER))
+      Error_P("auto or register in external-declaration");
+
+   // init-declarator or function-definition
+   Vector exprs;
+   {
+      // declarator
+      Declarator decl = ParseDeclarator(spec.type, in, context);
+
+      // function-definition
+      if(spec.external && in->peekType(SourceTokenC::TT_BRACE_O) &&
+         VariableType::is_bt_function(decl.type->getBasicType()))
+      {
+         return ParseFunction(spec, decl, in, context);
+      }
+
+      // init-declarator
+      exprs.push_back(ParseInitDeclarator(spec, decl, in, context));
+   }
+
+   // , init-declarator
+   while(in->dropType(SourceTokenC::TT_COMMA))
+      exprs.push_back(ParseInitDeclarator(spec, in, context));
+
+   // ;
+   in->get(SourceTokenC::TT_SEMICOLON);
+
    return create_value_block(exprs, context, pos);
+}
+
+//
+// SourceExpressionC::ParseDeclaration
+//
+SRCEXPC_PARSE_DEFN_HALF(Declaration)
+{
+   return ParseDeclaration(false, in, context);
 }
 
 //
@@ -627,60 +684,7 @@ SRCEXPC_PARSE_DEFN_EXT(Function, DeclarationSpecifiers const &spec, Declarator &
 //
 SRCEXPC_PARSE_DEFN_HALF(ExternalDeclaration)
 {
-   SourcePosition pos = in->peek()->pos;
-
-   if(in->peekType(SourceTokenC::TT_NAM, "_Static_assert"))
-      return ParseStaticAssert(in, context);
-
-   if(in->peekType(SourceTokenC::TT_NAM, "__address_space"))
-      return ParseAddressSpace(in, context);
-
-   // library-declaration:
-   //   __library ( string-literal ) ;
-   if(in->dropType(SourceTokenC::TT_NAM, "__library"))
-   {
-      in->get(SourceTokenC::TT_PAREN_O);
-      ObjectExpression::set_library(in->get(SourceTokenC::TT_STR)->data);
-      in->get(SourceTokenC::TT_PAREN_C);
-      in->get(SourceTokenC::TT_SEMICOLON);
-   }
-
-   DeclarationSpecifiers spec = ParseDeclarationSpecifiers(in, context);
-   spec.external = true;
-
-   if(spec.storage == SC_NONE && in->dropType(SourceTokenC::TT_SEMICOLON))
-      return create_value_data(context, pos);
-
-   if(spec.storage == SC_TYPEDEF)
-      return ParseTypedef(spec, in, context);
-
-   if(spec.storage == SC_AUTO || spec.storage == SC_REGISTER)
-      Error_P("auto or register in external-declaration");
-
-   Declarator decl = ParseDeclarator(spec.type, in, context);
-
-   if(VariableType::is_bt_function(decl.type->getBasicType()) &&
-      in->peekType(SourceTokenC::TT_BRACE_O))
-   {
-      return ParseFunction(spec, decl, in, context);
-   }
-
-   // Parse variable declarations and function prototypes.
-
-   Vector exprs;
-
-   exprs.push_back(ParseVariable(spec, decl, in, context));
-
-   while(in->dropType(SourceTokenC::TT_COMMA))
-   {
-      decl = ParseDeclarator(spec.type, in, context);
-
-      exprs.push_back(ParseVariable(spec, decl, in, context));
-   }
-
-   in->get(SourceTokenC::TT_SEMICOLON);
-
-   return create_value_block(exprs, context, pos);
+   return ParseDeclaration(true, in, context);
 }
 
 // EOF
