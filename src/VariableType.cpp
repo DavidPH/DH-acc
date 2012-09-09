@@ -1782,6 +1782,10 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
       if(is_bt_arithmetic(srcBT) && is_bt_arithmetic(dstBT))
          return CAST_PROMO;
 
+      // integer->enum
+      if(is_bt_integer(srcBT) && dstBT == BT_ENUM)
+         return CAST_CONVE;
+
       // arithmetic->enum
       if(is_bt_arithmetic(srcBT) && dstBT == BT_ENUM)
          return CAST_FORCE;
@@ -1969,8 +1973,8 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
       if(!dstR->getQualifier(srcR->getQualifiers()))
          return CAST_FORCE;
 
-      // Can go to void* implicitly.
-      if(dstR->getBasicType() == BT_VOID)
+      // Can go to and from void* implicitly.
+      if(dstR->getBasicType() == BT_VOID || srcR->getBasicType() == BT_VOID)
          return CAST_CONVE;
 
       // Not losing qualifiers, but still differing types.
