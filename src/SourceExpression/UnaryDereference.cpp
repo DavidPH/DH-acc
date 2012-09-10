@@ -59,7 +59,7 @@ public:
    //
    virtual bool canGetData() const
    {
-      if(VariableType::is_bt_function(expr->getType()->getReturn()->getBasicType()))
+      if(VariableType::IsTypeFunction(expr->getType()->getReturn()->getBasicType()))
          return false;
 
       return true;
@@ -72,7 +72,7 @@ public:
    {
       VariableType::Reference type = expr->getType()->getReturn();
 
-      if(VariableType::is_bt_function(type->getBasicType()))
+      if(VariableType::IsTypeFunction(type->getBasicType()))
          return Super::getData();
 
       biguint            size = type->getSize(pos);
@@ -202,7 +202,7 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
 
    VariableType::Reference type = getType();
 
-   if(VariableType::is_bt_function(type->getBasicType()))
+   if(VariableType::IsTypeFunction(type->getBasicType()))
       return expr->makeObjects(objects, dst);
 
    VariableData::Pointer src = getData();

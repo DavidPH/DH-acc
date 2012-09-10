@@ -80,7 +80,7 @@ protected:
    //
    virtual bool canDoSet(VariableData *data, VariableType *type) const
    {
-      if(VariableType::is_bt_unsigned(type->getBasicType()))
+      if(VariableType::IsTypeUnsigned(type->getBasicType()))
          return false;
 
       CAN_SET_SWITCHES(RSH);

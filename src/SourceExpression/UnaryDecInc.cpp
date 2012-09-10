@@ -847,7 +847,7 @@ private:
       {
          doL(objects, dst, src, tmp);
       }
-      else if (VariableType::is_bt_integer(bt))
+      else if (VariableType::IsTypeInteger(bt))
       {
          doI(objects, dst, src, tmp);
       }
@@ -869,7 +869,7 @@ private:
                doPF(objects, dst, src, tmp, objects->getValue(value));
          }
       }
-      else if (VariableType::is_bt_fix(bt))
+      else if (VariableType::IsTypeFixed(bt))
       {
          doX(objects, dst, src, tmp);
       }

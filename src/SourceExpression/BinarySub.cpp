@@ -66,7 +66,7 @@ public:
       if (btL == VariableType::BT_PTR || btR == VariableType::BT_PTR)
       {
          // Pointer constraints.
-         if (btR != VariableType::BT_PTR && !VariableType::is_bt_integer(btR))
+         if (btR != VariableType::BT_PTR && !VariableType::IsTypeInteger(btR))
             Error_NP("pointer - non-integer");
 
          if (btL != VariableType::BT_PTR)
@@ -77,7 +77,7 @@ public:
          CONSTRAINT_ARITHMETIC("-");
       }
 
-      if (assign && !VariableType::is_bt_arithmetic(btR))
+      if (assign && !VariableType::IsTypeArithmetic(btR))
          Error_NP("X -= non-arithmetic");
 
       CONSTRUCTOR_POINTER_PREAMBLE();

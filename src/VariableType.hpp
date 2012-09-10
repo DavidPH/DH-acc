@@ -292,25 +292,193 @@ public:
    static CastType get_cast(Vector const &dst, Vector const &src);
    static CastType get_cast(Vector const &dst, Vector const &src, VecObj const &srcObj);
 
-   // Returns true if the given type is an arithmetic type.
-   static bool is_bt_arithmetic(BasicType type);
+   //
+   // IsTypeAggregate
+   //
+   static bool IsTypeAggregate(BasicType type)
+   {
+      return type == BT_ARR || type == BT_STRUCT;
+   }
 
-   // Returns true if the given type is a BT_BIT* type.
-   static bool is_bt_bit(BasicType type) {return type == BT_BIT_HRD || type == BT_BIT_SFT;}
+   //
+   // IsTypeArithmetic
+   //
+   static bool IsTypeArithmetic(BasicType type)
+   {
+      return IsTypeInteger(type) || IsTypeFixed(type) || IsTypeFloating(type);
+   }
 
-   // Returns true if the given type is a BT_FIX* type.
-   static bool is_bt_fix(BasicType type);
+   //
+   // IsTypeBasic
+   //
+   static bool IsTypeBasic(BasicType type)
+   {
+      return type == BT_CHR || IsTypeSignedInteger(type) ||
+             IsTypeUnsignedInteger(type) || IsTypeFloating(type);
+   }
 
-   static bool is_bt_function(BasicType type);
+   //
+   // IsTypeBoolean
+   //
+   static bool IsTypeBoolean(BasicType type)
+   {
+      return type == BT_BIT_HRD || type == BT_BIT_SFT;
+   }
 
-   // Returns true if the given type is an integer type.
-   static bool is_bt_integer(BasicType type);
+   //
+   // IsTypeCharacter
+   //
+   static bool IsTypeCharacter(BasicType type)
+   {
+      return type == BT_CHR || type == BT_INT_HH || type == BT_UNS_HH;
+   }
 
-   // Returns true if the given type is a named or numbered script type.
-   static bool is_bt_script(BasicType type) {return type == BT_FUN_SNA || type == BT_FUN_SNU;}
+   //
+   // IsTypeComplex
+   //
+   static bool IsTypeComplex(BasicType type)
+   {
+      return type == BT_CLX;
+   }
 
-   // Returns true if the given type is an unsigned type.
-   static bool is_bt_unsigned(BasicType type);
+   //
+   // IsTypeEnumerated
+   //
+   static bool IsTypeEnumerated(BasicType type)
+   {
+      return type == BT_ENUM;
+   }
+
+   //
+   // IsTypeFixed
+   //
+   static bool IsTypeFixed(BasicType type)
+   {
+      return IsTypePrimaryFixed(type) || IsTypeSaturatingFixed(type);
+   }
+
+   //
+   // IsTypeFloating
+   //
+   static bool IsTypeFloating(BasicType type)
+   {
+      return IsTypeRealFloating(type) || IsTypeComplex(type);
+   }
+
+   //
+   // IsTypeFunction
+   //
+   static bool IsTypeFunction(BasicType type)
+   {
+      return type == BT_FUN || type == BT_FUN_ASM || type == BT_FUN_LIN ||
+             type == BT_FUN_NAT || IsTypeScript(type);
+   }
+
+   //
+   // IsTypeInteger
+   //
+   static bool IsTypeInteger(BasicType type)
+   {
+      return type == BT_CHR || IsTypeSignedInteger(type) ||
+             IsTypeUnsignedInteger(type) || IsTypeEnumerated(type);
+   }
+
+   //
+   // IsTypePrimaryFixed
+   //
+   static bool IsTypePrimaryFixed(BasicType type)
+   {
+      return IsTypePrimarySignedFixed(type) || IsTypePrimaryUnsignedFixed(type);
+   }
+
+   //
+   // IsTypeScript
+   //
+   static bool IsTypeScript(BasicType type)
+   {
+      return type == BT_FUN_SNA || type == BT_FUN_SNU;
+   }
+
+   //
+   // IsTypePrimarySignedFixed
+   //
+   static bool IsTypePrimarySignedFixed(BasicType type)
+   {
+      return type == BT_FIX_HH || type == BT_FIX_H || type == BT_FIX ||
+             type == BT_FIX_L || type == BT_FIX_LL ||
+             type == BT_FRA_HH || type == BT_FRA_H || type == BT_FRA ||
+             type == BT_FRA_L || type == BT_FRA_LL;
+   }
+
+   //
+   // IsTypePrimaryUnsignedFixed
+   //
+   static bool IsTypePrimaryUnsignedFixed(BasicType type)
+   {
+      return type == BT_ACC_HH || type == BT_ACC_H || type == BT_ACC ||
+             type == BT_ACC_L || type == BT_ACC_LL ||
+             type == BT_ANG_HH || type == BT_ANG_H || type == BT_ANG ||
+             type == BT_ANG_L || type == BT_ANG_LL;
+   }
+
+   //
+   // IsTypeReal
+   //
+   static bool IsTypeReal(BasicType type)
+   {
+      return IsTypeInteger(type) || IsTypeFixed(type) || IsTypeRealFloating(type);
+   }
+
+   //
+   // IsTypeRealFloating
+   //
+   static bool IsTypeRealFloating(BasicType type)
+   {
+      return type == BT_FLT_HH || type == BT_FLT_H || type == BT_FLT ||
+             type == BT_FLT_L || type == BT_FLT_LL;
+   }
+
+   //
+   // IsTypeSaturatingFixed
+   //
+   static bool IsTypeSaturatingFixed(BasicType type)
+   {
+      return type == BT_SAT;
+   }
+
+   //
+   // IsTypeScalar
+   //
+   static bool IsTypeScalar(BasicType type)
+   {
+      return IsTypeArithmetic(type) || type == BT_PTR || type == BT_STR;
+   }
+
+   //
+   // IsTypeSignedInteger
+   //
+   static bool IsTypeSignedInteger(BasicType type)
+   {
+      return type == BT_INT_HH || type == BT_INT_H || type == BT_INT ||
+             type == BT_INT_L || type == BT_INT_LL;
+   }
+
+   //
+   // IsTypeUnsigned
+   //
+   static bool IsTypeUnsigned(BasicType type)
+   {
+      return IsTypeUnsignedInteger(type) || type == BT_PTR || type == BT_STR;
+   }
+
+   //
+   // IsTypeUnsignedInteger
+   //
+   static bool IsTypeUnsignedInteger(BasicType type)
+   {
+      return type == BT_UNS_HH || type == BT_UNS_H || type == BT_UNS ||
+             type == BT_UNS_L || type == BT_UNS_LL || IsTypeBoolean(type);
+   }
 
 private:
    explicit VariableType();

@@ -56,7 +56,7 @@ public:
    //
    virtual bool canMakeObject() const
    {
-      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+      if(VariableType::IsTypeFunction(type->getReturn()->getBasicType()))
          return expr->canMakeObject();
 
       VariableData::Pointer data = expr->getData();
@@ -102,7 +102,7 @@ public:
    //
    virtual ObjectExpression::Pointer makeObject() const
    {
-      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+      if(VariableType::IsTypeFunction(type->getReturn()->getBasicType()))
          return expr->makeObject();
 
       VariableData::Pointer data = expr->getData();
@@ -152,7 +152,7 @@ private:
    {
       Super::recurse_makeObjects(objects, dst);
 
-      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+      if(VariableType::IsTypeFunction(type->getReturn()->getBasicType()))
          return expr->makeObjects(objects, dst);
 
       VariableData::Pointer data = expr->getData();

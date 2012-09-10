@@ -346,7 +346,7 @@ SRCEXPC_PARSE_DEFN_EXT(InitDeclarator, DeclarationSpecifiers const &spec, Declar
    }
 
    // Function prototype.
-   if(VariableType::is_bt_function(decl.type->getBasicType()))
+   if(VariableType::IsTypeFunction(decl.type->getBasicType()))
    {
       if(spec.storage == SC_AUTO || spec.storage == SC_REGISTER)
          Error_P("auto or register in function prototype");
@@ -582,7 +582,7 @@ SRCEXPC_PARSE_DEFN_EXT(Declaration, bool external)
 
       // function-definition
       if(spec.external && in->peekType(SourceTokenC::TT_BRACE_O) &&
-         VariableType::is_bt_function(decl.type->getBasicType()))
+         VariableType::IsTypeFunction(decl.type->getBasicType()))
       {
          return ParseFunction(spec, decl, in, context);
       }

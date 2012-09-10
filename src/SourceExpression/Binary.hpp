@@ -82,20 +82,20 @@ SourceExpression::Pointer exprSize =                      \
 // CONSTRAINT_ARITHMETIC
 //
 #define CONSTRAINT_ARITHMETIC(OPER)           \
-if (!VariableType::is_bt_arithmetic(btL))     \
+if (!VariableType::IsTypeArithmetic(btL))     \
    Error_N(pos, "non-arithmetic " OPER " X"); \
                                               \
-if (!VariableType::is_bt_arithmetic(btR))     \
+if (!VariableType::IsTypeArithmetic(btR))     \
    Error_N(pos, "X " OPER " non-arithmetic");
 
 //
 // CONSTRAINT_INTEGER
 //
 #define CONSTRAINT_INTEGER(OPER)           \
-if (!VariableType::is_bt_integer(btL))     \
+if (!VariableType::IsTypeInteger(btL))     \
    Error_N(pos, "non-integer " OPER " X"); \
                                            \
-if (!VariableType::is_bt_integer(btR))     \
+if (!VariableType::IsTypeInteger(btR))     \
    Error_N(pos, "X " OPER " non-integer");
 
 //

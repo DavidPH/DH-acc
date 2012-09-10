@@ -130,7 +130,7 @@ static void make_objects_literal
       break;
 
    case VariableType::BT_PTR:
-      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+      if(VariableType::IsTypeFunction(type->getReturn()->getBasicType()))
       {
          make_objects_literal(objects, elem, type->getReturn(), pos);
          break;

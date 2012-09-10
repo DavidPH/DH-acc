@@ -54,11 +54,11 @@ public:
       CONSTRUCTOR_ARRAY_DECAY();
 
       // Special case for integer+__string to become __string+integer.
-      if(!assign && VariableType::is_bt_integer(btL) && btR == VariableType::BT_STR)
+      if(!assign && VariableType::IsTypeInteger(btL) && btR == VariableType::BT_STR)
          swapExpr();
 
       // Special case for __string+integer.
-      if(!assign && btL == VariableType::BT_STR && VariableType::is_bt_integer(btR))
+      if(!assign && btL == VariableType::BT_STR && VariableType::IsTypeInteger(btR))
       {
          docast = false;
          exprR = create_value_cast_implicit(exprR, VariableType::get_bt_uns(), context, pos);
@@ -72,10 +72,10 @@ public:
          if (btL == VariableType::BT_PTR && btR == VariableType::BT_PTR)
             Error_NP("pointer + pointer");
 
-         if (btL == VariableType::BT_PTR && !VariableType::is_bt_integer(btR))
+         if (btL == VariableType::BT_PTR && !VariableType::IsTypeInteger(btR))
             Error_NP("pointer + non-integer");
 
-         if (!VariableType::is_bt_integer(btL) && btR == VariableType::BT_PTR)
+         if (!VariableType::IsTypeInteger(btL) && btR == VariableType::BT_PTR)
             Error_NP("non-integer + pointer");
       }
       else
@@ -83,7 +83,7 @@ public:
          CONSTRAINT_ARITHMETIC("+");
       }
 
-      if(assign && !VariableType::is_bt_arithmetic(btR))
+      if(assign && !VariableType::IsTypeArithmetic(btR))
          Error_NP("X += non-arithmetic");
 
       CONSTRUCTOR_POINTER_PREAMBLE();

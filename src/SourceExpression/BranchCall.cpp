@@ -82,7 +82,7 @@ SourceExpression_BranchCall::SourceExpression_BranchCall
       type = expr->getType();
    }
 
-   if(!VariableType::is_bt_function(type->getBasicType()))
+   if(!VariableType::IsTypeFunction(type->getBasicType()))
       Error_NP("expected function type");
 
    VariableType::Vector const &types = type->getTypes();

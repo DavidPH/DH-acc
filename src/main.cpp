@@ -347,7 +347,7 @@ static inline int _main()
 
       // Function preamble.
       SourceExpression::Pointer exprRoot;
-      if(VariableType::is_bt_script(type->getBasicType()))
+      if(VariableType::IsTypeScript(type->getBasicType()))
          exprRoot = SourceExpression::create_root_script(type, context, pos);
       else if(type->getBasicType() == VariableType::BT_FUN)
          exprRoot = SourceExpression::create_root_function(type, argTypes, context, pos);

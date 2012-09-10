@@ -900,7 +900,7 @@ bigsint VariableType::getSize(SourcePosition const &pos) const
       return width ? typeRet->getSize(pos) * width : 0;
 
    case BT_PTR:
-      if(is_bt_function(typeRet->basic))
+      if(IsTypeFunction(typeRet->basic))
          return typeRet->getSize(pos);
 
       if(typeRet->store == STORE_FAR || typeRet->store == STORE_STRING)
@@ -1724,7 +1724,7 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
          return get_cast(dst, src->getReturn()->getPointer(), NULL, CAST_POINT);
 
       // integer->pointer
-      if(is_bt_integer(srcBT) && dstBT == BT_PTR)
+      if(IsTypeInteger(srcBT) && dstBT == BT_PTR)
       {
          if(srcObj && !srcObj->resolveINT())
             return CAST_PROMO;
@@ -1733,7 +1733,7 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
       }
 
       // integer->string
-      if(is_bt_integer(srcBT) && dstBT == BT_STR)
+      if(IsTypeInteger(srcBT) && dstBT == BT_STR)
       {
          if(srcObj && !srcObj->resolveINT())
             return CAST_PROMO;
@@ -1746,7 +1746,7 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
          return CAST_PROMO;
 
       // nullptr->function
-      if(srcBT == BT_PTR_NUL && is_bt_function(dstBT))
+      if(srcBT == BT_PTR_NUL && IsTypeFunction(dstBT))
          return CAST_PROMO;
 
       // nullptr->string
@@ -1758,11 +1758,11 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
          return CAST_CONVE;
 
       // function->boolean
-      if(is_bt_function(srcBT) && (dstBT == BT_BIT_HRD || dstBT == BT_BIT_SFT))
+      if(IsTypeFunction(srcBT) && (dstBT == BT_BIT_HRD || dstBT == BT_BIT_SFT))
          return CAST_CONVE;
 
       // function->pointer
-      if(is_bt_function(srcBT) && dstBT == BT_PTR)
+      if(IsTypeFunction(srcBT) && dstBT == BT_PTR)
          return get_cast(dst, src->getPointer(), NULL, exact);
 
       // string->array
@@ -1770,7 +1770,7 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
          return CAST_FORCE;
 
       // string->integer
-      if(srcBT == BT_STR && is_bt_integer(dstBT))
+      if(srcBT == BT_STR && IsTypeInteger(dstBT))
          return CAST_FORCE;
 
       // string->pointer
@@ -1779,16 +1779,8 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
 
       // arithmetic->arithmetic
       // FIXME: Some arithmetic->arithmetic is CAST_CONVE.
-      if(is_bt_arithmetic(srcBT) && is_bt_arithmetic(dstBT))
+      if(IsTypeArithmetic(srcBT) && IsTypeArithmetic(dstBT))
          return CAST_PROMO;
-
-      // integer->enum
-      if(is_bt_integer(srcBT) && dstBT == BT_ENUM)
-         return CAST_CONVE;
-
-      // arithmetic->enum
-      if(is_bt_arithmetic(srcBT) && dstBT == BT_ENUM)
-         return CAST_FORCE;
 
       // block->
       if(srcBT == BT_BLOCK)
@@ -1833,20 +1825,12 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
             return get_cast(dst, src->types.back(), srcObjVec.back(), CAST_PROMO);
       }
 
-      // enum->int
-      if(srcBT == BT_ENUM && (is_bt_integer(dstBT) && dstBT != BT_ENUM))
-         return CAST_PROMO;
-
-      // enum->arithmetic
-      if(srcBT == BT_ENUM && is_bt_arithmetic(dstBT))
-         return CAST_FORCE;
-
       // function->function
-      if(is_bt_function(srcBT) && is_bt_function(dstBT))
+      if(IsTypeFunction(srcBT) && IsTypeFunction(dstBT))
          return CAST_FORCE;
 
       // pointer->int
-      if(srcBT == BT_PTR && (is_bt_integer(dstBT) && dstBT != BT_ENUM))
+      if(srcBT == BT_PTR && IsTypeInteger(dstBT))
          return CAST_FORCE;
 
 
@@ -2013,172 +1997,6 @@ VariableType::CastType VariableType::get_cast(Vector const &dst, Vector const &s
       cast = std::max(get_cast(*dstItr++, *srcItr++, *srcObjItr++), cast);
 
    return cast;
-}
-
-//
-// VariableType::is_bt_arithmetic
-//
-bool VariableType::is_bt_arithmetic(BasicType type)
-{
-   switch (type)
-   {
-   case BT_BIT_HRD:
-   case BT_BIT_SFT:
-   case BT_CHR:
-   case BT_ACC_HH:
-   case BT_ACC_H:
-   case BT_ACC:
-   case BT_ACC_L:
-   case BT_ACC_LL:
-   case BT_ANG_HH:
-   case BT_ANG_H:
-   case BT_ANG:
-   case BT_ANG_L:
-   case BT_ANG_LL:
-   case BT_FIX_HH:
-   case BT_FIX_H:
-   case BT_FIX:
-   case BT_FIX_L:
-   case BT_FIX_LL:
-   case BT_FLT_HH:
-   case BT_FLT_H:
-   case BT_FLT:
-   case BT_FLT_L:
-   case BT_FLT_LL:
-   case BT_FRA_HH:
-   case BT_FRA_H:
-   case BT_FRA:
-   case BT_FRA_L:
-   case BT_FRA_LL:
-   case BT_INT_HH:
-   case BT_INT_H:
-   case BT_INT:
-   case BT_INT_L:
-   case BT_INT_LL:
-   case BT_UNS_HH:
-   case BT_UNS_H:
-   case BT_UNS:
-   case BT_UNS_L:
-   case BT_UNS_LL:
-      return true;
-
-   default:
-      return false;
-   }
-}
-
-//
-// VariableType::is_bt_fix
-//
-bool VariableType::is_bt_fix(BasicType type)
-{
-   switch (type)
-   {
-   case BT_ACC_HH:
-   case BT_ACC_H:
-   case BT_ACC:
-   case BT_ACC_L:
-   case BT_ACC_LL:
-   case BT_ANG_HH:
-   case BT_ANG_H:
-   case BT_ANG:
-   case BT_ANG_L:
-   case BT_ANG_LL:
-   case BT_FIX_HH:
-   case BT_FIX_H:
-   case BT_FIX:
-   case BT_FIX_L:
-   case BT_FIX_LL:
-   case BT_FRA_HH:
-   case BT_FRA_H:
-   case BT_FRA:
-   case BT_FRA_L:
-   case BT_FRA_LL:
-      return true;
-
-   default:
-      return false;
-   }
-}
-
-//
-// VariableType::is_bt_function
-//
-bool VariableType::is_bt_function(BasicType type)
-{
-   switch (type)
-   {
-   case BT_FUN:
-   case BT_FUN_ASM:
-   case BT_FUN_LIN:
-   case BT_FUN_NAT:
-   case BT_FUN_SNA:
-   case BT_FUN_SNU:
-      return true;
-
-   default:
-      return false;
-   }
-}
-
-//
-// VariableType::is_bt_integer
-//
-bool VariableType::is_bt_integer(BasicType type)
-{
-   switch (type)
-   {
-   case BT_BIT_HRD:
-   case BT_BIT_SFT:
-   case BT_CHR:
-   case BT_INT_HH:
-   case BT_INT_H:
-   case BT_INT:
-   case BT_INT_L:
-   case BT_INT_LL:
-   case BT_UNS_HH:
-   case BT_UNS_H:
-   case BT_UNS:
-   case BT_UNS_L:
-   case BT_UNS_LL:
-
-   case BT_ENUM:
-      return true;
-
-   default:
-      return false;
-   }
-}
-
-//
-// VariableType::is_bt_unsigned
-//
-bool VariableType::is_bt_unsigned(BasicType type)
-{
-   switch (type)
-   {
-   case BT_BIT_HRD:
-   case BT_BIT_SFT:
-   case BT_UNS_HH:
-   case BT_UNS_H:
-   case BT_UNS:
-   case BT_UNS_L:
-   case BT_UNS_LL:
-
-   case BT_STR:
-
-   case BT_PTR:
-
-   case BT_FUN:
-   case BT_FUN_LIN:
-   case BT_FUN_NAT:
-   case BT_FUN_SNA:
-   case BT_FUN_SNU:
-      return true;
-
-   default:
-      return false;
-   }
 }
 
 //

@@ -135,7 +135,7 @@ public:
          (inBT == VariableType::BT_PTR && inType->getSize(pos) == 2))
          return makeObjectsL(objects, ocode, dst, src, type, inBT);
 
-      if (ct < CMP_EQ && VariableType::is_bt_unsigned(inBT))
+      if (ct < CMP_EQ && VariableType::IsTypeUnsigned(inBT))
          return makeObjectsU(objects, ocode, dst, src, type, NULL, NULL);
 
       objects->addToken(ocode);

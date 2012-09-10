@@ -67,7 +67,7 @@ public:
       }
 
       // function->pointer
-      if(thisBT == VariableType::BT_PTR && VariableType::is_bt_function(exprBT))
+      if(thisBT == VariableType::BT_PTR && VariableType::IsTypeFunction(exprBT))
       {
          expr = create_unary_reference(expr, context, pos);
          exprType = expr->getType();

@@ -100,7 +100,7 @@ void odata_set_strings(std::vector<int> &strings, VariableType const *type)
       break;
 
    case VariableType::BT_PTR:
-      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+      if(VariableType::IsTypeFunction(type->getReturn()->getBasicType()))
       {
          odata_set_strings(strings, type->getReturn());
          break;

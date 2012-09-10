@@ -267,7 +267,7 @@ void SourceExpression_RootOutput::doOut
       break;
 
    case VariableType::BT_PTR:
-      if(VariableType::is_bt_function(type->getReturn()->getBasicType()))
+      if(VariableType::IsTypeFunction(type->getReturn()->getBasicType()))
       {
          doOut(objects, type->getReturn());
       }

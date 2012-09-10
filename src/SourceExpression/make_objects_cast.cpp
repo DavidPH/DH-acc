@@ -240,7 +240,7 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
    VariableType::BasicType srcBT = srcType->getBasicType();
 
    // Cast to bool is always the same.
-   if(VariableType::is_bt_bit(dstBT))
+   if(VariableType::IsTypeBoolean(dstBT))
    {
       obj = ObjectExpression::create_branch_not(obj, pos);
       obj = ObjectExpression::create_branch_not(obj, pos);

@@ -71,7 +71,7 @@ protected:
    //
    virtual bool canDoSet(VariableData *data, VariableType *type) const
    {
-      if(VariableType::is_bt_fix(type->getBasicType())) return false;
+      if(VariableType::IsTypeFixed(type->getBasicType())) return false;
 
       CAN_SET_SWITCHES(MUL);
    }

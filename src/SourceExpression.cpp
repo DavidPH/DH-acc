@@ -613,10 +613,10 @@ SourceExpression::Pointer SourceExpression::makeExpressionFunction(
    VariableType::Reference type = getType();
    VariableType::BasicType bt   = type->getBasicType();
 
-   if(VariableType::is_bt_function(bt))
+   if(VariableType::IsTypeFunction(bt))
       return this;
 
-   if(bt == VariableType::BT_PTR && VariableType::is_bt_function(type->getReturn()->getBasicType()))
+   if(bt == VariableType::BT_PTR && VariableType::IsTypeFunction(type->getReturn()->getBasicType()))
       return create_unary_dereference(this, context, pos);
 
    Error_NP("expected function designator");

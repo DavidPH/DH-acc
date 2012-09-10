@@ -693,7 +693,7 @@ void SourceExpressionC::ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_AR
                param.back().decl.type = param.back().spec.type;
 
             // Change function to pointer-to-function.
-            if(VariableType::is_bt_function(param.back().decl.type->getBasicType()))
+            if(VariableType::IsTypeFunction(param.back().decl.type->getBasicType()))
                param.back().decl.type = param.back().decl.type->getPointer();
 
             // Change array-of-T to pointer-to-T.
