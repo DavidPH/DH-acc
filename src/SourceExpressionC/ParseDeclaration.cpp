@@ -39,6 +39,57 @@
 //
 
 //
+// SourceExpressionC::CreateObject
+//
+SourceExpression::Pointer SourceExpressionC::CreateObject(
+   std::string const &nameSrc, std::string const &nameObj, VariableType *type,
+   LinkageSpecifier linkage, std::string const &nameArr, StoreType store,
+   SourceExpression *init, bool externDef, SRCEXP_EXPR_ARGS)
+{
+   SourceVariable::Pointer var = SourceVariable::create_variable(nameSrc, type,
+      nameObj, nameArr, store, pos);
+
+   context->addVar(var, linkage, externDef);
+
+   SourceExpression::Pointer expr = create_value_variable(var, context, pos);
+
+   if(!init) return expr;
+
+   SourceExpression::Pointer exprRef = create_unary_reference(expr, context, pos);
+   expr = create_binary_assign_const(expr, init, context, pos);
+
+   if(store != STORE_AUTO && store != STORE_REGISTER)
+   {
+      // Create an extra variable to store isInit.
+      std::string             isInitName = nameObj + "::$isInit";
+      VariableType::Reference isInitType = VariableType::get_bt_bit_hrd();
+      SourceVariable::Pointer isInitVar  = SourceVariable::create_variable(
+         isInitName, isInitType, isInitName, nameArr, store, pos);
+      context->addVar(isInitVar, LINKAGE_INTERN, false);
+
+      // isInit
+      SourceExpression::Pointer isInitExpr = create_value_variable(isInitVar, context, pos);
+
+      // !isInit
+      SourceExpression::Pointer isInitNot = create_branch_not(isInitExpr, context, pos);
+
+      // isInit = true
+      SourceExpression::Pointer isInitSet = create_binary_assign(isInitExpr,
+         create_value_int(1, context, pos), context, pos);
+
+      // if(!isInit) isInit = true, var = init;
+      expr = create_binary_pair(isInitSet, expr, context, pos);
+      expr = create_branch_if(isInitNot, expr, context, pos);
+   }
+
+   // *(init, &var)
+   expr = create_binary_pair(expr, exprRef, context, pos);
+   expr = create_unary_dereference(expr, context, pos);
+
+   return expr;
+}
+
+//
 // SourceExpressionC::IsDeclaration
 //
 bool SourceExpressionC::IsDeclaration(SRCEXPC_PARSE_ARG1)
@@ -401,56 +452,14 @@ SRCEXPC_PARSE_DEFN_EXT(InitDeclarator, DeclarationSpecifiers const &spec, Declar
    {
       SourceExpression::Pointer init = ParseInitializer(decl.type, true, in, context);
 
-      SourceVariable::Pointer var = SourceVariable::create_variable(decl.name,
-         decl.type, nameObj, nameArr, store, pos);
-
-      if(!nameArr.empty()) var->setNameArr(nameArr);
-
-      context->addVar(var, linkage, false);
-
-      SourceExpression::Pointer expr = create_value_variable(var, context, pos);
-
-      expr = create_binary_assign_const(expr, init, context, pos);
-
-      if(store != STORE_AUTO && store != STORE_REGISTER)
-      {
-         // if(!isInit) isInit = true, expr = init;
-
-         std::string             isInitName = nameObj + "::$isInit";
-         VariableType::Reference isInitType = VariableType::get_bt_bit_hrd();
-
-         SourceExpression::Pointer isInitExpr;
-
-         // Create an extra variable to store isInit.
-
-         SourceVariable::Pointer isInitVar  = SourceVariable::create_variable(
-            isInitName, isInitType, isInitName, nameArr, store, pos);
-
-         context->addVar(isInitVar, LINKAGE_INTERN, false);
-
-         isInitExpr = create_value_variable(isInitVar, context, pos);
-
-         // Create expressions using isInit.
-
-         SourceExpression::Pointer isInitNot = create_branch_not(isInitExpr, context, pos);
-         SourceExpression::Pointer isInitSet = create_binary_assign(isInitExpr,
-            create_value_int(1, context, pos), context, pos);
-
-         expr = create_binary_pair(isInitSet, expr, context, pos);
-         expr = create_branch_if(isInitNot, expr, context, pos);
-      }
-
-      return expr;
+      return CreateObject(decl.name, nameObj, decl.type, linkage, nameArr, store,
+                          init, false, context, pos);
    }
    // Variable declaration or definition.
    else
    {
-      SourceVariable::Pointer var = SourceVariable::create_variable(decl.name,
-         decl.type, nameObj, nameArr, store, pos);
-
-      context->addVar(var, linkage, spec.storage == SC_EXTERN);
-
-      return create_value_variable(var, context, pos);
+      return CreateObject(decl.name, nameObj, decl.type, linkage, nameArr, store,
+                          NULL, spec.storage == SC_EXTERN, context, pos);
    }
 }
 

@@ -250,6 +250,11 @@ public:
    };
 
 
+   static SourceExpression::Pointer CreateObject(
+      std::string const &nameSrc, std::string const &nameObj, VariableType *type,
+      LinkageSpecifier linkage, std::string const &nameArr, StoreType store,
+      SourceExpression *init, bool externDef, SRCEXP_EXPR_ARGS);
+
    static bool IsDeclaration(SRCEXPC_PARSE_ARG1);
    static bool IsDeclarator(SRCEXPC_PARSE_ARG1);
    static bool IsQualifier(SRCEXPC_PARSE_ARG1);

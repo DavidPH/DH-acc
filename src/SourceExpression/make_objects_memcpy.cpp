@@ -689,6 +689,10 @@ void SourceExpression::make_objects_memcpy_post
 void SourceExpression::make_objects_memcpy_void
 (ObjectVector *objects, VariableData *src, SourcePosition const &position)
 {
+   // Evaluate offset expression for side effects.
+   if(src->offsetExpr)
+      src->offsetExpr->makeObjects(objects, VariableData::create_void(0));
+
    // Only need to do stuff for stuff on the stack.
    if (src->type != VariableData::MT_STACK)
       return;

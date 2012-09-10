@@ -303,15 +303,51 @@ SRCEXPC_PARSE_DEFN_HALF(Prefix)
 //
 SRCEXPC_PARSE_DEFN_HALF(Cast)
 {
+   // ( type-name ) { initializer-list }
+   // ( type-name ) { initializer-list , }
+   // ( type-name ) cast-expression
    if(in->peekType(SourceTokenC::TT_PAREN_O))
    {
       SourceTokenC::Reference tok = in->get();
+      SourcePosition const &pos = tok->pos;
 
       if(IsType(in, context))
       {
-         VariableType::Reference type = ParseType(in, context);
+         VariableType::Pointer type = ParseType(in, context);
          in->get(SourceTokenC::TT_PAREN_C);
-         return create_value_cast_explicit(ParseCast(in, context), type, context, tok->pos);
+
+         // ( type-name ) { initializer-list }
+         // ( type-name ) { initializer-list , }
+         if(in->peekType(SourceTokenC::TT_BRACE_O))
+         {
+            // Determine linkage.
+            LinkageSpecifier linkage = LINKAGE_INTERN;
+
+            // Determine storage.
+            std::string nameArr = type->getStoreArea();
+            StoreType store = type->getStoreType();
+
+            if(store == STORE_NONE)
+            {
+               if(context->getTypeRoot() == SourceContext::CT_NAMESPACE)
+                  store = STORE_STATIC;
+               else
+                  store = STORE_AUTO;
+            }
+
+            // Object name.
+            std::string nameObj = context->makeLabel();
+
+            // { initializer-list }
+            // { initializer-list , }
+            SourceExpression::Pointer init = ParseInitializer(type, true, in, context);
+
+            return CreateObject(nameObj, nameObj, type, linkage, nameArr, store,
+                                init, false, context, pos);
+         }
+         // ( type-name ) cast-expression
+         else
+            return create_value_cast_explicit(ParseCast(in, context), type, context, pos);
       }
 
       in->unget(tok);
