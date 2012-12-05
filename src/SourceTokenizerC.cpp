@@ -284,6 +284,7 @@ void SourceTokenizerC::doCommand()
    else if (tok->data == "ifndef")  doCommand_ifndef(tok);
    else if (tok->data == "include") doCommand_include(tok);
    else if (tok->data == "undef")   doCommand_undef(tok);
+   else if (tok->data == "warning") doCommand_warning(tok);
 
    else if(isSkip())
    {
@@ -400,12 +401,15 @@ void SourceTokenizerC::doCommand_endif(SourceTokenC *tok)
 //
 void SourceTokenizerC::doCommand_error(SourceTokenC *)
 {
-   SourceTokenC::Reference msg = getRaw(); doAssert(msg, SourceTokenC::TT_STR);
-   doAssert(peekRaw(), SourceTokenC::TT_ENDL);
+   SourcePosition pos(inStack.back()->getFilename(), inStack.back()->getLineCount(), inStack.back()->getColumn());
+   std::string msg;
+   char c;
 
-   if (isSkip()) return;
+   while((c = inStack.back()->get()) != '\n') msg += c;
 
-   Error(msg->pos, "#error %s", msg->data.c_str());
+   if(isSkip()) return;
+
+   Error(pos, "#error%s", msg.c_str());
 }
 
 //
@@ -490,6 +494,22 @@ void SourceTokenizerC::doCommand_undef(SourceTokenC *)
    if (isSkip()) return;
 
    remDefine(name->data);
+}
+
+//
+// SourceTokenizerC::doCommand_warning
+//
+void SourceTokenizerC::doCommand_warning(SourceTokenC *)
+{
+   SourcePosition pos(inStack.back()->getFilename(), inStack.back()->getLineCount(), inStack.back()->getColumn());
+   std::string msg;
+   char c;
+
+   while((c = inStack.back()->get()) != '\n') msg += c;
+
+   if(isSkip()) return;
+
+   Warn(pos, "#warning%s", msg.c_str());
 }
 
 //

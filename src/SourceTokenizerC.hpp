@@ -128,6 +128,7 @@ private:
    void doCommand_ifndef(SourceTokenC *tok);
    void doCommand_include(SourceTokenC *tok);
    void doCommand_undef(SourceTokenC *tok);
+   void doCommand_warning(SourceTokenC *tok);
 
    void expand(MacroVec &out, std::set<std::string> &used,
                SourcePosition const &pos, SourceTokenC::Reference tok,
