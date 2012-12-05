@@ -46,6 +46,9 @@ static option::option_data<bool> option_debug_error_pos
 ('\0', "debug-error-pos", "debugging",
  "If enabled, will print internal source of errors and warnings.", NULL, false);
 
+static option::option_data<bool> option_warnings('\0', "warnings", "warnings",
+   "Enables warnings. Use --no-warnings to disable. On by default.", NULL, true);
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -98,6 +101,8 @@ void SourceException::error(char const *file, int line, char const *func,
 void SourceException::warn(char const *file, int line, char const *func,
    char const *name, SourcePosition const &pos, char const *fmt, ...)
 {
+   if(!option_warnings.data) return;
+
    va_list whatarg;
 
    if(!option_debug_error_pos.data)
