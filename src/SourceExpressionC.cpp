@@ -713,6 +713,15 @@ void SourceExpressionC::ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_AR
 
       FunctionAttributes funcAttr = ParseFunctionAttributes(in, context);
 
+      // main needs to be implicitly an open script.
+      // Don't override any explicit script attributes, though.
+      if(decl.name == "main" && !funcAttr.script)
+      {
+         funcAttr.script = true;
+         funcAttr.scriptAddr = option_named_scripts ? -2 : -1;
+         funcAttr.scriptType = ObjectData_Script::ST_OPEN;
+      }
+
       ParseDeclaratorSuffix(decl, in, context);
 
       if(funcAttr.asmfun)
