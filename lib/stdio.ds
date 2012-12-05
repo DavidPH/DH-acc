@@ -1101,7 +1101,7 @@ __extfunc "C" void perror(char const *s)
 //
 // _Print_o
 //
-__extfunc "C" int _Print_l(int flags, int width, int prec, char fmt, unsigned o)
+__extfunc "C" int _Print_o(int flags, int width, int prec, char fmt, unsigned o)
 {
    PrintNum_Pre();
 
