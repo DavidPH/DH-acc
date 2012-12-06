@@ -56,9 +56,7 @@ __native _Accum   GetSideUDMFFixed(int, _Bool, __string) __addr(8);
 __native _Accum   GetActorVelX(int) __addr(9);
 __native _Accum   GetActorVelY(int) __addr(10);
 __native _Accum   GetActorVelZ(int) __addr(11);
-#ifndef __LANG_C__
 __native _Bool    SetActivator(int) __addr(12);
-#endif
 __native _Bool    SetActivator(int, int) __addr(12);
 __native _Bool    SetActivatorToTarget(int) __addr(13);
 __native _Accum   GetActorViewHeight(int) __addr(14);
@@ -70,17 +68,13 @@ __native int      GetArmorType(__string, int) __addr(19);
 __native int      SpawnSpotForced(__string, int) __addr(20);
 __native int      SpawnSpotForced(__string, int, int) __addr(20);
 __native int      SpawnSpotForced(__string, int, int, int) __addr(20);
-#ifndef __LANG_C__
 __native int      SpawnSpotFacingForced(__string, int) __addr(21);
-#endif
 __native int      SpawnSpotFacingForced(__string, int, int) __addr(21);
 __native _Bool    CheckActorProperty(int, int, int) __addr(22);
 __native _Bool    CheckActorPropertyFixed(int, int, _Accum) __addr(22);
 __native _Bool    CheckActorPropertyString(int, int, __string) __addr(22);
-#ifndef __LANG_C__
 __native void     SetActorVelocity(int, _Accum, _Accum, _Accum) __addr(23);
 __native void     SetActorVelocity(int, _Accum, _Accum, _Accum, _Bool) __addr(23);
-#endif
 __native void     SetActorVelocity(int, _Accum, _Accum, _Accum, _Bool, _Bool) __addr(23);
 __native void     SetUserVariable(int, __string, int) __addr(24);
 __native void     SetUserVariableFixed(int, __string, _Accum) __addr(24);
@@ -98,51 +92,37 @@ __native void     SoundSequenceOnPolyobj(int, __string) __addr(32);
 __native _Accum   GetPolyobjX(int) __addr(33);
 __native _Accum   GetPolyobjY(int) __addr(34);
 __native _Bool    CheckSight(int, int, int) __addr(35);
-#ifndef __LANG_C__
 __native int      SpawnForced(__string, _Accum, _Accum, _Accum) __addr(36);
 __native int      SpawnForced(__string, _Accum, _Accum, _Accum, int) __addr(36);
-#endif
 __native int      SpawnForced(__string, _Accum, _Accum, _Accum, int, int) __addr(36);
 __native void     AnnouncerSound(__string, int) __addr(37);
-#ifndef __LANG_C__
 __native _Bool    SetPointer(int, int) __addr(38);
 __native _Bool    SetPointer(int, int, int) __addr(38);
-#endif
 __native _Bool    SetPointer(int, int, int, int) __addr(38);
-#ifndef __LANG_C__
 __native _Bool    ACS_NamedExecute(__string, int) __addr(39);
 __native _Bool    ACS_NamedExecute(__string, int, int) __addr(39);
 __native _Bool    ACS_NamedExecute(__string, int, int, int) __addr(39);
-#endif
 __native _Bool    ACS_NamedExecute(__string, int, int, int, int) __addr(39);
 __native _Bool    ACS_NamedSuspend(__string, int) __addr(40);
 __native _Bool    ACS_NamedTerminate(__string, int) __addr(41);
 __native _Bool    ACS_NamedLockedExecute(__string, int, int, int, int) __addr(42);
 __native _Bool    ACS_NamedLockedExecuteDoor(__string, int, int, int, int) __addr(43);
-#ifndef __LANG_C__
 __native int      ACS_NamedExecuteWithResult(__string) __addr(44);
 __native int      ACS_NamedExecuteWithResult(__string, int) __addr(44);
 __native int      ACS_NamedExecuteWithResult(__string, int, int) __addr(44);
 __native int      ACS_NamedExecuteWithResult(__string, int, int, int) __addr(44);
-#endif
 __native int      ACS_NamedExecuteWithResult(__string, int, int, int, int) __addr(44);
-#ifndef __LANG_C__
 __native _Accum   ACS_NamedExecuteWithResultFixed(__string) __addr(44);
 __native _Accum   ACS_NamedExecuteWithResultFixed(__string, int) __addr(44);
 __native _Accum   ACS_NamedExecuteWithResultFixed(__string, int, int) __addr(44);
 __native _Accum   ACS_NamedExecuteWithResultFixed(__string, int, int, int) __addr(44);
-#endif
 __native _Accum   ACS_NamedExecuteWithResultFixed(__string, int, int, int, int) __addr(44);
-#ifndef __LANG_C__
 __native _Bool    ACS_NamedExecuteAlways(__string, int) __addr(45);
 __native _Bool    ACS_NamedExecuteAlways(__string, int, int) __addr(45);
 __native _Bool    ACS_NamedExecuteAlways(__string, int, int, int) __addr(45);
-#endif
 __native _Bool    ACS_NamedExecuteAlways(__string, int, int, int, int) __addr(45);
-#ifndef __LANG_C__
 __native int      UniqueTID() __addr(46);
 __native int      UniqueTID(int) __addr(46);
-#endif
 __native int      UniqueTID(int, int) __addr(46);
 __native _Bool    IsTIDUsed(int) __addr(47);
 

@@ -23,6 +23,7 @@
 
 #include "../SourceExpressionC.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceFunction.hpp"
@@ -80,6 +81,8 @@
 //
 SRCEXPC_PARSE_DEFN_HALF(Primary)
 {
+   int n;
+
    SourceTokenC::Reference tok = in->get(); switch(tok->type)
    {
    default:
@@ -180,11 +183,13 @@ SRCEXPC_PARSE_DEFN_HALF(Primary)
                                       context, tok->pos);
       }
 
-      if(context->isFunction(tok->data))
+      if((n = context->isFunction(tok->data)) == 1)
       {
          return create_value_function(context->getFunction(tok->data, tok->pos),
                                       context, tok->pos);
       }
+      else if(n)
+         return create_value_function(tok->data, context, tok->pos);
 
       Error(tok->pos, "undeclared identifier '%s'", tok->data.c_str());
 
@@ -221,15 +226,20 @@ case SourceTokenC::TT_BRACK_O:
 case SourceTokenC::TT_PAREN_O:
    {
       Vector args;
+      VariableType::Vector types;
+      ObjectExpression::Vector objs;
 
       if(!in->peekType(SourceTokenC::TT_PAREN_C)) do
       {
          args.push_back(ParseAssignment(in, context));
+         types.push_back(args.back()->getType()->getUnqualified());
+         objs.push_back(args.back()->makeObjectPartial());
       }
       while(in->dropType(SourceTokenC::TT_COMMA));
 
       in->get(SourceTokenC::TT_PAREN_C);
 
+      expr = expr->makeExpressionFunction(types, objs);
       expr = create_branch_call(expr, args, context, tok->pos);
    }
    break;
