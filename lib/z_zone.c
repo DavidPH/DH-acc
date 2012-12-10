@@ -126,25 +126,6 @@
 // Minimum size a block must be to become part of a split
 #define MIN_BLOCK_SPLIT (1024)
 
-// Uncomment this to enable LEAVE_ASIDE
-//#define ZONE_LEAVE_ASIDE
-
-// How much RAM to leave aside for other libraries
-#ifdef ZONE_LEAVE_ASIDE
-#  define LEAVE_ASIDE (128*1024)
-#else
-#  define LEAVE_ASIDE 0
-#endif
-
-// Minimum RAM machine is assumed to have
-#define MIN_RAM (7*1024*1024)
-
-// haleyjd 11/28/03: Minimum RAM we'd LIKE to have on non-DOS platforms
-#define DESIRED_RAM (16*1024*1024)
-
-// Amount to subtract when retrying failed attempts to allocate initial pool
-#define RETRY_AMOUNT (256*1024)
-
 // signature for block header
 #define ZONEID  0x931d4a11
 
@@ -312,7 +293,7 @@ static void (Z_IDCheck)(_Bool err, __string errmsg, memblock_t *block,
 
    zonef("%s\nSource: %s:%d\nSource of malloc: %s:%d\n",
          errmsg, file, line,
-#if defined(ZONEVERBOSE) && defined(INSTRUMENTED)
+#if defined(INSTRUMENTED)
          block->file, block->line
 #else
          "(not available)", 0
@@ -380,7 +361,10 @@ static void (Z_LogPuts)(__string msg)
 void (Z_Close)(__string file, int line)
 {
    Z_CloseLogFile();
+
+#ifdef DUMPONEXIT
    Z_PrintZoneHeap();
+#endif
 
    // Probably not a good idea.
  //zone = rover = zonebase = NULL;
@@ -430,10 +414,12 @@ void (Z_Init)(__string file, int line)
 //
 void *(Z_Malloc)(size_t size, int tag, void **user, __string file, int line)
 {
-   register memblock_t __near *block;
-   register memblock_t __near *start;
+   register memblock_t __near *block, *start;
 
    INSTRUMENT(register size_t size_orig = size);
+
+   // davidph 12/10/12: If zone not initialized, do so now.
+   if(!zone) (Z_Init)(file, line);
 
    DEBUG_CHECKHEAP();
 
@@ -689,30 +675,6 @@ void *(Z_Calloc)(size_t n1, size_t n2, int tag, void **user, __string file, int 
 
 #ifdef SMART_REALLOC
 //
-// Z_ReallocOld
-//
-// haleyjd 09/18/06: This is the original Z_Realloc routine. It is still called
-// from the new one below for several cases where this is the appropriate action
-// to be taken.
-//
-static void *(Z_ReallocOld)(void *ptr, size_t n, int tag, void **user, __string file, int line)
-{
-   register void *p = (Z_Malloc)(n, tag, user, file, line);
-
-   if(ptr)
-   {
-      register memblock_t __near *block = VoidToBlock(ptr);
-      if(p) // haleyjd 09/18/06: allow to return NULL without crashing
-         memcpy(p, ptr, n <= block->size ? n : block->size);
-      (Z_Free)(ptr, file, line);
-      if(user) // in case Z_Free nullified same user
-         *user = p;
-   }
-
-   return p;
-}
-
-//
 // Z_Realloc
 //
 // haleyjd 09/18/06: Rewritten to be an actual realloc routine. The
@@ -848,7 +810,19 @@ void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user, __string file, int 
          INSTRUMENT(inactive_memory += (block->extra = block->size - n));
       }
       else // else, do old realloc (make new, copy old, free old)
-         return Z_ReallocOld(ptr, n, tag, user, file, line);
+      {
+         // davidph 12/10/12: This was the only place Z_ReallocOld was called.
+         //   And we know that ptr != NULL and n != 0 and n > curr_size.
+
+         register void *p = (Z_Malloc)(n, tag, user, file, line);
+
+         memcpy(p, ptr, curr_size);
+         (Z_Free)(ptr, file, line);
+         if(user) // in case Z_Free nullified same user
+            *user = p;
+
+         return p;
+      }
    }
    else if(n < curr_size) // is new allocation size smaller than current?
    {
