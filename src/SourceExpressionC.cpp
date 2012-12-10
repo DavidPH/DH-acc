@@ -619,6 +619,11 @@ SourceExpressionC::Declarator SourceExpressionC::ParseDeclarator(
    // ( declarator )
    if(!toks.empty())
    {
+      // Save function attributes and parameters in case type doesn't change.
+      FunctionAttributes funcAttr = decl.funcAttr;
+      std::vector<Parameter> param = decl.param;
+      VariableType::Pointer type = decl.type;
+
       for(std::vector<SourceTokenC::Reference>::iterator itr = toks.end(),
           end = toks.begin(); itr-- != end;)
       {
@@ -627,6 +632,12 @@ SourceExpressionC::Declarator SourceExpressionC::ParseDeclarator(
 
       decl = ParseDeclarator(decl.type, in, context);
       in->get(SourceTokenC::TT_PAREN_C);
+
+      if(decl.type == type)
+      {
+         decl.funcAttr = funcAttr;
+         decl.param = param;
+      }
    }
 
    return decl;
