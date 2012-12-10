@@ -1939,7 +1939,8 @@ VariableType::CastType VariableType::get_cast(VariableType *dst, VariableType *s
             return get_cast(dst, srcR->setStorage(STORE_STATIC)->getPointer(), NULL, CAST_POINT);
 
          // And by explicit I mean reinterpret. Changing storage is NOT COOL.
-         return CAST_NEVER;
+         // ... Except in C all you have is explicit.
+         return CAST_FORCE;
       }
 
       // If they differ only in qualifiers, it's time for const_cast!
