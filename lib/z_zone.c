@@ -32,7 +32,7 @@
 // Added line and file numbers, in case of error. Added performance
 // statistics and tunables.
 //
-// Ported to DS by David Hill.
+// Ported to DS and then DH-acc's C by David Hill.
 //
 //-----------------------------------------------------------------------------
 
@@ -57,7 +57,22 @@
 
 #define HEAPSIZE (__LIBDS_ZONESIZE * 1024 * 1024)
 
-#define zonef __printf<__printf_log>
+#define zonef __printf __log
+
+//
+// VoidToBlock
+//
+// davidph 12/09/12: Converts a void * (as returned from Z_Malloc or passed to
+// Z_Free) to a memblock_t __near * for internal usage.
+//
+#define VoidToBlock(p) ((memblock_t __near *)((char __near *)(p) - HEADER_SIZE))
+
+//
+// BlockToVoid
+//
+// Reverses the above. Yields a memblock_t __near * for efficiency reasons.
+//
+#define BlockToVoid(p) ((memblock_t __near *)((char __near *)p + HEADER_SIZE))
 
 //===================================================================
 // Features
@@ -211,59 +226,57 @@
 //
 // memblock_t
 //
-struct memblock_t
+typedef struct memblock_s
 {
 #ifdef ZONEIDCHECK
    unsigned id;
 #endif
 
-   memblock_t *next, prev;
+   struct memblock_s __near *next, *prev;
    size_t size;
    void **user;
-   unsigned char tag, vm;
+   unsigned char tag;
 
 #ifdef INSTRUMENTED
    unsigned short extra;
    __string file;
    int line;
 #endif
-};
+} memblock_t;
 
 //
 // alloca_header_t
 //
-struct alloca_header_t
+typedef struct alloca_header_s
 {
-   alloca_header_t *next;
-};
+   struct alloca_header_s __near *next;
+} alloca_header_t;
 
 
 //----------------------------------------------------------------------------|
 // Static Variables                                                           |
 //
 
-__intvar static char[HEAPSIZE] heap;
+static char heap[HEAPSIZE];
 
-__intvar static memblock_t*         rover;         // roving pointer to memory blocks
-__intvar static memblock_t*         zone;          // pointer to first block
-__intvar static memblock_t*         zonebase;      // pointer to entire zone memory
-__intvar static size_t              zonebase_size; // zone memory allocated size
-__intvar static memblock_t*[PU_MAX] blockbytag;    // used for tracking vm blocks
+static memblock_t __near *rover;         // roving pointer to memory blocks
+static memblock_t __near *zone;          // pointer to first block
+static memblock_t __near *zonebase;      // pointer to entire zone memory
+static size_t             zonebase_size; // zone memory allocated size
 
-__intvar static alloca_header_t *alloca_root;
+static alloca_header_t __near *alloca_root;
 
 #ifdef INSTRUMENTED
 // statistics for evaluating performance
-__intvar static size_t free_memory;
-__intvar static size_t active_memory;
-__intvar static size_t purgable_memory;
-__intvar static size_t inactive_memory;
-__intvar static size_t virtual_memory;
+static size_t free_memory;
+static size_t active_memory;
+static size_t purgable_memory;
+static size_t inactive_memory;
 #endif
 
 #if defined(ZONEFILE) && !defined(ZONEFILE_FAKE)
 // haleyjd 09/16/06: zone logging file
-//__intvar static FILE *zonelog;
+static FILE *zonelog;
 #endif
 
 
@@ -277,13 +290,13 @@ __intvar static size_t virtual_memory;
 // Performs a fatal error condition check contingent on the definition
 // of ZONEIDCHECK, in any context where a memblock pointer is not available.
 //
-__intfunc void (Z_IDCheckNB)(bool err, __string errmsg, __string file, int line)
+static void (Z_IDCheckNB)(_Bool err, __string errmsg, __string file, int line)
 {
    if(!err) return;
 
    zonef("%s\nSource: %s:%d\n", errmsg, file, line);
    abort();
-};
+}
 
 //
 // Z_IDCheck
@@ -292,8 +305,8 @@ __intfunc void (Z_IDCheckNB)(bool err, __string errmsg, __string file, int line)
 // of ZONEIDCHECK, and accepts a memblock pointer for provision of additional
 // malloc source information available when INSTRUMENTED is also defined.
 //
-__intfunc void (Z_IDCheck)(bool err, __string errmsg, memblock_t *block,
-                           __string file, int line)
+static void (Z_IDCheck)(_Bool err, __string errmsg, memblock_t *block,
+                        __string file, int line)
 {
    if(!err) return
 
@@ -306,16 +319,16 @@ __intfunc void (Z_IDCheck)(bool err, __string errmsg, memblock_t *block,
 #endif
         );
    abort();
-};
+}
 
-__intfunc void (Z_OpenLogFile)()
+static void (Z_OpenLogFile)()
 {
 #if defined(ZONEFILE) && !defined(ZONEFILE_FAKE)
    zonelog = fopen("zonelog.txt", "w");
 #endif
-};
+}
 
-__intfunc void (Z_CloseLogFile)()
+static void (Z_CloseLogFile)()
 {
 #if defined(ZONEFILE) && !defined(ZONEFILE_FAKE)
    if(zonelog)
@@ -323,11 +336,11 @@ __intfunc void (Z_CloseLogFile)()
       fputs("Closing zone log", zonelog);
       fclose(zonelog);
       zonelog = NULL;
-   };
+   }
 #endif
-};
+}
 
-__intfunc void (Z_LogPrintf)(__string msg, ...)
+static void (Z_LogPrintf)(__string msg, ...)
 {
 #if defined(ZONEFILE) && !defined(ZONEFILE_FAKE)
    if(zonelog)
@@ -339,19 +352,19 @@ __intfunc void (Z_LogPrintf)(__string msg, ...)
 
       // flush after every message
       fflush(zonelog);
-   };
+   }
 #endif
-};
+}
 
-__intfunc void (Z_LogPuts)(__string msg)
+static void (Z_LogPuts)(__string msg)
 {
 #if defined(ZONEFILE) && !defined(ZONEFILE_FAKE)
    if(zonelog)
    {
       fputs(msg, zonelog);
-   };
+   }
 #endif
-};
+}
 
 
 
@@ -364,25 +377,25 @@ __intfunc void (Z_LogPuts)(__string msg)
 //
 // davidph 06/17/12: User must find the right time to call this.
 //
-__extfunc "C" void (Z_Close)(__string file, int line)
+void (Z_Close)(__string file, int line)
 {
    Z_CloseLogFile();
    Z_PrintZoneHeap();
 
    // Probably not a good idea.
  //zone = rover = zonebase = NULL;
-};
+}
 
 //
 // Z_Init
 //
-__extfunc "C" void (Z_Init)(__string file, int line)
+void (Z_Init)(__string file, int line)
 {
-   size_t size;
+   register size_t size;
 
    // Allocate the memory
    // davidph 06/17/12: For DS, memory is a static allocation.
-   zonebase = (memblock_t *)heap;
+   zonebase = (memblock_t __near *)heap;
    zonebase_size = HEAPSIZE;
 
    // Align on cache boundary
@@ -390,13 +403,12 @@ __extfunc "C" void (Z_Init)(__string file, int line)
  //zone = (memblock_t *)(((uintptr_t)zonebase + (CACHE_ALIGN - 1)) & ~(CACHE_ALIGN - 1));
    zone = zonebase;
 
-   size = zonebase_size - ((char *)zone - (char *)zonebase);
+   size = zonebase_size - ((char __near *)zone - (char __near *)zonebase);
 
    rover = zone;                    // Rover points to base of zone mem
    zone->next = zone->prev = zone;  // Single node
    zone->size = size - HEADER_SIZE; // All memory in one block
    zone->tag = PU_FREE;             // A free block
-   zone->vm  = 0;
 
 #ifdef ZONEIDCHECK
    zone->id  = 0;
@@ -408,20 +420,20 @@ __extfunc "C" void (Z_Init)(__string file, int line)
 
    Z_OpenLogFile();
    Z_LogPrintf("Initialized zone heap with size of %u bytes (zonebase = %p)\n",
-               zonebase_size, zonebase);
-};
+               zonebase_size, (void *)zonebase);
+}
 
 //
 // Z_Malloc
 //
 // You can pass a NULL user if the tag is < PU_PURGELEVEL.
 //
-__extfunc "C" void *(Z_Malloc)(size_t size, int tag, void **user, __string file, int line)
+void *(Z_Malloc)(size_t size, int tag, void **user, __string file, int line)
 {
-   register memblock_t *block;
-   memblock_t *start;
+   register memblock_t __near *block;
+   register memblock_t __near *start;
 
-   INSTRUMENT(size_t size_orig = size);
+   INSTRUMENT(register size_t size_orig = size);
 
    DEBUG_CHECKHEAP();
 
@@ -451,54 +463,52 @@ __extfunc "C" void *(Z_Malloc)(size_t size, int tag, void **user, __string file,
       if(block->tag >= PU_PURGELEVEL)
       {
          start = block->prev;
-         Z_Free((char *) block + HEADER_SIZE);
+         Z_Free((char __near *)block + HEADER_SIZE);
 
          // cph - If start->next == block, we did not merge with the previous
          //       If !=, we did, so we continue from start.
          //  Important: we've reset start!
          if(start->next == block)
-            start = start->next
+            start = start->next;
          else
             block = start;
-      };
+      }
 
       if(block->tag == PU_FREE && block->size >= size)   // First-fit
       {
          size_t extra = block->size - size;
          if(extra >= MIN_BLOCK_SPLIT + HEADER_SIZE)
          {
-            memblock_t *newb = (memblock_t *)((char *)block + HEADER_SIZE + size);
+            memblock_t __near *newb = (memblock_t __near *)((char __near *)block + HEADER_SIZE + size);
 
             (newb->next = block->next)->prev = newb;
             (newb->prev = block)->next = newb;          // Split up block
             block->size = size;
             newb->size = extra - HEADER_SIZE;
             newb->tag = PU_FREE;
-            newb->vm = 0;
 
             INSTRUMENT(inactive_memory += HEADER_SIZE);
             INSTRUMENT(free_memory -= HEADER_SIZE);
-         };
+         }
 
          rover = block->next;           // set roving pointer for next search
 
 #ifdef INSTRUMENTED
          inactive_memory += block->extra = block->size - size_orig;
          if(tag >= PU_PURGELEVEL)
-            purgable_memory += size_orig
+            purgable_memory += size_orig;
          else
             active_memory += size_orig;
          free_memory -= block->size;
 #endif
 
-allocated:
          INSTRUMENT(block->file = file);
          INSTRUMENT(block->line = line);
 
          IDCHECK(block->id = ZONEID);// signature required in block header
          block->tag = tag;           // tag
          block->user = user;         // user
-         block = (memblock_t *)((char *) block + HEADER_SIZE);
+         block = BlockToVoid(block);
          if(user)                    // if there is a user
             *user = block;           // set user to point to new block
 
@@ -511,145 +521,101 @@ allocated:
                      block, size, tag, user, file, line);
 
          return block;
-      };
+      }
    }
    while((block = block->next) != start);   // detect cycles as failure
 
-   // We've run out of physical memory, or so we think.
-   // Although less efficient, we'll just use ordinary malloc.
-   // This will squeeze the remaining juice out of this machine
-   // and start cutting into virtual memory if it has it.
-
-   // davidph 06/17/12: Admittedly this is a bit silly in DS, but it can stay.
-
-   while(!(block = (memblock_t *)(malloc)(size + HEADER_SIZE)))
-   {
-      if(!blockbytag[PU_CACHE])
-      {
-         zonef("Z_Malloc: Failure trying to allocate %u bytes\nSource: %s:%d\n", size, file, line);
-         abort();
-      };
-      Z_FreeTags(PU_CACHE, PU_CACHE);
-   };
-
-   if((block->next = blockbytag[tag]))
-      block->next->prev = (memblock_t *)&block->next;
-   blockbytag[tag] = block;
-   block->prev = (memblock_t *)&blockbytag[tag];
-   block->vm = 1;
-
-   // haleyjd: cph's virtual memory error fix
-   INSTRUMENT(virtual_memory += size + HEADER_SIZE);
-
-   // haleyjd 10/03/06: Big problem: extra wasn't being initialized for vm
-   // blocks. This caused the memset used to randomize freed memory when
-   // INSTRUMENTED is defined to stomp all over the C heap.
-   INSTRUMENT(block->extra = 0);
-
-   // cph - the next line was lost in the #ifdef above, and also added an
-   // extra HEADER_SIZE to block->size, which was incorrect
-   block->size = size;
-   goto allocated;
-};
+   zonef("Z_Malloc: Failure trying to allocate %u bytes\nSource: %s:%d\n", size, file, line);
+   abort();
+}
 
 //
 // Z_Free
 //
-__extfunc "C" void (Z_Free)(void *p, __string file, int line)
+void (Z_Free)(void *p, __string file, int line)
 {
+   register memblock_t __near *other, *block;
+
+   if(!p) return;
+
    DEBUG_CHECKHEAP();
 
-   if(p)
+   block = VoidToBlock(p);
+
+   Z_IDCheck(IDBOOL(block->id != ZONEID),
+             "Z_Free: freed a pointer without ZONEID", block, file, line);
+
+   IDCHECK(block->id = 0); // Nullify id so another free fails
+
+   // haleyjd 01/20/09: check invalid tags
+   // catches double frees and possible selective heap corruption
+   if(block->tag == PU_FREE || block->tag >= PU_MAX)
    {
-      memblock_t *other, block = (memblock_t *)((char *)p - HEADER_SIZE);
-
-      Z_IDCheck(IDBOOL(block->id != ZONEID),
-                "Z_Free: freed a pointer without ZONEID", block, file, line);
-
-      IDCHECK(block->id = 0); // Nullify id so another free fails
-
-      // haleyjd 01/20/09: check invalid tags
-      // catches double frees and possible selective heap corruption
-      if(block->tag == PU_FREE || block->tag >= PU_MAX)
-      {
-         zonef("Z_Free: freed a pointer with invalid tag %d\nSource: %s:%d\n"
+      zonef("Z_Free: freed a pointer with invalid tag %d\nSource: %s:%d\n"
 #ifdef INSTRUMENTED
-               "Source of malloc: %s:%d\n"
-               , block->tag, file, line, block->file, block->line
+            "Source of malloc: %s:%d\n"
+            , block->tag, file, line, block->file, block->line
 #else
-               , block->tag, file, line
+            , block->tag, file, line
 #endif
-               );
-         abort();
-      };
+            );
+      abort();
+   }
 
-      SCRAMBLER(p, block->size);
+   SCRAMBLER(p, block->size);
 
-      if(block->user)            // Nullify user if one exists
-         *block->user = NULL;
+   if(block->user)            // Nullify user if one exists
+      *block->user = NULL;
 
-      if(block->vm)
-      {
-         if((*(memblock_t **) block->prev = block->next))
-            block->next->prev = block->prev;
-
-         // haleyjd 07/17/09: must subtract HEADER_SIZE
-         INSTRUMENT(virtual_memory -= (block->size + HEADER_SIZE));
-         (free)(block);
-      }
-      else
-      {
 #ifdef INSTRUMENTED
-         free_memory += block->size;
-         inactive_memory -= block->extra;
-         if(block->tag >= PU_PURGELEVEL)
-            purgable_memory -= block->size - block->extra
-         else
-            active_memory -= block->size - block->extra;
+   free_memory += block->size;
+   inactive_memory -= block->extra;
+   if(block->tag >= PU_PURGELEVEL)
+      purgable_memory -= block->size - block->extra;
+   else
+      active_memory -= block->size - block->extra;
 #endif
 
-         block->tag = PU_FREE; // Mark block freed
+   block->tag = PU_FREE; // Mark block freed
 
-         if(block != zone)
-         {
-            other = block->prev; // Possibly merge with previous block
-            if(other->tag == PU_FREE)
-            {
-               if(rover == block)  // Move back rover if it points at block
-                  rover = other;
-               (other->next = block->next)->prev = other;
-               other->size += block->size + HEADER_SIZE;
-               block = other;
+   if(block != zone)
+   {
+      other = block->prev; // Possibly merge with previous block
+      if(other->tag == PU_FREE)
+      {
+         if(rover == block)  // Move back rover if it points at block
+            rover = other;
+         (other->next = block->next)->prev = other;
+         other->size += block->size + HEADER_SIZE;
+         block = other;
 
-               INSTRUMENT(inactive_memory -= HEADER_SIZE);
-               INSTRUMENT(free_memory += HEADER_SIZE);
-            };
-         };
+         INSTRUMENT(inactive_memory -= HEADER_SIZE);
+         INSTRUMENT(free_memory += HEADER_SIZE);
+      }
+   }
 
-         other = block->next;        // Possibly merge with next block
-         if(other->tag == PU_FREE && other != zone)
-         {
-            if(rover == other) // Move back rover if it points at next block
-               rover = block;
-            (block->next = other->next)->prev = block;
-            block->size += other->size + HEADER_SIZE;
+   other = block->next;        // Possibly merge with next block
+   if(other->tag == PU_FREE && other != zone)
+   {
+      if(rover == other) // Move back rover if it points at next block
+         rover = block;
+      (block->next = other->next)->prev = block;
+      block->size += other->size + HEADER_SIZE;
 
-            INSTRUMENT(inactive_memory -= HEADER_SIZE);
-            INSTRUMENT(free_memory += HEADER_SIZE);
-         };
-      };
+      INSTRUMENT(inactive_memory -= HEADER_SIZE);
+      INSTRUMENT(free_memory += HEADER_SIZE);
+   }
 
-      Z_PrintStats(); // print memory allocation stats
-      Z_LogPrintf("* Z_Free(p=%p, file=%s:%d)\n", p, file, line);
-   };
-};
+   Z_PrintStats(); // print memory allocation stats
+   Z_LogPrintf("* Z_Free(p=%p, file=%s:%d)\n", p, file, line);
+}
 
 //
 // Z_FreeTags
 //
-__extfunc "C" void (Z_FreeTags)(int lowtag, int hightag, __string file, int line)
+void (Z_FreeTags)(int lowtag, int hightag, __string file, int line)
 {
-   memblock_t *block = zone;
+   register memblock_t __near *block = zone;
 
    if(lowtag <= PU_FREE)
       lowtag = (int)PU_FREE + 1;
@@ -661,8 +627,8 @@ __extfunc "C" void (Z_FreeTags)(int lowtag, int hightag, __string file, int line
    {
       if(block->tag >= lowtag && block->tag <= hightag)
       {
-         memblock_t *prev = block->prev, cur = block;
-         (Z_Free)((char *) block + HEADER_SIZE, file, line);
+         register memblock_t __near *prev = block->prev, *cur = block;
+         (Z_Free)((char __near *)block + HEADER_SIZE, file, line);
          /* cph - be more careful here, we were skipping blocks!
           * If the current block was not merged with the previous,
           *  cur is still a valid pointer, prev->next == cur, and cur is
@@ -672,47 +638,20 @@ __extfunc "C" void (Z_FreeTags)(int lowtag, int hightag, __string file, int line
           * Note that the while() below does the actual step forward
           */
          block = (prev->next == cur) ? cur : prev;
-      };
+      }
    }
    while((block = block->next) != zone);
 
-   if(hightag > PU_CACHE)
-      hightag = PU_CACHE;
-
-   for(; lowtag <= hightag; ++lowtag)
-   {
-      for(block = blockbytag[lowtag], blockbytag[lowtag] = NULL; block;)
-      {
-         memblock_t *next = block->next;
-
-         Z_IDCheck(IDBOOL(block->id != ZONEID),
-                   "Z_FreeTags: Changed a tag without ZONEID",
-                   block, file, line);
-
-         IDCHECK(block->id = 0); // Nullify id so another free fails
-
-         // haleyjd 07/17/09: must subtract HEADER_SIZE here as well
-         INSTRUMENT(virtual_memory -= (block->size + HEADER_SIZE));
-
-         if(block->user)            // Nullify user if one exists
-            *block->user = NULL;
-
-         (free)(block);              // Free the block
-
-         block = next;               // Advance to next block
-      };
-   };
-
    Z_LogPrintf("* Z_FreeTags(lowtag=%d, hightag=%d, file=%s:%d)\n",
                lowtag, hightag, file, line);
-};
+}
 
 //
 // Z_ChangeTag
 //
-__extfunc "C" void (Z_ChangeTag)(void *ptr, int tag, __string file, int line)
+void (Z_ChangeTag)(void *ptr, int tag, __string file, int line)
 {
-   memblock_t *block = (memblock_t *)((char *)ptr - HEADER_SIZE);
+   register memblock_t __near *block = VoidToBlock(ptr);
 
    DEBUG_CHECKHEAP();
 
@@ -723,45 +662,30 @@ __extfunc "C" void (Z_ChangeTag)(void *ptr, int tag, __string file, int line)
              "Z_ChangeTag: an owner is required for purgable blocks",
              block, file, line);
 
-   if(block->vm)
-   {
-      if((*(memblock_t **) block->prev = block->next))
-         block->next->prev = block->prev;
-
-      if((block->next = blockbytag[tag]))
-         block->next->prev = (memblock_t *) &block->next;
-
-      block->prev = (memblock_t *)&blockbytag[tag];
-      blockbytag[tag] = block;
-   }
-   else
-   {
 #ifdef INSTRUMENTED
-      if(block->tag < PU_PURGELEVEL && tag >= PU_PURGELEVEL)
-      {
-         active_memory -= block->size - block->extra;
-         purgable_memory += block->size - block->extra;
-      }
-      else if(block->tag >= PU_PURGELEVEL && tag < PU_PURGELEVEL)
-      {
-         active_memory += block->size - block->extra;
-         purgable_memory -= block->size - block->extra;
-      };
+   if(block->tag < PU_PURGELEVEL && tag >= PU_PURGELEVEL)
+   {
+      active_memory -= block->size - block->extra;
+      purgable_memory += block->size - block->extra;
+   }
+   else if(block->tag >= PU_PURGELEVEL && tag < PU_PURGELEVEL)
+   {
+      active_memory += block->size - block->extra;
+      purgable_memory -= block->size - block->extra;
+   }
 #endif
-   };
    block->tag = tag;
 
    Z_LogPrintf("* Z_ChangeTag(p=%p, tag=%d, file=%s:%d)\n", ptr, tag, file, line);
-};
+}
 
 //
 // Z_Calloc
 //
-__extfunc "C" void *(Z_Calloc)(size_t n1, size_t n2, int tag, void **user,
-                               __string file, int line)
+void *(Z_Calloc)(size_t n1, size_t n2, int tag, void **user, __string file, int line)
 {
-   return (n1*=n2) ? memset((Z_Malloc)(n1, tag, user, file, line), 0, n1) : NULL;
-};
+   return (n1 *= n2) ? memset((Z_Malloc)(n1, tag, user, file, line), 0, n1) : NULL;
+}
 
 #ifdef SMART_REALLOC
 //
@@ -771,23 +695,22 @@ __extfunc "C" void *(Z_Calloc)(size_t n1, size_t n2, int tag, void **user,
 // from the new one below for several cases where this is the appropriate action
 // to be taken.
 //
-__intfunc void *(Z_ReallocOld)(void *ptr, size_t n, int tag, void **user,
-                               __string file, int line)
+static void *(Z_ReallocOld)(void *ptr, size_t n, int tag, void **user, __string file, int line)
 {
-   void *p = (Z_Malloc)(n, tag, user, file, line);
+   register void *p = (Z_Malloc)(n, tag, user, file, line);
 
    if(ptr)
    {
-      memblock_t *block = (memblock_t *)((char *)ptr - HEADER_SIZE);
+      register memblock_t __near *block = VoidToBlock(ptr);
       if(p) // haleyjd 09/18/06: allow to return NULL without crashing
          memcpy(p, ptr, n <= block->size ? n : block->size);
       (Z_Free)(ptr, file, line);
       if(user) // in case Z_Free nullified same user
          *user = p;
-   };
+   }
 
    return p;
-};
+}
 
 //
 // Z_Realloc
@@ -813,25 +736,23 @@ __intfunc void *(Z_ReallocOld)(void *ptr, size_t n, int tag, void **user,
 // 4. If the block is already the same size as "n", we don't need to do anything
 //    aside from adjusting the INSTRUMENTED block data for debugging purposes.
 //
-__extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
-                                __string file, int line)
+void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user, __string file, int line)
 {
-   memblock_t *block, other = NULL;
-   size_t curr_size = 0;
+   register memblock_t __near *block, *other;
+   register size_t curr_size = 0;
 
-   // is ptr null or requested size 0? if so, go to "old" realloc
-   if(ptr == NULL || n == 0)
-      return Z_ReallocOld(ptr, n, tag, user, file, line);
+   // davidph 12/09/12: Handle null and size 0 right here instead of in Z_ReallocOld.
+   if(n == 0) { (Z_Free)(ptr, file, line); return NULL; }
+
+   if(!ptr)
+      return (Z_Malloc)(n, tag, user, file, line);
 
    // get current size of block
-   block = (memblock_t *)((char *)ptr - HEADER_SIZE);
+   block = VoidToBlock(ptr);
 
    Z_IDCheck(IDBOOL(block->id != ZONEID),
              "Z_Realloc: Reallocated a block without ZONEID\n",
              block, file, line);
-
-   if(block->vm) // vm block? go to old realloc (can't mess with it)
-      return Z_ReallocOld(ptr, n, tag, user, file, line);
 
    other = block->next; // save pointer to next block
    curr_size = block->size;
@@ -841,20 +762,19 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
 
    if(n > curr_size) // is new allocation size larger than current?
    {
-      size_t extra;
+      register size_t extra;
 
       // haleyjd 10/03/06: free adjacent purgable blocks
       while(other != zone && other != block &&
-            (other->tag == PU_FREE ||
-             (other->tag >= PU_PURGELEVEL && !other->vm)))
+            (other->tag == PU_FREE || other->tag >= PU_PURGELEVEL))
       {
          if(other->tag >= PU_PURGELEVEL)
          {
-            (Z_Free)((char *)other + HEADER_SIZE, file, line);
+            (Z_Free)(BlockToVoid(other), file, line);
 
             // reset pointer to next block
             other = block->next;
-         };
+         }
 
          // use current size of block; note it may have increased if it was
          // merged with an adjacent free block
@@ -865,7 +785,7 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
 
          // move to next block
          other = other->next;
-      };
+      }
 
       // reset pointer
       other = block->next;
@@ -887,7 +807,7 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
          free_memory -= other->size;
          // increased active or purgable
          if(block->tag >= PU_PURGELEVEL)
-            purgable_memory += other->size + HEADER_SIZE
+            purgable_memory += other->size + HEADER_SIZE;
          else
             active_memory += other->size + HEADER_SIZE;
 #endif
@@ -898,15 +818,14 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
 
          if(extra >= MIN_BLOCK_SPLIT + HEADER_SIZE)
          {
-            memblock_t *newb =
-               (memblock_t *)((char *)block + HEADER_SIZE + n);
+            register memblock_t __near *newb =
+               (memblock_t __near *)((char __near *)block + HEADER_SIZE + n);
 
             (newb->next = block->next)->prev = newb;
             (newb->prev = block)->next = newb;
             block->size = n;
             newb->size = extra - HEADER_SIZE;
             newb->tag = PU_FREE;
-            newb->vm = 0;
 
             if(rover == block)
                rover = newb;
@@ -918,11 +837,11 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
             free_memory += newb->size;
             // decreased active or purgable
             if(block->tag >= PU_PURGELEVEL)
-               purgable_memory -= newb->size + HEADER_SIZE
+               purgable_memory -= newb->size + HEADER_SIZE;
             else
                active_memory -= newb->size + HEADER_SIZE;
 #endif
-         };
+         }
 
          // subtract old internal fragmentation and add new
          INSTRUMENT(inactive_memory -= block->extra);
@@ -939,15 +858,14 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
 
       if(extra >= MIN_BLOCK_SPLIT + HEADER_SIZE)
       {
-         memblock_t *newb =
-            (memblock_t *)((char *)block + HEADER_SIZE + n);
+         register memblock_t __near *newb =
+            (memblock_t __near *)((char __near *)block + HEADER_SIZE + n);
 
          (newb->next = block->next)->prev = newb;
          (newb->prev = block)->next = newb;
          block->size = n;
          newb->size = extra - HEADER_SIZE;
          newb->tag = PU_FREE;
-         newb->vm = 0;
 
 #ifdef INSTRUMENTED
          // added a block...
@@ -956,7 +874,7 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
          free_memory += newb->size;
          // decreased purgable or active
          if(block->tag >= PU_PURGELEVEL)
-            purgable_memory -= newb->size + HEADER_SIZE
+            purgable_memory -= newb->size + HEADER_SIZE;
          else
             active_memory -= newb->size + HEADER_SIZE;
 #endif
@@ -973,14 +891,14 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
             INSTRUMENT(inactive_memory -= HEADER_SIZE);
             // space between blocks is now free
             INSTRUMENT(free_memory += HEADER_SIZE);
-         };
-      };
+         }
+      }
       // else, leave block the same size
 
       // subtract old internal fragmentation and add new
       INSTRUMENT(inactive_memory -= block->extra);
       INSTRUMENT(inactive_memory += (block->extra = block->size - n));
-   };
+   }
    // else new allocation size is same as current, don't change it
 
    // modify the block
@@ -988,7 +906,7 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
    INSTRUMENT(block->line = line);
 
    // reset ptr for consistency
-   ptr = (void *)((char *)block + HEADER_SIZE);
+   ptr = BlockToVoid(block);
 
    if(block->user != user)
    {
@@ -997,7 +915,7 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
       block->user = user;       // set block's new user
       if(user)                  // if non-null, set user to allocation
          *user = ptr;
-   };
+   }
 
    // let Z_ChangeTag handle changing the tag
    if(block->tag != tag)
@@ -1008,7 +926,7 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
                ptr, n, tag, user, file, line);
 
    return ptr;
-};
+}
 #else
 //
 // Z_Realloc
@@ -1016,35 +934,36 @@ __extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
 // haleyjd 05/29/08: *Something* is wrong with my Z_Realloc routine, and I
 // cannot figure out what! So we're back to using Old Faithful for now.
 //
-__extfunc "C" void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user,
-                                __string file, int line)
+// davidph 12/09/12: You fool, you threw away gold! Gold, I say!
+//
+void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user, __string file, int line)
 {
-   void *p = (Z_Malloc)(n, tag, user, file, line);
+   register void *p = (Z_Malloc)(n, tag, user, file, line);
+
    if(ptr)
    {
-      memblock_t *block = (memblock_t *)((char *)ptr - HEADER_SIZE);
+      memblock_t *block = VoidToBlock(ptr);
       if(p) // haleyjd 09/18/06: allow to return NULL without crashing
          memcpy(p, ptr, n <= block->size ? n : block->size);
       (Z_Free)(ptr, file, line);
       if(user) // in case Z_Free nullified same user
          *user=p;
-   };
+   }
 
    Z_LogPrintf("* %p = Z_Realloc(ptr=%p, n=%u, tag=%d, user=%p, source=%s:%d)\n",
                p, ptr, n, tag, user, file, line);
 
    return p;
-};
+}
 #endif
 
 //
 // Z_Strdup
 //
-__extfunc "C" char *(Z_Strdup)(char const *s, int tag, void **user,
-                               __string file, int line)
+char *(Z_Strdup)(char const *s, int tag, void **user, __string file, int line)
 {
    return (char *)strcpy((char *)(Z_Malloc)(strlen(s)+1, tag, user, file, line), s);
-};
+}
 
 //
 // haleyjd 12/06/06: Zone alloca functions
@@ -1055,9 +974,9 @@ __extfunc "C" char *(Z_Strdup)(char const *s, int tag, void **user,
 //
 // haleyjd 12/06/06: Frees all blocks allocated with Z_Alloca.
 //
-__extfunc "C" void (Z_FreeAlloca)(__string file, int line)
+void (Z_FreeAlloca)(__string file, int line)
 {
-   alloca_header_t* hdr = alloca_root, next;
+   register alloca_header_t __near *hdr = alloca_root, *next;
 
    Z_LogPuts("* Freeing alloca blocks\n");
 
@@ -1068,10 +987,10 @@ __extfunc "C" void (Z_FreeAlloca)(__string file, int line)
       Z_Free(hdr);
 
       hdr = next;
-   };
+   }
 
    alloca_root = NULL;
-};
+}
 
 //
 // Z_Alloca
@@ -1079,10 +998,10 @@ __extfunc "C" void (Z_FreeAlloca)(__string file, int line)
 // haleyjd 12/06/06:
 // Implements a portable garbage-collected alloca on the zone heap.
 //
-__extfunc "C" void *(Z_Alloca)(size_t n, __string file, int line)
+void *(Z_Alloca)(size_t n, __string file, int line)
 {
-   alloca_header_t *hdr;
-   void *ptr;
+   register alloca_header_t __near *hdr;
+   register void *ptr;
 
    if(n == 0)
       return NULL;
@@ -1093,34 +1012,35 @@ __extfunc "C" void *(Z_Alloca)(size_t n, __string file, int line)
    Z_LogPrintf("* %p = Z_Alloca(n = %u, file = %s, line = %d)\n", ptr, n, file, line);
 
    // add to linked list
-   hdr = (alloca_header_t *)ptr;
+   hdr = (alloca_header_t __near *)ptr;
    hdr->next = alloca_root;
    alloca_root = hdr;
 
    // return a pointer to the actual allocation
-   return (void *)((char *)ptr + sizeof(alloca_header_t));
-};
+   return (void *)((char __near *)ptr + sizeof(alloca_header_t));
+}
 
 //
 // Z_Strdupa
 //
 // haleyjd 05/07/08: strdup that uses alloca, for convenience.
 //
-__extfunc "C" char *(Z_Strdupa)(char const *s, __string file, int line)
+char *(Z_Strdupa)(char const *s, __string file, int line)
 {
    return (char *)strcpy((char *)(Z_Alloca)(strlen(s)+1, file, line), s);
-};
+}
 
 //
 // Z_CheckHeap
 //
-__extfunc "C" void (Z_CheckHeap)(__string file, int line)
+void (Z_CheckHeap)(__string file, int line)
 {
-   memblock_t *block = zone;   // Start at base of zone mem
+   register memblock_t __near *block = zone;   // Start at base of zone mem
+
    do                          // Consistency check (last node treated special)
    {
       if((block->next != zone &&
-          (memblock_t *)((char *)block + HEADER_SIZE + block->size) != block->next) ||
+          (memblock_t __near *)((char __near *)block + HEADER_SIZE + block->size) != block->next) ||
          block->next->prev != block || block->prev->next != block)
       {
          zonef("Z_CheckHeap: Block size does not touch the next block\nSource: %s:%d\n"
@@ -1132,14 +1052,14 @@ __extfunc "C" void (Z_CheckHeap)(__string file, int line)
 #endif
                );
          abort();
-      };
+      }
    }
    while((block = block->next) != zone);
 
 #ifndef CHECKHEAP
    Z_LogPrintf("* Z_CheckHeap(file=%s:%d)\n", file, line);
 #endif
-};
+}
 
 //
 // Z_CheckTag
@@ -1149,9 +1069,9 @@ __extfunc "C" void (Z_CheckHeap)(__string file, int line)
 // inadvertently lower the cache level of lump allocations and
 // cause code which expects them to be static to lose them
 //
-__extfunc "C" int (Z_CheckTag)(void *ptr, __string file, int line)
+int (Z_CheckTag)(void *ptr, __string file, int line)
 {
-   memblock_t *block = (memblock_t *)((char *)ptr - HEADER_SIZE);
+   register memblock_t __near *block = VoidToBlock(ptr);
 
    DEBUG_CHECKHEAP();
 
@@ -1159,27 +1079,25 @@ __extfunc "C" int (Z_CheckTag)(void *ptr, __string file, int line)
              "Z_CheckTag: block doesn't have ZONEID", block, file, line);
 
    return block->tag;
-};
+}
 
 //
 // Z_PrintZoneHeap
 //
-__extfunc "C" void Z_PrintZoneHeap(void)
+void Z_PrintZoneHeap(void)
 {
-   // davidph 06/17/12: Uses FILE so it's a no-op for now.
-   #if 0
-   FILE *outfile;
-   memblock_t *block = zone;
+   register FILE *outfile;
+   register memblock_t __near *block = zone;
 
    char const *fmtstr =
 #if defined(ZONEIDCHECK) && defined(INSTRUMENTED)
-      "%p: { %8X : %p : %p : %8u : %p : %d : %d : %s : %d }\n"
+      "%p: { %8X : %p : %p : %8u : %p : %d : %s : %d }\n"
 #elif defined(INSTRUMENTED)
-      "%p: { %p : %p : %8u : %p : %d : %d : %s : %d }\n"
+      "%p: { %p : %p : %8u : %p : %d : %s : %d }\n"
 #elif defined(ZONEIDCHECK)
-      "%p: { %8X : %p : %p : %8u : %p : %d : %d }\n"
+      "%p: { %8X : %p : %p : %8u : %p : %d }\n"
 #else
-      "%p: { %p : %p : %8u : %p : %d : %d }\n"
+      "%p: { %p : %p : %8u : %p : %d }\n"
 #endif
       ;
 
@@ -1204,7 +1122,7 @@ __extfunc "C" void Z_PrintZoneHeap(void)
                  block->id,
 #endif
                  block->next, block->prev, block->size,
-                 block->user, block->tag, block->vm
+                 block->user, block->tag
 #if defined(INSTRUMENTED)
                  , block->file, block->line
 #endif
@@ -1239,27 +1157,23 @@ __extfunc "C" void Z_PrintZoneHeap(void)
    while((block = block->next) != zone);
 
    fclose(outfile);
-   #endif
-};
+}
 
 //
 // Z_DumpCore
 //
 // haleyjd 03/18/07: Write the zone heap to file
 //
-__extfunc "C" void Z_DumpCore()
+void Z_DumpCore()
 {
-   // davidph 06/17/12: Uses FILE so it's a no-op for now.
-   #if 0
-   FILE *outfile;
+   register FILE *outfile;
 
    if(!(outfile = fopen("zone.bin", "wb")))
       return;
 
    fwrite(zonebase, 1, zonebase_size, outfile);
    fclose(outfile);
-   #endif
-};
+}
 
 //
 // Z_SysMalloc
@@ -1271,36 +1185,40 @@ __extfunc "C" void Z_DumpCore()
 //
 // Care must be taken, of course, to not mix zone and C heap allocations.
 //
-__extfunc "C" void *(Z_SysMalloc)(size_t size, __string file, int line)
+void *(Z_SysMalloc)(size_t size, __string file, int line)
 {
    void *ret;
 
-   if(!(ret = (malloc)(size)))
+   // davidph 12/09/12: Don't fail on a null return if size is 0.
+   if(!(ret = malloc(size)) && size)
    {
-      zonef("Z_SysMalloc: failed on allocation of %u bytes\n", size);
+      zonef("Z_SysMalloc: failed on allocation of %u bytes\nSource: %s:%d\n",
+            size, file, line);
       abort();
-   };
+   }
 
    return ret;
-};
+}
 
 //
 // Z_SysCalloc
 //
 // Convenience routine to match above.
 //
-__extfunc "C" void *(Z_SysCalloc)(size_t n1, size_t n2, __string file, int line)
+void *(Z_SysCalloc)(size_t n1, size_t n2, __string file, int line)
 {
    void *ret;
 
-   if(!(ret = (calloc)(n1, n2)))
+   // davidph 12/09/12: Don't fail on a null return if size is 0.
+   if(!(ret = calloc(n1, n2)) && n1*n2)
    {
-      zonef("Z_SysCalloc: failed on allocation of %u bytes\n", n1*n2);
+      zonef("Z_SysCalloc: failed on allocation of %u bytes\nSource: %s:%d\n",
+            n1*n2, file, line);
       abort();
-   };
+   }
 
    return ret;
-};
+}
 
 //
 // Z_SysRealloc
@@ -1308,29 +1226,30 @@ __extfunc "C" void *(Z_SysCalloc)(size_t n1, size_t n2, __string file, int line)
 // Turns out I need this in the sound code to avoid possible multithreaded
 // race conditions.
 //
-__extfunc "C" void *(Z_SysRealloc)(void *ptr, size_t size, __string file, int line)
+void *(Z_SysRealloc)(void *ptr, size_t size, __string file, int line)
 {
    void *ret;
 
-   if(!(ret = (realloc)(ptr, size)))
+   // davidph 12/09/12: Don't fail on a null return if size is 0.
+   if(!(ret = realloc(ptr, size)) && size)
    {
-      zonef("Z_SysRealloc: failed on allocation of %u bytes\n", size);
+      zonef("Z_SysRealloc: failed on allocation of %u bytes\nSource: %s:%d\n",
+            size, file, line);
       abort();
-   };
+   }
 
    return ret;
-};
+}
 
 //
 // Z_SysFree
 //
 // For use with Z_SysAlloc.
 //
-__extfunc "C" void (Z_SysFree)(void *p, __string file, int line)
+void (Z_SysFree)(void *p, __string file, int line)
 {
-   if(p)
-      (free)(p);
-};
+   free(p);
+}
 
 
 //
@@ -1338,30 +1257,27 @@ __extfunc "C" void (Z_SysFree)(void *p, __string file, int line)
 //
 // Print allocation statistics.
 //
-__extfunc "C" void (Z_PrintStats)()
+void (Z_PrintStats)()
 {
    #ifdef INSTRUMENTED
    unsigned int total_memory = free_memory + active_memory +
-                               purgable_memory + inactive_memory +
-                               virtual_memory;
+                               purgable_memory + inactive_memory;
 
    zonef(
       "%9u  %3u%%  static\n"
       "%9u  %3u%%  purgable\n"
       "%9u  %3u%%  free\n"
       "%9u  %3u%%  fragmentary\n"
-      "%9u  %3u%%  virtual\n"
       "%9u  100%%  total\n",
       active_memory,   active_memory*100/total_memory,
       purgable_memory, purgable_memory*100/total_memory,
       free_memory,     free_memory*100/total_memory,
       inactive_memory, inactive_memory*100/total_memory,
-      virtual_memory,  virtual_memory*100/total_memory,
       total_memory);
    #else
    zonef("Z_PrintStats: not instrumented\n");
    #endif
-};
+}
 
 //-----------------------------------------------------------------------------
 //

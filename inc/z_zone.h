@@ -28,7 +28,7 @@
 //
 // Rewritten by Lee Killough, though, since it was not efficient enough.
 //
-// Ported to DS by David Hill.
+// Ported to DS and then DH-acc's C by David Hill.
 //
 //---------------------------------------------------------------------
 
@@ -159,6 +159,13 @@ __function void Z_DumpCore();
 #if defined(__LANG_DS__) || defined(__cplusplus)
 };
 #endif
+
+
+//----------------------------------------------------------------------------|
+// Cleanup                                                                    |
+//
+
+#undef __function
 
 #endif//__HEADER__Z_ZONE_H__
 
