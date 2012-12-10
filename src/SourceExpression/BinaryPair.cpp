@@ -70,7 +70,7 @@ public:
    //
    virtual ObjectExpression::Pointer makeObject() const
    {
-      return exprL->makeObject(), exprR->makeObject();
+      return exprR->makeObject();
    }
 
 private:
