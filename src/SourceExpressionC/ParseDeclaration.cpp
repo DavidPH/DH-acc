@@ -464,7 +464,7 @@ SRCEXPC_PARSE_DEFN_EXT(InitDeclarator, DeclarationSpecifiers const &spec, Declar
       return create_value_function(func, context, pos);
    }
 
-   std::string nameObj = context->makeNameObj(decl.name, LINKAGE_INTERN);
+   std::string nameObj = context->makeNameObj(decl.name, linkage);
 
    // Variable definition with initializer.
    if(in->dropType(SourceTokenC::TT_EQUALS))
