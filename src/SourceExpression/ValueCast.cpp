@@ -96,6 +96,14 @@ public:
    virtual VariableType::Reference getType() const {return type;}
 
    //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      return expr->isSideEffect();
+   }
+
+   //
    // ::makeObject
    //
    ObjectExpression::Pointer makeObject() const

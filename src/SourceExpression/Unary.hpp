@@ -45,6 +45,14 @@ protected:
    SourceExpression_Unary(SRCEXP_EXPRUNA_ARGS);
    SourceExpression_Unary(VariableType *cast, SRCEXP_EXPRUNA_ARGS);
 
+   //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      return expr->isSideEffect();
+   }
+
    void recurse_makeObjects(ObjectVector *objects, VariableData *dst);
 
    SourceExpression::Pointer expr;

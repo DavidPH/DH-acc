@@ -47,6 +47,14 @@ class SourceExpression_BranchReturn : public SourceExpression
 public:
    SourceExpression_BranchReturn(SRCEXP_EXPRUNA_ARGS);
 
+   //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      return true;
+   }
+
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 

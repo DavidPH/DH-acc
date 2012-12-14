@@ -60,6 +60,21 @@ public:
    virtual VariableType::Reference getType() const;
 
    //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      for(Vector::const_iterator itr = expressions.begin(),
+          end = expressions.end(); itr != end; ++itr)
+      {
+         if((*itr)->isSideEffect())
+            return true;
+      }
+
+      return false;
+   }
+
+   //
    // ::makeObject
    //
    virtual ObjectExpression::Pointer makeObject() const

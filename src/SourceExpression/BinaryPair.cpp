@@ -24,6 +24,7 @@
 #include "../SourceExpression.hpp"
 
 #include "../ObjectExpression.hpp"
+#include "../option.hpp"
 #include "../VariableData.hpp"
 #include "../VariableType.hpp"
 
@@ -54,7 +55,13 @@ public:
    //
    virtual bool canMakeObject() const
    {
-      return exprL->canMakeObject() && exprR->canMakeObject();
+      if(!exprR->canMakeObject()) return false;
+
+      // Ideally, the above is the only requirement to makeObject. However, this
+      // is largely untested and can easily result in erroneous code discarding.
+      if(AllowMakeObject || !exprL->isSideEffect()) return true;
+
+      return exprL->canMakeObject();
    }
 
    //
@@ -66,12 +73,23 @@ public:
    }
 
    //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      return exprL->isSideEffect() || exprR->isSideEffect();
+   }
+
+   //
    // ::makeObject
    //
    virtual ObjectExpression::Pointer makeObject() const
    {
       return exprR->makeObject();
    }
+
+
+   static bool AllowMakeObject;
 
 private:
    //
@@ -81,13 +99,26 @@ private:
    {
       Super::recurse_makeObjects(objects, dst);
 
-      exprL->makeObjects(objects, VariableData::create_void(0));
+      exprL->makeObjects(objects);
       exprR->makeObjects(objects, dst);
    }
 
-   std::string name;
    SourceExpression::Pointer exprL, exprR;
 };
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+bool SourceExpression_BinaryPair::AllowMakeObject = true;
+
+option::option_dptr<bool> Option_PairMakeObject('\0', "pair-make-object",
+   "optimization", "Allows the compiler to use the compile-time result of a "
+   "comma operator even when it needs to evaluate the left expression for side "
+   "effects. If the compiler is omitting code for such expressions or if "
+   "variables are not being initialized, disable this. On by default.", NULL,
+   &SourceExpression_BinaryPair::AllowMakeObject);
 
 
 //----------------------------------------------------------------------------|

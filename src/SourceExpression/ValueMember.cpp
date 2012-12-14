@@ -53,6 +53,14 @@ public:
 
    virtual VariableType::Reference getType() const;
 
+   //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      return expr->isSideEffect();
+   }
+
 private:
    SourceExpression::Pointer expr;
    std::string name;

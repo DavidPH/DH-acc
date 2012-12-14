@@ -46,6 +46,14 @@ class SourceExpression_RootOutput : public SourceExpression
 public:
    SourceExpression_RootOutput(SRCEXP_EXPRUNA_ARGS);
 
+   //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      return true;
+   }
+
 private:
    //
    // ::doChar

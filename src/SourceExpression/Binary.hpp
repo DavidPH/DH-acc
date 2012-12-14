@@ -283,6 +283,14 @@ protected:
    virtual void doSet(ObjectVector *objects, VariableData *data,
                       VariableType *type, int tmpBase);
 
+   //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      return assign || exprL->isSideEffect() || exprR->isSideEffect();
+   }
+
    void swapExpr()
    {
       SourceExpression::Pointer

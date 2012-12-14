@@ -58,6 +58,15 @@ public:
       return false;
    }
 
+   //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      // Assignment is the most fundamental side-effect.
+      return true;
+   }
+
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 

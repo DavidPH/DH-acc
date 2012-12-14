@@ -207,6 +207,11 @@ void SourceExpression_UnaryDereference::virtual_makeObjects
 
    VariableData::Pointer src = getData();
 
+   // If src doesn't include expr, then it is our job to evaluate for side effects.
+   // Of course, if someone else used us for our data then we still have a problem.
+   if(src->type == VariableData::MT_REGISTER || src->type == VariableData::MT_AUTO)
+      expr->makeObjects(objects);
+
    make_objects_memcpy_prep(objects, dst, src, pos);
    make_objects_memcpy_post(objects, dst, src, type, context, pos);
 }

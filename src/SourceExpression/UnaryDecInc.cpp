@@ -580,6 +580,14 @@ public:
    {
    }
 
+   //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      return true;
+   }
+
 private:
    //
    // ::doI

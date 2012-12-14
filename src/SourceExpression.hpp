@@ -287,6 +287,42 @@ public:
 
    virtual CounterReference<VariableType> getType() const;
 
+   //
+   // isSafe
+   //
+   // An expression is safe if it A, has no side effects and B, cannot trigger
+   // any traps/signals. Exceptionally expensive expressions should also be
+   // considered "unsafe". The primary purpose of asking this is to determine
+   // if an expression can be evaluated unconditionally despite the semantics
+   // saying not to.
+   //
+   // Example:
+   //   i && j;
+   //
+   //   Strictly, j should not be evaluated unless i is true. But since both
+   //   expressions are safe (variable access is always safe), they can both be
+   //   pushed and Hexen's LOGAND instruction used.
+   //
+   //   i && j % i;
+   //
+   //   This, on the other hand, really must not be evaluated without checking
+   //   i, because the host might otherwise intervene.
+   //
+   virtual bool isSafe() const
+   {
+      return !isSideEffect();
+   }
+
+   //
+   // isSideEffect
+   //
+   // Does this expression have side-effects? When in doubt, say yes.
+   //
+   virtual bool isSideEffect() const
+   {
+      return true;
+   }
+
    SourceExpression::Pointer makeExpressionFunction(
       std::vector<CounterPointer<VariableType> > const &types);
    virtual SourceExpression::Pointer makeExpressionFunction(
@@ -296,6 +332,18 @@ public:
    virtual CounterPointer<ObjectExpression> makeObject() const;
    virtual CounterPointer<ObjectExpression> makeObjectPartial() const;
 
+   //
+   // makeObjects
+   //
+   // This is the "evaluate for side effects" version of the function below.
+   //
+   void makeObjects(ObjectVector *objects);
+
+   //
+   // makeObjects
+   //
+   // The meat of code-gen. This turns the expression into instructions.
+   //
    void makeObjects(ObjectVector *objects, VariableData *dst);
 
    void makeObjectsCast

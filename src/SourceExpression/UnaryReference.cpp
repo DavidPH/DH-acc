@@ -167,6 +167,8 @@ private:
          break;
 
       case VariableData::MT_AUTO:
+         expr->makeObjects(objects);
+
          if (type->getReturn()->getStoreType() == STORE_AUTO)
             objects->addToken(OCODE_GET_IMM, data->address);
          else
@@ -196,6 +198,7 @@ private:
          Error_NP("invalid MT");
 
       case VariableData::MT_REGISTER:
+         expr->makeObjects(objects);
       case VariableData::MT_STATIC:
          objects->addToken(OCODE_GET_IMM, data->address);
          break;

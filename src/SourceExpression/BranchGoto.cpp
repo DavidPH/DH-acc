@@ -46,6 +46,16 @@ public:
    SourceExpression_BranchGoto(std::string const &label, SRCEXP_EXPR_ARGS);
    SourceExpression_BranchGoto(SRCEXP_EXPRUNA_ARGS);
 
+   //
+   // isSideEffect
+   //
+   // Branching isn't strictly a "side-effect", but it needs to happen.
+   //
+   virtual bool isSideEffect() const
+   {
+      return true;
+   }
+
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 

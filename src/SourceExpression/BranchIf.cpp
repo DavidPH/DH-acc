@@ -54,6 +54,15 @@ public:
 
    virtual VariableType::Reference getType() const;
 
+   //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      // TODO: Surely there are cases where there aren't.
+      return true;
+   }
+
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 

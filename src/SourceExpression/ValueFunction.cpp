@@ -111,6 +111,14 @@ public:
    }
 
    //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      return false;
+   }
+
+   //
    // ::makeExpressionFunction
    //
    virtual SourceExpression::Pointer makeExpressionFunction(

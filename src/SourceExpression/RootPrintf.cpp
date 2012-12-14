@@ -152,6 +152,14 @@ public:
       Error_NP("unrecognized printfType");
    }
 
+   //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      return printfType != PT_STRING;
+   }
+
 private:
    //
    // ::doFormat

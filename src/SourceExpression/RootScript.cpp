@@ -46,6 +46,16 @@ class SourceExpression_RootScript : public SourceExpression
 public:
    SourceExpression_RootScript(VariableType *type, SRCEXP_EXPR_ARGS);
 
+   //
+   // isSideEffect
+   //
+   // Well, the entire point of this expression is to have side effects, so yes.
+   //
+   virtual bool isSideEffect() const
+   {
+      return true;
+   }
+
 private:
    virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
 

@@ -64,6 +64,15 @@ public:
       if(exprInit) exprInit = create_value_cast_implicit(exprInit, type, context, pos);
    }
 
+   //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      // TODO: Surely there are cases where there aren't.
+      return true;
+   }
+
 private:
    //
    // ::virtual_makeObjects

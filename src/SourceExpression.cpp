@@ -646,6 +646,14 @@ ObjectExpression::Pointer SourceExpression::makeObjectPartial() const
 //
 // SourceExpression::makeObjects
 //
+void SourceExpression::makeObjects(ObjectVector *objects)
+{
+   makeObjects(objects, VariableData::create_void(getType()->getSize(pos)));
+}
+
+//
+// SourceExpression::makeObjects
+//
 void SourceExpression::
 makeObjects(ObjectVector *objects, VariableData *dst)
 {
@@ -657,6 +665,13 @@ makeObjects(ObjectVector *objects, VariableData *dst)
 
       VariableType::Reference type = getType();
 
+      // Evaluate for side effects.
+      // Check here and not before entering this block because it is almost
+      // certainly faster to only evaluate the expression for side effects and
+      // then push the literal.
+      if(isSideEffect())
+         virtual_makeObjects(objects, VariableData::create_void(type->getSize(pos)));
+
       // Don't try to makeObject on a void expression.
       if (type->getBasicType() == VariableType::BT_VOID) return;
 
@@ -667,7 +682,13 @@ makeObjects(ObjectVector *objects, VariableData *dst)
       make_objects_memcpy_post(objects, dst, src, type, context, pos);
    }
    else
+   {
+      // If only evaluating for side effects, and there are none, then do nothing.
+      if(dst->type == VariableData::MT_VOID && !isSideEffect())
+         return;
+
       virtual_makeObjects(objects, dst);
+   }
 }
 
 //

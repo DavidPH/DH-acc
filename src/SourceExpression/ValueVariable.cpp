@@ -53,6 +53,15 @@ public:
 
    virtual VariableType::Reference getType() const;
 
+   //
+   // isSideEffect
+   //
+   virtual bool isSideEffect() const
+   {
+      // Accessing a volatile variable is a side-effect.
+      return var->getType()->getQualifier(VariableType::QUAL_VOLATILE);
+   }
+
 private:
    SourceVariable::Pointer var;
 };
