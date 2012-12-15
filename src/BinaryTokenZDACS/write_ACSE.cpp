@@ -154,7 +154,7 @@ void BinaryTokenZDACS::write_ACSE_array_AINI
 
    for (size_t i = 0, end = a.size; i != end; ++i)
    {
-      if (i < init.size())
+      if(i < init.size() && init[i])
          BinaryTokenACS::write_ACS0_32(out, *init[i]);
       else
          BinaryTokenACS::write_ACS0_32(out, 0);
@@ -170,12 +170,13 @@ void BinaryTokenZDACS::write_ACSE_array_ASTR
    if (a.externDef) return;
    if(a.init.empty()) return;
 
-   for (size_t i = a.strings.size(); i--;)
-      if (a.strings[i])
-      {
-         BinaryTokenACS::write_ACS0_32(out, a.number);
-         break;
-      }
+   // Mark as strings only if totally comprised of strings.
+   for(size_t i = a.strings.size(); i--;)
+   {
+      if(!a.strings[i]) return;
+   }
+
+   BinaryTokenACS::write_ACS0_32(out, a.number);
 }
 
 //

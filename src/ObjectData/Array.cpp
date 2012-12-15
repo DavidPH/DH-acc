@@ -29,6 +29,7 @@
 #include "../SourceExpression.hpp"
 #include "../VariableType.hpp"
 
+#include <algorithm>
 #include <map>
 
 
@@ -101,6 +102,38 @@ static void CountRegister(std::ostream *, ObjectData_Register const &r)
 }
 
 //
+// GenerateInit
+//
+static void GenerateInit(ArrayTable &table, ObjectData_ArrayVar const &v)
+{
+   ObjectData_Array &a = table[v.array];
+
+   // If no init data, then never mind this var.
+   if(v.init.empty() || v.strings.empty())
+   {
+      // But just to be safe, mark its contents as non-strings.
+      // Um, but as a sort of GROSS HACK, don't do so for "::$init" objects.
+      if(v.name.size() < 7 || !v.name.compare(v.name.size() - 7, 7, "::$init"))
+         std::fill_n(a.strings.begin() + v.number, v.size, 0);
+
+      return;
+   }
+
+   std::copy(v.init.begin(), v.init.end(), a.init.begin() + v.number);
+   std::copy(v.strings.begin(), v.strings.end(), a.strings.begin() + v.number);
+
+   // TODO: Add init for status byte when needed.
+}
+
+//
+// GenerateInitMap
+//
+static void GenerateInitMap(std::ostream *, ObjectData_ArrayVar const &v)
+{
+   GenerateInit(MapTable, v);
+}
+
+//
 // GenerateNumber
 //
 static void GenerateNumber(ArrayTable &table, ObjectData_Array &data)
@@ -130,7 +163,17 @@ static void GenerateSize(ArrayTable &table, ObjectData_ArrayVar const &v)
    bigsint size = v.number + v.size;
 
    if(data.size < size)
+   {
       data.size = size;
+
+      // Preload init tables. Preload the strings table with true so it's easier to
+      // detect all-strings. (Otherwise unused and init bytes would be unmarked.)
+      // Possible alternative: 0 means Don't Care, 1 means String, 2 means Integer.
+      // Although, at that point it should probably be an enumeration to allow for
+      // other types of translated-index values. Such as functions.
+      data.init.resize(data.size, NULL);
+      data.strings.resize(data.size, 1);
+   }
 }
 
 //
@@ -238,6 +281,9 @@ void ObjectData_Array::GenerateSymbols()
    ObjectData_ArrayVar::IterateMap(GenerateSizeMap, NULL);
    ObjectData_ArrayVar::IterateMap(GenerateSizeWorld, NULL);
    ObjectData_ArrayVar::IterateMap(GenerateSizeGlobal, NULL);
+
+   // Build init table.
+   ObjectData_ArrayVar::IterateMap(GenerateInitMap, NULL);
 }
 
 //
