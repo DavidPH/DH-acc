@@ -113,7 +113,7 @@ static void GenerateInit(ArrayTable &table, ObjectData_ArrayVar const &v)
    {
       // But just to be safe, mark its contents as non-strings.
       // Um, but as a sort of GROSS HACK, don't do so for "::$init" objects.
-      if(v.name.size() < 7 || !v.name.compare(v.name.size() - 7, 7, "::$init"))
+      if(v.name.size() < 5 || v.name.compare(v.name.size() - 5, 5, "$init"))
          std::fill_n(a.strings.begin() + v.number, v.size, 0);
 
       return;
