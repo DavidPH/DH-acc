@@ -220,6 +220,27 @@ static bool is_void(VariableType const *type)
 }
 
 //
+// MakeInit
+//
+static SourceExpression::Pointer MakeInit(SourceContext *context,
+   SourcePosition const &pos, SourceVariable *var, std::string const &nameObj,
+   StoreData const &store, bool externDef)
+{
+   static VariableType::Reference const initType = VariableType::get_bt_bit_hrd();
+
+   // Generate source/object name
+   std::string initNameObj = nameObj + "$init";
+
+   // Generate variable.
+   SourceVariable::Pointer initVar = SourceVariable::create_variable(
+      initNameObj, initType, initNameObj, var->nameArr, store.type, pos);
+   context->addVar(initVar, LINKAGE_INTERN, externDef);
+
+   // Generate expression.
+   return SourceExpression::create_value_variable(initVar, context, pos);
+}
+
+//
 // make_var
 //
 static SourceExpression::Pointer make_var(SourceTokenizerC *in,
@@ -227,6 +248,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
    std::string const &nameSrc, VariableType::Reference type,
    StoreData const &store, bool externDef)
 {
+   SourceExpression::Pointer initExpr;
    SourceVariable::Pointer var;
 
    ObjectExpression::Pointer addr;
@@ -267,10 +289,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
    // Variable initialization. (But not for external declaration.)
    if (!externDef && in->peekType(SourceTokenC::TT_EQUALS))
    {
-      static VariableType::Reference const initType =
-         VariableType::get_bt_bit_hrd();
-
-      SourceExpression::Pointer initSrc, initExpr;
+      SourceExpression::Pointer initSrc;
       ObjectExpression::Pointer initObj;
 
       in->get(SourceTokenC::TT_EQUALS);
@@ -350,7 +369,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
       {
       case STORE_MAPREGISTER:
          if(!initObj || Target == TARGET_Hexen)
-            goto case_static;
+            goto case_init;
 
          ObjectData_Register::ini_map(nameObj, initObj);
 
@@ -358,52 +377,21 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
 
       case STORE_MAPARRAY:
          if(!initObj)
-            goto case_array;
+            goto case_init;
 
          if(!ObjectData_ArrayVar::InitMap(nameObj, type, initObj))
-            goto case_array;
+            goto case_init;
 
          break;
 
       case STORE_WORLDARRAY:
       case STORE_GLOBALARRAY:
-      case_array:
-         {
-            // Generate source/object name
-            std::string initNameObj = nameObj + "$init";
-
-            // Generate variable.
-            SourceVariable::Pointer initVar = SourceVariable::create_variable(
-               initNameObj, initType, initNameObj, var->nameArr, store.type, pos);
-            context->addVar(initVar, LINKAGE_INTERN, false);
-
-            // Generate expression.
-            initExpr = SourceExpression::create_value_variable(initVar, context, pos);
-         }
-
-         goto case_init;
-
-         // Only initialize static-duration storage-classes once.
       case STORE_STATIC:
-      case_static:
-      {
-         // Generate source/object name
-         std::string initNameSrc = nameSrc + "$init";
-         std::string initNameObj = context->getLabel() + initNameSrc;
-
-         // Generate variable.
-         SourceVariable::Pointer initVar = SourceVariable::create_variable
-            (initNameSrc, initType, initNameObj, store.type, pos);
-         context->addVar(initVar, LINKAGE_INTERN, false);
-
-         // Generate expression.
-         initExpr = SourceExpression::
-            create_value_variable(initVar, context, pos);
-      }
-         goto case_init;
-
       case_init:
       {
+         if(!initExpr)
+            initExpr = MakeInit(context, pos, var, nameObj, store, false);
+
          // Generate expression of value if initialized.
          SourceExpression::Pointer initVal = SourceExpression::
             create_value_int(1, context, pos);
@@ -439,6 +427,13 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
    if (!expr)
       expr = add_var(context, linkSpec, pos, nameSrc, nameObj, type, store,
                      addr, externDef, var);
+
+   // Need to always generate the init var for array storage.
+   if((store.type == STORE_MAPARRAY || store.type == STORE_WORLDARRAY ||
+      store.type == STORE_GLOBALARRAY) && !initExpr)
+   {
+      initExpr = MakeInit(context, pos, var, nameObj, store, externDef);
+   }
 
    return expr;
 }
