@@ -84,6 +84,8 @@ extern "C"
 
 // Copies a chunk of memory.
 __function void *memcpy(void *restrict s1, void const *restrict s2, size_t n);
+__function void __near *memcpy_near(void __near *restrict s1,
+   void const __near *restrict s2, size_t n);
 
 // Copies a chunk of memory.
 __function void *memmove(void *s1, void const *s2, size_t n);
@@ -160,6 +162,7 @@ __function char *strtok(char *restrict s1, char const *restrict s2);
 
 // Sets a chunk of memory.
 __function void *memset(void *s, int c, size_t n);
+__function void __near *memset_near(void __near *s, int c, size_t n);
 
 //
 __function char *strerror(int errnum);

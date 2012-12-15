@@ -670,7 +670,10 @@ void (Z_ChangeTag)(void *ptr, int tag, __string file, int line)
 //
 void *(Z_Calloc)(size_t n1, size_t n2, int tag, void **user, __string file, int line)
 {
-   return (n1 *= n2) ? memset((Z_Malloc)(n1, tag, user, file, line), 0, n1) : NULL;
+   if(!(n1 *= n2))
+      return NULL;
+
+   return memset_near((void __near *)(Z_Malloc)(n1, tag, user, file, line), 0, n1);
 }
 
 #ifdef SMART_REALLOC
@@ -816,7 +819,7 @@ void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user, __string file, int 
 
          register void *p = (Z_Malloc)(n, tag, user, file, line);
 
-         memcpy(p, ptr, curr_size);
+         memcpy_near((void __near *)p, (void __near *)ptr, curr_size);
          (Z_Free)(ptr, file, line);
          if(user) // in case Z_Free nullified same user
             *user = p;
@@ -918,7 +921,7 @@ void *(Z_Realloc)(void *ptr, size_t n, int tag, void **user, __string file, int 
    {
       memblock_t *block = VoidToBlock(ptr);
       if(p) // haleyjd 09/18/06: allow to return NULL without crashing
-         memcpy(p, ptr, n <= block->size ? n : block->size);
+         memcpy_near((void __near *p, (void __near *)ptr, n <= block->size ? n : block->size);
       (Z_Free)(ptr, file, line);
       if(user) // in case Z_Free nullified same user
          *user=p;
