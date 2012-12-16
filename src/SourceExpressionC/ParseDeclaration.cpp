@@ -35,6 +35,28 @@
 
 
 //----------------------------------------------------------------------------|
+// Static Functions                                                           |
+//
+
+//
+// CreateIsInit
+//
+// Creates an extra variable to store isInit.
+//
+static SourceExpression::Pointer CreateIsInit(std::string const &nameObj,
+   std::string const &nameArr, StoreType store, bool externDef, SRCEXP_EXPR_ARGS)
+{
+   std::string             isInitName = nameObj + "::$isInit";
+   VariableType::Reference isInitType = VariableType::get_bt_bit_hrd();
+   SourceVariable::Pointer isInitVar  = SourceVariable::create_variable(
+      isInitName, isInitType, isInitName, nameArr, store, pos);
+   context->addVar(isInitVar, LINKAGE_INTERN, externDef);
+
+   return SourceExpression::create_value_variable(isInitVar, context, pos);
+}
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -53,28 +75,46 @@ SourceExpression::Pointer SourceExpressionC::CreateObject(
 
    SourceExpression::Pointer expr = create_value_variable(var, context, pos);
 
+   // isInit (Always needed by array storage.)
+   SourceExpression::Pointer isInit;
+   if(store == STORE_MAPARRAY || store == STORE_WORLDARRAY || store == STORE_GLOBALARRAY)
+      isInit = CreateIsInit(nameObj, nameArr, store, externDef, context, pos);
+
    if(!init) return expr;
 
+   // Map array storage variables can be initialized via the AINI chunk. In
+   // which case, the below init code is unneeded.
+   if(store == STORE_MAPARRAY && init->canMakeObject() &&
+      ObjectData_ArrayVar::InitMap(nameObj, type, init->makeObject()))
+   {
+      return expr;
+   }
+
+   // If we've reached this point, then we need to initialize the object
+   // manually. However, the resulting expression must still be an lvalue. (For
+   // things such as C99 anonymous objects.) Basically, this is done using the
+   // comma operator to yield a pointer to the object.
+   //   int i = 5;      // original code
+   //   *((i = 5), &i); // resulting expression
+
+   // Acquire the reference now so that expr can be used as a temporary.
    SourceExpression::Pointer exprRef = create_unary_reference(expr, context, pos);
+
    expr = create_binary_assign_const(expr, init, context, pos);
 
+   // Herein lies the rub. For static-lifetime objects, we need to only
+   // initialize once. So we use an extra isInit variable to track this.
    if(store != STORE_AUTO && store != STORE_REGISTER)
    {
-      // Create an extra variable to store isInit.
-      std::string             isInitName = nameObj + "::$isInit";
-      VariableType::Reference isInitType = VariableType::get_bt_bit_hrd();
-      SourceVariable::Pointer isInitVar  = SourceVariable::create_variable(
-         isInitName, isInitType, isInitName, nameArr, store, pos);
-      context->addVar(isInitVar, LINKAGE_INTERN, false);
-
       // isInit
-      SourceExpression::Pointer isInitExpr = create_value_variable(isInitVar, context, pos);
+      if(!isInit)
+         isInit = CreateIsInit(nameObj, nameArr, store, externDef, context, pos);
 
       // !isInit
-      SourceExpression::Pointer isInitNot = create_branch_not(isInitExpr, context, pos);
+      SourceExpression::Pointer isInitNot = create_branch_not(isInit, context, pos);
 
       // isInit = true
-      SourceExpression::Pointer isInitSet = create_binary_assign(isInitExpr,
+      SourceExpression::Pointer isInitSet = create_binary_assign(isInit,
          create_value_int(1, context, pos), context, pos);
 
       // if(!isInit) isInit = true, var = init;
