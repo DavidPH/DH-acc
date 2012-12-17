@@ -371,7 +371,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
          if(!initObj || Target == TARGET_Hexen)
             goto case_init;
 
-         if(!ObjectData::Register::InitMap(nameObj, initObj))
+         if(!ObjectData::Register::InitMap(nameObj, type, initObj))
             goto case_init;
 
          break;

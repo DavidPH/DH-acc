@@ -23,20 +23,47 @@
 
 #include "ObjectData.hpp"
 
+#include "ObjectExpression.hpp"
+#include "object_io.hpp"
+#include "option.hpp"
 #include "SourcePosition.hpp"
 #include "VariableType.hpp"
 
 
 //----------------------------------------------------------------------------|
-// Global Functions                                                           |
+// Global Variables                                                           |
 //
 
+bool Option_UseChunkATAG = false;
+
+
+//----------------------------------------------------------------------------|
+// Static Variables                                                           |
 //
-// odata_set_strings
+
+static option::option_dptr<bool> Option_UseChunkATAG_Handler('\0',
+   "use-chunk-ATAG", "features", "Enables generation of the ATAG chunk for "
+   "static initialization of arrays with disparate tagging requirements. On by "
+   "default.", NULL, &Option_UseChunkATAG);
+
+
+//----------------------------------------------------------------------------|
+// Static Functions                                                           |
 //
-void odata_set_strings(std::vector<int> &strings, VariableType const *type)
+
+namespace ObjectData
 {
-   switch (type->getBasicType())
+
+//
+// SetInit
+//
+// This one recursively scans through type, consuming dataVec and writing to
+// initData and initType.
+//
+static void SetInit(InitDataVector::iterator &initData, InitTypeVector::iterator &initType,
+   ObjectExpression::Vector::iterator &dataVec, VariableType const *type, bool hasData)
+{
+   switch(type->getBasicType())
    {
    case VariableType::BT_VOID:
       break;
@@ -69,7 +96,8 @@ void odata_set_strings(std::vector<int> &strings, VariableType const *type)
    case VariableType::BT_UNS_HH:
    case VariableType::BT_UNS_H:
    case VariableType::BT_UNS:
-      strings.push_back(false);
+      if(hasData) *initData++ = *dataVec++;
+      *initType++ = IT_INTEGER;
       break;
 
    case VariableType::BT_ACC_L:
@@ -82,54 +110,77 @@ void odata_set_strings(std::vector<int> &strings, VariableType const *type)
    case VariableType::BT_INT_LL:
    case VariableType::BT_UNS_L:
    case VariableType::BT_UNS_LL:
-      strings.push_back(false);
-      strings.push_back(false);
+      if(hasData)
+      {
+         ++dataVec; // TODO
+         *initData++ = NULL;
+         *initData++ = NULL;
+      }
+      *initType++ = IT_INTEGER;
+      *initType++ = IT_INTEGER;
       break;
 
    case VariableType::BT_LABEL:
-      strings.push_back(false);
+      if(hasData) *initData++ = *dataVec++;
+      *initType++ = IT_INTEGER;
       break;
 
    case VariableType::BT_STR:
-      strings.push_back(true);
+      if(hasData) *initData++ = *dataVec++;
+      *initType++ = IT_STRING;
       break;
 
    case VariableType::BT_ARR:
-      for (bigsint i = type->getWidth(); i--;)
-         odata_set_strings(strings, type->getReturn());
+      for(bigsint i = type->getWidth(); i--;)
+         SetInit(initData, initType, dataVec, type->getReturn(), hasData);
       break;
 
    case VariableType::BT_PTR:
       if(VariableType::IsTypeFunction(type->getReturn()->getBasicType()))
       {
-         odata_set_strings(strings, type->getReturn());
+         SetInit(initData, initType, dataVec, type->getReturn(), hasData);
          break;
       }
 
       switch(type->getReturn()->getStoreType())
       {
       case STORE_FAR:
-         strings.push_back(false);
-         strings.push_back(false);
+         if(hasData)
+         {
+            ++dataVec; // TODO
+            *initData++ = NULL;
+            *initData++ = NULL;
+         }
+         *initType++ = IT_INTEGER;
+         *initType++ = IT_INTEGER;
          break;
 
       case STORE_STRING:
-         strings.push_back(true);
-         strings.push_back(false);
+         if(hasData)
+         {
+            ++dataVec; // TODO
+            *initData++ = NULL;
+            *initData++ = NULL;
+         }
+         *initType++ = IT_STRING;
+         *initType++ = IT_INTEGER;
          break;
 
       default:
-         strings.push_back(false);
+         if(hasData) *initData++ = *dataVec++;
+         *initType++ = IT_INTEGER;
          break;
       }
       break;
 
    case VariableType::BT_PTR_NUL:
-      strings.push_back(false);
+      if(hasData) *initData++ = *dataVec++;
+      *initType++ = IT_INTEGER;
       break;
 
    case VariableType::BT_ENUM:
-      strings.push_back(false);
+      if(hasData) *initData++ = *dataVec++;
+      *initType++ = IT_INTEGER;
       break;
 
    case VariableType::BT_CLX:
@@ -137,30 +188,149 @@ void odata_set_strings(std::vector<int> &strings, VariableType const *type)
    case VariableType::BT_SAT:
    case VariableType::BT_STRUCT:
    case VariableType::BT_BLOCK:
-      for (VariableType::Vector::const_iterator end = type->getTypes().end(),
-           itr = type->getTypes().begin(); itr != end; ++itr)
-         odata_set_strings(strings, *itr);
+      for(VariableType::Vector::const_iterator end = type->getTypes().end(),
+          itr = type->getTypes().begin(); itr != end; ++itr)
+      {
+         SetInit(initData, initType, dataVec, *itr, hasData);
+      }
       break;
 
    case VariableType::BT_UNION:
-      for (bigsint i = type->getSize(SourcePosition::none()); i--;)
-         strings.push_back(false);
+      if(hasData) ++dataVec; // TODO
+      for(bigsint i = type->getSize(SourcePosition::none()); i--;)
+      {
+         if(hasData) *initData++ = NULL;
+         *initType++ = IT_INTEGER;
+      }
       break;
 
    case VariableType::BT_FUN_ASM:
+      if(hasData) ++dataVec; // TODO
       break;
 
    case VariableType::BT_FUN:
+      if(hasData) *initData++ = *dataVec++;
+      *initType++ = IT_FUNCTION;
+      break;
+
    case VariableType::BT_FUN_LIN:
    case VariableType::BT_FUN_NAT:
    case VariableType::BT_FUN_SNU:
-      strings.push_back(false);
+      if(hasData) *initData++ = *dataVec++;
+      *initType++ = IT_INTEGER;
       break;
 
    case VariableType::BT_FUN_SNA:
-      strings.push_back(true);
+      if(hasData) *initData++ = *dataVec++;
+      *initType++ = IT_STRING;
       break;
    }
+}
+
+}
+
+
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
+
+namespace ObjectData
+{
+
+//
+// ObjectData::SetInit
+//
+void SetInit(Init &init, ObjectExpression *data, VariableType const *type)
+{
+   init.data.clear();
+   init.type.clear();
+   init.dataAll = false;
+   init.typeAll = IT_UNKNOWN;
+
+   ObjectExpression::Vector dataVec;
+   if(data)
+   {
+      data->expand(&dataVec);
+      init.data.resize(type->getSize(SourcePosition::none()));
+      dataVec.resize(init.data.size());
+   }
+   init.type.resize(type->getSize(SourcePosition::none()));
+
+   InitDataVector::iterator dataItr = init.data.begin();
+   InitTypeVector::iterator typeItr = init.type.begin();
+   ObjectExpression::Vector::iterator dataVecItr = dataVec.begin();
+
+   SetInit(dataItr, typeItr, dataVecItr, type, !!data);
+
+   // Check if the data is all there.
+   init.dataAll = true;
+   for(InitDataVector::iterator itr = init.data.begin(), end = init.data.end(); itr != end; ++itr)
+   {
+      if(!*itr)
+      {
+         init.dataAll = false;
+         break;
+      }
+   }
+
+   // Check if the types are all the same.
+   for(InitTypeVector::iterator itr = init.type.begin(), end = init.type.end(); itr != end; ++itr)
+   {
+      if(*itr == IT_UNKNOWN || *itr == init.typeAll) continue;
+
+      if(init.typeAll == IT_UNKNOWN)
+      {
+         init.typeAll = *itr;
+      }
+      else
+      {
+         init.typeAll = IT_MIXED;
+         break;
+      }
+   }
+}
+
+}
+
+//
+// read_object<ObjectData::Init>
+//
+void read_object(std::istream *in, ObjectData::Init *out)
+{
+   read_object(in, &out->data);
+   read_object(in, &out->type);
+   read_object(in, &out->dataAll);
+   read_object(in, &out->typeAll);
+}
+
+//
+// read_object<ObjectData::InitType>
+//
+void read_object(std::istream *in, ObjectData::InitType *out)
+{
+   *out = static_cast<ObjectData::InitType>(read_object_int(in));
+
+   if(*out > ObjectData::IT_FUNCTION)
+      *out = ObjectData::IT_UNKNOWN;
+}
+
+//
+// write_object<ObjectData::Init>
+//
+void write_object(std::ostream *out, ObjectData::Init const *in)
+{
+   write_object(out, &in->data);
+   write_object(out, &in->type);
+   write_object(out, &in->dataAll);
+   write_object(out, &in->typeAll);
+}
+
+//
+// write_object<ObjectData::InitType>
+//
+void write_object(std::ostream *out, ObjectData::InitType const *in)
+{
+   write_object_int(out, static_cast<bigsint>(*in));
 }
 
 // EOF

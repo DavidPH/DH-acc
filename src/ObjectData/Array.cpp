@@ -110,19 +110,13 @@ static void GenerateInit(ArrayTable &table, ArrayVar const &v)
 {
    Array &a = table[v.array];
 
-   // If no init data, then never mind this var.
-   if(v.init.empty() || v.strings.empty())
-   {
-      // But just to be safe, mark its contents as non-strings.
-      // Um, but as a sort of GROSS HACK, don't do so for "::$init" objects.
-      if(v.name.size() < 5 || v.name.compare(v.name.size() - 5, 5, "$init"))
-         std::fill_n(a.strings.begin() + v.number, v.size, 0);
+   std::copy(v.init.data.begin(), v.init.data.end(), a.init.data.begin() + v.number);
+   std::copy(v.init.type.begin(), v.init.type.end(), a.init.type.begin() + v.number);
 
-      return;
-   }
-
-   std::copy(v.init.begin(), v.init.end(), a.init.begin() + v.number);
-   std::copy(v.strings.begin(), v.strings.end(), a.strings.begin() + v.number);
+   if(a.init.typeAll == IT_UNKNOWN)
+      a.init.typeAll = v.init.typeAll;
+   else if(v.init.typeAll != IT_UNKNOWN && v.init.typeAll != a.init.typeAll)
+      a.init.typeAll = IT_MIXED;
 
    // TODO: Add init for status byte when needed.
 }
@@ -168,13 +162,9 @@ static void GenerateSize(ArrayTable &table, ArrayVar const &v)
    {
       data.size = size;
 
-      // Preload init tables. Preload the strings table with true so it's easier to
-      // detect all-strings. (Otherwise unused and init bytes would be unmarked.)
-      // Possible alternative: 0 means Don't Care, 1 means String, 2 means Integer.
-      // Although, at that point it should probably be an enumeration to allow for
-      // other types of translated-index values. Such as functions.
-      data.init.resize(data.size, NULL);
-      data.strings.resize(data.size, 1);
+      // Preload init tables.
+      data.init.data.resize(data.size, NULL);
+      data.init.type.resize(data.size, IT_UNKNOWN);
    }
 }
 
@@ -355,7 +345,6 @@ void override_object(ObjectData::Array *out, ObjectData::Array const *in)
 void read_object(std::istream *in, ObjectData::Array *out)
 {
    read_object(in, &out->init);
-   read_object(in, &out->strings);
    read_object(in, &out->name);
    read_object(in, &out->number);
    read_object(in, &out->size);
@@ -369,7 +358,6 @@ void read_object(std::istream *in, ObjectData::Array *out)
 void write_object(std::ostream *out, ObjectData::Array const *in)
 {
    write_object(out, &in->init);
-   write_object(out, &in->strings);
    write_object(out, &in->name);
    write_object(out, &in->number);
    write_object(out, &in->size);

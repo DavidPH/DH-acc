@@ -84,6 +84,9 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    ObjectData::Array::IterateMap(write_ACSE_array_ASTR, &chunkout);
    write_ACSE_chunk(out, &chunkout, "ASTR");
 
+   // ATAG - Map Array Tagging
+   ObjectData::Array::IterateMap(write_ACSE_array_ATAG, out);
+
    // FNAM - Function Names
    ObjectData::Function::Iterate(write_ACSE_function_FNAM, NULL);
    write_ACSE_stringtable(&chunkout, false);

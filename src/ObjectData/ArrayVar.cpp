@@ -63,7 +63,13 @@ static void Add(ArrayVarTable &table, std::string const &array,
 
    if(data.name != name)
    {
-      odata_set_strings(data.strings, type);
+      SetInit(data.init, NULL, type);
+
+      // A slight hack for isInit variables.
+      if(name.size() < 5 || name.compare(name.size() - 5, 5, "$init"))
+         data.init.typeAll = IT_UNKNOWN;
+      if(name.size() < 7 || name.compare(name.size() - 7, 7, "$isInit"))
+         data.init.typeAll = IT_UNKNOWN;
 
       data.array     = array;
       data.name      = name;
@@ -148,45 +154,24 @@ static bool Init(ArrayVarTable &table, std::string const &name,
 
    ArrayVar &data = tableItr->second;
 
-   // Clear init data.
-   data.init.clear();
-   data.strings.clear();
-
    // Set init data.
-   init->expand(&data.init);
-   odata_set_strings(data.strings, type);
+   SetInit(data.init, init, type);
 
    // Now to determine if the entire object can be statically initialized.
 
-   // This is an "unfortunate limitation", but currently only the strings table
-   // accounts for multi-byte types. If there is a discrepancy between the two
-   // tables, then we cannot do any static initialization.
-   // TODO: Fix that.
-   if(data.init.size() != data.strings.size())
-   {
-      data.init.clear();
-      data.strings.clear();
-
-      return false;
-   }
-
    // This test is as simple as it is obvious. Is it a constant?
-   for(ObjectExpression::Vector::iterator itr = data.init.begin(),
-       end = data.init.end(); itr != end; ++itr)
-   {
-      if(!*itr) return false;
-   }
+   if(!data.init.dataAll)
+      return false;
 
    // The second is simple, but less obvious. If the expression contains any
    // strings, return false. Technically, if all of the objects in the final
    // array are strings, then the static initialization can (and will) happen.
    // But we can't know what else might be put in the final array. However, if
    // there are no strings, then we know that this section can be initialized.
-   for(std::vector<int>::iterator itr = data.strings.begin(),
-       end = data.strings.end(); itr != end; ++itr)
-   {
-      if(*itr) return false;
-   }
+   //
+   // Unless we're using the ATAG chunk.
+   if(!Option_UseChunkATAG && data.init.typeAll != IT_INTEGER)
+      return false;
 
    // At this point, we know that the object can be statically initialized.
    return true;
@@ -349,7 +334,6 @@ void override_object(ObjectData::ArrayVar *out, ObjectData::ArrayVar const *in)
 void read_object(std::istream *in, ObjectData::ArrayVar *out)
 {
    read_object(in, &out->init);
-   read_object(in, &out->strings);
    read_object(in, &out->array);
    read_object(in, &out->name);
    read_object(in, &out->number);
@@ -364,7 +348,6 @@ void read_object(std::istream *in, ObjectData::ArrayVar *out)
 void write_object(std::ostream *out, ObjectData::ArrayVar const *in)
 {
    write_object(out, &in->init);
-   write_object(out, &in->strings);
    write_object(out, &in->array);
    write_object(out, &in->name);
    write_object(out, &in->number);

@@ -91,11 +91,11 @@ static void Add(RegisterTable &table, std::string const &name,
 
    if (data.name != name)
    {
-      odata_set_strings(data.strings, type);
+      SetInit(data.init, NULL, type);
+
       data.name      = name;
       data.number    = number;
       data.size      = type->getSize(SourcePosition::none());
-      data.init      = NULL;
       data.externDef = externDef;
       data.externVis = externVis;
 
@@ -238,12 +238,17 @@ void Register::GenerateSymbols()
 //
 // ObjectData::Register::InitMap
 //
-bool Register::InitMap(std::string const &name, ObjectExpression *init)
+bool Register::InitMap(std::string const &name, VariableType const *type,
+                       ObjectExpression *init)
 {
    RegisterIter r = MapTable.find(name);
    if(r == MapTable.end()) return false;
 
-   r->second.init = init;
+   Register &data = r->second;
+
+   SetInit(data.init, init, type);
+
+   if(!data.init.dataAll) return false;
 
    return true;
 }
@@ -321,11 +326,10 @@ void override_object(ObjectData::Register *out, ObjectData::Register const *in)
 //
 void read_object(std::istream *in, ObjectData::Register *out)
 {
-   read_object(in, &out->strings);
+   read_object(in, &out->init);
    read_object(in, &out->name);
    read_object(in, &out->number);
    read_object(in, &out->size);
-   read_object(in, &out->init);
    read_object(in, &out->externDef);
    read_object(in, &out->externVis);
 }
@@ -335,11 +339,10 @@ void read_object(std::istream *in, ObjectData::Register *out)
 //
 void write_object(std::ostream *out, ObjectData::Register const *in)
 {
-   write_object(out, &in->strings);
+   write_object(out, &in->init);
    write_object(out, &in->name);
    write_object(out, &in->number);
    write_object(out, &in->size);
-   write_object(out, &in->init);
    write_object(out, &in->externDef);
    write_object(out, &in->externVis);
 }

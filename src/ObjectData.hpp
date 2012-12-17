@@ -45,6 +45,23 @@ class VariableType;
 namespace ObjectData
 {
 
+typedef CounterPointer<ObjectExpression> InitData;
+typedef std::vector<InitData> InitDataVector;
+
+//
+// ObjectData::InitType
+//
+enum InitType
+{
+   IT_UNKNOWN,
+   IT_MIXED,
+   IT_INTEGER,
+   IT_STRING,
+   IT_FUNCTION
+};
+
+typedef std::vector<InitType> InitTypeVector;
+
 //
 // ObjectData::ScriptFlag
 //
@@ -73,6 +90,18 @@ enum ScriptType
 };
 
 //
+// ObjectData::Init
+//
+struct Init
+{
+   InitDataVector data;
+   InitTypeVector type;
+
+   InitType typeAll;
+   bool dataAll;
+};
+
+//
 // ObjectData::Array
 //
 struct Array
@@ -80,8 +109,7 @@ struct Array
    typedef void (*IterFunc)(std::ostream *, Array const &);
 
 
-   std::vector<CounterPointer<ObjectExpression> > init;
-   std::vector<int> strings;
+   Init init;
    std::string name;
    bigsint number;
    bigsint size;
@@ -115,8 +143,7 @@ struct ArrayVar
    typedef void (*IterFunc)(std::ostream *, ArrayVar const &);
 
 
-   std::vector<CounterPointer<ObjectExpression> > init;
-   std::vector<int> strings;
+   Init init;
    std::string array;
    std::string name;
    bigsint number;
@@ -222,11 +249,10 @@ struct Register
    typedef void (*IterFunc)(std::ostream *, Register const &);
 
 
-   std::vector<int> strings;
+   Init init;
    std::string name;
    bigsint number;
    bigsint size;
-   CounterPointer<ObjectExpression> init;
    bool externDef;
    bool externVis;
 
@@ -242,7 +268,8 @@ struct Register
 
    static void GenerateSymbols();
 
-   static bool InitMap(std::string const &name, ObjectExpression *ini);
+   static bool InitMap(std::string const &name, VariableType const *type,
+                       ObjectExpression *init);
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
    static void IterateMap(IterFunc iterFunc, std::ostream *out);
@@ -356,13 +383,22 @@ struct String
 //
 
 extern bool option_named_scripts;
+extern bool Option_UseChunkATAG;
 
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
-void odata_set_strings(std::vector<int> &strings, VariableType const *type);
+namespace ObjectData
+{
+
+//
+// ObjectData::SetInit
+//
+void SetInit(Init &init, ObjectExpression *data, VariableType const *type);
+
+}
 
 extern void override_object(ObjectData::Array    *out, ObjectData::Array    const *in);
 extern void override_object(ObjectData::ArrayVar *out, ObjectData::ArrayVar const *in);
@@ -377,6 +413,8 @@ extern void read_object(std::istream *in, ObjectData::Array      *out);
 extern void read_object(std::istream *in, ObjectData::ArrayVar   *out);
 extern void read_object(std::istream *in, ObjectData::Auto       *out);
 extern void read_object(std::istream *in, ObjectData::Function   *out);
+extern void read_object(std::istream *in, ObjectData::Init       *out);
+extern void read_object(std::istream *in, ObjectData::InitType   *out);
 extern void read_object(std::istream *in, ObjectData::Register   *out);
 extern void read_object(std::istream *in, ObjectData::Script     *out);
 extern void read_object(std::istream *in, ObjectData::Static     *out);
@@ -387,6 +425,8 @@ extern void write_object(std::ostream *out, ObjectData::Array      const *in);
 extern void write_object(std::ostream *out, ObjectData::ArrayVar   const *in);
 extern void write_object(std::ostream *out, ObjectData::Auto       const *in);
 extern void write_object(std::ostream *out, ObjectData::Function   const *in);
+extern void write_object(std::ostream *out, ObjectData::Init       const *in);
+extern void write_object(std::ostream *out, ObjectData::InitType   const *in);
 extern void write_object(std::ostream *out, ObjectData::Register   const *in);
 extern void write_object(std::ostream *out, ObjectData::Script     const *in);
 extern void write_object(std::ostream *out, ObjectData::Static     const *in);

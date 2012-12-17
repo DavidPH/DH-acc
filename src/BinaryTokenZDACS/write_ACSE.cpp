@@ -140,17 +140,16 @@ void BinaryTokenZDACS::write_ACSE_array_AIMP_counter(std::ostream *,
 //
 // BinaryTokenZDACS::write_ACSE_array_AINI
 //
-void BinaryTokenZDACS::write_ACSE_array_AINI
-(std::ostream *out, ObjectData::Array const &a)
+void BinaryTokenZDACS::write_ACSE_array_AINI(std::ostream *out, ObjectData::Array const &a)
 {
    if (a.externDef) return;
-   if(a.init.empty()) return;
+   if(a.init.data.empty()) return;
 
    *out << 'A' << 'I' << 'N' << 'I';
    BinaryTokenACS::write_ACS0_32(out, (a.size + 1) * 4);
    BinaryTokenACS::write_ACS0_32(out, a.number);
 
-   ObjectExpression::Vector const &init = a.init;
+   ObjectExpression::Vector const &init = a.init.data;
 
    for (size_t i = 0, end = a.size; i != end; ++i)
    {
@@ -164,19 +163,57 @@ void BinaryTokenZDACS::write_ACSE_array_AINI
 //
 // BinaryTokenZDACS::write_ACSE_array_ASTR
 //
-void BinaryTokenZDACS::write_ACSE_array_ASTR(std::ostream *out,
-   ObjectData::Array const &a)
+void BinaryTokenZDACS::write_ACSE_array_ASTR(std::ostream *out, ObjectData::Array const &a)
 {
    if (a.externDef) return;
-   if(a.init.empty()) return;
 
    // Mark as strings only if totally comprised of strings.
-   for(size_t i = a.strings.size(); i--;)
-   {
-      if(!a.strings[i]) return;
-   }
+   if(a.init.typeAll != ObjectData::IT_STRING)
+      return;
 
    BinaryTokenACS::write_ACS0_32(out, a.number);
+}
+
+//
+// BinaryTokenZDACS::write_ACSE_array_ATAG
+//
+void BinaryTokenZDACS::write_ACSE_array_ATAG(std::ostream *out, ObjectData::Array const &a)
+{
+   if(!Option_UseChunkATAG) return;
+
+   if(a.externDef) return;
+   if(a.init.type.empty()) return;
+
+   // If true, the array is covered by ASTR.
+   if(a.init.typeAll == ObjectData::IT_STRING) return;
+
+   std::vector<unsigned char> buf; buf.reserve(a.init.type.size());
+
+   for(auto const &itr : a.init.type)
+   {
+      switch(itr)
+      {
+      default:
+      case ObjectData::IT_INTEGER:  buf.push_back('\0'); break;
+      case ObjectData::IT_STRING:   buf.push_back('\1'); break;
+      case ObjectData::IT_FUNCTION: buf.push_back('\2'); break;
+      }
+   }
+
+   // Strip trailing 0s.
+   while(!buf.empty() && !buf.back())
+      buf.pop_back();
+
+   // If that was everything, then don't generate a chunk.
+   if(buf.empty()) return;
+
+   *out << 'A' << 'T' << 'A' << 'G';
+   BinaryTokenACS::write_ACS0_32(out, buf.size() + 5);
+   *out << '\0';
+   BinaryTokenACS::write_ACS0_32(out, a.number);
+
+   for(auto const &itr : buf)
+      out->put(itr);
 }
 
 //
@@ -315,18 +352,17 @@ void BinaryTokenZDACS::write_ACSE_register_MINI(std::ostream *out,
    ObjectData::Register const &r)
 {
    if (r.externDef) return;
-   if (!r.init) return;
+   if(r.init.data.empty()) return;
 
    *out << 'M' << 'I' << 'N' << 'I';
    BinaryTokenACS::write_ACS0_32(out, r.size*4+4);
    BinaryTokenACS::write_ACS0_32(out, r.number);
 
-   ObjectExpression::Vector init;
-   r.init->expand(&init);
+   ObjectExpression::Vector const &init = r.init.data;
 
    for (size_t i = 0, end = r.size; i != end; ++i)
    {
-      if (i < init.size())
+      if(i < init.size() && init[i])
          BinaryTokenACS::write_ACS0_32(out, *init[i]);
       else
          BinaryTokenACS::write_ACS0_32(out, 0);
@@ -340,10 +376,10 @@ void BinaryTokenZDACS::write_ACSE_register_MSTR(std::ostream *out,
    ObjectData::Register const &r)
 {
    if (r.externDef) return;
-   if (!r.init) return;
+   if(!r.init.type.empty()) return;
 
-   for (size_t i = r.strings.size(); i--;)
-      if (r.strings[i])
+   for(size_t i = r.init.type.size(); i--;)
+      if(r.init.type[i] == ObjectData::IT_STRING)
          BinaryTokenACS::write_ACS0_32(out, r.number + i);
 }
 
