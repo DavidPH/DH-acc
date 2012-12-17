@@ -68,29 +68,29 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
       iter->writeACS0(out);
 
    // AIMP - Map Array Imports
-   ObjectData_Array::IterateMap(write_ACSE_array_AIMP_counter, &chunkout);
+   ObjectData::Array::IterateMap(write_ACSE_array_AIMP_counter, &chunkout);
    write_ACSE_counter(&chunkout);
-   ObjectData_Array::IterateMap(write_ACSE_array_AIMP, &chunkout);
+   ObjectData::Array::IterateMap(write_ACSE_array_AIMP, &chunkout);
    write_ACSE_chunk(out, &chunkout, "AIMP");
 
    // AINI - Map Array Initialization
-   ObjectData_Array::IterateMap(write_ACSE_array_AINI, out);
+   ObjectData::Array::IterateMap(write_ACSE_array_AINI, out);
 
    // ARAY - Map Array Declarations
-   ObjectData_Array::IterateMap(write_ACSE_array_ARAY, &chunkout);
+   ObjectData::Array::IterateMap(write_ACSE_array_ARAY, &chunkout);
    write_ACSE_chunk(out, &chunkout, "ARAY");
 
    // ASTR - Map Array Strings
-   ObjectData_Array::IterateMap(write_ACSE_array_ASTR, &chunkout);
+   ObjectData::Array::IterateMap(write_ACSE_array_ASTR, &chunkout);
    write_ACSE_chunk(out, &chunkout, "ASTR");
 
    // FNAM - Function Names
-   ObjectData_Function::iterate(write_ACSE_function_FNAM, NULL);
+   ObjectData::Function::Iterate(write_ACSE_function_FNAM, NULL);
    write_ACSE_stringtable(&chunkout, false);
    write_ACSE_chunk(out, &chunkout, "FNAM");
 
    // FUNC - Functions
-   ObjectData_Function::iterate(write_ACSE_function_FUNC, &chunkout);
+   ObjectData::Function::Iterate(write_ACSE_function_FUNC, &chunkout);
    write_ACSE_chunk(out, &chunkout, "FUNC");
 
    // LOAD - Load Libraries
@@ -98,42 +98,42 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    write_ACSE_chunk(out, &chunkout, "LOAD");
 
    // MEXP - Map Register Exports
-   ObjectData_Register::iterate_map(write_ACSE_register_MEXP, NULL);
-   ObjectData_Array   ::IterateMap(write_ACSE_array_MEXP,    NULL);
+   ObjectData::Register::IterateMap(write_ACSE_register_MEXP, NULL);
+   ObjectData::Array   ::IterateMap(write_ACSE_array_MEXP,    NULL);
    write_ACSE_stringtable(&chunkout, false);
    write_ACSE_chunk(out, &chunkout, "MEXP");
 
    // MIMP - Map Register Imports
-   ObjectData_Register::iterate_map(write_ACSE_register_MIMP, &chunkout);
+   ObjectData::Register::IterateMap(write_ACSE_register_MIMP, &chunkout);
    write_ACSE_chunk(out, &chunkout, "MIMP");
 
    // MINI - Map Register Initialization
-   ObjectData_Register::iterate_map(write_ACSE_register_MINI, out);
+   ObjectData::Register::IterateMap(write_ACSE_register_MINI, out);
 
    // MSTR - Map Register Strings
-   ObjectData_Register::iterate_map(write_ACSE_register_MSTR, &chunkout);
+   ObjectData::Register::IterateMap(write_ACSE_register_MSTR, &chunkout);
    write_ACSE_chunk(out, &chunkout, "MSTR");
 
    // SPTR - Script Pointers
-   ObjectData_Script::iterate(write_ACSE_script, &chunkout);
+   ObjectData::Script::Iterate(write_ACSE_script, &chunkout);
    write_ACSE_chunk(out, &chunkout, "SPTR");
 
    // SFLG - Script Flags
-   ObjectData_Script::iterate(write_ACSE_script_SFLG, &chunkout);
+   ObjectData::Script::Iterate(write_ACSE_script_SFLG, &chunkout);
    write_ACSE_chunk(out, &chunkout, "SFLG");
 
    // SNAM - Script Names
-   ObjectData_Script::iterate(write_ACSE_script_SNAM, &chunkout);
+   ObjectData::Script::Iterate(write_ACSE_script_SNAM, &chunkout);
    write_ACSE_stringtable(&chunkout, false);
    write_ACSE_chunk(out, &chunkout, "SNAM");
 
    // STRL - String Literals
-   ObjectData_String::iterate(write_ACSE_string_STRL, NULL);
+   ObjectData::String::Iterate(write_ACSE_string_STRL, NULL);
    write_ACSE_stringtable(&chunkout, true);
    write_ACSE_chunk(out, &chunkout, "STRL");
 
    // SVCT - Script Variable Counts
-   ObjectData_Script::iterate(write_ACSE_script_SVCT, &chunkout);
+   ObjectData::Script::Iterate(write_ACSE_script_SVCT, &chunkout);
    write_ACSE_chunk(out, &chunkout, "SVCT");
 
    // Header (really)

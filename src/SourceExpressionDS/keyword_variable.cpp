@@ -67,13 +67,13 @@ static SourceExpression::Pointer add_var(SourceContext *context,
       bigsint number = store.area ? store.area->resolveINT() : -1;
 
       if(store.type == STORE_MAPARRAY)
-         ObjectData_Array::AddMap(nameArr, linkSpec, externDef, number);
+         ObjectData::Array::AddMap(nameArr, linkSpec, externDef, number);
 
       else if(store.type == STORE_WORLDARRAY)
-         ObjectData_Array::AddWorld(nameArr, linkSpec, externDef, number);
+         ObjectData::Array::AddWorld(nameArr, linkSpec, externDef, number);
 
       else if(store.type == STORE_GLOBALARRAY)
-         ObjectData_Array::AddGlobal(nameArr, linkSpec, externDef, number);
+         ObjectData::Array::AddGlobal(nameArr, linkSpec, externDef, number);
 
       var = SourceVariable::create_variable(nameSrc, type, nameObj, nameArr, store.type, pos);
    }
@@ -371,7 +371,8 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
          if(!initObj || Target == TARGET_Hexen)
             goto case_init;
 
-         ObjectData_Register::ini_map(nameObj, initObj);
+         if(!ObjectData::Register::InitMap(nameObj, initObj))
+            goto case_init;
 
          break;
 
@@ -379,7 +380,7 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
          if(!initObj)
             goto case_init;
 
-         if(!ObjectData_ArrayVar::InitMap(nameObj, type, initObj))
+         if(!ObjectData::ArrayVar::InitMap(nameObj, type, initObj))
             goto case_init;
 
          break;

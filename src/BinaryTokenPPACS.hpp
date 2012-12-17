@@ -37,10 +37,13 @@
 // Types                                                                      |
 //
 
-struct ObjectData_Auto;
-struct ObjectData_Script;
-struct ObjectData_Static;
-struct ObjectData_String;
+namespace ObjectData
+{
+struct Auto;
+struct Script;
+struct Static;
+struct String;
+}
 class ObjectExpression;
 class ObjectToken;
 class ObjectVector;
@@ -147,9 +150,9 @@ public:
    static void output_ACSP(std::ostream *out, std::vector<T> const &instructions);
 
    static void write_ACSP_label(std::ostream *out, std::string const &label);
-   static void write_ACSP_script(std::ostream *out, ObjectData_Script const &s);
-   static void write_ACSP_static(std::ostream *out, ObjectData_Static const &s);
-   static void write_ACSP_string(std::ostream *out, ObjectData_String const &s);
+   static void write_ACSP_script(std::ostream *out, ObjectData::Script const &s);
+   static void write_ACSP_static(std::ostream *out, ObjectData::Static const &s);
+   static void write_ACSP_string(std::ostream *out, ObjectData::String const &s);
    static void write_ACSP_string(std::ostream *out, std::string const &s);
 
    static void write_all(std::ostream *out, std::vector<BinaryTokenPPACS> const &instructions);

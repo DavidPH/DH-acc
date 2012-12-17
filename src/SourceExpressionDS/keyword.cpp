@@ -95,15 +95,15 @@ SRCEXPDS_KEYWORD_DEFN(address_space)
    switch(addr.store)
    {
    case STORE_MAPARRAY:
-      ObjectData_Array::AddMap(addr.array, linkage, externDef, number);
+      ObjectData::Array::AddMap(addr.array, linkage, externDef, number);
       break;
 
    case STORE_WORLDARRAY:
-      ObjectData_Array::AddWorld(addr.array, linkage, externDef, number);
+      ObjectData::Array::AddWorld(addr.array, linkage, externDef, number);
       break;
 
    case STORE_GLOBALARRAY:
-      ObjectData_Array::AddGlobal(addr.array, linkage, externDef, number);
+      ObjectData::Array::AddGlobal(addr.array, linkage, externDef, number);
       break;
 
    default:

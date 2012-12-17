@@ -85,7 +85,7 @@ SourceExpression::Pointer SourceExpressionC::CreateObject(
    // Map array storage variables can be initialized via the AINI chunk. In
    // which case, the below init code is unneeded.
    if(store == STORE_MAPARRAY && init->canMakeObject() &&
-      ObjectData_ArrayVar::InitMap(nameObj, type, init->makeObject()))
+      ObjectData::ArrayVar::InitMap(nameObj, type, init->makeObject()))
    {
       return expr;
    }
@@ -213,15 +213,15 @@ SRCEXPC_PARSE_DEFN_HALF(AddressSpace)
    switch(addr.store)
    {
    case STORE_MAPARRAY:
-      ObjectData_Array::AddMap(addr.array, linkage, externDef, number);
+      ObjectData::Array::AddMap(addr.array, linkage, externDef, number);
       break;
 
    case STORE_WORLDARRAY:
-      ObjectData_Array::AddWorld(addr.array, linkage, externDef, number);
+      ObjectData::Array::AddWorld(addr.array, linkage, externDef, number);
       break;
 
    case STORE_GLOBALARRAY:
-      ObjectData_Array::AddGlobal(addr.array, linkage, externDef, number);
+      ObjectData::Array::AddGlobal(addr.array, linkage, externDef, number);
       break;
 
    default:
@@ -486,12 +486,12 @@ SRCEXPC_PARSE_DEFN_EXT(InitDeclarator, DeclarationSpecifiers const &spec, Declar
       {
          if(decl.funcAttr.scriptName.empty()) decl.funcAttr.scriptName = nameObj;
 
-         ObjectData_Script::add(nameObj, label, decl.funcAttr.scriptType,
-            decl.funcAttr.scriptFlag, paramSize, NULL, linkage != LINKAGE_INTERN,
+         ObjectData::Script::Add(nameObj, label, decl.funcAttr.scriptType,
+            decl.funcAttr.scriptFlag, paramSize, nullptr, linkage != LINKAGE_INTERN,
             decl.funcAttr.scriptAddr, decl.funcAttr.scriptName);
       }
       else
-         ObjectData_Function::add(nameObj, label, paramSize, returnSize, NULL);
+         ObjectData::Function::Add(nameObj, label, paramSize, returnSize, nullptr);
 
       SourceVariable::Pointer var;
       if(obj) var = SourceVariable::create_constant(decl.name, decl.type,     obj, pos);
@@ -722,19 +722,19 @@ SRCEXPC_PARSE_DEFN_EXT(Function, DeclarationSpecifiers const &spec, Declarator &
 
    // __func__
    funcContext->addVar(SourceVariable::create_constant("__func__",
-      VariableType::get_bt_str(), ObjectData_String::add(decl.name), pos),
+      VariableType::get_bt_str(), ObjectData::String::Add(decl.name), pos),
       LINKAGE_INTERN, false);
 
    if(decl.funcAttr.script)
    {
       if(decl.funcAttr.scriptName.empty()) decl.funcAttr.scriptName = nameObj;
 
-      ObjectData_Script::add(nameObj, label, decl.funcAttr.scriptType,
+      ObjectData::Script::Add(nameObj, label, decl.funcAttr.scriptType,
          decl.funcAttr.scriptFlag, paramSize, funcContext, linkage != LINKAGE_INTERN,
          decl.funcAttr.scriptAddr, decl.funcAttr.scriptName);
    }
    else
-      ObjectData_Function::add(nameObj, label, paramSize, returnSize, funcContext);
+      ObjectData::Function::Add(nameObj, label, paramSize, returnSize, funcContext);
 
    SourceFunction::Reference func = SourceFunction::FindFunction(
       SourceVariable::create_constant(decl.name, decl.type, nameObj, pos));

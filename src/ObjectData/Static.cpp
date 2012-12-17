@@ -35,7 +35,7 @@
 // Types                                                                      |
 //
 
-typedef std::map<std::string, ObjectData_Static> StaticTable;
+typedef std::map<std::string, ObjectData::Static> StaticTable;
 typedef StaticTable::iterator StaticIter;
 
 
@@ -49,7 +49,7 @@ static option::option_dptr<int> option_static_offset_handler
  "Sets the allocation offset for static variables. 8192 by default.",
  NULL, &option_static_offset);
 
-static StaticTable static_table;
+static StaticTable Table;
 
 
 //----------------------------------------------------------------------------|
@@ -63,12 +63,15 @@ int option_static_offset = 8192;
 // Static Functions                                                           |
 //
 
-//
-// set_number
-//
-void set_number(ObjectData_Static &data)
+namespace ObjectData
 {
-   StaticIter itr = static_table.begin(), end = static_table.end();
+
+//
+// SetNumber
+//
+void SetNumber(Static &data)
+{
+   StaticIter itr = Table.begin(), end = Table.end();
    bigsint index = option_static_offset, limit, iterI, iterL;
 
    while (itr != end)
@@ -86,7 +89,7 @@ void set_number(ObjectData_Static &data)
           (iterL >  index && limit > iterL))
       {
          index = iterL;
-         itr = static_table.begin();
+         itr = Table.begin();
          continue;
       }
 
@@ -96,29 +99,23 @@ void set_number(ObjectData_Static &data)
    data.number = index;
 }
 
+}
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
-//
-// ObjectData_Static::add
-//
-void ObjectData_Static::add
-(std::string const &name, VariableType const *type, bool externDef,
- bool externVis)
+namespace ObjectData
 {
-   add(name, type, externDef, externVis, -1);
-}
 
 //
-// ObjectData_Static::add
+// ObjectData::Static::Add
 //
-void ObjectData_Static::add
-(std::string const &name, VariableType const *type, bool externDef,
- bool externVis, bigsint number)
+void Static::Add(std::string const &name, VariableType const *type,
+   bool externDef, bool externVis, bigsint number)
 {
-   ObjectData_Static &data = static_table[name];
+   Static &data = Table[name];
 
    if (data.name != name)
    {
@@ -138,17 +135,20 @@ void ObjectData_Static::add
 }
 
 //
-// ObjectData_Static::generate_symbols
+// ObjectData::Static::GenerateSymbols
 //
-void ObjectData_Static::generate_symbols()
+void Static::GenerateSymbols()
 {
    ObjectExpression::Pointer obj;
-   StaticIter itr, end = static_table.end();
+   StaticIter itr, end = Table.end();
 
-   for (itr = static_table.begin(); itr != end; ++itr)
-      if (itr->second.number == -1) set_number(itr->second);
+   for(itr = Table.begin(); itr != end; ++itr)
+   {
+      if(itr->second.number == -1)
+         SetNumber(itr->second);
+   }
 
-   for (itr = static_table.begin(); itr != end; ++itr)
+   for(itr = Table.begin(); itr != end; ++itr)
    {
       obj = ObjectExpression::create_value_uns
       (itr->second.number, SourcePosition::none());
@@ -158,45 +158,45 @@ void ObjectData_Static::generate_symbols()
 }
 
 //
-// ObjectData_Static::iterate
+// ObjectData::Static::iterate
 //
-void ObjectData_Static::iterate(IterFunc iterFunc, std::ostream *out)
+void Static::Iterate(IterFunc iterFunc, std::ostream *out)
 {
-   StaticIter itr, end = static_table.end();
-
-   for (itr = static_table.begin(); itr != end; ++itr)
+   for(StaticIter itr = Table.begin(), end = Table.end(); itr != end; ++itr)
       iterFunc(out, itr->second);
 }
 
 //
-// ObjectData_Static::read_objects
+// ObjectData::Static::ReadObjects
 //
-void ObjectData_Static::read_objects(std::istream *in)
+void Static::ReadObjects(std::istream *in)
 {
-   read_object(in, &static_table);
+   read_object(in, &Table);
 }
 
 //
-// ObjectData_Static::write_objects
+// ObjectData::Static::write_objects
 //
-void ObjectData_Static::write_objects(std::ostream *out)
+void Static::WriteObjects(std::ostream *out)
 {
-   write_object(out, &static_table);
+   write_object(out, &Table);
+}
+
 }
 
 //
-// override_object<ObjectData_Static>
+// override_object<ObjectData::Static>
 //
-void override_object(ObjectData_Static *out, ObjectData_Static const *in)
+void override_object(ObjectData::Static *out, ObjectData::Static const *in)
 {
    if (out->number == -1)
       *out = *in;
 }
 
 //
-// read_object<ObjectData_Static>
+// read_object<ObjectData::Static>
 //
-void read_object(std::istream *in, ObjectData_Static *out)
+void read_object(std::istream *in, ObjectData::Static *out)
 {
    read_object(in, &out->name);
    read_object(in, &out->number);
@@ -207,9 +207,9 @@ void read_object(std::istream *in, ObjectData_Static *out)
 }
 
 //
-// write_object<ObjectData_Static>
+// write_object<ObjectData::Static>
 //
-void write_object(std::ostream *out, ObjectData_Static const *in)
+void write_object(std::ostream *out, ObjectData::Static const *in)
 {
    write_object(out, &in->name);
    write_object(out, &in->number);

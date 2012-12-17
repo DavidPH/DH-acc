@@ -183,10 +183,10 @@ public:
    //
    struct FunctionAttributes
    {
-      typedef ObjectData_Script::ScriptType ScriptType;
+      typedef ObjectData::ScriptType ScriptType;
 
       FunctionAttributes()
-       : scriptAddr(-1), scriptFlag(0), scriptType(ObjectData_Script::ST_CLOSED),
+       : scriptAddr(-1), scriptFlag(0), scriptType(ObjectData::ST_CLOSED),
          asmfun(false), lnspec(false), native(false), script(false)
       {
       }

@@ -730,7 +730,7 @@ void SourceExpressionC::ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_AR
       {
          funcAttr.script = true;
          funcAttr.scriptAddr = option_named_scripts ? -2 : -1;
-         funcAttr.scriptType = ObjectData_Script::ST_OPEN;
+         funcAttr.scriptType = ObjectData::ST_OPEN;
       }
 
       ParseDeclaratorSuffix(decl, in, context);

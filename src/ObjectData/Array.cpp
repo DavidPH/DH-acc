@@ -37,7 +37,7 @@
 // Types                                                                      |
 //
 
-typedef std::map<std::string, ObjectData_Array> ArrayTable;
+typedef std::map<std::string, ObjectData::Array> ArrayTable;
 typedef ArrayTable::iterator ArrayIter;
 
 
@@ -60,12 +60,14 @@ static std::set<bigsint> used;
 //
 
 int option_addr_array = 0;
-extern bool option_named_scripts;
 
 
 //----------------------------------------------------------------------------|
 // Static Functions                                                           |
 //
+
+namespace ObjectData
+{
 
 //
 // Add
@@ -73,7 +75,7 @@ extern bool option_named_scripts;
 static void Add(ArrayTable &table, std::string const &name,
                 LinkageSpecifier linkage, bool externDef, bigsint number)
 {
-   ObjectData_Array &data = table[name];
+   Array &data = table[name];
 
    if(data.name != name)
    {
@@ -95,7 +97,7 @@ static void Add(ArrayTable &table, std::string const &name,
 //
 // CountRegister
 //
-static void CountRegister(std::ostream *, ObjectData_Register const &r)
+static void CountRegister(std::ostream *, Register const &r)
 {
    for(bigsint i = r.size; i--;)
       used.insert(r.number + i);
@@ -104,9 +106,9 @@ static void CountRegister(std::ostream *, ObjectData_Register const &r)
 //
 // GenerateInit
 //
-static void GenerateInit(ArrayTable &table, ObjectData_ArrayVar const &v)
+static void GenerateInit(ArrayTable &table, ArrayVar const &v)
 {
-   ObjectData_Array &a = table[v.array];
+   Array &a = table[v.array];
 
    // If no init data, then never mind this var.
    if(v.init.empty() || v.strings.empty())
@@ -128,7 +130,7 @@ static void GenerateInit(ArrayTable &table, ObjectData_ArrayVar const &v)
 //
 // GenerateInitMap
 //
-static void GenerateInitMap(std::ostream *, ObjectData_ArrayVar const &v)
+static void GenerateInitMap(std::ostream *, ArrayVar const &v)
 {
    GenerateInit(MapTable, v);
 }
@@ -136,7 +138,7 @@ static void GenerateInitMap(std::ostream *, ObjectData_ArrayVar const &v)
 //
 // GenerateNumber
 //
-static void GenerateNumber(ArrayTable &table, ObjectData_Array &data)
+static void GenerateNumber(ArrayTable &table, Array &data)
 {
    ArrayIter itr, end = table.end();
    bigsint index = 0;
@@ -157,9 +159,9 @@ begin:
 //
 // GenerateSize
 //
-static void GenerateSize(ArrayTable &table, ObjectData_ArrayVar const &v)
+static void GenerateSize(ArrayTable &table, ArrayVar const &v)
 {
-   ObjectData_Array &data = table[v.array];
+   Array &data = table[v.array];
    bigsint size = v.number + v.size;
 
    if(data.size < size)
@@ -179,7 +181,7 @@ static void GenerateSize(ArrayTable &table, ObjectData_ArrayVar const &v)
 //
 // GenerateSizeMap
 //
-static void GenerateSizeMap(std::ostream *, ObjectData_ArrayVar const &v)
+static void GenerateSizeMap(std::ostream *, ArrayVar const &v)
 {
    GenerateSize(MapTable, v);
 }
@@ -187,7 +189,7 @@ static void GenerateSizeMap(std::ostream *, ObjectData_ArrayVar const &v)
 //
 // GenerateSizeWorld
 //
-static void GenerateSizeWorld(std::ostream *, ObjectData_ArrayVar const &v)
+static void GenerateSizeWorld(std::ostream *, ArrayVar const &v)
 {
    GenerateSize(WorldTable, v);
 }
@@ -195,7 +197,7 @@ static void GenerateSizeWorld(std::ostream *, ObjectData_ArrayVar const &v)
 //
 // GenerateSizeGlobal
 //
-static void GenerateSizeGlobal(std::ostream *, ObjectData_ArrayVar const &v)
+static void GenerateSizeGlobal(std::ostream *, ArrayVar const &v)
 {
    GenerateSize(GlobalTable, v);
 }
@@ -222,11 +224,12 @@ static void GenerateSymbols(ArrayTable &table)
 //
 // Iterate
 //
-static void Iterate(ArrayTable &table, ObjectData_Array::IterFunc iterFunc,
-                    std::ostream *out)
+static void Iterate(ArrayTable &table, Array::IterFunc iterFunc, std::ostream *out)
 {
    for(ArrayIter itr = table.begin(), end = table.end(); itr != end; ++itr)
       iterFunc(out, itr->second);
+}
+
 }
 
 
@@ -234,86 +237,87 @@ static void Iterate(ArrayTable &table, ObjectData_Array::IterFunc iterFunc,
 // Global Functions                                                           |
 //
 
+namespace ObjectData
+{
+
 //
-// ObjectData_Array::AddMap
+// ObjectData::Array::AddMap
 //
-void ObjectData_Array::AddMap(std::string const &name,
-   LinkageSpecifier linkage, bool externDef, bigsint number)
+void Array::AddMap(std::string const &name, LinkageSpecifier linkage,
+   bool externDef, bigsint number)
 {
    Add(MapTable, name, linkage, externDef, number);
 }
 
 //
-// ObjectData_Array::AddWorld
+// ObjectData::Array::AddWorld
 //
-void ObjectData_Array::AddWorld(std::string const &name,
-   LinkageSpecifier linkage, bool externDef, bigsint number)
+void Array::AddWorld(std::string const &name, LinkageSpecifier linkage,
+   bool externDef, bigsint number)
 {
    Add(WorldTable, name, linkage, externDef, number);
 }
 
 //
-// ObjectData_Array::AddGlobal
+// ObjectData::Array::AddGlobal
 //
-void ObjectData_Array::AddGlobal(std::string const &name,
-   LinkageSpecifier linkage, bool externDef, bigsint number)
+void Array::AddGlobal(std::string const &name, LinkageSpecifier linkage,
+   bool externDef, bigsint number)
 {
    Add(GlobalTable, name, linkage, externDef, number);
 }
 
 //
-// ObjectData_Array::GenerateSymbols
+// ObjectData::Array::GenerateSymbols
 //
-void ObjectData_Array::GenerateSymbols()
+void Array::GenerateSymbols()
 {
-   ObjectData_Register::iterate_map(CountRegister, NULL);
-   ::GenerateSymbols(MapTable);
+   used.clear(); Register::IterateMap(CountRegister, NULL);
+   ObjectData::GenerateSymbols(MapTable);
 
    used.clear(); used.insert(option_auto_array);
-   ::GenerateSymbols(WorldTable);
+   ObjectData::GenerateSymbols(WorldTable);
 
    used.clear(); used.insert(option_addr_array);
-   ::GenerateSymbols(GlobalTable);
-
-   used.clear();
+   ObjectData::GenerateSymbols(GlobalTable);
 
    // Set sizes.
-   ObjectData_ArrayVar::IterateMap(GenerateSizeMap, NULL);
-   ObjectData_ArrayVar::IterateMap(GenerateSizeWorld, NULL);
-   ObjectData_ArrayVar::IterateMap(GenerateSizeGlobal, NULL);
+   ArrayVar::IterateMap(GenerateSizeMap, NULL);
+   ArrayVar::IterateMap(GenerateSizeWorld, NULL);
+   ArrayVar::IterateMap(GenerateSizeGlobal, NULL);
 
    // Build init table.
-   ObjectData_ArrayVar::IterateMap(GenerateInitMap, NULL);
+   ArrayVar::IterateMap(GenerateInitMap, NULL);
 }
 
 //
-// ObjectData_Array::IterateMap
+// ObjectData::Array::IterateMap
 //
-void ObjectData_Array::IterateMap(IterFunc iterFunc, std::ostream *out)
+void Array::IterateMap(IterFunc iterFunc, std::ostream *out)
 {
    Iterate(MapTable, iterFunc, out);
 }
 
 //
-// ObjectData_Array::IterateWorld
+// ObjectData::Array::IterateWorld
 //
-void ObjectData_Array::IterateWorld(IterFunc iterFunc, std::ostream *out)
+void Array::IterateWorld(IterFunc iterFunc, std::ostream *out)
 {
    Iterate(WorldTable, iterFunc, out);
 }
 
 //
-// ObjectData_Array::IterateGlobal
+// ObjectData::Array::IterateGlobal
 //
-void ObjectData_Array::IterateGlobal(IterFunc iterFunc, std::ostream *out)
+void Array::IterateGlobal(IterFunc iterFunc, std::ostream *out)
 {
    Iterate(GlobalTable, iterFunc, out);
 }
 
 //
-// ObjectData_Array::ReadObjects
+// ObjectData::Array::ReadObjects
 //
-void ObjectData_Array::ReadObjects(std::istream *in)
+void Array::ReadObjects(std::istream *in)
 {
    read_object(in, &MapTable);
    read_object(in, &WorldTable);
@@ -321,19 +325,21 @@ void ObjectData_Array::ReadObjects(std::istream *in)
 }
 
 //
-// ObjectData_Array::WriteObjects
+// ObjectData::Array::WriteObjects
 //
-void ObjectData_Array::WriteObjects(std::ostream *out)
+void Array::WriteObjects(std::ostream *out)
 {
    write_object(out, &MapTable);
    write_object(out, &WorldTable);
    write_object(out, &GlobalTable);
 }
 
+}
+
 //
-// override_object<ObjectData_Array>
+// override_object<ObjectData::Array>
 //
-void override_object(ObjectData_Array *out, ObjectData_Array const *in)
+void override_object(ObjectData::Array *out, ObjectData::Array const *in)
 {
    if (out->externDef && !in->externDef)
    {
@@ -344,9 +350,9 @@ void override_object(ObjectData_Array *out, ObjectData_Array const *in)
 }
 
 //
-// read_object<ObjectData_Array>
+// read_object<ObjectData::Array>
 //
-void read_object(std::istream *in, ObjectData_Array *out)
+void read_object(std::istream *in, ObjectData::Array *out)
 {
    read_object(in, &out->init);
    read_object(in, &out->strings);
@@ -358,9 +364,9 @@ void read_object(std::istream *in, ObjectData_Array *out)
 }
 
 //
-// write_object<ObjectData_Array>
+// write_object<ObjectData::Array>
 //
-void write_object(std::ostream *out, ObjectData_Array const *in)
+void write_object(std::ostream *out, ObjectData::Array const *in)
 {
    write_object(out, &in->init);
    write_object(out, &in->strings);

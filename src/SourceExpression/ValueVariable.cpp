@@ -414,7 +414,7 @@ SRCEXP_EXPRVAL_DEFN(i, short)
 //
 SRCEXP_EXPRVAL_DEFN(s, string)
 {
-   std::string stringVarData = ObjectData_String::add(value);
+   std::string stringVarData = ObjectData::String::Add(value);
 
    VariableType::Reference stringVarType = VariableType::get_bt_str();
 

@@ -36,7 +36,7 @@
 // Types                                                                      |
 //
 
-typedef std::map<std::string, ObjectData_Script> ScriptTable;
+typedef std::map<std::string, ObjectData::Script> ScriptTable;
 typedef ScriptTable::iterator ScriptIter;
 
 
@@ -55,7 +55,7 @@ static option::option_dptr<int> option_script_start_handler
  "Sets the lowest number to use for automatically allocated script numbers.",
  NULL, &option_script_start);
 
-static ScriptTable script_table;
+static ScriptTable Table;
 
 
 //----------------------------------------------------------------------------|
@@ -69,21 +69,29 @@ bool option_named_scripts = false;
 // Static Functions                                                           |
 //
 
-static bigsint get_number()
+namespace ObjectData
+{
+
+//
+// GetNumber
+//
+static bigsint GetNumber()
 {
    ScriptIter iter;
    bigsint number = option_script_start;
 
-   for (iter = script_table.begin(); iter != script_table.end(); ++iter)
+   for(iter = Table.begin(); iter != Table.end(); ++iter)
    {
       if (iter->second.number == number)
       {
          ++number;
-         iter = script_table.begin();
+         iter = Table.begin();
       }
    }
 
    return number;
+}
+
 }
 
 
@@ -91,14 +99,17 @@ static bigsint get_number()
 // Global Functions                                                           |
 //
 
+namespace ObjectData
+{
+
 //
-// ObjectData_Script::add
+// ObjectData::Script::Add
 //
-bool ObjectData_Script::add(std::string const &name, std::string const &label,
+bool Script::Add(std::string const &name, std::string const &label,
    ScriptType stype, bigsint flags, bigsint argCount, SourceContext *context,
    bool externVis, bigsint number, std::string const &string)
 {
-   ObjectData_Script &data = script_table[name];
+   Script &data = Table[name];
 
    if (data.name != name)
    {
@@ -129,13 +140,13 @@ bool ObjectData_Script::add(std::string const &name, std::string const &label,
 }
 
 //
-// ObjectData_Script::Add
+// ObjectData::Script::Add
 //
-bool ObjectData_Script::Add(std::string const &name, std::string const &label,
+bool Script::Add(std::string const &name, std::string const &label,
    ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount,
    bool externVis, bigsint number, std::string const &string)
 {
-   ObjectData_Script &data = script_table[name];
+   Script &data = Table[name];
 
    if(data.name != name)
    {
@@ -166,31 +177,31 @@ bool ObjectData_Script::Add(std::string const &name, std::string const &label,
 }
 
 //
-// ObjectData_Script::generate_symbols
+// ObjectData::Script::GenerateSymbols
 //
-void ObjectData_Script::generate_symbols()
+void ObjectData::Script::GenerateSymbols()
 {
    ObjectExpression::Pointer obj;
    ScriptIter iter;
    bigsint number = 0;
 
    // Generate numbers.
-   for (iter = script_table.begin(); iter != script_table.end(); ++iter)
+   for(iter = Table.begin(); iter != Table.end(); ++iter)
    {
       if (iter->second.number >= 0 || iter->second.externDef) continue;
 
       if(iter->second.number == -2)
          iter->second.number = --number;
       else
-         iter->second.number = get_number();
+         iter->second.number = GetNumber();
    }
 
    // Generate symbols.
-   for (iter = script_table.begin(); iter != script_table.end(); ++iter)
+   for(iter = Table.begin(); iter != Table.end(); ++iter)
    {
       if (iter->second.number < 0)
-         obj = ObjectExpression::create_value_symbol
-         (ObjectData_String::add(iter->second.string), SourcePosition::none());
+         obj = ObjectExpression::create_value_symbol(
+            String::Add(iter->second.string), SourcePosition::none());
       else
          obj = ObjectExpression::create_value_int
          (iter->second.number, SourcePosition::none());
@@ -200,13 +211,13 @@ void ObjectData_Script::generate_symbols()
 }
 
 //
-// ObjectData_Script::iterate
+// ObjectData::Script::Iterate
 //
-void ObjectData_Script::iterate(IterFunc iterFunc, std::ostream *out)
+void Script::Iterate(IterFunc iterFunc, std::ostream *out)
 {
    ScriptIter iter;
 
-   for (iter = script_table.begin(); iter != script_table.end(); ++iter)
+   for(iter = Table.begin(); iter != Table.end(); ++iter)
    {
       if (iter->second.context)
          iter->second.varCount = iter->second.context->getLimit(STORE_REGISTER);
@@ -216,25 +227,27 @@ void ObjectData_Script::iterate(IterFunc iterFunc, std::ostream *out)
 }
 
 //
-// ObjectData_Script::read_objects
+// ObjectData::Script::ReadObjects
 //
-void ObjectData_Script::read_objects(std::istream *in)
+void Script::ReadObjects(std::istream *in)
 {
-   read_object(in, &script_table);
+   read_object(in, &Table);
 }
 
 //
-// ObjectData_Script::write_objects
+// ObjectData::Script::WriteObjects
 //
-void ObjectData_Script::write_objects(std::ostream *out)
+void Script::WriteObjects(std::ostream *out)
 {
-   write_object(out, &script_table);
+   write_object(out, &Table);
+}
+
 }
 
 //
-// override_object<ObjectData_Script>
+// override_object<ObjectData::Script>
 //
-void override_object(ObjectData_Script *out, ObjectData_Script const *in)
+void override_object(ObjectData::Script *out, ObjectData::Script const *in)
 {
    if (out->externDef && !in->externDef)
    {
@@ -245,9 +258,9 @@ void override_object(ObjectData_Script *out, ObjectData_Script const *in)
 }
 
 //
-// read_object<ObjectData_Script>
+// read_object<ObjectData::Script>
 //
-void read_object(std::istream *in, ObjectData_Script *out)
+void read_object(std::istream *in, ObjectData::Script *out)
 {
    read_object(in, &out->label);
    read_object(in, &out->name);
@@ -264,24 +277,24 @@ void read_object(std::istream *in, ObjectData_Script *out)
 }
 
 //
-// read_object<ObjectData_Script::ScriptType>
+// read_object<ObjectData::ScriptType>
 //
-void read_object(std::istream *in, ObjectData_Script::ScriptType *out)
+void read_object(std::istream *in, ObjectData::ScriptType *out)
 {
-   *out = static_cast<ObjectData_Script::ScriptType>(read_object_int(in));
+   *out = static_cast<ObjectData::ScriptType>(read_object_int(in));
 
-   if (*out > ObjectData_Script::ST_NONE)
-      *out = ObjectData_Script::ST_NONE;
+   if(*out > ObjectData::ST_NONE)
+      *out = ObjectData::ST_NONE;
 }
 
 //
-// write_object<ObjectData_Script>
+// write_object<ObjectData::Script>
 //
-void write_object(std::ostream *out, ObjectData_Script const *in)
+void write_object(std::ostream *out, ObjectData::Script const *in)
 {
    if (in->context)
    {
-      const_cast<ObjectData_Script *>(in)->varCount =
+      const_cast<ObjectData::Script *>(in)->varCount =
          in->context->getLimit(STORE_REGISTER);
    }
 
@@ -298,9 +311,9 @@ void write_object(std::ostream *out, ObjectData_Script const *in)
 }
 
 //
-// write_object<ObjectData_Script::ScriptType>
+// write_object<ObjectData::ScriptType>
 //
-void write_object(std::ostream *out, ObjectData_Script::ScriptType const *in)
+void write_object(std::ostream *out, ObjectData::ScriptType const *in)
 {
    write_object_int(out, static_cast<bigsint>(*in));
 }

@@ -103,12 +103,12 @@ static bool is_script_type(std::string const &data)
 //
 // make_script_flag
 //
-static ObjectData_Script::ScriptFlag make_script_flag(SourceTokenizerC *in)
+static ObjectData::ScriptFlag make_script_flag(SourceTokenizerC *in)
 {
    SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
 
-   if (tok->data == "__net")        return ObjectData_Script::SF_NET;
-   if (tok->data == "__clientside") return ObjectData_Script::SF_CLIENTSIDE;
+   if (tok->data == "__net")        return ObjectData::SF_NET;
+   if (tok->data == "__clientside") return ObjectData::SF_CLIENTSIDE;
 
    Error(tok->pos, "invalid script-flag: %s", tok->data.c_str());
 }
@@ -116,19 +116,19 @@ static ObjectData_Script::ScriptFlag make_script_flag(SourceTokenizerC *in)
 //
 // make_script_type
 //
-static ObjectData_Script::ScriptType make_script_type(SourceTokenizerC *in)
+static ObjectData::ScriptType make_script_type(SourceTokenizerC *in)
 {
    SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
 
-   if (tok->data == "__closed")     return ObjectData_Script::ST_CLOSED;
-   if (tok->data == "__open")       return ObjectData_Script::ST_OPEN;
-   if (tok->data == "__respawn")    return ObjectData_Script::ST_RESPAWN;
-   if (tok->data == "__death")      return ObjectData_Script::ST_DEATH;
-   if (tok->data == "__enter")      return ObjectData_Script::ST_ENTER;
-   if (tok->data == "__lightning")  return ObjectData_Script::ST_LIGHTNING;
-   if (tok->data == "__unloading")  return ObjectData_Script::ST_UNLOADING;
-   if (tok->data == "__disconnect") return ObjectData_Script::ST_DISCONNECT;
-   if (tok->data == "__return")     return ObjectData_Script::ST_RETURN;
+   if (tok->data == "__closed")     return ObjectData::ST_CLOSED;
+   if (tok->data == "__open")       return ObjectData::ST_OPEN;
+   if (tok->data == "__respawn")    return ObjectData::ST_RESPAWN;
+   if (tok->data == "__death")      return ObjectData::ST_DEATH;
+   if (tok->data == "__enter")      return ObjectData::ST_ENTER;
+   if (tok->data == "__lightning")  return ObjectData::ST_LIGHTNING;
+   if (tok->data == "__unloading")  return ObjectData::ST_UNLOADING;
+   if (tok->data == "__disconnect") return ObjectData::ST_DISCONNECT;
+   if (tok->data == "__return")     return ObjectData::ST_RETURN;
 
    Error(tok->pos, "invalid script-type: %s", tok->data.c_str());
 }
@@ -158,11 +158,11 @@ static SourceExpression::Pointer make_script
    SourceExpressionDS::make_arglist(in, context, &args);
 
    // script-type
-   ObjectData_Script::ScriptType scriptType;
+   ObjectData::ScriptType scriptType;
    if (in->peekType(SourceTokenC::TT_NAM) && is_script_type(in->peek()->data))
       scriptType = make_script_type(in);
    else
-      scriptType = ObjectData_Script::ST_CLOSED;
+      scriptType = ObjectData::ST_CLOSED;
 
    // script-flag-list
    bigsint scriptFlags = 0;
@@ -267,7 +267,7 @@ static SourceExpression::Pointer make_script
             scriptFunc += "(void)";
       }
 
-      scriptFunc = ObjectData_String::add(scriptFunc);
+      scriptFunc = ObjectData::String::Add(scriptFunc);
 
       SourceVariable::Pointer scriptFuncVar = SourceVariable::create_constant
          ("__func__", VariableType::get_bt_str(), scriptFunc, tok->pos);
@@ -284,7 +284,7 @@ static SourceExpression::Pointer make_script
    SourceVariable::Pointer scriptVar = SourceVariable::create_constant
       (args.name, scriptVarType, scriptNameObj, tok->pos);
 
-   ObjectData_Script::add(scriptNameObj, scriptLabel, scriptType, scriptFlags,
+   ObjectData::Script::Add(scriptNameObj, scriptLabel, scriptType, scriptFlags,
       args.count, args.context, externVis, scriptNumber, scriptString);
 
    SourceFunction::Reference func = SourceFunction::FindFunction(scriptVar, args.args);

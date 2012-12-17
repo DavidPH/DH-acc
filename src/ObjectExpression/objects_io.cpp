@@ -145,14 +145,14 @@ void ObjectExpression::read_objects(std::istream *in, ObjectVector *objects)
    read_object(in, &symbol_table);
    read_object(in, &symbol_type_table);
 
-   ObjectData_Array::ReadObjects(in);
-   ObjectData_ArrayVar::ReadObjects(in);
-   ObjectData_Auto::read_objects(in);
-   ObjectData_Function::read_objects(in);
-   ObjectData_Register::read_objects(in);
-   ObjectData_Script::read_objects(in);
-   ObjectData_Static::read_objects(in);
-   ObjectData_String::read_objects(in);
+   ObjectData::Array::ReadObjects(in);
+   ObjectData::ArrayVar::ReadObjects(in);
+   ObjectData::Auto::ReadObjects(in);
+   ObjectData::Function::ReadObjects(in);
+   ObjectData::Register::ReadObjects(in);
+   ObjectData::Script::ReadObjects(in);
+   ObjectData::Static::ReadObjects(in);
+   ObjectData::String::ReadObjects(in);
 }
 
 //
@@ -170,14 +170,14 @@ void ObjectExpression::write_objects
    write_object(out, &symbol_table);
    write_object(out, &symbol_type_table);
 
-   ObjectData_Array::WriteObjects(out);
-   ObjectData_ArrayVar::WriteObjects(out);
-   ObjectData_Auto::write_objects(out);
-   ObjectData_Function::write_objects(out);
-   ObjectData_Register::write_objects(out);
-   ObjectData_Script::write_objects(out);
-   ObjectData_Static::write_objects(out);
-   ObjectData_String::write_objects(out);
+   ObjectData::Array::WriteObjects(out);
+   ObjectData::ArrayVar::WriteObjects(out);
+   ObjectData::Auto::WriteObjects(out);
+   ObjectData::Function::WriteObjects(out);
+   ObjectData::Register::WriteObjects(out);
+   ObjectData::Script::WriteObjects(out);
+   ObjectData::Static::WriteObjects(out);
+   ObjectData::String::WriteObjects(out);
 }
 
 //

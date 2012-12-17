@@ -34,7 +34,7 @@
 // Types                                                                      |
 //
 
-typedef std::map<std::string, ObjectData_Auto> AutoTable;
+typedef std::map<std::string, ObjectData::Auto> AutoTable;
 typedef AutoTable::iterator AutoIter;
 
 
@@ -42,21 +42,23 @@ typedef AutoTable::iterator AutoIter;
 // Static Variables                                                           |
 //
 
-static AutoTable auto_table;
+static AutoTable Table;
 
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
-//
-// ObjectData_Auto::add
-//
-void ObjectData_Auto::add
-(std::string const &name, VariableType const *type, bool externDef,
- bool externVis, bigsint number)
+namespace ObjectData
 {
-   ObjectData_Auto &data = auto_table[name];
+
+//
+// ObjectData::Auto::Add
+//
+void Auto::Add(std::string const &name, VariableType const *type,
+   bool externDef, bool externVis, bigsint number)
+{
+   Auto &data = Table[name];
 
    if (data.name != name)
    {
@@ -76,14 +78,14 @@ void ObjectData_Auto::add
 }
 
 //
-// ObjectData_Auto::generate_symbols
+// ObjectData::Auto::GenerateSymbols
 //
-void ObjectData_Auto::generate_symbols()
+void Auto::GenerateSymbols()
 {
    ObjectExpression::Pointer obj;
-   AutoIter itr, end = auto_table.end();
+   AutoIter itr, end = Table.end();
 
-   for (itr = auto_table.begin(); itr != end; ++itr)
+   for (itr = Table.begin(); itr != end; ++itr)
    {
       obj = ObjectExpression::create_value_int
       (itr->second.number, SourcePosition::none());
@@ -93,43 +95,45 @@ void ObjectData_Auto::generate_symbols()
 }
 
 //
-// ObjectData_Auto::iterate
+// ObjectData::Auto::Iterate
 //
-void ObjectData_Auto::iterate(IterFunc iterFunc, std::ostream *out)
+void Auto::Iterate(IterFunc iterFunc, std::ostream *out)
 {
-   AutoIter itr, end = auto_table.end();
+   AutoIter itr, end = Table.end();
 
-   for (itr = auto_table.begin(); itr != end; ++itr)
+   for (itr = Table.begin(); itr != end; ++itr)
       iterFunc(out, itr->second);
 }
 
 //
-// ObjectData_Auto::read_objects
+// ObjectData::Auto::ReadObjects
 //
-void ObjectData_Auto::read_objects(std::istream *in)
+void Auto::ReadObjects(std::istream *in)
 {
-   read_object(in, &auto_table);
+   read_object(in, &Table);
 }
 
 //
-// ObjectData_Auto::write_objects
+// ObjectData::Auto::WriteObjects
 //
-void ObjectData_Auto::write_objects(std::ostream *out)
+void Auto::WriteObjects(std::ostream *out)
 {
-   write_object(out, &auto_table);
+   write_object(out, &Table);
+}
+
 }
 
 //
-// override_object<ObjectData_Auto>
+// override_object<ObjectData::Auto>
 //
-void override_object(ObjectData_Auto *, ObjectData_Auto const *)
+void override_object(ObjectData::Auto *, ObjectData::Auto const *)
 {
 }
 
 //
-// read_object<ObjectData_Auto>
+// read_object<ObjectData::Auto>
 //
-void read_object(std::istream *in, ObjectData_Auto *out)
+void read_object(std::istream *in, ObjectData::Auto *out)
 {
    read_object(in, &out->name);
    read_object(in, &out->number);
@@ -140,9 +144,9 @@ void read_object(std::istream *in, ObjectData_Auto *out)
 }
 
 //
-// write_object<ObjectData_Auto>
+// write_object<ObjectData::Auto>
 //
-void write_object(std::ostream *out, ObjectData_Auto const *in)
+void write_object(std::ostream *out, ObjectData::Auto const *in)
 {
    write_object(out, &in->name);
    write_object(out, &in->number);

@@ -36,8 +36,11 @@
 // Types                                                                      |
 //
 
-struct ObjectData_Script;
-struct ObjectData_String;
+namespace ObjectData
+{
+struct Script;
+struct String;
+}
 class ObjectExpression;
 class ObjectToken;
 class ObjectVector;
@@ -197,13 +200,13 @@ public:
    static void write_ACS0_16(std::ostream *out, bigsint i);
    static void write_ACS0_32(std::ostream *out, ObjectExpression const &expr);
    static void write_ACS0_32(std::ostream *out, bigsint i);
-   static void write_ACS0_script(std::ostream *out, ObjectData_Script const &s);
+   static void write_ACS0_script(std::ostream *out, ObjectData::Script const &s);
    static void write_ACS0_script_count(std::ostream *out);
-   static void write_ACS0_script_counter(std::ostream *out, ObjectData_Script const &s);
-   static void write_ACS0_string(std::ostream *out, ObjectData_String const &s);
+   static void write_ACS0_script_counter(std::ostream *out, ObjectData::Script const &s);
+   static void write_ACS0_string(std::ostream *out, ObjectData::String const &s);
    static void write_ACS0_string_count(std::ostream *out);
-   static void write_ACS0_string_counter(std::ostream *out, ObjectData_String const &s);
-   static void write_ACS0_string_offset(std::ostream *out, ObjectData_String const &s);
+   static void write_ACS0_string_counter(std::ostream *out, ObjectData::String const &s);
+   static void write_ACS0_string_offset(std::ostream *out, ObjectData::String const &s);
 
    static void write_all(std::ostream *out, std::vector<BinaryTokenACS> const &instructions);
 

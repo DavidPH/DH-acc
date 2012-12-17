@@ -38,6 +38,24 @@
 // Global Functions                                                           |
 //
 
+template<typename Tk, typename Tv>
+void read_object(std::istream *in, std::map<Tk, Tv> *out);
+template<typename Tk, typename Tv>
+void read_object(std::istream *in, std::pair<Tk, Tv> *out);
+template<typename T>
+void read_object(std::istream *in, std::set<T> *out);
+template<typename T>
+void read_object(std::istream *in, std::vector<T> *out);
+
+template<typename Tk, typename Tv>
+void write_object(std::ostream *out, std::map<Tk, Tv> const *in);
+template<typename Tk, typename Tv>
+void write_object(std::ostream *out, std::pair<Tk, Tv> const *in);
+template<typename T>
+void write_object(std::ostream *out, std::set<T> const *in);
+template<typename T>
+void write_object(std::ostream *out, std::vector<T> const *in);
+
 void read_object(std::istream *in, bool *out);
 void read_object(std::istream *in, long double *out);
 void read_object(std::istream *in, signed int *out);

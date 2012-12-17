@@ -51,8 +51,7 @@ void BinaryTokenPPACS::write_ACSP_label
 //
 // BinaryTokenPPACS::write_ACSP_script
 //
-void BinaryTokenPPACS::write_ACSP_script
-(std::ostream *out, ObjectData_Script const &s)
+void BinaryTokenPPACS::write_ACSP_script(std::ostream *out, ObjectData::Script const &s)
 {
    std::ostringstream token;
 
@@ -73,8 +72,7 @@ void BinaryTokenPPACS::write_ACSP_script
 //
 // BinaryTokenPPACS::write_ACSP_static
 //
-void BinaryTokenPPACS::write_ACSP_static
-(std::ostream *out, ObjectData_Static const &s)
+void BinaryTokenPPACS::write_ACSP_static(std::ostream *out, ObjectData::Static const &s)
 {
    std::ostringstream token;
 
@@ -100,8 +98,7 @@ void BinaryTokenPPACS::write_ACSP_static
 //
 // BinaryTokenPPACS::write_ACSP_string
 //
-void BinaryTokenPPACS::write_ACSP_string
-(std::ostream *out, ObjectData_String const &s)
+void BinaryTokenPPACS::write_ACSP_string(std::ostream *out, ObjectData::String const &s)
 {
    // Don't output if there are no names associated with it.
    if (s.names.empty()) return;

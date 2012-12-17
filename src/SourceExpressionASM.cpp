@@ -345,7 +345,7 @@ SourceExpression::Pointer SourceExpressionASM::MakeStatement(
          in->get(SourceTokenASM::TT_COMMA);
          bigsint varCount = Make_Expression(in, context)->makeObject()->resolveINT();
 
-         ObjectData_Function::Add(name, label, argCount, retCount, varCount);
+         ObjectData::Function::Add(name, label, argCount, retCount, varCount);
       }
       else if(tok->data == "SCRIPT")
       {
@@ -368,8 +368,8 @@ SourceExpression::Pointer SourceExpressionASM::MakeStatement(
          in->get(SourceTokenASM::TT_COMMA);
          std::string string = in->get(SourceTokenASM::TT_STR)->data;
 
-         ObjectData_Script::Add(name, label, (ObjectData_Script::ScriptType)stype,
-                                flags, argCount, varCount, true, number, string);
+         ObjectData::Script::Add(name, label, (ObjectData::ScriptType)stype,
+                                 flags, argCount, varCount, true, number, string);
       }
       else if(tok->data == "STRING")
       {
@@ -377,7 +377,7 @@ SourceExpression::Pointer SourceExpressionASM::MakeStatement(
          in->get(SourceTokenASM::TT_COMMA);
          std::string string = in->get(SourceTokenASM::TT_STR)->data;
 
-         ObjectData_String::Add(name, string);
+         ObjectData::String::Add(name, string);
       }
       else
         Error(tok->pos, "unrecognized command '%s'", tok->data.c_str());

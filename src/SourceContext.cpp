@@ -201,7 +201,7 @@ addLabelCase(bigsint value, SourcePosition const &pos)
       if (cases.find(value) == cases.end() || !cases[value])
          cases[value] = true;
       else
-         Error_NP("case redefined: "PRI_LL, static_cast<long long int>(value));
+         Error_NP("case redefined: " PRI_LL, static_cast<long long int>(value));
 
       return getLabelCase(value, pos);
    }
@@ -296,41 +296,41 @@ void SourceContext::addVar(SourceVariable *var, LinkageSpecifier linkSpec, bool 
       break;
 
    case STORE_STATIC:
-      ObjectData_Static::add(PARM);
+      ObjectData::Static::Add(PARM);
       break;
 
    case STORE_AUTO:
-      ObjectData_Auto::add(PARM, getCount(store));
+      ObjectData::Auto::Add(PARM, getCount(store));
       addCount(type->getSize(pos), store);
       break;
 
    case STORE_REGISTER:
-      ObjectData_Register::add(PARM, getCount(store));
+      ObjectData::Register::Add(PARM, getCount(store));
       addCount(type->getSize(pos), store);
       break;
 
    case STORE_MAPREGISTER:
-      ObjectData_Register::add_map(PARM);
+      ObjectData::Register::AddMap(PARM);
       break;
 
    case STORE_WORLDREGISTER:
-      ObjectData_Register::add_world(PARM);
+      ObjectData::Register::AddWorld(PARM);
       break;
 
    case STORE_GLOBALREGISTER:
-      ObjectData_Register::add_global(PARM);
+      ObjectData::Register::AddGlobal(PARM);
       break;
 
    case STORE_MAPARRAY:
-      ObjectData_ArrayVar::AddMap(var->nameArr, nameObj, type, linkSpec, externDef);
+      ObjectData::ArrayVar::AddMap(var->nameArr, nameObj, type, linkSpec, externDef);
       break;
 
    case STORE_WORLDARRAY:
-      ObjectData_ArrayVar::AddWorld(var->nameArr, nameObj, type, linkSpec, externDef);
+      ObjectData::ArrayVar::AddWorld(var->nameArr, nameObj, type, linkSpec, externDef);
       break;
 
    case STORE_GLOBALARRAY:
-      ObjectData_ArrayVar::AddGlobal(var->nameArr, nameObj, type, linkSpec, externDef);
+      ObjectData::ArrayVar::AddGlobal(var->nameArr, nameObj, type, linkSpec, externDef);
       break;
    }
 
@@ -362,41 +362,41 @@ void SourceContext::addVar(SourceVariable *var, LinkageSpecifier linkSpec,
       break;
 
    case STORE_STATIC:
-      ObjectData_Static::add(PARM);
+      ObjectData::Static::Add(PARM);
       break;
 
    case STORE_AUTO:
-      ObjectData_Auto::add(PARM);
+      ObjectData::Auto::Add(PARM);
       addCount(type->getSize(pos), store);
       break;
 
    case STORE_REGISTER:
-      ObjectData_Register::add(PARM);
+      ObjectData::Register::Add(PARM);
       addCount(type->getSize(pos), store);
       break;
 
    case STORE_MAPREGISTER:
-      ObjectData_Register::add_map(PARM);
+      ObjectData::Register::AddMap(PARM);
       break;
 
    case STORE_WORLDREGISTER:
-      ObjectData_Register::add_world(PARM);
+      ObjectData::Register::AddWorld(PARM);
       break;
 
    case STORE_GLOBALREGISTER:
-      ObjectData_Register::add_global(PARM);
+      ObjectData::Register::AddGlobal(PARM);
       break;
 
    case STORE_MAPARRAY:
-      ObjectData_ArrayVar::AddMap(var->nameArr, nameObj, type, linkSpec, externDef, address);
+      ObjectData::ArrayVar::AddMap(var->nameArr, nameObj, type, linkSpec, externDef, address);
       break;
 
    case STORE_WORLDARRAY:
-      ObjectData_ArrayVar::AddWorld(var->nameArr, nameObj, type, linkSpec, externDef, address);
+      ObjectData::ArrayVar::AddWorld(var->nameArr, nameObj, type, linkSpec, externDef, address);
       break;
 
    case STORE_GLOBALARRAY:
-      ObjectData_ArrayVar::AddGlobal(var->nameArr, nameObj, type, linkSpec, externDef, address);
+      ObjectData::ArrayVar::AddGlobal(var->nameArr, nameObj, type, linkSpec, externDef, address);
       break;
    }
 
@@ -474,7 +474,7 @@ std::vector<bigsint> SourceContext::getCases(SourcePosition const &pos) const
            iter != cases.end(); ++iter)
       {
          if (!iter->second)
-            Error_NP("case undefined: "PRI_LL, static_cast<long long int>(iter->first));
+            Error_NP("case undefined: " PRI_LL, static_cast<long long int>(iter->first));
 
          casev[i++] = iter->first;
       }

@@ -134,19 +134,19 @@ void ObjectExpression::add_symbol
 //
 void ObjectExpression::do_deferred_allocation()
 {
-   ObjectData_ArrayVar::GenerateSymbols();
-   ObjectData_Auto::generate_symbols();
-   ObjectData_Register::generate_symbols();
+   ObjectData::ArrayVar::GenerateSymbols();
+   ObjectData::Auto::GenerateSymbols();
+   ObjectData::Register::GenerateSymbols();
    // Array must be after Register and ArrayVar.
-   ObjectData_Array::GenerateSymbols();
+   ObjectData::Array::GenerateSymbols();
 
    // For ACS+, all the following allocation is done by the linker.
    if(Output == OUTPUT_ACSP) return;
 
-   ObjectData_Function::generate_symbols();
-   ObjectData_Script::generate_symbols();
-   ObjectData_Static::generate_symbols();
-   ObjectData_String::generate_symbols();
+   ObjectData::Function::GenerateSymbols();
+   ObjectData::Script::GenerateSymbols();
+   ObjectData::Static::GenerateSymbols();
+   ObjectData::String::GenerateSymbols();
 }
 
 //
@@ -316,9 +316,9 @@ std::string ObjectExpression::resolveSymbol() const
 std::string ObjectExpression::resolveString() const
 {
    std::string symbol = resolveSymbol();
-   ObjectData_String const *string;
+   ObjectData::String const *string;
 
-   string = ObjectData_String::find(symbol);
+   string = ObjectData::String::Find(symbol);
 
    if(!string)
       Error_NP("cannot resolve string");

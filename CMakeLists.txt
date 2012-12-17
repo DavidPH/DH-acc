@@ -38,6 +38,10 @@ TRY_CXX_COMPILER_FLAG_ID(-Wshadow           FLAG_CXX_Wshadow           "GNU"   )
 TRY_CXX_COMPILER_FLAG_ID(-Wshorten-64-to-32 FLAG_CXX_Wshorten_64_to_32 "Intel" )
 TRY_CXX_COMPILER_FLAG_ID(-ansi              FLAG_CXX_ansi              "GNU"   )
 
+# Features.
+TRY_CXX_COMPILER_FLAG_ID(-std=c++11         FLAG_CXX_STDCXX11          "Clang" )
+TRY_CXX_COMPILER_FLAG_ID(-std=c++11         FLAG_CXX_STDCXX11          "GNU"   )
+
 
 
 add_subdirectory(src)

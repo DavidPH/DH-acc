@@ -35,7 +35,7 @@
 // Types                                                                      |
 //
 
-typedef std::map<std::string, ObjectData_String> StringTable;
+typedef std::map<std::string, ObjectData::String> StringTable;
 typedef StringTable::iterator StringIter;
 
 
@@ -47,7 +47,7 @@ static option::option_dptr<bool> option_string_fold_handle
 ('\0', "string-fold", "optimization", "Removes duplicate strings.", NULL,
  &option_string_fold);
 
-static StringTable string_table;
+static StringTable Table;
 
 
 //----------------------------------------------------------------------------|
@@ -61,20 +61,23 @@ bool option_string_fold = false;
 // Global Functions                                                           |
 //
 
-//
-// ObjectData_String::add
-//
-std::string const &ObjectData_String::add(std::string const &string)
+namespace ObjectData
 {
-   if (string_table.count(string))
-      return string_table[string].names[0];
 
-   ObjectData_String &data = string_table[string];
+//
+// ObjectData::String::Add
+//
+std::string const &String::Add(std::string const &string)
+{
+   if(Table.count(string))
+      return Table[string].names[0];
+
+   String &data = Table[string];
 
    data.string = string + '\0';
 
    std::ostringstream oss;
-   oss << ObjectExpression::get_filename() << "::0s::" << string_table.size();
+   oss << ObjectExpression::get_filename() << "::0s::" << Table.size();
    data.names.push_back(oss.str());
 
    ObjectExpression::add_symbol(data.names[0], ObjectExpression::ET_INT);
@@ -83,11 +86,11 @@ std::string const &ObjectData_String::add(std::string const &string)
 }
 
 //
-// ObjectData_String::Add
+// ObjectData::String::Add
 //
-void ObjectData_String::Add(std::string const &name, std::string const &string)
+void String::Add(std::string const &name, std::string const &string)
 {
-   ObjectData_String &data = string_table[string];
+   String &data = Table[string];
 
    if(data.string.empty())
       data.string = string + '\0';
@@ -98,15 +101,14 @@ void ObjectData_String::Add(std::string const &name, std::string const &string)
 }
 
 //
-// ObjectData_String::find
+// ObjectData::String::Find
 //
-ObjectData_String const *ObjectData_String::find(std::string const &symbol)
+String const *String::Find(std::string const &symbol)
 {
    StringIter strItr, strEnd;
    std::vector<std::string>::iterator symItr, symEnd;
 
-   for(strItr = string_table.begin(), strEnd = string_table.end();
-       strItr != strEnd; ++strItr)
+   for(strItr = Table.begin(), strEnd = Table.end(); strItr != strEnd; ++strItr)
    {
       for(symItr = strItr->second.names.begin(), symEnd = strItr->second.names.end();
           symItr != symEnd; ++symItr)
@@ -120,18 +122,18 @@ ObjectData_String const *ObjectData_String::find(std::string const &symbol)
 }
 
 //
-// ObjectData_String::generate_symbols
+// ObjectData::String::GenerateSymbols
 //
-void ObjectData_String::generate_symbols()
+void String::GenerateSymbols()
 {
    ObjectExpression::Pointer expr;
    StringIter it;
    std::vector<std::string>::iterator name;
    bigsint i = 1;
 
-   for (it = string_table.begin(); it != string_table.end(); ++it)
+   for(it = Table.begin(); it != Table.end(); ++it)
    {
-      ObjectData_String &s = it->second;
+      String &s = it->second;
 
       expr = ObjectExpression::create_value_int(i++, SourcePosition::none());
 
@@ -141,38 +143,38 @@ void ObjectData_String::generate_symbols()
 }
 
 //
-// ObjectData_String::iterate
+// ObjectData::String::Iterate
 //
-void ObjectData_String::iterate(IterFunc iterFunc, std::ostream *out)
+void String::Iterate(IterFunc iterFunc, std::ostream *out)
 {
-   static ObjectData_String nullstring; iterFunc(out, nullstring);
+   static String nullstring; iterFunc(out, nullstring);
 
-   StringIter it;
-
-   for (it = string_table.begin(); it != string_table.end(); ++it)
-      iterFunc(out, it->second);
+   for(StringIter itr = Table.begin(), end = Table.end(); itr != end; ++itr)
+      iterFunc(out, itr->second);
 }
 
 //
-// ObjectData_String::read_objects
+// ObjectData::String::ReadObjects
 //
-void ObjectData_String::read_objects(std::istream *in)
+void String::ReadObjects(std::istream *in)
 {
-   read_object(in, &string_table);
+   read_object(in, &Table);
 }
 
 //
-// ObjectData_String::write_objects
+// ObjectData::String::WriteObjects
 //
-void ObjectData_String::write_objects(std::ostream *out)
+void String::WriteObjects(std::ostream *out)
 {
-   write_object(out, &string_table);
+   write_object(out, &Table);
+}
+
 }
 
 //
-// override_object<ObjectData_String>
+// override_object<ObjectData::String>
 //
-void override_object(ObjectData_String *out, ObjectData_String const *in)
+void override_object(ObjectData::String *out, ObjectData::String const *in)
 {
    // This function only gets called when the relevant key is the same. For
    // strings that inherently means override, which means adding more symbols
@@ -184,18 +186,18 @@ void override_object(ObjectData_String *out, ObjectData_String const *in)
 }
 
 //
-// read_object<ObjectData_String>
+// read_object<ObjectData::String>
 //
-void read_object(std::istream *in, ObjectData_String *out)
+void read_object(std::istream *in, ObjectData::String *out)
 {
    read_object(in, &out->names);
    read_object(in, &out->string);
 }
 
 //
-// write_object<ObjectData_String>
+// write_object<ObjectData::String>
 //
-void write_object(std::ostream *out, ObjectData_String const *in)
+void write_object(std::ostream *out, ObjectData::String const *in)
 {
    write_object(out, &in->names);
    write_object(out, &in->string);

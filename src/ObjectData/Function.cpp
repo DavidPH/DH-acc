@@ -34,7 +34,7 @@
 // Types                                                                      |
 //
 
-typedef std::map<std::string, ObjectData_Function> FunctionTable;
+typedef std::map<std::string, ObjectData::Function> FunctionTable;
 typedef FunctionTable::iterator FunctionIter;
 
 
@@ -42,21 +42,23 @@ typedef FunctionTable::iterator FunctionIter;
 // Static Variables                                                           |
 //
 
-static FunctionTable function_table;
+static FunctionTable Table;
 
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
-//
-// ObjectData_Function::add
-//
-bool ObjectData_Function::add
-(std::string const &name, std::string const &label, bigsint argCount,
- bigsint retCount, SourceContext *context)
+namespace ObjectData
 {
-   ObjectData_Function &data = function_table[name];
+
+//
+// ObjectData::Function::Add
+//
+bool Function::Add(std::string const &name, std::string const &label,
+   bigsint argCount, bigsint retCount, SourceContext *context)
+{
+   Function &data = Table[name];
 
    if (data.name != name)
    {
@@ -82,12 +84,12 @@ bool ObjectData_Function::add
 }
 
 //
-// ObjectData_Function::Add
+// ObjectData::Function::Add
 //
-bool ObjectData_Function::Add(std::string const &name, std::string const &label,
+bool Function::Add(std::string const &name, std::string const &label,
    bigsint argCount, bigsint retCount, bigsint varCount)
 {
-   ObjectData_Function &data = function_table[name];
+   Function &data = Table[name];
 
    if(data.name != name)
    {
@@ -114,15 +116,15 @@ bool ObjectData_Function::Add(std::string const &name, std::string const &label,
 }
 
 //
-// ObjectData_Function::generate_symbols
+// ObjectData::Function::GenerateSymbols
 //
-void ObjectData_Function::generate_symbols()
+void Function::GenerateSymbols()
 {
    ObjectExpression::Pointer obj;
    FunctionIter iter;
    bigsint number = 0;
 
-   for (iter = function_table.begin(); iter != function_table.end(); ++iter)
+   for(iter = Table.begin(); iter != Table.end(); ++iter)
    {
       iter->second.number = number++;
 
@@ -134,13 +136,13 @@ void ObjectData_Function::generate_symbols()
 }
 
 //
-// ObjectData_Function::iterate
+// ObjectData::Function::iterate
 //
-void ObjectData_Function::iterate(IterFunc iterFunc, std::ostream *out)
+void Function::Iterate(IterFunc iterFunc, std::ostream *out)
 {
    FunctionIter iter;
 
-   for (iter = function_table.begin(); iter != function_table.end(); ++iter)
+   for(iter = Table.begin(); iter != Table.end(); ++iter)
    {
       if (iter->second.context)
          iter->second.varCount = iter->second.context->getLimit(STORE_REGISTER);
@@ -150,25 +152,27 @@ void ObjectData_Function::iterate(IterFunc iterFunc, std::ostream *out)
 }
 
 //
-// ObjectData_Function::read_objects
+// ObjectData::Function::ReadObjects
 //
-void ObjectData_Function::read_objects(std::istream *in)
+void Function::ReadObjects(std::istream *in)
 {
-   read_object(in, &function_table);
+   read_object(in, &Table);
 }
 
 //
-// ObjectData_Function::write_objects
+// ObjectData::Function::WriteObjects
 //
-void ObjectData_Function::write_objects(std::ostream *out)
+void Function::WriteObjects(std::ostream *out)
 {
-   write_object(out, &function_table);
+   write_object(out, &Table);
+}
+
 }
 
 //
-// override_object<ObjectData_Function>
+// override_object<ObjectData::Function>
 //
-void override_object(ObjectData_Function *out, ObjectData_Function const *in)
+void override_object(ObjectData::Function *out, ObjectData::Function const *in)
 {
    if (out->externDef && !in->externDef)
    {
@@ -178,9 +182,9 @@ void override_object(ObjectData_Function *out, ObjectData_Function const *in)
 }
 
 //
-// read_object<ObjectData_Function>
+// read_object<ObjectData::Function>
 //
-void read_object(std::istream *in, ObjectData_Function *out)
+void read_object(std::istream *in, ObjectData::Function *out)
 {
    read_object(in, &out->label);
    read_object(in, &out->name);
@@ -194,13 +198,13 @@ void read_object(std::istream *in, ObjectData_Function *out)
 }
 
 //
-// write_object<ObjectData_Function>
+// write_object<ObjectData::Function>
 //
-void write_object(std::ostream *out, ObjectData_Function const *in)
+void write_object(std::ostream *out, ObjectData::Function const *in)
 {
    if (in->context)
    {
-      const_cast<ObjectData_Function *>(in)->varCount =
+      const_cast<ObjectData::Function *>(in)->varCount =
          in->context->getLimit(STORE_REGISTER);
    }
 

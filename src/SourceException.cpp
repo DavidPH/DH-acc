@@ -65,11 +65,11 @@ void SourceException::error(char const *file, int line, char const *func,
    va_list whatarg;
 
    if(!option_debug_error_pos.data)
-      whatlen = std::snprintf(NULL, 0, POSSTR": ", POS);
+      whatlen = std::snprintf(NULL, 0, POSSTR ": ", POS);
    else if(name)
-      whatlen = std::snprintf(NULL, 0, POSSTR" (%s:%i %s::%s): ", POS, file, line, name, func);
+      whatlen = std::snprintf(NULL, 0, POSSTR " (%s:%i %s::%s): ", POS, file, line, name, func);
    else
-      whatlen = std::snprintf(NULL, 0, POSSTR" (%s:%i %s): ", POS, file, line, func);
+      whatlen = std::snprintf(NULL, 0, POSSTR " (%s:%i %s): ", POS, file, line, func);
 
    va_start(whatarg, fmt);
 
@@ -80,11 +80,11 @@ void SourceException::error(char const *file, int line, char const *func,
    whatstr = new char[++whatlen];
 
    if(!option_debug_error_pos.data)
-      whatprt = std::snprintf(whatstr, whatlen, POSSTR": ", POS);
+      whatprt = std::snprintf(whatstr, whatlen, POSSTR ": ", POS);
    else if(name)
-      whatprt = std::snprintf(whatstr, whatlen, POSSTR" (%s:%i %s::%s): ", POS, file, line, name, func);
+      whatprt = std::snprintf(whatstr, whatlen, POSSTR " (%s:%i %s::%s): ", POS, file, line, name, func);
    else
-      whatprt = std::snprintf(whatstr, whatlen, POSSTR" (%s:%i %s): ", POS, file, line, func);
+      whatprt = std::snprintf(whatstr, whatlen, POSSTR " (%s:%i %s): ", POS, file, line, func);
 
    va_start(whatarg, fmt);
 
@@ -106,11 +106,11 @@ void SourceException::warn(char const *file, int line, char const *func,
    va_list whatarg;
 
    if(!option_debug_error_pos.data)
-      std::fprintf(stderr, "warning: "POSSTR": ", POS);
+      std::fprintf(stderr, "warning: " POSSTR ": ", POS);
    else if(name)
-      std::fprintf(stderr, "warning: "POSSTR" (%s:%i %s::%s): ", POS, file, line, name, func);
+      std::fprintf(stderr, "warning: " POSSTR " (%s:%i %s::%s): ", POS, file, line, name, func);
    else
-      std::fprintf(stderr, "warning: "POSSTR" (%s:%i %s): ", POS, file, line, func);
+      std::fprintf(stderr, "warning: " POSSTR " (%s:%i %s): ", POS, file, line, func);
 
    va_start(whatarg, fmt);
 

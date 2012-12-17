@@ -162,7 +162,7 @@ static SourceExpression::Pointer make_func
             funcFunc += "(void)";
       }
 
-      funcFunc = ObjectData_String::add(funcFunc);
+      funcFunc = ObjectData::String::Add(funcFunc);
 
       SourceVariable::Pointer funcFuncVar = SourceVariable::create_constant
          ("__func__", VariableType::get_bt_str(), funcFunc, tok->pos);
@@ -178,8 +178,8 @@ static SourceExpression::Pointer make_func
       create_constant(args.name, funcVarType, funcNameObj, tok->pos);
 
    // funcAdded
-   ObjectData_Function::add(funcNameObj, funcLabel, args.count,
-                            args.retn->getSize(tok->pos), args.context);
+   ObjectData::Function::Add(funcNameObj, funcLabel, args.count,
+                             args.retn->getSize(tok->pos), args.context);
 
    SourceFunction::Reference func = SourceFunction::FindFunction(funcVar, args.args);
 

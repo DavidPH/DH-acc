@@ -152,7 +152,7 @@ static SourceType divine_source_type(std::string const &name)
 //
 // dump_array_debug
 //
-static void dump_array_debug(std::ostream *out, ObjectData_Array const &a)
+static void dump_array_debug(std::ostream *out, ObjectData::Array const &a)
 {
    *out << a.name << ' ' << a.number << ' ' << a.size << '\n';
 }
@@ -174,7 +174,7 @@ static void dump_ocodes(std::ostream *out, ObjectVector const *objects)
 //
 // dump_register_debug
 //
-static void dump_register_debug(std::ostream *out, ObjectData_Register const &r)
+static void dump_register_debug(std::ostream *out, ObjectData::Register const &r)
 {
    *out << r.name << ' ' << r.number << ' ' << r.size << '\n';
 }
@@ -182,7 +182,7 @@ static void dump_register_debug(std::ostream *out, ObjectData_Register const &r)
 //
 // dump_script
 //
-static void dump_script(std::ostream *out, ObjectData_Script const &s)
+static void dump_script(std::ostream *out, ObjectData::Script const &s)
 {
    if (!s.externDef && s.externVis)
       *out << s.name << ' ' << s.number << '\n';
@@ -191,7 +191,7 @@ static void dump_script(std::ostream *out, ObjectData_Script const &s)
 //
 // dump_static_debug
 //
-static void dump_static_debug(std::ostream *out, ObjectData_Static const &s)
+static void dump_static_debug(std::ostream *out, ObjectData::Static const &s)
 {
    *out << s.name << ' ' << s.number << ' ' << s.size << '\n';
 }
@@ -267,9 +267,9 @@ static void read_source(std::string const &name, SourceType type,
          std::string mainName = SourceContext::global_context->makeLabel() + "main";
          std::string mainLabel = mainName + "::$label";
 
-         ObjectData_Script::ScriptType mainType = ObjectData_Script::ST_OPEN;
+         ObjectData::ScriptType mainType = ObjectData::ST_OPEN;
 
-         ObjectData_Script::add(mainName, mainLabel, mainType, 0, 0,
+         ObjectData::Script::Add(mainName, mainLabel, mainType, 0, 0,
             SourceContext::global_context, false, mainNumber, mainName);
 
          objects->addLabel(mainLabel);
@@ -390,11 +390,11 @@ static inline int _main()
    if (option_maparray_list_debug.handled)
    {
       if (option_maparray_list_debug.data == "-")
-         ObjectData_Array::IterateMap(dump_array_debug, &std::cout);
+         ObjectData::Array::IterateMap(dump_array_debug, &std::cout);
       else
       {
          std::ofstream ofs(option_maparray_list_debug.data.c_str());
-         ObjectData_Array::IterateMap(dump_array_debug, &ofs);
+         ObjectData::Array::IterateMap(dump_array_debug, &ofs);
       }
    }
 
@@ -402,11 +402,11 @@ static inline int _main()
    if (option_mapregister_list_debug.handled)
    {
       if (option_mapregister_list_debug.data == "-")
-         ObjectData_Register::iterate_map(dump_register_debug, &std::cout);
+         ObjectData::Register::IterateMap(dump_register_debug, &std::cout);
       else
       {
          std::ofstream ofs(option_mapregister_list_debug.data.c_str());
-         ObjectData_Register::iterate_map(dump_register_debug, &ofs);
+         ObjectData::Register::IterateMap(dump_register_debug, &ofs);
       }
    }
 
@@ -426,11 +426,11 @@ static inline int _main()
    if (!option_script_list.data.empty())
    {
       if (option_script_list.data == "-")
-         ObjectData_Script::iterate(dump_script, &std::cout);
+         ObjectData::Script::Iterate(dump_script, &std::cout);
       else
       {
          std::ofstream ofs(option_script_list.data.c_str());
-         ObjectData_Script::iterate(dump_script, &ofs);
+         ObjectData::Script::Iterate(dump_script, &ofs);
       }
    }
 
@@ -438,11 +438,11 @@ static inline int _main()
    if (option_static_list_debug.handled)
    {
       if (option_static_list_debug.data == "-")
-         ObjectData_Static::iterate(dump_static_debug, &std::cout);
+         ObjectData::Static::Iterate(dump_static_debug, &std::cout);
       else
       {
          std::ofstream ofs(option_static_list_debug.data.c_str());
-         ObjectData_Static::iterate(dump_static_debug, &ofs);
+         ObjectData::Static::Iterate(dump_static_debug, &ofs);
       }
    }
 

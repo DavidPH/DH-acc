@@ -45,9 +45,9 @@ template<typename T> void BinaryTokenPPACS::output_ACSP
    for (instr = instructions.begin(); instr != instructions.end(); ++instr)
       instr->writeACSP(out);
 
-   ObjectData_Script::iterate(write_ACSP_script, out);
-   ObjectData_Static::iterate(write_ACSP_static, out);
-   ObjectData_String::iterate(write_ACSP_string, out);
+   ObjectData::Script::Iterate(write_ACSP_script, out);
+   ObjectData::Static::Iterate(write_ACSP_static, out);
+   ObjectData::String::Iterate(write_ACSP_string, out);
 
    BinaryTokenACS::write_ACS0_32(out, ACSP_TOKEN_EOF);
    BinaryTokenACS::write_ACS0_32(out, 0);

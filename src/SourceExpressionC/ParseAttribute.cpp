@@ -99,31 +99,31 @@ void SourceExpressionC::ParseAttributeScript(FunctionAttributes &funcAttr, SRCEX
    SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
 
    if(tok->data == "closed" || tok->data == "__closed" || tok->data == "__closed__")
-      funcAttr.scriptType = ObjectData_Script::ST_CLOSED;
+      funcAttr.scriptType = ObjectData::ST_CLOSED;
 
    else if(tok->data == "open" || tok->data == "__open" || tok->data == "__open__")
-      funcAttr.scriptType = ObjectData_Script::ST_OPEN;
+      funcAttr.scriptType = ObjectData::ST_OPEN;
 
    else if(tok->data == "respawn" || tok->data == "__respawn" || tok->data == "__respawn__")
-      funcAttr.scriptType = ObjectData_Script::ST_RESPAWN;
+      funcAttr.scriptType = ObjectData::ST_RESPAWN;
 
    else if(tok->data == "death" || tok->data == "__death" || tok->data == "__death__")
-      funcAttr.scriptType = ObjectData_Script::ST_DEATH;
+      funcAttr.scriptType = ObjectData::ST_DEATH;
 
    else if(tok->data == "enter" || tok->data == "__enter" || tok->data == "__enter__")
-      funcAttr.scriptType = ObjectData_Script::ST_ENTER;
+      funcAttr.scriptType = ObjectData::ST_ENTER;
 
    else if(tok->data == "lightning" || tok->data == "__lightning" || tok->data == "__lightning__")
-      funcAttr.scriptType = ObjectData_Script::ST_LIGHTNING;
+      funcAttr.scriptType = ObjectData::ST_LIGHTNING;
 
    else if(tok->data == "unloading" || tok->data == "__unloading" || tok->data == "__unloading__")
-      funcAttr.scriptType = ObjectData_Script::ST_UNLOADING;
+      funcAttr.scriptType = ObjectData::ST_UNLOADING;
 
    else if(tok->data == "disconnect" || tok->data == "__disconnect" || tok->data == "__disconnect__")
-      funcAttr.scriptType = ObjectData_Script::ST_DISCONNECT;
+      funcAttr.scriptType = ObjectData::ST_DISCONNECT;
 
    else if(tok->data == "return" || tok->data == "__return" || tok->data == "__return__")
-      funcAttr.scriptType = ObjectData_Script::ST_RETURN;
+      funcAttr.scriptType = ObjectData::ST_RETURN;
 
    else
       Error(tok->pos, "unrecognized script-type '%s'", tok->data.c_str());
@@ -135,10 +135,10 @@ void SourceExpressionC::ParseAttributeScript(FunctionAttributes &funcAttr, SRCEX
       tok = in->get(SourceTokenC::TT_NAM);
 
       if(tok->data == "net" || tok->data == "__net" || tok->data == "__net__")
-         funcAttr.scriptFlag |= ObjectData_Script::SF_NET;
+         funcAttr.scriptFlag |= ObjectData::SF_NET;
 
       else if(tok->data == "clientside" || tok->data == "__clientside" || tok->data == "__clientside__")
-         funcAttr.scriptFlag |= ObjectData_Script::SF_CLIENTSIDE;
+         funcAttr.scriptFlag |= ObjectData::SF_CLIENTSIDE;
 
       else
          Error(tok->pos, "unrecognized script-flag '%s'", tok->data.c_str());

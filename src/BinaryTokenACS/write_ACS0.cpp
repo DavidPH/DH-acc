@@ -87,8 +87,7 @@ void BinaryTokenACS::write_ACS0_32(std::ostream *out, bigsint i)
 //
 // BinaryTokenACS::write_ACS0_script
 //
-void BinaryTokenACS::write_ACS0_script
-(std::ostream *out, ObjectData_Script const &s)
+void BinaryTokenACS::write_ACS0_script(std::ostream *out, ObjectData::Script const &s)
 {
    ObjectExpression::Pointer addr =
       ObjectExpression::get_symbol(s.label, SourcePosition::none());
@@ -112,8 +111,7 @@ void BinaryTokenACS::write_ACS0_script_count(std::ostream *out)
 //
 // BinaryTokenACS::write_ACS0_script_counter
 //
-void BinaryTokenACS::write_ACS0_script_counter
-(std::ostream *, ObjectData_Script const &)
+void BinaryTokenACS::write_ACS0_script_counter(std::ostream *, ObjectData::Script const &)
 {
    ++script_count;
 }
@@ -121,8 +119,7 @@ void BinaryTokenACS::write_ACS0_script_counter
 //
 // BinaryTokenACS::write_ACS0_string
 //
-void BinaryTokenACS::write_ACS0_string
-(std::ostream *out, ObjectData_String const &s)
+void BinaryTokenACS::write_ACS0_string(std::ostream *out, ObjectData::String const &s)
 {
    *out << s.string;
 }
@@ -138,8 +135,7 @@ void BinaryTokenACS::write_ACS0_string_count(std::ostream *out)
 //
 // BinaryTokenACS::write_ACS0_string_counter
 //
-void BinaryTokenACS::write_ACS0_string_counter
-(std::ostream *, ObjectData_String const &)
+void BinaryTokenACS::write_ACS0_string_counter(std::ostream *, ObjectData::String const &)
 {
    ++string_count;
 }
@@ -147,8 +143,8 @@ void BinaryTokenACS::write_ACS0_string_counter
 //
 // BinaryTokenACS::write_ACS0_string_offset
 //
-void BinaryTokenACS::write_ACS0_string_offset
-(std::ostream *out, ObjectData_String const &s)
+void BinaryTokenACS::write_ACS0_string_offset(std::ostream *out,
+   ObjectData::String const &s)
 {
    bigsint base_offset =
       ObjectExpression::get_address_count() +
