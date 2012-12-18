@@ -138,6 +138,7 @@ void BinaryTokenZDACS::init()
    DO_INIT(INV_STK,    0);
 
    // Jumps
+   DO_INIT(JMP,             0);
    DO_INIT(JMP_CAL,         0);
    DO_INIT(JMP_CAL_IMM,     1);
    DO_INIT(JMP_CAL_NIL_IMM, 1);
@@ -286,8 +287,10 @@ void BinaryTokenZDACS::init()
    DO_INIT(TRANSLATION_END,                    0);
    DO_INIT(TRANSLATION_PALETTE,                0);
    DO_INIT(TRANSLATION_RGB,                    0);
+   DO_INIT(TRANSLATION_RGBA,                   0);
    DO_INIT(TRANSLATION_START,                  0);
    DO_INIT(TRIG_VECTORANGLE,                   0);
+   DO_INIT(WAIT_SNAM,                          0);
 
    // ACS Printing
    DO_INIT(PRINT_END_HUD,      0);

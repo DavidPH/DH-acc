@@ -117,6 +117,10 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    ObjectData::Register::IterateMap(write_ACSE_register_MSTR, &chunkout);
    write_ACSE_chunk(out, &chunkout, "MSTR");
 
+   // JUMP - Dynamic jumps table.
+   ObjectData::Label::Iterate(write_ACSE_label_JUMP, &chunkout);
+   write_ACSE_chunk(out, &chunkout, "JUMP");
+
    // SPTR - Script Pointers
    ObjectData::Script::Iterate(write_ACSE_script, &chunkout);
    write_ACSE_chunk(out, &chunkout, "SPTR");

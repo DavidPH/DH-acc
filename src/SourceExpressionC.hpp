@@ -267,14 +267,21 @@ public:
    static void ParseAttributeScript(FunctionAttributes &funcAttr, SRCEXPC_PARSE_ARG1);
    static FunctionAttributes ParseFunctionAttributes(SRCEXPC_PARSE_ARG1);
 
-   static CounterReference<VariableType> ParseEnum(SRCEXPC_PARSE_ARG1);
-   static CounterReference<VariableType> ParseStruct(SRCEXPC_PARSE_ARG1);
+   // Declarations.
    static DeclarationSpecifiers ParseDeclarationSpecifiers(SRCEXPC_PARSE_ARG1);
    static Declarator ParseDeclarator(VariableType *typeBase, SRCEXPC_PARSE_ARG1);
    static void ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_ARG1);
+
+   // Literals.
    static SourceExpression::Pointer ParseFloat(std::string const &value, SRCEXP_EXPR_ARGS);
    static SourceExpression::Pointer ParseInt(std::string const &value, SRCEXP_EXPR_ARGS);
+   static SourceExpression::Pointer ParseLabel(std::string const &value, SRCEXP_EXPR_ARGS);
+   static std::string ParseLabel(SRCEXPC_PARSE_ARG1);
+
+   // Types.
+   static CounterReference<VariableType> ParseEnum(SRCEXPC_PARSE_ARG1);
    static Qualifier ParseQualifier(SRCEXPC_PARSE_ARG1);
+   static CounterReference<VariableType> ParseStruct(SRCEXPC_PARSE_ARG1);
    static CounterReference<VariableType> ParseType(SRCEXPC_PARSE_ARG1);
 
    SRCEXPC_PARSE_DECL(Primary);

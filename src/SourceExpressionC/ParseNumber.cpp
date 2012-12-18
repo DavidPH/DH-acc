@@ -23,8 +23,13 @@
 
 #include "../SourceExpressionC.hpp"
 
+#include "../ObjectExpression.hpp"
 #include "../option.hpp"
+#include "../SourceContext.hpp"
 #include "../SourceException.hpp"
+#include "../SourceTokenC.hpp"
+#include "../SourceTokenizerC.hpp"
+#include "../SourceVariable.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -323,6 +328,38 @@ dointLL:
       return create_value_ullong(val, context, pos);
 
    Error_P("integer literal out of range");
+}
+
+//
+// SourceExpressionC::ParseLabel
+//
+SourceExpression::Pointer SourceExpressionC::ParseLabel(std::string const &value, SRCEXP_EXPR_ARGS)
+{
+   std::string varData = ObjectData::Label::Add(value);
+
+   VariableType::Reference varType = VariableType::get_bt_label();
+
+   SourceVariable::Pointer var = SourceVariable::create_literal(varType, varData, pos);
+
+   return create_value_variable(var, context, pos);
+}
+
+//
+// SourceExpressionC::ParseLabel
+//
+std::string SourceExpressionC::ParseLabel(SRCEXPC_PARSE_ARG1)
+{
+   SourceTokenC::Reference tok = in->get(SourceTokenC::TT_NAM);
+
+   if(tok->data == "case")
+   {
+      SourceExpression::Pointer expr = ParseExpression(in, context);
+      return context->getLabelCase(expr->makeObject()->resolveINT(), tok->pos);
+   }
+   else if(tok->data == "default")
+      return context->getLabelCaseDefault(tok->pos);
+   else
+      return context->getLabelGoto(tok->data, tok->pos);
 }
 
 // EOF

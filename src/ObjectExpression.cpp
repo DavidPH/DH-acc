@@ -134,6 +134,8 @@ void ObjectExpression::add_symbol
 //
 void ObjectExpression::do_deferred_allocation()
 {
+   ObjectData::Label::GenerateSymbols();
+
    ObjectData::ArrayVar::GenerateSymbols();
    ObjectData::Auto::GenerateSymbols();
    ObjectData::Register::GenerateSymbols();

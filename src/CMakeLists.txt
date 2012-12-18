@@ -21,6 +21,7 @@ add_executable(DH-acc
    ObjectData/ArrayVar.cpp
    ObjectData/Auto.cpp
    ObjectData/Function.cpp
+   ObjectData/Label.cpp
    ObjectData/Register.cpp
    ObjectData/Script.cpp
    ObjectData/Static.cpp

@@ -242,6 +242,30 @@ struct Function
 };
 
 //
+// ObjectData::Label
+//
+struct Label
+{
+   typedef void (*IterFunc)(std::ostream *, Label const &);
+
+
+   std::string label;
+   std::string name;
+
+
+   // Returns the new label's name.
+   static std::string const &Add(std::string const &label);
+
+   static void GenerateSymbols();
+
+   static void Iterate(IterFunc iterFunc, std::ostream *out);
+
+   static void ReadObjects(std::istream *in);
+
+   static void WriteObjects(std::ostream *out);
+};
+
+//
 // ObjectData::Register
 //
 struct Register
@@ -415,6 +439,7 @@ extern void read_object(std::istream *in, ObjectData::Auto       *out);
 extern void read_object(std::istream *in, ObjectData::Function   *out);
 extern void read_object(std::istream *in, ObjectData::Init       *out);
 extern void read_object(std::istream *in, ObjectData::InitType   *out);
+extern void read_object(std::istream *in, ObjectData::Label      *out);
 extern void read_object(std::istream *in, ObjectData::Register   *out);
 extern void read_object(std::istream *in, ObjectData::Script     *out);
 extern void read_object(std::istream *in, ObjectData::Static     *out);
@@ -427,13 +452,12 @@ extern void write_object(std::ostream *out, ObjectData::Auto       const *in);
 extern void write_object(std::ostream *out, ObjectData::Function   const *in);
 extern void write_object(std::ostream *out, ObjectData::Init       const *in);
 extern void write_object(std::ostream *out, ObjectData::InitType   const *in);
+extern void write_object(std::ostream *out, ObjectData::Label      const *in);
 extern void write_object(std::ostream *out, ObjectData::Register   const *in);
 extern void write_object(std::ostream *out, ObjectData::Script     const *in);
 extern void write_object(std::ostream *out, ObjectData::Static     const *in);
 extern void write_object(std::ostream *out, ObjectData::String     const *in);
 extern void write_object(std::ostream *out, ObjectData::ScriptType const *in);
-
-//namespace ObjectData { using ::override_object; }
 
 #endif//HPP_ObjectData_
 

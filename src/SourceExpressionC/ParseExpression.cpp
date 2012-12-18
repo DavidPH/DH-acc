@@ -205,6 +205,9 @@ SRCEXPC_PARSE_DEFN_HALF(Primary)
    case SourceTokenC::TT_STR:
       return create_value_string(tok->data, context, tok->pos);
 
+   case SourceTokenC::TT_AN2:
+      return ParseLabel(ParseLabel(in, context), context, tok->pos);
+
    case SourceTokenC::TT_PAREN_O:
       {
          SourceExpression::Pointer expr = ParseExpression(in, context);

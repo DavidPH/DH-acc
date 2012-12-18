@@ -151,19 +151,11 @@ void SourceExpression_BranchGoto::virtual_makeObjects(ObjectVector *objects, Var
 
    if (expr)
    {
-      if (expr->canMakeObject())
-      {
-         objects->addToken(OCODE_JMP_IMM, expr->makeObject());
-      }
-      else
-      {
-         VariableData::Pointer src =
-            VariableData::create_stack(expr->getType()->getSize(pos));
+      VariableData::Pointer src = VariableData::create_stack(expr->getType()->getSize(pos));
 
-         expr->makeObjects(objects, src);
-         objects->setPosition(pos);
-         objects->addToken(OCODE_JMP);
-      }
+      expr->makeObjects(objects, src);
+      objects->setPosition(pos);
+      objects->addToken(OCODE_JMP);
    }
    else
       objects->addToken(OCODE_JMP_IMM, objects->getValue(labelGoto));

@@ -289,6 +289,18 @@ void BinaryTokenZDACS::write_ACSE_function_FNAM(std::ostream *,
 }
 
 //
+// BinaryTokenZDACS::write_ACSE_label_JUMP
+//
+void BinaryTokenZDACS::write_ACSE_label_JUMP(std::ostream *out, ObjectData::Label const &l)
+{
+   ObjectExpression::Pointer addr;
+
+   addr = ObjectExpression::get_symbol(l.label, SourcePosition::none());
+
+   BinaryTokenACS::write_ACS0_32(out, *addr);
+}
+
+//
 // BinaryTokenZDACS::write_ACSE_library
 //
 void BinaryTokenZDACS::

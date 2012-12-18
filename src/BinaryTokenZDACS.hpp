@@ -41,6 +41,7 @@ namespace ObjectData
 {
 struct Array;
 struct Function;
+struct Label;
 struct Register;
 struct Script;
 struct String;
@@ -292,6 +293,9 @@ public:
       BCODE_STRING_COPY_GLOBALRANGE            = 358,
       BCODE_GET_FUNCP                          = 359,
       BCODE_JMP_CAL                            = 360,
+      BCODE_WAIT_SNAM                          = 361,
+      BCODE_TRANSLATION_RGBA                   = 362,
+      BCODE_JMP                                = 363,
 
       BCODE_NONE
    };
@@ -336,6 +340,7 @@ public:
    static void write_ACSE_counter(std::ostream *out);
    static void write_ACSE_function_FUNC(std::ostream *out, ObjectData::Function const &f);
    static void write_ACSE_function_FNAM(std::ostream *out, ObjectData::Function const &f);
+   static void write_ACSE_label_JUMP(std::ostream *out, ObjectData::Label const &l);
    static void write_ACSE_library(std::ostream *out, std::string const &lib);
    static void write_ACSE_register_MEXP(std::ostream *out, ObjectData::Register const &r);
    static void write_ACSE_register_MIMP(std::ostream *out, ObjectData::Register const &r);

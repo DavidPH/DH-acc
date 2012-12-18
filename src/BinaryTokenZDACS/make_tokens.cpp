@@ -270,6 +270,7 @@ void BinaryTokenZDACS::make_tokens
    CASE_REMAP(INV_STK_X, INV_STK);
 
    // Jumps
+   CASE_REMAP(JMP,             JMP);
    case OCODE_JMP_TAB:
       if((args = object->args).size() % 2)
          Error_P("uneven OCODE_JMP_TAB");
@@ -485,8 +486,10 @@ void BinaryTokenZDACS::make_tokens
    CASE_MAP_ACSE(TRANSLATION_END);
    CASE_MAP_ACSE(TRANSLATION_PALETTE);
    CASE_MAP_ACSE(TRANSLATION_RGB);
+   CASE_MAP_ACSE(TRANSLATION_RGBA);
    CASE_MAP_ACSE(TRANSLATION_START);
    CASE_MAP_ACSE(TRIG_VECTORANGLE);
+   CASE_MAP_ACSE(WAIT_SNAM);
 
    // ACS Printing
    CASE_MAP_ACSP(END_HUD);

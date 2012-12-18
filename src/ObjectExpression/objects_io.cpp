@@ -149,6 +149,7 @@ void ObjectExpression::read_objects(std::istream *in, ObjectVector *objects)
    ObjectData::ArrayVar::ReadObjects(in);
    ObjectData::Auto::ReadObjects(in);
    ObjectData::Function::ReadObjects(in);
+   ObjectData::Label::ReadObjects(in);
    ObjectData::Register::ReadObjects(in);
    ObjectData::Script::ReadObjects(in);
    ObjectData::Static::ReadObjects(in);
@@ -174,6 +175,7 @@ void ObjectExpression::write_objects
    ObjectData::ArrayVar::WriteObjects(out);
    ObjectData::Auto::WriteObjects(out);
    ObjectData::Function::WriteObjects(out);
+   ObjectData::Label::WriteObjects(out);
    ObjectData::Register::WriteObjects(out);
    ObjectData::Script::WriteObjects(out);
    ObjectData::Static::WriteObjects(out);

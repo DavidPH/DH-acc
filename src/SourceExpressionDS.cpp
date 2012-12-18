@@ -222,6 +222,8 @@ SRCEXPDS_EXPR_DEF1(primary)
       else
          label = context->getLabelGoto(gotoToken->data, gotoToken->pos);
 
+      label = ObjectData::Label::Add(label);
+
       return create_value_variable(SourceVariable::create_literal(
          VariableType::get_bt_label(), label, gotoToken->pos), context, tok->pos);
    }
