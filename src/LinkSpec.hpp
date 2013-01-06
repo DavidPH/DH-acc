@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,12 +24,12 @@
 #ifndef HPP_LinkSpec_
 #define HPP_LinkSpec_
 
-#include <iostream>
-
 
 //----------------------------------------------------------------------------|
 // Types                                                                      |
 //
+
+class ObjectArchive;
 
 //
 // LinkageSpecifier
@@ -48,8 +48,7 @@ enum LinkageSpecifier
 // Global Functions                                                           |
 //
 
-void read_object(std::istream *in, LinkageSpecifier *out);
-void write_object(std::ostream *out, LinkageSpecifier const *in);
+ObjectArchive &operator << (ObjectArchive &arc, LinkageSpecifier &data);
 
 #endif//HPP_LinkSpec_
 

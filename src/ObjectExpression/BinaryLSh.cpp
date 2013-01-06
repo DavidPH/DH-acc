@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,32 +37,19 @@ class ObjectExpression_BinaryLSh : public ObjectExpression_Binary
                                    ObjectExpression_Binary);
 
 public:
-   //
-   // ::ObjectExpression_BinaryLSh
-   //
-   ObjectExpression_BinaryLSh(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
-   {
-   }
-
-   //
-   // ::ObjectExpression_BinaryLSh
-   //
-   ObjectExpression_BinaryLSh(std::istream *in) : Super(in)
-   {
-   }
+   ObjectExpression_BinaryLSh(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
+   ObjectExpression_BinaryLSh(ObjectArchive &arc) : Super(arc) {}
 
    bigsint resolveINT() const {return exprL->resolveINT() << exprR->resolveINT();}
    biguint resolveUNS() const {return exprL->resolveUNS() << exprR->resolveUNS();}
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_BINARY_LSH);
-
-      Super::writeObject(out);
+      return Super::archive(arc << OT_BINARY_LSH);
    }
 };
 
@@ -80,11 +67,11 @@ ObjectExpression::Reference ObjectExpression::create_binary_lsh(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::create_binary_lsh
+// ObjectExpression::CreateBinaryLSh
 //
-ObjectExpression::Reference ObjectExpression::create_binary_lsh(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateBinaryLSh(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryLSh(in));
+   return static_cast<Reference>(new ObjectExpression_BinaryLSh(arc));
 }
 
 // EOF

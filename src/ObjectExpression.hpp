@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@
 // Types                                                                      |
 //
 
+class ObjectArchive;
 struct ObjectCodeSet;
 class ObjectVector;
 class SourceTokenC;
@@ -118,17 +119,13 @@ public:
 
    friend std::string const &make_string(ExpressionType et);
 
-   friend void override_object(ExpressionType *out, ExpressionType const *in);
-   friend void override_object(Pointer        *out, Pointer        const *in);
-   friend void override_object(Reference      *out, Reference      const *in);
+   friend void OA_Override(ExpressionType &out, ExpressionType const &in);
+   friend void OA_Override(Pointer        &out, Pointer        const &in);
+   friend void OA_Override(Reference      &out, Reference      const &in);
 
-   friend void read_object(std::istream *in, ExpressionType *out);
-   friend void read_object(std::istream *in, Pointer        *out);
-   friend void read_object(std::istream *in, Reference      *out);
-
-   friend void write_object(std::ostream *out, ExpressionType const *in);
-   friend void write_object(std::ostream *out, Pointer        const *in);
-   friend void write_object(std::ostream *out, Reference      const *in);
+   friend ObjectArchive &operator << (ObjectArchive &arc, ExpressionType &data);
+   friend ObjectArchive &operator << (ObjectArchive &arc, Pointer        &data);
+   friend ObjectArchive &operator << (ObjectArchive &arc, Reference      &data);
 
 	static void add_address_count(bigsint const addressCount);
 
@@ -137,6 +134,8 @@ public:
 
 	static void add_symbol(std::string const & symbol, ObjectExpression * value);
 	static void add_symbol(std::string const & symbol, ExpressionType type);
+
+   static ObjectArchive &Archive(ObjectArchive &arc, ObjectVector &objects);
 
    static Reference create_unary_add(OBJEXP_EXPRUNA_ARGS);
    static Reference create_unary_not(OBJEXP_EXPRUNA_ARGS);
@@ -200,16 +199,12 @@ public:
 
 	static void iter_library(void (*iter)(std::ostream *, std::string const &), std::ostream * out);
 
-	static void read_objects(std::istream * in, ObjectVector * objects);
-
 	static void set_address_count(bigsint addressCount);
 
 	// Sets the current filename, translating to make it a valid symbol.
 	static void set_filename(std::string const & filename);
 
 	static void set_library(std::string const & library);
-
-   static void write_objects(std::ostream *out, ObjectVector const *objects);
 
 protected:
    enum ObjectType
@@ -249,53 +244,50 @@ protected:
       OT_NONE
    };
 
-   ObjectExpression(SourcePosition const &pos);
-   ObjectExpression(std::istream *in);
+   explicit ObjectExpression(SourcePosition const &pos);
+   explicit ObjectExpression(ObjectArchive &arc);
 
-   virtual void writeObject(std::ostream *out) const;
+   virtual ObjectArchive &archive(ObjectArchive &arc);
 
    SourcePosition pos;
 
 
+   friend ObjectArchive &operator << (ObjectArchive &arc, ObjectType &data);
+   friend ObjectArchive &operator << (ObjectArchive &arc, ObjectType const &data);
 
-   friend void read_object(std::istream *in, ObjectType *out);
+   static Reference Create(ObjectArchive &arc);
 
-   friend void write_object(std::ostream *out, ObjectType const *in);
-   friend void write_object(std::ostream *out, ObjectType const &in);
+   static Reference CreateUnaryAdd(ObjectArchive &arc);
+   static Reference CreateUnaryNot(ObjectArchive &arc);
+   static Reference CreateUnarySub(ObjectArchive &arc);
 
-   static Reference create(std::istream *in);
+   static Reference CreateBinaryAdd(ObjectArchive &arc);
+   static Reference CreateBinaryAnd(ObjectArchive &arc);
+   static Reference CreateBinaryCmp(ObjectArchive &arc);
+   static Reference CreateBinaryDiv(ObjectArchive &arc);
+   static Reference CreateBinaryIOr(ObjectArchive &arc);
+   static Reference CreateBinaryLSh(ObjectArchive &arc);
+   static Reference CreateBinaryMod(ObjectArchive &arc);
+   static Reference CreateBinaryMul(ObjectArchive &arc);
+   static Reference CreateBinaryRSh(ObjectArchive &arc);
+   static Reference CreateBinarySub(ObjectArchive &arc);
+   static Reference CreateBinaryXOr(ObjectArchive &arc);
 
-   static Reference create_unary_add(std::istream *in);
-   static Reference create_unary_not(std::istream *in);
-   static Reference create_unary_sub(std::istream *in);
+   static Reference CreateBranchAnd(ObjectArchive &arc);
+   static Reference CreateBranchIf (ObjectArchive &arc);
+   static Reference CreateBranchIOr(ObjectArchive &arc);
+   static Reference CreateBranchNot(ObjectArchive &arc);
+   static Reference CreateBranchXOr(ObjectArchive &arc);
 
-   static Reference create_binary_add(std::istream *in);
-   static Reference create_binary_and(std::istream *in);
-   static Reference create_binary_cmp(std::istream *in);
-   static Reference create_binary_div(std::istream *in);
-   static Reference create_binary_ior(std::istream *in);
-   static Reference create_binary_lsh(std::istream *in);
-   static Reference create_binary_mod(std::istream *in);
-   static Reference create_binary_mul(std::istream *in);
-   static Reference create_binary_rsh(std::istream *in);
-   static Reference create_binary_sub(std::istream *in);
-   static Reference create_binary_xor(std::istream *in);
+   static Reference CreateCast(ObjectArchive &arc);
 
-   static Reference create_branch_and(std::istream *in);
-   static Reference create_branch_if (std::istream *in);
-   static Reference create_branch_ior(std::istream *in);
-   static Reference create_branch_not(std::istream *in);
-   static Reference create_branch_xor(std::istream *in);
-
-   static Reference create_cast(std::istream *in);
-
-   static Reference create_value_fix(std::istream *in);
-   static Reference create_value_flt(std::istream *in);
-   static Reference create_value_int(std::istream *in);
-   static Reference create_value_uns(std::istream *in);
-   static Reference create_value_ocs(std::istream *in);
-   static Reference create_value_arr(std::istream *in);
-   static Reference create_value_symbol(std::istream *in);
+   static Reference CreateValueFIX   (ObjectArchive &arc);
+   static Reference CreateValueFLT   (ObjectArchive &arc);
+   static Reference CreateValueINT   (ObjectArchive &arc);
+   static Reference CreateValueUNS   (ObjectArchive &arc);
+   static Reference CreateValueOCS   (ObjectArchive &arc);
+   static Reference CreateValueARR   (ObjectArchive &arc);
+   static Reference CreateValueSymbol(ObjectArchive &arc);
 
 private:
    virtual void writeACSPLong(std::ostream *out) const;

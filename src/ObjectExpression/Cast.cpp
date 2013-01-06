@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ class ObjectExpression_Cast : public ObjectExpression_Unary
 
 public:
    //
-   // ::ObjectExpression_Cast
+   // ObjectExpression_Cast
    //
    ObjectExpression_Cast(OBJEXP_EXPRUNA_PARM, ExpressionType _dstType,
                          ExpressionType _srcType)
@@ -51,32 +51,19 @@ public:
    }
 
    //
-   // ::ObjectExpression_Cast
+   // ObjectExpression_Cast
    //
-   ObjectExpression_Cast(std::istream *in) : Super(in)
+   ObjectExpression_Cast(ObjectArchive &arc) : Super(arc)
    {
-      read_object(in, &dstType);
-      read_object(in, &srcType);
+      arc << dstType << srcType;
    }
 
-   //
-   // ::canResolve
-   //
-   virtual bool canResolve() const
-   {
-      return expr->canResolve();
-   }
+   virtual bool canResolve() const {return expr->canResolve();}
+
+   virtual ExpressionType getType() const {return dstType;}
 
    //
-   // ::getType
-   //
-   virtual ExpressionType getType() const
-   {
-      return dstType;
-   }
-
-   //
-   // ::resolveFIX
+   // resolveFIX
    //
    virtual bigreal resolveFIX() const
    {
@@ -96,7 +83,7 @@ public:
    }
 
    //
-   // ::resolveFLT
+   // resolveFLT
    //
    virtual bigreal resolveFLT() const
    {
@@ -116,7 +103,7 @@ public:
    }
 
    //
-   // ::resolveINT
+   // resolveINT
    //
    virtual bigsint resolveINT() const
    {
@@ -137,7 +124,7 @@ public:
    }
 
    //
-   // ::resolveUNS
+   // resolveUNS
    //
    virtual biguint resolveUNS() const
    {
@@ -159,21 +146,16 @@ public:
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_CAST);
-
-      Super::writeObject(out);
-
-      write_object(out, &dstType);
-      write_object(out, &srcType);
+      return Super::archive(arc << OT_CAST) << dstType << srcType;
    }
 
 private:
    //
-   // ::writeACSPLong
+   // writeACSPLong
    //
    virtual void writeACSPLong(std::ostream *out) const
    {
@@ -210,11 +192,11 @@ private:
 //
 
 //
-// ObjectExpression::create_cast
+// ObjectExpression::CreateCast
 //
-ObjectExpression::Reference ObjectExpression::create_cast(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateCast(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_Cast(in));
+   return static_cast<Reference>(new ObjectExpression_Cast(arc));
 }
 
 //

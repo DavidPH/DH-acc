@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,30 +40,13 @@ class ObjectExpression_BranchIOr : public ObjectExpression_Binary
                                    ObjectExpression_Binary);
 
 public:
-   //
-   // ::ObjectExpression_BranchIOr
-   //
-   ObjectExpression_BranchIOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
-   {
-   }
+   ObjectExpression_BranchIOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
+   ObjectExpression_BranchIOr(ObjectArchive &arc) : Super(arc) {}
+
+   virtual ExpressionType getType() const {return ET_INT;}
 
    //
-   // ::ObjectExpression_BranchIOr
-   //
-   ObjectExpression_BranchIOr(std::istream *in) : Super(in)
-   {
-   }
-
-   //
-   // ::getType
-   //
-   virtual ExpressionType getType() const
-   {
-      return ET_INT;
-   }
-
-   //
-   // ::resolveINT
+   // resolveINT
    //
    virtual bigsint resolveINT() const
    {
@@ -84,18 +67,16 @@ public:
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_BRANCH_IOR);
-
-      Super::writeObject(out);
+      return Super::archive(arc << OT_BRANCH_IOR);
    }
 
 private:
    //
-   // ::writeACSPLong
+   // writeACSPLong
    //
    virtual void writeACSPLong(std::ostream *out) const
    {
@@ -116,16 +97,15 @@ private:
 //
 ObjectExpression::Reference ObjectExpression::create_branch_ior(OBJEXP_EXPRBIN_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_BranchIOr(
-      exprL, exprR, pos));
+   return static_cast<Reference>(new ObjectExpression_BranchIOr(exprL, exprR, pos));
 }
 
 //
-// ObjectExpression::create_branch_ior
+// ObjectExpression::CreateBranchIOr
 //
-ObjectExpression::Reference ObjectExpression::create_branch_ior(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateBranchIOr(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_BranchIOr(in));
+   return static_cast<Reference>(new ObjectExpression_BranchIOr(arc));
 }
 
 // EOF

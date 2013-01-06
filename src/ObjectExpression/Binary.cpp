@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include "Binary.hpp"
 
+#include "../ObjectArchive.hpp"
 #include "../SourceException.hpp"
 
 
@@ -49,9 +50,17 @@ ObjectExpression_Binary::ObjectExpression_Binary(OBJEXP_EXPRBIN_PARM)
 //
 // ObjectExpression_Binary::ObjectExpression_Binary
 //
-ObjectExpression_Binary::ObjectExpression_Binary(std::istream *in)
- : Super(in), exprL(create(in)), exprR(create(in))
+ObjectExpression_Binary::ObjectExpression_Binary(ObjectArchive &arc)
+ : Super(arc), exprL(Create(arc)), exprR(Create(arc))
 {
+}
+
+//
+// ObjectExpression_Binary::archive
+//
+ObjectArchive &ObjectExpression_Binary::archive(ObjectArchive &arc)
+{
+   return Super::archive(arc) << exprL << exprR;
 }
 
 //
@@ -68,17 +77,6 @@ bool ObjectExpression_Binary::canResolve() const
 ObjectExpression::ExpressionType ObjectExpression_Binary::getType() const
 {
    return exprL->getType();
-}
-
-//
-// ObjectExpression_Binary::writeObject
-//
-void ObjectExpression_Binary::writeObject(std::ostream *out) const
-{
-   Super::writeObject(out);
-
-   write_object(out, &exprL);
-   write_object(out, &exprR);
 }
 
 // EOF

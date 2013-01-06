@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@
 #include "../ACSP.hpp"
 #include "../BinaryTokenACS.hpp"
 #include "../BinaryTokenPPACS.hpp"
+#include "../ObjectArchive.hpp"
 #include "../ObjectCode.hpp"
-#include "../object_io.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -43,35 +43,22 @@ class ObjectExpression_ValueSymbol : public ObjectExpression
                                    ObjectExpression);
 
 public:
-   //
-   // ::ObjectExpression_ValueSymbol
-   //
    ObjectExpression_ValueSymbol(std::string const &_value, OBJEXP_EXPR_PARM)
-    : Super(OBJEXP_EXPR_PASS), value(_value)
-   {
-   }
+    : Super(OBJEXP_EXPR_PASS), value(_value) {}
+   ObjectExpression_ValueSymbol(ObjectArchive &arc) : Super(arc) {arc << value;}
 
    //
-   // ::ObjectExpression_ValueSymbol
-   //
-   ObjectExpression_ValueSymbol(std::istream *in) : Super(in)
-   {
-      read_object(in, &value);
-   }
-
-   //
-   // ::canResolve
+   // canResolve
    //
    virtual bool canResolve() const
    {
-      ObjectExpression::Pointer symbol =
-         ObjectExpression::get_symbol_null(value);
+      ObjectExpression::Pointer symbol = ObjectExpression::get_symbol_null(value);
 
       return symbol && symbol->canResolve();
    }
 
    //
-   // ::getType
+   // getType
    //
    virtual ExpressionType getType() const
    {
@@ -84,30 +71,20 @@ public:
    biguint resolveUNS() const {return get_symbol(value, pos)->resolveUNS();}
    ObjectCodeSet resolveOCS() const {return get_symbol(value, pos)->resolveOCS();}
 
-   //
-   // ::resolveSymbol
-   //
-   virtual std::string resolveSymbol() const
-   {
-      return value;
-   }
+   virtual std::string resolveSymbol() const {return value;}
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_VALUE_SYMBOL);
-
-      Super::writeObject(out);
-
-      write_object(out, &value);
+      return Super::archive(arc << OT_VALUE_SYMBOL) << value;
    }
 
 private:
    //
-   // ::writeACSPLong
+   // writeACSPLong
    //
    virtual void writeACSPLong(std::ostream *out) const
    {
@@ -133,11 +110,11 @@ ObjectExpression::Reference ObjectExpression::create_value_symbol(
 }
 
 //
-// ObjectExpression::create_value_symbol
+// ObjectExpression::CreateValueSymbol
 //
-ObjectExpression::Reference ObjectExpression::create_value_symbol(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateValueSymbol(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueSymbol(in));
+   return static_cast<Reference>(new ObjectExpression_ValueSymbol(arc));
 }
 
 // EOF

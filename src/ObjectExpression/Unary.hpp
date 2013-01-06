@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@
 //
 class ObjectExpression_Unary : public ObjectExpression
 {
-	MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression_Unary, ObjectExpression);
+   MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression_Unary, ObjectExpression);
 
 public:
    virtual bool canResolve() const;
@@ -45,9 +45,9 @@ public:
 
 protected:
    ObjectExpression_Unary(OBJEXP_EXPRUNA_ARGS);
-   ObjectExpression_Unary(std::istream *in);
+   ObjectExpression_Unary(ObjectArchive &arc);
 
-   virtual void writeObject(std::ostream *out) const;
+   virtual ObjectArchive &archive(ObjectArchive &arc);
 
    ObjectExpression::Reference expr;
 };

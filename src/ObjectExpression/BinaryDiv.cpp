@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,19 +37,8 @@ class ObjectExpression_BinaryDiv : public ObjectExpression_Binary
                                    ObjectExpression_Binary);
 
 public:
-   //
-   // ::ObjectExpression_BinaryDiv
-   //
-   ObjectExpression_BinaryDiv(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
-   {
-   }
-
-   //
-   // ::ObjectExpression_BinaryDiv
-   //
-   ObjectExpression_BinaryDiv(std::istream *in) : Super(in)
-   {
-   }
+   ObjectExpression_BinaryDiv(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
+   ObjectExpression_BinaryDiv(ObjectArchive &arc) : Super(arc) {}
 
    bigreal resolveFLT() const {return exprL->resolveFLT() / exprR->resolveFLT();}
    bigreal resolveFIX() const {return exprL->resolveFIX() / exprR->resolveFIX();}
@@ -58,13 +47,11 @@ public:
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_BINARY_DIV);
-
-      Super::writeObject(out);
+      return Super::archive(arc << OT_BINARY_DIV);
    }
 };
 
@@ -82,11 +69,11 @@ ObjectExpression::Reference ObjectExpression::create_binary_div(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::create_binary_div
+// ObjectExpression::CreateBinaryDiv
 //
-ObjectExpression::Reference ObjectExpression::create_binary_div(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateBinaryDiv(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryDiv(in));
+   return static_cast<Reference>(new ObjectExpression_BinaryDiv(arc));
 }
 
 // EOF

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,19 +37,8 @@ class ObjectExpression_UnaryAdd : public ObjectExpression_Unary
                                    ObjectExpression_Unary);
 
 public:
-   //
-   // ::ObjectExpression_UnaryAdd
-   //
-   ObjectExpression_UnaryAdd(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS)
-   {
-   }
-
-   //
-   // ::ObjectExpression_UnaryAdd
-   //
-   ObjectExpression_UnaryAdd(std::istream *in) : Super(in)
-   {
-   }
+   ObjectExpression_UnaryAdd(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS) {}
+   ObjectExpression_UnaryAdd(ObjectArchive &arc) : Super(arc) {}
 
    bigreal resolveFIX() const {return +expr->resolveFIX();}
    bigreal resolveFLT() const {return +expr->resolveFLT();}
@@ -58,18 +47,16 @@ public:
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_UNARY_ADD);
-
-      Super::writeObject(out);
+      return Super::archive(arc << OT_UNARY_ADD);
    }
 
 private:
    //
-   // ::writeACSPLong
+   // writeACSPLong
    //
    virtual void writeACSPLong(std::ostream *out) const
    {
@@ -91,11 +78,11 @@ ObjectExpression::Reference ObjectExpression::create_unary_add(OBJEXP_EXPRUNA_AR
 }
 
 //
-// ObjectExpression::create_unary_add
+// ObjectExpression::CreateUnaryAdd
 //
-ObjectExpression::Reference ObjectExpression::create_unary_add(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateUnaryAdd(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_UnaryAdd(in));
+   return static_cast<Reference>(new ObjectExpression_UnaryAdd(arc));
 }
 
 // EOF

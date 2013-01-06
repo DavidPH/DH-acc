@@ -38,6 +38,7 @@
 // Types                                                                      |
 //
 
+class ObjectArchive;
 class ObjectExpression;
 
 //
@@ -158,8 +159,7 @@ public:
    void setPosition(SourcePosition const &_pos) {head.pos = _pos;}
 
 
-   friend void read_object(std::istream *in, ObjectVector *out);
-   friend void write_object(std::ostream *out, ObjectVector const *in);
+   friend ObjectArchive &operator << (ObjectArchive &arc, ObjectVector &data);
 
 private:
    void addToken(ObjectToken *token);

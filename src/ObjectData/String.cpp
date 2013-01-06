@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,11 +23,10 @@
 
 #include "../ObjectData.hpp"
 
+#include "../ObjectArchive.hpp"
 #include "../ObjectExpression.hpp"
-#include "../object_io.hpp"
 #include "../option.hpp"
 
-#include <map>
 #include <sstream>
 
 
@@ -101,6 +100,14 @@ void String::Add(std::string const &name, std::string const &string)
 }
 
 //
+// ObjectData::String::Archive
+//
+ObjectArchive &String::Archive(ObjectArchive &arc)
+{
+   return arc << Table;
+}
+
+//
 // ObjectData::String::Find
 //
 String const *String::Find(std::string const &symbol)
@@ -153,54 +160,27 @@ void String::Iterate(IterFunc iterFunc, std::ostream *out)
       iterFunc(out, itr->second);
 }
 
-//
-// ObjectData::String::ReadObjects
-//
-void String::ReadObjects(std::istream *in)
-{
-   read_object(in, &Table);
 }
 
 //
-// ObjectData::String::WriteObjects
+// OA_Override<ObjectData::String>
 //
-void String::WriteObjects(std::ostream *out)
-{
-   write_object(out, &Table);
-}
-
-}
-
-//
-// override_object<ObjectData::String>
-//
-void override_object(ObjectData::String *out, ObjectData::String const *in)
+void OA_Override(ObjectData::String &out, ObjectData::String const &in)
 {
    // This function only gets called when the relevant key is the same. For
    // strings that inherently means override, which means adding more symbols
    // for the data.
 
-   std::vector<std::string>::const_iterator it;
-   for (it = in->names.begin(); it != in->names.end(); ++it)
-      out->names.push_back(*it);
+   for(auto const &itr : in.names)
+      out.names.push_back(itr);
 }
 
 //
-// read_object<ObjectData::String>
+// operator ObjectArchive << ObjectData::String
 //
-void read_object(std::istream *in, ObjectData::String *out)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::String &data)
 {
-   read_object(in, &out->names);
-   read_object(in, &out->string);
-}
-
-//
-// write_object<ObjectData::String>
-//
-void write_object(std::ostream *out, ObjectData::String const *in)
-{
-   write_object(out, &in->names);
-   write_object(out, &in->string);
+   return arc << data.names << data.string;
 }
 
 // EOF

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,13 +23,11 @@
 
 #include "../ObjectData.hpp"
 
+#include "../ObjectArchive.hpp"
 #include "../ObjectExpression.hpp"
-#include "../object_io.hpp"
 #include "../option.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
-
-#include <map>
 
 
 //----------------------------------------------------------------------------|
@@ -177,6 +175,14 @@ bool Script::Add(std::string const &name, std::string const &label,
 }
 
 //
+// ObjectData::Script::Archive
+//
+ObjectArchive &Script::Archive(ObjectArchive &arc)
+{
+   return arc << Table;
+}
+
+//
 // ObjectData::Script::GenerateSymbols
 //
 void ObjectData::Script::GenerateSymbols()
@@ -226,96 +232,47 @@ void Script::Iterate(IterFunc iterFunc, std::ostream *out)
    }
 }
 
-//
-// ObjectData::Script::ReadObjects
-//
-void Script::ReadObjects(std::istream *in)
-{
-   read_object(in, &Table);
 }
 
 //
-// ObjectData::Script::WriteObjects
+// OA_Override<ObjectData::Script>
 //
-void Script::WriteObjects(std::ostream *out)
+void OA_Override(ObjectData::Script &out, ObjectData::Script const &in)
 {
-   write_object(out, &Table);
+   if(out.externDef && !in.externDef)
+      out = in;
 }
 
-}
-
 //
-// override_object<ObjectData::Script>
+// operator ObjectArchive << ObjectData::Script
 //
-void override_object(ObjectData::Script *out, ObjectData::Script const *in)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Script &data)
 {
-   if (out->externDef && !in->externDef)
+   decltype(ObjectData::Script::varCount) varCount;
+
+   if(arc.isSaving())
    {
-      out->number    = in->number;
-      out->varCount  = in->varCount;
-      out->externDef = false;
-   }
-}
-
-//
-// read_object<ObjectData::Script>
-//
-void read_object(std::istream *in, ObjectData::Script *out)
-{
-   read_object(in, &out->label);
-   read_object(in, &out->name);
-   read_object(in, &out->string);
-   read_object(in, &out->stype);
-   read_object(in, &out->argCount);
-   read_object(in, &out->flags);
-   read_object(in, &out->number);
-   read_object(in, &out->varCount);
-   read_object(in, &out->externDef);
-   read_object(in, &out->externVis);
-
-   out->context = NULL;
-}
-
-//
-// read_object<ObjectData::ScriptType>
-//
-void read_object(std::istream *in, ObjectData::ScriptType *out)
-{
-   *out = static_cast<ObjectData::ScriptType>(read_object_int(in));
-
-   if(*out > ObjectData::ST_NONE)
-      *out = ObjectData::ST_NONE;
-}
-
-//
-// write_object<ObjectData::Script>
-//
-void write_object(std::ostream *out, ObjectData::Script const *in)
-{
-   if (in->context)
-   {
-      const_cast<ObjectData::Script *>(in)->varCount =
-         in->context->getLimit(STORE_REGISTER);
+      if(data.context)
+         varCount = data.context->getLimit(STORE_REGISTER);
+      else
+         varCount = data.varCount;
    }
 
-   write_object(out, &in->label);
-   write_object(out, &in->name);
-   write_object(out, &in->string);
-   write_object(out, &in->stype);
-   write_object(out, &in->argCount);
-   write_object(out, &in->flags);
-   write_object(out, &in->number);
-   write_object(out, &in->varCount);
-   write_object(out, &in->externDef);
-   write_object(out, &in->externVis);
+   arc << data.label << data.name << data.string << data.stype << data.argCount
+       << data.flags << data.number << varCount << data.externDef << data.externVis;
+
+   if(arc.isLoading())
+      data.varCount = varCount;
+
+   return arc;
 }
 
 //
-// write_object<ObjectData::ScriptType>
+// operator ObjectArchive << ObjectData::ScriptType
 //
-void write_object(std::ostream *out, ObjectData::ScriptType const *in)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::ScriptType &data)
 {
-   write_object_int(out, static_cast<bigsint>(*in));
+   return arc.archiveEnum(data, ObjectData::ST_NONE);
 }
 
 // EOF

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 #include "../ACSP.hpp"
 #include "../BinaryTokenACS.hpp"
-#include "../object_io.hpp"
+#include "../ObjectArchive.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -40,72 +40,30 @@ class ObjectExpression_ValueUNS : public ObjectExpression
    MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueUNS, ObjectExpression);
 
 public:
-   //
-   // ::ObjectExpression_ValueUNS
-   //
    ObjectExpression_ValueUNS(biguint _value, SourcePosition const &_pos)
-    : Super(_pos), value(_value)
-   {
-   }
+    : Super(_pos), value(_value) {}
+   ObjectExpression_ValueUNS(ObjectArchive &arc) : Super(arc) {arc << value;}
 
-   //
-   // ::ObjectExpression_ValueUNS
-   //
-   ObjectExpression_ValueUNS(std::istream *in) : Super(in)
-   {
-      read_object(in, &value);
-   }
+   virtual bool canResolve() const {return true;}
 
-   //
-   // ::canResolve
-   //
-   virtual bool canResolve() const
-   {
-      return true;
-   }
+   virtual ExpressionType getType() const {return ET_UNS;}
 
-   //
-   // ::getType
-   //
-   virtual ExpressionType getType() const
-   {
-      return ET_UNS;
-   }
-
-   //
-   // ::resolveINT
-   //
    // HACK! Allow resolving as INT.
-   //
-   virtual bigsint resolveINT() const
-   {
-      return value;
-   }
-
-   //
-   // ::resolveUNS
-   //
-   virtual biguint resolveUNS() const
-   {
-      return value;
-   }
+   virtual bigsint resolveINT() const {return value;}
+   virtual biguint resolveUNS() const {return value;}
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_VALUE_UNS);
-
-      Super::writeObject(out);
-
-      write_object(out, &value);
+      return Super::archive(arc << OT_VALUE_UNS) << value;
    }
 
 private:
    //
-   // ::writeACSPLong
+   // writeACSPLong
    //
    virtual void writeACSPLong(std::ostream *out) const
    {
@@ -130,11 +88,11 @@ ObjectExpression::Reference ObjectExpression::create_value_uns(biguint value, OB
 }
 
 //
-// ObjectExpression::create_value_uns
+// ObjectExpression::CreateValueUNS
 //
-ObjectExpression::Reference ObjectExpression::create_value_uns(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateValueUNS(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueUNS(in));
+   return static_cast<Reference>(new ObjectExpression_ValueUNS(arc));
 }
 
 // EOF

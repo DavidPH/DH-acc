@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ class ObjectExpression_BranchIf : public ObjectExpression_Binary
 
 public:
    //
-   // ::ObjectExpression_BranchIf
+   // ObjectExpression_BranchIf
    //
    ObjectExpression_BranchIf(OBJEXP_EXPRTRI_PARM)
     : Super(OBJEXP_EXPRBIN_PASS), exprC(_exprC)
@@ -50,14 +50,14 @@ public:
    }
 
    //
-   // ::ObjectExpression_BranchIf
+   // ObjectExpression_BranchIf
    //
-   ObjectExpression_BranchIf(std::istream *in) : Super(in), exprC(create(in))
+   ObjectExpression_BranchIf(ObjectArchive &arc) : Super(arc), exprC(Create(arc))
    {
    }
 
    //
-   // ::canResolve
+   // canResolve
    //
    virtual bool canResolve() const
    {
@@ -72,15 +72,11 @@ public:
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_BRANCH_IF);
-
-      Super::writeObject(out);
-
-      write_object(out, &exprC);
+      return Super::archive(arc << OT_BRANCH_IF) << exprC;
    }
 
 private:
@@ -101,11 +97,11 @@ ObjectExpression::Reference ObjectExpression::create_branch_if(OBJEXP_EXPRTRI_AR
 }
 
 //
-// ObjectExpression::create_branch_if
+// ObjectExpression::CreateBranchIf
 //
-ObjectExpression::Reference ObjectExpression::create_branch_if(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateBranchIf(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_BranchIf(in));
+   return static_cast<Reference>(new ObjectExpression_BranchIf(arc));
 }
 
 // EOF

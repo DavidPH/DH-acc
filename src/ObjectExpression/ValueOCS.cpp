@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,57 +38,23 @@ class ObjectExpression_ValueOCS : public ObjectExpression
    MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_ValueOCS, ObjectExpression);
 
 public:
-   //
-   // ::ObjectExpression_ValueOCS
-   //
    ObjectExpression_ValueOCS(ObjectCodeSet const &_value, OBJEXP_EXPR_PARM)
-    : Super(OBJEXP_EXPR_PASS), value(_value)
-   {
-   }
+    : Super(OBJEXP_EXPR_PASS), value(_value) {}
+   ObjectExpression_ValueOCS(ObjectArchive &arc) : Super(arc) {arc << value;}
 
-   //
-   // ::ObjectExpression_ValueOCS
-   //
-   ObjectExpression_ValueOCS(std::istream *in) : Super(in)
-   {
-      read_object(in, &value);
-   }
+   virtual bool canResolve() const {return true;}
 
-   //
-   // ::canResolve
-   //
-   virtual bool canResolve() const
-   {
-      return true;
-   }
+   virtual ExpressionType getType() const {return ET_OCS;}
 
-   //
-   // ::getType
-   //
-   virtual ExpressionType getType() const
-   {
-      return ET_OCS;
-   }
-
-   //
-   // ::resolveOCS
-   //
-   virtual ObjectCodeSet resolveOCS() const
-   {
-      return value;
-   }
+   virtual ObjectCodeSet resolveOCS() const {return value;}
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_VALUE_OCS);
-
-      Super::writeObject(out);
-
-      write_object(out, &value);
+      return Super::archive(arc << OT_VALUE_OCS) << value;
    }
 
 private:
@@ -110,11 +76,11 @@ ObjectExpression::Reference ObjectExpression::create_value_ocs(
 }
 
 //
-// ObjectExpression::create_value_ocs
+// ObjectExpression::CreateValueOCS
 //
-ObjectExpression::Reference ObjectExpression::create_value_ocs(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateValueOCS(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueOCS(in));
+   return static_cast<Reference>(new ObjectExpression_ValueOCS(arc));
 }
 
 // EOF

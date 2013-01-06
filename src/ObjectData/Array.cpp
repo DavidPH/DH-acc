@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 
 #include "../ObjectData.hpp"
 
+#include "../ObjectArchive.hpp"
 #include "../ObjectExpression.hpp"
-#include "../object_io.hpp"
 #include "../option.hpp"
 #include "../SourceExpression.hpp"
 #include "../VariableType.hpp"
@@ -258,6 +258,14 @@ void Array::AddGlobal(std::string const &name, LinkageSpecifier linkage,
 }
 
 //
+// ObjectData::Array::Archive
+//
+ObjectArchive &Array::Archive(ObjectArchive &arc)
+{
+   return arc << MapTable << WorldTable << GlobalTable;
+}
+
+//
 // ObjectData::Array::GenerateSymbols
 //
 void Array::GenerateSymbols()
@@ -304,65 +312,24 @@ void Array::IterateGlobal(IterFunc iterFunc, std::ostream *out)
    Iterate(GlobalTable, iterFunc, out);
 }
 
-//
-// ObjectData::Array::ReadObjects
-//
-void Array::ReadObjects(std::istream *in)
-{
-   read_object(in, &MapTable);
-   read_object(in, &WorldTable);
-   read_object(in, &GlobalTable);
 }
 
 //
-// ObjectData::Array::WriteObjects
+// OA_Override<ObjectData::Array>
 //
-void Array::WriteObjects(std::ostream *out)
+void OA_Override(ObjectData::Array &out, ObjectData::Array const &in)
 {
-   write_object(out, &MapTable);
-   write_object(out, &WorldTable);
-   write_object(out, &GlobalTable);
-}
-
+   if(out.externDef && !in.externDef)
+      out = in;
 }
 
 //
-// override_object<ObjectData::Array>
+// operator ObjectArchive << ObjectData::Array
 //
-void override_object(ObjectData::Array *out, ObjectData::Array const *in)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Array &data)
 {
-   if (out->externDef && !in->externDef)
-   {
-      out->number    = in->number;
-      out->size      = in->size;
-      out->externDef = in->externDef;
-   }
-}
-
-//
-// read_object<ObjectData::Array>
-//
-void read_object(std::istream *in, ObjectData::Array *out)
-{
-   read_object(in, &out->init);
-   read_object(in, &out->name);
-   read_object(in, &out->number);
-   read_object(in, &out->size);
-   read_object(in, &out->linkage);
-   read_object(in, &out->externDef);
-}
-
-//
-// write_object<ObjectData::Array>
-//
-void write_object(std::ostream *out, ObjectData::Array const *in)
-{
-   write_object(out, &in->init);
-   write_object(out, &in->name);
-   write_object(out, &in->number);
-   write_object(out, &in->size);
-   write_object(out, &in->linkage);
-   write_object(out, &in->externDef);
+   return arc << data.init << data.name << data.number << data.size
+              << data.linkage << data.externDef;
 }
 
 // EOF

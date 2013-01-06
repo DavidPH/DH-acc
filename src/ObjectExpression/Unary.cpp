@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,9 +41,17 @@ ObjectExpression_Unary::ObjectExpression_Unary(OBJEXP_EXPRUNA_PARM)
 //
 // ObjectExpression_Unary::ObjectExpression_Unary
 //
-ObjectExpression_Unary::ObjectExpression_Unary(std::istream *in)
- : Super(in), expr(create(in))
+ObjectExpression_Unary::ObjectExpression_Unary(ObjectArchive &arc)
+ : Super(arc), expr(Create(arc))
 {
+}
+
+//
+// ObjectExpression_Unary::archive
+//
+ObjectArchive &ObjectExpression_Unary::archive(ObjectArchive &arc)
+{
+   return Super::archive(arc) << expr;
 }
 
 //
@@ -60,16 +68,6 @@ bool ObjectExpression_Unary::canResolve() const
 ObjectExpression::ExpressionType ObjectExpression_Unary::getType() const
 {
    return expr->getType();
-}
-
-//
-// ObjectExpression_Unary::writeObject
-//
-void ObjectExpression_Unary::writeObject(std::ostream *out) const
-{
-   Super::writeObject(out);
-
-   write_object(out, &expr);
 }
 
 // EOF

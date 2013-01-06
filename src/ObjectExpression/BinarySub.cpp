@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,19 +37,8 @@ class ObjectExpression_BinarySub : public ObjectExpression_Binary
                                    ObjectExpression_Binary);
 
 public:
-   //
-   // ::ObjectExpression_BinarySub
-   //
-   ObjectExpression_BinarySub(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
-   {
-   }
-
-   //
-   // ::ObjectExpression_BinarySub
-   //
-   ObjectExpression_BinarySub(std::istream *in) : Super(in)
-   {
-   }
+   ObjectExpression_BinarySub(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
+   ObjectExpression_BinarySub(ObjectArchive &arc) : Super(arc) {}
 
    bigreal resolveFLT() const {return exprL->resolveFLT() - exprR->resolveFLT();}
    bigreal resolveFIX() const {return exprL->resolveFIX() - exprR->resolveFIX();}
@@ -58,13 +47,11 @@ public:
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_BINARY_SUB);
-
-      Super::writeObject(out);
+      return Super::archive(arc << OT_BINARY_SUB);
    }
 };
 
@@ -82,11 +69,11 @@ ObjectExpression::Reference ObjectExpression::create_binary_sub(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::create_binary_sub
+// ObjectExpression::CreateBinarySub
 //
-ObjectExpression::Reference ObjectExpression::create_binary_sub(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateBinarySub(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_BinarySub(in));
+   return static_cast<Reference>(new ObjectExpression_BinarySub(arc));
 }
 
 // EOF

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -89,9 +89,9 @@ ObjectExpression::ObjectExpression(OBJEXP_EXPR_PARM) : pos(_pos)
 //
 // ObjectExpression::ObjectExpression
 //
-ObjectExpression::ObjectExpression(std::istream *in)
+ObjectExpression::ObjectExpression(ObjectArchive &arc)
 {
-   read_object(in, &pos);
+   arc << pos;
 }
 
 //
@@ -127,6 +127,14 @@ void ObjectExpression::add_symbol
 (std::string const &symbol, ExpressionType type)
 {
    symbol_type_table[symbol] = type;
+}
+
+//
+// ObjectExpression::archive
+//
+ObjectArchive &ObjectExpression::archive(ObjectArchive &arc)
+{
+   return arc << pos;
 }
 
 //
@@ -396,14 +404,6 @@ void ObjectExpression::writeACSP(std::ostream *out) const
 void ObjectExpression::writeACSPLong(std::ostream *) const
 {
    Error_NP("cannot write ACS+");
-}
-
-//
-// ObjectExpression::writeObject
-//
-void ObjectExpression::writeObject(std::ostream *out) const
-{
-   write_object(out, &pos);
 }
 
 //

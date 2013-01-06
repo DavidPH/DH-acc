@@ -15,6 +15,7 @@ add_executable(DH-acc
    BinaryTokenZDACS/output.cpp
    BinaryTokenZDACS/write_ACSE.cpp
    LinkSpec.cpp
+   ObjectArchive.cpp
    ObjectCode.cpp
    ObjectData.cpp
    ObjectData/Array.cpp
@@ -27,6 +28,7 @@ add_executable(DH-acc
    ObjectData/Static.cpp
    ObjectData/String.cpp
    ObjectExpression.cpp
+   ObjectExpression/Archive.cpp
    ObjectExpression/Binary.cpp
    ObjectExpression/BinaryAdd.cpp
    ObjectExpression/BinaryAnd.cpp
@@ -45,7 +47,6 @@ add_executable(DH-acc
    ObjectExpression/BranchNot.cpp
    ObjectExpression/BranchXOr.cpp
    ObjectExpression/Cast.cpp
-   ObjectExpression/objects_io.cpp
    ObjectExpression/Unary.cpp
    ObjectExpression/UnaryAdd.cpp
    ObjectExpression/UnaryNot.cpp
@@ -59,7 +60,6 @@ add_executable(DH-acc
    ObjectExpression/ValueUNS.cpp
    ObjectToken.cpp
    ObjectVector.cpp
-   object_io.cpp
    option.cpp
    ost_type.cpp
    SourceContext.cpp

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 #include "../ObjectExpression.hpp"
 
-#include "../object_io.hpp"
+#include "../ObjectArchive.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -39,7 +39,7 @@ class ObjectExpression_ValueARR : public ObjectExpression
 
 public:
    //
-   // ::ObjectExpression_ValueARR
+   // ObjectExpression_ValueARR
    //
    ObjectExpression_ValueARR(Vector const &_elems, VecStr const &_names,
                              SourcePosition const &_pos)
@@ -48,7 +48,7 @@ public:
    }
 
    //
-   // ::ObjectExpression_ValueARR
+   // ObjectExpression_ValueARR
    //
    ObjectExpression_ValueARR(Vector const &_elems, SourcePosition const &_pos)
     : Super(_pos), elems(_elems), type(ET_ARR)
@@ -56,52 +56,37 @@ public:
    }
 
    //
-   // ::ObjectExpression_ValueARR
+   // ObjectExpression_ValueARR
    //
-   ObjectExpression_ValueARR(std::istream *in) : Super(in)
+   ObjectExpression_ValueARR(ObjectArchive &arc) : Super(arc)
    {
-      read_object(in, &elems);
-      read_object(in, &names);
-
-      read_object(in, &type);
+      arc << elems << names << type;
    }
 
-   //
-   // ::canResolve
-   //
-   virtual bool canResolve() const
-   {
-      return true;
-   }
+   virtual bool canResolve() const {return true;}
 
    //
-   // ::expand
+   // expand
    //
    virtual void expand(Vector *out)
    {
-      for (Vector::iterator iter = elems.begin(); iter != elems.end(); ++iter)
+      for(Vector::iterator iter = elems.begin(); iter != elems.end(); ++iter)
          (*iter)->expand(out);
    }
 
    //
-   // ::expandOnce
+   // expandOnce
    //
    virtual void expandOnce(Vector *out)
    {
-      for (Vector::iterator iter = elems.begin(); iter != elems.end(); ++iter)
+      for(Vector::iterator iter = elems.begin(); iter != elems.end(); ++iter)
          out->push_back(*iter);
    }
 
-   //
-   // ::getType
-   //
-   virtual ExpressionType getType() const
-   {
-      return type;
-   }
+   virtual ExpressionType getType() const {return type;}
 
    //
-   // ::resolveARR
+   // resolveARR
    //
    virtual ObjectExpression::Reference resolveARR(biguint index) const
    {
@@ -112,12 +97,12 @@ public:
    }
 
    //
-   // ::resolveMAP
+   // resolveMAP
    //
    virtual ObjectExpression::Reference resolveMAP(std::string const &name) const
    {
-      for (size_t i = 0; i < names.size(); ++i)
-         if (names[i] == name)
+      for(size_t i = 0; i < names.size(); ++i)
+         if(names[i] == name)
             return static_cast<ObjectExpression::Reference>(elems[i]);
 
       return Super::resolveMAP(name);
@@ -125,18 +110,11 @@ public:
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_VALUE_ARR);
-
-      Super::writeObject(out);
-
-      write_object(out, &elems);
-      write_object(out, &names);
-
-      write_object(out, &type);
+      return Super::archive(arc << OT_VALUE_ARR) << elems << names << type;
    }
 
 private:
@@ -161,11 +139,11 @@ ObjectExpression::Reference ObjectExpression::create_value_arr(
 }
 
 //
-// ObjectExpression::create_value_arr
+// ObjectExpression::CreateValueARR
 //
-ObjectExpression::Reference ObjectExpression::create_value_arr(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateValueARR(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_ValueARR(in));
+   return static_cast<Reference>(new ObjectExpression_ValueARR(arc));
 }
 
 //

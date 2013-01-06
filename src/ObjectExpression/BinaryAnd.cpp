@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,32 +37,19 @@ class ObjectExpression_BinaryAnd : public ObjectExpression_Binary
                                    ObjectExpression_Binary);
 
 public:
-   //
-   // ::ObjectExpression_BinaryAnd
-   //
-   ObjectExpression_BinaryAnd(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
-   {
-   }
-
-   //
-   // ::ObjectExpression_BinaryAnd
-   //
-   ObjectExpression_BinaryAnd(std::istream *in) : Super(in)
-   {
-   }
+   ObjectExpression_BinaryAnd(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
+   ObjectExpression_BinaryAnd(ObjectArchive &arc) : Super(arc) {}
 
    bigsint resolveINT() const {return exprL->resolveINT() & exprR->resolveINT();}
    biguint resolveUNS() const {return exprL->resolveUNS() & exprR->resolveUNS();}
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_BINARY_AND);
-
-      Super::writeObject(out);
+      return Super::archive(arc << OT_BINARY_AND);
    }
 };
 
@@ -80,11 +67,11 @@ ObjectExpression::Reference ObjectExpression::create_binary_and(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::create_binary_and
+// ObjectExpression::CreateBinaryAnd
 //
-ObjectExpression::Reference ObjectExpression::create_binary_and(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateBinaryAnd(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryAnd(in));
+   return static_cast<Reference>(new ObjectExpression_BinaryAnd(arc));
 }
 
 // EOF

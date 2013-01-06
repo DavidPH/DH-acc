@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,11 +23,9 @@
 
 #include "../ObjectData.hpp"
 
+#include "../ObjectArchive.hpp"
 #include "../ObjectExpression.hpp"
-#include "../object_io.hpp"
 #include "../VariableType.hpp"
-
-#include <map>
 
 
 //----------------------------------------------------------------------------|
@@ -78,6 +76,14 @@ void Auto::Add(std::string const &name, VariableType const *type,
 }
 
 //
+// ObjectData::Auto::Archive
+//
+ObjectArchive &Auto::Archive(ObjectArchive &arc)
+{
+   return arc << Table;
+}
+
+//
 // ObjectData::Auto::GenerateSymbols
 //
 void Auto::GenerateSymbols()
@@ -105,55 +111,24 @@ void Auto::Iterate(IterFunc iterFunc, std::ostream *out)
       iterFunc(out, itr->second);
 }
 
-//
-// ObjectData::Auto::ReadObjects
-//
-void Auto::ReadObjects(std::istream *in)
-{
-   read_object(in, &Table);
 }
 
 //
-// ObjectData::Auto::WriteObjects
+// OA_Override<ObjectData::Auto>
 //
-void Auto::WriteObjects(std::ostream *out)
+void OA_Override(ObjectData::Auto &out, ObjectData::Auto const &in)
 {
-   write_object(out, &Table);
-}
-
-}
-
-//
-// override_object<ObjectData::Auto>
-//
-void override_object(ObjectData::Auto *, ObjectData::Auto const *)
-{
+   if(out.externDef && !in.externDef)
+      out = in;
 }
 
 //
-// read_object<ObjectData::Auto>
+// operator ObjectArchive << ObjectData::Auto
 //
-void read_object(std::istream *in, ObjectData::Auto *out)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Auto &data)
 {
-   read_object(in, &out->name);
-   read_object(in, &out->number);
-   read_object(in, &out->size);
-   read_object(in, &out->init);
-   read_object(in, &out->externDef);
-   read_object(in, &out->externVis);
-}
-
-//
-// write_object<ObjectData::Auto>
-//
-void write_object(std::ostream *out, ObjectData::Auto const *in)
-{
-   write_object(out, &in->name);
-   write_object(out, &in->number);
-   write_object(out, &in->size);
-   write_object(out, &in->init);
-   write_object(out, &in->externDef);
-   write_object(out, &in->externVis);
+   return arc << data.name << data.number << data.size << data.init
+              << data.externDef << data.externVis;
 }
 
 // EOF

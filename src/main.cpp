@@ -24,6 +24,7 @@
 #include "BinaryTokenACS.hpp"
 #include "BinaryTokenPPACS.hpp"
 #include "BinaryTokenZDACS.hpp"
+#include "ObjectArchive.hpp"
 #include "ObjectData.hpp"
 #include "ObjectExpression.hpp"
 #include "ObjectToken.hpp"
@@ -245,7 +246,8 @@ static void read_source(std::string const &name, SourceType type,
    case SOURCE_object:
       {
          std::ifstream in(name.c_str(), std::ios_base::in|std::ios_base::binary);
-         ObjectExpression::read_objects(&in, objects);
+         ObjectArchive arc(&in);
+         ObjectExpression::Archive(arc, *objects);
       }
       break;
 
@@ -374,10 +376,10 @@ static inline int _main()
    // If doing object output, don't process object data.
    if(Output == OUTPUT_object)
    {
-      std::ofstream ofs(option_out.data.c_str(),
+      std::ofstream out(option_out.data.c_str(),
                         std::ios_base::out|std::ios_base::binary);
-
-      ObjectExpression::write_objects(&ofs, &objects);
+      ObjectArchive arc(&out);
+      ObjectExpression::Archive(arc, objects);
 
       return 0;
    }

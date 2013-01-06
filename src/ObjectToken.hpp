@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,8 +29,6 @@
 #include "ObjectCode.hpp"
 #include "SourcePosition.hpp"
 
-#include <map>
-#include <ostream>
 #include <string>
 #include <vector>
 
@@ -39,6 +37,7 @@
 // Types                                                                      |
 //
 
+class ObjectArchive;
 class ObjectExpression;
 class SourceTokenC;
 
@@ -68,9 +67,7 @@ public:
    ObjectCode code;
 
 
-   friend bool override_object(ObjectToken *out, ObjectToken const &in);
-   friend void read_object(std::istream *in, ObjectToken *out);
-   friend void write_object(std::ostream *out, ObjectToken const *in);
+   friend ObjectArchive &operator << (ObjectArchive &arc, ObjectToken &data);
 };
 
 #endif//HPP_ObjectToken_

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,11 +23,9 @@
 
 #include "../ObjectData.hpp"
 
+#include "../ObjectArchive.hpp"
 #include "../ObjectExpression.hpp"
-#include "../object_io.hpp"
 #include "../VariableType.hpp"
-
-#include <map>
 
 
 //----------------------------------------------------------------------------|
@@ -227,6 +225,14 @@ void ArrayVar::AddGlobal(std::string const &array, std::string const &name,
 }
 
 //
+// ObjectData::ArrayVar::Archive
+//
+ObjectArchive &ArrayVar::Archive(ObjectArchive &arc)
+{
+   return arc << MapTable << WorldTable << GlobalTable;
+}
+
+//
 // ObjectData::ArrayVar::ArrayMap
 //
 std::string const &ArrayVar::ArrayMap(std::string const &name)
@@ -293,67 +299,24 @@ void ArrayVar::IterateGlobal(IterFunc iterFunc, std::ostream *out)
    Iterate(GlobalTable, iterFunc, out);
 }
 
-//
-// ObjectData::ArrayVar::ReadObjects
-//
-void ArrayVar::ReadObjects(std::istream *in)
-{
-   read_object(in, &MapTable);
-   read_object(in, &WorldTable);
-   read_object(in, &GlobalTable);
 }
 
 //
-// ObjectData::ArrayVar::WriteObjects
+// OA_Override<ObjectData::ArrayVar>
 //
-void ArrayVar::WriteObjects(std::ostream *out)
+void OA_Override(ObjectData::ArrayVar &out, ObjectData::ArrayVar const &in)
 {
-   write_object(out, &MapTable);
-   write_object(out, &WorldTable);
-   write_object(out, &GlobalTable);
-}
-
+   if(out.externDef && !in.externDef)
+      out = in;
 }
 
 //
-// override_object<ObjectData::ArrayVar>
+// operator ObjectArchive << ObjectData::ArrayVar
 //
-void override_object(ObjectData::ArrayVar *out, ObjectData::ArrayVar const *in)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::ArrayVar &data)
 {
-   if(out->externDef && !in->externDef)
-   {
-      out->number    = in->number;
-      out->size      = in->size;
-      out->externDef = in->externDef;
-   }
-}
-
-//
-// read_object<ObjectData::ArrayVar>
-//
-void read_object(std::istream *in, ObjectData::ArrayVar *out)
-{
-   read_object(in, &out->init);
-   read_object(in, &out->array);
-   read_object(in, &out->name);
-   read_object(in, &out->number);
-   read_object(in, &out->size);
-   read_object(in, &out->linkage);
-   read_object(in, &out->externDef);
-}
-
-//
-// write_object<ObjectData::ArrayVar>
-//
-void write_object(std::ostream *out, ObjectData::ArrayVar const *in)
-{
-   write_object(out, &in->init);
-   write_object(out, &in->array);
-   write_object(out, &in->name);
-   write_object(out, &in->number);
-   write_object(out, &in->size);
-   write_object(out, &in->linkage);
-   write_object(out, &in->externDef);
+   return arc << data.init << data.array << data.name << data.number
+              << data.size << data.linkage << data.externDef;
 }
 
 // EOF

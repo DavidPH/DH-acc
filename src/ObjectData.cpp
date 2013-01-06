@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 
 #include "ObjectData.hpp"
 
+#include "ObjectArchive.hpp"
 #include "ObjectExpression.hpp"
-#include "object_io.hpp"
 #include "option.hpp"
 #include "SourcePosition.hpp"
 #include "VariableType.hpp"
@@ -293,44 +293,19 @@ void SetInit(Init &init, ObjectExpression *data, VariableType const *type)
 }
 
 //
-// read_object<ObjectData::Init>
+// operator ObjectArchive << ObjectData::Init
 //
-void read_object(std::istream *in, ObjectData::Init *out)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Init &data)
 {
-   read_object(in, &out->data);
-   read_object(in, &out->type);
-   read_object(in, &out->dataAll);
-   read_object(in, &out->typeAll);
+   return arc << data.data << data.type << data.dataAll << data.typeAll;
 }
 
 //
-// read_object<ObjectData::InitType>
+// operator ObjectArchive << ObjectData::InitType
 //
-void read_object(std::istream *in, ObjectData::InitType *out)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::InitType &data)
 {
-   *out = static_cast<ObjectData::InitType>(read_object_int(in));
-
-   if(*out > ObjectData::IT_FUNCTION)
-      *out = ObjectData::IT_UNKNOWN;
-}
-
-//
-// write_object<ObjectData::Init>
-//
-void write_object(std::ostream *out, ObjectData::Init const *in)
-{
-   write_object(out, &in->data);
-   write_object(out, &in->type);
-   write_object(out, &in->dataAll);
-   write_object(out, &in->typeAll);
-}
-
-//
-// write_object<ObjectData::InitType>
-//
-void write_object(std::ostream *out, ObjectData::InitType const *in)
-{
-   write_object_int(out, static_cast<bigsint>(*in));
+   return arc.archiveEnum(data, ObjectData::IT_FUNCTION, ObjectData::IT_UNKNOWN);
 }
 
 // EOF

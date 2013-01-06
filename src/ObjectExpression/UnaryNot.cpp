@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,42 +40,30 @@ class ObjectExpression_UnaryNot : public ObjectExpression_Unary
                                    ObjectExpression_Unary);
 
 public:
-   //
-   // ::ObjectExpression_UnaryNot
-   //
-   ObjectExpression_UnaryNot(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS)
-   {
-   }
-
-   //
-   // ::ObjectExpression_UnaryNot
-   //
-   ObjectExpression_UnaryNot(std::istream *in) : Super(in)
-   {
-   }
+   ObjectExpression_UnaryNot(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS) {}
+   ObjectExpression_UnaryNot(ObjectArchive &arc) : Super(arc) {}
 
    virtual bigsint resolveINT() const {return ~expr->resolveINT();}
    virtual biguint resolveUNS() const {return ~expr->resolveUNS();}
 
+protected:
    //
-   // ::writeACSPLong
+   // archive
+   //
+   virtual ObjectArchive &archive(ObjectArchive &arc)
+   {
+      return Super::archive(arc << OT_UNARY_NOT);
+   }
+
+private:
+   //
+   // writeACSPLong
    //
    virtual void writeACSPLong(std::ostream *out) const
    {
       BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_BNOT);
 
       expr->writeACSP(out);
-   }
-
-protected:
-   //
-   // ::writeObject
-   //
-   virtual void writeObject(std::ostream *out) const
-   {
-      write_object(out, OT_UNARY_NOT);
-
-      Super::writeObject(out);
    }
 };
 
@@ -93,11 +81,11 @@ ObjectExpression::Reference ObjectExpression::create_unary_not(OBJEXP_EXPRUNA_AR
 }
 
 //
-// ObjectExpression::create_unary_not
+// ObjectExpression::CreateUnaryNot
 //
-ObjectExpression::Reference ObjectExpression::create_unary_not(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateUnaryNot(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_UnaryNot(in));
+   return static_cast<Reference>(new ObjectExpression_UnaryNot(arc));
 }
 
 // EOF

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,12 +23,10 @@
 
 #include "../ObjectData.hpp"
 
+#include "../ObjectArchive.hpp"
 #include "../ObjectExpression.hpp"
-#include "../object_io.hpp"
 #include "../option.hpp"
 #include "../VariableType.hpp"
-
-#include <map>
 
 
 //----------------------------------------------------------------------------|
@@ -135,6 +133,14 @@ void Static::Add(std::string const &name, VariableType const *type,
 }
 
 //
+// ObjectData::Static::Archive
+//
+ObjectArchive &Static::Archive(ObjectArchive &arc)
+{
+   return arc << Table;
+}
+
+//
 // ObjectData::Static::GenerateSymbols
 //
 void Static::GenerateSymbols()
@@ -166,57 +172,24 @@ void Static::Iterate(IterFunc iterFunc, std::ostream *out)
       iterFunc(out, itr->second);
 }
 
-//
-// ObjectData::Static::ReadObjects
-//
-void Static::ReadObjects(std::istream *in)
-{
-   read_object(in, &Table);
 }
 
 //
-// ObjectData::Static::write_objects
+// OA_Override<ObjectData::Static>
 //
-void Static::WriteObjects(std::ostream *out)
+void OA_Override(ObjectData::Static &out, ObjectData::Static const &in)
 {
-   write_object(out, &Table);
-}
-
-}
-
-//
-// override_object<ObjectData::Static>
-//
-void override_object(ObjectData::Static *out, ObjectData::Static const *in)
-{
-   if (out->number == -1)
-      *out = *in;
+   if(out.externDef && !in.externDef)
+      out = in;
 }
 
 //
-// read_object<ObjectData::Static>
+// operator ObjectArchive << ObjectData::Static
 //
-void read_object(std::istream *in, ObjectData::Static *out)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Static &data)
 {
-   read_object(in, &out->name);
-   read_object(in, &out->number);
-   read_object(in, &out->size);
-   read_object(in, &out->init);
-   read_object(in, &out->externDef);
-   read_object(in, &out->externVis);
-}
-
-//
-// write_object<ObjectData::Static>
-//
-void write_object(std::ostream *out, ObjectData::Static const *in)
-{
-   write_object(out, &in->name);
-   write_object(out, &in->number);
-   write_object(out, &in->size);
-   write_object(out, &in->init);
-   write_object(out, &in->externDef);
-   write_object(out, &in->externVis);
+   return arc << data.name << data.number << data.size << data.init
+              << data.externDef << data.externVis;
 }
 
 // EOF

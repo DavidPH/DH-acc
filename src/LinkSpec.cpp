@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 #include "LinkSpec.hpp"
 
-#include "object_io.hpp"
+#include "ObjectArchive.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -31,19 +31,11 @@
 //
 
 //
+// operator ObjectArchive << LinkageSpecifier
 //
-//
-void read_object(std::istream *in, LinkageSpecifier *out)
+ObjectArchive &operator << (ObjectArchive &arc, LinkageSpecifier &data)
 {
-   *out = static_cast<LinkageSpecifier>(read_object_int(in));
-
-   if(*out > LINKAGE_DS)
-      *out = LINKAGE_DS;
-}
-
-void write_object(std::ostream *out, LinkageSpecifier const *in)
-{
-   write_object_int(out, static_cast<bigsint>(*in));
+   return arc.archiveEnum(data, LINKAGE_DS);
 }
 
 //EOF

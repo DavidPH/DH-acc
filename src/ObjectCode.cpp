@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,12 +23,9 @@
 
 #include "ObjectCode.hpp"
 
-#include "object_io.hpp"
+#include "ObjectArchive.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
-
-#include <map>
-#include <string>
 
 
 //----------------------------------------------------------------------------|
@@ -59,13 +56,6 @@ _ocode_init_s::_ocode_init_s()
    DO_INIT(NONE)
 
    #undef DO_INIT
-}
-
-//
-// ObjectCodeSet::ObjectCodeSet
-//
-ObjectCodeSet::ObjectCodeSet() : ocode(OCODE_NONE), ocode_imm(OCODE_NONE)
-{
 }
 
 //
@@ -139,40 +129,19 @@ char const *make_string(ObjectCode ocode)
 }
 
 //
-// read_object<ObjectCode>
+// operator ObjectArchive << ObjectCode
 //
-void read_object(std::istream *in, ObjectCode *out)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectCode &data)
 {
-   *out = static_cast<ObjectCode>(read_object_int(in));
-
-   if (*out > OCODE_NONE)
-      *out = OCODE_NONE;
+   return arc.archiveEnum(data, OCODE_NONE);
 }
 
 //
-// read_object<ObjectCodeSet>
+// operator ObjectArchive << ObjectCodeSet
 //
-void read_object(std::istream *in, ObjectCodeSet *out)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectCodeSet &data)
 {
-   read_object(in, &out->ocode);
-   read_object(in, &out->ocode_imm);
-}
-
-//
-// write_object<ObjectCode>
-//
-void write_object(std::ostream *out, ObjectCode const *in)
-{
-   write_object_int(out, static_cast<bigsint>(*in));
-}
-
-//
-// write_object<ObjectCodeSet>
-//
-void write_object(std::ostream *out, ObjectCodeSet const *in)
-{
-   write_object(out, &in->ocode);
-   write_object(out, &in->ocode_imm);
+   return arc << data.ocode << data.ocode_imm;
 }
 
 // EOF

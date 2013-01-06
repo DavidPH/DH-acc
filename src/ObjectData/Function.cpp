@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,11 +23,9 @@
 
 #include "../ObjectData.hpp"
 
+#include "../ObjectArchive.hpp"
 #include "../ObjectExpression.hpp"
-#include "../object_io.hpp"
 #include "../SourceContext.hpp"
-
-#include <map>
 
 
 //----------------------------------------------------------------------------|
@@ -116,6 +114,14 @@ bool Function::Add(std::string const &name, std::string const &label,
 }
 
 //
+// ObjectData::Function::Archive
+//
+ObjectArchive &Function::Archive(ObjectArchive &arc)
+{
+   return arc << Table;
+}
+
+//
 // ObjectData::Function::GenerateSymbols
 //
 void Function::GenerateSymbols()
@@ -151,70 +157,39 @@ void Function::Iterate(IterFunc iterFunc, std::ostream *out)
    }
 }
 
-//
-// ObjectData::Function::ReadObjects
-//
-void Function::ReadObjects(std::istream *in)
-{
-   read_object(in, &Table);
 }
 
 //
-// ObjectData::Function::WriteObjects
+// OA_Override<ObjectData::Function>
 //
-void Function::WriteObjects(std::ostream *out)
+void OA_Override(ObjectData::Function &out, ObjectData::Function const &in)
 {
-   write_object(out, &Table);
+   if(out.externDef && !in.externDef)
+      out = in;
 }
 
-}
-
 //
-// override_object<ObjectData::Function>
+// operator ObjectArchive << ObjectData::Function
 //
-void override_object(ObjectData::Function *out, ObjectData::Function const *in)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Function &data)
 {
-   if (out->externDef && !in->externDef)
+   decltype(ObjectData::Function::varCount) varCount;
+
+   if(arc.isSaving())
    {
-      out->varCount = in->varCount;
-      out->externDef = false;
-   }
-}
-
-//
-// read_object<ObjectData::Function>
-//
-void read_object(std::istream *in, ObjectData::Function *out)
-{
-   read_object(in, &out->label);
-   read_object(in, &out->name);
-   read_object(in, &out->argCount);
-   read_object(in, &out->number);
-   read_object(in, &out->retCount);
-   read_object(in, &out->varCount);
-   read_object(in, &out->externDef);
-
-   out->context = NULL;
-}
-
-//
-// write_object<ObjectData::Function>
-//
-void write_object(std::ostream *out, ObjectData::Function const *in)
-{
-   if (in->context)
-   {
-      const_cast<ObjectData::Function *>(in)->varCount =
-         in->context->getLimit(STORE_REGISTER);
+      if(data.context)
+         varCount = data.context->getLimit(STORE_REGISTER);
+      else
+         varCount = data.varCount;
    }
 
-   write_object(out, &in->label);
-   write_object(out, &in->name);
-   write_object(out, &in->argCount);
-   write_object(out, &in->number);
-   write_object(out, &in->retCount);
-   write_object(out, &in->varCount);
-   write_object(out, &in->externDef);
+   arc << data.label << data.name << data.argCount << data.number
+       << data.retCount << varCount << data.externDef;
+
+   if(arc.isLoading())
+      data.varCount = varCount;
+
+   return arc;
 }
 
 // EOF

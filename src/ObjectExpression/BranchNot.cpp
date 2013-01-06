@@ -40,31 +40,13 @@ class ObjectExpression_BranchNot : public ObjectExpression_Unary
                                    ObjectExpression_Unary);
 
 public:
-   //
-   // ::ObjectExpression_BranchNot
-   //
-   ObjectExpression_BranchNot(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS)
-   {
-   }
+   ObjectExpression_BranchNot(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS) {}
+   ObjectExpression_BranchNot(ObjectArchive &arc) : Super(arc) {}
+
+   virtual ExpressionType getType() const {return ET_INT;}
 
    //
-   // ::ObjectExpression_BranchNot
-   //
-   ObjectExpression_BranchNot(std::istream *in)
-   : Super(in)
-   {
-   }
-
-   //
-   // ::getType
-   //
-   virtual ExpressionType getType() const
-   {
-      return ET_INT;
-   }
-
-   //
-   // ::resolveINT
+   // resolveINT
    //
    virtual bigsint resolveINT() const
    {
@@ -85,18 +67,16 @@ public:
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_BRANCH_NOT);
-
-      Super::writeObject(out);
+      return Super::archive(arc << OT_BRANCH_NOT);
    }
 
 private:
    //
-   // ::writeACSPLong
+   // writeACSPLong
    //
    virtual void writeACSPLong(std::ostream *out) const
    {
@@ -119,11 +99,11 @@ ObjectExpression::Reference ObjectExpression::create_branch_not(OBJEXP_EXPRUNA_A
 }
 
 //
-// ObjectExpression::create_branch_not
+// ObjectExpression::CreateBranchNot
 //
-ObjectExpression::Reference ObjectExpression::create_branch_not(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateBranchNot(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_BranchNot(in));
+   return static_cast<Reference>(new ObjectExpression_BranchNot(arc));
 }
 
 // EOF

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,19 +37,8 @@ class ObjectExpression_BinaryMul : public ObjectExpression_Binary
                                    ObjectExpression_Binary);
 
 public:
-   //
-   // ::ObjectExpression_BinaryMul
-   //
-   ObjectExpression_BinaryMul(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
-   {
-   }
-
-   //
-   // ::ObjectExpression_BinaryMul
-   //
-   ObjectExpression_BinaryMul(std::istream *in) : Super(in)
-   {
-   }
+   ObjectExpression_BinaryMul(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
+   ObjectExpression_BinaryMul(ObjectArchive &arc) : Super(arc) {}
 
    bigreal resolveFLT() const {return exprL->resolveFLT() * exprR->resolveFLT();}
    bigreal resolveFIX() const {return exprL->resolveFIX() * exprR->resolveFIX();}
@@ -58,13 +47,11 @@ public:
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_BINARY_MUL);
-
-      Super::writeObject(out);
+      return Super::archive(arc << OT_BINARY_MUL);
    }
 };
 
@@ -82,11 +69,11 @@ ObjectExpression::Reference ObjectExpression::create_binary_mul(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::create_binary_mul
+// ObjectExpression::CreateBinaryMul
 //
-ObjectExpression::Reference ObjectExpression::create_binary_mul(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateBinaryMul(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryMul(in));
+   return static_cast<Reference>(new ObjectExpression_BinaryMul(arc));
 }
 
 // EOF

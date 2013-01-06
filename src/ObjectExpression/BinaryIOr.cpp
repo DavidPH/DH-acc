@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,32 +37,19 @@ class ObjectExpression_BinaryIOr : public ObjectExpression_Binary
                                    ObjectExpression_Binary);
 
 public:
-   //
-   // ::ObjectExpression_BinaryIOr
-   //
-   ObjectExpression_BinaryIOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
-   {
-   }
-
-   //
-   // ::ObjectExpression_BinaryIOr
-   //
-   ObjectExpression_BinaryIOr(std::istream *in) : Super(in)
-   {
-   }
+   ObjectExpression_BinaryIOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
+   ObjectExpression_BinaryIOr(ObjectArchive &arc) : Super(arc) {}
 
    bigsint resolveINT() const {return exprL->resolveINT() | exprR->resolveINT();}
    biguint resolveUNS() const {return exprL->resolveUNS() | exprR->resolveUNS();}
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_BINARY_IOR);
-
-      Super::writeObject(out);
+      return Super::archive(arc << OT_BINARY_IOR);
    }
 };
 
@@ -80,11 +67,11 @@ ObjectExpression::Reference ObjectExpression::create_binary_ior(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::create_binary_ior
+// ObjectExpression::CreateBinaryIOr
 //
-ObjectExpression::Reference ObjectExpression::create_binary_ior(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateBinaryIOr(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryIOr(in));
+   return static_cast<Reference>(new ObjectExpression_BinaryIOr(arc));
 }
 
 // EOF

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 #include "Binary.hpp"
 
-#include "../object_io.hpp"
+#include "../ObjectArchive.hpp"
 #include "../SourceException.hpp"
 
 
@@ -55,7 +55,7 @@ public:
 
 
    //
-   // ::ObjectExpression_BinaryCmp
+   // ObjectExpression_BinaryCmp
    //
    ObjectExpression_BinaryCmp(OBJEXP_EXPRBIN_PARM, CmpType _ct)
     : Super(OBJEXP_EXPRBIN_PASS), ct(_ct)
@@ -63,11 +63,11 @@ public:
    }
 
    //
-   // ::ObjectExpression_BinaryCmp
+   // ObjectExpression_BinaryCmp
    //
-   ObjectExpression_BinaryCmp(std::istream *in) : Super(in)
+   ObjectExpression_BinaryCmp(ObjectArchive &arc) : Super(arc)
    {
-      read_object(in, &ct);
+      arc << ct;
    }
 
    //
@@ -98,21 +98,15 @@ public:
    }
 
 
-   friend void read_object(std::istream *in, CmpType *out);
-
-   friend void write_object(std::ostream *out, CmpType const *in);
+   friend ObjectArchive &operator << (ObjectArchive &arc, CmpType &data);
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_BINARY_CMP);
-
-      Super::writeObject(out);
-
-      write_object(out, &ct);
+      return Super::archive(arc << OT_BINARY_CMP) << ct;
    }
 
 private:
@@ -174,11 +168,11 @@ private:
 //
 
 //
-// ObjectExpression::create_binary_cmp
+// ObjectExpression::CreateBinaryCmp
 //
-ObjectExpression::Reference ObjectExpression::create_binary_cmp(std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateBinaryCmp(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_BinaryCmp(in));
+   return static_cast<Reference>(new ObjectExpression_BinaryCmp(arc));
 }
 
 //
@@ -236,22 +230,11 @@ ObjectExpression::Reference ObjectExpression::create_binary_cmp_ne(OBJEXP_EXPRBI
 }
 
 //
-// read_object<ObjectExpression_BinaryCmp::CmpType>
+// operator ObjectArchive << ObjectExpression_BinaryCmp::CmpType
 //
-void read_object(std::istream *in, ObjectExpression_BinaryCmp::CmpType *out)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectExpression_BinaryCmp::CmpType &data)
 {
-   *out = static_cast<ObjectExpression_BinaryCmp::CmpType>(read_object_int(in));
-
-   if (*out > ObjectExpression_BinaryCmp::CMP_NE)
-      *out = ObjectExpression_BinaryCmp::CMP_NE;
-}
-
-//
-// write_object<ObjectExpression_BinaryCmp::CmpType>
-//
-void write_object(std::ostream *out, ObjectExpression_BinaryCmp::CmpType const *in)
-{
-   write_object_int(out, static_cast<bigsint>(*in));
+   return arc.archiveEnum(data, ObjectExpression_BinaryCmp::CMP_NE);
 }
 
 // EOF

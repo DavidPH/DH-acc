@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,30 +40,13 @@ class ObjectExpression_BranchXOr : public ObjectExpression_Binary
                                    ObjectExpression_Binary);
 
 public:
-   //
-   // ::ObjectExpression_BranchXOr
-   //
-   ObjectExpression_BranchXOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS)
-   {
-   }
+   ObjectExpression_BranchXOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
+   ObjectExpression_BranchXOr(ObjectArchive &arc) : Super(arc) {}
+
+   virtual ExpressionType getType() const {return ET_INT;}
 
    //
-   // ::ObjectExpression_BranchXOr
-   //
-   ObjectExpression_BranchXOr(std::istream *in) : Super(in)
-   {
-   }
-
-   //
-   // ::getType
-   //
-   virtual ExpressionType getType() const
-   {
-      return ET_INT;
-   }
-
-   //
-   // ::resolveInt
+   // resolveInt
    //
    virtual bigsint resolveInt() const
    {
@@ -84,18 +67,16 @@ public:
 
 protected:
    //
-   // ::writeObject
+   // archive
    //
-   virtual void writeObject(std::ostream *out) const
+   virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      write_object(out, OT_BRANCH_XOR);
-
-      Super::writeObject(out);
+      return Super::archive(arc << OT_BRANCH_XOR);
    }
 
 private:
    //
-   // ::writeACSPLong
+   // writeACSPLong
    //
    virtual void writeACSPLong(std::ostream *out) const
    {
@@ -114,20 +95,17 @@ private:
 //
 // ObjectExpression::create_branch_xor
 //
-ObjectExpression::Reference ObjectExpression::create_branch_xor(
-   OBJEXP_EXPRBIN_ARGS)
+ObjectExpression::Reference ObjectExpression::create_branch_xor(OBJEXP_EXPRBIN_ARGS)
 {
-   return static_cast<Reference>(new ObjectExpression_BranchXOr(
-      exprL, exprR, pos));
+   return static_cast<Reference>(new ObjectExpression_BranchXOr(exprL, exprR, pos));
 }
 
 //
-// ObjectExpression::create_branch_xor
+// ObjectExpression::CreateBranchXOr
 //
-ObjectExpression::Reference ObjectExpression::create_branch_xor(
-   std::istream *in)
+ObjectExpression::Reference ObjectExpression::CreateBranchXOr(ObjectArchive &arc)
 {
-   return static_cast<Reference>(new ObjectExpression_BranchXOr(in));
+   return static_cast<Reference>(new ObjectExpression_BranchXOr(arc));
 }
 
 // EOF

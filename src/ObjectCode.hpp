@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,13 +24,14 @@
 #ifndef HPP_ObjectCode_
 #define HPP_ObjectCode_
 
-#include <ostream>
+#include <string>
 
 
 //----------------------------------------------------------------------------|
 // Types                                                                      |
 //
 
+class ObjectArchive;
 class SourcePosition;
 
 //
@@ -52,7 +53,7 @@ enum ObjectCode
 //
 struct ObjectCodeSet
 {
-   ObjectCodeSet();
+   ObjectCodeSet() : ocode(OCODE_NONE), ocode_imm(OCODE_NONE) {}
 
    ObjectCode ocode;
    ObjectCode ocode_imm;
@@ -75,11 +76,8 @@ bool ocode_is_push_noarg(ObjectCode ocode);
 
 char const *make_string(ObjectCode ocode);
 
-void read_object(std::istream *in, ObjectCode *out);
-void read_object(std::istream *in, ObjectCodeSet *out);
-
-void write_object(std::ostream *out, ObjectCode const *in);
-void write_object(std::ostream *out, ObjectCodeSet const *in);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectCode    &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectCodeSet &data);
 
 #endif//HPP_ObjectCode_
 

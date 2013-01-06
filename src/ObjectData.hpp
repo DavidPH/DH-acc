@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@
 #include "Counter.hpp"
 #include "LinkSpec.hpp"
 
-#include <istream>
-#include <ostream>
 #include <string>
 #include <vector>
 
@@ -38,6 +36,7 @@
 // Types                                                                      |
 //
 
+class ObjectArchive;
 class ObjectExpression;
 class SourceContext;
 class VariableType;
@@ -124,15 +123,13 @@ struct Array
    static void AddGlobal(std::string const &name, LinkageSpecifier linkage,
                          bool externDef, bigsint number = -1);
 
+   static ObjectArchive &Archive(ObjectArchive &arc);
+
    static void GenerateSymbols();
 
    static void IterateMap(IterFunc iterFunc, std::ostream *out);
    static void IterateWorld(IterFunc iterFunc, std::ostream *out);
    static void IterateGlobal(IterFunc iterFunc, std::ostream *out);
-
-   static void ReadObjects(std::istream *in);
-
-   static void WriteObjects(std::ostream *out);
 };
 
 //
@@ -162,6 +159,8 @@ struct ArrayVar
       VariableType const *type, LinkageSpecifier linkage, bool externDef,
       bigsint number = -1);
 
+   static ObjectArchive &Archive(ObjectArchive &arc);
+
    // Gets the name of the associated Array.
    static std::string const &ArrayMap(std::string const &name);
    static std::string const &ArrayWorld(std::string const &name);
@@ -175,10 +174,6 @@ struct ArrayVar
    static void IterateMap(IterFunc iterFunc, std::ostream *out);
    static void IterateWorld(IterFunc iterFunc, std::ostream *out);
    static void IterateGlobal(IterFunc iterFunc, std::ostream *out);
-
-   static void ReadObjects(std::istream *in);
-
-   static void WriteObjects(std::ostream *out);
 };
 
 //
@@ -200,13 +195,11 @@ struct Auto
    static void Add(std::string const &name, VariableType const *type,
       bool externDef, bool externVis, bigsint number);
 
+   static ObjectArchive &Archive(ObjectArchive &arc);
+
    static void GenerateSymbols();
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
-
-   static void ReadObjects(std::istream *in);
-
-   static void WriteObjects(std::ostream *out);
 };
 
 //
@@ -232,13 +225,11 @@ struct Function
    static bool Add(std::string const &name, std::string const &label,
       bigsint argCount, bigsint retCount, bigsint varCount);
 
+   static ObjectArchive &Archive(ObjectArchive &arc);
+
    static void GenerateSymbols();
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
-
-   static void ReadObjects(std::istream *in);
-
-   static void WriteObjects(std::ostream *out);
 };
 
 //
@@ -256,13 +247,11 @@ struct Label
    // Returns the new label's name.
    static std::string const &Add(std::string const &label);
 
+   static ObjectArchive &Archive(ObjectArchive &arc);
+
    static void GenerateSymbols();
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
-
-   static void ReadObjects(std::istream *in);
-
-   static void WriteObjects(std::ostream *out);
 };
 
 //
@@ -290,6 +279,8 @@ struct Register
    static void AddGlobal(std::string const &name, VariableType const *type,
       bool externDef, bool externVis, bigsint number = -1);
 
+   static ObjectArchive &Archive(ObjectArchive &arc);
+
    static void GenerateSymbols();
 
    static bool InitMap(std::string const &name, VariableType const *type,
@@ -299,10 +290,6 @@ struct Register
    static void IterateMap(IterFunc iterFunc, std::ostream *out);
    static void IterateWorld(IterFunc iterFunc, std::ostream *out);
    static void IterateGlobal(IterFunc iterFunc, std::ostream *out);
-
-   static void ReadObjects(std::istream *in);
-
-   static void WriteObjects(std::ostream *out);
 };
 
 //
@@ -333,13 +320,11 @@ struct Script
       ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount,
       bool externVis, bigsint number, std::string const &string);
 
+   static ObjectArchive &Archive(ObjectArchive &arc);
+
    static void GenerateSymbols();
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
-
-   static void ReadObjects(std::istream *in);
-
-   static void WriteObjects(std::ostream *out);
 };
 
 //
@@ -361,15 +346,13 @@ struct Static
    static void Add(std::string const &name, VariableType const *type,
       bool externDef, bool externVis, bigsint number = -1);
 
+   static ObjectArchive &Archive(ObjectArchive &arc);
+
    static void GenerateSymbols();
 
    static void Init(std::string const &name, ObjectExpression *init);
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
-
-   static void ReadObjects(std::istream *in);
-
-   static void WriteObjects(std::ostream *out);
 };
 
 //
@@ -388,15 +371,13 @@ struct String
    static std::string const &Add(std::string const &string);
    static void Add(std::string const &name, std::string const &string);
 
+   static ObjectArchive &Archive(ObjectArchive &arc);
+
    static String const *Find(std::string const &symbol);
 
    static void GenerateSymbols();
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
-
-   static void ReadObjects(std::istream *in);
-
-   static void WriteObjects(std::ostream *out);
 };
 
 }
@@ -424,40 +405,27 @@ void SetInit(Init &init, ObjectExpression *data, VariableType const *type);
 
 }
 
-extern void override_object(ObjectData::Array    *out, ObjectData::Array    const *in);
-extern void override_object(ObjectData::ArrayVar *out, ObjectData::ArrayVar const *in);
-extern void override_object(ObjectData::Auto     *out, ObjectData::Auto     const *in);
-extern void override_object(ObjectData::Function *out, ObjectData::Function const *in);
-extern void override_object(ObjectData::Register *out, ObjectData::Register const *in);
-extern void override_object(ObjectData::Script   *out, ObjectData::Script   const *in);
-extern void override_object(ObjectData::Static   *out, ObjectData::Static   const *in);
-extern void override_object(ObjectData::String   *out, ObjectData::String   const *in);
+void OA_Override(ObjectData::Array    &out, ObjectData::Array    const &in);
+void OA_Override(ObjectData::ArrayVar &out, ObjectData::ArrayVar const &in);
+void OA_Override(ObjectData::Auto     &out, ObjectData::Auto     const &in);
+void OA_Override(ObjectData::Function &out, ObjectData::Function const &in);
+void OA_Override(ObjectData::Register &out, ObjectData::Register const &in);
+void OA_Override(ObjectData::Script   &out, ObjectData::Script   const &in);
+void OA_Override(ObjectData::Static   &out, ObjectData::Static   const &in);
+void OA_Override(ObjectData::String   &out, ObjectData::String   const &in);
 
-extern void read_object(std::istream *in, ObjectData::Array      *out);
-extern void read_object(std::istream *in, ObjectData::ArrayVar   *out);
-extern void read_object(std::istream *in, ObjectData::Auto       *out);
-extern void read_object(std::istream *in, ObjectData::Function   *out);
-extern void read_object(std::istream *in, ObjectData::Init       *out);
-extern void read_object(std::istream *in, ObjectData::InitType   *out);
-extern void read_object(std::istream *in, ObjectData::Label      *out);
-extern void read_object(std::istream *in, ObjectData::Register   *out);
-extern void read_object(std::istream *in, ObjectData::Script     *out);
-extern void read_object(std::istream *in, ObjectData::Static     *out);
-extern void read_object(std::istream *in, ObjectData::String     *out);
-extern void read_object(std::istream *in, ObjectData::ScriptType *out);
-
-extern void write_object(std::ostream *out, ObjectData::Array      const *in);
-extern void write_object(std::ostream *out, ObjectData::ArrayVar   const *in);
-extern void write_object(std::ostream *out, ObjectData::Auto       const *in);
-extern void write_object(std::ostream *out, ObjectData::Function   const *in);
-extern void write_object(std::ostream *out, ObjectData::Init       const *in);
-extern void write_object(std::ostream *out, ObjectData::InitType   const *in);
-extern void write_object(std::ostream *out, ObjectData::Label      const *in);
-extern void write_object(std::ostream *out, ObjectData::Register   const *in);
-extern void write_object(std::ostream *out, ObjectData::Script     const *in);
-extern void write_object(std::ostream *out, ObjectData::Static     const *in);
-extern void write_object(std::ostream *out, ObjectData::String     const *in);
-extern void write_object(std::ostream *out, ObjectData::ScriptType const *in);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Array      &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::ArrayVar   &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Auto       &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Function   &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Init       &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::InitType   &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Label      &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Register   &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Script     &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Static     &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::String     &data);
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::ScriptType &data);
 
 #endif//HPP_ObjectData_
 

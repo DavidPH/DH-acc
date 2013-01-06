@@ -23,8 +23,8 @@
 
 #include "ObjectVector.hpp"
 
+#include "ObjectArchive.hpp"
 #include "ObjectExpression.hpp"
-#include "object_io.hpp"
 #include "ObjectToken.hpp"
 #include "option.hpp"
 
@@ -425,38 +425,33 @@ void ObjectVector::remToken(ObjectToken *token)
 }
 
 //
-// read_object<ObjectVector>
+// operator ObjectArchive << ObjectVector
 //
-void read_object(std::istream *in, ObjectVector *out)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectVector &data)
 {
-   ObjectToken *token;
+   arc << data.head.labels << data.head.pos;
 
-   read_object(in, &out->head.labels);
-   read_object(in, &out->head.pos);
-
-   while (read_object_bit(in))
+   if(arc.isSaving())
    {
-      read_object(in, token = new ObjectToken);
-      out->addToken(token);
+      for(auto &token : data)
+      {
+         arc.writeBool(true);
+         arc << token;
+      }
+      arc.writeBool(false);
    }
-}
-
-//
-// write_object<ObjectVector>
-//
-void write_object(std::ostream *out, ObjectVector const *in)
-{
-   ObjectVector::const_iterator token;
-
-   write_object(out, &in->head.labels);
-   write_object(out, &in->head.pos);
-
-   for (token = in->begin(); token != in->end(); ++token)
+   else
    {
-      write_object_bit(out, true);
-      write_object(out, token);
+      ObjectToken *token;
+
+      while(arc.readBool())
+      {
+         arc << *(token = new ObjectToken);
+         data.addToken(token);
+      }
    }
-   write_object_bit(out, false);
+
+   return arc;
 }
 
 // EOF

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 
 #include "ObjectToken.hpp"
 
+#include "ObjectArchive.hpp"
 #include "ObjectExpression.hpp"
-#include "object_io.hpp"
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 
@@ -87,33 +87,11 @@ void ObjectToken::swapData(ObjectToken *token)
 }
 
 //
-// override_object<ObjectToken>
+// operator ObjectArchive << ObjectToken
 //
-bool override_object(ObjectToken *, ObjectToken const &)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectToken &data)
 {
-   return false;
-}
-
-//
-// read_object<ObjectToken>
-//
-void read_object(std::istream *in, ObjectToken *out)
-{
-   read_object(in, &out->args);
-   read_object(in, &out->labels);
-   read_object(in, &out->pos);
-   read_object(in, &out->code);
-}
-
-//
-// write_object<ObjectToken>
-//
-void write_object(std::ostream *out, ObjectToken const *in)
-{
-   write_object(out, &in->args);
-   write_object(out, &in->labels);
-   write_object(out, &in->pos);
-   write_object(out, &in->code);
+   return arc << data.args << data.labels << data.pos << data.code;
 }
 
 // EOF

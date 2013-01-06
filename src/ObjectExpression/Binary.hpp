@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -45,9 +45,9 @@ public:
 
 protected:
    ObjectExpression_Binary(OBJEXP_EXPRBIN_ARGS);
-   ObjectExpression_Binary(std::istream *in);
+   ObjectExpression_Binary(ObjectArchive &arc);
 
-   virtual void writeObject(std::ostream *out) const;
+   virtual ObjectArchive &archive(ObjectArchive &arc);
 
    ObjectExpression::Reference exprL, exprR;
 };

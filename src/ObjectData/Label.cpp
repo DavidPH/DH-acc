@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 
 #include "../ObjectData.hpp"
 
+#include "../ObjectArchive.hpp"
 #include "../ObjectExpression.hpp"
-#include "../object_io.hpp"
 
 #include <sstream>
 
@@ -71,6 +71,14 @@ std::string const &Label::Add(std::string const &label)
 }
 
 //
+// ObjectData::Label::Archive
+//
+ObjectArchive &Label::Archive(ObjectArchive &arc)
+{
+   return arc << Table;
+}
+
+//
 // ObjectData::Label::GenerateSymbols
 //
 void Label::GenerateSymbols()
@@ -94,40 +102,14 @@ void Label::Iterate(IterFunc iterFunc, std::ostream *out)
       iterFunc(out, itr);
 }
 
-//
-// ObjectData::Label::ReadObjects
-//
-void Label::ReadObjects(std::istream *in)
-{
-   read_object(in, &Table);
 }
 
 //
-// ObjectData::Label::WriteObjects
+// operator ObjectArchive << ObjectData::Label
 //
-void Label::WriteObjects(std::ostream *out)
+ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Label &data)
 {
-   write_object(out, &Table);
-}
-
-}
-
-//
-// read_object<ObjectData::Label>
-//
-void read_object(std::istream *in, ObjectData::Label *out)
-{
-   read_object(in, &out->label);
-   read_object(in, &out->name);
-}
-
-//
-// write_object<ObjectData::Label>
-//
-void write_object(std::ostream *out, ObjectData::Label const *in)
-{
-   write_object(out, &in->label);
-   write_object(out, &in->name);
+   return arc << data.label << data.name;
 }
 
 // EOF
