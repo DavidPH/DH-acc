@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "option.hpp"
 #include "SourcePosition.hpp"
 
+#include <csignal>
 #include <cstdarg>
 #include <cstdio>
 
@@ -41,6 +42,9 @@
 //----------------------------------------------------------------------------|
 // Static Variables                                                           |
 //
+
+static option::option_data<bool> option_signal('\0', "debug-error-signal", "debugging",
+   "If enabled, errors will raise a fatal signal.", NULL, false);
 
 static option::option_data<bool> option_debug_error_pos
 ('\0', "debug-error-pos", "debugging",
@@ -63,6 +67,29 @@ void SourceException::error(char const *file, int line, char const *func,
    char *whatstr;
    size_t whatlen, whatprt;
    va_list whatarg;
+
+   // We can be asked to segfault the compiler in order to help track down
+   // internal problems with a debugger.
+   if(option_signal.data)
+   {
+      if(!option_debug_error_pos.data)
+         std::fprintf(stderr, POSSTR ": ", POS);
+      else if(name)
+         std::fprintf(stderr, POSSTR " (%s:%i %s::%s): ", POS, file, line, name, func);
+      else
+         std::fprintf(stderr, POSSTR " (%s:%i %s): ", POS, file, line, func);
+
+      va_start(whatarg, fmt);
+
+      std::vfprintf(stderr, fmt, whatarg);
+
+      va_end(whatarg);
+
+      std::fputc('\n', stderr);
+      std::fflush(stderr);
+
+      std::raise(SIGSEGV);
+   }
 
    if(!option_debug_error_pos.data)
       whatlen = std::snprintf(NULL, 0, POSSTR ": ", POS);
