@@ -55,6 +55,17 @@ public:
    }
 
    //
+   // isSafe
+   //
+   // Modulus by zero can cause environmental effects.
+   //
+   virtual bool isSafe() const
+   {
+      // TODO: Check for known nonzero exprR.
+      return false;
+   }
+
+   //
    // ::makeObject
    //
    virtual ObjectExpression::Pointer makeObject() const

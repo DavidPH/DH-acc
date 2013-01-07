@@ -21,7 +21,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "BinaryCompare.hpp"
+#include "Binary.hpp"
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
@@ -37,15 +37,93 @@
 //
 // SourceExpression_BranchIOr
 //
-class SourceExpression_BranchIOr : public SourceExpression_BinaryCompare
+class SourceExpression_BranchIOr : public SourceExpression_Binary
 {
-   CounterPreambleNoClone(SourceExpression_BranchIOr, SourceExpression_BinaryCompare);
+   CounterPreambleNoClone(SourceExpression_BranchIOr, SourceExpression_Binary);
 
 public:
-   SourceExpression_BranchIOr(SRCEXP_EXPRBIN_ARGS);
+   SourceExpression_BranchIOr(SRCEXP_EXPRBIN_PARM) : Super(SRCEXP_EXPRBIN_PASS,
+      VariableType::get_bt_bit_sft(), VariableType::get_bt_bit_sft(), false) {}
+
+   VariableType::Reference getType() const {return VariableType::get_bt_bit_hrd();}
+
+   //
+   // makeObject
+   //
+   virtual ObjectExpression::Pointer makeObject() const
+   {
+      return ObjectExpression::create_branch_ior(exprL->makeObject(), exprR->makeObject(), pos);
+   }
 
 private:
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   //
+   // virtual_makeObjects
+   //
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+   {
+      Super::recurse_makeObjects(objects, dst);
+
+      auto    srcType = VariableType::get_bt_bit_hrd();
+      bigsint srcSize = srcType->getSize(pos);
+
+      auto src = VariableData::create_stack(srcSize);
+      auto tmp = VariableData::create_stack(srcSize);
+
+      std::string label    = context->makeLabel();
+      std::string label1   = label + "_1";
+      std::string labelEnd = label + "_end";
+
+      // If the right expression is safe, then we don't need to short-circuit
+      // around its evaluation.
+      if(exprR->isSafe())
+      {
+         if(dst->type == VariableData::MT_VOID)
+         {
+            exprL->makeObjects(objects);
+            exprR->makeObjects(objects); // Technically unnecessary.
+         }
+         else
+         {
+            exprL->makeObjects(objects, tmp);
+            exprR->makeObjects(objects, tmp);
+            objects->setPosition(pos);
+            objects->addToken(OCODE_LOGIOR_STK_I);
+         }
+      }
+      else if(dst->type == VariableData::MT_VOID)
+      {
+         exprL->makeObjects(objects, tmp);
+         objects->setPosition(pos);
+         objects->addToken(OCODE_JMP_TRU, objects->getValue(labelEnd));
+
+         exprR->makeObjects(objects, dst);
+         objects->setPosition(pos);
+
+         objects->addLabel(labelEnd);
+      }
+      else
+      {
+         make_objects_memcpy_prep(objects, dst, src, pos);
+
+         exprL->makeObjects(objects, tmp);
+         objects->setPosition(pos);
+         objects->addToken(OCODE_JMP_TRU, objects->getValue(label1));
+
+         exprR->makeObjects(objects, tmp);
+         objects->setPosition(pos);
+         objects->addToken(OCODE_JMP_TRU, objects->getValue(label1));
+
+         objects->addToken(OCODE_GET_IMM, objects->getValue(0));
+         objects->addToken(OCODE_JMP_IMM, objects->getValue(labelEnd));
+
+         objects->addLabel(label1);
+         objects->addToken(OCODE_GET_IMM, objects->getValue(1));
+
+         objects->addLabel(labelEnd);
+
+         make_objects_memcpy_post(objects, dst, src, srcType, context, pos);
+      }
+   }
 };
 
 
@@ -68,67 +146,6 @@ SRCEXP_EXPRBRA_DEFN(b, ior_eq)
 {
    return create_binary_assign
       (exprL, create_branch_ior(exprL, exprR, context, pos), context, pos);
-}
-
-//
-// SourceExpression_BranchIOr::SourceExpression_BranchIOr
-//
-SourceExpression_BranchIOr::SourceExpression_BranchIOr(SRCEXP_EXPRBIN_PARM)
- : Super(SRCEXP_EXPRBIN_PASS)
-{
-}
-
-//
-// SourceExpression_BranchIOr::virtual_makeObjects
-//
-void SourceExpression_BranchIOr::
-virtual_makeObjects(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   VariableType::Reference srcType = VariableType::get_bt_bit_hrd();
-   bigsint                 srcSize = srcType->getSize(pos);
-
-   VariableData::Pointer src = VariableData::create_stack(srcSize);
-   VariableData::Pointer tmp = VariableData::create_stack(srcSize);
-
-   std::string label = context->makeLabel();
-   std::string label1   = label + "_1";
-   std::string labelEnd = label + "_end";
-
-   if (dst->type == VariableData::MT_VOID)
-   {
-      exprL->makeObjects(objects, tmp);
-      objects->setPosition(pos);
-      objects->addToken(OCODE_JMP_TRU, objects->getValue(labelEnd));
-
-      exprR->makeObjects(objects, dst);
-      objects->setPosition(pos);
-
-      objects->addLabel(labelEnd);
-   }
-   else
-   {
-      make_objects_memcpy_prep(objects, dst, src, pos);
-
-      exprL->makeObjects(objects, tmp);
-      objects->setPosition(pos);
-      objects->addToken(OCODE_JMP_TRU, objects->getValue(label1));
-
-      exprR->makeObjects(objects, tmp);
-      objects->setPosition(pos);
-      objects->addToken(OCODE_JMP_TRU, objects->getValue(label1));
-
-      objects->addToken(OCODE_GET_IMM, objects->getValue(0));
-      objects->addToken(OCODE_JMP_IMM, objects->getValue(labelEnd));
-
-      objects->addLabel(label1);
-      objects->addToken(OCODE_GET_IMM, objects->getValue(1));
-
-      objects->addLabel(labelEnd);
-
-      make_objects_memcpy_post(objects, dst, src, srcType, context, pos);
-   }
 }
 
 // EOF

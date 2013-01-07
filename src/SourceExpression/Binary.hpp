@@ -284,6 +284,14 @@ protected:
                       VariableType *type, int tmpBase);
 
    //
+   // isSafe
+   //
+   virtual bool isSafe() const
+   {
+      return !isSideEffect() && exprL->isSafe() && exprR->isSafe();
+   }
+
+   //
    // isSideEffect
    //
    virtual bool isSideEffect() const

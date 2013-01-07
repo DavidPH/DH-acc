@@ -21,7 +21,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "BinaryCompare.hpp"
+#include "Binary.hpp"
 
 #include "../ObjectExpression.hpp"
 #include "../ObjectVector.hpp"
@@ -37,15 +37,55 @@
 //
 // SourceExpression_BranchXOr
 //
-class SourceExpression_BranchXOr : public SourceExpression_BinaryCompare
+class SourceExpression_BranchXOr : public SourceExpression_Binary
 {
-   CounterPreambleNoClone(SourceExpression_BranchXOr, SourceExpression_BinaryCompare);
+   CounterPreambleNoClone(SourceExpression_BranchXOr, SourceExpression_Binary);
 
 public:
-   SourceExpression_BranchXOr(SRCEXP_EXPRBIN_ARGS);
+   SourceExpression_BranchXOr(SRCEXP_EXPRBIN_PARM) : Super(SRCEXP_EXPRBIN_PASS,
+      VariableType::get_bt_bit_hrd(), VariableType::get_bt_bit_hrd(), false) {}
+
+   VariableType::Reference getType() const {return VariableType::get_bt_bit_hrd();}
+
+   //
+   // makeObject
+   //
+   virtual ObjectExpression::Pointer makeObject() const
+   {
+      return ObjectExpression::create_branch_xor(exprL->makeObject(), exprR->makeObject(), pos);
+   }
 
 private:
-   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst);
+   //
+   // virtual_makeObjects
+   //
+   virtual void virtual_makeObjects(ObjectVector *objects, VariableData *dst)
+   {
+      Super::recurse_makeObjects(objects, dst);
+
+      auto    srcType = VariableType::get_bt_bit_hrd();
+      bigsint srcSize = srcType->getSize(pos);
+
+      auto src = VariableData::create_stack(srcSize);
+      auto tmp = VariableData::create_stack(srcSize);
+
+      if(dst->type == VariableData::MT_VOID)
+      {
+         exprL->makeObjects(objects, dst);
+         exprR->makeObjects(objects, dst);
+      }
+      else
+      {
+         make_objects_memcpy_prep(objects, dst, src, pos);
+
+         exprL->makeObjects(objects, tmp);
+         exprR->makeObjects(objects, tmp);
+         objects->setPosition(pos);
+         objects->addToken(OCODE_XOR_STK_I);
+
+         make_objects_memcpy_post(objects, dst, src, srcType, context, pos);
+      }
+   }
 };
 
 
@@ -68,68 +108,6 @@ SRCEXP_EXPRBRA_DEFN(b, xor_eq)
 {
    return create_binary_assign
       (exprL, create_branch_xor(exprL, exprR, context, pos), context, pos);
-}
-
-//
-// SourceExpression_BranchXOr::SourceExpression_BranchXOr
-//
-SourceExpression_BranchXOr::SourceExpression_BranchXOr(SRCEXP_EXPRBIN_PARM)
- : Super(SRCEXP_EXPRBIN_PASS)
-{
-}
-
-//
-// SourceExpression_BranchXOr::virtual_makeObjects
-//
-void SourceExpression_BranchXOr::
-virtual_makeObjects(ObjectVector *objects, VariableData *dst)
-{
-   Super::recurse_makeObjects(objects, dst);
-
-   VariableType::Reference srcType = VariableType::get_bt_bit_hrd();
-   bigsint                 srcSize = srcType->getSize(pos);
-
-   VariableData::Pointer src = VariableData::create_stack(srcSize);
-   VariableData::Pointer tmp = VariableData::create_stack(srcSize);
-
-   if (dst->type == VariableData::MT_VOID)
-   {
-      exprL->makeObjects(objects, dst);
-      exprR->makeObjects(objects, dst);
-   }
-   else
-   {
-      std::string label = context->makeLabel();
-      std::string labelL0  = label + "_L0";
-      std::string label0   = label + "_0";
-      std::string label1   = label + "_1";
-      std::string labelEnd = label + "_end";
-
-      make_objects_memcpy_prep(objects, dst, src, pos);
-
-      exprL->makeObjects(objects, tmp);
-      exprR->makeObjects(objects, tmp);
-
-      objects->setPosition(pos);
-      objects->addToken(OCODE_JMP_NIL, objects->getValue(labelL0));
-
-      objects->addToken(OCODE_JMP_NIL, objects->getValue(label1));
-      objects->addToken(OCODE_JMP_IMM, objects->getValue(label0));
-
-      objects->addLabel(labelL0);
-      objects->addToken(OCODE_JMP_NIL, objects->getValue(label0));
-
-      objects->addLabel(label1);
-      objects->addToken(OCODE_GET_IMM, objects->getValue(1));
-      objects->addToken(OCODE_JMP_IMM, objects->getValue(labelEnd));
-
-      objects->addLabel(label0);
-      objects->addToken(OCODE_GET_IMM, objects->getValue(0));
-
-      objects->addLabel(labelEnd);
-
-      make_objects_memcpy_post(objects, dst, src, srcType, context, pos);
-   }
 }
 
 // EOF
