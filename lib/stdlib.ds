@@ -69,15 +69,15 @@ struct heapdata
 // Static Variables                                                           |
 //
 
-__intvar __staticarray __func_t()[EXITSIZE] exitarr;
-__intvar __staticregister decltype(*exitarr) *exitptr = exitarr;
+__intvar __static_array __func_t()[EXITSIZE] exitarr;
+__intvar __static_register decltype(*exitarr) *exitptr = exitarr;
 
 
 __intvar static char[HEAPSIZE] heap;
-__intvar __staticregister heapdata static *heapptr = HEAPBEGIN;
+__intvar __static_register heapdata static *heapptr = HEAPBEGIN;
 
 
-__intvar __staticregister unsigned randval = 1;
+__intvar __static_register unsigned randval = 1;
 
 
 //----------------------------------------------------------------------------|
@@ -136,8 +136,9 @@ __extfunc "C" double strtod(char const *restrict nptr, char **restrict endptr)
 //
 __extfunc "C" float strtof(char const *restrict nptr, char **restrict endptr)
 {
+   float f;
    if(endptr) *endptr = NULL;
-   //return 0;
+   return f;
 };
 
 //

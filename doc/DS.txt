@@ -724,11 +724,12 @@ Storage Classes
     store-type ( expression )
 
   store-type: one of
-    <static> <__staticregister> <__staticarray>
-    <auto> <__autoregister> <__autoarray>
-    <register> <__mapregister> <__worldregister> <__globalregister>
-    <__maparray> <__worldarray> <__globalarray>
-    <__far> <__stringarray>
+    <static> <__static_register> <__static_array>
+    <auto> <__auto_register> <__auto_array>
+    <register> <__local_register>
+    <__map_register> <__world_register> <__global_register>
+    <__map_array> <__world_array> <__global_array>
+    <__far> <__string_array>
 
 ===========================================================
 Block Specifier

@@ -878,9 +878,9 @@ Script Attribute
 Function Attributes
 ===========================================================
 
-  function-attributes-lists:
+  function-attributes-list:
     function-attributes
-    function-attributes-lists function-attributes
+    function-attributes-list function-attributes
 
   function-attributes:
     <__attribute__> ( ( function-attribute-list(opt) ) )
@@ -951,9 +951,15 @@ Address_Space Declaration
       identifier address_space-expression(opt) ;
 
   address_space-specifier:
-    <__maparray>
-    <__worldarray>
-    <__globalarray>
+    <map_array>
+    <__map_array>
+    <__map_array__>
+    <world_array>
+    <__world_array>
+    <__world_array__>
+    <global_array>
+    <__global_array>
+    <__global_array__>
 
   address_space-expression:
     = constant-expression

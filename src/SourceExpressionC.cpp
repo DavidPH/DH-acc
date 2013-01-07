@@ -783,16 +783,16 @@ SourceExpressionC::Qualifier SourceExpressionC::ParseQualifier(SRCEXPC_PARSE_ARG
    if(in->dropType(SourceTokenC::TT_NAM, "__local"))
       return STORE_AUTO;
 
-   if(in->dropType(SourceTokenC::TT_NAM, "__localregister"))
+   if(in->dropType(SourceTokenC::TT_NAM, "__local_register"))
       return STORE_REGISTER;
 
-   if(in->dropType(SourceTokenC::TT_NAM, "__mapregister"))
+   if(in->dropType(SourceTokenC::TT_NAM, "__map_register"))
       return STORE_MAPREGISTER;
 
-   if(in->dropType(SourceTokenC::TT_NAM, "__worldregister"))
+   if(in->dropType(SourceTokenC::TT_NAM, "__world_register"))
       return STORE_WORLDREGISTER;
 
-   if(in->dropType(SourceTokenC::TT_NAM, "__globalregister"))
+   if(in->dropType(SourceTokenC::TT_NAM, "__global_register"))
       return STORE_GLOBALREGISTER;
 
    if(in->peekType(SourceTokenC::TT_NAM) && context->isAddressSpace(in->peek()->data))

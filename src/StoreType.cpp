@@ -38,13 +38,13 @@ static std::string const store_name[] =
    "auto",
    "literal",
    "register",
-   "mapregister",
-   "worldregister",
-   "globalregister",
-   "maparray",
-   "worldarray",
-   "globalarray",
-   "stringarray",
+   "map_register",
+   "world_register",
+   "global_register",
+   "map_array",
+   "world_array",
+   "global_array",
+   "string_array",
 };
 
 

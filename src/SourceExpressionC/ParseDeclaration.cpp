@@ -184,14 +184,16 @@ SRCEXPC_PARSE_DEFN_HALF(AddressSpace)
    LinkageSpecifier linkage = storage == SC_STATIC ? LINKAGE_INTERN : LINKAGE_C;
 
    // address_space-specifier
-   if(in->dropType(SourceTokenC::TT_NAM, "__maparray"))
+   auto spaceTok = in->get(SourceTokenC::TT_NAM);
+   std::string const &space = spaceTok->data;
+   if(space == "map_array" || space == "__map_array" || space == "__map_array__")
       addr.store = STORE_MAPARRAY;
-   else if(in->dropType(SourceTokenC::TT_NAM, "__worldarray"))
+   else if(space == "world_array" || space == "__world_array" || space == "__world_array__")
       addr.store = STORE_WORLDARRAY;
-   else if(in->dropType(SourceTokenC::TT_NAM, "__globalarray"))
+   else if(space == "global_array" || space == "__global_array" || space == "__global_array__")
       addr.store = STORE_GLOBALARRAY;
    else
-      Error(in->peek()->pos, "expected address-space-specifier");
+      Error(spaceTok->pos, "expected address-space-specifier");
 
    // identifier
    std::string nameSrc = in->get(SourceTokenC::TT_NAM)->data;
