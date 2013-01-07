@@ -345,7 +345,7 @@ SourceExpression::Pointer SourceExpressionASM::MakeStatement(
          in->get(SourceTokenASM::TT_COMMA);
          bigsint varCount = Make_Expression(in, context)->makeObject()->resolveINT();
 
-         ObjectData::Function::Add(name, label, argCount, retCount, varCount);
+         ObjectData::Function::Add(name, label, argCount, retCount, varCount, LINKAGE_C);
       }
       else if(tok->data == "SCRIPT")
       {
@@ -368,8 +368,8 @@ SourceExpression::Pointer SourceExpressionASM::MakeStatement(
          in->get(SourceTokenASM::TT_COMMA);
          std::string string = in->get(SourceTokenASM::TT_STR)->data;
 
-         ObjectData::Script::Add(name, label, (ObjectData::ScriptType)stype,
-                                 flags, argCount, varCount, true, number, string);
+         ObjectData::Script::Add(name, label, argCount, retCount, varCount, LINKAGE_C,
+            number, string, static_cast<ObjectData::ScriptType>(stype), flags);
       }
       else if(tok->data == "STRING")
       {

@@ -179,7 +179,7 @@ static SourceExpression::Pointer make_func
 
    // funcAdded
    ObjectData::Function::Add(funcNameObj, funcLabel, args.count,
-                             args.retn->getSize(tok->pos), args.context);
+      args.retn->getSize(tok->pos), args.context, linkSpec);
 
    SourceFunction::Reference func = SourceFunction::FindFunction(funcVar, args.args);
 

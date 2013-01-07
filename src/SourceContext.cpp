@@ -277,7 +277,7 @@ void SourceContext::addLimit(int limit, StoreType store)
 //
 void SourceContext::addVar(SourceVariable *var, LinkageSpecifier linkSpec, bool externDef)
 {
-   #define PARM nameObj, type, externDef, linkSpec != LINKAGE_INTERN
+   #define PARM nameObj, type, linkSpec, externDef
 
    std::string const &nameObj = var->getNameObject();
    SourcePosition const &pos = var->getPosition();
@@ -343,7 +343,7 @@ void SourceContext::addVar(SourceVariable *var, LinkageSpecifier linkSpec, bool 
 void SourceContext::addVar(SourceVariable *var, LinkageSpecifier linkSpec,
                            bool externDef, bigsint address)
 {
-   #define PARM nameObj, type, externDef, linkSpec != LINKAGE_INTERN, address
+   #define PARM nameObj, type, linkSpec, externDef, address
 
    std::string const &nameObj = var->getNameObject();
    SourcePosition const &pos = var->getPosition();

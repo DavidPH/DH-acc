@@ -54,11 +54,12 @@ namespace ObjectData
 // ObjectData::Function::Add
 //
 bool Function::Add(std::string const &name, std::string const &label,
-   bigsint argCount, bigsint retCount, SourceContext *context)
+   bigsint argCount, bigsint retCount, SourceContext *context,
+   LinkageSpecifier linkage)
 {
    Function &data = Table[name];
 
-   if (data.name != name)
+   if(data.name != name)
    {
       data.label     = label;
       data.name      = name;
@@ -67,13 +68,14 @@ bool Function::Add(std::string const &name, std::string const &label,
       data.retCount  = retCount;
       data.varCount  = -1;
       data.context   = context;
+      data.linkage   = linkage;
       data.externDef = !context;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
 
       return true;
    }
-   else if (data.externDef && context)
+   else if(data.externDef && context)
    {
       data.externDef = false;
    }
@@ -85,7 +87,8 @@ bool Function::Add(std::string const &name, std::string const &label,
 // ObjectData::Function::Add
 //
 bool Function::Add(std::string const &name, std::string const &label,
-   bigsint argCount, bigsint retCount, bigsint varCount)
+   bigsint argCount, bigsint retCount, bigsint varCount,
+   LinkageSpecifier linkage)
 {
    Function &data = Table[name];
 
@@ -98,6 +101,7 @@ bool Function::Add(std::string const &name, std::string const &label,
       data.retCount  = retCount;
       data.varCount  = varCount;
       data.context   = NULL;
+      data.linkage   = linkage;
       data.externDef = varCount == -1;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);

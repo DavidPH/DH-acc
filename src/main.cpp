@@ -185,7 +185,7 @@ static void dump_register_debug(std::ostream *out, ObjectData::Register const &r
 //
 static void dump_script(std::ostream *out, ObjectData::Script const &s)
 {
-   if (!s.externDef && s.externVis)
+   if (!s.externDef && s.linkage == LINKAGE_ACS)
       *out << s.name << ' ' << s.number << '\n';
 }
 
@@ -269,10 +269,8 @@ static void read_source(std::string const &name, SourceType type,
          std::string mainName = SourceContext::global_context->makeLabel() + "main";
          std::string mainLabel = mainName + "::$label";
 
-         ObjectData::ScriptType mainType = ObjectData::ST_OPEN;
-
-         ObjectData::Script::Add(mainName, mainLabel, mainType, 0, 0,
-            SourceContext::global_context, false, mainNumber, mainName);
+         ObjectData::Script::Add(mainName, mainLabel, 0, 0, SourceContext::global_context,
+            LINKAGE_INTERN, mainNumber, mainName, ObjectData::ST_OPEN);
 
          objects->addLabel(mainLabel);
       }

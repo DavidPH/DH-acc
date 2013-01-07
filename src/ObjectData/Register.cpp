@@ -83,24 +83,27 @@ namespace ObjectData
 // Add
 //
 static void Add(RegisterTable &table, std::string const &name,
-   VariableType const *type, bool externDef, bool externVis, bigsint number)
+   VariableType const *type, LinkageSpecifier linkage, bool externDef,
+   bigsint number)
 {
    Register &data = table[name];
 
-   if (data.name != name)
+   if(data.name != name)
    {
       SetInit(data.init, NULL, type);
 
       data.name      = name;
       data.number    = number;
       data.size      = type->getSize(SourcePosition::none());
+      data.linkage   = linkage;
       data.externDef = externDef;
-      data.externVis = externVis;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
    }
-   else if (data.externDef && externDef)
+   else if(data.externDef && !externDef)
    {
+      data.number    = number;
+      data.size      = type->getSize(SourcePosition::none());
       data.externDef = false;
    }
 }
@@ -126,7 +129,7 @@ static void GenerateSymbols(RegisterTable &table)
 }
 
 //
-// iterate
+// Iterate
 //
 static void Iterate(RegisterTable &table, Register::IterFunc iterFunc, std::ostream *out)
 {
@@ -190,36 +193,36 @@ namespace ObjectData
 // ObjectData::Register::Add
 //
 void Register::Add(std::string const &name, VariableType const *type,
-   bool externDef, bool externVis, bigsint number)
+   LinkageSpecifier linkage, bool externDef, bigsint number)
 {
-   ObjectData::Add(Table, name, type, externDef, externVis, number);
+   ObjectData::Add(Table, name, type, linkage, externDef, number);
 }
 
 //
 // ObjectData::Register::AddMap
 //
 void Register::AddMap(std::string const &name, VariableType const *type,
-   bool externDef, bool externVis, bigsint number)
+   LinkageSpecifier linkage, bool externDef, bigsint number)
 {
-   ObjectData::Add(MapTable, name, type, externDef, externVis, number);
+   ObjectData::Add(MapTable, name, type, linkage, externDef, number);
 }
 
 //
 // ObjectData::Register::AddWorld
 //
 void Register::AddWorld(std::string const &name, VariableType const *type,
-   bool externDef, bool externVis, bigsint number)
+   LinkageSpecifier linkage, bool externDef, bigsint number)
 {
-   ObjectData::Add(WorldTable, name, type, externDef, externVis, number);
+   ObjectData::Add(WorldTable, name, type, linkage, externDef, number);
 }
 
 //
 // ObjectData::Register::AddGlobal
 //
 void Register::AddGlobal(std::string const &name, VariableType const *type,
-   bool externDef, bool externVis, bigsint number)
+   LinkageSpecifier linkage, bool externDef, bigsint number)
 {
-   ObjectData::Add(GlobalTable, name, type, externDef, externVis, number);
+   ObjectData::Add(GlobalTable, name, type, linkage, externDef, number);
 }
 
 //
@@ -308,7 +311,7 @@ void OA_Override(ObjectData::Register &out, ObjectData::Register const &in)
 ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Register &data)
 {
    return arc << data.init << data.name << data.number << data.size
-              << data.externDef << data.externVis;
+              << data.linkage << data.externDef;
 }
 
 // EOF

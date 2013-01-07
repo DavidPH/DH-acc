@@ -339,7 +339,7 @@ void BinaryTokenZDACS::write_ACSE_register_MIMP(std::ostream *out,
 void BinaryTokenZDACS::write_ACSE_register_MEXP(std::ostream *,
    ObjectData::Register const &r)
 {
-   if (r.externDef || !r.externVis) return;
+   if(r.externDef || r.linkage == LINKAGE_INTERN) return;
 
    if (r.size > 1)
    {

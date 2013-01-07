@@ -54,22 +54,24 @@ namespace ObjectData
 // ObjectData::Auto::Add
 //
 void Auto::Add(std::string const &name, VariableType const *type,
-   bool externDef, bool externVis, bigsint number)
+   LinkageSpecifier linkage, bool externDef, bigsint number)
 {
    Auto &data = Table[name];
 
-   if (data.name != name)
+   if(data.name != name)
    {
       data.name      = name;
       data.number    = number;
       data.size      = type->getSize(SourcePosition::none());
+      data.linkage   = linkage;
       data.externDef = externDef;
-      data.externVis = externVis;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
    }
-   else if (data.externDef && externDef)
+   else if(data.externDef && !externDef)
    {
+      data.number    = number;
+      data.size      = type->getSize(SourcePosition::none());
       data.externDef = false;
    }
 }
@@ -126,8 +128,7 @@ void OA_Override(ObjectData::Auto &out, ObjectData::Auto const &in)
 //
 ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Auto &data)
 {
-   return arc << data.name << data.number << data.size << data.externDef
-              << data.externVis;
+   return arc << data.name << data.number << data.size << data.linkage << data.externDef;
 }
 
 // EOF

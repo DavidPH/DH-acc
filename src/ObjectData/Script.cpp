@@ -104,12 +104,13 @@ namespace ObjectData
 // ObjectData::Script::Add
 //
 bool Script::Add(std::string const &name, std::string const &label,
-   ScriptType stype, bigsint flags, bigsint argCount, SourceContext *context,
-   bool externVis, bigsint number, std::string const &string)
+   bigsint argCount, bigsint retCount, SourceContext *context,
+   LinkageSpecifier linkage, bigsint number, std::string const &string,
+   ScriptType stype, biguint flags)
 {
    Script &data = Table[name];
 
-   if (data.name != name)
+   if(data.name != name)
    {
       data.label     = label;
       data.name      = name;
@@ -118,16 +119,17 @@ bool Script::Add(std::string const &name, std::string const &label,
       data.argCount  = argCount;
       data.flags     = flags;
       data.number    = number;
+      data.retCount  = retCount;
       data.varCount  = -1;
       data.context   = context;
+      data.linkage   = linkage;
       data.externDef = !context;
-      data.externVis = externVis;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
 
       return true;
    }
-   else if (data.externDef && context)
+   else if(data.externDef && context)
    {
       data.string    = string;
       data.number    = number;
@@ -141,8 +143,9 @@ bool Script::Add(std::string const &name, std::string const &label,
 // ObjectData::Script::Add
 //
 bool Script::Add(std::string const &name, std::string const &label,
-   ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount,
-   bool externVis, bigsint number, std::string const &string)
+   bigsint argCount, bigsint retCount, bigsint varCount,
+   LinkageSpecifier linkage, bigsint number, std::string const &string,
+   ScriptType stype, biguint flags)
 {
    Script &data = Table[name];
 
@@ -155,10 +158,11 @@ bool Script::Add(std::string const &name, std::string const &label,
       data.argCount  = argCount;
       data.flags     = flags;
       data.number    = number;
+      data.retCount  = retCount;
       data.varCount  = varCount;
       data.context   = NULL;
+      data.linkage   = linkage;
       data.externDef = varCount == -1;
-      data.externVis = externVis;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
 
@@ -259,7 +263,8 @@ ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Script &data)
    }
 
    arc << data.label << data.name << data.string << data.stype << data.argCount
-       << data.flags << data.number << varCount << data.externDef << data.externVis;
+       << data.flags << data.number << data.retCount << varCount << data.linkage
+       << data.externDef;
 
    if(arc.isLoading())
       data.varCount = varCount;

@@ -486,12 +486,12 @@ SRCEXPC_PARSE_DEFN_EXT(InitDeclarator, DeclarationSpecifiers const &spec, Declar
       {
          if(decl.funcAttr.scriptName.empty()) decl.funcAttr.scriptName = nameObj;
 
-         ObjectData::Script::Add(nameObj, label, decl.funcAttr.scriptType,
-            decl.funcAttr.scriptFlag, paramSize, nullptr, linkage != LINKAGE_INTERN,
-            decl.funcAttr.scriptAddr, decl.funcAttr.scriptName);
+         ObjectData::Script::Add(nameObj, label, paramSize, returnSize, nullptr,
+            linkage, decl.funcAttr.scriptAddr, decl.funcAttr.scriptName,
+            decl.funcAttr.scriptType, decl.funcAttr.scriptFlag);
       }
       else
-         ObjectData::Function::Add(nameObj, label, paramSize, returnSize, nullptr);
+         ObjectData::Function::Add(nameObj, label, paramSize, returnSize, nullptr, linkage);
 
       SourceVariable::Pointer var;
       if(obj) var = SourceVariable::create_constant(decl.name, decl.type,     obj, pos);
@@ -729,12 +729,12 @@ SRCEXPC_PARSE_DEFN_EXT(Function, DeclarationSpecifiers const &spec, Declarator &
    {
       if(decl.funcAttr.scriptName.empty()) decl.funcAttr.scriptName = nameObj;
 
-      ObjectData::Script::Add(nameObj, label, decl.funcAttr.scriptType,
-         decl.funcAttr.scriptFlag, paramSize, funcContext, linkage != LINKAGE_INTERN,
-         decl.funcAttr.scriptAddr, decl.funcAttr.scriptName);
+      ObjectData::Script::Add(nameObj, label, paramSize, returnSize, funcContext,
+         linkage, decl.funcAttr.scriptAddr, decl.funcAttr.scriptName,
+         decl.funcAttr.scriptType, decl.funcAttr.scriptFlag);
    }
    else
-      ObjectData::Function::Add(nameObj, label, paramSize, returnSize, funcContext);
+      ObjectData::Function::Add(nameObj, label, paramSize, returnSize, funcContext, linkage);
 
    SourceFunction::Reference func = SourceFunction::FindFunction(
       SourceVariable::create_constant(decl.name, decl.type, nameObj, pos));

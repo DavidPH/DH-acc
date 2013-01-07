@@ -187,12 +187,12 @@ struct Auto
    std::string name;
    bigsint number;
    bigsint size;
+   LinkageSpecifier linkage;
    bool externDef;
-   bool externVis;
 
 
    static void Add(std::string const &name, VariableType const *type,
-      bool externDef, bool externVis, bigsint number);
+      LinkageSpecifier linkage, bool externDef, bigsint number);
 
    static ObjectArchive &Archive(ObjectArchive &arc);
 
@@ -216,13 +216,16 @@ struct Function
    bigsint retCount;
    bigsint varCount;
    CounterPointer<SourceContext> context;
+   LinkageSpecifier linkage;
    bool externDef;
 
 
    static bool Add(std::string const &name, std::string const &label,
-      bigsint argCount, bigsint retCount, SourceContext *context);
+      bigsint argCount, bigsint retCount, SourceContext *context,
+      LinkageSpecifier linkage);
    static bool Add(std::string const &name, std::string const &label,
-      bigsint argCount, bigsint retCount, bigsint varCount);
+      bigsint argCount, bigsint retCount, bigsint varCount,
+      LinkageSpecifier linkage);
 
    static ObjectArchive &Archive(ObjectArchive &arc);
 
@@ -265,18 +268,18 @@ struct Register
    std::string name;
    bigsint number;
    bigsint size;
+   LinkageSpecifier linkage;
    bool externDef;
-   bool externVis;
 
 
    static void Add(std::string const &name, VariableType const *type,
-      bool externDef, bool externVis, bigsint number);
+      LinkageSpecifier linkage, bool externDef, bigsint number);
    static void AddMap(std::string const &name, VariableType const *type,
-      bool externDef, bool externVis, bigsint number = -1);
+      LinkageSpecifier linkage, bool externDef, bigsint number = -1);
    static void AddWorld(std::string const &name, VariableType const *type,
-      bool externDef, bool externVis, bigsint number = -1);
+      LinkageSpecifier linkage, bool externDef, bigsint number = -1);
    static void AddGlobal(std::string const &name, VariableType const *type,
-      bool externDef, bool externVis, bigsint number = -1);
+      LinkageSpecifier linkage, bool externDef, bigsint number = -1);
 
    static ObjectArchive &Archive(ObjectArchive &arc);
 
@@ -304,20 +307,23 @@ struct Script
    std::string string;
    ScriptType stype;
    bigsint argCount;
-   bigsint flags;
+   biguint flags;
    bigsint number;
+   bigsint retCount;
    bigsint varCount;
    CounterPointer<SourceContext> context;
+   LinkageSpecifier linkage;
    bool externDef;
-   bool externVis;
 
 
    static bool Add(std::string const &name, std::string const &label,
-      ScriptType stype, bigsint flags, bigsint argCount, SourceContext *context,
-      bool externVis, bigsint number, std::string const &string);
+      bigsint argCount, bigsint retCount, SourceContext *context,
+      LinkageSpecifier linkage, bigsint number, std::string const &string,
+      ScriptType stype = ST_CLOSED, biguint flags = 0);
    static bool Add(std::string const &name, std::string const &label,
-      ScriptType stype, bigsint flags, bigsint argCount, bigsint varCount,
-      bool externVis, bigsint number, std::string const &string);
+      bigsint argCount, bigsint retCount, bigsint varCount,
+      LinkageSpecifier linkage, bigsint number, std::string const &string,
+      ScriptType stype = ST_CLOSED, biguint flags = 0);
 
    static ObjectArchive &Archive(ObjectArchive &arc);
 
@@ -337,12 +343,12 @@ struct Static
    std::string name;
    bigsint number;
    bigsint size;
+   LinkageSpecifier linkage;
    bool externDef;
-   bool externVis;
 
 
    static void Add(std::string const &name, VariableType const *type,
-      bool externDef, bool externVis, bigsint number = -1);
+      LinkageSpecifier linkage, bool externDef, bigsint number = -1);
 
    static ObjectArchive &Archive(ObjectArchive &arc);
 

@@ -140,8 +140,6 @@ static SourceExpression::Pointer make_script
 (SourceTokenizerC *in, SourceTokenC *tok, SourceContext *context,
  LinkageSpecifier linkSpec, bool externDef)
 {
-   bool externVis = linkSpec != LINKAGE_INTERN;
-
    // Is this a named script? --named-script determines the default.
    bool named = option_named_scripts;
 
@@ -284,8 +282,9 @@ static SourceExpression::Pointer make_script
    SourceVariable::Pointer scriptVar = SourceVariable::create_constant
       (args.name, scriptVarType, scriptNameObj, tok->pos);
 
-   ObjectData::Script::Add(scriptNameObj, scriptLabel, scriptType, scriptFlags,
-      args.count, args.context, externVis, scriptNumber, scriptString);
+   ObjectData::Script::Add(scriptNameObj, scriptLabel, args.count,
+      args.retn->getSize(tok->pos), args.context, linkSpec, scriptNumber,
+      scriptString, scriptType, scriptFlags);
 
    SourceFunction::Reference func = SourceFunction::FindFunction(scriptVar, args.args);
 

@@ -111,7 +111,7 @@ namespace ObjectData
 // ObjectData::Static::Add
 //
 void Static::Add(std::string const &name, VariableType const *type,
-   bool externDef, bool externVis, bigsint number)
+   LinkageSpecifier linkage, bool externDef, bigsint number)
 {
    Static &data = Table[name];
 
@@ -120,13 +120,15 @@ void Static::Add(std::string const &name, VariableType const *type,
       data.name      = name;
       data.number    = number;
       data.size      = type->getSize(SourcePosition::none());
+      data.linkage   = linkage;
       data.externDef = externDef;
-      data.externVis = externVis;
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_UNS);
    }
    else if (data.externDef && externDef)
    {
+      data.number    = number;
+      data.size      = type->getSize(SourcePosition::none());
       data.externDef = false;
    }
 }
@@ -163,7 +165,7 @@ void Static::GenerateSymbols()
 }
 
 //
-// ObjectData::Static::iterate
+// ObjectData::Static::Iterate
 //
 void Static::Iterate(IterFunc iterFunc, std::ostream *out)
 {
@@ -187,8 +189,7 @@ void OA_Override(ObjectData::Static &out, ObjectData::Static const &in)
 //
 ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Static &data)
 {
-   return arc << data.name << data.number << data.size << data.externDef
-              << data.externVis;
+   return arc << data.name << data.number << data.size << data.linkage << data.externDef;
 }
 
 // EOF
