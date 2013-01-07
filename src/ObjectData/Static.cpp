@@ -120,7 +120,6 @@ void Static::Add(std::string const &name, VariableType const *type,
       data.name      = name;
       data.number    = number;
       data.size      = type->getSize(SourcePosition::none());
-      data.init      = NULL;
       data.externDef = externDef;
       data.externVis = externVis;
 
@@ -188,8 +187,8 @@ void OA_Override(ObjectData::Static &out, ObjectData::Static const &in)
 //
 ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Static &data)
 {
-   return arc << data.name << data.number << data.size << data.init
-              << data.externDef << data.externVis;
+   return arc << data.name << data.number << data.size << data.externDef
+              << data.externVis;
 }
 
 // EOF

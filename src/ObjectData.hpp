@@ -187,7 +187,6 @@ struct Auto
    std::string name;
    bigsint number;
    bigsint size;
-   CounterPointer<ObjectExpression> init;
    bool externDef;
    bool externVis;
 
@@ -338,7 +337,6 @@ struct Static
    std::string name;
    bigsint number;
    bigsint size;
-   CounterPointer<ObjectExpression> init;
    bool externDef;
    bool externVis;
 
@@ -349,8 +347,6 @@ struct Static
    static ObjectArchive &Archive(ObjectArchive &arc);
 
    static void GenerateSymbols();
-
-   static void Init(std::string const &name, ObjectExpression *init);
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
 };
