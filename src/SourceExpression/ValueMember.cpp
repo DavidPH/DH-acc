@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,8 +40,7 @@
 //
 class SourceExpression_ValueMember : public SourceExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueMember,
-                                   SourceExpression);
+   CounterPreambleNoClone(SourceExpression_ValueMember, SourceExpression);
 
 public:
    SourceExpression_ValueMember(SourceExpression *expr,

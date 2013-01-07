@@ -35,7 +35,7 @@
 //
 class ObjectExpression_ValueARR : public ObjectExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_ValueARR, ObjectExpression);
+   CounterPreambleNoClone(ObjectExpression_ValueARR, ObjectExpression);
 
 public:
    //

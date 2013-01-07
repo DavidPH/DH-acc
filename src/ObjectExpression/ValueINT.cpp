@@ -37,7 +37,7 @@
 //
 class ObjectExpression_ValueINT : public ObjectExpression
 {
-   MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueINT, ObjectExpression);
+   CounterPreambleNoClone(ObjectExpression_ValueINT, ObjectExpression);
 
 public:
    ObjectExpression_ValueINT(bigsint _value, SourcePosition const &_pos)

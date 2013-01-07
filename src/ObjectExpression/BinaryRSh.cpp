@@ -33,8 +33,7 @@
 //
 class ObjectExpression_BinaryRSh : public ObjectExpression_Binary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_BinaryRSh,
-                                   ObjectExpression_Binary);
+   CounterPreambleNoClone(ObjectExpression_BinaryRSh, ObjectExpression_Binary);
 
 public:
    ObjectExpression_BinaryRSh(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}

@@ -28,81 +28,71 @@
 //----------------------------------------------------------------------------|
 // Macros                                                                     |
 //
-#define MAKE_COMMON_COUNTER_CLASS_TYPES(CLASS)        \
-public:                                               \
-typedef CLASS This;                                   \
-typedef CounterPointer<CLASS> Pointer;                \
-typedef CounterPointer<CLASS const> ConstPointer;     \
-friend class CounterPointer<CLASS>;                   \
-friend class CounterPointer<CLASS const>;             \
-typedef CounterReference<CLASS> Reference;            \
-typedef CounterReference<CLASS const> ConstReference; \
-friend class CounterReference<CLASS>;                 \
-friend class CounterReference<CLASS const>
-
-#define MAKE_COMMON_COUNTER_CLASS(CLASS)                  \
-public:                                                   \
-CounterPointer<CLASS> clone() const {return cloneRaw();}  \
-virtual char const *getClassName() const {return #CLASS;} \
-MAKE_COMMON_COUNTER_CLASS_TYPES(CLASS)
 
 //
-// MAKE_ABSTRACT_COUNTER_CLASS
+// CounterPreambleCommonTypes
+//
+// Used for common definitions for macros below.
+//
+#define CounterPreambleCommonTypes(CLASS,BASE) \
+public: \
+   typedef CLASS This; \
+   typedef BASE Super; \
+   typedef CounterPointer<CLASS> Pointer; \
+   typedef CounterPointer<CLASS const> ConstPointer; \
+   friend class CounterPointer<CLASS>; \
+   friend class CounterPointer<CLASS const>; \
+   typedef CounterReference<CLASS> Reference; \
+   typedef CounterReference<CLASS const> ConstReference; \
+   friend class CounterReference<CLASS>; \
+   friend class CounterReference<CLASS const>
+
+//
+// CounterPreambleCommon
+//
+#define CounterPreambleCommon(CLASS,BASE) \
+public: \
+   CounterPointer<CLASS> clone() const {return cloneRaw();} \
+   virtual char const *getClassName() const {return #CLASS;} \
+   CounterPreambleCommonTypes(CLASS, BASE)
+
+//
+// CounterPreamble
+//
+#define CounterPreamble(CLASS,BASE) \
+private: \
+   virtual CLASS *cloneRaw() const {return new CLASS(*this);} \
+   CounterPreambleCommon(CLASS, BASE)
+
+//
+// CounterPreambleAbstract
 //
 // For use in defining abstract reference-counted classes.
 //
-#define MAKE_ABSTRACT_COUNTER_CLASS(CLASS)    \
-private: virtual CLASS *cloneRaw() const = 0; \
-MAKE_COMMON_COUNTER_CLASS(CLASS)
+#define CounterPreambleAbstract(CLASS,BASE) \
+private: \
+   virtual CLASS *cloneRaw() const = 0; \
+   CounterPreambleCommon(CLASS, BASE)
 
 //
-// MAKE_ABSTRACT_COUNTER_CLASS_BASE
-//
-#define MAKE_ABSTRACT_COUNTER_CLASS_BASE(CLASS,BASE) \
-MAKE_ABSTRACT_COUNTER_CLASS(CLASS); typedef BASE Super
-
-//
-// MAKE_NOCLONE_COUNTER_CLASS
+// CounterPreambleNoClone
 //
 // For use in defining reference-counted classes that cannot be copied.
 //
-#define MAKE_NOCLONE_COUNTER_CLASS(CLASS) private: \
-virtual CLASS *cloneRaw() const {throw 1;}         \
-MAKE_COMMON_COUNTER_CLASS(CLASS)
+#define CounterPreambleNoClone(CLASS,BASE) \
+private: \
+   virtual CLASS *cloneRaw() const {throw 1;} \
+   CounterPreambleCommon(CLASS, BASE)
 
 //
-// MAKE_NOCLONE_COUNTER_CLASS_BASE
-//
-#define MAKE_NOCLONE_COUNTER_CLASS_BASE(CLASS,BASE) \
-MAKE_NOCLONE_COUNTER_CLASS(CLASS); typedef BASE Super
-
-//
-// MAKE_NOVIRTUAL_COUNTER_CLASS
+// CounterPreambleNoVirtual
 //
 // For use in defining reference-counted classes without virtuals.
 //
-#define MAKE_NOVIRTUAL_COUNTER_CLASS(CLASS)       \
-char const *getClassName() const {return #CLASS;} \
-MAKE_COMMON_COUNTER_CLASS_TYPES(CLASS)
-
-//
-// MAKE_NOVIRTUAL_COUNTER_CLASS_BASE
-//
-#define MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(CLASS,BASE) \
-MAKE_NOVIRTUAL_COUNTER_CLASS(CLASS); typedef BASE Super
-
-//
-// MAKE_COUNTER_CLASS
-//
-#define MAKE_COUNTER_CLASS(CLASS) private:                 \
-virtual CLASS *cloneRaw() const {return new CLASS(*this);} \
-MAKE_COMMON_COUNTER_CLASS(CLASS)
-
-//
-// MAKE_COUNTER_CLASS_BASE
-//
-#define MAKE_COUNTER_CLASS_BASE(CLASS,BASE) \
-MAKE_COUNTER_CLASS(CLASS); typedef BASE Super
+#define CounterPreambleNoVirtual(CLASS,BASE) \
+public: \
+   char const *getClassName() const {return #CLASS;} \
+   CounterPreambleCommonTypes(CLASS, BASE)
 
 
 //----------------------------------------------------------------------------|
@@ -121,59 +111,66 @@ template<typename T>
 class CounterPointer
 {
 public:
+   // Constructor
    CounterPointer() : p(0) {}
 
-   CounterPointer(T *_p) : p(_p) {if (p) ++p->refCount;}
-
+   // Pointer->CounterPointer
+   CounterPointer(T *_p) : p(_p) {if(p) ++p->refCount;}
    template<typename T2>
-   CounterPointer(T2 *_p) : p(static_cast<T*>(_p)) {if (p) ++p->refCount;}
+   CounterPointer(T2 *_p) : p(static_cast<T2 *>(_p)) {if(p) ++p->refCount;}
 
-   CounterPointer(CounterPointer<T> const &_p) : p(_p.p) {if (p) ++p->refCount;}
-
+   // CounterPointer->CounterPointer
+   CounterPointer(CounterPointer<T> const &_p) : p(_p.p) {if(p) ++p->refCount;}
    template<typename T2>
-   CounterPointer(CounterPointer<T2> const &_p) : p(static_cast<T*>(_p))
-   {if (p) ++p->refCount;}
+   CounterPointer(CounterPointer<T2> const &_p) : p(static_cast<T2 *>(_p)) {if(p) ++p->refCount;}
 
-   CounterPointer(CounterReference<T> const &_p) : p(static_cast<T*>(_p))
-   {++p->refCount;}
-
+   // CounterReference->CounterPointer
+   CounterPointer(CounterReference<T> const &_p) : p(static_cast<T *>(_p)) {++p->refCount;}
    template<typename T2>
-   CounterPointer(CounterReference<T2> const &_p) : p(static_cast<T*>(_p))
-   {++p->refCount;}
+   CounterPointer(CounterReference<T2> const &_p) : p(static_cast<T2 *>(_p)) {++p->refCount;}
 
-   ~CounterPointer() {if (p && !--p->refCount) delete p;}
+   // Destructor
+   ~CounterPointer() {if(p && !--p->refCount) delete p;}
 
    operator T * () const {return p;}
 
+   // CounterPointer = Pointer
    CounterPointer<T> &operator = (T *_p)
    {
-      T *old = p; if ((p = _p)) ++p->refCount;
-      if (old && !--old->refCount) delete old;
+      T *old = p; if((p = _p)) ++p->refCount;
+      if(old && !--old->refCount) delete old;
       return *this;
    }
-
    template<typename T2>
    CounterPointer<T> &operator = (T2 *_p)
    {
-      T *old = p; if ((p = _p)) ++p->refCount;
-      if (old && !--old->refCount) delete old;
+      T *old = p; if((p = _p)) ++p->refCount;
+      if(old && !--old->refCount) delete old;
       return *this;
    }
 
+   // CounterPointer = CounterPointer
    CounterPointer<T> &operator = (CounterPointer<T> const &_p)
-   {return *this = static_cast<T *>(_p);}
-
+   {
+      T *old = p; if((p = static_cast<T *>(_p))) ++p->refCount;
+      if(old && !--old->refCount) delete old;
+      return *this;
+   }
    template<typename T2>
    CounterPointer<T> &operator = (CounterPointer<T2> const &_p)
-   {return *this = static_cast<T2 *>(_p);}
+   {
+      T *old = p; if((p = static_cast<T2 *>(_p))) ++p->refCount;
+      if(old && !--old->refCount) delete old;
+      return *this;
+   }
 
+   // CounterPointer = CounterReference
    CounterPointer<T> &operator = (CounterReference<T> const &_p)
    {
       T *old = p; ++(p = static_cast<T *>(_p))->refCount;
       if (old && !--old->refCount) delete old;
       return *this;
    }
-
    template<typename T2>
    CounterPointer<T> &operator = (CounterReference<T2> const &_p)
    {
@@ -201,40 +198,38 @@ template<typename T>
 class CounterReference
 {
 public:
+   // Pointer->CounterReference
    explicit CounterReference(T *_p) : p(_p) {++p->refCount;}
-
    template<typename T2>
    explicit CounterReference(T2 *_p) : p(static_cast<T*>(_p)) {++p->refCount;}
 
-   explicit CounterReference(CounterPointer<T> const &_p)
-    : p(static_cast<T*>(_p)) {++p->refCount;}
-
+   // CounterPointer->CounterReference
+   explicit CounterReference(CounterPointer<T> const &_p) : p(static_cast<T*>(_p)) {++p->refCount;}
    template<typename T2>
-   explicit CounterReference(CounterPointer<T2> const &_p)
-    : p(static_cast<T*>(_p)) {++p->refCount;}
+   explicit CounterReference(CounterPointer<T2> const &_p) : p(static_cast<T*>(_p)) {++p->refCount;}
 
+   // CounterReference->CounterReference
    CounterReference(CounterReference<T> const &_p) : p(_p.p) {++p->refCount;}
-
    template<typename T2>
-   CounterReference(CounterReference<T2> const &_p) : p(static_cast<T*>(_p))
-   {++p->refCount;}
+   CounterReference(CounterReference<T2> const &_p) : p(static_cast<T*>(_p)) {++p->refCount;}
 
-   ~CounterReference() {if (!--p->refCount) delete p;}
+   // Destructor
+   ~CounterReference() {if(!--p->refCount) delete p;}
 
    operator T * () const {return p;}
 
+   // CounterReference = CounterReference
    CounterReference<T> &operator = (CounterReference<T> const &_p)
    {
       T *old = p; ++(p = static_cast<T *>(_p))->refCount;
-      if (!--old->refCount) delete old;
+      if(!--old->refCount) delete old;
       return *this;
    }
-
    template<typename T2>
    CounterReference<T> &operator = (CounterReference<T2> const &_p)
    {
       T *old = p; ++(p = static_cast<T2 *>(_p))->refCount;
-      if (!--old->refCount) delete old;
+      if(!--old->refCount) delete old;
       return *this;
    }
 
@@ -255,7 +250,7 @@ private:
 //
 class Counter
 {
-   MAKE_COUNTER_CLASS(Counter);
+   CounterPreamble(Counter, Counter);
 
 public:
    virtual ~Counter() {}
@@ -271,6 +266,7 @@ protected:
    // Mutable for CounterPointer-to-const.
    mutable unsigned refCount;
 };
+
 //
 // PlainCounter
 //
@@ -278,7 +274,7 @@ protected:
 //
 class PlainCounter
 {
-   MAKE_NOVIRTUAL_COUNTER_CLASS(PlainCounter);
+   CounterPreambleNoVirtual(PlainCounter, PlainCounter);
 
 protected:
    PlainCounter() : refCount(0) {}

@@ -37,7 +37,7 @@
 //
 class ObjectExpression_ValueFLT : public ObjectExpression
 {
-   MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueFLT, ObjectExpression);
+   CounterPreambleNoClone(ObjectExpression_ValueFLT, ObjectExpression);
 
 public:
    ObjectExpression_ValueFLT(bigreal _value, SourcePosition const &_pos)

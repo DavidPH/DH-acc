@@ -36,8 +36,7 @@
 //
 class ObjectExpression_BranchIOr : public ObjectExpression_Binary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_BranchIOr,
-                                   ObjectExpression_Binary);
+   CounterPreambleNoClone(ObjectExpression_BranchIOr, ObjectExpression_Binary);
 
 public:
    ObjectExpression_BranchIOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}

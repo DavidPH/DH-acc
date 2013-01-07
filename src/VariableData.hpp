@@ -40,7 +40,7 @@ class SourceExpression;
 //
 class VariableData : public PlainCounter
 {
-   MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(VariableData, PlainCounter);
+   CounterPreambleNoVirtual(VariableData, PlainCounter);
 
 public:
    enum MemoryType

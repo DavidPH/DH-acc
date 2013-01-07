@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ typedef SourceTokenizer<SourceTokenASM> SourceTokenizerASM;
 
 class SourceExpressionASM : public SourceExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpressionASM, SourceExpression);
+   CounterPreambleNoClone(SourceExpressionASM, SourceExpression);
 
 public:
    Vector     args;

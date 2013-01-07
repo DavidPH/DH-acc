@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ class VariableType;
 //
 class SourceVariable : PlainCounter
 {
-   MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(SourceVariable, PlainCounter);
+   CounterPreambleNoVirtual(SourceVariable, PlainCounter);
 
 public:
    StoreType getStoreType() const {return store;}

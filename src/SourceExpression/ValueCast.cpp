@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,8 +39,7 @@
 //
 class SourceExpression_ValueCast : public SourceExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueCast,
-                                   SourceExpression);
+   CounterPreambleNoClone(SourceExpression_ValueCast, SourceExpression);
 
 public:
    //
@@ -131,7 +130,7 @@ private:
 //
 class SourceExpression_ValueCastQualifier : public SourceExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueCastQualifier, SourceExpression);
+   CounterPreambleNoClone(SourceExpression_ValueCastQualifier, SourceExpression);
 
 public:
    //
@@ -190,7 +189,7 @@ private:
 //
 class SourceExpression_ValueCastRaw : public SourceExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueCastRaw, SourceExpression);
+   CounterPreambleNoClone(SourceExpression_ValueCastRaw, SourceExpression);
 
 public:
    //
@@ -245,7 +244,7 @@ private:
 //
 class SourceExpression_ValueCastStorage : public SourceExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_ValueCastStorage, SourceExpression);
+   CounterPreambleNoClone(SourceExpression_ValueCastStorage, SourceExpression);
 
 public:
    //

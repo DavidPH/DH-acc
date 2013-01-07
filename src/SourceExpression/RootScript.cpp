@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,8 +40,7 @@
 //
 class SourceExpression_RootScript : public SourceExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(SourceExpression_RootScript,
-                                   SourceExpression);
+   CounterPreambleNoClone(SourceExpression_RootScript, SourceExpression);
 
 public:
    SourceExpression_RootScript(VariableType *type, SRCEXP_EXPR_ARGS);

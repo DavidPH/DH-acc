@@ -36,8 +36,7 @@
 //
 class ObjectExpression_UnaryNot : public ObjectExpression_Unary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_UnaryNot,
-                                   ObjectExpression_Unary);
+   CounterPreambleNoClone(ObjectExpression_UnaryNot, ObjectExpression_Unary);
 
 public:
    ObjectExpression_UnaryNot(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS) {}

@@ -35,7 +35,7 @@
 //
 class ObjectExpression_ValueOCS : public ObjectExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_ValueOCS, ObjectExpression);
+   CounterPreambleNoClone(ObjectExpression_ValueOCS, ObjectExpression);
 
 public:
    ObjectExpression_ValueOCS(ObjectCodeSet const &_value, OBJEXP_EXPR_PARM)

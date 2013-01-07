@@ -36,8 +36,7 @@
 //
 class ObjectExpression_BinaryCmp : public ObjectExpression_Binary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_BinaryCmp,
-                                   ObjectExpression_Binary);
+   CounterPreambleNoClone(ObjectExpression_BinaryCmp, ObjectExpression_Binary);
 
 public:
    //

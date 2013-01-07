@@ -73,7 +73,7 @@ class SourceTokenC;
 //
 class ObjectExpression : public Counter
 {
-	MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression, Counter);
+   CounterPreambleAbstract(ObjectExpression, Counter);
 
 public:
    typedef std::vector<std::string> VecStr;

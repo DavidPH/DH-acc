@@ -39,8 +39,7 @@
 //
 class ObjectExpression_ValueSymbol : public ObjectExpression
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_ValueSymbol,
-                                   ObjectExpression);
+   CounterPreambleNoClone(ObjectExpression_ValueSymbol, ObjectExpression);
 
 public:
    ObjectExpression_ValueSymbol(std::string const &_value, OBJEXP_EXPR_PARM)

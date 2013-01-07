@@ -36,7 +36,7 @@
 //
 class ObjectExpression_Unary : public ObjectExpression
 {
-   MAKE_ABSTRACT_COUNTER_CLASS_BASE(ObjectExpression_Unary, ObjectExpression);
+   CounterPreambleAbstract(ObjectExpression_Unary, ObjectExpression);
 
 public:
    virtual bool canResolve() const;

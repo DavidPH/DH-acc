@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -131,7 +131,7 @@ class SourceTokenizerC;
 
 class SourceExpressionDS : public SourceExpression
 {
-   MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpressionDS, SourceExpression);
+   CounterPreambleAbstract(SourceExpressionDS, SourceExpression);
 
 public:
    struct ArgList

@@ -37,8 +37,7 @@
 //
 class ObjectExpression_Cast : public ObjectExpression_Unary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_Cast,
-                                   ObjectExpression_Unary);
+   CounterPreambleNoClone(ObjectExpression_Cast, ObjectExpression_Unary);
 
 public:
    //

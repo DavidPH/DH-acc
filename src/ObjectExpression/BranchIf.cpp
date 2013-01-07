@@ -37,8 +37,7 @@
 //
 class ObjectExpression_BranchIf : public ObjectExpression_Binary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE(ObjectExpression_BranchIf,
-                                   ObjectExpression_Binary);
+   CounterPreambleNoClone(ObjectExpression_BranchIf, ObjectExpression_Binary);
 
 public:
    //

@@ -37,7 +37,7 @@
 //
 class ObjectExpression_ValueUNS : public ObjectExpression
 {
-   MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueUNS, ObjectExpression);
+   CounterPreambleNoClone(ObjectExpression_ValueUNS, ObjectExpression);
 
 public:
    ObjectExpression_ValueUNS(biguint _value, SourcePosition const &_pos)

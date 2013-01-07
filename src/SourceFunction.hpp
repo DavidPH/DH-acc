@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ class VariableType;
 //
 class SourceFunction : public PlainCounter
 {
-   MAKE_NOVIRTUAL_COUNTER_CLASS_BASE(SourceFunction, PlainCounter);
+   CounterPreambleNoVirtual(SourceFunction, PlainCounter);
 
 public:
    typedef std::vector<CounterPointer<SourceExpression> > ArgVec;

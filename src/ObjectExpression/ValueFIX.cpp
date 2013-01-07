@@ -37,7 +37,7 @@
 //
 class ObjectExpression_ValueFIX : public ObjectExpression
 {
-   MAKE_COUNTER_CLASS_BASE(ObjectExpression_ValueFIX, ObjectExpression);
+   CounterPreambleNoClone(ObjectExpression_ValueFIX, ObjectExpression);
 
 public:
    ObjectExpression_ValueFIX(bigreal _value, SourcePosition const &_pos)

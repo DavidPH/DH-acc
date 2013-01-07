@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -258,7 +258,7 @@ ObjectExpression::Pointer objR =                                        \
 //
 class SourceExpression_Binary : public SourceExpression
 {
-   MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression_Binary, SourceExpression);
+   CounterPreambleAbstract(SourceExpression_Binary, SourceExpression);
 
 public:
    virtual bool canMakeObject() const;

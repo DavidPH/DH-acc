@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -255,7 +255,7 @@ class VariableType;
 //
 class SourceExpression : public Counter
 {
-   MAKE_ABSTRACT_COUNTER_CLASS_BASE(SourceExpression, Counter);
+   CounterPreambleAbstract(SourceExpression, Counter);
 
 public:
    typedef std::vector<Pointer> Vector;

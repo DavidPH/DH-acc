@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,8 +39,7 @@
 //
 class SourceExpression_BinaryCmp : public SourceExpression_Binary
 {
-   MAKE_NOCLONE_COUNTER_CLASS_BASE
-   (SourceExpression_BinaryCmp, SourceExpression_Binary);
+   CounterPreambleNoClone(SourceExpression_BinaryCmp, SourceExpression_Binary);
 
 public:
    enum CmpType
