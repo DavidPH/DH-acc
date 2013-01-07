@@ -84,10 +84,14 @@ private:
          }
          else
          {
+            make_objects_memcpy_prep(objects, dst, src, pos);
+
             exprL->makeObjects(objects, tmp);
             exprR->makeObjects(objects, tmp);
             objects->setPosition(pos);
             objects->addToken(OCODE_LOGIOR_STK_I);
+
+            make_objects_memcpy_post(objects, dst, src, srcType, context, pos);
          }
       }
       else if(dst->type == VariableData::MT_VOID)
