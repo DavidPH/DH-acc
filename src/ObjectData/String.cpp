@@ -73,7 +73,7 @@ std::string const &String::Add(std::string const &string)
 
    String &data = Table[string];
 
-   data.string = string + '\0';
+   data.string = string;
 
    std::ostringstream oss;
    oss << ObjectExpression::get_filename() << "::0s::" << Table.size();
@@ -92,7 +92,7 @@ void String::Add(std::string const &name, std::string const &string)
    String &data = Table[string];
 
    if(data.string.empty())
-      data.string = string + '\0';
+      data.string = string;
 
    data.names.push_back(name);
 
@@ -154,7 +154,8 @@ void String::GenerateSymbols()
 //
 void String::Iterate(IterFunc iterFunc, std::ostream *out)
 {
-   static String nullstring; iterFunc(out, nullstring);
+   static String nullstring = {std::vector<std::string>(), std::string("\0", 1)};
+   iterFunc(out, nullstring);
 
    for(StringIter itr = Table.begin(), end = Table.end(); itr != end; ++itr)
       iterFunc(out, itr->second);
