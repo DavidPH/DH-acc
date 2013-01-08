@@ -51,18 +51,18 @@
 // Alternate spellings of DS/C extension keywords.
 #define address_space   __address_space
 #define far             __far
-#define global_array    __globalarray
-#define global_register __globalregister
+#define global_array    __global_array
+#define global_register __global_register
 #define library         __library
 #define local           __local
-#define local_register  __localregister
-#define map_array       __maparray
-#define map_register    __mapregister
+#define local_register  __local_register
+#define map_array       __map_array
+#define map_register    __map_register
 #define near            __near
 #define storeof         __storeof
 #define typestr         __typestr
-#define world_array     __worldarray
-#define world_register  __worldregister
+#define world_array     __world_array
+#define world_register  __world_register
 
 #endif//__HEADER__DS_DEF_H__
 
