@@ -32,6 +32,7 @@
 #include "SourceException.hpp"
 #include "SourceTokenC.hpp"
 
+#include <cmath>
 #include <sstream>
 
 
@@ -41,10 +42,30 @@
 
 static std::string et_names[] =
 {
+   "ET_FIX_HH",
+   "ET_FIX_H",
    "ET_FIX",
+   "ET_FIX_L",
+   "ET_FIX_LL",
+
+   "ET_FLT_HH",
+   "ET_FLT_H",
    "ET_FLT",
+   "ET_FLT_L",
+   "ET_FLT_LL",
+
+   "ET_INT_HH",
+   "ET_INT_H",
    "ET_INT",
+   "ET_INT_L",
+   "ET_INT_LL",
+
+   "ET_UNS_HH",
+   "ET_UNS_H",
    "ET_UNS",
+   "ET_UNS_L",
+   "ET_UNS_LL",
+
    "ET_OCS",
 
    "ET_ARR",
@@ -107,7 +128,7 @@ void ObjectExpression::add_address_count(bigsint const addressCount)
 //
 void ObjectExpression::add_label(std::string const & symbol)
 {
-   add_symbol(symbol, create_value_int(address_count, SourcePosition::none()));
+   add_symbol(symbol, CreateValueUNS(address_count, SourcePosition::none()));
 }
 
 //
@@ -295,14 +316,53 @@ ObjectExpression::Reference ObjectExpression::resolveMAP(std::string const &name
 //
 // ObjectExpression::resolveBinary
 //
-biguint ObjectExpression::resolveBinary() const
+biguint ObjectExpression::resolveBinary(biguint part) const
 {
    switch(getType())
    {
-   case ET_FIX: return static_cast<bigsint>(resolveFIX() * 65536.0);
-   case ET_FLT: Error_NP("TODO");
-   case ET_INT: return resolveINT();
-   case ET_UNS: return resolveUNS();
+   case ET_FIX_HH:
+      return static_cast<biguint>(static_cast<bigsint>(resolveFIX() * 16.0)) & 0xFF;
+
+   case ET_FIX_H:
+      return static_cast<biguint>(static_cast<bigsint>(resolveFIX() * 256.0)) & 0xFFFF;
+
+   case ET_FIX:
+      return static_cast<biguint>(static_cast<bigsint>(resolveFIX() * 65536.0)) & 0xFFFFFFFF;
+
+   case ET_FIX_L:
+   case ET_FIX_LL:
+      if(part)
+         return static_cast<biguint>(static_cast<bigsint>(resolveFIX())) & 0xFFFFFFFF;
+      else
+         return static_cast<biguint>(static_cast<bigsint>(std::fmod(resolveFIX(), 1) * 4294967296.0)) & 0xFFFFFFFF;
+
+   case ET_FLT_HH:
+      Error_NP("TODO FLT_HH");
+
+   case ET_FLT_H:
+      Error_NP("TODO FLT_H");
+
+   case ET_FLT:
+      Error_NP("TODO FLT");
+
+   case ET_FLT_L:
+   case ET_FLT_LL:
+      Error_NP("TODO FLT_L");
+
+   case ET_INT_HH:
+   case ET_INT_H:
+   case ET_INT:
+   case ET_INT_L:
+   case ET_INT_LL:
+      return (static_cast<biguint>(resolveINT()) >> (part * 32)) & 0xFFFFFFFF;
+
+   case ET_UNS_HH:
+   case ET_UNS_H:
+   case ET_UNS:
+   case ET_UNS_L:
+   case ET_UNS_LL:
+      return (resolveUNS() >> (part * 32)) & 0xFFFFFFFF;
+
    case ET_OCS: Error_NP("cannot resolve raw bits of ET_OCS");
 
    case ET_ARR: Error_NP("cannot resolve raw bits of ET_ARR");

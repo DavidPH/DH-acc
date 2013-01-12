@@ -98,7 +98,7 @@ static void Add(RegisterTable &table, std::string const &name,
       data.linkage   = linkage;
       data.externDef = externDef;
 
-      ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
+      ObjectExpression::add_symbol(name, ObjectExpression::ET_UNS);
    }
    else if(data.externDef && !externDef)
    {
@@ -121,8 +121,7 @@ static void GenerateSymbols(RegisterTable &table)
 
    for (iter = table.begin(); iter != table.end(); ++iter)
    {
-      obj = ObjectExpression::create_value_int
-      (iter->second.number, SourcePosition::none());
+      obj = ObjectExpression::CreateValueUNS(iter->second.number, SourcePosition::none());
 
       ObjectExpression::add_symbol(iter->second.name, obj);
    }

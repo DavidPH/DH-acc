@@ -479,10 +479,10 @@ SRCEXPC_PARSE_DEFN_EXT(InitDeclarator, DeclarationSpecifiers const &spec, Declar
       ObjectExpression::Pointer obj;
 
       if(decl.funcAttr.asmfun)
-         obj = ObjectExpression::create_value_ocs(decl.funcAttr.asmfunCode, pos);
+         obj = ObjectExpression::CreateValueOCS(decl.funcAttr.asmfunCode, pos);
 
       else if(decl.funcAttr.lnspec || decl.funcAttr.native)
-         obj = ObjectExpression::create_value_int(decl.funcAttr.scriptAddr, pos);
+         obj = ObjectExpression::CreateValueINT(decl.funcAttr.scriptAddr, pos);
 
       else if(decl.funcAttr.script)
       {

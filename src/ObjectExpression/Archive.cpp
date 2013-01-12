@@ -97,14 +97,14 @@ ObjectExpression::Reference ObjectExpression::Create(ObjectArchive &arc)
    case OT_BRANCH_NOT: return CreateBranchNot(arc);
    case OT_BRANCH_XOR: return CreateBranchXOr(arc);
 
-   case OT_CAST: return CreateCast(arc);
-
    case OT_VALUE_FIX:    return CreateValueFIX   (arc);
    case OT_VALUE_FLT:    return CreateValueFLT   (arc);
    case OT_VALUE_INT:    return CreateValueINT   (arc);
    case OT_VALUE_UNS:    return CreateValueUNS   (arc);
    case OT_VALUE_OCS:    return CreateValueOCS   (arc);
    case OT_VALUE_ARR:    return CreateValueARR   (arc);
+   case OT_VALUE_CAST:   return CreateValueCast  (arc);
+   case OT_VALUE_PART:   return CreateValuePart  (arc);
    case OT_VALUE_SYMBOL: return CreateValueSymbol(arc);
 
    case OT_NONE: throw __FILE__ ": OT_NONE";
@@ -142,7 +142,7 @@ void OA_Override(ObjectExpression::Reference &out, ObjectExpression::Reference c
 //
 ObjectArchive &operator << (ObjectArchive &arc, ObjectExpression::ExpressionType &data)
 {
-   return arc.archiveEnum(data, ObjectExpression::ET_INT);
+   return arc.archiveEnum(data, ObjectExpression::ET_MAP);
 }
 
 //

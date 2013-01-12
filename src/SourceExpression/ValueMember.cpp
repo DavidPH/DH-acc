@@ -143,7 +143,7 @@ VariableData::Pointer SourceExpression_ValueMember::getData() const
       return VariableData::create_literal(memberSize, src->address->resolveMAP(name));
 
    ObjectExpression::Pointer memberOffsetObj =
-      ObjectExpression::create_value_uns(memberOffset, pos);
+      ObjectExpression::CreateValueUNS(memberOffset, pos);
 
    ObjectExpression::Pointer address =
       ObjectExpression::create_binary_add(src->address, memberOffsetObj, pos);

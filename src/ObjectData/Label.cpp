@@ -65,7 +65,7 @@ std::string const &Label::Add(std::string const &label)
    oss << ObjectExpression::get_filename() << "::0l::" << Table.size();
    data.name = oss.str();
 
-   ObjectExpression::add_symbol(data.name, ObjectExpression::ET_INT);
+   ObjectExpression::add_symbol(data.name, ObjectExpression::ET_UNS);
 
    return data.name;
 }
@@ -88,7 +88,7 @@ void Label::GenerateSymbols()
 
    for(auto const &itr : Table)
    {
-      expr = ObjectExpression::create_value_int(i++, SourcePosition::none());
+      expr = ObjectExpression::CreateValueUNS(i++, SourcePosition::none());
       ObjectExpression::add_symbol(itr.name, expr);
    }
 }

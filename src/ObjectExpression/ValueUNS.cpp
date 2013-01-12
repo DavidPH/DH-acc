@@ -21,11 +21,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "../ObjectExpression.hpp"
-
-#include "../ACSP.hpp"
-#include "../BinaryTokenACS.hpp"
-#include "../ObjectArchive.hpp"
+#include "Value.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -40,13 +36,13 @@ class ObjectExpression_ValueUNS : public ObjectExpression
    CounterPreambleNoClone(ObjectExpression_ValueUNS, ObjectExpression);
 
 public:
-   ObjectExpression_ValueUNS(biguint _value, SourcePosition const &_pos)
-    : Super(_pos), value(_value) {}
-   ObjectExpression_ValueUNS(ObjectArchive &arc) : Super(arc) {arc << value;}
+   ObjectExpression_ValueUNS(biguint _value, ExpressionType _type, OBJEXP_EXPR_PARM)
+    : Super(_pos), value(_value), type(_type) {}
+   ObjectExpression_ValueUNS(ObjectArchive &arc) : Super(arc) {arc << value << type;}
 
    virtual bool canResolve() const {return true;}
 
-   virtual ExpressionType getType() const {return ET_UNS;}
+   virtual ExpressionType getType() const {return type;}
 
    // HACK! Allow resolving as INT.
    virtual bigsint resolveINT() const {return value;}
@@ -58,7 +54,7 @@ protected:
    //
    virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      return Super::archive(arc << OT_VALUE_UNS) << value;
+      return Super::archive(arc << OT_VALUE_UNS) << value << type;
    }
 
 private:
@@ -72,6 +68,7 @@ private:
    }
 
    biguint value;
+   ExpressionType type;
 };
 
 
@@ -80,20 +77,9 @@ private:
 //
 
 //
-// ObjectExpression::create_value_uns
+// CreateValueUNS*
 //
-ObjectExpression::Reference ObjectExpression::create_value_uns(biguint value, OBJEXP_EXPR_ARGS)
-{
-   return static_cast<Reference>(new ObjectExpression_ValueUNS(value, pos));
-}
-
-//
-// ObjectExpression::CreateValueUNS
-//
-ObjectExpression::Reference ObjectExpression::CreateValueUNS(ObjectArchive &arc)
-{
-   return static_cast<Reference>(new ObjectExpression_ValueUNS(arc));
-}
+CreateValueX(biguint, UNS)
 
 // EOF
 

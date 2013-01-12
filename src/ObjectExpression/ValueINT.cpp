@@ -21,11 +21,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "../ObjectExpression.hpp"
-
-#include "../ACSP.hpp"
-#include "../BinaryTokenACS.hpp"
-#include "../ObjectArchive.hpp"
+#include "Value.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -40,13 +36,13 @@ class ObjectExpression_ValueINT : public ObjectExpression
    CounterPreambleNoClone(ObjectExpression_ValueINT, ObjectExpression);
 
 public:
-   ObjectExpression_ValueINT(bigsint _value, SourcePosition const &_pos)
-    : Super(_pos), value(_value) {}
-   ObjectExpression_ValueINT(ObjectArchive &arc) : Super(arc) {arc << value;}
+   ObjectExpression_ValueINT(bigsint _value, ExpressionType _type, OBJEXP_EXPR_PARM)
+    : Super(_pos), value(_value), type(_type) {}
+   ObjectExpression_ValueINT(ObjectArchive &arc) : Super(arc) {arc << value << type;}
 
    virtual bool canResolve() const {return true;}
 
-   virtual ExpressionType getType() const {return ET_INT;}
+   virtual ExpressionType getType() const {return type;}
 
    virtual bigsint resolveINT() const {return value;}
    // HACK! Allow resolving as UNS.
@@ -58,7 +54,7 @@ protected:
    //
    virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      return Super::archive(arc << OT_VALUE_INT) << value;
+      return Super::archive(arc << OT_VALUE_INT) << value << type;
    }
 
 private:
@@ -72,6 +68,7 @@ private:
    }
 
    bigsint value;
+   ExpressionType type;
 };
 
 
@@ -80,20 +77,9 @@ private:
 //
 
 //
-// ObjectExpression::create_value_int
+// CreateValueINT*
 //
-ObjectExpression::Reference ObjectExpression::create_value_int(bigsint value, OBJEXP_EXPR_ARGS)
-{
-   return static_cast<Reference>(new ObjectExpression_ValueINT(value, pos));
-}
-
-//
-// ObjectExpression::CreateValueINT
-//
-ObjectExpression::Reference ObjectExpression::CreateValueINT(ObjectArchive &arc)
-{
-   return static_cast<Reference>(new ObjectExpression_ValueINT(arc));
-}
+CreateValueX(bigsint, INT)
 
 // EOF
 

@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -97,18 +97,17 @@ EXPR_DEFN(Primary)
          bool isdef = hasDefine(tok->data) || hasMacro(tok->data);
 
          ObjectExpression::Reference expr =
-            ObjectExpression::create_value_int(isdef, tok->pos);
+            ObjectExpression::CreateValueINT(isdef, tok->pos);
 
          if (hasParen) doAssert(getRaw(), SourceTokenC::TT_PAREN_C);
 
          return expr;
       }
       else
-         return ObjectExpression::create_value_int(0, tok->pos);
+         return ObjectExpression::CreateValueINT(0, tok->pos);
 
    case SourceTokenC::TT_INT:
-      return ObjectExpression::create_value_int(
-         get_bigsint(tok->data, tok->pos), tok->pos);
+      return ObjectExpression::CreateValueINT(get_bigsint(tok->data, tok->pos), tok->pos);
 
    case SourceTokenC::TT_PAREN_O:
    {

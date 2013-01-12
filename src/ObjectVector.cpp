@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -142,7 +142,7 @@ void ObjectVector::addTokenPushZero()
 //
 ObjectExpression::Pointer ObjectVector::getValue(bigreal f) const
 {
-   return ObjectExpression::create_value_fix(f, head.pos);
+   return ObjectExpression::CreateValueFIX(f, head.pos);
 }
 
 //
@@ -150,7 +150,7 @@ ObjectExpression::Pointer ObjectVector::getValue(bigreal f) const
 //
 ObjectExpression::Pointer ObjectVector::getValue(bigsint i) const
 {
-   return ObjectExpression::create_value_int(i, head.pos);
+   return ObjectExpression::CreateValueINT(i, head.pos);
 }
 
 //
@@ -182,7 +182,7 @@ ObjectExpression::Pointer ObjectVector::getValue(ObjectExpression *expr) const
 //
 ObjectExpression::Pointer ObjectVector::getValue(std::string const &symbol) const
 {
-   return ObjectExpression::create_value_symbol(symbol, head.pos);
+   return ObjectExpression::CreateValueSymbol(symbol, head.pos);
 }
 
 //

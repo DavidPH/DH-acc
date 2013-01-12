@@ -84,7 +84,7 @@ public:
            iter != expressions.end(); ++iter)
          elems.push_back((*iter)->makeObject());
 
-      return ObjectExpression::create_value_arr(elems, pos);
+      return ObjectExpression::CreateValueARR(elems, pos);
    }
 
    //
@@ -100,7 +100,7 @@ public:
          elems.push_back((*itr)->makeObjectPartial());
       }
 
-      return ObjectExpression::create_value_arr(elems, pos);
+      return ObjectExpression::CreateValueARR(elems, pos);
    }
 
 private:

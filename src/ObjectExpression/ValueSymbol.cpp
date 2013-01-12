@@ -100,9 +100,9 @@ private:
 //
 
 //
-// ObjectExpression::create_value_symbol
+// ObjectExpression::CreateValueSymbol
 //
-ObjectExpression::Reference ObjectExpression::create_value_symbol(
+ObjectExpression::Reference ObjectExpression::CreateValueSymbol(
    std::string const &value, OBJEXP_EXPR_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_ValueSymbol(value, pos));

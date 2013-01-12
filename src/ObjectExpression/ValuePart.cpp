@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2013 David Hill
+// Copyright(C) 2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,11 +17,13 @@
 //
 //-----------------------------------------------------------------------------
 //
-// ObjectExpression handling of fixed-point numbers.
+// Handles dividing up of multi-byte binary representation types.
 //
 //-----------------------------------------------------------------------------
 
-#include "Value.hpp"
+#include "Unary.hpp"
+
+#include "../ObjectArchive.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -29,22 +31,25 @@
 //
 
 //
-// ObjectExpression_ValueFIX
+// ObjectExpression_ValuePart
 //
-class ObjectExpression_ValueFIX : public ObjectExpression
+class ObjectExpression_ValuePart : public ObjectExpression_Unary
 {
-   CounterPreambleNoClone(ObjectExpression_ValueFIX, ObjectExpression);
+   CounterPreambleNoClone(ObjectExpression_ValuePart, ObjectExpression_Unary);
 
 public:
-   ObjectExpression_ValueFIX(bigreal _value, ExpressionType _type, OBJEXP_EXPR_PARM)
-    : Super(_pos), value(_value), type(_type) {}
-   ObjectExpression_ValueFIX(ObjectArchive &arc) : Super(arc) {arc << value << type;}
+   ObjectExpression_ValuePart(biguint _part, OBJEXP_EXPRUNA_PARM)
+    : Super(OBJEXP_EXPRUNA_PASS), part(_part) {}
+   ObjectExpression_ValuePart(ObjectArchive &arc) : Super(arc) {arc << part;}
 
-   virtual bool canResolve() const {return true;}
+   virtual bool canResolve() const {return false;}
 
-   virtual ExpressionType getType() const {return type;}
+   virtual ExpressionType getType() const {return ET_UNS;}
 
-   virtual bigreal resolveFIX() const {return value;}
+   // Technically, resolving should be forbidden. Technically.
+   virtual biguint resolveUNS() const {return resolveBinary(0);}
+
+   virtual biguint resolveBinary(biguint) const {return expr->resolveBinary(part);}
 
 protected:
    //
@@ -52,21 +57,11 @@ protected:
    //
    virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      return Super::archive(arc << OT_VALUE_FIX) << value << type;
+      return Super::archive(arc << OT_VALUE_PART) << part;
    }
 
 private:
-   //
-   // writeACSPLong
-   //
-   virtual void writeACSPLong(std::ostream *out) const
-   {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LITERAL);
-      BinaryTokenACS::write_ACS0_32(out, *this);
-   }
-
-   bigreal value;
-   ExpressionType type;
+   biguint part;
 };
 
 
@@ -75,9 +70,21 @@ private:
 //
 
 //
-// CreateValueFIX*
+// ObjectExpression::CreateValuePart
 //
-CreateValueX(bigreal, FIX)
+ObjectExpression::Reference ObjectExpression::CreateValuePart(
+   biguint part, ObjectExpression *expr, OBJEXP_EXPR_ARGS)
+{
+   return static_cast<Reference>(new ObjectExpression_ValuePart(part, expr, pos));
+}
+
+//
+// ObjectExpression::CreateValuePart
+//
+ObjectExpression::Reference ObjectExpression::CreateValuePart(ObjectArchive &arc)
+{
+   return static_cast<Reference>(new ObjectExpression_ValuePart(arc));
+}
 
 // EOF
 

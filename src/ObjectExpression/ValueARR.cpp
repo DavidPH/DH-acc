@@ -130,9 +130,9 @@ private:
 //
 
 //
-// ObjectExpression::create_value_arr
+// ObjectExpression::CreateValueARR
 //
-ObjectExpression::Reference ObjectExpression::create_value_arr(
+ObjectExpression::Reference ObjectExpression::CreateValueARR(
    Vector const &elems, OBJEXP_EXPR_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_ValueARR(elems, pos));
@@ -147,9 +147,9 @@ ObjectExpression::Reference ObjectExpression::CreateValueARR(ObjectArchive &arc)
 }
 
 //
-// ObjectExpression::create_value_map
+// ObjectExpression::CreateValueMAP
 //
-ObjectExpression::Reference ObjectExpression::create_value_map(
+ObjectExpression::Reference ObjectExpression::CreateValueMAP(
    Vector const &elems, VecStr const &names, OBJEXP_EXPR_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_ValueARR(elems, names, pos));

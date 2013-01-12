@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ void BinaryTokenPPACS::make_tokens
 (ObjectVector const &objects, std::vector<BinaryTokenPPACS> *instructions)
 {
    static ObjectExpression::Pointer const fracbits =
-      ObjectExpression::create_value_int(16, SourcePosition::builtin());
+      ObjectExpression::CreateValueINT(16, SourcePosition::builtin());
 
    static std::vector<std::string> const nolabels;
 

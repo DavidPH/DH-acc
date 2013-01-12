@@ -88,7 +88,7 @@ public:
          Error_NP("STORE_NONE");
 
       case STORE_FAR:
-         address = ObjectExpression::create_value_int(0, pos);
+         address = ObjectExpression::CreateValueUNS(0, pos);
          return VariableData::create_farptr(size, address, expr);
 
       case STORE_STATIC:
@@ -99,7 +99,7 @@ public:
          }
          else
          {
-            address = ObjectExpression::create_value_int(0, pos);
+            address = ObjectExpression::CreateValueUNS(0, pos);
             return VariableData::create_pointer(size, address, expr);
          }
 
@@ -111,7 +111,7 @@ public:
          }
          else
          {
-            address = ObjectExpression::create_value_int(0, pos);
+            address = ObjectExpression::CreateValueUNS(0, pos);
             offset = SourceExpression::create_value_cast_implicit(expr,
                type->setStorage(STORE_STATIC)->getPointer(), context, pos);
             return VariableData::create_pointer(size, address, offset);
@@ -141,7 +141,7 @@ public:
       case STORE_MAPARRAY:
          sectionA = VariableData::SA_MAP;
       case_array:
-         address = ObjectExpression::create_value_symbol(area, pos);
+         address = ObjectExpression::CreateValueSymbol(area, pos);
          return VariableData::create_array(size, sectionA, address, expr);
 
       case STORE_WORLDARRAY:

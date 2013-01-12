@@ -21,11 +21,7 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "../ObjectExpression.hpp"
-
-#include "../ACSP.hpp"
-#include "../BinaryTokenACS.hpp"
-#include "../ObjectArchive.hpp"
+#include "Value.hpp"
 
 
 //----------------------------------------------------------------------------|
@@ -40,13 +36,13 @@ class ObjectExpression_ValueFLT : public ObjectExpression
    CounterPreambleNoClone(ObjectExpression_ValueFLT, ObjectExpression);
 
 public:
-   ObjectExpression_ValueFLT(bigreal _value, SourcePosition const &_pos)
-    : Super(_pos), value(_value) {}
-   ObjectExpression_ValueFLT(ObjectArchive &arc) : Super(arc) {arc << value;}
+   ObjectExpression_ValueFLT(bigreal _value, ExpressionType _type, OBJEXP_EXPR_PARM)
+    : Super(_pos), value(_value), type(_type) {}
+   ObjectExpression_ValueFLT(ObjectArchive &arc) : Super(arc) {arc << value << type;}
 
    virtual bool canResolve() const {return true;}
 
-   virtual ExpressionType getType() const {return ET_FLT;}
+   virtual ExpressionType getType() const {return type;}
 
    virtual bigreal resolveFLT() const {return value;}
 
@@ -56,7 +52,7 @@ protected:
    //
    virtual ObjectArchive &archive(ObjectArchive &arc)
    {
-      return Super::archive(arc << OT_VALUE_FLT) << value;
+      return Super::archive(arc << OT_VALUE_FLT) << value << type;
    }
 
 private:
@@ -70,6 +66,7 @@ private:
    }
 
    bigreal value;
+   ExpressionType type;
 };
 
 
@@ -78,20 +75,9 @@ private:
 //
 
 //
-// ObjectExpression::create_value_flt
+// CreateValueFLT*
 //
-ObjectExpression::Reference ObjectExpression::create_value_flt(bigreal value, OBJEXP_EXPR_ARGS)
-{
-   return static_cast<Reference>(new ObjectExpression_ValueFLT(value, pos));
-}
-
-//
-// ObjectExpression::CreateValueFLT
-//
-ObjectExpression::Reference ObjectExpression::CreateValueFLT(ObjectArchive &arc)
-{
-   return static_cast<Reference>(new ObjectExpression_ValueFLT(arc));
-}
+CreateValueX(bigreal, FLT)
 
 // EOF
 

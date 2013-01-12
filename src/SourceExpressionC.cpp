@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012 David Hill
+// Copyright(C) 2012-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -155,8 +155,7 @@ VariableType::Reference SourceExpressionC::ParseEnum(SRCEXPC_PARSE_ARG1)
       if(in->dropType(SourceTokenC::TT_EQUALS))
          enumVal = ParseConditional(in, context)->makeObject()->resolveINT();
 
-      ObjectExpression::Pointer enumObj =
-         ObjectExpression::create_value_int(enumVal++, enumTok->pos);
+      auto enumObj = ObjectExpression::CreateValueINT(enumVal++, enumTok->pos);
 
       context->addVar(SourceVariable::create_constant(enumTok->data, enumType,
          enumObj, enumTok->pos), LINKAGE_C, false);

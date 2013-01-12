@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -90,12 +90,18 @@ static ObjectExpression::ExpressionType GetET(VariableType const *type)
    case VariableType::BT_BIT_HRD:
    case VariableType::BT_BIT_SFT:
    case VariableType::BT_CHR:
-   case VariableType::BT_INT_HH:
-   case VariableType::BT_INT_H:
-   case VariableType::BT_INT:
-   case VariableType::BT_INT_L:
-   case VariableType::BT_INT_LL:
       return ObjectExpression::ET_INT;
+
+   case VariableType::BT_INT_HH:
+      return ObjectExpression::ET_INT_HH;
+   case VariableType::BT_INT_H:
+      return ObjectExpression::ET_INT_H;
+   case VariableType::BT_INT:
+      return ObjectExpression::ET_INT;
+   case VariableType::BT_INT_L:
+      return ObjectExpression::ET_INT_L;
+   case VariableType::BT_INT_LL:
+      return ObjectExpression::ET_INT_LL;
 
    case VariableType::BT_CLX:
    case VariableType::BT_CLX_IM:
@@ -125,18 +131,26 @@ static ObjectExpression::ExpressionType GetET(VariableType const *type)
       return ObjectExpression::ET_FIX;
 
    case VariableType::BT_FLT_HH:
+      return ObjectExpression::ET_FLT_HH;
    case VariableType::BT_FLT_H:
+      return ObjectExpression::ET_FLT_H;
    case VariableType::BT_FLT:
-   case VariableType::BT_FLT_L:
-   case VariableType::BT_FLT_LL:
       return ObjectExpression::ET_FLT;
+   case VariableType::BT_FLT_L:
+      return ObjectExpression::ET_FLT_L;
+   case VariableType::BT_FLT_LL:
+      return ObjectExpression::ET_FLT_LL;
 
    case VariableType::BT_UNS_HH:
+      return ObjectExpression::ET_UNS_HH;
    case VariableType::BT_UNS_H:
+      return ObjectExpression::ET_UNS_H;
    case VariableType::BT_UNS:
-   case VariableType::BT_UNS_L:
-   case VariableType::BT_UNS_LL:
       return ObjectExpression::ET_UNS;
+   case VariableType::BT_UNS_L:
+      return ObjectExpression::ET_UNS_L;
+   case VariableType::BT_UNS_LL:
+      return ObjectExpression::ET_UNS_LL;
 
    case VariableType::BT_LABEL:
    case VariableType::BT_STR:
@@ -146,6 +160,11 @@ static ObjectExpression::ExpressionType GetET(VariableType const *type)
       return ObjectExpression::ET_ARR;
 
    case VariableType::BT_PTR:
+      if(type->getSize(SourcePosition::none()) == 2)
+         return ObjectExpression::ET_UNS_L;
+      else
+         return ObjectExpression::ET_UNS;
+
    case VariableType::BT_PTR_NUL:
       return ObjectExpression::ET_UNS;
 
@@ -156,6 +175,7 @@ static ObjectExpression::ExpressionType GetET(VariableType const *type)
       return ObjectExpression::ET_MAP;
 
    case VariableType::BT_UNION:
+      // FIXME: wat
       return ObjectExpression::ET_UNS;
 
    case VariableType::BT_BLOCK:
@@ -176,6 +196,50 @@ static ObjectExpression::ExpressionType GetET(VariableType const *type)
 }
 
 //
+// GetSimpleET
+//
+static ObjectExpression::ExpressionType GetSimpleET(ObjectExpression::ExpressionType et)
+{
+   switch(et)
+   {
+   case ObjectExpression::ET_FIX_HH:
+   case ObjectExpression::ET_FIX_H:
+   case ObjectExpression::ET_FIX:
+   case ObjectExpression::ET_FIX_L:
+   case ObjectExpression::ET_FIX_LL:
+      return ObjectExpression::ET_FIX;
+
+   case ObjectExpression::ET_FLT_HH:
+   case ObjectExpression::ET_FLT_H:
+   case ObjectExpression::ET_FLT:
+   case ObjectExpression::ET_FLT_L:
+   case ObjectExpression::ET_FLT_LL:
+      return ObjectExpression::ET_FLT;
+
+   case ObjectExpression::ET_INT_HH:
+   case ObjectExpression::ET_INT_H:
+   case ObjectExpression::ET_INT:
+   case ObjectExpression::ET_INT_L:
+   case ObjectExpression::ET_INT_LL:
+      return ObjectExpression::ET_INT;
+
+   case ObjectExpression::ET_UNS_HH:
+   case ObjectExpression::ET_UNS_H:
+   case ObjectExpression::ET_UNS:
+   case ObjectExpression::ET_UNS_L:
+   case ObjectExpression::ET_UNS_LL:
+      return ObjectExpression::ET_UNS;
+
+   case ObjectExpression::ET_OCS:
+   case ObjectExpression::ET_ARR:
+   case ObjectExpression::ET_MAP:
+      return et;
+   }
+
+   return et;
+}
+
+//
 // MakeObject
 //
 static ObjectExpression::Reference MakeObject(VariableType *type, SourcePosition const &pos)
@@ -188,12 +252,32 @@ static ObjectExpression::Reference MakeObject(VariableType *type, SourcePosition
 
    switch(GetET(type))
    {
-   case ObjectExpression::ET_FIX: return ObjectExpression::create_value_fix(0, pos);
-   case ObjectExpression::ET_FLT: return ObjectExpression::create_value_flt(0, pos);
-   case ObjectExpression::ET_INT: return ObjectExpression::create_value_int(0, pos);
-   case ObjectExpression::ET_UNS: return ObjectExpression::create_value_uns(0, pos);
+   case ObjectExpression::ET_FIX_HH: return ObjectExpression::CreateValueFIX_HH(0, pos);
+   case ObjectExpression::ET_FIX_H:  return ObjectExpression::CreateValueFIX_H (0, pos);
+   case ObjectExpression::ET_FIX:    return ObjectExpression::CreateValueFIX   (0, pos);
+   case ObjectExpression::ET_FIX_L:  return ObjectExpression::CreateValueFIX_L (0, pos);
+   case ObjectExpression::ET_FIX_LL: return ObjectExpression::CreateValueFIX_LL(0, pos);
+
+   case ObjectExpression::ET_FLT_HH: return ObjectExpression::CreateValueFLT_HH(0, pos);
+   case ObjectExpression::ET_FLT_H:  return ObjectExpression::CreateValueFLT_H (0, pos);
+   case ObjectExpression::ET_FLT:    return ObjectExpression::CreateValueFLT   (0, pos);
+   case ObjectExpression::ET_FLT_L:  return ObjectExpression::CreateValueFLT_L (0, pos);
+   case ObjectExpression::ET_FLT_LL: return ObjectExpression::CreateValueFLT_LL(0, pos);
+
+   case ObjectExpression::ET_INT_HH: return ObjectExpression::CreateValueINT_HH(0, pos);
+   case ObjectExpression::ET_INT_H:  return ObjectExpression::CreateValueINT_H (0, pos);
+   case ObjectExpression::ET_INT:    return ObjectExpression::CreateValueINT   (0, pos);
+   case ObjectExpression::ET_INT_L:  return ObjectExpression::CreateValueINT_L (0, pos);
+   case ObjectExpression::ET_INT_LL: return ObjectExpression::CreateValueINT_LL(0, pos);
+
+   case ObjectExpression::ET_UNS_HH: return ObjectExpression::CreateValueUNS_HH(0, pos);
+   case ObjectExpression::ET_UNS_H:  return ObjectExpression::CreateValueUNS_H (0, pos);
+   case ObjectExpression::ET_UNS:    return ObjectExpression::CreateValueUNS   (0, pos);
+   case ObjectExpression::ET_UNS_L:  return ObjectExpression::CreateValueUNS_L (0, pos);
+   case ObjectExpression::ET_UNS_LL: return ObjectExpression::CreateValueUNS_LL(0, pos);
+
    case ObjectExpression::ET_OCS:
-      return ObjectExpression::create_value_ocs(ObjectCodeSet(), pos);
+      return ObjectExpression::CreateValueOCS(ObjectCodeSet(), pos);
 
    case ObjectExpression::ET_ARR:
       if(type->getBasicType() == VariableType::BT_ARR)
@@ -207,13 +291,13 @@ static ObjectExpression::Reference MakeObject(VariableType *type, SourcePosition
             elems.push_back(MakeObject(*itr, pos));
       }
 
-      return ObjectExpression::create_value_arr(elems, pos);
+      return ObjectExpression::CreateValueARR(elems, pos);
 
    case ObjectExpression::ET_MAP:
       for(itr = types.begin(); itr != end; ++itr)
          elems.push_back(MakeObject(*itr, pos));
 
-      return ObjectExpression::create_value_map(elems, names, pos);
+      return ObjectExpression::CreateValueMAP(elems, names, pos);
    }
 
    Error_P("unknown BT");
@@ -257,9 +341,9 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
       std::string::iterator srcStrItr = srcStr.begin(), srcStrEnd = srcStr.end();
       ObjectExpression::Vector::iterator srcVecItr = srcVec.begin();
       while(srcStrItr != srcStrEnd)
-         *srcVecItr++ = ObjectExpression::create_value_int(*srcStrItr++, pos);
+         *srcVecItr++ = ObjectExpression::CreateValueINT(*srcStrItr++, pos);
 
-      return ObjectExpression::create_value_arr(srcVec, pos);
+      return ObjectExpression::CreateValueARR(srcVec, pos);
    }
 
    // String-to-far*.
@@ -274,16 +358,18 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
    if(srcBT == VariableType::BT_STR && dstBT == VariableType::BT_PTR &&
       dstType->getReturn()->getStoreType() == STORE_STRING)
    {
-      ObjectExpression::Reference obj32 = ObjectExpression::create_value_uns(32, pos);
-      return ObjectExpression::create_binary_lsh(obj, obj32, pos);
+      auto objPtr = ObjectExpression::CreateValueCast(ObjectExpression::ET_UNS_L, obj, pos);
+      auto obj32  = ObjectExpression::CreateValueUNS_L(32, pos);
+      return ObjectExpression::create_binary_lsh(objPtr, obj32, pos);
    }
 
    // Strptr-to-string.
    if(dstBT == VariableType::BT_STR && srcBT == VariableType::BT_PTR &&
       srcType->getReturn()->getStoreType() == STORE_STRING)
    {
-      ObjectExpression::Reference obj32 = ObjectExpression::create_value_uns(32, pos);
-      return ObjectExpression::create_binary_rsh(obj, obj32, pos);
+      auto obj32  = ObjectExpression::CreateValueUNS_L(32, pos);
+      auto objPtr = ObjectExpression::create_binary_rsh(obj, obj32, pos);
+      return ObjectExpression::CreateValueCast(ObjectExpression::ET_UNS, objPtr, pos);
    }
 
    // Pointer-to-pointer casts are special if changing storage.
@@ -305,12 +391,17 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
       if(srcST == dstST || (srcNear && dstNear))
          return obj;
 
-      ObjectExpression::Reference obj32 = ObjectExpression::create_value_uns(32, pos);
-      ObjectExpression::Reference objMask = ObjectExpression::create_value_uns(0xFFFFFFFF, pos);
+      auto obj32 = ObjectExpression::CreateValueUNS_L(32, pos);
+      auto objMask = ObjectExpression::CreateValueUNS_L(0xFFFFFFFF, pos);
 
       // Cast from far to near is pure truncation!
+      // HACK! Should only need the cast.
       if(srcST == STORE_FAR && dstNear)
-         return ObjectExpression::create_binary_and(obj, objMask, pos);
+      {
+         auto objMask = ObjectExpression::CreateValueUNS_L(0xFFFFFFFF, pos);
+         auto objPtr = ObjectExpression::create_binary_and(obj, objMask, pos);
+         return ObjectExpression::CreateValueCast(ObjectExpression::ET_UNS, objPtr, pos);
+      }
 
       // Casting from near to far.
       if(srcNear && dstST == STORE_FAR)
@@ -319,26 +410,28 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
 
          switch(srcST)
          {
-         case STORE_STATIC: return obj;
+         case STORE_STATIC:
+            return ObjectExpression::CreateValueCast(ObjectExpression::ET_UNS, obj, pos);
+
          case STORE_WORLDARRAY:  ptrBase = 0x80000000; break;
          case STORE_GLOBALARRAY: ptrBase = 0x80010000; break;
          default: BAD_CAST();
          }
 
-         ObjectExpression::Reference objPtr = ObjectExpression::
-            create_value_uns(ptrBase, pos);
+         auto objPtr = ObjectExpression::CreateValueUNS_L(ptrBase, pos);
 
-         ObjectExpression::Reference objSA = ObjectExpression::
-            create_value_symbol(srcType->getReturn()->getStoreArea(), pos);
+         auto objSA = ObjectExpression::CreateValueSymbol(srcType->getReturn()->getStoreArea(), pos);
+         objSA = ObjectExpression::CreateValueCast(ObjectExpression::ET_UNS_L, objSA, pos);
 
          objPtr = ObjectExpression::create_binary_ior(objPtr, objSA, pos);
          objPtr = ObjectExpression::create_binary_lsh(objPtr, obj32, pos);
          objPtr = ObjectExpression::create_binary_ior(objPtr, obj, pos);
 
          // But here's the thing. If it's null, it needs to stay null.
-         ObjectExpression::Reference objNull = ObjectExpression::create_branch_not(obj, pos);
+         auto objOrig = ObjectExpression::CreateValueCast(ObjectExpression::ET_UNS_L, obj, pos);
+         auto objNull = ObjectExpression::create_branch_not(obj, pos);
 
-         return ObjectExpression::create_branch_if(objNull, obj, objPtr, pos);
+         return ObjectExpression::create_branch_if(objNull, objOrig, objPtr, pos);
       }
 
       // Invalid at compile-time: near->string, far->string, string->near, string->far
@@ -351,50 +444,6 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
 
    switch(srcET)
    {
-   case ObjectExpression::ET_FIX:
-      switch(dstET)
-      {
-      case ObjectExpression::ET_FIX: return obj;
-      case ObjectExpression::ET_FLT: return ObjectExpression::create_cast_fix_to_flt(obj, pos);
-      case ObjectExpression::ET_INT: return ObjectExpression::create_cast_fix_to_int(obj, pos);
-      case ObjectExpression::ET_UNS: return ObjectExpression::create_cast_fix_to_uns(obj, pos);
-
-      default: BAD_CAST();
-      }
-
-   case ObjectExpression::ET_FLT:
-      switch(dstET)
-      {
-      case ObjectExpression::ET_FIX: return ObjectExpression::create_cast_flt_to_fix(obj, pos);
-      case ObjectExpression::ET_FLT: return obj;
-      case ObjectExpression::ET_INT: return ObjectExpression::create_cast_flt_to_int(obj, pos);
-      case ObjectExpression::ET_UNS: return ObjectExpression::create_cast_flt_to_uns(obj, pos);
-
-      default: BAD_CAST();
-      }
-
-   case ObjectExpression::ET_INT:
-      switch(dstET)
-      {
-      case ObjectExpression::ET_FIX: return ObjectExpression::create_cast_int_to_fix(obj, pos);
-      case ObjectExpression::ET_FLT: return ObjectExpression::create_cast_int_to_flt(obj, pos);
-      case ObjectExpression::ET_INT: return obj;
-      case ObjectExpression::ET_UNS: return ObjectExpression::create_cast_int_to_uns(obj, pos);
-
-      default: BAD_CAST();
-      }
-
-   case ObjectExpression::ET_UNS:
-      switch(dstET)
-      {
-      case ObjectExpression::ET_FIX: return ObjectExpression::create_cast_uns_to_fix(obj, pos);
-      case ObjectExpression::ET_FLT: return ObjectExpression::create_cast_uns_to_flt(obj, pos);
-      case ObjectExpression::ET_INT: return ObjectExpression::create_cast_uns_to_int(obj, pos);
-      case ObjectExpression::ET_UNS: return obj;
-
-      default: BAD_CAST();
-      }
-
    case ObjectExpression::ET_OCS:
       BAD_CAST();
 
@@ -420,7 +469,7 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
                elems[i] = MakeObject(dstTypes, pos);
          }
 
-         obj = ObjectExpression::create_value_arr(elems, pos);
+         obj = ObjectExpression::CreateValueARR(elems, pos);
       }
       else if(dstBT == VariableType::BT_STRUCT ||
               dstBT == VariableType::BT_BLOCK)
@@ -438,9 +487,9 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
          }
 
          if(dstBT == VariableType::BT_STRUCT)
-            obj = ObjectExpression::create_value_map(elems, dstType->getNames(), pos);
+            obj = ObjectExpression::CreateValueMAP(elems, dstType->getNames(), pos);
          else
-            obj = ObjectExpression::create_value_arr(elems, pos);
+            obj = ObjectExpression::CreateValueARR(elems, pos);
       }
       else if(!elems.empty())
          obj = make_object_cast(elems.back(), dstType, srcTypes.back(), pos);
@@ -452,6 +501,9 @@ ObjectExpression::Reference SourceExpression::make_object_cast(ObjectExpression 
 
    case ObjectExpression::ET_MAP:
       BAD_CAST();
+
+   default:
+      return ObjectExpression::CreateValueCast(dstET, src, pos);
    }
 
    BAD_CAST();
@@ -730,13 +782,13 @@ void SourceExpression::make_objects_memcpy_cast
       objects->addToken(OCODE_NOT_STK_I);
    }
 
-   switch(srcET)
+   switch(GetSimpleET(srcET))
    {
    case ObjectExpression::ET_FIX:
       ExtendSign(objects, dstSize, srcSize, context);
       for(; srcSize > dstSize; --srcSize) objects->addToken(OCODE_STK_DROP);
 
-      switch(dstET)
+      switch(GetSimpleET(dstET))
       {
       case ObjectExpression::ET_FIX:
          goto cast_done;
@@ -755,7 +807,7 @@ void SourceExpression::make_objects_memcpy_cast
       for(; srcSize < dstSize; ++srcSize) objects->addTokenPushZero();
       for(; srcSize > dstSize; --srcSize) objects->addToken(OCODE_STK_DROP);
 
-      switch(dstET)
+      switch(GetSimpleET(dstET))
       {
       case ObjectExpression::ET_FIX:
          objects->addToken(OCODE_CAST_STK_I2X);

@@ -33,6 +33,35 @@
 
 
 //----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+#define CreateValueX(T, BT, ET) \
+   CreateValueXPart(T, BT##_hh, ET##_HH, BT##_hh) \
+   CreateValueXPart(T, BT##_h,  ET##_H,  BT##_h) \
+   CreateValueXPart(T, BT,      ET,      BT) \
+   CreateValueXPart(T, BT##_l,  ET##_L,  BT##_l) \
+   CreateValueXPart(T, BT##_ll, ET##_LL, BT##_ll)
+
+#define CreateValueXN(T, BT, ET, N1, N2, N3, N4, N5) \
+   CreateValueXPart(T, BT##_hh, ET##_HH, N1) \
+   CreateValueXPart(T, BT##_h,  ET##_H,  N2) \
+   CreateValueXPart(T, BT,      ET,      N3) \
+   CreateValueXPart(T, BT##_l,  ET##_L,  N4) \
+   CreateValueXPart(T, BT##_ll, ET##_LL, N5)
+
+#define CreateValueXPart(T, BT, ET, N) \
+   SRCEXP_EXPRVAL_DEFN(T, N) \
+   { \
+      auto varType = VariableType::get_bt_##BT(); \
+      auto varData = ObjectExpression::CreateValue##ET(value, pos); \
+      auto var = SourceVariable::create_literal(varType, varData, pos); \
+      \
+      return SourceExpression::create_value_variable(var, context, pos); \
+   }
+
+
+//----------------------------------------------------------------------------|
 // Types                                                                      |
 //
 
@@ -44,13 +73,21 @@ class SourceExpression_ValueVariable : public SourceExpression
    CounterPreambleNoClone(SourceExpression_ValueVariable, SourceExpression);
 
 public:
-   SourceExpression_ValueVariable(SourceVariable *var, SRCEXP_EXPR_ARGS);
+   //
+   // SourceExpression_ValueVariable
+   //
+   SourceExpression_ValueVariable(SourceVariable *_var, SRCEXP_EXPR_PARM)
+    : Super(SRCEXP_EXPR_PASS), var(_var)
+   {
+      if (!_var->getType()->getComplete())
+         Error_NP("incomplete type");
+   }
 
-   virtual bool canGetData() const;
+   virtual bool canGetData() const {return true;}
 
-   virtual VariableData::Pointer getData() const;
+   virtual VariableData::Pointer getData() const {return var->getData();}
 
-   virtual VariableType::Reference getType() const;
+   virtual VariableType::Reference getType() const {return var->getType();}
 
    //
    // isSideEffect
@@ -67,150 +104,29 @@ private:
 
 
 //----------------------------------------------------------------------------|
-// Static Functions                                                           |
-//
-
-static SourceExpression::Pointer CreateFIX(bigreal data, VariableType *type, SRCEXP_EXPR_ARGS)
-{
-   ObjectExpression::Pointer varData = ObjectExpression::create_value_fix(data, pos);
-
-   SourceVariable::Pointer var = SourceVariable::create_literal(type, varData, pos);
-
-   return SourceExpression::create_value_variable(var, context, pos);
-}
-
-static SourceExpression::Pointer CreateFLT(bigreal data, VariableType *type, SRCEXP_EXPR_ARGS)
-{
-   ObjectExpression::Pointer varData = ObjectExpression::create_value_flt(data, pos);
-
-   SourceVariable::Pointer var = SourceVariable::create_literal(type, varData, pos);
-
-   return SourceExpression::create_value_variable(var, context, pos);
-}
-
-static SourceExpression::Pointer create_int
-(bigsint data, VariableType *varType, SRCEXP_EXPR_ARGS)
-{
-   ObjectExpression::Pointer varData =
-      ObjectExpression::create_value_int(data, pos);
-
-   SourceVariable::Pointer var =
-      SourceVariable::create_literal(varType, varData, pos);
-
-   return SourceExpression::create_value_variable(var, context, pos);
-}
-
-static SourceExpression::Pointer create_uns(
-   bigsint data, VariableType *varType, SRCEXP_EXPR_ARGS)
-{
-   ObjectExpression::Pointer varData =
-      ObjectExpression::create_value_uns(data, pos);
-
-   SourceVariable::Pointer var =
-      SourceVariable::create_literal(varType, varData, pos);
-
-   return SourceExpression::create_value_variable(var, context, pos);
-}
-
-
-//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
 //
-// SourceExpression::create_value_acc_hh
+// SourceExpression::create_value_acc*
 //
-SRCEXP_EXPRVAL_DEFN(r, acc_hh)
-{
-   return CreateFIX(value, VariableType::get_bt_acc_hh(), context, pos);
-}
+CreateValueX(r, acc, FIX)
 
 //
-// SourceExpression::create_value_acc_h
+// SourceExpression::create_value_ang*
 //
-SRCEXP_EXPRVAL_DEFN(r, acc_h)
-{
-   return CreateFIX(value, VariableType::get_bt_acc_h(), context, pos);
-}
-
-//
-// SourceExpression::create_value_acc
-//
-SRCEXP_EXPRVAL_DEFN(r, acc)
-{
-   return CreateFIX(value, VariableType::get_bt_acc(), context, pos);
-}
-
-//
-// SourceExpression::create_value_acc_l
-//
-SRCEXP_EXPRVAL_DEFN(r, acc_l)
-{
-   return CreateFIX(value, VariableType::get_bt_acc_l(), context, pos);
-}
-
-//
-// SourceExpression::create_value_acc_ll
-//
-SRCEXP_EXPRVAL_DEFN(r, acc_ll)
-{
-   return CreateFIX(value, VariableType::get_bt_acc_ll(), context, pos);
-}
-
-//
-// SourceExpression::create_value_ang_hh
-//
-SRCEXP_EXPRVAL_DEFN(r, ang_hh)
-{
-   return CreateFIX(value, VariableType::get_bt_ang_hh(), context, pos);
-}
-
-//
-// SourceExpression::create_value_ang_h
-//
-SRCEXP_EXPRVAL_DEFN(r, ang_h)
-{
-   return CreateFIX(value, VariableType::get_bt_ang_h(), context, pos);
-}
-
-//
-// SourceExpression::create_value_ang
-//
-SRCEXP_EXPRVAL_DEFN(r, ang)
-{
-   return CreateFIX(value, VariableType::get_bt_ang(), context, pos);
-}
-
-//
-// SourceExpression::create_value_ang_l
-//
-SRCEXP_EXPRVAL_DEFN(r, ang_l)
-{
-   return CreateFIX(value, VariableType::get_bt_ang_l(), context, pos);
-}
-
-//
-// SourceExpression::create_value_ang_ll
-//
-SRCEXP_EXPRVAL_DEFN(r, ang_ll)
-{
-   return CreateFIX(value, VariableType::get_bt_ang_ll(), context, pos);
-}
+CreateValueX(r, ang, FIX)
 
 //
 // SourceExpression::create_value_char
 //
 SRCEXP_EXPRVAL_DEFN(c, char)
 {
-   ObjectExpression::Pointer charVarData =
-      ObjectExpression::create_value_int(value, pos);
+   auto varData = ObjectExpression::CreateValueINT(value, pos);
+   auto varType = VariableType::get_bt_chr();
+   auto var = SourceVariable::create_literal(varType, varData, pos);
 
-   VariableType::Reference charVarType = VariableType::get_bt_chr();
-
-   SourceVariable::Pointer charVariable =
-      SourceVariable::create_literal(charVarType, charVarData, pos);
-
-   return create_value_variable(charVariable, context, pos);
+   return create_value_variable(var, context, pos);
 }
 
 //
@@ -225,163 +141,31 @@ SRCEXP_EXPRVAL_DEFN(s, char)
 }
 
 //
-// SourceExpression::create_value_fix_hh
+// SourceExpression::create_value_fix*
 //
-SRCEXP_EXPRVAL_DEFN(r, fix_hh)
-{
-   return CreateFIX(value, VariableType::get_bt_fix_hh(), context, pos);
-}
+CreateValueX(r, fix, FIX)
 
 //
-// SourceExpression::create_value_fix_h
+// SourceExpression::create_value_flt*
 //
-SRCEXP_EXPRVAL_DEFN(r, fix_h)
-{
-   return CreateFIX(value, VariableType::get_bt_fix_h(), context, pos);
-}
+CreateValueX(r, flt, FLT)
 
 //
-// SourceExpression::create_value_fix
+// SourceExpression::create_value_fra*
 //
-SRCEXP_EXPRVAL_DEFN(r, fix)
-{
-   return CreateFIX(value, VariableType::get_bt_fix(), context, pos);
-}
+CreateValueX(r, fra, FIX)
 
 //
-// SourceExpression::create_value_fix_l
+// SourceExpression::create_value_int*
 //
-SRCEXP_EXPRVAL_DEFN(r, fix_l)
-{
-   return CreateFIX(value, VariableType::get_bt_fix_l(), context, pos);
-}
-
-//
-// SourceExpression::create_value_fix_ll
-//
-SRCEXP_EXPRVAL_DEFN(r, fix_ll)
-{
-   return CreateFIX(value, VariableType::get_bt_fix_ll(), context, pos);
-}
-
-//
-// SourceExpression::create_value_flt_hh
-//
-SRCEXP_EXPRVAL_DEFN(r, flt_hh)
-{
-   return CreateFLT(value, VariableType::get_bt_flt_hh(), context, pos);
-}
-
-//
-// SourceExpression::create_value_flt_h
-//
-SRCEXP_EXPRVAL_DEFN(r, flt_h)
-{
-   return CreateFLT(value, VariableType::get_bt_flt_h(), context, pos);
-}
-
-//
-// SourceExpression::create_value_flt
-//
-SRCEXP_EXPRVAL_DEFN(r, flt)
-{
-   return CreateFLT(value, VariableType::get_bt_flt(), context, pos);
-}
-
-//
-// SourceExpression::create_value_flt_l
-//
-SRCEXP_EXPRVAL_DEFN(r, flt_l)
-{
-   return CreateFLT(value, VariableType::get_bt_flt_l(), context, pos);
-}
-
-//
-// SourceExpression::create_value_flt_ll
-//
-SRCEXP_EXPRVAL_DEFN(r, flt_ll)
-{
-   return CreateFLT(value, VariableType::get_bt_flt_ll(), context, pos);
-}
-
-//
-// SourceExpression::create_value_fra_hh
-//
-SRCEXP_EXPRVAL_DEFN(r, fra_hh)
-{
-   return CreateFIX(value, VariableType::get_bt_fra_hh(), context, pos);
-}
-
-//
-// SourceExpression::create_value_fra_h
-//
-SRCEXP_EXPRVAL_DEFN(r, fra_h)
-{
-   return CreateFIX(value, VariableType::get_bt_fra_h(), context, pos);
-}
-
-//
-// SourceExpression::create_value_fra
-//
-SRCEXP_EXPRVAL_DEFN(r, fra)
-{
-   return CreateFIX(value, VariableType::get_bt_fra(), context, pos);
-}
-
-//
-// SourceExpression::create_value_fra_l
-//
-SRCEXP_EXPRVAL_DEFN(r, fra_l)
-{
-   return CreateFIX(value, VariableType::get_bt_fra_l(), context, pos);
-}
-
-//
-// SourceExpression::create_value_fra_ll
-//
-SRCEXP_EXPRVAL_DEFN(r, fra_ll)
-{
-   return CreateFIX(value, VariableType::get_bt_fra_ll(), context, pos);
-}
-
-//
-// SourceExpression::create_value_int
-//
-SRCEXP_EXPRVAL_DEFN(i, int)
-{
-   return create_int(value, VariableType::get_bt_int(), context, pos);
-}
-
-//
-// SourceExpression::create_value_llong
-//
-SRCEXP_EXPRVAL_DEFN(i, llong)
-{
-   return create_int(value, VariableType::get_bt_int_ll(), context, pos);
-}
-
-//
-// SourceExpression::create_value_long
-//
-SRCEXP_EXPRVAL_DEFN(i, long)
-{
-   return create_int(value, VariableType::get_bt_int_l(), context, pos);
-}
+CreateValueXN(i, int, INT, schar, short, int, long, llong)
 
 //
 // SourceExpression::create_value_real
 //
 SRCEXP_EXPRVAL_DEFN(r, real)
 {
-   ObjectExpression::Pointer realVarData =
-      ObjectExpression::create_value_fix(value, pos);
-
-   VariableType::Reference realVarType = VariableType::get_bt_fix();
-
-   SourceVariable::Pointer realVariable =
-      SourceVariable::create_literal(realVarType, realVarData, pos);
-
-   return create_value_variable(realVariable, context, pos);
+   return create_value_fix(value, context, pos);
 }
 
 //
@@ -393,75 +177,21 @@ SRCEXP_EXPRVAL_DEFN(s, real)
 }
 
 //
-// SourceExpression::create_value_schar
-//
-SRCEXP_EXPRVAL_DEFN(i, schar)
-{
-   return create_int(value, VariableType::get_bt_int_hh(), context, pos);
-}
-
-//
-// SourceExpression::create_value_short
-//
-SRCEXP_EXPRVAL_DEFN(i, short)
-{
-   return create_int(value, VariableType::get_bt_int_h(), context, pos);
-}
-
-//
 // SourceExpression::create_value_string
 //
 SRCEXP_EXPRVAL_DEFN(s, string)
 {
-   std::string stringVarData = ObjectData::String::Add(value);
+   auto varData = ObjectData::String::Add(value);
+   auto varType = VariableType::get_bt_str();
+   auto var = SourceVariable::create_literal(varType, varData, pos);
 
-   VariableType::Reference stringVarType = VariableType::get_bt_str();
-
-   SourceVariable::Pointer stringVariable
-      = SourceVariable::create_literal(stringVarType, stringVarData, pos);
-
-   return create_value_variable(stringVariable, context, pos);
+   return create_value_variable(var, context, pos);
 }
 
 //
-// SourceExpression::create_value_uchar
+// SourceExpression::create_value_uns*
 //
-SRCEXP_EXPRVAL_DEFN(i, uchar)
-{
-   return create_uns(value, VariableType::get_bt_uns_hh(), context, pos);
-}
-
-//
-// SourceExpression::create_value_uint
-//
-SRCEXP_EXPRVAL_DEFN(i, uint)
-{
-   return create_uns(value, VariableType::get_bt_uns(), context, pos);
-}
-
-//
-// SourceExpression::create_value_ullong
-//
-SRCEXP_EXPRVAL_DEFN(i, ullong)
-{
-   return create_uns(value, VariableType::get_bt_uns_ll(), context, pos);
-}
-
-//
-// SourceExpression::create_value_ulong
-//
-SRCEXP_EXPRVAL_DEFN(i, ulong)
-{
-   return create_uns(value, VariableType::get_bt_uns_l(), context, pos);
-}
-
-//
-// SourceExpression::create_value_ushort
-//
-SRCEXP_EXPRVAL_DEFN(i, ushort)
-{
-   return create_uns(value, VariableType::get_bt_uns_h(), context, pos);
-}
+CreateValueXN(i, uns, UNS, uchar, ushort, uint, ulong, ullong)
 
 //
 // SourceExpression::create_value_variable
@@ -469,42 +199,6 @@ SRCEXP_EXPRVAL_DEFN(i, ushort)
 SRCEXP_EXPRVAL_DEFN(v, variable)
 {
    return new SourceExpression_ValueVariable(var, context, pos);
-}
-
-//
-// SourceExpression_ValueVariable::SourceExpression_ValueVariable
-//
-SourceExpression_ValueVariable::
-SourceExpression_ValueVariable(SourceVariable *_var, SRCEXP_EXPR_PARM)
-                               : Super(SRCEXP_EXPR_PASS),
-                                 var(_var)
-{
-   if (!_var->getType()->getComplete())
-      Error_NP("incomplete type");
-}
-
-//
-// SourceExpression_ValueVariable::canGetData
-//
-bool SourceExpression_ValueVariable::canGetData() const
-{
-   return true;
-}
-
-//
-// SourceExpression_ValueVariable::getData
-//
-VariableData::Pointer SourceExpression_ValueVariable::getData() const
-{
-   return var->getData();
-}
-
-//
-// SourceExpression_ValueVariable::getType
-//
-VariableType::Reference SourceExpression_ValueVariable::getType() const
-{
-   return var->getType();
 }
 
 // EOF

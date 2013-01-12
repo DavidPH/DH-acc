@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -126,36 +126,34 @@ void BinaryTokenZDACS::make_tokens
 (ObjectVector const &objects, std::vector<BinaryTokenZDACS> *instructions)
 {
    static ObjectExpression::Pointer const fracbits =
-      ObjectExpression::create_value_int(16, SourcePosition::builtin());
+      ObjectExpression::CreateValueINT(16, SourcePosition::builtin());
 
    static ObjectExpression::Pointer const indexAddr =
-      ObjectExpression::create_value_int
-      (option_addr_array, SourcePosition::builtin());
+      ObjectExpression::CreateValueINT(option_addr_array, SourcePosition::builtin());
 
    static ObjectExpression::Reference const indexAuto =
-      ObjectExpression::create_value_int(option_auto_array, SourcePosition::builtin());
+      ObjectExpression::CreateValueINT(option_auto_array, SourcePosition::builtin());
 
    static ObjectExpression::Reference const indexRet1 =
-      ObjectExpression::create_value_int(-1, SourcePosition::builtin());
+      ObjectExpression::CreateValueINT(-1, SourcePosition::builtin());
 
    static ObjectExpression::Pointer const indexStack =
-      ObjectExpression::create_value_int
-      (option_addr_stack, SourcePosition::builtin());
+      ObjectExpression::CreateValueINT(option_addr_stack, SourcePosition::builtin());
 
    static ObjectExpression::Reference const func_GetChar =
-      ObjectExpression::create_value_uns(15, SourcePosition::builtin());
+      ObjectExpression::CreateValueUNS(15, SourcePosition::builtin());
    static ObjectExpression::Reference const func_GetCharArgs =
-      ObjectExpression::create_value_uns(2, SourcePosition::builtin());
+      ObjectExpression::CreateValueUNS(2, SourcePosition::builtin());
 
    static ObjectExpression::Reference const func_Getptr =
-      ObjectExpression::create_value_symbol("__Getptr", SourcePosition::builtin());
+      ObjectExpression::CreateValueSymbol("__Getptr", SourcePosition::builtin());
    static ObjectExpression::Reference const func_Setptr =
-      ObjectExpression::create_value_symbol("__Setptr", SourcePosition::builtin());
+      ObjectExpression::CreateValueSymbol("__Setptr", SourcePosition::builtin());
 
    static ObjectExpression::Reference const func_Udiv =
-      ObjectExpression::create_value_symbol("__Udiv", SourcePosition::builtin());
+      ObjectExpression::CreateValueSymbol("__Udiv", SourcePosition::builtin());
    static ObjectExpression::Reference const func_Ursh =
-      ObjectExpression::create_value_symbol("__Ursh", SourcePosition::builtin());
+      ObjectExpression::CreateValueSymbol("__Ursh", SourcePosition::builtin());
 
    static std::vector<std::string> const nolabels;
 
@@ -333,7 +331,7 @@ void BinaryTokenZDACS::make_tokens
    case OCODE_GET_STRING:
       PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1);
       // Don't tag nullptr.
-      if(option_string_tag && object->getArg(0)->resolveINT())
+      if(option_string_tag && object->getArg(0)->resolveUNS())
          PUSH_TOKEN(BCODE_STRING_TAG);
       break;
 

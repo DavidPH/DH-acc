@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011 David Hill
+// Copyright(C) 2011, 2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 //
 
 static ObjectExpression::Reference address0 =
-   ObjectExpression::create_value_uns(0, SourcePosition::none());
+   ObjectExpression::CreateValueUNS(0, SourcePosition::none());
 
 
 //----------------------------------------------------------------------------|

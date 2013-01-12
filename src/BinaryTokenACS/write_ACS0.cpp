@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ void BinaryTokenACS::write_ACS0_16(std::ostream *out, bigsint i)
 //
 void BinaryTokenACS::write_ACS0_32(std::ostream *out, ObjectExpression const &expr)
 {
-   write_ACS0_32(out, expr.resolveBinary());
+   write_ACS0_32(out, expr.resolveBinary(0));
 }
 
 //

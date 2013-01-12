@@ -133,7 +133,7 @@ static void GenerateSymbols(ArrayVarTable &table)
 
    for(itr = table.begin(); itr != end; ++itr)
    {
-      obj = ObjectExpression::create_value_uns(itr->second.number, SourcePosition::none());
+      obj = ObjectExpression::CreateValueUNS(itr->second.number, SourcePosition::none());
 
       ObjectExpression::add_symbol(itr->second.name, obj);
    }

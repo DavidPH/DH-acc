@@ -125,7 +125,7 @@ bool Script::Add(std::string const &name, std::string const &label,
       data.linkage   = linkage;
       data.externDef = !context;
 
-      ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
+      ObjectExpression::add_symbol(name, ObjectExpression::ET_UNS);
 
       return true;
    }
@@ -164,7 +164,7 @@ bool Script::Add(std::string const &name, std::string const &label,
       data.linkage   = linkage;
       data.externDef = varCount == -1;
 
-      ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
+      ObjectExpression::add_symbol(name, ObjectExpression::ET_UNS);
 
       return true;
    }
@@ -210,11 +210,10 @@ void ObjectData::Script::GenerateSymbols()
    for(iter = Table.begin(); iter != Table.end(); ++iter)
    {
       if (iter->second.number < 0)
-         obj = ObjectExpression::create_value_symbol(
+         obj = ObjectExpression::CreateValueSymbol(
             String::Add(iter->second.string), SourcePosition::none());
       else
-         obj = ObjectExpression::create_value_int
-         (iter->second.number, SourcePosition::none());
+         obj = ObjectExpression::CreateValueUNS(iter->second.number, SourcePosition::none());
 
       ObjectExpression::add_symbol(iter->second.name, obj);
    }

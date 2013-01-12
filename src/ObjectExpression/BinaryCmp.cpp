@@ -113,7 +113,11 @@ private:
    {
       switch (Super::getType())
       {
+      case ET_FIX_HH:
+      case ET_FIX_H:
       case ET_FIX:
+      case ET_FIX_L:
+      case ET_FIX_LL:
       {
          bigreal l = exprL->resolveFIX();
          bigreal r = exprR->resolveFIX();
@@ -122,7 +126,11 @@ private:
          return 0;
       }
 
+      case ET_FLT_HH:
+      case ET_FLT_H:
       case ET_FLT:
+      case ET_FLT_L:
+      case ET_FLT_LL:
       {
          bigreal l = exprL->resolveFLT();
          bigreal r = exprR->resolveFLT();
@@ -131,7 +139,11 @@ private:
          return 0;
       }
 
+      case ET_INT_HH:
+      case ET_INT_H:
       case ET_INT:
+      case ET_INT_L:
+      case ET_INT_LL:
       {
          bigsint l = exprL->resolveINT();
          bigsint r = exprR->resolveINT();
@@ -140,7 +152,11 @@ private:
          return 0;
       }
 
+      case ET_UNS_HH:
+      case ET_UNS_H:
       case ET_UNS:
+      case ET_UNS_L:
+      case ET_UNS_LL:
       {
          biguint l = exprL->resolveUNS();
          biguint r = exprR->resolveUNS();

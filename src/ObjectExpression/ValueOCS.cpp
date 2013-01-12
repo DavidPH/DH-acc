@@ -67,9 +67,9 @@ private:
 //
 
 //
-// ObjectExpression::create_value_ocs
+// ObjectExpression::CreateValueOCS
 //
-ObjectExpression::Reference ObjectExpression::create_value_ocs(
+ObjectExpression::Reference ObjectExpression::CreateValueOCS(
    ObjectCodeSet const &value, OBJEXP_EXPR_ARGS)
 {
    return static_cast<Reference>(new ObjectExpression_ValueOCS(value, pos));

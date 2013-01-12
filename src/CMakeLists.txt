@@ -46,16 +46,17 @@ add_executable(DH-acc
    ObjectExpression/BranchIOr.cpp
    ObjectExpression/BranchNot.cpp
    ObjectExpression/BranchXOr.cpp
-   ObjectExpression/Cast.cpp
    ObjectExpression/Unary.cpp
    ObjectExpression/UnaryAdd.cpp
    ObjectExpression/UnaryNot.cpp
    ObjectExpression/UnarySub.cpp
    ObjectExpression/ValueARR.cpp
+   ObjectExpression/ValueCast.cpp
    ObjectExpression/ValueFIX.cpp
    ObjectExpression/ValueFLT.cpp
    ObjectExpression/ValueINT.cpp
    ObjectExpression/ValueOCS.cpp
+   ObjectExpression/ValuePart.cpp
    ObjectExpression/ValueSymbol.cpp
    ObjectExpression/ValueUNS.cpp
    ObjectToken.cpp

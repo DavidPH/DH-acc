@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ VariableData::Pointer SourceVariable::getData() const
    if (expr)
       address = expr;
    else
-      address = ObjectExpression::create_value_symbol(nameObj, pos);
+      address = ObjectExpression::CreateValueSymbol(nameObj, pos);
 
    switch (store)
    {
@@ -134,21 +134,21 @@ VariableData::Pointer SourceVariable::getData() const
          (size, VariableData::SR_GLOBAL, address);
 
    case STORE_MAPARRAY:
-      address = ObjectExpression::create_value_symbol(nameArr, pos);
+      address = ObjectExpression::CreateValueSymbol(nameArr, pos);
       arrbase = SourceExpression::create_value_variable(create_literal(
          VariableType::get_bt_uns(), nameObj, pos), SourceContext::global_context, pos);
 
       return VariableData::create_array(size, VariableData::SA_MAP, address, arrbase);
 
    case STORE_WORLDARRAY:
-      address = ObjectExpression::create_value_symbol(nameArr, pos);
+      address = ObjectExpression::CreateValueSymbol(nameArr, pos);
       arrbase = SourceExpression::create_value_variable(create_literal(
          VariableType::get_bt_uns(), nameObj, pos), SourceContext::global_context, pos);
 
       return VariableData::create_array(size, VariableData::SA_WORLD, address, arrbase);
 
    case STORE_GLOBALARRAY:
-      address = ObjectExpression::create_value_symbol(nameArr, pos);
+      address = ObjectExpression::CreateValueSymbol(nameArr, pos);
       arrbase = SourceExpression::create_value_variable(create_literal(
          VariableType::get_bt_uns(), nameObj, pos), SourceContext::global_context, pos);
 

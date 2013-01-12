@@ -66,7 +66,7 @@ void Auto::Add(std::string const &name, VariableType const *type,
       data.linkage   = linkage;
       data.externDef = externDef;
 
-      ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
+      ObjectExpression::add_symbol(name, ObjectExpression::ET_UNS);
    }
    else if(data.externDef && !externDef)
    {
@@ -94,8 +94,7 @@ void Auto::GenerateSymbols()
 
    for (itr = Table.begin(); itr != end; ++itr)
    {
-      obj = ObjectExpression::create_value_int
-      (itr->second.number, SourcePosition::none());
+      obj = ObjectExpression::CreateValueUNS(itr->second.number, SourcePosition::none());
 
       ObjectExpression::add_symbol(itr->second.name, obj);
    }

@@ -96,7 +96,7 @@ void String::Add(std::string const &name, std::string const &string)
 
    data.names.push_back(name);
 
-   ObjectExpression::add_symbol(name, ObjectExpression::ET_INT);
+   ObjectExpression::add_symbol(name, ObjectExpression::ET_UNS);
 }
 
 //
@@ -142,7 +142,7 @@ void String::GenerateSymbols()
    {
       String &s = it->second;
 
-      expr = ObjectExpression::create_value_int(i++, SourcePosition::none());
+      expr = ObjectExpression::CreateValueUNS(i++, SourcePosition::none());
 
       for (name = s.names.begin(); name != s.names.end(); ++name)
          ObjectExpression::add_symbol(*name, expr);

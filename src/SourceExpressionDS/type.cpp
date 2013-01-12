@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -526,7 +526,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
             }
 
             ObjectExpression::Pointer enumObj =
-               ObjectExpression::create_value_int(enumVal++, enumTok->pos);
+               ObjectExpression::CreateValueINT(enumVal++, enumTok->pos);
 
             context->addVar(SourceVariable::create_constant
                (enumTok->data, type, enumObj, enumTok->pos), LINKAGE_C, false);

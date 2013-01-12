@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -383,17 +383,17 @@ SRCEXPDS_KEYWORD_DEFN(literal)
 
    if(tok->data == "true")
    {
-      obj = ObjectExpression::create_value_int(1, tok->pos);
+      obj = ObjectExpression::CreateValueINT(1, tok->pos);
       type = VariableType::get_bt_bit_hrd();
    }
    else if(tok->data == "false")
    {
-      obj = ObjectExpression::create_value_int(0, tok->pos);
+      obj = ObjectExpression::CreateValueINT(0, tok->pos);
       type = VariableType::get_bt_bit_hrd();
    }
    else if(tok->data == "nullptr")
    {
-      obj = ObjectExpression::create_value_uns(0, tok->pos);
+      obj = ObjectExpression::CreateValueUNS(0, tok->pos);
       type = VariableType::get_bt_ptr_nul();
    }
    else
@@ -453,7 +453,7 @@ SRCEXPDS_KEYWORD_DEFN(ocode)
 
    in->get(SourceTokenC::TT_PAREN_C);
 
-   ocodeObj = ObjectExpression::create_value_ocs(ocode, tok->pos);
+   ocodeObj = ObjectExpression::CreateValueOCS(ocode, tok->pos);
    ocodeVar = SourceVariable::create_literal(ocodeTyp, ocodeObj, tok->pos);
 
    return create_value_variable(ocodeVar, context, tok->pos);

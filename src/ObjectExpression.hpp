@@ -81,10 +81,30 @@ public:
 
    enum ExpressionType
    {
+      ET_FIX_HH,
+      ET_FIX_H,
       ET_FIX, // bigreal
+      ET_FIX_L,
+      ET_FIX_LL,
+
+      ET_FLT_HH,
+      ET_FLT_H,
       ET_FLT, // bigreal
+      ET_FLT_L,
+      ET_FLT_LL,
+
+      ET_INT_HH,
+      ET_INT_H,
       ET_INT, // bigsint
+      ET_INT_L,
+      ET_INT_LL,
+
+      ET_UNS_HH,
+      ET_UNS_H,
       ET_UNS, // biguint
+      ET_UNS_L,
+      ET_UNS_LL,
+
       ET_OCS, // ObjectCodeSet
 
       ET_ARR,
@@ -110,7 +130,7 @@ public:
    virtual Reference resolveARR(biguint index) const;
    virtual Reference resolveMAP(std::string const &name) const;
 
-   virtual biguint     resolveBinary() const;
+   virtual biguint     resolveBinary(biguint part) const;
    virtual std::string resolveString() const;
    virtual std::string resolveSymbol() const;
 
@@ -164,27 +184,32 @@ public:
    static Reference create_branch_not(OBJEXP_EXPRUNA_ARGS);
    static Reference create_branch_xor(OBJEXP_EXPRBIN_ARGS);
 
-   static Reference create_cast_fix_to_flt(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_fix_to_int(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_fix_to_uns(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_flt_to_fix(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_flt_to_int(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_flt_to_uns(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_int_to_fix(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_int_to_flt(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_int_to_uns(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_uns_to_fix(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_uns_to_flt(OBJEXP_EXPRUNA_ARGS);
-   static Reference create_cast_uns_to_int(OBJEXP_EXPRUNA_ARGS);
-
-   static Reference create_value_fix(bigreal value, SourcePosition const &pos);
-   static Reference create_value_flt(bigreal value, SourcePosition const &pos);
-   static Reference create_value_int(bigsint value, SourcePosition const &pos);
-   static Reference create_value_uns(biguint value, SourcePosition const &pos);
-   static Reference create_value_ocs(ObjectCodeSet const &ocode, SourcePosition const &pos);
-   static Reference create_value_arr(Vector const &elems, SourcePosition const &pos);
-   static Reference create_value_map(Vector const &elems, VecStr const &names, SourcePosition const &pos);
-   static Reference create_value_symbol(std::string const &symbol, SourcePosition const &pos);
+   static Reference CreateValueFIX_HH(bigreal value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueFIX_H (bigreal value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueFIX   (bigreal value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueFIX_L (bigreal value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueFIX_LL(bigreal value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueFLT_HH(bigreal value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueFLT_H (bigreal value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueFLT   (bigreal value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueFLT_L (bigreal value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueFLT_LL(bigreal value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueINT_HH(bigsint value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueINT_H (bigsint value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueINT   (bigsint value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueINT_L (bigsint value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueINT_LL(bigsint value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueUNS_HH(biguint value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueUNS_H (biguint value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueUNS   (biguint value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueUNS_L (biguint value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueUNS_LL(biguint value, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueOCS(ObjectCodeSet const &ocode, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueARR(Vector const &elems, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueMAP(Vector const &elems, VecStr const &names, OBJEXP_EXPR_ARGS);
+   static Reference CreateValueCast(ExpressionType type, OBJEXP_EXPRUNA_ARGS);
+   static Reference CreateValuePart(biguint part, OBJEXP_EXPRUNA_ARGS);
+   static Reference CreateValueSymbol(std::string const &symbol, OBJEXP_EXPR_ARGS);
 
 	static void do_deferred_allocation();
 
@@ -231,20 +256,20 @@ protected:
       OT_BRANCH_NOT,
       OT_BRANCH_XOR,
 
-      OT_CAST,
-
       OT_VALUE_FIX,
       OT_VALUE_FLT,
       OT_VALUE_INT,
       OT_VALUE_UNS,
       OT_VALUE_OCS,
       OT_VALUE_ARR,
+      OT_VALUE_CAST,
+      OT_VALUE_PART,
       OT_VALUE_SYMBOL,
 
       OT_NONE
    };
 
-   explicit ObjectExpression(SourcePosition const &pos);
+   explicit ObjectExpression(OBJEXP_EXPR_ARGS);
    explicit ObjectExpression(ObjectArchive &arc);
 
    virtual ObjectArchive &archive(ObjectArchive &arc);
@@ -279,7 +304,6 @@ protected:
    static Reference CreateBranchNot(ObjectArchive &arc);
    static Reference CreateBranchXOr(ObjectArchive &arc);
 
-   static Reference CreateCast(ObjectArchive &arc);
 
    static Reference CreateValueFIX   (ObjectArchive &arc);
    static Reference CreateValueFLT   (ObjectArchive &arc);
@@ -287,6 +311,8 @@ protected:
    static Reference CreateValueUNS   (ObjectArchive &arc);
    static Reference CreateValueOCS   (ObjectArchive &arc);
    static Reference CreateValueARR   (ObjectArchive &arc);
+   static Reference CreateValueCast  (ObjectArchive &arc);
+   static Reference CreateValuePart  (ObjectArchive &arc);
    static Reference CreateValueSymbol(ObjectArchive &arc);
 
 private:

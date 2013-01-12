@@ -69,7 +69,7 @@ void ObjectToken::addLabel(std::vector<std::string> const &_labels)
 ObjectExpression::Pointer ObjectToken::getArg(bigsint index) const
 {
    static ObjectExpression::Pointer expr =
-      ObjectExpression::create_value_int(0, SourcePosition::builtin());
+      ObjectExpression::CreateValueINT(0, SourcePosition::builtin());
 
    if (index < static_cast<bigsint>(args.size()))
       return args[index];

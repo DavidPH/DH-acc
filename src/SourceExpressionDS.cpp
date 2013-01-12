@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2013 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -351,7 +351,7 @@ SRCEXPDS_EXPR_DEF1(prefix)
       case VariableData::MT_AUTO:
       case VariableData::MT_POINTER:
       case VariableData::MT_STATIC:
-         addr = ObjectExpression::create_value_int(option_addr_array, tok->pos);
+         addr = ObjectExpression::CreateValueINT(option_addr_array, tok->pos);
          break;
 
       case VariableData::MT_FARPTR:

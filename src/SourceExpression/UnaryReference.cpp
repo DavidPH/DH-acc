@@ -110,8 +110,8 @@ public:
       {
       case VariableData::MT_ARRAY:
       case VariableData::MT_STRING:
-         if (!data->offsetExpr)
-            return ObjectExpression::create_value_uns(0, pos);
+         if(!data->offsetExpr)
+            return ObjectExpression::CreateValueUNS(0, pos);
 
          return data->offsetExpr->makeObject();
 

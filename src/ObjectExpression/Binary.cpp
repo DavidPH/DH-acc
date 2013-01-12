@@ -43,8 +43,9 @@ ObjectExpression_Binary::ObjectExpression_Binary(OBJEXP_EXPRBIN_PARM)
    if((typeL == ET_INT && typeR == ET_UNS) || (typeL == ET_UNS && typeR == ET_INT))
       return;
 
-   if(typeL != typeR)
-      Error_NP("type mismatch: %s %s", make_string(typeL).c_str(), make_string(typeR).c_str());
+   // TODO: Re-enable this check.
+   //if(typeL != typeR)
+   //   Error_NP("type mismatch: %s %s", make_string(typeL).c_str(), make_string(typeR).c_str());
 }
 
 //
