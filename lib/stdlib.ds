@@ -93,8 +93,7 @@ __intvar __static_register unsigned randval = 1;
 //
 __extfunc "C" double atof(char const *nptr)
 {
-   double f;
-   return f;
+   return 0;
 };
 
 //
@@ -126,9 +125,8 @@ __extfunc "C" long long atoll(char const *nptr)
 //
 __extfunc "C" double strtod(char const *restrict nptr, char **restrict endptr)
 {
-   double f;
    if(endptr) *endptr = NULL;
-   return f;
+   return 0;
 };
 
 //
@@ -136,9 +134,8 @@ __extfunc "C" double strtod(char const *restrict nptr, char **restrict endptr)
 //
 __extfunc "C" float strtof(char const *restrict nptr, char **restrict endptr)
 {
-   float f;
    if(endptr) *endptr = NULL;
-   return f;
+   return 0;
 };
 
 //
@@ -146,9 +143,8 @@ __extfunc "C" float strtof(char const *restrict nptr, char **restrict endptr)
 //
 __extfunc "C" long double strtold(char const *restrict nptr, char **restrict endptr)
 {
-   long double f;
    if(endptr) *endptr = NULL;
-   return f;
+   return 0;
 };
 
 //

@@ -33,6 +33,7 @@
 #include "SourceTokenC.hpp"
 
 #include <cmath>
+#include <cstring>
 #include <sstream>
 
 
@@ -318,6 +319,32 @@ ObjectExpression::Reference ObjectExpression::resolveMAP(std::string const &name
 //
 biguint ObjectExpression::resolveBinary(biguint part) const
 {
+   #define DoFlt(BITS,SIG,MAN,EXP) \
+      real = resolveFLT(); \
+      \
+      if(!real) return 0; \
+      \
+      std::snprintf(str, sizeof(str), "%.*LA", static_cast<int>(((BITS) + 3) / 4), \
+         static_cast<long double>(real)); \
+      \
+      man  = std::strtoll(str, &s, 0) << (((BITS) + 3) / 4 * 4); \
+      man += std::strtoll(s+1, &s, 16) * (man < 0 ? -1 : 1); \
+      exp  = std::strtoll(s+1, NULL, 0) - (((BITS) + 3) / 4 * 4); \
+      \
+      if(man < 0) {man = -man; sig = (SIG);} else sig = 0; \
+      while(man > ((MAN) * 2 + 1)) {man >>= 1; ++exp;} \
+      \
+      if(exp < -(EXP)+1) {exp = -(EXP); man = 0;} \
+      if(exp > (EXP)) {exp = (EXP)+1; man = 0;} \
+      \
+      value = static_cast<biguint>(sig | ((exp + (EXP)) << (BITS)) | (man & (MAN))); \
+      return (value >> (part * 32)) & 0xFFFFFFFF;
+
+   bigreal real;
+   bigsint man, exp, sig;
+   biguint value;
+   char str[/*-0xh.*/5 + /*digits*/13 + /*p+*/2 + /*exponent*/8 + /*null*/1], *s;
+
    switch(getType())
    {
    case ET_FIX_HH:
@@ -337,17 +364,17 @@ biguint ObjectExpression::resolveBinary(biguint part) const
          return static_cast<biguint>(static_cast<bigsint>(std::fmod(resolveFIX(), 1) * 4294967296.0)) & 0xFFFFFFFF;
 
    case ET_FLT_HH:
-      Error_NP("TODO FLT_HH");
+      DoFlt(4, 0x80, 0xF, 3);
 
    case ET_FLT_H:
-      Error_NP("TODO FLT_H");
+      DoFlt(10, 0x8000, 0x3FF, 15);
 
    case ET_FLT:
-      Error_NP("TODO FLT");
+      DoFlt(23, 0x80000000, 0x7FFFFF, 127);
 
    case ET_FLT_L:
    case ET_FLT_LL:
-      Error_NP("TODO FLT_L");
+      DoFlt(52, 0x8000000000000000, 0xFFFFFFFFFFFFF, 1023);
 
    case ET_INT_HH:
    case ET_INT_H:
