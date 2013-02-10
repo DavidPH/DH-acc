@@ -27,6 +27,7 @@
 #include "option.hpp"
 #include "ost_type.hpp"
 #include "SourceException.hpp"
+#include "SourceExpression.hpp"
 #include "SourceStream.hpp"
 
 #include <cctype>
@@ -179,6 +180,11 @@ SourceTokenizerC::SourceTokenizerC(SourceStream *_in)
 
    if (option_script_autoargs)
       addDefine("__SCRIPT_AUTOARGS__", "");
+
+   if(option_near_pointers)
+      addDefine("__NEAR_POINTERS__", "");
+   else
+      addDefine("__FAR_POINTERS__", "");
 
    inStack.push_back(_in);
    ungetStack.push_back(static_cast<SourceTokenC::Reference>(
