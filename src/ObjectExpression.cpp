@@ -25,6 +25,7 @@
 
 #include "ACSP.hpp"
 #include "BinaryTokenACS.hpp"
+#include "BinaryTokenNTS.hpp"
 #include "ObjectCode.hpp"
 #include "ObjectData.hpp"
 #include "option.hpp"
@@ -164,13 +165,15 @@ ObjectArchive &ObjectExpression::archive(ObjectArchive &arc)
 //
 void ObjectExpression::do_deferred_allocation()
 {
-   ObjectData::Label::GenerateSymbols();
-
    ObjectData::ArrayVar::GenerateSymbols();
    ObjectData::Auto::GenerateSymbols();
    ObjectData::Register::GenerateSymbols();
    // Array must be after Register and ArrayVar.
    ObjectData::Array::GenerateSymbols();
+
+   if(Target == TARGET_MageCraft) return;
+
+   ObjectData::Label::GenerateSymbols();
 
    // For ACS+, all the following allocation is done by the linker.
    if(Output == OUTPUT_ACSP) return;
@@ -472,6 +475,14 @@ void ObjectExpression::set_library(std::string const &library)
 }
 
 //
+// ObjectExpression::v_writeNTS0
+//
+void ObjectExpression::v_writeNTS0(std::ostream *) const
+{
+   Error_NP("cannot write NTS0");
+}
+
+//
 // ObjectExpression::writeACSP
 //
 void ObjectExpression::writeACSP(std::ostream *out) const
@@ -483,6 +494,17 @@ void ObjectExpression::writeACSP(std::ostream *out) const
    }
    else
       writeACSPLong(out);
+}
+
+//
+// ObjectExpression::writeNTS0
+//
+void ObjectExpression::writeNTS0(std::ostream *out) const
+{
+   if(canResolve())
+      BinaryTokenNTS::WriteInt(out, resolveBinary(0));
+   else
+      v_writeNTS0(out);
 }
 
 //

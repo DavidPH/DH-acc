@@ -52,6 +52,17 @@ void SourceExpression::make_objects_call_function
    FUNCTION_PREAMBLE
    FUNCTION_ARGS
 
+   // Handle MageCraft's calling separately for now.
+   if(Target == TARGET_MageCraft)
+   {
+      data->makeObjects(objects, VariableData::create_stack(1));
+      objects->addToken(OCODE_JMP_CAL, objects->getValue(callSize + vaSize));
+
+      make_objects_memcpy_post(objects, dst, src, retnType, context, pos);
+
+      return;
+   }
+
    // Determine which OCODE to use.
    ObjectCode ocode;
    if(data->canMakeObject())

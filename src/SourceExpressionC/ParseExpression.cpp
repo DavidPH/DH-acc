@@ -24,6 +24,7 @@
 #include "../SourceExpressionC.hpp"
 
 #include "../ObjectExpression.hpp"
+#include "../ost_type.hpp"
 #include "../SourceContext.hpp"
 #include "../SourceException.hpp"
 #include "../SourceFunction.hpp"
@@ -175,6 +176,26 @@ SRCEXPC_PARSE_DEFN_HALF(Primary)
          in->get(SourceTokenC::TT_PAREN_C);
 
          return create_root_printf(type, format, exprs, context, tok->pos);
+      }
+
+      // string_table-expression
+
+      // <__string_table> ( string-literal )
+      if(tok->data == "__string_table")
+      {
+         in->get(SourceTokenC::TT_PAREN_O);
+         std::string data = in->get(SourceTokenC::TT_STR)->data;
+         in->get(SourceTokenC::TT_PAREN_C);
+
+         if(Target == TARGET_MageCraft)
+         {
+            auto type = VariableType::get_bt_uns();
+            auto var  = SourceVariable::create_literal(type, '"' + data, tok->pos);
+
+            return create_value_variable(var, context, tok->pos);
+         }
+
+         return create_value_string(data, context, tok->pos);
       }
 
       if(context->isVariable(tok->data))

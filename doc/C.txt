@@ -901,6 +901,7 @@ Primary Expression
 
   primary-expression: add
     printf-expression
+    string_table-expression
 
 ===========================================================
 Printf Expression
@@ -934,6 +935,17 @@ Performs a compile-time checked formatted print. Syntax of the format string is
 as described for fprintf, with the exception of %n which is not available.
 
 If no printf-specifier is given, the behavior is as if print was given.
+
+===========================================================
+String_Table Expression
+===========================================================
+
+  string_table-expression:
+    <__string_table> ( string-literal )
+
+Adds or finds an entry to the target's string table, yielding its index.
+
+For ACS-based targets, this is equivalent to specifying the string literal.
 
 ===========================================================
 Declaration

@@ -24,6 +24,7 @@
 #include "SourceExpressionC.hpp"
 
 #include "ObjectExpression.hpp"
+#include "ost_type.hpp"
 #include "SourceContext.hpp"
 #include "SourceException.hpp"
 #include "SourceStream.hpp"
@@ -725,7 +726,8 @@ void SourceExpressionC::ParseDeclaratorSuffix(Declarator &decl, SRCEXPC_PARSE_AR
 
       // main needs to be implicitly an open script.
       // Don't override any explicit script attributes, though.
-      if(decl.name == "main" && !funcAttr.script)
+      // MageCraft needs main to be a normal function.
+      if(Target != TARGET_MageCraft && decl.name == "main" && !funcAttr.script)
       {
          funcAttr.script = true;
          funcAttr.scriptAddr = option_named_scripts ? -2 : -1;

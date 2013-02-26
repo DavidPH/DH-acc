@@ -25,6 +25,7 @@
 
 #include "../ObjectData.hpp"
 #include "../ObjectExpression.hpp"
+#include "../ost_type.hpp"
 #include "../SourceException.hpp"
 #include "../SourceTokenC.hpp"
 #include "../SourceVariable.hpp"
@@ -182,10 +183,21 @@ SRCEXP_EXPRVAL_DEFN(s, real)
 SRCEXP_EXPRVAL_DEFN(s, string)
 {
    auto varData = ObjectData::String::Add(value);
-   auto varType = VariableType::get_bt_str();
-   auto var = SourceVariable::create_literal(varType, varData, pos);
 
-   return create_value_variable(var, context, pos);
+   if(Target == TARGET_MageCraft)
+   {
+      auto varType = VariableType::get_bt_chr()->addQualifier(VariableType::QUAL_CONST)->getPointer();
+      auto var     = SourceVariable::create_literal(varType, varData, pos);
+
+      return create_value_variable(var, context, pos);
+   }
+   else
+   {
+      auto varType = VariableType::get_bt_str();
+      auto var     = SourceVariable::create_literal(varType, varData, pos);
+
+      return create_value_variable(var, context, pos);
+   }
 }
 
 //

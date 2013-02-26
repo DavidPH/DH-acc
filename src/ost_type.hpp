@@ -38,6 +38,7 @@ enum OutputType
    OUTPUT_ACSE,
    OUTPUT_ACSP,
    OUTPUT_object,
+   OUTPUT_NTS0,
 
    OUTPUT_UNKNOWN
 };
@@ -62,6 +63,7 @@ enum TargetType
 {
    TARGET_Eternity,
    TARGET_Hexen,
+   TARGET_MageCraft,
    TARGET_ZDoom,
 
    TARGET_UNKNOWN

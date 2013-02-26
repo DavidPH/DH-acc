@@ -6,6 +6,7 @@ add_executable(DH-acc
    BinaryTokenACS/make_tokens.cpp
    BinaryTokenACS/output.cpp
    BinaryTokenACS/write_ACS0.cpp
+   BinaryTokenNTS.cpp
    BinaryTokenPPACS.cpp
    BinaryTokenPPACS/make_tokens.cpp
    BinaryTokenPPACS/output.cpp

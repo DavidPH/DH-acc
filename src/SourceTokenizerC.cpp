@@ -172,10 +172,11 @@ SourceTokenizerC::SourceTokenizerC(SourceStream *_in)
 {
    switch(Target)
    {
-   case TARGET_Eternity: addDefine("__TARGET_Eternity__", ""); break;
-   case TARGET_Hexen:    addDefine("__TARGET_Hexen__",    ""); break;
-   case TARGET_ZDoom:    addDefine("__TARGET_ZDoom__",    ""); break;
-   case TARGET_UNKNOWN:  addDefine("__TARGET_UNKNOWN__",  ""); break;
+   case TARGET_Eternity:  addDefine("__TARGET_Eternity__",  ""); break;
+   case TARGET_Hexen:     addDefine("__TARGET_Hexen__",     ""); break;
+   case TARGET_MageCraft: addDefine("__TARGET_MageCraft__", ""); break;
+   case TARGET_ZDoom:     addDefine("__TARGET_ZDoom__",     ""); break;
+   case TARGET_UNKNOWN:   addDefine("__TARGET_UNKNOWN__",   ""); break;
    }
 
    if (option_script_autoargs)

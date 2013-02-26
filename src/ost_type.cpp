@@ -86,14 +86,12 @@ TargetType Target = TARGET_UNKNOWN, Tune = TARGET_UNKNOWN;
 //
 static TargetType GetTarget(char const *target)
 {
-   if(!strcmp(target, "Eternity"))
-      return TARGET_Eternity;
-   else if(!strcmp(target, "Hexen"))
-      return TARGET_Hexen;
-   else if(!strcmp(target, "ZDoom"))
-      return TARGET_ZDoom;
-   else
-      return TARGET_UNKNOWN;
+   if(!std::strcmp(target, "Eternity"))  return TARGET_Eternity;
+   if(!std::strcmp(target, "Hexen"))     return TARGET_Hexen;
+   if(!std::strcmp(target, "MageCraft")) return TARGET_MageCraft;
+   if(!std::strcmp(target, "ZDoom"))     return TARGET_ZDoom;
+
+   return TARGET_UNKNOWN;
 }
 
 //
@@ -111,6 +109,8 @@ static int OutputHandler(char const *opt, int optf, int argc, char const *const 
       Output = OUTPUT_ACSP;
    else if(!strcmp(argv[0], "object"))
       Output = OUTPUT_object;
+   else if(!std::strcmp(argv[0], "NTS0"))
+      Output = OUTPUT_NTS0;
    else
       option::exception::error(opt, optf, "unrecognized type");
 

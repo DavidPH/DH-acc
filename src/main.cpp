@@ -22,6 +22,7 @@
 //-----------------------------------------------------------------------------
 
 #include "BinaryTokenACS.hpp"
+#include "BinaryTokenNTS.hpp"
 #include "BinaryTokenPPACS.hpp"
 #include "BinaryTokenZDACS.hpp"
 #include "ObjectArchive.hpp"
@@ -312,6 +313,13 @@ static inline void _init(int argc, char const *const *argv)
       option::print_help(stderr);
       throw 1;
    }
+
+   // HACK: Too much code needs to be updated to handle MageCraft with certain options.
+   if(Target == TARGET_MageCraft)
+   {
+      // All pointers in MageCraft are near. Far pointers need to be 1 byte.
+      option_near_pointers = true;
+   }
 }
 
 //
@@ -449,9 +457,10 @@ static inline int _main()
    // Default output.
    if(Output == OUTPUT_UNKNOWN) switch(Target)
    {
-   case TARGET_Eternity: Output = OUTPUT_ACSE; break;
-   case TARGET_Hexen:    Output = OUTPUT_ACS0; break;
-   case TARGET_ZDoom:    Output = OUTPUT_ACSE; break;
+   case TARGET_Eternity:  Output = OUTPUT_ACSE; break;
+   case TARGET_Hexen:     Output = OUTPUT_ACS0; break;
+   case TARGET_MageCraft: Output = OUTPUT_NTS0; break;
+   case TARGET_ZDoom:     Output = OUTPUT_ACSE; break;
    case TARGET_UNKNOWN: break;
    }
 
@@ -476,6 +485,14 @@ static inline int _main()
       BinaryTokenZDACS::make_tokens(objects, &instructions);
       BinaryTokenZDACS::write_all(&ofs, instructions);
    }
+      break;
+
+   case TARGET_MageCraft:
+      {
+         std::vector<BinaryTokenNTS> instructions;
+         BinaryTokenNTS::MakeTokens(&instructions, objects);
+         BinaryTokenNTS::WriteAll(&ofs, instructions);
+      }
       break;
 
    default:

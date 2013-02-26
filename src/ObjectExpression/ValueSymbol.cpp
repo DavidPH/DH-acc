@@ -83,6 +83,15 @@ protected:
 
 private:
    //
+   // v_writeNTS0
+   //
+   virtual void v_writeNTS0(std::ostream *out) const
+   {
+      if(value[0] != '"') *out << '$';
+      *out << value << '\0';
+   }
+
+   //
    // writeACSPLong
    //
    virtual void writeACSPLong(std::ostream *out) const

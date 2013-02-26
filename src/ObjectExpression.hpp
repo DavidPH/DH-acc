@@ -135,6 +135,7 @@ public:
    virtual std::string resolveSymbol() const;
 
    void writeACSP(std::ostream *out) const;
+   void writeNTS0(std::ostream *out) const;
 
 
    friend std::string const &make_string(ExpressionType et);
@@ -317,6 +318,7 @@ protected:
 
 private:
    virtual void writeACSPLong(std::ostream *out) const;
+   virtual void v_writeNTS0(std::ostream *out) const;
 
 
    static bigsint address_count;
