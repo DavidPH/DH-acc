@@ -178,6 +178,20 @@ SRCEXPC_PARSE_DEFN_HALF(Primary)
          return create_root_printf(type, format, exprs, context, tok->pos);
       }
 
+      // symbol-expression:
+      //   <__symbol> ( type-name , string-literal )
+      if(tok->data == "__symbol")
+      {
+         in->get(SourceTokenC::TT_PAREN_O);
+         auto type = ParseType(in, context);
+         in->get(SourceTokenC::TT_COMMA);
+         auto data = in->get(SourceTokenC::TT_STR)->data;
+         in->get(SourceTokenC::TT_PAREN_C);
+
+         auto var = SourceVariable::create_literal(type, data, tok->pos);
+         return create_value_variable(var, context, tok->pos);
+      }
+
       // string_table-expression
 
       // <__string_table> ( string-literal )

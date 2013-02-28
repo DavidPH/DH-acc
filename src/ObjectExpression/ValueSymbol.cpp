@@ -87,7 +87,7 @@ private:
    //
    virtual void v_writeNTS0(std::ostream *out) const
    {
-      if(value[0] != '"') *out << '$';
+      if(value[0] != '"' && value[0] != '{') *out << '$';
       *out << value << '\0';
    }
 

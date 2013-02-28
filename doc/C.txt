@@ -901,6 +901,7 @@ Primary Expression
 
   primary-expression: add
     printf-expression
+    symbol-expression
     string_table-expression
 
 ===========================================================
@@ -935,6 +936,18 @@ Performs a compile-time checked formatted print. Syntax of the format string is
 as described for fprintf, with the exception of %n which is not available.
 
 If no printf-specifier is given, the behavior is as if print was given.
+
+===========================================================
+Symbol Expression
+===========================================================
+
+  symbol-expression:
+    <__symbol> ( type-name , string-literal )
+
+Creates a literal defined by the given symbol name.
+
+This exists primarily for MageCraft targets, where symbols starting with " or {
+are treated specially.
 
 ===========================================================
 String_Table Expression
