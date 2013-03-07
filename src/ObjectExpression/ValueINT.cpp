@@ -59,12 +59,11 @@ protected:
 
 private:
    //
-   // writeACSPLong
+   // v_writeNTS0
    //
-   virtual void writeACSPLong(std::ostream *out) const
+   virtual void v_writeNTS0(std::ostream *out) const
    {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LITERAL);
-      BinaryTokenACS::write_ACS0_32(out, value);
+      *out << std::hex << value << '\0';
    }
 
    bigsint value;

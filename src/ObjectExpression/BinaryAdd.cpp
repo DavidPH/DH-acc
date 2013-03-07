@@ -55,14 +55,13 @@ protected:
 
 private:
    //
-   // ::writeACSPLong
+   // v_writeNTS0
    //
-   virtual void writeACSPLong(std::ostream *out) const
+   virtual void v_writeNTS0(std::ostream *out) const
    {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_ADD);
-
-      exprL->writeACSP(out);
-      exprR->writeACSP(out);
+      *out << '+' << '\0';
+      exprL->writeNTS0(out);
+      exprR->writeNTS0(out);
    }
 };
 
