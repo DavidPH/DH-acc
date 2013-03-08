@@ -77,6 +77,7 @@ bool Function::Add(std::string const &name, std::string const &label,
    }
    else if(data.externDef && context)
    {
+      data.context   = context;
       data.externDef = false;
    }
 

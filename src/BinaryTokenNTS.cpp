@@ -30,6 +30,16 @@
 
 
 //----------------------------------------------------------------------------|
+// Macros                                                                     |
+//
+
+#define TranslateDirect(OCODE,NTS) \
+   case OCODE_##OCODE: \
+      tokens->emplace_back(object.labels, object.args, NTS, object.pos); \
+      break
+
+
+//----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
@@ -51,65 +61,45 @@ void BinaryTokenNTS::MakeTokens(std::vector<BinaryTokenNTS> *tokens, ObjectVecto
    {
       switch(object.code)
       {
-      case OCODE_NOP:
-         tokens->emplace_back(object.labels, object.args, "nop", object.pos);
-         break;
+         TranslateDirect(NOP, "nop");
 
       case OCODE_ADD_STK_I:
-      case OCODE_ADD_STK_U:
-         tokens->emplace_back(object.labels, object.args, "addu_stk", object.pos);
-         break;
+         TranslateDirect(ADD_STK_U, "addu_stk");
 
+         TranslateDirect(JMP_CAL, "call_stk");
+
+         TranslateDirect(JMP_NIL, "cjmp_stk_nil");
+         TranslateDirect(JMP_TRU, "cjmp_stk_tru");
+
+      case OCODE_CMP_EQ_I:
+         TranslateDirect(CMP_EQ_U, "cmpu_stk_eq");
+         TranslateDirect(CMP_GE_U, "cmpu_stk_ge");
+         TranslateDirect(CMP_GT_U, "cmpu_stk_gt");
+         TranslateDirect(CMP_LE_U, "cmpu_stk_le");
+         TranslateDirect(CMP_LT_U, "cmpu_stk_lt");
+      case OCODE_CMP_NE_I:
+         TranslateDirect(CMP_NE_U, "cmpu_stk_ne");
+
+         TranslateDirect(SET_STATIC, "drop_dat");
+         TranslateDirect(STK_DROP,   "drop_nul");
+         TranslateDirect(SET_PTR,    "drop_ptr");
+         TranslateDirect(SET_REG,    "drop_reg");
+
+         TranslateDirect(JMP_IMM, "jump_imm");
+         TranslateDirect(JMP,     "jump_stk");
+
+         TranslateDirect(GET_STATIC, "push_dat");
       case OCODE_GET_FUNCP:
-      case OCODE_GET_IMM:
-         tokens->emplace_back(object.labels, object.args, "push_imm", object.pos);
-         break;
+         TranslateDirect(GET_IMM,    "push_imm");
+         TranslateDirect(GET_PTR,    "push_ptr");
+         TranslateDirect(GET_REG,    "push_reg");
 
-      case OCODE_GET_PTR:
-         tokens->emplace_back(object.labels, object.args, "push_ptr", object.pos);
-         break;
-
-      case OCODE_GET_REG:
-         tokens->emplace_back(object.labels, object.args, "push_reg", object.pos);
-         break;
-
-      case OCODE_GET_STATIC:
-         tokens->emplace_back(object.labels, object.args, "push_dat", object.pos);
-         break;
-
-      case OCODE_JMP:
-         tokens->emplace_back(object.labels, object.args, "jump_stk", object.pos);
-         break;
-
-      case OCODE_JMP_CAL:
-         tokens->emplace_back(object.labels, object.args, "call_stk", object.pos);
-         break;
-
-      case OCODE_JMP_RET:
       case OCODE_JMP_RET_NIL:
       case OCODE_JMP_RET_SCR:
-         tokens->emplace_back(object.labels, object.args, "retn", object.pos);
-         break;
+         TranslateDirect(JMP_RET, "retn");
 
-      case OCODE_JMP_TRU:
-         tokens->emplace_back(object.labels, object.args, "cjmp_tru", object.pos);
-         break;
-
-      case OCODE_SET_PTR:
-         tokens->emplace_back(object.labels, object.args, "drop_ptr", object.pos);
-         break;
-
-      case OCODE_SET_REG:
-         tokens->emplace_back(object.labels, object.args, "drop_reg", object.pos);
-         break;
-
-      case OCODE_SET_STATIC:
-         tokens->emplace_back(object.labels, object.args, "drop_dat", object.pos);
-         break;
-
-      case OCODE_STK_DROP:
-         tokens->emplace_back(object.labels, object.args, "drop_nul", object.pos);
-         break;
+      case OCODE_SUB_STK_I:
+         TranslateDirect(SUB_STK_U, "subu_stk");
 
       default:
          Error(object.pos, "unknown OCODE: %s", make_string(object.code));
