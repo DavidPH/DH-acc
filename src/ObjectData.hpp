@@ -340,6 +340,7 @@ struct Static
    typedef void (*IterFunc)(std::ostream *, Static const &);
 
 
+   ObjectData::Init init;
    std::string name;
    bigsint number;
    bigsint size;
@@ -353,6 +354,9 @@ struct Static
    static ObjectArchive &Archive(ObjectArchive &arc);
 
    static void GenerateSymbols();
+
+   static bool Init(std::string const &name, VariableType const *type,
+                    ObjectExpression *init);
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
 };

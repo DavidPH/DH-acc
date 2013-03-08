@@ -26,6 +26,7 @@
 #include "../ObjectArchive.hpp"
 #include "../ObjectExpression.hpp"
 #include "../option.hpp"
+#include "../ost_type.hpp"
 #include "../VariableType.hpp"
 
 
@@ -161,6 +162,25 @@ void Static::GenerateSymbols()
 
       ObjectExpression::add_symbol(itr->second.name, obj);
    }
+}
+
+//
+// ObjectData::Static::Init
+//
+bool Static::Init(std::string const &name, VariableType const *type, ObjectExpression *init)
+{
+   auto itr = Table.find(name);
+   if(itr == Table.end()) return false;
+
+   Static &data = itr->second;
+
+   SetInit(data.init, init, type);
+
+   if(!data.init.dataAll) return false;
+
+   if(Target != TARGET_MageCraft) return false;
+
+   return true;
 }
 
 //

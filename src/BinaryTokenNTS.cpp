@@ -211,7 +211,18 @@ void BinaryTokenNTS::WriteStatic(std::ostream *out, ObjectData::Static const &s)
    WriteStr(out, "data");
    WriteStr(out, s.name);
    WriteInt(out, s.size);
-   WriteStr(out, ";");
+
+   if(!s.init.data.empty())
+   {
+      auto itr = s.init.data.begin(), end = s.init.data.end();
+      WriteStr(out, "(");
+      (*itr++)->writeNTS0(out);
+      while(itr != end)
+         WriteStr(out, ","), (*itr++)->writeNTS0(out);
+      WriteStr(out, ")");
+   }
+   else
+      WriteStr(out, ";");
 }
 
 //

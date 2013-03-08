@@ -84,10 +84,21 @@ SourceExpression::Pointer SourceExpressionC::CreateObject(
 
    // Map array storage variables can be initialized via the AINI chunk. In
    // which case, the below init code is unneeded.
-   if(store == STORE_MAPARRAY && init->canMakeObject() &&
-      ObjectData::ArrayVar::InitMap(nameObj, type, init->makeObject()))
+   // For MageCraft targets, static initialization can be applied to statics.
+   if(init->canMakeObject()) switch(store)
    {
-      return expr;
+   case STORE_STATIC:
+      if(ObjectData::Static::Init(nameObj, type, init->makeObject()))
+         return expr;
+      break;
+
+   case STORE_MAPARRAY:
+      if(ObjectData::ArrayVar::InitMap(nameObj, type, init->makeObject()))
+         return expr;
+      break;
+
+   default:
+      break;
    }
 
    // If we've reached this point, then we need to initialize the object
