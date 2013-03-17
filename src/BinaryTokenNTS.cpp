@@ -248,14 +248,35 @@ void BinaryTokenNTS::WriteString(std::ostream *out, ObjectData::String const &s)
 {
    if(s.names.empty()) return;
 
+   biguint bytes = s.string.size() + 1;
+   biguint words = (bytes + 3) / 4;
+
+   // Convert the string into words.
+   std::vector<biguint> data(words, 0);
+   for(auto i = s.string.size(); i--;)
+      data[i / 4] |= static_cast<biguint>(s.string[i] & 0xFF) << (i % 4 * 8);
+
+   // Add the string as a data.
    WriteStr(out, "data");
-   WriteStr(out, s.names[0]);
-   WriteInt(out, s.string.size() + 1);
+   WriteStr(out, s.names[0] + '_');
+   WriteInt(out, words);
    WriteStr(out, "(");
-   for(auto const &c : s.string)
-      WriteInt(out, c), WriteStr(out, ",");
-   WriteStr(out, "0");
+   {
+      auto itr = data.begin(), end = data.end();
+      WriteInt(out, *itr++);
+      while(itr != end)
+         WriteStr(out, ","), WriteInt(out, *itr++);
+   }
    WriteStr(out, ")");
+
+   // Define the actual name as the byte-oriented address.
+   WriteStr(out, "define");
+   WriteStr(out, s.names[0]);
+   WriteStr(out, "=");
+   WriteStr(out, "*");
+   WriteStr(out, '$' + s.names[0] + '_');
+   WriteStr(out, "4");
+   WriteStr(out, ";");
 }
 
 // EOF
