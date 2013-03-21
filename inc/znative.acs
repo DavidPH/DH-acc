@@ -132,6 +132,16 @@ __native void     SetHudClipRect(int x, int y, int width, int height) __addr(51)
 __native void     SetHudClipRect(int x, int y, int width, int height, int wrapwidth) __addr(51);
 __native void     SetHudWrapWidth(int wrapwidth) __addr(52);
 
+__native int      ResetMap() __addr(100);
+__native int      PlayerIsSpectator(int player) __addr(101);
+__native int      ConsolePlayerNumber() __addr(102);
+__native int      GetTeamProperty(int team, int prop) __addr(103);
+__native _Accum   GetTeamPropertyFixed(int team, int prop) __addr(103);
+__native __string GetTeamPropertyString(int team, int prop) __addr(103);
+__native int      GetPlayerLivesLeft(int player) __addr(104);
+__native int      SetPlayerLivesLeft(int player, int amount) __addr(105);
+__native int      KickFromGame(int player, __string reason) __addr(106);
+
 __native int      GetTeamScore(int team) __addr(19620);
 __native int      SetTeamScore(int team, int value) __addr(19621);
 

@@ -396,6 +396,26 @@
 #define A_CSF_NOFAKEFLOORS 1
 #define A_CSF_NOBLOCKALL   2
 
+// Zandronum Team Property values.
+#define A_TPROP_Name           0
+#define A_TPROP_Score          1
+#define A_TPROP_IsValid        2
+#define A_TPROP_NumPlayers     3
+#define A_TPROP_NumLivePlayers 4
+#define A_TPROP_TextColor      5
+#define A_TPROP_PlayerStartNum 6
+#define A_TPROP_Spread         7
+#define A_TPROP_Carrier        8
+#define A_TPROP_Assister       9
+#define A_TPROP_FragCount     10
+#define A_TPROP_DeathCount    11
+#define A_TPROP_WinCount      12
+#define A_TPROP_PointCount    13
+#define A_TPROP_ReturnTics    14
+#define A_TPROP_TeamItem      15
+#define A_TPROP_WinnerTheme   16
+#define A_TPROP_LoserTheme    17
+
 //
 // _A
 //
@@ -1006,12 +1026,22 @@ __native _Bool    A_IsTIDUsed(int) __nacode(47);
 __native int      A_Sqrt(int) __nacode(48);
 __native _Accum   A_FixedSqrt(_Accum) __nacode(49);
 __native _Accum   A_VectorLength(_Accum, _Accum) __nacode(50);
-__native void     A_SetHudClipRect(int x, int y, int width, int height) __addr(51);
-__native void     A_SetHudClipRect(int x, int y, int width, int height, int wrapwidth) __addr(51);
-__native void     A_SetHudWrapWidth(int wrapwidth) __addr(52);
+__native void     A_SetHudClipRect(int x, int y, int width, int height) __nacode(51);
+__native void     A_SetHudClipRect(int x, int y, int width, int height, int wrapwidth) __nacode(51);
+__native void     A_SetHudWrapWidth(int wrapwidth) __nacode(52);
 
-__native int      A_GetTeamScore(int team) __addr(19620);
-__native int      A_SetTeamScore(int team, int value) __addr(19621);
+__native int      A_ResetMap() __nacode(100);
+__native int      A_PlayerIsSpectator(int player) __nacode(101);
+__native int      A_ConsolePlayerNumber() __nacode(102);
+__native int      A_GetTeamProperty(int team, int prop) __nacode(103);
+__native _Accum   A_GetTeamPropertyFixed(int team, int prop) __nacode(103);
+__native __string A_GetTeamPropertyString(int team, int prop) __nacode(103);
+__native int      A_GetPlayerLivesLeft(int player) __nacode(104);
+__native int      A_SetPlayerLivesLeft(int player, int amount) __nacode(105);
+__native int      A_KickFromGame(int player, __string reason) __nacode(106);
+
+__native int      A_GetTeamScore(int team) __nacode(19620);
+__native int      A_SetTeamScore(int team, int value) __nacode(19621);
 
 
 //----------------------------------------------------------------------------|
