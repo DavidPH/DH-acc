@@ -198,6 +198,8 @@
 #define A_HUDMSG_NOTWITH3DVIEW     0x00010000
 #define A_HUDMSG_NOTWITHFULLMAP    0x00020000
 #define A_HUDMSG_NOTWITHOVERLAYMAP 0x00040000
+#define A_HUDMSG_NOWRAP            0x08000000
+#define A_HUDMSG_ALPHA             0x10000000
 #define A_HUDMSG_ADDBLEND          0x20000000
 #define A_HUDMSG_COLORSTRING       0x40000000
 #define A_HUDMSG_LOG               0x80000000
@@ -250,6 +252,8 @@
 #define A_APROP_Mass         32
 #define A_APROP_Accuracy     33
 #define A_APROP_Stamina      34
+#define A_APROP_Height       35
+#define A_APROP_Radius       36
 
 #define A_STYLE_None                0
 #define A_STYLE_Normal              1
@@ -281,6 +285,8 @@
 #define A_PLAYERINFO_MOVEBOB     5
 #define A_PLAYERINFO_STILLBOB    6
 #define A_PLAYERINFO_PLAYERCLASS 7
+#define A_PLAYERINFO_FOV         8
+#define A_PLAYERINFO_DESIREDFOV  9
 
 #define A_NOT_BOTTOM  0x00000001
 #define A_NOT_MIDDLE  0x00000002
@@ -537,6 +543,7 @@ __asmfunc _Accum   A_VectorAngle(_Accum, _Accum) __asmcode(ACSE_TRIG_VECTORANGLE
 
 // Miscellaneous
 __asmfunc void     A_CreateTranslationStart(int transnumber) __asmcode(ACSE_TRANSLATION_START);
+__asmfunc void     A_CreateTranslationDesat(int a, int b, _Accum r1, _Accum g1, _Accum b1, _Accum r2, _Accum g2, _Accum b2) __asmcode(ACSE_TRANSLATION_DESAT);
 __asmfunc void     A_CreateTranslationPalette(int a, int b, int c, int d) __asmcode(ACSE_TRANSLATION_PALETTE);
 __asmfunc void     A_CreateTranslationRGB(int a, int b, int r1, int g1, int b1, int r2, int g2, int b2) __asmcode(ACSE_TRANSLATION_RGB);
 __asmfunc void     A_CreateTranslationEnd(void) __asmcode(ACSE_TRANSLATION_END);
@@ -996,6 +1003,15 @@ __native int      A_UniqueTID() __nacode(46);
 __native int      A_UniqueTID(int) __nacode(46);
 __native int      A_UniqueTID(int, int) __nacode(46);
 __native _Bool    A_IsTIDUsed(int) __nacode(47);
+__native int      A_Sqrt(int) __nacode(48);
+__native _Accum   A_FixedSqrt(_Accum) __nacode(49);
+__native _Accum   A_VectorLength(_Accum, _Accum) __nacode(50);
+__native void     A_SetHudClipRect(int x, int y, int width, int height) __addr(51);
+__native void     A_SetHudClipRect(int x, int y, int width, int height, int wrapwidth) __addr(51);
+__native void     A_SetHudWrapWidth(int wrapwidth) __addr(52);
+
+__native int      A_GetTeamScore(int team) __addr(19620);
+__native int      A_SetTeamScore(int team, int value) __addr(19621);
 
 
 //----------------------------------------------------------------------------|

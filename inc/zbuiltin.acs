@@ -167,6 +167,7 @@ __asmfunc _Accum   VectorAngle(_Accum, _Accum) __asmcode(ACSE_TRIG_VECTORANGLE);
 
 // Miscellaneous
 __asmfunc void     CreateTranslationStart(int transnumber) __asmcode(ACSE_TRANSLATION_START);
+__asmfunc void     CreateTranslationDesat(int a, int b, _Accum r1, _Accum g1, _Accum b1, _Accum r2, _Accum g2, _Accum b2) __asmcode(ACSE_TRANSLATION_DESAT);
 __asmfunc void     CreateTranslationPalette(int a, int b, int c, int d) __asmcode(ACSE_TRANSLATION_PALETTE);
 __asmfunc void     CreateTranslationRGB(int a, int b, int r1, int g1, int b1, int r2, int g2, int b2) __asmcode(ACSE_TRANSLATION_RGB);
 __asmfunc void     CreateTranslationEnd(void) __asmcode(ACSE_TRANSLATION_END);

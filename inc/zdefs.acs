@@ -202,6 +202,8 @@
 #define HUDMSG_NOTWITH3DVIEW     0x00010000
 #define HUDMSG_NOTWITHFULLMAP    0x00020000
 #define HUDMSG_NOTWITHOVERLAYMAP 0x00040000
+#define HUDMSG_NOWRAP            0x08000000
+#define HUDMSG_ALPHA             0x10000000
 #define HUDMSG_ADDBLEND          0x20000000
 #define HUDMSG_COLORSTRING       0x40000000
 #define HUDMSG_LOG               0x80000000
@@ -256,6 +258,8 @@
 #define APROP_Mass         32
 #define APROP_Accuracy     33
 #define APROP_Stamina      34
+#define APROP_Height       35
+#define APROP_Radius       36
 
 // Render styles.
 #define STYLE_None                0 // Do not draw
@@ -290,6 +294,8 @@
 #define PLAYERINFO_MOVEBOB     5
 #define PLAYERINFO_STILLBOB    6
 #define PLAYERINFO_PLAYERCLASS 7
+#define PLAYERINFO_FOV         8
+#define PLAYERINFO_DESIREDFOV  9
 
 // Flags for ReplaceTextures.
 #define NOT_BOTTOM    1

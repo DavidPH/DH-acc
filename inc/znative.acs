@@ -125,6 +125,15 @@ __native int      UniqueTID() __addr(46);
 __native int      UniqueTID(int) __addr(46);
 __native int      UniqueTID(int, int) __addr(46);
 __native _Bool    IsTIDUsed(int) __addr(47);
+__native int      Sqrt(int) __addr(48);
+__native _Accum   FixedSqrt(_Accum) __addr(49);
+__native _Accum   VectorLength(_Accum, _Accum) __addr(50);
+__native void     SetHudClipRect(int x, int y, int width, int height) __addr(51);
+__native void     SetHudClipRect(int x, int y, int width, int height, int wrapwidth) __addr(51);
+__native void     SetHudWrapWidth(int wrapwidth) __addr(52);
+
+__native int      GetTeamScore(int team) __addr(19620);
+__native int      SetTeamScore(int team, int value) __addr(19621);
 
 
 //----------------------------------------------------------------------------|

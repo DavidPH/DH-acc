@@ -294,7 +294,7 @@ public:
       BCODE_GET_FUNCP                          = 359,
       BCODE_JMP_CAL                            = 360,
       BCODE_WAIT_SNAM                          = 361,
-      BCODE_TRANSLATION_RGBA                   = 362,
+      BCODE_TRANSLATION_DESAT                  = 362,
       BCODE_JMP                                = 363,
 
       BCODE_NONE

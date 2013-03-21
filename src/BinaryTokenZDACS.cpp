@@ -284,10 +284,10 @@ void BinaryTokenZDACS::init()
    DO_INIT(THING_SUB_INVENTORY,                0);
    DO_INIT(THING_SUB_INVENTORY_IMM,            2);
    DO_INIT(THING_USEINVENTORY,                 0);
+   DO_INIT(TRANSLATION_DESAT,                  0);
    DO_INIT(TRANSLATION_END,                    0);
    DO_INIT(TRANSLATION_PALETTE,                0);
    DO_INIT(TRANSLATION_RGB,                    0);
-   DO_INIT(TRANSLATION_RGBA,                   0);
    DO_INIT(TRANSLATION_START,                  0);
    DO_INIT(TRIG_VECTORANGLE,                   0);
    DO_INIT(WAIT_SNAM,                          0);
