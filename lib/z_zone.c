@@ -1063,6 +1063,8 @@ int (Z_CheckTag)(void *ptr, __string file, int line)
 //
 void Z_PrintZoneHeap(void)
 {
+   // This function isn't exactly fantastically useful without an fopen, anyway.
+   #ifndef __NEAR_POINTERS__
    register FILE *outfile;
    register memblock_t __near *block = zone;
 
@@ -1134,6 +1136,7 @@ void Z_PrintZoneHeap(void)
    while((block = block->next) != zone);
 
    fclose(outfile);
+   #endif
 }
 
 //
@@ -1143,6 +1146,8 @@ void Z_PrintZoneHeap(void)
 //
 void Z_DumpCore()
 {
+   // This function isn't exactly fantastically useful without an fopen, anyway.
+   #ifndef __NEAR_POINTERS__
    register FILE *outfile;
 
    if(!(outfile = fopen("zone.bin", "wb")))
@@ -1150,6 +1155,7 @@ void Z_DumpCore()
 
    fwrite(zonebase, 1, zonebase_size, outfile);
    fclose(outfile);
+   #endif
 }
 
 //
