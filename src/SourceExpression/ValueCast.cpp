@@ -54,6 +54,11 @@ public:
       VariableType::BasicType exprBT = exprType->getBasicType();
       VariableType::BasicType thisBT = type->getBasicType();
 
+      // __string->char[]
+      if(thisBT == VariableType::BT_ARR && exprBT == VariableType::BT_STR &&
+         type->getReturn()->getBasicType() == VariableType::BT_CHR)
+         return;
+
       // array->pointer
       if(thisBT == VariableType::BT_PTR && exprBT == VariableType::BT_ARR)
       {
