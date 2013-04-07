@@ -454,8 +454,9 @@ bool SourceExpressionDS::is_type(SourceTokenizerC *in, SourceTokenC *_tok,
 // SourceExpressionDS::make_type
 //
 VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
-   SourceContext *context)
+   SourceContext *context_)
 {
+   SourceContext::Reference context{context_};
    SourceTokenC::Reference tok = in->peek();
 
    ArgList args;
@@ -467,11 +468,22 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
       in->get(SourceTokenC::TT_PAREN_O);
       type = make_type(in, context);
       in->get(SourceTokenC::TT_PAREN_C);
+
+      goto parse_suffix;
+   }
+   else if(tok->type == SourceTokenC::TT_COLON2)
+   {
+      context = static_cast<SourceContext::Reference>(SourceContext::global_context);
+      tok = in->get(SourceTokenC::TT_NAM);
    }
    else
       in->get(SourceTokenC::TT_NAM);
 
-   if (type || (type = make_basic(tok, in)) != NULL)
+   // Namespace traversal.
+   for(; in->dropType(SourceTokenC::TT_COLON2); tok = in->get(SourceTokenC::TT_NAM))
+      context = context->getContext(tok->data, tok->pos);
+
+   if((type = make_basic(tok, in)))
    {
    }
    else if (tok->data == "__asmfunc_t")
@@ -620,7 +632,7 @@ VariableType::Reference SourceExpressionDS::make_type(SourceTokenizerC *in,
       type = context->getVariableType(tok->data, tok->pos);
 
    // Suffix modifiers.
-   for(;;) switch(in->peek()->type)
+   parse_suffix: for(;;) switch(in->peek()->type)
    {
    case SourceTokenC::TT_NAM:
       if(in->peek()->data == "const")
