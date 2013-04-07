@@ -52,7 +52,8 @@ public: \
 //
 #define CounterPreambleCommon(CLASS,BASE) \
 public: \
-   CounterPointer<CLASS> clone() const {return cloneRaw();} \
+   CounterReference<CLASS> clone() const \
+      {return static_cast<CounterReference<CLASS>>(cloneRaw());} \
    virtual char const *getClassName() const {return #CLASS;} \
    CounterPreambleCommonTypes(CLASS, BASE)
 

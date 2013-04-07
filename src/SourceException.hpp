@@ -25,6 +25,7 @@
 #define HPP_SourceException_
 
 #include "attr.hpp"
+#include "SourcePosition.hpp"
 
 #include <stdexcept>
 

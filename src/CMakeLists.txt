@@ -1,3 +1,9 @@
+##-----------------------------------------------------------------------------
+##
+## CMake file for main DH-acc executable.
+##
+##-----------------------------------------------------------------------------
+
 add_executable(DH-acc
    main.cpp
 
@@ -143,9 +149,26 @@ add_executable(DH-acc
    SourceTokenizerC/getExpr.cpp
    SourceVariable.cpp
    StoreType.cpp
+   Type.cpp
+   Type/Array.cpp
+   Type/Bitfield.cpp
+   Type/Boolean.cpp
+   Type/Char.cpp
+   Type/Class.cpp
+   Type/Enum.cpp
+   Type/Fixed.cpp
+   Type/Floating.cpp
+   Type/Function.cpp
+   Type/Integer.cpp
+   Type/MemFunc.cpp
+   Type/MemPtr.cpp
+   Type/Pointer.cpp
+   Type/Void.cpp
    VariableData.cpp
    VariableType.cpp
 )
+
+include_directories(.)
 
 # EOF
 
