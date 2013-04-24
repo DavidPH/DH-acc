@@ -21,6 +21,7 @@ add_executable(DH-acc
    BinaryTokenZDACS/make_tokens.cpp
    BinaryTokenZDACS/output.cpp
    BinaryTokenZDACS/write_ACSE.cpp
+   Keyword.cpp
    LinkSpec.cpp
    ObjectArchive.cpp
    ObjectCode.cpp

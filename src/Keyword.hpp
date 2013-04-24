@@ -31,12 +31,40 @@
 // Types                                                                      |
 //
 
+class Keyword;
+
 //
 // KeywordIndex
 //
 enum KeywordIndex
 {
    KWRD,
+   #define KWRD(NAME) KWRD_##NAME,
+   #include "KWRD.hpp"
+};
+
+//
+// ContextKey
+//
+class ContextKey
+{
+public:
+   constexpr ContextKey(KeywordIndex kwrd = KWRD) : ctxk{kwrd} {}
+
+   explicit constexpr operator bool () {return ctxk;}
+
+   ContextKey get(Keyword kwrd) const;
+   ContextKey getBase() const;
+   Keyword getKeyword() const;
+
+   std::size_t ctxk;
+
+
+   static ContextKey Get(ContextKey base, Keyword kwrd);
+   static ContextKey Get(Keyword kwrd);
+
+private:
+   explicit constexpr ContextKey(std::size_t ctxk_) : ctxk{ctxk_} {}
 };
 
 //
@@ -52,22 +80,14 @@ public:
    std::string const &getString() const;
 
    std::size_t kwrd;
-};
 
-//
-// ContextKey
-//
-class ContextKey
-{
-public:
-   constexpr ContextKey(KeywordIndex kwrd = KWRD) : ctxk{kwrd} {}
 
-   explicit constexpr operator bool () {return ctxk;}
+   friend class ContextKey;
 
-   ContextKey getBase() const;
-   Keyword getKeyword() const;
+   static Keyword Get(std::string const &str);
 
-   std::size_t ctxk;
+private:
+   explicit constexpr Keyword(std::size_t kwrd_) : kwrd{kwrd_} {}
 };
 
 //
