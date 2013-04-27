@@ -41,27 +41,12 @@ public:
    //
    // ObjectExpression_ValueARR
    //
-   ObjectExpression_ValueARR(Vector const &_elems, VecStr const &_names,
-                             SourcePosition const &_pos)
-    : Super(_pos), elems(_elems), names(_names), type(ET_MAP)
-   {
-   }
-
-   //
-   // ObjectExpression_ValueARR
-   //
-   ObjectExpression_ValueARR(Vector const &_elems, SourcePosition const &_pos)
-    : Super(_pos), elems(_elems), type(ET_ARR)
-   {
-   }
-
-   //
-   // ObjectExpression_ValueARR
-   //
-   ObjectExpression_ValueARR(ObjectArchive &arc) : Super(arc)
-   {
-      arc << elems << names << type;
-   }
+   ObjectExpression_ValueARR(Vector const &elems_, VecStr const &names_,
+      SourcePosition const &pos_) : Super{pos_}, elems{elems_}, names{names_},
+      type{ET_MAP} {}
+   ObjectExpression_ValueARR(Vector const &elems_, SourcePosition const &pos_)
+    : Super{pos_}, elems{elems_}, type{ET_ARR} {}
+   ObjectExpression_ValueARR(ObjectLoad &arc) : Super{arc} {arc >> elems >> names >> type;}
 
    virtual bool canResolve() const {return true;}
 
@@ -110,11 +95,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_VALUE_ARR) << elems << names << type;
+      return Super::save(arc << OT_VALUE_ARR) << elems << names << type;
    }
 
 private:
@@ -132,27 +117,26 @@ private:
 //
 // ObjectExpression::CreateValueARR
 //
-ObjectExpression::Reference ObjectExpression::CreateValueARR(
-   Vector const &elems, OBJEXP_EXPR_ARGS)
+auto ObjectExpression::CreateValueARR(Vector const &elems, OBJEXP_EXPR_ARGS) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_ValueARR(elems, pos));
 }
 
 //
-// ObjectExpression::CreateValueARR
+// ObjectExpression::CreateValueMAP
 //
-ObjectExpression::Reference ObjectExpression::CreateValueARR(ObjectArchive &arc)
+auto ObjectExpression::CreateValueMAP(Vector const &elems, VecStr const &names,
+   OBJEXP_EXPR_ARGS) -> Reference
 {
-   return static_cast<Reference>(new ObjectExpression_ValueARR(arc));
+   return static_cast<Reference>(new ObjectExpression_ValueARR(elems, names, pos));
 }
 
 //
-// ObjectExpression::CreateValueMAP
+// ObjectExpression::LoadValueARR
 //
-ObjectExpression::Reference ObjectExpression::CreateValueMAP(
-   Vector const &elems, VecStr const &names, OBJEXP_EXPR_ARGS)
+auto ObjectExpression::LoadValueARR(ObjectLoad &arc) -> Reference
 {
-   return static_cast<Reference>(new ObjectExpression_ValueARR(elems, names, pos));
+   return static_cast<Reference>(new ObjectExpression_ValueARR(arc));
 }
 
 // EOF

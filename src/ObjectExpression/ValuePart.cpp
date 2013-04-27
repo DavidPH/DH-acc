@@ -40,7 +40,7 @@ class ObjectExpression_ValuePart : public ObjectExpression_Unary
 public:
    ObjectExpression_ValuePart(biguint _part, OBJEXP_EXPRUNA_PARM)
     : Super(OBJEXP_EXPRUNA_PASS), part(_part) {}
-   ObjectExpression_ValuePart(ObjectArchive &arc) : Super(arc) {arc << part;}
+   ObjectExpression_ValuePart(ObjectLoad &arc) : Super(arc) {arc >> part;}
 
    virtual bool canResolve() const {return false;}
 
@@ -53,11 +53,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_VALUE_PART) << part;
+      return Super::save(arc << OT_VALUE_PART) << part;
    }
 
 private:
@@ -72,16 +72,16 @@ private:
 //
 // ObjectExpression::CreateValuePart
 //
-ObjectExpression::Reference ObjectExpression::CreateValuePart(
-   biguint part, ObjectExpression *expr, OBJEXP_EXPR_ARGS)
+auto ObjectExpression::CreateValuePart(biguint part, ObjectExpression *expr,
+   OBJEXP_EXPR_ARGS) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_ValuePart(part, expr, pos));
 }
 
 //
-// ObjectExpression::CreateValuePart
+// ObjectExpression::LoadValuePart
 //
-ObjectExpression::Reference ObjectExpression::CreateValuePart(ObjectArchive &arc)
+auto ObjectExpression::LoadValuePart(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_ValuePart(arc));
 }

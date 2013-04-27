@@ -87,11 +87,19 @@ void ObjectToken::swapData(ObjectToken *token)
 }
 
 //
-// operator ObjectArchive << ObjectToken
+// operator ObjectSave << ObjectToken
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectToken &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectToken const &data)
 {
    return arc << data.args << data.labels << data.pos << data.code;
+}
+
+//
+// operator ObjectLoad >> ObjectToken
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectToken &data)
+{
+   return arc >> data.args >> data.labels >> data.pos >> data.code;
 }
 
 // EOF

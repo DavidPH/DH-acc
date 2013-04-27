@@ -37,7 +37,7 @@ class ObjectExpression_BinaryMul : public ObjectExpression_Binary
 
 public:
    ObjectExpression_BinaryMul(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
-   ObjectExpression_BinaryMul(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_BinaryMul(ObjectLoad &arc) : Super(arc) {}
 
    bigreal resolveFLT() const {return exprL->resolveFLT() * exprR->resolveFLT();}
    bigreal resolveFIX() const {return exprL->resolveFIX() * exprR->resolveFIX();}
@@ -46,11 +46,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BINARY_MUL);
+      return Super::save(arc << OT_BINARY_MUL);
    }
 };
 
@@ -68,9 +68,9 @@ ObjectExpression::Reference ObjectExpression::create_binary_mul(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::CreateBinaryMul
+// ObjectExpression::LoadBinaryMul
 //
-ObjectExpression::Reference ObjectExpression::CreateBinaryMul(ObjectArchive &arc)
+auto ObjectExpression::LoadBinaryMul(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_BinaryMul(arc));
 }

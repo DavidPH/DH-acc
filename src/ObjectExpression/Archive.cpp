@@ -27,90 +27,104 @@
 #include "../ObjectData.hpp"
 #include "../ObjectVector.hpp"
 
+#include <cstring>
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
 
 //
-// ObjectExpression::Archive
+// ObjectExpression::Load
 //
-ObjectArchive &ObjectExpression::Archive(ObjectArchive &arc, ObjectVector &objects)
+ObjectLoad &ObjectExpression::Load(ObjectLoad &arc, ObjectVector &objects)
 {
    // Format verification.
-   if(arc.isSaving())
-   {
-      std::string head("object");
-      arc << head;
-   }
-   else
-   {
-      std::string head;
-      arc << head;
-      if(head != "object")
-         throw __FILE__ ": not object";
-   }
+   char head[7];
+   arc >> head;
+   if(std::memcmp(head, "object", 7))
+      throw __FILE__ ": not object";
 
-   arc << objects << library_table << symbol_table << symbol_type_table;
+   arc >> objects >> library_table >> symbol_table >> symbol_type_table;
 
-   ObjectData::Array   ::Archive(arc);
-   ObjectData::ArrayVar::Archive(arc);
-   ObjectData::Auto    ::Archive(arc);
-   ObjectData::Function::Archive(arc);
-   ObjectData::Label   ::Archive(arc);
-   ObjectData::Register::Archive(arc);
-   ObjectData::Script  ::Archive(arc);
-   ObjectData::Static  ::Archive(arc);
-   ObjectData::String  ::Archive(arc);
+   ObjectData::Array   ::Load(arc);
+   ObjectData::ArrayVar::Load(arc);
+   ObjectData::Auto    ::Load(arc);
+   ObjectData::Function::Load(arc);
+   ObjectData::Label   ::Load(arc);
+   ObjectData::Register::Load(arc);
+   ObjectData::Script  ::Load(arc);
+   ObjectData::Static  ::Load(arc);
+   ObjectData::String  ::Load(arc);
 
    return arc;
 }
 
 //
-// ObjectExpression::Create
+// ObjectExpression::LoadExpr
 //
-ObjectExpression::Reference ObjectExpression::Create(ObjectArchive &arc)
+ObjectExpression::Reference ObjectExpression::LoadExpr(ObjectLoad &arc)
 {
    ObjectExpression::ObjectType type;
 
-   switch((arc << type), type)
+   switch((arc >> type), type)
    {
-   case OT_UNARY_ADD: return CreateUnaryAdd(arc);
-   case OT_UNARY_NOT: return CreateUnaryNot(arc);
-   case OT_UNARY_SUB: return CreateUnarySub(arc);
+   case OT_UNARY_ADD: return LoadUnaryAdd(arc);
+   case OT_UNARY_NOT: return LoadUnaryNot(arc);
+   case OT_UNARY_SUB: return LoadUnarySub(arc);
 
-   case OT_BINARY_ADD: return CreateBinaryAdd(arc);
-   case OT_BINARY_AND: return CreateBinaryAnd(arc);
-   case OT_BINARY_CMP: return CreateBinaryCmp(arc);
-   case OT_BINARY_DIV: return CreateBinaryDiv(arc);
-   case OT_BINARY_IOR: return CreateBinaryIOr(arc);
-   case OT_BINARY_LSH: return CreateBinaryLSh(arc);
-   case OT_BINARY_MOD: return CreateBinaryMod(arc);
-   case OT_BINARY_MUL: return CreateBinaryMul(arc);
-   case OT_BINARY_RSH: return CreateBinaryRSh(arc);
-   case OT_BINARY_SUB: return CreateBinarySub(arc);
-   case OT_BINARY_XOR: return CreateBinaryXOr(arc);
+   case OT_BINARY_ADD: return LoadBinaryAdd(arc);
+   case OT_BINARY_AND: return LoadBinaryAnd(arc);
+   case OT_BINARY_CMP: return LoadBinaryCmp(arc);
+   case OT_BINARY_DIV: return LoadBinaryDiv(arc);
+   case OT_BINARY_IOR: return LoadBinaryIOr(arc);
+   case OT_BINARY_LSH: return LoadBinaryLSh(arc);
+   case OT_BINARY_MOD: return LoadBinaryMod(arc);
+   case OT_BINARY_MUL: return LoadBinaryMul(arc);
+   case OT_BINARY_RSH: return LoadBinaryRSh(arc);
+   case OT_BINARY_SUB: return LoadBinarySub(arc);
+   case OT_BINARY_XOR: return LoadBinaryXOr(arc);
 
-   case OT_BRANCH_AND: return CreateBranchAnd(arc);
-   case OT_BRANCH_IF:  return CreateBranchIf (arc);
-   case OT_BRANCH_IOR: return CreateBranchIOr(arc);
-   case OT_BRANCH_NOT: return CreateBranchNot(arc);
-   case OT_BRANCH_XOR: return CreateBranchXOr(arc);
+   case OT_BRANCH_AND: return LoadBranchAnd(arc);
+   case OT_BRANCH_IF:  return LoadBranchIf (arc);
+   case OT_BRANCH_IOR: return LoadBranchIOr(arc);
+   case OT_BRANCH_NOT: return LoadBranchNot(arc);
+   case OT_BRANCH_XOR: return LoadBranchXOr(arc);
 
-   case OT_VALUE_FIX:    return CreateValueFIX   (arc);
-   case OT_VALUE_FLT:    return CreateValueFLT   (arc);
-   case OT_VALUE_INT:    return CreateValueINT   (arc);
-   case OT_VALUE_UNS:    return CreateValueUNS   (arc);
-   case OT_VALUE_OCS:    return CreateValueOCS   (arc);
-   case OT_VALUE_ARR:    return CreateValueARR   (arc);
-   case OT_VALUE_CAST:   return CreateValueCast  (arc);
-   case OT_VALUE_PART:   return CreateValuePart  (arc);
-   case OT_VALUE_SYMBOL: return CreateValueSymbol(arc);
+   case OT_VALUE_FIX:    return LoadValueFIX   (arc);
+   case OT_VALUE_FLT:    return LoadValueFLT   (arc);
+   case OT_VALUE_INT:    return LoadValueINT   (arc);
+   case OT_VALUE_UNS:    return LoadValueUNS   (arc);
+   case OT_VALUE_OCS:    return LoadValueOCS   (arc);
+   case OT_VALUE_ARR:    return LoadValueARR   (arc);
+   case OT_VALUE_CAST:   return LoadValueCast  (arc);
+   case OT_VALUE_PART:   return LoadValuePart  (arc);
+   case OT_VALUE_SYMBOL: return LoadValueSymbol(arc);
 
    case OT_NONE: throw __FILE__ ": OT_NONE";
    }
 
    throw __FILE__ ": NOT OT";
+}
+
+//
+// ObjectExpression::Save
+//
+ObjectSave &ObjectExpression::Save(ObjectSave &arc, ObjectVector const &objects)
+{
+   arc << "object" << objects << library_table << symbol_table << symbol_type_table;
+
+   ObjectData::Array   ::Save(arc);
+   ObjectData::ArrayVar::Save(arc);
+   ObjectData::Auto    ::Save(arc);
+   ObjectData::Function::Save(arc);
+   ObjectData::Label   ::Save(arc);
+   ObjectData::Register::Save(arc);
+   ObjectData::Script  ::Save(arc);
+   ObjectData::Static  ::Save(arc);
+   ObjectData::String  ::Save(arc);
+
+   return arc;
 }
 
 //
@@ -138,66 +152,83 @@ void OA_Override(ObjectExpression::Reference &out, ObjectExpression::Reference c
 }
 
 //
-// operator ObjectArchive << ObjectExpression::ExpressionType
+// operator ObjectSave << ObjectExpression::ExpressionType
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectExpression::ExpressionType &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectExpression::ExpressionType const &data)
 {
-   return arc.archiveEnum(data, ObjectExpression::ET_MAP);
+   return arc.saveEnum(data);
 }
 
 //
-// operator ObjectArchive << ObjectExpression::ObjectType
+// operator ObjectSave << ObjectExpression::ObjectType
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectExpression::ObjectType &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectExpression::ObjectType const &data)
 {
-   return arc.archiveEnum(data, ObjectExpression::OT_NONE);
+   return arc.saveEnum(data);
 }
 
 //
-// operator ObjectArchive << ObjectExpression::ObjectType
+// operator ObjectSave << ObjectExpression::Pointer
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectExpression::ObjectType const &_data)
+ObjectSave &operator << (ObjectSave &arc, ObjectExpression::Pointer const &data)
 {
-   ObjectExpression::ObjectType data = _data;
-   return arc << data;
-}
-
-//
-// operator ObjectArchive << ObjectExpression::Pointer
-//
-ObjectArchive &operator << (ObjectArchive &arc, ObjectExpression::Pointer &data)
-{
-   if(arc.isSaving())
-   {
-      if(data)
-         data->archive(arc);
-      else
-         arc << ObjectExpression::OT_NONE;
-   }
+   if(data)
+      data->save(arc);
    else
+      arc << ObjectExpression::OT_NONE;
+
+   return arc;
+}
+
+//
+// operator ObjectSave << ObjectExpression::Reference
+//
+ObjectSave &operator << (ObjectSave &arc, ObjectExpression::Reference const &data)
+{
+   data->save(arc);
+
+   return arc;
+}
+
+//
+// operator ObjectLoad >> ObjectExpression::ExpressionType
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectExpression::ExpressionType &data)
+{
+   return arc.loadEnum(data, ObjectExpression::ET_MAP);
+}
+
+//
+// operator ObjectLoad >> ObjectExpression::ObjectType
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectExpression::ObjectType &data)
+{
+   return arc.loadEnum(data, ObjectExpression::OT_NONE);
+}
+
+//
+// operator ObjectLoad >> ObjectExpression::Pointer
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectExpression::Pointer &data)
+{
+   try
    {
-      try
-      {
-         data = ObjectExpression::Create(arc);
-      }
-      catch(char const *)
-      {
-         data = NULL;
-      }
+      data = ObjectExpression::LoadExpr(arc);
+   }
+   catch(char const *)
+   {
+      data = nullptr;
    }
 
    return arc;
 }
 
 //
-// operator ObjectArchive << ObjectExpression::Reference
+// operator ObjectLoad >> ObjectExpression::Reference
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectExpression::Reference &data)
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectExpression::Reference &data)
 {
-   if(arc.isSaving())
-      data->archive(arc);
-   else
-      data = ObjectExpression::Create(arc);
+   data = ObjectExpression::LoadExpr(arc);
 
    return arc;
 }

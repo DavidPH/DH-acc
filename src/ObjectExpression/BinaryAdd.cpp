@@ -37,7 +37,7 @@ class ObjectExpression_BinaryAdd : public ObjectExpression_Binary
 
 public:
    ObjectExpression_BinaryAdd(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
-   ObjectExpression_BinaryAdd(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_BinaryAdd(ObjectLoad &arc) : Super{arc} {}
 
    bigreal resolveFLT() const {return exprL->resolveFLT() + exprR->resolveFLT();}
    bigreal resolveFIX() const {return exprL->resolveFIX() + exprR->resolveFIX();}
@@ -46,11 +46,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BINARY_ADD);
+      return Super::save(arc << OT_BINARY_ADD);
    }
 
 private:
@@ -79,9 +79,9 @@ ObjectExpression::Reference ObjectExpression::create_binary_add(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::CreateBinaryAdd
+// ObjectExpression::LoadBinaryAdd
 //
-ObjectExpression::Reference ObjectExpression::CreateBinaryAdd(ObjectArchive &arc)
+auto ObjectExpression::LoadBinaryAdd(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_BinaryAdd(arc));
 }

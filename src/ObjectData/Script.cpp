@@ -179,14 +179,6 @@ bool Script::Add(std::string const &name, std::string const &label,
 }
 
 //
-// ObjectData::Script::Archive
-//
-ObjectArchive &Script::Archive(ObjectArchive &arc)
-{
-   return arc << Table;
-}
-
-//
 // ObjectData::Script::GenerateSymbols
 //
 void ObjectData::Script::GenerateSymbols()
@@ -235,6 +227,22 @@ void Script::Iterate(IterFunc iterFunc, std::ostream *out)
    }
 }
 
+//
+// ObjectData::Script::Load
+//
+ObjectLoad &Script::Load(ObjectLoad &arc)
+{
+   return arc >> Table;
+}
+
+//
+// ObjectData::Script::Save
+//
+ObjectSave &Script::Save(ObjectSave &arc)
+{
+   return arc << Table;
+}
+
 }
 
 //
@@ -247,36 +255,45 @@ void OA_Override(ObjectData::Script &out, ObjectData::Script const &in)
 }
 
 //
-// operator ObjectArchive << ObjectData::Script
+// operator ObjectSave << ObjectData::Script
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Script &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Script const &data)
 {
-   decltype(ObjectData::Script::varCount) varCount;
-
-   if(arc.isSaving())
-   {
-      if(data.context)
-         varCount = data.context->getLimit(STORE_REGISTER);
-      else
-         varCount = data.varCount;
-   }
+   auto varCount = data.context ? data.context->getLimit(STORE_REGISTER) : data.varCount;
 
    arc << data.label << data.name << data.string << data.stype << data.argCount
        << data.flags << data.number << data.retCount << varCount << data.linkage
        << data.externDef;
 
-   if(arc.isLoading())
-      data.varCount = varCount;
+   return arc;
+}
+
+//
+// operator ObjectSave << ObjectData::ScriptType
+//
+ObjectSave &operator << (ObjectSave &arc, ObjectData::ScriptType const &data)
+{
+   return arc.saveEnum(data);
+}
+
+//
+// operator ObjectLoad >> ObjectData::Script
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Script &data)
+{
+   arc >> data.label >> data.name >> data.string >> data.stype >> data.argCount
+       >> data.flags >> data.number >> data.retCount >> data.varCount >> data.linkage
+       >> data.externDef;
 
    return arc;
 }
 
 //
-// operator ObjectArchive << ObjectData::ScriptType
+// operator ObjectLoad >> ObjectData::ScriptType
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::ScriptType &data)
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::ScriptType &data)
 {
-   return arc.archiveEnum(data, ObjectData::ST_NONE);
+   return arc.loadEnum(data, ObjectData::ST_NONE);
 }
 
 // EOF

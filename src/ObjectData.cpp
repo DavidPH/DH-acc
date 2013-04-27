@@ -293,19 +293,35 @@ void SetInit(Init &init, ObjectExpression *data, VariableType const *type)
 }
 
 //
-// operator ObjectArchive << ObjectData::Init
+// operator ObjectSave << ObjectData::Init
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Init &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Init const &data)
 {
    return arc << data.data << data.type << data.dataAll << data.typeAll;
 }
 
 //
-// operator ObjectArchive << ObjectData::InitType
+// operator ObjectSave << ObjectData::InitType
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::InitType &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectData::InitType const &data)
 {
-   return arc.archiveEnum(data, ObjectData::IT_FUNCTION, ObjectData::IT_UNKNOWN);
+   return arc.saveEnum(data);
+}
+
+//
+// operator ObjectLoad >> ObjectData::Init
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Init &data)
+{
+   return arc >> data.data >> data.type >> data.dataAll >> data.typeAll;
+}
+
+//
+// operator ObjectLoad >> ObjectData::InitType
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::InitType &data)
+{
+   return arc.loadEnum(data, ObjectData::IT_FUNCTION, ObjectData::IT_UNKNOWN);
 }
 
 // EOF

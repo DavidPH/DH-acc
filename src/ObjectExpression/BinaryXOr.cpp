@@ -37,18 +37,18 @@ class ObjectExpression_BinaryXOr : public ObjectExpression_Binary
 
 public:
    ObjectExpression_BinaryXOr(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
-   ObjectExpression_BinaryXOr(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_BinaryXOr(ObjectLoad &arc) : Super(arc) {}
 
    bigsint resolveINT() const {return exprL->resolveINT() ^ exprR->resolveINT();}
    biguint resolveUNS() const {return exprL->resolveUNS() ^ exprR->resolveUNS();}
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BINARY_XOR);
+      return Super::save(arc << OT_BINARY_XOR);
    }
 };
 
@@ -66,9 +66,9 @@ ObjectExpression::Reference ObjectExpression::create_binary_xor(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::CreateBinaryXOr
+// ObjectExpression::LoadBinaryXOr
 //
-ObjectExpression::Reference ObjectExpression::CreateBinaryXOr(ObjectArchive &arc)
+auto ObjectExpression::LoadBinaryXOr(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_BinaryXOr(arc));
 }

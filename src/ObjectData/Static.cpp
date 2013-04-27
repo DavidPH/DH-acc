@@ -135,14 +135,6 @@ void Static::Add(std::string const &name, VariableType const *type,
 }
 
 //
-// ObjectData::Static::Archive
-//
-ObjectArchive &Static::Archive(ObjectArchive &arc)
-{
-   return arc << Table;
-}
-
-//
 // ObjectData::Static::GenerateSymbols
 //
 void Static::GenerateSymbols()
@@ -192,6 +184,22 @@ void Static::Iterate(IterFunc iterFunc, std::ostream *out)
       iterFunc(out, itr->second);
 }
 
+//
+// ObjectData::Static::Load
+//
+ObjectLoad &Static::Load(ObjectLoad &arc)
+{
+   return arc >> Table;
+}
+
+//
+// ObjectData::Static::Save
+//
+ObjectSave &Static::Save(ObjectSave &arc)
+{
+   return arc << Table;
+}
+
 }
 
 //
@@ -204,11 +212,19 @@ void OA_Override(ObjectData::Static &out, ObjectData::Static const &in)
 }
 
 //
-// operator ObjectArchive << ObjectData::Static
+// operator ObjectSave << ObjectData::Static
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Static &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Static const &data)
 {
    return arc << data.name << data.number << data.size << data.linkage << data.externDef;
+}
+
+//
+// operator ObjectLoad >> ObjectData::Static
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Static &data)
+{
+   return arc >> data.name >> data.number >> data.size >> data.linkage >> data.externDef;
 }
 
 // EOF

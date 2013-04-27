@@ -40,20 +40,9 @@ class ObjectExpression_BranchIf : public ObjectExpression_Binary
    CounterPreambleNoClone(ObjectExpression_BranchIf, ObjectExpression_Binary);
 
 public:
-   //
-   // ObjectExpression_BranchIf
-   //
-   ObjectExpression_BranchIf(OBJEXP_EXPRTRI_PARM)
-    : Super(OBJEXP_EXPRBIN_PASS), exprC(_exprC)
-   {
-   }
-
-   //
-   // ObjectExpression_BranchIf
-   //
-   ObjectExpression_BranchIf(ObjectArchive &arc) : Super(arc), exprC(Create(arc))
-   {
-   }
+   ObjectExpression_BranchIf(OBJEXP_EXPRTRI_PARM) : Super(OBJEXP_EXPRBIN_PASS),
+      exprC(_exprC) {}
+   ObjectExpression_BranchIf(ObjectLoad &arc) : Super(arc), exprC(LoadExpr(arc)) {}
 
    //
    // canResolve
@@ -71,11 +60,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BRANCH_IF) << exprC;
+      return Super::save(arc << OT_BRANCH_IF) << exprC;
    }
 
 private:
@@ -96,9 +85,9 @@ ObjectExpression::Reference ObjectExpression::create_branch_if(OBJEXP_EXPRTRI_AR
 }
 
 //
-// ObjectExpression::CreateBranchIf
+// ObjectExpression::LoadBranchIf
 //
-ObjectExpression::Reference ObjectExpression::CreateBranchIf(ObjectArchive &arc)
+auto ObjectExpression::LoadBranchIf(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_BranchIf(arc));
 }

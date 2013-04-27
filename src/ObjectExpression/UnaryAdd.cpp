@@ -37,7 +37,7 @@ class ObjectExpression_UnaryAdd : public ObjectExpression_Unary
 
 public:
    ObjectExpression_UnaryAdd(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS) {}
-   ObjectExpression_UnaryAdd(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_UnaryAdd(ObjectLoad &arc) : Super(arc) {}
 
    bigreal resolveFIX() const {return +expr->resolveFIX();}
    bigreal resolveFLT() const {return +expr->resolveFLT();}
@@ -46,20 +46,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_UNARY_ADD);
-   }
-
-private:
-   //
-   // writeACSPLong
-   //
-   virtual void writeACSPLong(std::ostream *out) const
-   {
-      expr->writeACSP(out);
+      return Super::save(arc << OT_UNARY_ADD);
    }
 };
 
@@ -77,9 +68,9 @@ ObjectExpression::Reference ObjectExpression::create_unary_add(OBJEXP_EXPRUNA_AR
 }
 
 //
-// ObjectExpression::CreateUnaryAdd
+// ObjectExpression::LoadUnaryAdd
 //
-ObjectExpression::Reference ObjectExpression::CreateUnaryAdd(ObjectArchive &arc)
+auto ObjectExpression::LoadUnaryAdd(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_UnaryAdd(arc));
 }

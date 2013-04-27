@@ -40,7 +40,7 @@ class ObjectExpression_ValueOCS : public ObjectExpression
 public:
    ObjectExpression_ValueOCS(ObjectCodeSet const &_value, OBJEXP_EXPR_PARM)
     : Super(OBJEXP_EXPR_PASS), value(_value) {}
-   ObjectExpression_ValueOCS(ObjectArchive &arc) : Super(arc) {arc << value;}
+   ObjectExpression_ValueOCS(ObjectLoad &arc) : Super(arc) {arc >> value;}
 
    virtual bool canResolve() const {return true;}
 
@@ -50,11 +50,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_VALUE_OCS) << value;
+      return Super::save(arc << OT_VALUE_OCS) << value;
    }
 
 private:
@@ -69,16 +69,15 @@ private:
 //
 // ObjectExpression::CreateValueOCS
 //
-ObjectExpression::Reference ObjectExpression::CreateValueOCS(
-   ObjectCodeSet const &value, OBJEXP_EXPR_ARGS)
+auto ObjectExpression::CreateValueOCS(ObjectCodeSet const &value, OBJEXP_EXPR_ARGS) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_ValueOCS(value, pos));
 }
 
 //
-// ObjectExpression::CreateValueOCS
+// ObjectExpression::LoadValueOCS
 //
-ObjectExpression::Reference ObjectExpression::CreateValueOCS(ObjectArchive &arc)
+auto ObjectExpression::LoadValueOCS(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_ValueOCS(arc));
 }

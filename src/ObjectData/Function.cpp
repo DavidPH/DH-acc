@@ -119,14 +119,6 @@ bool Function::Add(std::string const &name, std::string const &label,
 }
 
 //
-// ObjectData::Function::Archive
-//
-ObjectArchive &Function::Archive(ObjectArchive &arc)
-{
-   return arc << Table;
-}
-
-//
 // ObjectData::Function::GenerateSymbols
 //
 void Function::GenerateSymbols()
@@ -146,7 +138,7 @@ void Function::GenerateSymbols()
 }
 
 //
-// ObjectData::Function::iterate
+// ObjectData::Function::Iterate
 //
 void Function::Iterate(IterFunc iterFunc, std::ostream *out)
 {
@@ -161,6 +153,22 @@ void Function::Iterate(IterFunc iterFunc, std::ostream *out)
    }
 }
 
+//
+// ObjectData::Function::Load
+//
+ObjectLoad &Function::Load(ObjectLoad &arc)
+{
+   return arc >> Table;
+}
+
+//
+// ObjectData::Function::Save
+//
+ObjectSave &Function::Save(ObjectSave &arc)
+{
+   return arc << Table;
+}
+
 }
 
 //
@@ -173,25 +181,25 @@ void OA_Override(ObjectData::Function &out, ObjectData::Function const &in)
 }
 
 //
-// operator ObjectArchive << ObjectData::Function
+// operator ObjectSave << ObjectData::Function
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Function &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Function const &data)
 {
-   decltype(ObjectData::Function::varCount) varCount;
-
-   if(arc.isSaving())
-   {
-      if(data.context)
-         varCount = data.context->getLimit(STORE_REGISTER);
-      else
-         varCount = data.varCount;
-   }
+   auto varCount = data.context ? data.context->getLimit(STORE_REGISTER) : data.varCount;
 
    arc << data.label << data.name << data.argCount << data.number
        << data.retCount << varCount << data.externDef;
 
-   if(arc.isLoading())
-      data.varCount = varCount;
+   return arc;
+}
+
+//
+// operator ObjectLoad >> ObjectData::Function
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Function &data)
+{
+   arc >> data.label >> data.name >> data.argCount >> data.number
+       >> data.retCount >> data.varCount >> data.externDef;
 
    return arc;
 }

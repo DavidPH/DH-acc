@@ -45,9 +45,9 @@ public:
 
 protected:
    ObjectExpression_Binary(OBJEXP_EXPRBIN_ARGS);
-   ObjectExpression_Binary(ObjectArchive &arc);
+   ObjectExpression_Binary(ObjectLoad &arc);
 
-   virtual ObjectArchive &archive(ObjectArchive &arc);
+   virtual ObjectSave &save(ObjectSave &arc) const;
 
    ObjectExpression::Reference exprL, exprR;
 };

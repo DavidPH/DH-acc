@@ -113,9 +113,9 @@ ObjectExpression::ObjectExpression(OBJEXP_EXPR_PARM) : pos(_pos)
 //
 // ObjectExpression::ObjectExpression
 //
-ObjectExpression::ObjectExpression(ObjectArchive &arc)
+ObjectExpression::ObjectExpression(ObjectLoad &arc)
 {
-   arc << pos;
+   arc >> pos;
 }
 
 //
@@ -151,14 +151,6 @@ void ObjectExpression::add_symbol
 (std::string const &symbol, ExpressionType type)
 {
    symbol_type_table[symbol] = type;
-}
-
-//
-// ObjectExpression::archive
-//
-ObjectArchive &ObjectExpression::archive(ObjectArchive &arc)
-{
-   return arc << pos;
 }
 
 //
@@ -425,6 +417,14 @@ std::string ObjectExpression::resolveString() const
       Error_NP("cannot resolve string");
 
    return string->string;
+}
+
+//
+// ObjectExpression::save
+//
+ObjectSave &ObjectExpression::save(ObjectSave &arc) const
+{
+   return arc << pos;
 }
 
 //

@@ -225,14 +225,6 @@ void Register::AddGlobal(std::string const &name, VariableType const *type,
 }
 
 //
-// ObjectData::Register::Archive
-//
-ObjectArchive &Register::Archive(ObjectArchive &arc)
-{
-   return arc << Table << MapTable << WorldTable << GlobalTable;
-}
-
-//
 // ObjectData::Register::GenerateSymbols
 //
 void Register::GenerateSymbols()
@@ -293,6 +285,22 @@ void Register::IterateGlobal(IterFunc iterFunc, std::ostream *out)
    ObjectData::Iterate(GlobalTable, iterFunc, out);
 }
 
+//
+// ObjectData::Register::Load
+//
+ObjectLoad &Register::Load(ObjectLoad &arc)
+{
+   return arc >> Table >> MapTable >> WorldTable >> GlobalTable;
+}
+
+//
+// ObjectData::Register::Save
+//
+ObjectSave &Register::Save(ObjectSave &arc)
+{
+   return arc << Table << MapTable << WorldTable << GlobalTable;
+}
+
 }
 
 //
@@ -305,12 +313,21 @@ void OA_Override(ObjectData::Register &out, ObjectData::Register const &in)
 }
 
 //
-// operator ObjectArchive << ObjectData::Register
+// operator ObjectSave << ObjectData::Register
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Register &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Register const &data)
 {
    return arc << data.init << data.name << data.number << data.size
               << data.linkage << data.externDef;
+}
+
+//
+// operator ObjectLoad >> ObjectData::Register
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Register &data)
+{
+   return arc >> data.init >> data.name >> data.number >> data.size
+              >> data.linkage >> data.externDef;
 }
 
 // EOF

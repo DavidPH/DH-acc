@@ -31,11 +31,19 @@
 //
 
 //
-// operator ObjectArchive << LinkageSpecifier
+// operator ObjectSave << LinkageSpecifier
 //
-ObjectArchive &operator << (ObjectArchive &arc, LinkageSpecifier &data)
+ObjectSave &operator << (ObjectSave &arc, LinkageSpecifier const &data)
 {
-   return arc.archiveEnum(data, LINKAGE_DS);
+   return arc.saveEnum(data);
+}
+
+//
+// operator ObjectLoad >> LinkageSpecifier
+//
+ObjectLoad &operator >> (ObjectLoad &arc, LinkageSpecifier &data)
+{
+   return arc.loadEnum(data, LINKAGE_DS);
 }
 
 //EOF

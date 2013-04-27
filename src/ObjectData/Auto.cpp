@@ -77,14 +77,6 @@ void Auto::Add(std::string const &name, VariableType const *type,
 }
 
 //
-// ObjectData::Auto::Archive
-//
-ObjectArchive &Auto::Archive(ObjectArchive &arc)
-{
-   return arc << Table;
-}
-
-//
 // ObjectData::Auto::GenerateSymbols
 //
 void Auto::GenerateSymbols()
@@ -111,6 +103,22 @@ void Auto::Iterate(IterFunc iterFunc, std::ostream *out)
       iterFunc(out, itr->second);
 }
 
+//
+// ObjectData::Auto::Load
+//
+ObjectLoad &Auto::Load(ObjectLoad &arc)
+{
+   return arc >> Table;
+}
+
+//
+// ObjectData::Auto::Save
+//
+ObjectSave &Auto::Save(ObjectSave &arc)
+{
+   return arc << Table;
+}
+
 }
 
 //
@@ -123,11 +131,19 @@ void OA_Override(ObjectData::Auto &out, ObjectData::Auto const &in)
 }
 
 //
-// operator ObjectArchive << ObjectData::Auto
+// operator ObjectSave << ObjectData::Auto
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Auto &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Auto const &data)
 {
    return arc << data.name << data.number << data.size << data.linkage << data.externDef;
+}
+
+//
+// operator ObjectLoad >> ObjectData::Auto
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Auto &data)
+{
+   return arc >> data.name >> data.number >> data.size >> data.linkage >> data.externDef;
 }
 
 // EOF

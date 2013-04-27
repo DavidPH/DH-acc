@@ -31,6 +31,14 @@
 //
 
 //
+// operator ObjectSave << SourcePosition
+//
+ObjectSave &operator << (ObjectSave &arc, SourcePosition const &data)
+{
+   return arc << data.filename << data.line << data.column;
+}
+
+//
 // operator std::ostream << SourcePosition
 //
 std::ostream &operator << (std::ostream &out, SourcePosition const &in)
@@ -39,11 +47,11 @@ std::ostream &operator << (std::ostream &out, SourcePosition const &in)
 }
 
 //
-// operator ObjectArchive << SourcePosition
+// operator ObjectLoad >> SourcePosition
 //
-ObjectArchive &operator << (ObjectArchive &arc, SourcePosition &data)
+ObjectLoad &operator >> (ObjectLoad &arc, SourcePosition &data)
 {
-   return arc << data.filename << data.line << data.column;
+   return arc >> data.filename >> data.line >> data.column;
 }
 
 // EOF

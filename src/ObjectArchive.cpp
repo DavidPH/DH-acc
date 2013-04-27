@@ -33,72 +33,72 @@
 //
 
 //
-// ReadInt
+// LoadInt
 //
-static biguint ReadInt(std::istream *in)
+static biguint LoadInt(std::istream &load)
 {
    biguint i = 0;
 
-   for(int c; (c = in->get()) && *in;)
+   for(int c; (c = load.get()) && load;)
       i = i * 16 + SourceExpression::ParseNumber(c);
 
    return i;
 }
 
 //
-// ReadRealFrac
+// LoadRealFrac
 //
-static bigreal ReadRealFrac(std::istream *in)
+static bigreal LoadRealFrac(std::istream &load)
 {
-   int c = in->get();
+   int c = load.get();
 
    if(c == '\0') return 0;
 
-   return (SourceExpression::ParseNumber(c) + ReadRealFrac(in)) / 16;
+   return (SourceExpression::ParseNumber(c) + LoadRealFrac(load)) / 16;
 }
 
 //
-// ReadRealInt
+// LoadRealInt
 //
-static bigreal ReadRealInt(std::istream *in)
+static bigreal LoadRealInt(std::istream &load)
 {
    bigreal i = 0;
 
-   for(int c; (c = in->get()) != '.' && *in;)
+   for(int c; (c = load.get()) != '.' && load;)
       i = i * 16 + SourceExpression::ParseNumber(c);
 
    return i;
 }
 
 //
-// WriteInt
+// SaveInt
 //
-static void WriteInt(std::ostream *out, biguint i)
+static void SaveInt(std::ostream &save, biguint i)
 {
    if(!i) return;
 
-   WriteInt(out, i / 16);
-   out->put("0123456789ABCDEF"[i % 16]);
+   SaveInt(save, i / 16);
+   save.put("0123456789ABCDEF"[i % 16]);
 }
 
 //
-// WriteRealFrac
+// SaveRealFrac
 //
-static void WriteRealFrac(std::ostream *out, bigreal f)
+static void SaveRealFrac(std::ostream &save, bigreal f)
 {
    for(; f; f = std::fmod(f, 1) * 16)
-      out->put("0123456789ABCDEF"[static_cast<unsigned>(std::floor(f))]);
+      save.put("0123456789ABCDEF"[static_cast<unsigned>(std::floor(f))]);
 }
 
 //
-// WriteRealInt
+// SaveRealInt
 //
-static void WriteRealInt(std::ostream *out, bigreal i)
+static void SaveRealInt(std::ostream &save, bigreal i)
 {
    if(!i) return;
 
-   WriteRealInt(out, std::floor(i / 16));
-   out->put("0123456789ABCDEF"[static_cast<unsigned>(std::floor(std::fmod(i, 16)))]);
+   SaveRealInt(save, std::floor(i / 16));
+   save.put("0123456789ABCDEF"[static_cast<unsigned>(std::floor(std::fmod(i, 16)))]);
 }
 
 
@@ -107,128 +107,128 @@ static void WriteRealInt(std::ostream *out, bigreal i)
 //
 
 //
-// ObjectArchive::readBool
+// ObjectLoad::loadPrimBool
 //
-bool ObjectArchive::readBool()
+bool ObjectLoad::loadPrimBool()
 {
-   if(!in || !*in) return false;
+   if(!load) return false;
 
-   int c = in->get();
+   int c = load.get();
 
-   while(*in && in->get()) {}
+   while(load && load.get()) {}
 
    return c != '0';
 }
 
 //
-// ObjectArchive::readChar
+// ObjectLoad::loadPrimChar
 //
-char ObjectArchive::readChar()
+char ObjectLoad::loadPrimChar()
 {
-   if(!in || !*in) return '\0';
+   if(!load) return '\0';
 
-   return static_cast<char>(in->get());
+   return static_cast<char>(load.get());
 }
 
 //
-// ObjectArchive::readReal
+// ObjectLoad::loadPrimReal
 //
-bigreal ObjectArchive::readReal()
+bigreal ObjectLoad::loadPrimReal()
 {
-   if(!in || !*in) return 0;
+   if(!load) return 0.0;
 
-   char sign = in->get();
+   char sign = load.get();
 
-   bigreal data = ReadRealInt(in);
-   data += ReadRealFrac(in);
+   bigreal data = LoadRealInt(load);
+   data += LoadRealFrac(load);
 
    return sign == '-' ? -data : data;
 }
 
 //
-// ObjectArchive::readSInt
+// ObjectLoad::loadPrimSInt
 //
-bigsint ObjectArchive::readSInt()
+bigsint ObjectLoad::loadPrimSInt()
 {
-   if(!in || !*in) return 0;
+   if(!load) return 0;
 
-   if(in->get() == '-')
-      return -static_cast<bigsint>(ReadInt(in));
+   if(load.get() == '-')
+      return -static_cast<bigsint>(LoadInt(load));
    else
-      return static_cast<bigsint>(ReadInt(in));
+      return static_cast<bigsint>(LoadInt(load));
 }
 
 //
-// ObjectArchive::readUInt
+// ObjectLoad::loadPrimUInt
 //
-biguint ObjectArchive::readUInt()
+biguint ObjectLoad::loadPrimUInt()
 {
-   if(!in || !*in) return 0;
+   if(!load) return 0;
 
-   return ReadInt(in);
+   return LoadInt(load);
 }
 
 //
-// ObjectArchive::writeBool
+// ObjectSave::savePrimBool
 //
-void ObjectArchive::writeBool(bool data)
+void ObjectSave::savePrimBool(bool data)
 {
-   if(!out || !*out) return;
+   if(!save) return;
 
-   out->put(data ? '1' : '0');
-   out->put('\0');
+   save.put('0' + data);
+   save.put('\0');
 }
 
 //
-// ObjectArchive::writeChar
+// ObjectSave::savePrimChar
 //
-void ObjectArchive::writeChar(char data)
+void ObjectSave::savePrimChar(char data)
 {
-   if(!out || !*out) return;
+   if(!save) return;
 
-   out->put(data);
+   save.put(data);
 }
 
 //
-// ObjectArchive::writeReal
+// ObjectSave::savePrimReal
 //
-void ObjectArchive::writeReal(bigreal data)
+void ObjectSave::savePrimReal(bigreal data)
 {
-   if(!out || !*out) return;
+   if(!save) return;
 
-   if(data < 0) {data = -data; out->put('-');} else out->put('+');
+   if(data < 0) {data = -data; save.put('-');} else save.put('+');
 
-   WriteRealInt(out, std::floor(data));
-   out->put('.');
-   WriteRealFrac(out, std::fmod(data, 1) * 16);
+   SaveRealInt(save, std::floor(data));
+   save.put('.');
+   SaveRealFrac(save, std::fmod(data, 1) * 16);
 
-   out->put('\0');
+   save.put('\0');
 }
 
 //
-// ObjectArchive::writeSInt
+// ObjectSave::savePrimSInt
 //
-void ObjectArchive::writeSInt(bigsint data)
+void ObjectSave::savePrimSInt(bigsint data)
 {
-   if(!out || !*out) return;
+   if(!save) return;
 
-   if(data < 0) {data = -data; out->put('-');} else out->put('+');
+   if(data < 0) {data = -data; save.put('-');} else save.put('+');
 
-   WriteInt(out, data);
+   SaveInt(save, data);
 
-   out->put('\0');
+   save.put('\0');
 }
 
 //
-// ObjectArchive::writeUInt
+// ObjectSave::savePrimUInt
 //
-void ObjectArchive::writeUInt(biguint data)
+void ObjectSave::savePrimUInt(biguint data)
 {
-   if(!out || !*out) return;
+   if(!save) return;
 
-   WriteInt(out, data);
+   SaveInt(save, data);
 
-   out->put('\0');
+   save.put('\0');
 }
 
 // EOF

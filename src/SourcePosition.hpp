@@ -32,7 +32,8 @@
 // Types                                                                      |
 //
 
-class ObjectArchive;
+class ObjectLoad;
+class ObjectSave;
 
 //
 // SourcePosition
@@ -49,8 +50,10 @@ public:
    long column;
 
 
-   friend ObjectArchive &operator << (ObjectArchive &arc, SourcePosition &data);
+   friend ObjectSave &operator << (ObjectSave &arc, SourcePosition const &data);
    friend std::ostream &operator << (std::ostream &out, SourcePosition const &in);
+
+   friend ObjectLoad &operator >> (ObjectLoad &arc, SourcePosition &data);
 
    //
    // builtin

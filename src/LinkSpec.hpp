@@ -29,7 +29,8 @@
 // Types                                                                      |
 //
 
-class ObjectArchive;
+class ObjectLoad;
+class ObjectSave;
 
 //
 // LinkageSpecifier
@@ -48,7 +49,8 @@ enum LinkageSpecifier
 // Global Functions                                                           |
 //
 
-ObjectArchive &operator << (ObjectArchive &arc, LinkageSpecifier &data);
+ObjectSave &operator << (ObjectSave &arc, LinkageSpecifier const &data);
+ObjectLoad &operator >> (ObjectLoad &arc, LinkageSpecifier &data);
 
 #endif//HPP_LinkSpec_
 

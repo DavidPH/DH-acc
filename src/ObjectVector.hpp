@@ -38,8 +38,9 @@
 // Types                                                                      |
 //
 
-class ObjectArchive;
 class ObjectExpression;
+class ObjectLoad;
+class ObjectSave;
 
 //
 // ObjectVector
@@ -159,7 +160,9 @@ public:
    void setPosition(SourcePosition const &_pos) {head.pos = _pos;}
 
 
-   friend ObjectArchive &operator << (ObjectArchive &arc, ObjectVector &data);
+   friend ObjectSave &operator << (ObjectSave &arc, ObjectVector const &data);
+
+   friend ObjectLoad &operator >> (ObjectLoad &arc, ObjectVector &data);
 
 private:
    void addToken(ObjectToken *token);

@@ -50,7 +50,7 @@
    }
 
 #define CreateValueXArc(X) \
-   ObjectExpression::Reference ObjectExpression::CreateValue##X(ObjectArchive &arc) \
+   auto ObjectExpression::LoadValue##X(ObjectLoad &arc) -> Reference \
    { \
       return static_cast<Reference>(new ObjectExpression_Value##X(arc)); \
    }

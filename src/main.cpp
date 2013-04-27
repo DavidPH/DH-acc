@@ -247,8 +247,8 @@ static void read_source(std::string const &name, SourceType type,
    case SOURCE_object:
       {
          std::ifstream in(name.c_str(), std::ios_base::in|std::ios_base::binary);
-         ObjectArchive arc(&in);
-         ObjectExpression::Archive(arc, *objects);
+         ObjectLoad arc{in};
+         ObjectExpression::Load(arc, *objects);
       }
       break;
 
@@ -384,8 +384,8 @@ static inline int _main()
    {
       std::ofstream out(option_out.data.c_str(),
                         std::ios_base::out|std::ios_base::binary);
-      ObjectArchive arc(&out);
-      ObjectExpression::Archive(arc, objects);
+      ObjectSave arc{out};
+      ObjectExpression::Save(arc, objects);
 
       return 0;
    }

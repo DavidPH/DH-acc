@@ -42,7 +42,7 @@ class ObjectExpression_ValueCast : public ObjectExpression_Unary
 public:
    ObjectExpression_ValueCast(ExpressionType _type, OBJEXP_EXPRUNA_PARM)
     : Super(OBJEXP_EXPRUNA_PASS), type(_type) {}
-   ObjectExpression_ValueCast(ObjectArchive &arc) : Super(arc) {arc << type;}
+   ObjectExpression_ValueCast(ObjectLoad &arc) : Super(arc) {arc >> type;}
 
    virtual bool canResolve() const {return expr->canResolve();}
 
@@ -149,11 +149,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_VALUE_CAST) << type;
+      return Super::save(arc << OT_VALUE_CAST) << type;
    }
 
 private:
@@ -209,18 +209,17 @@ private:
 //
 // ObjectExpression::CreateValueCast
 //
-ObjectExpression::Reference ObjectExpression::CreateValueCast(ObjectArchive &arc)
+auto ObjectExpression::CreateValueCast(ExpressionType type, OBJEXP_EXPRUNA_ARGS) -> Reference
 {
-   return static_cast<Reference>(new ObjectExpression_ValueCast(arc));
+   return static_cast<Reference>(new ObjectExpression_ValueCast(type, expr, pos));
 }
 
 //
-// ObjectExpression::CreateValueCast
+// ObjectExpression::LoadValueCast
 //
-ObjectExpression::Reference ObjectExpression::CreateValueCast(
-   ExpressionType type, OBJEXP_EXPRUNA_ARGS)
+auto ObjectExpression::LoadValueCast(ObjectLoad &arc) -> Reference
 {
-   return static_cast<Reference>(new ObjectExpression_ValueCast(type, expr, pos));
+   return static_cast<Reference>(new ObjectExpression_ValueCast(arc));
 }
 
 // EOF

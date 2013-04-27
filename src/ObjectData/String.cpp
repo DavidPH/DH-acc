@@ -100,14 +100,6 @@ void String::Add(std::string const &name, std::string const &string)
 }
 
 //
-// ObjectData::String::Archive
-//
-ObjectArchive &String::Archive(ObjectArchive &arc)
-{
-   return arc << Table;
-}
-
-//
 // ObjectData::String::Find
 //
 String const *String::Find(std::string const &symbol)
@@ -161,6 +153,22 @@ void String::Iterate(IterFunc iterFunc, std::ostream *out)
       iterFunc(out, itr->second);
 }
 
+//
+// ObjectData::String::Load
+//
+ObjectLoad &String::Load(ObjectLoad &arc)
+{
+   return arc >> Table;
+}
+
+//
+// ObjectData::String::Save
+//
+ObjectSave &String::Save(ObjectSave &arc)
+{
+   return arc << Table;
+}
+
 }
 
 //
@@ -177,11 +185,19 @@ void OA_Override(ObjectData::String &out, ObjectData::String const &in)
 }
 
 //
-// operator ObjectArchive << ObjectData::String
+// operator ObjectSave << ObjectData::String
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::String &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectData::String const &data)
 {
    return arc << data.names << data.string;
+}
+
+//
+// operator ObjectLoad >> ObjectData::String
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::String &data)
+{
+   return arc >> data.names >> data.string;
 }
 
 // EOF

@@ -40,7 +40,7 @@ class ObjectExpression_UnarySub : public ObjectExpression_Unary
 
 public:
    ObjectExpression_UnarySub(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS) {}
-   ObjectExpression_UnarySub(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_UnarySub(ObjectLoad &arc) : Super(arc) {}
 
    bigreal resolveFIX() const {return -expr->resolveFIX();}
    bigreal resolveFLT() const {return -expr->resolveFLT();}
@@ -49,22 +49,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_UNARY_SUB);
-   }
-
-private:
-   //
-   // writeACSPLong
-   //
-   virtual void writeACSPLong(std::ostream *out) const
-   {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_NEGATE);
-
-      expr->writeACSP(out);
+      return Super::save(arc << OT_UNARY_SUB);
    }
 };
 
@@ -82,9 +71,9 @@ ObjectExpression::Reference ObjectExpression::create_unary_sub(OBJEXP_EXPRUNA_AR
 }
 
 //
-// ObjectExpression::CreateUnarySub
+// ObjectExpression::LoadUnarySub
 //
-ObjectExpression::Reference ObjectExpression::CreateUnarySub(ObjectArchive &arc)
+auto ObjectExpression::LoadUnarySub(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_UnarySub(arc));
 }

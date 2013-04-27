@@ -38,7 +38,7 @@ class ObjectExpression_ValueFLT : public ObjectExpression
 public:
    ObjectExpression_ValueFLT(bigreal _value, ExpressionType _type, OBJEXP_EXPR_PARM)
     : Super(_pos), value(_value), type(_type) {}
-   ObjectExpression_ValueFLT(ObjectArchive &arc) : Super(arc) {arc << value << type;}
+   ObjectExpression_ValueFLT(ObjectLoad &arc) : Super(arc) {arc >> value >> type;}
 
    virtual bool canResolve() const {return true;}
 
@@ -48,23 +48,14 @@ public:
 
 protected:
    //
-   // writeObject
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_VALUE_FLT) << value << type;
+      return Super::save(arc << OT_VALUE_FLT) << value << type;
    }
 
 private:
-   //
-   // writeACSPLong
-   //
-   virtual void writeACSPLong(std::ostream *out) const
-   {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LITERAL);
-      BinaryTokenACS::write_ACS0_32(out, *this);
-   }
-
    bigreal value;
    ExpressionType type;
 };
