@@ -53,29 +53,11 @@ public:
    };
 
 
-   //
-   // ObjectExpression_BinaryCmp
-   //
    ObjectExpression_BinaryCmp(OBJEXP_EXPRBIN_PARM, CmpType _ct)
-    : Super(OBJEXP_EXPRBIN_PASS), ct(_ct)
-   {
-   }
+    : Super{OBJEXP_EXPRBIN_PASS}, ct{_ct} {}
+   ObjectExpression_BinaryCmp(ObjectLoad &arc) : Super{arc} {arc >> ct;}
 
-   //
-   // ObjectExpression_BinaryCmp
-   //
-   ObjectExpression_BinaryCmp(ObjectArchive &arc) : Super(arc)
-   {
-      arc << ct;
-   }
-
-   //
-   // ::getType
-   //
-   virtual ExpressionType getType() const
-   {
-      return ET_INT;
-   }
+   virtual ExpressionType getType() const {return ET_INT;}
 
    //
    // ::resolveINT
@@ -97,18 +79,23 @@ public:
    }
 
 
-   friend ObjectArchive &operator << (ObjectArchive &arc, CmpType &data);
+   friend ObjectSave &operator << (ObjectSave &arc, CmpType const &data);
+
+   friend ObjectLoad &operator >> (ObjectLoad &arc, CmpType &data);
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BINARY_CMP) << ct;
+      return Super::save(arc << OT_BINARY_CMP) << ct;
    }
 
 private:
+   //
+   // doCmp
+   //
    int doCmp() const
    {
       switch (Super::getType())
@@ -183,14 +170,6 @@ private:
 //
 
 //
-// ObjectExpression::CreateBinaryCmp
-//
-ObjectExpression::Reference ObjectExpression::CreateBinaryCmp(ObjectArchive &arc)
-{
-   return static_cast<Reference>(new ObjectExpression_BinaryCmp(arc));
-}
-
-//
 // ObjectExpression::create_binary_cmp_ge
 //
 ObjectExpression::Reference ObjectExpression::create_binary_cmp_ge(OBJEXP_EXPRBIN_ARGS)
@@ -245,11 +224,27 @@ ObjectExpression::Reference ObjectExpression::create_binary_cmp_ne(OBJEXP_EXPRBI
 }
 
 //
-// operator ObjectArchive << ObjectExpression_BinaryCmp::CmpType
+// ObjectExpression::LoadBinaryCmp
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectExpression_BinaryCmp::CmpType &data)
+auto ObjectExpression::LoadBinaryCmp(ObjectLoad &arc) -> Reference
 {
-   return arc.archiveEnum(data, ObjectExpression_BinaryCmp::CMP_NE);
+   return static_cast<Reference>(new ObjectExpression_BinaryCmp(arc));
+}
+
+//
+// operator ObjectSave << ObjectExpression_BinaryCmp::CmpType
+//
+ObjectSave &operator << (ObjectSave &arc, ObjectExpression_BinaryCmp::CmpType const &data)
+{
+   return arc.saveEnum(data);
+}
+
+//
+// operator ObjectLoad >> ObjectExpression_BinaryCmp::CmpType
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectExpression_BinaryCmp::CmpType &data)
+{
+   return arc.loadEnum(data, ObjectExpression_BinaryCmp::CMP_NE);
 }
 
 // EOF

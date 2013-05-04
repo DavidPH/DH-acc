@@ -31,7 +31,8 @@
 // Types                                                                      |
 //
 
-class ObjectArchive;
+class ObjectLoad;
+class ObjectSave;
 class SourcePosition;
 
 //
@@ -76,8 +77,11 @@ bool ocode_is_push_noarg(ObjectCode ocode);
 
 char const *make_string(ObjectCode ocode);
 
-ObjectArchive &operator << (ObjectArchive &arc, ObjectCode    &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectCodeSet &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectCode    const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectCodeSet const &data);
+
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectCode    &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectCodeSet &data);
 
 #endif//HPP_ObjectCode_
 

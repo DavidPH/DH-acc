@@ -37,18 +37,18 @@ class ObjectExpression_BinaryRSh : public ObjectExpression_Binary
 
 public:
    ObjectExpression_BinaryRSh(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
-   ObjectExpression_BinaryRSh(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_BinaryRSh(ObjectLoad &arc) : Super(arc) {}
 
    bigsint resolveINT() const {return exprL->resolveINT() >> exprR->resolveINT();}
    biguint resolveUNS() const {return exprL->resolveUNS() >> exprR->resolveUNS();}
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BINARY_RSH);
+      return Super::save(arc << OT_BINARY_RSH);
    }
 };
 
@@ -66,9 +66,9 @@ ObjectExpression::Reference ObjectExpression::create_binary_rsh(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::CreateBinaryRSh
+// ObjectExpression::LoadBinaryRSh
 //
-ObjectExpression::Reference ObjectExpression::CreateBinaryRSh(ObjectArchive &arc)
+auto ObjectExpression::LoadBinaryRSh(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_BinaryRSh(arc));
 }

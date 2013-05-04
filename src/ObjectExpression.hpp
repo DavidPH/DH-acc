@@ -63,8 +63,9 @@
 // Types                                                                      |
 //
 
-class ObjectArchive;
 struct ObjectCodeSet;
+class ObjectLoad;
+class ObjectSave;
 class ObjectVector;
 class SourceTokenC;
 
@@ -144,9 +145,13 @@ public:
    friend void OA_Override(Pointer        &out, Pointer        const &in);
    friend void OA_Override(Reference      &out, Reference      const &in);
 
-   friend ObjectArchive &operator << (ObjectArchive &arc, ExpressionType &data);
-   friend ObjectArchive &operator << (ObjectArchive &arc, Pointer        &data);
-   friend ObjectArchive &operator << (ObjectArchive &arc, Reference      &data);
+   friend ObjectSave &operator << (ObjectSave &arc, ExpressionType const &data);
+   friend ObjectSave &operator << (ObjectSave &arc, Pointer        const &data);
+   friend ObjectSave &operator << (ObjectSave &arc, Reference      const &data);
+
+   friend ObjectLoad &operator >> (ObjectLoad &arc, ExpressionType &data);
+   friend ObjectLoad &operator >> (ObjectLoad &arc, Pointer        &data);
+   friend ObjectLoad &operator >> (ObjectLoad &arc, Reference      &data);
 
 	static void add_address_count(bigsint const addressCount);
 
@@ -155,8 +160,6 @@ public:
 
 	static void add_symbol(std::string const & symbol, ObjectExpression * value);
 	static void add_symbol(std::string const & symbol, ExpressionType type);
-
-   static ObjectArchive &Archive(ObjectArchive &arc, ObjectVector &objects);
 
    static Reference create_unary_add(OBJEXP_EXPRUNA_ARGS);
    static Reference create_unary_not(OBJEXP_EXPRUNA_ARGS);
@@ -225,6 +228,10 @@ public:
 
 	static void iter_library(void (*iter)(std::ostream *, std::string const &), std::ostream * out);
 
+   static ObjectLoad &Load(ObjectLoad &arc, ObjectVector &objects);
+
+   static ObjectSave &Save(ObjectSave &arc, ObjectVector const &objects);
+
 	static void set_address_count(bigsint addressCount);
 
 	// Sets the current filename, translating to make it a valid symbol.
@@ -271,50 +278,51 @@ protected:
    };
 
    explicit ObjectExpression(OBJEXP_EXPR_ARGS);
-   explicit ObjectExpression(ObjectArchive &arc);
+   explicit ObjectExpression(ObjectLoad &arc);
 
-   virtual ObjectArchive &archive(ObjectArchive &arc);
+   virtual ObjectSave &save(ObjectSave &arc) const;
 
    SourcePosition pos;
 
 
-   friend ObjectArchive &operator << (ObjectArchive &arc, ObjectType &data);
-   friend ObjectArchive &operator << (ObjectArchive &arc, ObjectType const &data);
+   friend ObjectSave &operator << (ObjectSave &arc, ObjectType const &data);
 
-   static Reference Create(ObjectArchive &arc);
+   friend ObjectLoad &operator >> (ObjectLoad &arc, ObjectType &data);
 
-   static Reference CreateUnaryAdd(ObjectArchive &arc);
-   static Reference CreateUnaryNot(ObjectArchive &arc);
-   static Reference CreateUnarySub(ObjectArchive &arc);
+   static Reference LoadExpr(ObjectLoad &arc);
 
-   static Reference CreateBinaryAdd(ObjectArchive &arc);
-   static Reference CreateBinaryAnd(ObjectArchive &arc);
-   static Reference CreateBinaryCmp(ObjectArchive &arc);
-   static Reference CreateBinaryDiv(ObjectArchive &arc);
-   static Reference CreateBinaryIOr(ObjectArchive &arc);
-   static Reference CreateBinaryLSh(ObjectArchive &arc);
-   static Reference CreateBinaryMod(ObjectArchive &arc);
-   static Reference CreateBinaryMul(ObjectArchive &arc);
-   static Reference CreateBinaryRSh(ObjectArchive &arc);
-   static Reference CreateBinarySub(ObjectArchive &arc);
-   static Reference CreateBinaryXOr(ObjectArchive &arc);
+   static Reference LoadUnaryAdd(ObjectLoad &arc);
+   static Reference LoadUnaryNot(ObjectLoad &arc);
+   static Reference LoadUnarySub(ObjectLoad &arc);
 
-   static Reference CreateBranchAnd(ObjectArchive &arc);
-   static Reference CreateBranchIf (ObjectArchive &arc);
-   static Reference CreateBranchIOr(ObjectArchive &arc);
-   static Reference CreateBranchNot(ObjectArchive &arc);
-   static Reference CreateBranchXOr(ObjectArchive &arc);
+   static Reference LoadBinaryAdd(ObjectLoad &arc);
+   static Reference LoadBinaryAnd(ObjectLoad &arc);
+   static Reference LoadBinaryCmp(ObjectLoad &arc);
+   static Reference LoadBinaryDiv(ObjectLoad &arc);
+   static Reference LoadBinaryIOr(ObjectLoad &arc);
+   static Reference LoadBinaryLSh(ObjectLoad &arc);
+   static Reference LoadBinaryMod(ObjectLoad &arc);
+   static Reference LoadBinaryMul(ObjectLoad &arc);
+   static Reference LoadBinaryRSh(ObjectLoad &arc);
+   static Reference LoadBinarySub(ObjectLoad &arc);
+   static Reference LoadBinaryXOr(ObjectLoad &arc);
+
+   static Reference LoadBranchAnd(ObjectLoad &arc);
+   static Reference LoadBranchIf (ObjectLoad &arc);
+   static Reference LoadBranchIOr(ObjectLoad &arc);
+   static Reference LoadBranchNot(ObjectLoad &arc);
+   static Reference LoadBranchXOr(ObjectLoad &arc);
 
 
-   static Reference CreateValueFIX   (ObjectArchive &arc);
-   static Reference CreateValueFLT   (ObjectArchive &arc);
-   static Reference CreateValueINT   (ObjectArchive &arc);
-   static Reference CreateValueUNS   (ObjectArchive &arc);
-   static Reference CreateValueOCS   (ObjectArchive &arc);
-   static Reference CreateValueARR   (ObjectArchive &arc);
-   static Reference CreateValueCast  (ObjectArchive &arc);
-   static Reference CreateValuePart  (ObjectArchive &arc);
-   static Reference CreateValueSymbol(ObjectArchive &arc);
+   static Reference LoadValueFIX   (ObjectLoad &arc);
+   static Reference LoadValueFLT   (ObjectLoad &arc);
+   static Reference LoadValueINT   (ObjectLoad &arc);
+   static Reference LoadValueUNS   (ObjectLoad &arc);
+   static Reference LoadValueOCS   (ObjectLoad &arc);
+   static Reference LoadValueARR   (ObjectLoad &arc);
+   static Reference LoadValueCast  (ObjectLoad &arc);
+   static Reference LoadValuePart  (ObjectLoad &arc);
+   static Reference LoadValueSymbol(ObjectLoad &arc);
 
 private:
    virtual void writeACSPLong(std::ostream *out) const;

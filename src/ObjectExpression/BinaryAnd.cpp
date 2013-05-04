@@ -37,18 +37,18 @@ class ObjectExpression_BinaryAnd : public ObjectExpression_Binary
 
 public:
    ObjectExpression_BinaryAnd(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
-   ObjectExpression_BinaryAnd(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_BinaryAnd(ObjectLoad &arc) : Super(arc) {}
 
    bigsint resolveINT() const {return exprL->resolveINT() & exprR->resolveINT();}
    biguint resolveUNS() const {return exprL->resolveUNS() & exprR->resolveUNS();}
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BINARY_AND);
+      return Super::save(arc << OT_BINARY_AND);
    }
 };
 
@@ -66,9 +66,9 @@ ObjectExpression::Reference ObjectExpression::create_binary_and(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::CreateBinaryAnd
+// ObjectExpression::LoadBinaryAnd
 //
-ObjectExpression::Reference ObjectExpression::CreateBinaryAnd(ObjectArchive &arc)
+auto ObjectExpression::LoadBinaryAnd(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_BinaryAnd(arc));
 }

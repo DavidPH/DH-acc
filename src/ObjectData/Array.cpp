@@ -258,14 +258,6 @@ void Array::AddGlobal(std::string const &name, LinkageSpecifier linkage,
 }
 
 //
-// ObjectData::Array::Archive
-//
-ObjectArchive &Array::Archive(ObjectArchive &arc)
-{
-   return arc << MapTable << WorldTable << GlobalTable;
-}
-
-//
 // ObjectData::Array::GenerateSymbols
 //
 void Array::GenerateSymbols()
@@ -312,6 +304,22 @@ void Array::IterateGlobal(IterFunc iterFunc, std::ostream *out)
    Iterate(GlobalTable, iterFunc, out);
 }
 
+//
+// ObjectData::Array::Load
+//
+ObjectLoad &Array::Load(ObjectLoad &arc)
+{
+   return arc >> MapTable >> WorldTable >> GlobalTable;
+}
+
+//
+// ObjectData::Array::Save
+//
+ObjectSave &Array::Save(ObjectSave &arc)
+{
+   return arc << MapTable << WorldTable << GlobalTable;
+}
+
 }
 
 //
@@ -324,12 +332,21 @@ void OA_Override(ObjectData::Array &out, ObjectData::Array const &in)
 }
 
 //
-// operator ObjectArchive << ObjectData::Array
+// operator ObjectSave << ObjectData::Array
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Array &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Array const &data)
 {
    return arc << data.init << data.name << data.number << data.size
               << data.linkage << data.externDef;
+}
+
+//
+// operator ObjectLoad >> ObjectData::Array
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Array &data)
+{
+   return arc >> data.init >> data.name >> data.number >> data.size
+              >> data.linkage >> data.externDef;
 }
 
 // EOF

@@ -425,30 +425,33 @@ void ObjectVector::remToken(ObjectToken *token)
 }
 
 //
-// operator ObjectArchive << ObjectVector
+// operator ObjectSave << ObjectVector
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectVector &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectVector const &data)
 {
    arc << data.head.labels << data.head.pos;
 
-   if(arc.isSaving())
-   {
-      for(auto &token : data)
-      {
-         arc.writeBool(true);
-         arc << token;
-      }
-      arc.writeBool(false);
-   }
-   else
-   {
-      ObjectToken *token;
+   for(auto &token : data)
+      arc << true << token;
+   arc << false;
 
-      while(arc.readBool())
-      {
-         arc << *(token = new ObjectToken);
-         data.addToken(token);
-      }
+   return arc;
+}
+
+//
+// operator ObjectLoad >> ObjectVector
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectVector &data)
+{
+   ObjectToken *token;
+   bool b;
+
+   arc >> data.head.labels >> data.head.pos;
+
+   while(arc >> b, b)
+   {
+      arc >> *(token = new ObjectToken);
+      data.addToken(token);
    }
 
    return arc;

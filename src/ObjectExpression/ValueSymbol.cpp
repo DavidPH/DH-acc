@@ -44,7 +44,7 @@ class ObjectExpression_ValueSymbol : public ObjectExpression
 public:
    ObjectExpression_ValueSymbol(std::string const &_value, OBJEXP_EXPR_PARM)
     : Super(OBJEXP_EXPR_PASS), value(_value) {}
-   ObjectExpression_ValueSymbol(ObjectArchive &arc) : Super(arc) {arc << value;}
+   ObjectExpression_ValueSymbol(ObjectLoad &arc) : Super(arc) {arc >> value;}
 
    //
    // canResolve
@@ -74,11 +74,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_VALUE_SYMBOL) << value;
+      return Super::save(arc << OT_VALUE_SYMBOL) << value;
    }
 
 private:
@@ -89,15 +89,6 @@ private:
    {
       if(value[0] != '"' && value[0] != '{') *out << '$';
       *out << value << '\0';
-   }
-
-   //
-   // writeACSPLong
-   //
-   virtual void writeACSPLong(std::ostream *out) const
-   {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_SYMBOL);
-      BinaryTokenPPACS::write_ACSP_string(out, value);
    }
 
    std::string value;
@@ -111,16 +102,15 @@ private:
 //
 // ObjectExpression::CreateValueSymbol
 //
-ObjectExpression::Reference ObjectExpression::CreateValueSymbol(
-   std::string const &value, OBJEXP_EXPR_ARGS)
+auto ObjectExpression::CreateValueSymbol(std::string const &value, OBJEXP_EXPR_ARGS) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_ValueSymbol(value, pos));
 }
 
 //
-// ObjectExpression::CreateValueSymbol
+// ObjectExpression::LoadValueSymbol
 //
-ObjectExpression::Reference ObjectExpression::CreateValueSymbol(ObjectArchive &arc)
+auto ObjectExpression::LoadValueSymbol(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_ValueSymbol(arc));
 }

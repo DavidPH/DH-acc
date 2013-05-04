@@ -38,7 +38,7 @@ class ObjectExpression_ValueINT : public ObjectExpression
 public:
    ObjectExpression_ValueINT(bigsint _value, ExpressionType _type, OBJEXP_EXPR_PARM)
     : Super(_pos), value(_value), type(_type) {}
-   ObjectExpression_ValueINT(ObjectArchive &arc) : Super(arc) {arc << value << type;}
+   ObjectExpression_ValueINT(ObjectLoad &arc) : Super(arc) {arc >> value >> type;}
 
    virtual bool canResolve() const {return true;}
 
@@ -50,11 +50,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_VALUE_INT) << value << type;
+      return Super::save(arc << OT_VALUE_INT) << value << type;
    }
 
 private:

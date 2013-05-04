@@ -225,14 +225,6 @@ void ArrayVar::AddGlobal(std::string const &array, std::string const &name,
 }
 
 //
-// ObjectData::ArrayVar::Archive
-//
-ObjectArchive &ArrayVar::Archive(ObjectArchive &arc)
-{
-   return arc << MapTable << WorldTable << GlobalTable;
-}
-
-//
 // ObjectData::ArrayVar::ArrayMap
 //
 std::string const &ArrayVar::ArrayMap(std::string const &name)
@@ -299,6 +291,22 @@ void ArrayVar::IterateGlobal(IterFunc iterFunc, std::ostream *out)
    Iterate(GlobalTable, iterFunc, out);
 }
 
+//
+// ObjectData::ArrayVar::Load
+//
+ObjectLoad &ArrayVar::Load(ObjectLoad &arc)
+{
+   return arc >> MapTable >> WorldTable >> GlobalTable;
+}
+
+//
+// ObjectData::ArrayVar::Save
+//
+ObjectSave &ArrayVar::Save(ObjectSave &arc)
+{
+   return arc << MapTable << WorldTable << GlobalTable;
+}
+
 }
 
 //
@@ -311,12 +319,21 @@ void OA_Override(ObjectData::ArrayVar &out, ObjectData::ArrayVar const &in)
 }
 
 //
-// operator ObjectArchive << ObjectData::ArrayVar
+// operator ObjectSave << ObjectData::ArrayVar
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::ArrayVar &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectData::ArrayVar const &data)
 {
    return arc << data.init << data.array << data.name << data.number
               << data.size << data.linkage << data.externDef;
+}
+
+//
+// operator ObjectLoad >> ObjectData::ArrayVar
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::ArrayVar &data)
+{
+   return arc >> data.init >> data.array >> data.name >> data.number
+              >> data.size >> data.linkage >> data.externDef;
 }
 
 // EOF

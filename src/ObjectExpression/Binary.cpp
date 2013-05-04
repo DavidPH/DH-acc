@@ -51,17 +51,17 @@ ObjectExpression_Binary::ObjectExpression_Binary(OBJEXP_EXPRBIN_PARM)
 //
 // ObjectExpression_Binary::ObjectExpression_Binary
 //
-ObjectExpression_Binary::ObjectExpression_Binary(ObjectArchive &arc)
- : Super(arc), exprL(Create(arc)), exprR(Create(arc))
+ObjectExpression_Binary::ObjectExpression_Binary(ObjectLoad &arc) : Super{arc},
+   exprL{LoadExpr(arc)}, exprR{LoadExpr(arc)}
 {
 }
 
 //
-// ObjectExpression_Binary::archive
+// ObjectExpression_Binary::save
 //
-ObjectArchive &ObjectExpression_Binary::archive(ObjectArchive &arc)
+ObjectSave &ObjectExpression_Binary::save(ObjectSave &arc) const
 {
-   return Super::archive(arc) << exprL << exprR;
+   return Super::save(arc) << exprL << exprR;
 }
 
 //

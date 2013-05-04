@@ -37,7 +37,7 @@ class ObjectExpression_BinaryDiv : public ObjectExpression_Binary
 
 public:
    ObjectExpression_BinaryDiv(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
-   ObjectExpression_BinaryDiv(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_BinaryDiv(ObjectLoad &arc) : Super(arc) {}
 
    bigreal resolveFLT() const {return exprL->resolveFLT() / exprR->resolveFLT();}
    bigreal resolveFIX() const {return exprL->resolveFIX() / exprR->resolveFIX();}
@@ -46,11 +46,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BINARY_DIV);
+      return Super::save(arc << OT_BINARY_DIV);
    }
 };
 
@@ -68,9 +68,9 @@ ObjectExpression::Reference ObjectExpression::create_binary_div(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::CreateBinaryDiv
+// ObjectExpression::LoadBinaryDiv
 //
-ObjectExpression::Reference ObjectExpression::CreateBinaryDiv(ObjectArchive &arc)
+auto ObjectExpression::LoadBinaryDiv(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_BinaryDiv(arc));
 }

@@ -37,7 +37,7 @@ class ObjectExpression_BinarySub : public ObjectExpression_Binary
 
 public:
    ObjectExpression_BinarySub(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
-   ObjectExpression_BinarySub(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_BinarySub(ObjectLoad &arc) : Super(arc) {}
 
    bigreal resolveFLT() const {return exprL->resolveFLT() - exprR->resolveFLT();}
    bigreal resolveFIX() const {return exprL->resolveFIX() - exprR->resolveFIX();}
@@ -46,11 +46,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BINARY_SUB);
+      return Super::save(arc << OT_BINARY_SUB);
    }
 };
 
@@ -68,9 +68,9 @@ ObjectExpression::Reference ObjectExpression::create_binary_sub(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::CreateBinarySub
+// ObjectExpression::LoadBinarySub
 //
-ObjectExpression::Reference ObjectExpression::CreateBinarySub(ObjectArchive &arc)
+auto ObjectExpression::LoadBinarySub(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_BinarySub(arc));
 }

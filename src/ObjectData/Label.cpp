@@ -71,14 +71,6 @@ std::string const &Label::Add(std::string const &label)
 }
 
 //
-// ObjectData::Label::Archive
-//
-ObjectArchive &Label::Archive(ObjectArchive &arc)
-{
-   return arc << Table;
-}
-
-//
 // ObjectData::Label::GenerateSymbols
 //
 void Label::GenerateSymbols()
@@ -102,14 +94,38 @@ void Label::Iterate(IterFunc iterFunc, std::ostream *out)
       iterFunc(out, itr);
 }
 
+//
+// ObjectData::Label::Load
+//
+ObjectLoad &Label::Load(ObjectLoad &arc)
+{
+   return arc >> Table;
 }
 
 //
-// operator ObjectArchive << ObjectData::Label
+// ObjectData::Label::Save
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Label &data)
+ObjectSave &Label::Save(ObjectSave &arc)
+{
+   return arc << Table;
+}
+
+}
+
+//
+// operator ObjectSave << ObjectData::Label
+//
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Label const &data)
 {
    return arc << data.label << data.name;
+}
+
+//
+// operator ObjectLoad >> ObjectData::Label
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Label &data)
+{
+   return arc >> data.label >> data.name;
 }
 
 // EOF

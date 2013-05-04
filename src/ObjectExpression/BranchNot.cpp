@@ -40,7 +40,7 @@ class ObjectExpression_BranchNot : public ObjectExpression_Unary
 
 public:
    ObjectExpression_BranchNot(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS) {}
-   ObjectExpression_BranchNot(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_BranchNot(ObjectLoad &arc) : Super(arc) {}
 
    virtual ExpressionType getType() const {return ET_INT;}
 
@@ -90,21 +90,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BRANCH_NOT);
-   }
-
-private:
-   //
-   // writeACSPLong
-   //
-   virtual void writeACSPLong(std::ostream *out) const
-   {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LNOT);
-      expr->writeACSP(out);
+      return Super::save(arc << OT_BRANCH_NOT);
    }
 };
 
@@ -122,9 +112,9 @@ ObjectExpression::Reference ObjectExpression::create_branch_not(OBJEXP_EXPRUNA_A
 }
 
 //
-// ObjectExpression::CreateBranchNot
+// ObjectExpression::LoadBranchNot
 //
-ObjectExpression::Reference ObjectExpression::CreateBranchNot(ObjectArchive &arc)
+auto ObjectExpression::LoadBranchNot(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_BranchNot(arc));
 }

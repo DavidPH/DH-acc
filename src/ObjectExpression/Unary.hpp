@@ -45,9 +45,9 @@ public:
 
 protected:
    ObjectExpression_Unary(OBJEXP_EXPRUNA_ARGS);
-   ObjectExpression_Unary(ObjectArchive &arc);
+   ObjectExpression_Unary(ObjectLoad &arc);
 
-   virtual ObjectArchive &archive(ObjectArchive &arc);
+   virtual ObjectSave &save(ObjectSave &arc) const;
 
    ObjectExpression::Reference expr;
 };

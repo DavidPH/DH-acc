@@ -40,29 +40,18 @@ class ObjectExpression_UnaryNot : public ObjectExpression_Unary
 
 public:
    ObjectExpression_UnaryNot(OBJEXP_EXPRUNA_PARM) : Super(OBJEXP_EXPRUNA_PASS) {}
-   ObjectExpression_UnaryNot(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_UnaryNot(ObjectLoad &arc) : Super(arc) {}
 
    virtual bigsint resolveINT() const {return ~expr->resolveINT();}
    virtual biguint resolveUNS() const {return ~expr->resolveUNS();}
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_UNARY_NOT);
-   }
-
-private:
-   //
-   // writeACSPLong
-   //
-   virtual void writeACSPLong(std::ostream *out) const
-   {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_BNOT);
-
-      expr->writeACSP(out);
+      return Super::save(arc << OT_UNARY_NOT);
    }
 };
 
@@ -80,9 +69,9 @@ ObjectExpression::Reference ObjectExpression::create_unary_not(OBJEXP_EXPRUNA_AR
 }
 
 //
-// ObjectExpression::CreateUnaryNot
+// ObjectExpression::LoadUnaryNot
 //
-ObjectExpression::Reference ObjectExpression::CreateUnaryNot(ObjectArchive &arc)
+auto ObjectExpression::LoadUnaryNot(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_UnaryNot(arc));
 }

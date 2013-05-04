@@ -36,8 +36,9 @@
 // Types                                                                      |
 //
 
-class ObjectArchive;
 class ObjectExpression;
+class ObjectLoad;
+class ObjectSave;
 class SourceContext;
 class VariableType;
 
@@ -123,13 +124,15 @@ struct Array
    static void AddGlobal(std::string const &name, LinkageSpecifier linkage,
                          bool externDef, bigsint number = -1);
 
-   static ObjectArchive &Archive(ObjectArchive &arc);
-
    static void GenerateSymbols();
 
    static void IterateMap(IterFunc iterFunc, std::ostream *out);
    static void IterateWorld(IterFunc iterFunc, std::ostream *out);
    static void IterateGlobal(IterFunc iterFunc, std::ostream *out);
+
+   static ObjectLoad &Load(ObjectLoad &arc);
+
+   static ObjectSave &Save(ObjectSave &arc);
 };
 
 //
@@ -159,8 +162,6 @@ struct ArrayVar
       VariableType const *type, LinkageSpecifier linkage, bool externDef,
       bigsint number = -1);
 
-   static ObjectArchive &Archive(ObjectArchive &arc);
-
    // Gets the name of the associated Array.
    static std::string const &ArrayMap(std::string const &name);
    static std::string const &ArrayWorld(std::string const &name);
@@ -174,6 +175,10 @@ struct ArrayVar
    static void IterateMap(IterFunc iterFunc, std::ostream *out);
    static void IterateWorld(IterFunc iterFunc, std::ostream *out);
    static void IterateGlobal(IterFunc iterFunc, std::ostream *out);
+
+   static ObjectLoad &Load(ObjectLoad &arc);
+
+   static ObjectSave &Save(ObjectSave &arc);
 };
 
 //
@@ -194,11 +199,13 @@ struct Auto
    static void Add(std::string const &name, VariableType const *type,
       LinkageSpecifier linkage, bool externDef, bigsint number);
 
-   static ObjectArchive &Archive(ObjectArchive &arc);
-
    static void GenerateSymbols();
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
+
+   static ObjectLoad &Load(ObjectLoad &arc);
+
+   static ObjectSave &Save(ObjectSave &arc);
 };
 
 //
@@ -227,11 +234,13 @@ struct Function
       bigsint argCount, bigsint retCount, bigsint varCount,
       LinkageSpecifier linkage);
 
-   static ObjectArchive &Archive(ObjectArchive &arc);
-
    static void GenerateSymbols();
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
+
+   static ObjectLoad &Load(ObjectLoad &arc);
+
+   static ObjectSave &Save(ObjectSave &arc);
 };
 
 //
@@ -249,11 +258,13 @@ struct Label
    // Returns the new label's name.
    static std::string const &Add(std::string const &label);
 
-   static ObjectArchive &Archive(ObjectArchive &arc);
-
    static void GenerateSymbols();
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
+
+   static ObjectLoad &Load(ObjectLoad &arc);
+
+   static ObjectSave &Save(ObjectSave &arc);
 };
 
 //
@@ -281,8 +292,6 @@ struct Register
    static void AddGlobal(std::string const &name, VariableType const *type,
       LinkageSpecifier linkage, bool externDef, bigsint number = -1);
 
-   static ObjectArchive &Archive(ObjectArchive &arc);
-
    static void GenerateSymbols();
 
    static bool InitMap(std::string const &name, VariableType const *type,
@@ -292,6 +301,10 @@ struct Register
    static void IterateMap(IterFunc iterFunc, std::ostream *out);
    static void IterateWorld(IterFunc iterFunc, std::ostream *out);
    static void IterateGlobal(IterFunc iterFunc, std::ostream *out);
+
+   static ObjectLoad &Load(ObjectLoad &arc);
+
+   static ObjectSave &Save(ObjectSave &arc);
 };
 
 //
@@ -325,11 +338,13 @@ struct Script
       LinkageSpecifier linkage, bigsint number, std::string const &string,
       ScriptType stype = ST_CLOSED, biguint flags = 0);
 
-   static ObjectArchive &Archive(ObjectArchive &arc);
-
    static void GenerateSymbols();
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
+
+   static ObjectLoad &Load(ObjectLoad &arc);
+
+   static ObjectSave &Save(ObjectSave &arc);
 };
 
 //
@@ -351,14 +366,16 @@ struct Static
    static void Add(std::string const &name, VariableType const *type,
       LinkageSpecifier linkage, bool externDef, bigsint number = -1);
 
-   static ObjectArchive &Archive(ObjectArchive &arc);
-
    static void GenerateSymbols();
 
    static bool Init(std::string const &name, VariableType const *type,
                     ObjectExpression *init);
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
+
+   static ObjectLoad &Load(ObjectLoad &arc);
+
+   static ObjectSave &Save(ObjectSave &arc);
 };
 
 //
@@ -377,13 +394,15 @@ struct String
    static std::string const &Add(std::string const &string);
    static void Add(std::string const &name, std::string const &string);
 
-   static ObjectArchive &Archive(ObjectArchive &arc);
-
    static String const *Find(std::string const &symbol);
 
    static void GenerateSymbols();
 
    static void Iterate(IterFunc iterFunc, std::ostream *out);
+
+   static ObjectLoad &Load(ObjectLoad &arc);
+
+   static ObjectSave &Save(ObjectSave &arc);
 };
 
 }
@@ -420,18 +439,31 @@ void OA_Override(ObjectData::Script   &out, ObjectData::Script   const &in);
 void OA_Override(ObjectData::Static   &out, ObjectData::Static   const &in);
 void OA_Override(ObjectData::String   &out, ObjectData::String   const &in);
 
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Array      &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::ArrayVar   &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Auto       &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Function   &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Init       &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::InitType   &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Label      &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Register   &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Script     &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::Static     &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::String     &data);
-ObjectArchive &operator << (ObjectArchive &arc, ObjectData::ScriptType &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Array      const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::ArrayVar   const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Auto       const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Function   const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Init       const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::InitType   const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Label      const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Register   const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Script     const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::Static     const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::String     const &data);
+ObjectSave &operator << (ObjectSave &arc, ObjectData::ScriptType const &data);
+
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Array      &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::ArrayVar   &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Auto       &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Function   &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Init       &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::InitType   &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Label      &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Register   &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Script     &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::Static     &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::String     &data);
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectData::ScriptType &data);
 
 #endif//HPP_ObjectData_
 

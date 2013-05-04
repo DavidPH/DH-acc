@@ -39,7 +39,7 @@ class ObjectExpression_BinaryMod : public ObjectExpression_Binary
 
 public:
    ObjectExpression_BinaryMod(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
-   ObjectExpression_BinaryMod(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_BinaryMod(ObjectLoad &arc) : Super(arc) {}
 
    bigreal resolveFLT() const {return std::fmod(exprL->resolveFLT(), exprR->resolveFLT());}
    bigreal resolveFIX() const {return std::fmod(exprL->resolveFIX(), exprR->resolveFIX());}
@@ -48,11 +48,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BINARY_MOD);
+      return Super::save(arc << OT_BINARY_MOD);
    }
 };
 
@@ -70,9 +70,9 @@ ObjectExpression::Reference ObjectExpression::create_binary_mod(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::CreateBinaryMod
+// ObjectExpression::LoadBinaryMod
 //
-ObjectExpression::Reference ObjectExpression::CreateBinaryMod(ObjectArchive &arc)
+auto ObjectExpression::LoadBinaryMod(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_BinaryMod(arc));
 }

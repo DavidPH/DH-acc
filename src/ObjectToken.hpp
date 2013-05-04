@@ -37,8 +37,9 @@
 // Types                                                                      |
 //
 
-class ObjectArchive;
 class ObjectExpression;
+class ObjectLoad;
+class ObjectSave;
 class SourceTokenC;
 
 //
@@ -67,7 +68,9 @@ public:
    ObjectCode code;
 
 
-   friend ObjectArchive &operator << (ObjectArchive &arc, ObjectToken &data);
+   friend ObjectSave &operator << (ObjectSave &arc, ObjectToken const &data);
+
+   friend ObjectLoad &operator >> (ObjectLoad &arc, ObjectToken &data);
 };
 
 #endif//HPP_ObjectToken_

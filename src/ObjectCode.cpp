@@ -129,19 +129,35 @@ char const *make_string(ObjectCode ocode)
 }
 
 //
-// operator ObjectArchive << ObjectCode
+// operator ObjectSave << ObjectCode
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectCode &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectCode const &data)
 {
-   return arc.archiveEnum(data, OCODE_NONE);
+   return arc.saveEnum(data);
 }
 
 //
-// operator ObjectArchive << ObjectCodeSet
+// operator ObjectSave << ObjectCodeSet
 //
-ObjectArchive &operator << (ObjectArchive &arc, ObjectCodeSet &data)
+ObjectSave &operator << (ObjectSave &arc, ObjectCodeSet const &data)
 {
    return arc << data.ocode << data.ocode_imm;
+}
+
+//
+// operator ObjectLoad >> ObjectCode
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectCode &data)
+{
+   return arc.loadEnum(data, OCODE_NONE);
+}
+
+//
+// operator ObjectLoad >> ObjectCodeSet
+//
+ObjectLoad &operator >> (ObjectLoad &arc, ObjectCodeSet &data)
+{
+   return arc >> data.ocode >> data.ocode_imm;
 }
 
 // EOF

@@ -40,7 +40,7 @@ class ObjectExpression_BranchAnd : public ObjectExpression_Binary
 
 public:
    ObjectExpression_BranchAnd(OBJEXP_EXPRBIN_PARM) : Super(OBJEXP_EXPRBIN_PASS) {}
-   ObjectExpression_BranchAnd(ObjectArchive &arc) : Super(arc) {}
+   ObjectExpression_BranchAnd(ObjectLoad &arc) : Super(arc) {}
 
    virtual ExpressionType getType() const {return ET_INT;}
 
@@ -90,23 +90,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_BRANCH_AND);
-   }
-
-private:
-   //
-   // writeACSPLong
-   //
-   virtual void writeACSPLong(std::ostream *out) const
-   {
-      BinaryTokenACS::write_ACS0_32(out, ACSP_EXPR_LAND);
-
-      exprL->writeACSP(out);
-      exprR->writeACSP(out);
+      return Super::save(arc << OT_BRANCH_AND);
    }
 };
 
@@ -124,9 +112,9 @@ ObjectExpression::Reference ObjectExpression::create_branch_and(OBJEXP_EXPRBIN_A
 }
 
 //
-// ObjectExpression::CreateBranchAnd
+// ObjectExpression::LoadBranchAnd
 //
-ObjectExpression::Reference ObjectExpression::CreateBranchAnd(ObjectArchive &arc)
+auto ObjectExpression::LoadBranchAnd(ObjectLoad &arc) -> Reference
 {
    return static_cast<Reference>(new ObjectExpression_BranchAnd(arc));
 }

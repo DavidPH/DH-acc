@@ -38,7 +38,7 @@ class ObjectExpression_ValueUNS : public ObjectExpression
 public:
    ObjectExpression_ValueUNS(biguint _value, ExpressionType _type, OBJEXP_EXPR_PARM)
     : Super(_pos), value(_value), type(_type) {}
-   ObjectExpression_ValueUNS(ObjectArchive &arc) : Super(arc) {arc << value << type;}
+   ObjectExpression_ValueUNS(ObjectLoad &arc) : Super(arc) {arc >> value >> type;}
 
    virtual bool canResolve() const {return true;}
 
@@ -50,11 +50,11 @@ public:
 
 protected:
    //
-   // archive
+   // save
    //
-   virtual ObjectArchive &archive(ObjectArchive &arc)
+   virtual ObjectSave &save(ObjectSave &arc) const
    {
-      return Super::archive(arc << OT_VALUE_UNS) << value << type;
+      return Super::save(arc << OT_VALUE_UNS) << value << type;
    }
 
 private:

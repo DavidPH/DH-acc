@@ -41,17 +41,17 @@ ObjectExpression_Unary::ObjectExpression_Unary(OBJEXP_EXPRUNA_PARM)
 //
 // ObjectExpression_Unary::ObjectExpression_Unary
 //
-ObjectExpression_Unary::ObjectExpression_Unary(ObjectArchive &arc)
- : Super(arc), expr(Create(arc))
+ObjectExpression_Unary::ObjectExpression_Unary(ObjectLoad &arc)
+ : Super(arc), expr(LoadExpr(arc))
 {
 }
 
 //
-// ObjectExpression_Unary::archive
+// ObjectExpression_Unary::save
 //
-ObjectArchive &ObjectExpression_Unary::archive(ObjectArchive &arc)
+ObjectSave &ObjectExpression_Unary::save(ObjectSave &arc) const
 {
-   return Super::archive(arc) << expr;
+   return Super::save(arc) << expr;
 }
 
 //
