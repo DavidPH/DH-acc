@@ -231,5 +231,13 @@ void ObjectSave::savePrimUInt(biguint data)
    save.put('\0');
 }
 
+//
+// OA_Override bigsint
+//
+void OA_Override(bigsint &out, bigsint const &in)
+{
+   out = in;
+}
+
 // EOF
 

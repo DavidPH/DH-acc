@@ -26,6 +26,7 @@
 
 #include "Type.hpp"
 
+#include <set>
 #include <vector>
 
 
@@ -54,20 +55,24 @@ class Type_Class final : public Type
 protected:
    typedef AccessControl Access;
 
-   typedef Type_Class Clas;
-   typedef ConstReference ClasCR;
-
 public:
    //
    // BaseClass
    //
    struct BaseClass
    {
+      explicit BaseClass(ObjectLoad &load);
       BaseClass(Clas const *base, Access cont, bool virt);
+
+      bool operator == (BaseClass const &m) const;
 
       ClasCR const base;
       Access const cont;
       bool   const virt : 1;
+
+      friend ObjectSave &operator << (ObjectSave &save, BaseClass const &data);
+
+      friend ObjectLoad &operator >> (ObjectLoad &load, std::vector<BaseClass> &data);
    };
 
    //
@@ -75,13 +80,20 @@ public:
    //
    struct DataMember
    {
+      explicit DataMember(ObjectLoad &load);
       DataMember(bigsint offs, Type const *type, Keyword name, Access cont, bool muta);
+
+      bool operator == (DataMember const &m) const;
 
       bigsint const offs;
       TypeCR  const type;
       Keyword const name;
       Access  const cont;
       bool    const muta : 1;
+
+      friend ObjectSave &operator << (ObjectSave &save, DataMember const &data);
+
+      friend ObjectLoad &operator >> (ObjectLoad &load, std::vector<DataMember> &data);
    };
 
    //
@@ -89,13 +101,20 @@ public:
    //
    struct FuncMember
    {
+      explicit FuncMember(ObjectLoad &load);
       FuncMember(bigsint offs, MFun const *type, Keyword name, Access cont, bool pure);
+
+      bool operator == (FuncMember const &m) const;
 
       bigsint const offs;
       MFunCR  const type;
       Keyword const name;
       Access  const cont;
       bool    const pure : 1;
+
+      friend ObjectSave &operator << (ObjectSave &save, FuncMember const &data);
+
+      friend ObjectLoad &operator >> (ObjectLoad &load, std::vector<FuncMember> &data);
    };
 
 protected:
@@ -145,13 +164,25 @@ public:
    static Reference CreateStruct(ContextKey name);
    static Reference CreateUnion(ContextKey name);
 
+   static Pointer Find(ContextKey name);
+
+   static ClasCR Get(ContextKey name);
+
+   static ObjectLoad &Load(ObjectLoad &load);
+   static void LoadFinish();
+
+   static ClasCR LoadType(ObjectLoad &load);
+
+   static ObjectSave &Save(ObjectSave &save);
+
 protected:
    //
    // ClassData
    //
    struct ClassData
    {
-      ClassData(ContextKey name, bool structure);
+      ClassData(Clas *type, ContextKey name, bool structure);
+      ~ClassData();
 
       std::vector<BaseClass> baseClass;
 
@@ -163,23 +194,47 @@ protected:
       Type_MemberFunction *mfnType;
       Type_MemberPointer *ptmType;
 
+      Clas *type;
+
       ContextKey const name;
       ContextKey nameTypedef;
 
       bool       complete  : 1;
       bool const structure : 1;
+
+
+      friend ObjectSave &operator << (ObjectSave &save, ClassData const &data);
+
+      static std::set<ClassData *> ClassDataSet;
    };
 
 
    Type_Class(ContextKey name, bool structure);
    virtual ~Type_Class();
 
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
    ClassData *const data;
+
+
+   friend ObjectSave &operator << (ObjectSave &save, ClassData const &data);
 
 private:
    virtual void getNameMangleBase(std::ostream &out, NameMangleStyle mangle) const;
    virtual void getNameMangleName(std::ostream &out, NameMangleStyle mangle) const;
+
+
+   static std::set<ClasCR> LoadSet;
 };
+
+
+//----------------------------------------------------------------------------|
+// Global Functions                                                           |
+//
+
+ObjectSave &operator << (ObjectSave &save, AccessControl const &data);
+
+ObjectLoad &operator >> (ObjectLoad &load, AccessControl &data);
 
 #endif//Type__Class_H__
 

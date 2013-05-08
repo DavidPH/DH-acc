@@ -77,6 +77,9 @@ public:
    static Type_Floating const LongFloatObj;
    static Type_Floating const LongLongFloatObj;
 
+protected:
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
 private:
    Type_Floating(unsigned size, bool comp, bool imag);
 

@@ -25,8 +25,18 @@
 
 #include "MemFunc.hpp"
 
+#include "ObjectArchive.hpp"
 #include "ost_type.hpp"
 #include "SourceException.hpp"
+
+
+//----------------------------------------------------------------------------|
+// Global Variables                                                           |
+//
+
+std::set<Type_Class::ClasCR> Type_Class::LoadSet;
+
+std::set<Type_Class::ClassData *> Type_Class::ClassData::ClassDataSet;
 
 
 //----------------------------------------------------------------------------|
@@ -36,8 +46,33 @@
 //
 // Type_Class::BaseClass::BaseClass
 //
+Type_Class::BaseClass::BaseClass(ObjectLoad &load) : base{LoadType(load)},
+   cont{load.loadBits(cont)}, virt{load.loadBits(virt)}
+{
+}
+
+//
+// Type_Class::BaseClass::BaseClass
+//
 Type_Class::BaseClass::BaseClass(Clas const *base_, Access cont_, bool virt_) :
    base{base_}, cont{cont_}, virt{virt_}
+{
+}
+
+//
+// Type_Class::BaseClass::operator == Type_Class::BaseClass
+//
+bool Type_Class::BaseClass::operator == (BaseClass const &m) const
+{
+   return m.base == base && m.cont == cont && m.virt == virt;
+}
+
+//
+// Type_Class::DataMember::DataMember
+//
+Type_Class::DataMember::DataMember(ObjectLoad &load) : offs{load.loadBits(offs)},
+   type{Type::LoadType(load)}, name{load.loadBits(name)}, cont{load.loadBits(cont)},
+   muta{load.loadBits(muta)}
 {
 }
 
@@ -51,6 +86,23 @@ Type_Class::DataMember::DataMember(bigsint offs_, Type const *type_, Keyword nam
 }
 
 //
+// Type_Class::DataMember::operator == Type_Class::DataMember
+//
+bool Type_Class::DataMember::operator == (DataMember const &m) const
+{
+   return m.offs == offs && m.type == type && m.name == name && m.cont == cont && m.muta == muta;
+}
+
+//
+// Type_Class::FuncMember::FuncMember
+//
+Type_Class::FuncMember::FuncMember(ObjectLoad &load) : offs{load.loadBits(offs)},
+   type{MFun::LoadType(load)}, name{load.loadBits(name)}, cont{load.loadBits(cont)},
+   pure{load.loadBits(pure)}
+{
+}
+
+//
 // Type_Class::FuncMember::FuncMember
 //
 Type_Class::FuncMember::FuncMember(bigsint offs_, MFun const *type_, Keyword name_,
@@ -60,18 +112,35 @@ Type_Class::FuncMember::FuncMember(bigsint offs_, MFun const *type_, Keyword nam
 }
 
 //
+// Type_Class::FuncMember::operator == Type_Class::FuncMember
+//
+bool Type_Class::FuncMember::operator == (FuncMember const &m) const
+{
+   return m.offs == offs && m.type == type && m.name == name && m.cont == cont && m.pure == pure;
+}
+
+//
 // Type_Class::ClassData::ClassData
 //
-Type_Class::ClassData::ClassData(ContextKey name_, bool structure_) :
+Type_Class::ClassData::ClassData(Clas *type_, ContextKey name_, bool structure_) :
    sizeBytes{0}, sizePtr{0}, sizeWords{0}, mfnType{nullptr}, ptmType{nullptr},
-   name{name_}, complete{false}, structure{structure_}
+   type{type_}, name{name_}, complete{false}, structure{structure_}
 {
+   ClassDataSet.insert(this);
+}
+
+//
+// Type_Class::ClassData::~ClassData
+//
+Type_Class::ClassData::~ClassData()
+{
+   ClassDataSet.erase(this);
 }
 
 //
 // Type_Class::Type_Class
 //
-Type_Class::Type_Class(ContextKey name, bool structure) : data{new ClassData(name, structure)}
+Type_Class::Type_Class(ContextKey name, bool structure) : data{new ClassData(this, name, structure)}
 {
 }
 
@@ -289,6 +358,229 @@ int Type_Class::isFuncMember(Keyword name) const
       if(mem.name == name) ++n;
 
    return n;
+}
+
+//
+// Type_Class::saveObject
+//
+ObjectSave &Type_Class::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_class << data->name);
+}
+
+//
+// Type_Class::CreateStruct
+//
+auto Type_Class::CreateStruct(ContextKey name) -> Reference
+{
+   return static_cast<Reference>(new Type_Class(name, true));
+}
+
+//
+// Type_Class::CreateUnion
+//
+auto Type_Class::CreateUnion(ContextKey name) -> Reference
+{
+   return static_cast<Reference>(new Type_Class(name, false));
+}
+
+//
+// Type_Class::Find
+//
+auto Type_Class::Find(ContextKey name) -> Pointer
+{
+   for(auto const &data : ClassData::ClassDataSet)
+      if(data->name == name) return data->type;
+
+   return nullptr;
+}
+
+//
+// Type_Class::Get
+//
+auto Type_Class::Get(ContextKey name) -> ClasCR
+{
+   if(auto type = Find(name))
+      return static_cast<ClasCR>(type);
+
+   Error_p("internal error");
+}
+
+//
+// Type_Class::Load
+//
+ObjectLoad &Type_Class::Load(ObjectLoad &load)
+{
+   std::set<ClassData *>::size_type size;
+
+   load >> size;
+
+   while(size--)
+   {
+      std::vector<BaseClass> baseClass;
+      std::vector<DataMember> dataMember;
+      std::vector<FuncMember> funcMember;
+      bigsint sizeBytes, sizePtr, sizeWords;
+      ContextKey name, nameTypedef;
+      bool complete, structure;
+
+      load >> name >> structure
+         >> baseClass >> dataMember >> funcMember
+         >> sizeBytes >> sizePtr >> sizeWords >> nameTypedef >> complete;
+
+      auto type = Find(name);
+
+      if(type)
+      {
+         if(!complete) continue;
+
+         if(type->data->complete)
+         {
+            if(type->data->baseClass != baseClass || type->data->dataMember != dataMember ||
+               type->data->funcMember != funcMember || type->data->sizeBytes != sizeBytes ||
+               type->data->sizePtr != sizePtr || type->data->sizeWords != sizeWords ||
+               type->data->nameTypedef != type->data->nameTypedef)
+            {
+               Error_p("conflicting class definitions");
+            }
+
+            continue;
+         }
+      }
+      else
+      {
+         type = structure ? CreateStruct(name) : CreateUnion(name);
+
+         LoadSet.insert(static_cast<ClasCR>(type));
+      }
+
+      type->data->baseClass .swap(baseClass);
+      type->data->dataMember.swap(dataMember);
+      type->data->funcMember.swap(funcMember);
+      type->data->sizeBytes   = sizeBytes;
+      type->data->sizePtr     = sizePtr;
+      type->data->sizeWords   = sizeWords;
+      type->data->nameTypedef = nameTypedef;
+      type->data->complete    = complete;
+   }
+
+   return load;
+}
+
+//
+// Type_Class::LoadFinish
+//
+void Type_Class::LoadFinish()
+{
+   LoadSet.clear();
+}
+
+//
+// Type_Class::LoadType
+//
+auto Type_Class::LoadType(ObjectLoad &load) -> ClasCR
+{
+   TypeCR baseType = Type::LoadType(load);
+
+   if(Clas const *realType = dynamic_cast<Clas const *>(&*baseType))
+      return static_cast<ClasCR>(realType);
+
+   Error_p("internal error: expected Type_Class");
+}
+
+//
+// Type_Class::Save
+//
+ObjectSave &Type_Class::Save(ObjectSave &save)
+{
+   save << ClassData::ClassDataSet.size();
+
+   for(auto const &data : ClassData::ClassDataSet)
+      save << *data;
+
+   return save;
+}
+
+//
+// operator ObjectSave << AccessControl
+//
+ObjectSave &operator << (ObjectSave &save, AccessControl const &data)
+{
+   return save.saveEnum(data);
+}
+
+//
+// operator ObjectSave << Type::ClasCR
+//
+ObjectSave &operator << (ObjectSave &save, Type::ClasCR const &data)
+{
+   return save << static_cast<Type::TypeCR>(data);
+}
+
+//
+// operator ObjectSave << Type_Class::BaseClass
+//
+ObjectSave &operator << (ObjectSave &save, Type_Class::BaseClass const &data)
+{
+   return save << data.base << data.cont << data.virt;
+}
+
+//
+// operator ObjectSave << Type_Class::ClassData
+//
+ObjectSave &operator << (ObjectSave &save, Type_Class::ClassData const &data)
+{
+   return save << data.name << data.structure
+      << data.baseClass << data.dataMember << data.funcMember << data.sizeBytes
+      << data.sizePtr << data.sizeWords << data.nameTypedef << data.complete;
+}
+
+//
+// operator ObjectSave << Type_Class::DataMember
+//
+ObjectSave &operator << (ObjectSave &save, Type_Class::DataMember const &data)
+{
+   return save << data.offs << data.type << data.name << data.cont << data.muta;
+}
+
+//
+// operator ObjectSave << Type_Class::FuncMember
+//
+ObjectSave &operator << (ObjectSave &save, Type_Class::FuncMember const &data)
+{
+   return save << data.offs << data.type << data.name << data.cont << data.pure;
+}
+
+//
+// operator ObjectLoad >> AccessControl
+//
+ObjectLoad &operator >> (ObjectLoad &load, AccessControl &data)
+{
+   return load.loadEnum(data, ACCESS_Internal);
+}
+
+//
+// operator ObjectLoad >> std::vector<Type_Class::BaseClass>
+//
+ObjectLoad &operator >> (ObjectLoad &load, std::vector<Type_Class::BaseClass> &data)
+{
+   return OA_LoadEmplace(load, data);
+}
+
+//
+// operator ObjectLoad >> std::vector<Type_Class::DataMember>
+//
+ObjectLoad &operator >> (ObjectLoad &load, std::vector<Type_Class::DataMember> &data)
+{
+   return OA_LoadEmplace(load, data);
+}
+
+//
+// operator ObjectLoad >> std::vector<Type_Class::FuncMember>
+//
+ObjectLoad &operator >> (ObjectLoad &load, std::vector<Type_Class::FuncMember> &data)
+{
+   return OA_LoadEmplace(load, data);
 }
 
 // EOF

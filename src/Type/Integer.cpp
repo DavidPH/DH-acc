@@ -30,6 +30,12 @@
 // Static Variables                                                           |
 //
 
+static constexpr KeywordIndex SaveObjectTable[2][4] =
+{
+   {KWRD_UnsignedShortInt, KWRD_UnsignedInt, KWRD_UnsignedLongInt, KWRD_UnsignedLongLongInt},
+   {KWRD_ShortInt, KWRD_Int, KWRD_LongInt, KWRD_LongLongInt},
+};
+
 static constexpr int SizeBitsTable_ACS[4] = {32, 32, 64, 64};
 static constexpr int SizeBytesTable_ACS[4] = {1, 1, 2, 2};
 static constexpr int SizePtrTable_ACS[4] = {1, 1, 2, 2};
@@ -139,6 +145,14 @@ bigsint Type_Integer::getSizeWords() const
    if(Target == TARGET_MageCraft) return SizeWordsTable_MageCraft[size];
 
    return SizeWordsTable_ACS[size];
+}
+
+//
+// Type_Integer::saveObject
+//
+ObjectSave &Type_Integer::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << SaveObjectTable[sign][size]);
 }
 
 // EOF

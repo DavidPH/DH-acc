@@ -35,6 +35,8 @@
 // Types                                                                      |
 //
 
+class ObjectLoad;
+class ObjectSave;
 class ParameterSet;
 class SourceExpression;
 class Type_Array;
@@ -42,6 +44,8 @@ class Type_Array0;
 class Type_ArrayVLA;
 class Type_ArrayVLA0;
 class Type_Bitfield;
+class Type_Class;
+class Type_Enumerated;
 class Type_Function;
 class Type_MemberFunction;
 class Type_StaticFunction;
@@ -125,6 +129,10 @@ struct AddressSpace
 
    AddressSpaceBase base;
    AddressSpaceName name;
+
+
+   friend ObjectSave &operator << (ObjectSave &save, AddressSpace const &data);
+   friend ObjectLoad &operator >> (ObjectLoad &load, AddressSpace       &data);
 };
 
 //
@@ -148,6 +156,10 @@ struct TypeQual
    bool accessConst    : 1;
    bool accessRestrict : 1;
    bool accessVolatile : 1;
+
+
+   friend ObjectSave &operator << (ObjectSave &save, TypeQual const &data);
+   friend ObjectLoad &operator >> (ObjectLoad &load, TypeQual       &data);
 };
 
 //
@@ -162,10 +174,18 @@ protected:
 
    typedef CallingConvention CallCon;
 
+   typedef Type_Class Clas;
+   typedef CounterPointer<Clas const>   ClasCP;
+   typedef CounterReference<Clas const> ClasCR;
+
+   typedef Type_Enumerated Enum;
+   typedef CounterReference<Enum const> EnumCR;
+
    typedef Type_MemberFunction MFun;
    typedef CounterReference<MFun const> MFunCR;
 
    typedef ParameterSet Parm;
+   typedef CounterPointer<Parm const>   ParmCP;
    typedef CounterReference<Parm const> ParmCR;
 
    typedef TypeQual Qual;
@@ -284,6 +304,14 @@ public:
    friend class Type_RValueReference;
    friend class Type_StaticFunction;
 
+   friend ObjectSave &operator << (ObjectSave &save, ClasCR const &data);
+   friend ObjectSave &operator << (ObjectSave &save, MFunCR const &data);
+   friend ObjectSave &operator << (ObjectSave &save, TypeCP const &data);
+   friend ObjectSave &operator << (ObjectSave &save, TypeCR const &data);
+
+   friend ObjectLoad &operator >> (ObjectLoad &load, TypeCP &data);
+   friend ObjectLoad &operator >> (ObjectLoad &load, TypeCR &data);
+
    static bigsint GetAlignmentHWord();
    static bigsint GetAlignmentWord();
    static void    GetNameMangle(CallCon conv, std::ostream &out, NameMangleStyle mangle);
@@ -293,6 +321,13 @@ public:
    static bigsint GetSizeByte();
    static bigsint GetSizeHWord();
    static bigsint GetSizeWord();
+
+   static ObjectLoad &Load(ObjectLoad &load);
+   static void LoadFinish();
+
+   static TypeCR LoadType(ObjectLoad &load);
+
+   static ObjectSave &Save(ObjectSave &save);
 
    static TypeCR const Accum;
    static TypeCR const BoolC;
@@ -366,6 +401,8 @@ protected:
    // creation of qualified types.
    Type(Type const &type);
    virtual ~Type();
+
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
 
 private:
    virtual void getNameMangleBase(std::ostream &out, NameMangleStyle mangle) const = 0;
@@ -443,6 +480,12 @@ constexpr TypeQual QUAL_Volatile{false, false, false, true };
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
 //
+
+ObjectSave &operator << (ObjectSave &save, AddressSpaceBase  const &data);
+ObjectSave &operator << (ObjectSave &save, CallingConvention const &data);
+
+ObjectLoad &operator >> (ObjectLoad &load, AddressSpaceBase  &data);
+ObjectLoad &operator >> (ObjectLoad &load, CallingConvention &data);
 
 constexpr bool operator == (AddressSpace const &l, AddressSpace const &r);
 constexpr bool operator == (TypeQual const &l, TypeQual const &r);

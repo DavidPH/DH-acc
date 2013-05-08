@@ -68,6 +68,39 @@ static constexpr Type_Fixed const *PrimaryTable[2][2][4] =
    },
 };
 
+//
+// SaveObjectTable
+//
+// Converts a [satu][sign][frac][size] to a save KWRD.
+//
+static constexpr KeywordIndex SaveObjectTable[2][2][2][4] =
+{
+   {
+      {
+         {KWRD_ShortFract, KWRD_Fract, KWRD_LongFract, KWRD_LongLongFract},
+         {KWRD_ShortAccum, KWRD_Accum, KWRD_LongAccum, KWRD_LongLongAccum},
+      },
+      {
+         {KWRD_UnsignedShortFract, KWRD_UnsignedFract,
+          KWRD_UnsignedLongFract,  KWRD_UnsignedLongLongFract},
+         {KWRD_UnsignedShortAccum, KWRD_UnsignedAccum,
+          KWRD_UnsignedLongAccum,  KWRD_UnsignedLongLongAccum},
+      },
+   },
+   {
+      {
+         {KWRD_SatShortFract, KWRD_SatFract, KWRD_SatLongFract, KWRD_SatLongLongFract},
+         {KWRD_SatShortAccum, KWRD_SatAccum, KWRD_SatLongAccum, KWRD_SatLongLongAccum},
+      },
+      {
+         {KWRD_SatUnsignedShortFract, KWRD_SatUnsignedFract,
+          KWRD_SatUnsignedLongFract,  KWRD_SatUnsignedLongLongFract},
+         {KWRD_SatUnsignedShortAccum, KWRD_SatUnsignedAccum,
+          KWRD_SatUnsignedLongAccum,  KWRD_SatUnsignedLongLongAccum},
+      },
+   },
+};
+
 static constexpr int SizeBitsTable_ACS[2][4] = {{16, 32, 64, 64}, {8, 16, 32, 32}};
 static constexpr int SizeBytesTable_ACS[2][4] = {{1, 1, 2, 2}, {1, 1, 1, 1}};
 static constexpr int SizePtrTable_ACS[2][4] = {{1, 1, 2, 2}, {1, 1, 1, 1}};
@@ -243,6 +276,14 @@ bigsint Type_Fixed::getSizeWords() const
    if(Target == TARGET_MageCraft) return SizeWordsTable_MageCraft[frac][size];
 
    return SizeWordsTable_ACS[frac][size];
+}
+
+//
+// Type_Fixed::saveObject
+//
+ObjectSave &Type_Fixed::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << SaveObjectTable[satu][sign][frac][size]);
 }
 
 // EOF

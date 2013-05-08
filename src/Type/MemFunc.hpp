@@ -40,10 +40,6 @@ class Type_MemberFunction : public Type_Function
 {
    CounterPreamble(Type_MemberFunction, Type_Function);
 
-protected:
-   typedef Type_Class Clas;
-   typedef CounterReference<Clas const> ClasCR;
-
 public:
    // Type information.
    virtual bigsint getCallWords() const;
@@ -54,10 +50,14 @@ public:
 
    friend TypeCR Clas::getMemberFunctionType(Type const *retn, Parm const *parm, CallCon conv) const;
 
+   static MFunCR LoadType(ObjectLoad &load);
+
 protected:
    Type_MemberFunction(Type_MemberFunction const &type);
    Type_MemberFunction(Clas const *clas, Type const *retn, Parm const *parm, CallCon conv);
    virtual ~Type_MemberFunction();
+
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
 
    ClasCR const clas;
 

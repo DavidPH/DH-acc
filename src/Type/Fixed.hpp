@@ -107,6 +107,9 @@ public:
    static Type_Fixed const SatUnsignedLongAccumObj;
    static Type_Fixed const SatUnsignedLongLongAccumObj;
 
+protected:
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
 private:
    Type_Fixed(unsigned size, bool satu, bool sign, bool frac);
 

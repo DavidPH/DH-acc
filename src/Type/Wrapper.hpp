@@ -101,6 +101,9 @@ public:
 protected:
    Type_Wrapper(Type const *base_) : base{base_} {}
 
+   virtual ObjectSave &saveObject(ObjectSave &save) const
+      {return Super::saveObject(save << base);}
+
    TypeCR const base;
 };
 

@@ -23,6 +23,8 @@
 
 #include "MemFunc.hpp"
 
+#include "SourceException.hpp"
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -131,6 +133,35 @@ void Type_MemberFunction::getNameMangleBase(std::ostream &out, NameMangleStyle m
    parm->getNameMangle(out, mangle);
 
    GetNameMangle(retn, out, mangle);
+}
+
+//
+// Type_MemberFunction::saveObject
+//
+ObjectSave &Type_MemberFunction::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_memfunc << clas);
+}
+
+//
+// Type_MemberFunction::LoadType
+//
+auto Type_MemberFunction::LoadType(ObjectLoad &load) -> MFunCR
+{
+   TypeCR baseType = Type::LoadType(load);
+
+   if(MFun const *realType = dynamic_cast<MFun const *>(&*baseType))
+      return static_cast<MFunCR>(realType);
+
+   Error_p("internal error: expected Type_MemberFunction");
+}
+
+//
+// operator ObjectSave << Type::MFunCR
+//
+ObjectSave &operator << (ObjectSave &save, Type::MFunCR const &data)
+{
+   return save << static_cast<Type::TypeCR>(data);
 }
 
 // EOF

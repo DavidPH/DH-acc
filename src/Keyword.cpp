@@ -23,8 +23,11 @@
 
 #include "Keyword.hpp"
 
-#include <vector>
+#include "ObjectArchive.hpp"
+
+#include <cstring>
 #include <unordered_map>
+#include <vector>
 
 
 //----------------------------------------------------------------------------|
@@ -147,6 +150,73 @@ Keyword Keyword::Get(std::string const &str)
    KeywordVec.emplace_back(str, num);
    KeywordMap.emplace     (str, num);
    return Keyword(num);
+}
+
+//
+// operator ObjectSave << ContextKey
+//
+ObjectSave &operator << (ObjectSave &save, ContextKey const &data)
+{
+   if(auto ctxk = data.getBase())
+      save << "ctxk" << ctxk;
+   else
+      save << "kwrd";
+
+   return save << data.getKeyword();
+}
+
+//
+// operator ObjectSave << Keyword
+//
+ObjectSave &operator << (ObjectSave &save, Keyword const &data)
+{
+   return save << KeywordVec[data.kwrd].str;
+}
+
+//
+// operator ObjectSave << KeywordIndex
+//
+ObjectSave &operator << (ObjectSave &save, KeywordIndex const &data)
+{
+   return save << KeywordVec[data].str;
+}
+
+//
+// operator ObjectLoad >> ContextKey
+//
+ObjectLoad &operator >> (ObjectLoad &load, ContextKey &data)
+{
+   char type[5];
+
+   load >> type;
+
+   if(!std::memcmp(type, "ctxk", 5))
+   {
+      ContextKey ctxk;
+      Keyword kwrd;
+      load >> ctxk >> kwrd;
+      data = ContextKey::Get(ctxk, kwrd);
+   }
+   else
+   {
+      Keyword kwrd;
+      load >> kwrd;
+      data = ContextKey::Get(kwrd);
+   }
+
+   return load;
+}
+
+//
+// operator ObjectLoad >> Keyword
+//
+ObjectLoad &operator >> (ObjectLoad &load, Keyword &data)
+{
+   std::string kwrd;
+   load >> kwrd;
+   data = Keyword::Get(kwrd);
+
+   return load;
 }
 
 // EOF

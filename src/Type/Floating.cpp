@@ -74,6 +74,21 @@ Type_Floating const Type_Floating::FloatObj        {1, false, false};
 Type_Floating const Type_Floating::LongFloatObj    {2, false, false};
 Type_Floating const Type_Floating::LongLongFloatObj{3, false, false};
 
+Type::TypeCR const Type::ShortFloatComplex   {&Type_Floating::ShortFloatComplexObj};
+Type::TypeCR const Type::FloatComplex        {&Type_Floating::FloatComplexObj};
+Type::TypeCR const Type::LongFloatComplex    {&Type_Floating::LongFloatComplexObj};
+Type::TypeCR const Type::LongLongFloatComplex{&Type_Floating::LongLongFloatComplexObj};
+
+Type::TypeCR const Type::ShortFloatImaginary   {&Type_Floating::ShortFloatImaginaryObj};
+Type::TypeCR const Type::FloatImaginary        {&Type_Floating::FloatImaginaryObj};
+Type::TypeCR const Type::LongFloatImaginary    {&Type_Floating::LongFloatImaginaryObj};
+Type::TypeCR const Type::LongLongFloatImaginary{&Type_Floating::LongLongFloatImaginaryObj};
+
+Type::TypeCR const Type::ShortFloat   {&Type_Floating::ShortFloatObj};
+Type::TypeCR const Type::Float        {&Type_Floating::FloatObj};
+Type::TypeCR const Type::LongFloat    {&Type_Floating::LongFloatObj};
+Type::TypeCR const Type::LongLongFloat{&Type_Floating::LongLongFloatObj};
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -159,6 +174,36 @@ bigsint Type_Floating::getSizeWords() const
    if(Target == TARGET_MageCraft) return SizeWordsTable_MageCraft[comp][size];
 
    return SizeWordsTable_ACS[comp][size];
+}
+
+//
+// Type_Floating::saveObject
+//
+ObjectSave &Type_Floating::saveObject(ObjectSave &save) const
+{
+   if(comp) switch(size)
+   {
+   case 0: save << KWRD_ShortFloatComplex;    break;
+   case 1: save << KWRD_FloatComplex;         break;
+   case 2: save << KWRD_LongFloatComplex;     break;
+   case 3: save << KWRD_LongLongFloatComplex; break;
+   }
+   else if(imag) switch(size)
+   {
+   case 0: save << KWRD_ShortFloatImaginary;    break;
+   case 1: save << KWRD_FloatImaginary;         break;
+   case 2: save << KWRD_LongFloatImaginary;     break;
+   case 3: save << KWRD_LongLongFloatImaginary; break;
+   }
+   else switch(size)
+   {
+   case 0: save << KWRD_ShortFloat;    break;
+   case 1: save << KWRD_Float;         break;
+   case 2: save << KWRD_LongFloat;     break;
+   case 3: save << KWRD_LongLongFloat; break;
+   }
+
+   return Super::saveObject(save);
 }
 
 // EOF

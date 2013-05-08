@@ -32,6 +32,8 @@
 //
 
 class Keyword;
+class ObjectLoad;
+class ObjectSave;
 
 //
 // KeywordIndex
@@ -41,6 +43,8 @@ enum KeywordIndex
    KWRD,
    #define KWRD(NAME) KWRD_##NAME,
    #include "KWRD.hpp"
+
+   KWRDMAX
 };
 
 //
@@ -63,6 +67,10 @@ public:
    static ContextKey Get(ContextKey base, Keyword kwrd);
    static ContextKey Get(Keyword kwrd);
 
+   friend ObjectSave &operator << (ObjectSave &save, ContextKey const &data);
+
+   friend ObjectLoad &operator >> (ObjectLoad &load, ContextKey &data);
+
 private:
    explicit constexpr ContextKey(std::size_t ctxk_) : ctxk{ctxk_} {}
 };
@@ -77,12 +85,19 @@ public:
 
    explicit constexpr operator bool () {return kwrd;}
 
+   explicit constexpr operator KeywordIndex ()
+      {return kwrd < KWRDMAX ? static_cast<KeywordIndex>(kwrd) : KWRD;}
+
    std::string const &getString() const;
 
    std::size_t kwrd;
 
 
    friend class ContextKey;
+
+   friend ObjectSave &operator << (ObjectSave &save, Keyword const &data);
+
+   friend ObjectLoad &operator >> (ObjectLoad &load, Keyword &data);
 
    static Keyword Get(std::string const &str);
 
@@ -111,6 +126,8 @@ template<> struct std::hash<Keyword>
 // Global Functions                                                           |
 //
 
+ObjectSave &operator << (ObjectSave &save, KeywordIndex const &data);
+
 //
 // operator ContextKey == ContextKey
 //
@@ -120,11 +137,27 @@ constexpr bool operator == (ContextKey const &l, ContextKey const &r)
 }
 
 //
+// operator ContextKey != ContextKey
+//
+constexpr bool operator != (ContextKey const &l, ContextKey const &r)
+{
+   return l.ctxk != r.ctxk;
+}
+
+//
 // operator Keyword == Keyword
 //
 constexpr bool operator == (Keyword const &l, Keyword const &r)
 {
    return l.kwrd == r.kwrd;
+}
+
+//
+// operator Keyword != Keyword
+//
+constexpr bool operator != (Keyword const &l, Keyword const &r)
+{
+   return l.kwrd != r.kwrd;
 }
 
 #endif//Keyword_H__

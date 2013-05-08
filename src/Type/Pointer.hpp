@@ -57,6 +57,10 @@ public:
 
    static Type_Nullptr const NullptrObj;
 
+protected:
+   virtual ObjectSave &saveObject(ObjectSave &save) const
+      {return Super::saveObject(save << KWRD_Nullptr);}
+
 private:
    Type_Nullptr();
 
@@ -84,6 +88,8 @@ public:
 protected:
    Type_PointerBase(Type const *base);
 
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
    TypeCR const base;
 };
 
@@ -105,6 +111,8 @@ public:
 protected:
    explicit Type_LValueReference(Type const *base);
    virtual ~Type_LValueReference();
+
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
 
 private:
    virtual void getNameMangleBase(std::ostream &out, NameMangleStyle mangle) const;
@@ -130,6 +138,8 @@ protected:
    explicit Type_Pointer(Type const *base);
    virtual ~Type_Pointer();
 
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
 private:
    virtual void getNameMangleBase(std::ostream &out, NameMangleStyle mangle) const;
 };
@@ -152,6 +162,8 @@ public:
 protected:
    explicit Type_RValueReference(Type const *base);
    virtual ~Type_RValueReference();
+
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
 
 private:
    virtual void getNameMangleBase(std::ostream &out, NameMangleStyle mangle) const;

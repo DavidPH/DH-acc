@@ -59,6 +59,9 @@ public:
    static Type_Boolean const BoolCXXObj;
    static Type_Boolean const FastBoolObj;
 
+protected:
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
 private:
    Type_Boolean(bool hard, bool unsi);
 

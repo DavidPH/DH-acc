@@ -23,6 +23,7 @@
 
 #include "Array.hpp"
 
+#include "ObjectArchive.hpp"
 #include "SourceException.hpp"
 #include "SourceExpression.hpp"
 
@@ -105,6 +106,14 @@ Type_ArrayBase::Type_ArrayBase(Type const *base_) : base{base_}
 bigsint Type_ArrayBase::getAlignment() const
 {
    return base->getAlignment();
+}
+
+//
+// Type_ArrayBase::saveObject
+//
+ObjectSave &Type_ArrayBase::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << base);
 }
 
 //
@@ -214,6 +223,14 @@ bool Type_Array::isVM() const
 }
 
 //
+// Type_Array::saveObject
+//
+ObjectSave &Type_Array::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_array << size);
+}
+
+//
 // Type_Array0::Type_Array0
 //
 Type_Array0::Type_Array0(Type const *base_) : Super{base_}
@@ -275,6 +292,14 @@ bool Type_Array0::isSizeVM() const
 bool Type_Array0::isVM() const
 {
    return base->isSizeVM();
+}
+
+//
+// Type_Array0::saveObject
+//
+ObjectSave &Type_Array0::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_array0);
 }
 
 //
@@ -393,6 +418,14 @@ auto Type_ArrayVLA::getSizeWordsVM() const -> SrcExpR
 }
 
 //
+// Type_ArrayVLA::saveObject
+//
+ObjectSave &Type_ArrayVLA::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_arrayVLA);
+}
+
+//
 // Type_ArrayVLA0::Type_ArrayVLA0
 //
 Type_ArrayVLA0::Type_ArrayVLA0(Type const *base_) : Super{base_}
@@ -438,6 +471,14 @@ bigsint Type_ArrayVLA0::getSizePtr() const
 bigsint Type_ArrayVLA0::getSizeWords() const
 {
    Error_Np("internal error: incomplete VLA");
+}
+
+//
+// Type_ArrayVLA0::saveObject
+//
+ObjectSave &Type_ArrayVLA0::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_arrayVLA);
 }
 
 // EOF

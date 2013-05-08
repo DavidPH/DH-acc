@@ -66,6 +66,9 @@ public:
    static Type_Char const SignedCharObj;
    static Type_Char const UnsignedCharObj;
 
+protected:
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
 private:
    Type_Char(bool unsi, bool sign);
 
@@ -107,6 +110,9 @@ public:
    static Type_WChar const Char16Obj;
    static Type_WChar const Char32Obj;
    static Type_WChar const WCharObj;
+
+protected:
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
 
 private:
    Type_WChar(bool wide, bool sign);

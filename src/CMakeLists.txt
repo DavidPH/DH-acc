@@ -151,6 +151,7 @@ add_executable(DH-acc
    SourceVariable.cpp
    StoreType.cpp
    Type.cpp
+   Type/Archive.cpp
    Type/Array.cpp
    Type/Bitfield.cpp
    Type/Boolean.cpp

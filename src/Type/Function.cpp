@@ -23,6 +23,7 @@
 
 #include "Function.hpp"
 
+#include "ObjectArchive.hpp"
 #include "SourceException.hpp"
 
 #include "Type/Void.hpp"
@@ -99,6 +100,14 @@ void ParameterSet::getNameMangle(std::ostream &out, NameMangleStyle mangle) cons
 }
 
 //
+// ParameterSet::saveObject
+//
+ObjectSave &ParameterSet::saveObject(ObjectSave &save) const
+{
+   return (save << varia << typeC).saveRange(begin(), end());
+}
+
+//
 // ParameterSet::Get
 //
 auto ParameterSet::Get() -> ParmCR
@@ -124,6 +133,22 @@ auto ParameterSet::Get(TypeCR const *types, std::size_t typeC, bool varia) -> Pa
    TypeCR *typesNew = static_cast<TypeCR *>(operator new(typeC * sizeof(TypeCR)));
    std::uninitialized_copy_n(types, typeC, typesNew);
    return static_cast<ParmCR>(new ParameterSet(head, typesNew, typeC, varia));
+}
+
+//
+// ParameterSet::LoadParm
+//
+auto ParameterSet::LoadParm(ObjectLoad &load) -> ParmCR
+{
+   std::vector<TypeCR> types;
+   std::size_t typeC;
+   bool varia;
+
+   load >> varia >> typeC;
+
+   for(types.reserve(typeC); typeC--;) types.emplace_back(Type::LoadType(load));
+
+   return Get(types.data(), types.size(), varia);
 }
 
 //
@@ -183,6 +208,14 @@ bigsint Type_Function::getSizePtr() const
 bigsint Type_Function::getSizeWords() const
 {
    Error_Np("internal error: function");
+}
+
+//
+// Type_Function::saveObject
+//
+ObjectSave &Type_Function::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << retn << parm << conv);
 }
 
 //
@@ -267,6 +300,40 @@ void Type_StaticFunction::getNameMangleBase(std::ostream &out, NameMangleStyle m
    parm->getNameMangle(out, mangle);
 
    GetNameMangle(retn, out, mangle);
+}
+
+//
+// Type_StaticFunction::saveObject
+//
+ObjectSave &Type_StaticFunction::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_function);
+}
+
+//
+// operator ObjectSave << ParameterSet::ConstReference
+//
+ObjectSave &operator << (ObjectSave &save, ParameterSet::ParmCR const &data)
+{
+   return data->saveObject(save);
+}
+
+//
+// operator ObjectLoad >> ParameterSet::ConstPointer
+//
+ObjectLoad &operator >> (ObjectLoad &load, ParameterSet::ParmCP &data)
+{
+   data = ParameterSet::LoadParm(load);
+   return load;
+}
+
+//
+// operator ObjectLoad >> ParameterSet::ConstReference
+//
+ObjectLoad &operator >> (ObjectLoad &load, ParameterSet::ParmCR &data)
+{
+   data = ParameterSet::LoadParm(load);
+   return load;
 }
 
 // EOF

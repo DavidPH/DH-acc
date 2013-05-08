@@ -58,6 +58,8 @@ protected:
    Type_Bitfield(Type const *base, bigsint bits, bigsint offs);
    virtual ~Type_Bitfield();
 
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
    bigsint const bits;
    bigsint const offs;
 

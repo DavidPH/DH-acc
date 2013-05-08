@@ -26,6 +26,7 @@
 
 #include "Type.hpp"
 
+#include <set>
 #include <unordered_map>
 
 
@@ -75,16 +76,23 @@ public:
    static Reference CreateC(ContextKey name);
    static Reference CreateCXX(ContextKey name, bool scoped);
 
-protected:
-   Type_Enumerated(ContextKey name, bool cxx, bool scoped);
-   virtual ~Type_Enumerated();
+   static Pointer Find(ContextKey name);
 
+   static EnumCR Get(ContextKey name);
+
+   static ObjectLoad &Load(ObjectLoad &load);
+   static void LoadFinish();
+
+   static ObjectSave &Save(ObjectSave &save);
+
+protected:
    //
    // EnumData
    //
    struct EnumData
    {
-      EnumData(ContextKey name, bool cxx, bool scoped);
+      EnumData(Enum *type, ContextKey name, bool cxx, bool scoped);
+      ~EnumData();
 
       std::unordered_map<Keyword, bigsint> values;
 
@@ -95,17 +103,35 @@ protected:
 
       TypeCR baseType;
 
+      Enum *type;
+
       bool       complete : 1;
       bool const cxx      : 1;
       bool const scoped   : 1;
       bool const unscoped : 1;
+
+
+      friend ObjectSave &operator << (ObjectSave &save, EnumData const &data);
+
+      static std::set<EnumData *> EnumDataSet;
    };
 
+   Type_Enumerated(ContextKey name, bool cxx, bool scoped);
+   virtual ~Type_Enumerated();
+
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
    EnumData *const data;
+
+
+   friend ObjectSave &operator << (ObjectSave &save, EnumData const &data);
 
 private:
    virtual void getNameMangleBase(std::ostream &out, NameMangleStyle mangle) const;
    virtual void getNameMangleName(std::ostream &out, NameMangleStyle mangle) const;
+
+
+   static std::set<EnumCR> LoadSet;
 };
 
 #endif//Type__Enum_H__

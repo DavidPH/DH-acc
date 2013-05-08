@@ -43,7 +43,9 @@ class ParameterSet : public PlainCounter
 
 protected:
    typedef ParameterSet Parm;
+   typedef ConstPointer   ParmCP;
    typedef ConstReference ParmCR;
+
    typedef Type::ConstReference TypeCR;
 
 public:
@@ -52,13 +54,22 @@ public:
 
    void getNameMangle(std::ostream &out, NameMangleStyle mangle) const;
 
+   ObjectSave &saveObject(ObjectSave &save) const;
+
    TypeCR const *const types;
    std::size_t   const typeC;
    bool          const varia : 1;
 
 
+   friend ObjectSave &operator << (ObjectSave &load, ParmCR const &data);
+
+   friend ObjectLoad &operator >> (ObjectLoad &load, ParmCP &data);
+   friend ObjectLoad &operator >> (ObjectLoad &load, ParmCR &data);
+
    static ParmCR Get();
    static ParmCR Get(TypeCR const *types, std::size_t typeC, bool varia);
+
+   static ParmCR LoadParm(ObjectLoad &load);
 
 private:
    explicit ParameterSet(bool varia);
@@ -99,6 +110,8 @@ public:
 protected:
    Type_Function(Type const *retn, Parm const *parm, CallCon conv);
 
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
    TypeCR const retn;
    ParmCR const parm;
 
@@ -126,6 +139,8 @@ protected:
    Type_StaticFunction(Type_StaticFunction const &type);
    Type_StaticFunction(Type const *retn, Parm const *parm, CallCon conv);
    virtual ~Type_StaticFunction();
+
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
 
 private:
    virtual void getNameMangleBase(std::ostream &out, NameMangleStyle mangle) const;

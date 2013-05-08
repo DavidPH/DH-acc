@@ -23,6 +23,8 @@
 
 #include "Bitfield.hpp"
 
+#include "ObjectArchive.hpp"
+
 
 //----------------------------------------------------------------------------|
 // Global Functions                                                           |
@@ -150,6 +152,14 @@ void Type_Bitfield::getNameMangleBase(std::ostream &out, NameMangleStyle mangle)
    GetNameMangle(base, out, mangle);
    GetNameMangle(bits, out, mangle);
    GetNameMangle(offs, out, mangle);
+}
+
+//
+// Type_Bitfield::saveObject
+//
+ObjectSave &Type_Bitfield::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_bitfield << bits << offs);
 }
 
 // EOF

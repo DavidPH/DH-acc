@@ -31,6 +31,7 @@
 #include <ostream>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 
@@ -62,6 +63,8 @@ public:
    ObjectLoad &operator >> (unsigned long int &data)      {return loadUInt(data);}
    ObjectLoad &operator >> (unsigned long long int &data) {return loadUInt(data);}
 
+   template<typename T> T           loadBits() {T data; *this >> data; return data;}
+   template<typename T> T           loadBits(T const &) {T data; *this >> data; return data;}
    template<typename T> ObjectLoad &loadBool(T &data);
    template<typename T> ObjectLoad &loadChar(T &data);
    template<typename T> ObjectLoad &loadEnum(T &data, T max) {return loadEnum(data, max, max);}
@@ -70,6 +73,8 @@ public:
    template<typename T> ObjectLoad &loadRange(T begin, T end);
    template<typename T> ObjectLoad &loadReal(T &data);
    template<typename T> ObjectLoad &loadSInt(T &data);
+   template<typename T> ObjectLoad &loadSkip() {T data; return *this >> data;}
+   template<typename T> ObjectLoad &loadSkip(T const &) {T data; return *this >> data;}
    template<typename T> ObjectLoad &loadUInt(T &data);
 
 private:
@@ -145,6 +150,9 @@ ObjectSave &operator << (ObjectSave &arc, std::pair<Tk, Tv> const &data);
 template<typename T>
 ObjectSave &operator << (ObjectSave &arc, std::set<T> const &data);
 
+template<typename Tk, typename Tv>
+ObjectSave &operator << (ObjectSave &arc, std::unordered_map<Tk, Tv> const &data);
+
 template<typename T>
 ObjectSave &operator << (ObjectSave &arc, std::vector<T> const &data);
 
@@ -163,8 +171,16 @@ ObjectLoad &operator >> (ObjectLoad &arc, std::pair<Tk, Tv> &data);
 template<typename T>
 ObjectLoad &operator >> (ObjectLoad &arc, std::set<T> &data);
 
+template<typename Tk, typename Tv>
+ObjectLoad &operator >> (ObjectLoad &arc, std::unordered_map<Tk, Tv> &data);
+
 template<typename T>
 ObjectLoad &operator >> (ObjectLoad &arc, std::vector<T> &data);
+
+template<typename T>
+ObjectLoad &OA_LoadEmplace(ObjectLoad &load, std::vector<T> &data);
+
+void OA_Override(bigsint &out, bigsint const &in);
 
 //
 // ObjectLoad::loadBool
@@ -372,6 +388,18 @@ ObjectSave &operator << (ObjectSave &arc, std::set<T> const &data)
 }
 
 //
+// operator ObjectSave << std::unordered_map
+//
+template<typename Tk, typename Tv>
+ObjectSave &operator << (ObjectSave &arc, std::unordered_map<Tk, Tv> const &data)
+{
+   arc << data.size();
+   arc.saveRange(data.begin(), data.end());
+
+   return arc;
+}
+
+//
 // operator ObjectSave << std::vector
 //
 template<typename T>
@@ -466,6 +494,31 @@ ObjectLoad &operator >> (ObjectLoad &arc, std::set<T> &data)
 }
 
 //
+// operator ObjectLoad >> std::unordered_map
+//
+template<typename Tk, typename Tv>
+ObjectLoad &operator >> (ObjectLoad &arc, std::unordered_map<Tk, Tv> &data)
+{
+   typename std::unordered_map<Tk, Tv>::iterator  itr;
+   typename std::unordered_map<Tk, Tv>::size_type size;
+
+   arc >> size;
+
+   while(size--)
+   {
+      std::pair<Tk, Tv> o;
+      arc >> o;
+
+      if((itr = data.find(o.first)) == data.end())
+         data.insert(std::move(o));
+      else
+         OA_Override(itr->second, o.second);
+   }
+
+   return arc;
+}
+
+//
 // operator ObjectLoad >> std::vector
 //
 template<typename T>
@@ -479,6 +532,22 @@ ObjectLoad &operator >> (ObjectLoad &arc, std::vector<T> &data)
    arc.loadRange(data.begin() + sizeBase, data.end());
 
    return arc;
+}
+
+//
+// OA_LoadEmplace std::vector
+//
+template<typename T>
+ObjectLoad &OA_LoadEmplace(ObjectLoad &load, std::vector<T> &data)
+{
+   typename std::vector<T>::size_type sizeBase, sizeLoad;
+
+   sizeBase = data.size();
+   load >> sizeLoad;
+   data.reserve(sizeBase + sizeLoad);
+   while(sizeLoad--) data.emplace_back(load);
+
+   return load;
 }
 
 #endif//HPP_ObjectArchive_

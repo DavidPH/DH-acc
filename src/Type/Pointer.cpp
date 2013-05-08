@@ -195,6 +195,14 @@ bool Type_PointerBase::isVM() const
 }
 
 //
+// Type_PointerBase::saveObject
+//
+ObjectSave &Type_PointerBase::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << base);
+}
+
+//
 // Type_LValueReference::Type_LValueReference
 //
 Type_LValueReference::Type_LValueReference(Type const *base_) : Super{base_}
@@ -216,6 +224,14 @@ Type_LValueReference::~Type_LValueReference()
 void Type_LValueReference::getNameMangleBase(std::ostream &out, NameMangleStyle mangle) const
 {
    out << 'L'; GetNameMangle(base, out, mangle);
+}
+
+//
+// Type_LValueReference::saveObject
+//
+ObjectSave &Type_LValueReference::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_lvref);
 }
 
 //
@@ -243,6 +259,14 @@ void Type_Pointer::getNameMangleBase(std::ostream &out, NameMangleStyle mangle) 
 }
 
 //
+// Type_Pointer::saveObject
+//
+ObjectSave &Type_Pointer::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_pointer);
+}
+
+//
 // Type_RValueReference::Type_RValueReference
 //
 Type_RValueReference::Type_RValueReference(Type const *base_) : Super{base_}
@@ -264,6 +288,14 @@ Type_RValueReference::~Type_RValueReference()
 void Type_RValueReference::getNameMangleBase(std::ostream &out, NameMangleStyle mangle) const
 {
    out << 'R'; GetNameMangle(base, out, mangle);
+}
+
+//
+// Type_RValueReference::saveObject
+//
+ObjectSave &Type_RValueReference::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_rvref);
 }
 
 // EOF

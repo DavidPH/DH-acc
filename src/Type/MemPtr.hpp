@@ -65,6 +65,8 @@ protected:
    Type_MemberPointer(Clas const *clas, Type const *base);
    virtual ~Type_MemberPointer();
 
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
    ClasCR const clas;
    TypeCR const base;
 

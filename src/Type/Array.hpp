@@ -51,6 +51,8 @@ public:
 protected:
    Type_ArrayBase(Type const *base);
 
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
    TypeCR const base;
 };
 
@@ -78,6 +80,8 @@ protected:
    Type_Array(Type_Array const &type);
    Type_Array(Type const *base, bigsint size);
    virtual ~Type_Array();
+
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
 
    bigsint const size;
 
@@ -109,6 +113,8 @@ public:
 protected:
    explicit Type_Array0(Type const *base);
    virtual ~Type_Array0();
+
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
 
 private:
    virtual void getNameMangleBase(std::ostream &out, NameMangleStyle mangle) const;
@@ -142,6 +148,8 @@ protected:
    Type_ArrayVLA(Type const *base, SrcExp *size);
    virtual ~Type_ArrayVLA();
 
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
    SrcExpR const size;
 
 private:
@@ -172,6 +180,8 @@ public:
 protected:
    explicit Type_ArrayVLA0(Type const *base);
    virtual ~Type_ArrayVLA0();
+
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
 
 private:
    virtual void getNameMangleBase(std::ostream &out, NameMangleStyle mangle) const;

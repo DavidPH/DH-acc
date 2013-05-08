@@ -83,5 +83,14 @@ bigsint Type_Boolean::getSizeBytes() const
    return GetSizeWord();
 }
 
+//
+// Type_Boolean::saveObject
+//
+ObjectSave &Type_Boolean::saveObject(ObjectSave &save) const
+{
+   save << (hard ? unsi ? KWRD_BoolC : KWRD_BoolCXX : KWRD_FastBool);
+   return Super::saveObject(save);
+}
+
 // EOF
 

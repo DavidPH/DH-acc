@@ -48,6 +48,10 @@ public:
 
    static Type_Label const LabelObj;
 
+protected:
+   virtual ObjectSave &saveObject(ObjectSave &save) const
+      {return Super::saveObject(save << KWRD_Label);}
+
 private:
    Type_Label();
 
@@ -78,6 +82,10 @@ public:
 
    static Type_String const StringObj;
 
+protected:
+   virtual ObjectSave &saveObject(ObjectSave &save) const
+      {return Super::saveObject(save << KWRD_String);}
+
 private:
    Type_String();
 
@@ -106,6 +114,10 @@ public:
    static Type_Void const &GetVoidObj();
 
    static Type_Void const &VoidObj;
+
+protected:
+   virtual ObjectSave &saveObject(ObjectSave &save) const
+      {return Super::saveObject(save << KWRD_Void);}
 
 private:
    Type_Void();

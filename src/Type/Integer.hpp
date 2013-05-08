@@ -69,6 +69,9 @@ public:
    static Type_Integer const UnsignedLongIntObj;
    static Type_Integer const UnsignedLongLongIntObj;
 
+protected:
+   virtual ObjectSave &saveObject(ObjectSave &save) const;
+
 private:
    Type_Integer(unsigned size, bool sign);
 

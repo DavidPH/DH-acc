@@ -146,5 +146,13 @@ bigsint Type_MemberPointer::getSizeWords() const
    return 1;
 }
 
+//
+// Type_MemberPointer::saveObject
+//
+ObjectSave &Type_MemberPointer::saveObject(ObjectSave &save) const
+{
+   return Super::saveObject(save << KWRD_memptr << clas << base);
+}
+
 // EOF
 

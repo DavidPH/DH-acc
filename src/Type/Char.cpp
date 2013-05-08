@@ -95,6 +95,17 @@ bool Type_Char::isSigned() const
 }
 
 //
+// Type_Char::saveObject
+//
+ObjectSave &Type_Char::saveObject(ObjectSave &save) const
+{
+        if(sign) save << KWRD_SignedChar;
+   else if(unsi) save << KWRD_UnsignedChar;
+   else          save << KWRD_Char;
+   return Super::saveObject(save);
+}
+
+//
 // Type_WChar::Type_WChar
 //
 Type_WChar::Type_WChar(bool wide_, bool sign_) : sign{sign_}, wide{wide_}
@@ -159,6 +170,15 @@ bool Type_WChar::isSigned() const
 
    // For ACS targets, signed is faster.
    return true;
+}
+
+//
+// Type_WChar::saveObject
+//
+ObjectSave &Type_WChar::saveObject(ObjectSave &save) const
+{
+   save << (wide ? sign ? KWRD_WChar : KWRD_Char32 : KWRD_Char16);
+   return Super::saveObject(save);
 }
 
 // EOF
