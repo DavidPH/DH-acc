@@ -49,6 +49,7 @@ class Type_Enumerated;
 class Type_Function;
 class Type_MemberFunction;
 class Type_StaticFunction;
+class Type_Tuple;
 class Value;
 
 typedef ContextKey AddressSpaceName;
@@ -197,6 +198,9 @@ protected:
    typedef CounterPointer<SrcExp>   SrcExpP;
    typedef CounterReference<SrcExp> SrcExpR;
 
+   typedef Type_Tuple                   Tupl;
+   typedef CounterReference<Tupl const> TuplCR;
+
    typedef ConstPointer   TypeCP;
    typedef ConstReference TypeCR;
 
@@ -286,6 +290,7 @@ public:
    virtual bool isStaticFunctionType() const               {return false;}
    virtual bool isString() const                           {return false;}
    virtual bool isStructureType() const                    {return false;}
+   virtual bool isTupleType() const                        {return false;}
    virtual bool isUnionType() const                        {return false;}
    virtual bool isUnscopedEnumerationType() const          {return false;}
    virtual bool isUnsignedAccumType() const                {return false;}

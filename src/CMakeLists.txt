@@ -165,6 +165,7 @@ add_executable(DH-acc
    Type/MemFunc.cpp
    Type/MemPtr.cpp
    Type/Pointer.cpp
+   Type/Tuple.cpp
    Type/Void.cpp
    VariableData.cpp
    VariableType.cpp

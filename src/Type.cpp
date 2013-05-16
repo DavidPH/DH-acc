@@ -54,6 +54,7 @@
 //   +-aggregate types
 //   | +-array types
 //   | +-structure types
+//   | +-tuple types
 //   +-character types
 //   | +-char
 //   | +-signed char
@@ -219,6 +220,7 @@
 //               ::= P <type-single>          # pointer type
 //               ::= R <type-single>          # rvalue reference type
 //               ::= S <name>                 # structure type
+//               ::= T <type-list>            # tuple type
 //               ::= U <name>                 # union type
 //
 //   <function-list> ::= <call-type>? <type-list> <type-single>

@@ -26,6 +26,7 @@
 #include "Class.hpp"
 #include "Enum.hpp"
 #include "Function.hpp"
+#include "Tuple.hpp"
 
 #include "ObjectArchive.hpp"
 #include "SourceException.hpp"
@@ -186,6 +187,11 @@ auto Type::LoadType(ObjectLoad &load) -> TypeCR
       clas = Clas::LoadType(load);
       type = LoadType(load);
       type = clas->getMemberPointerType(type);
+      break;
+
+   case KWRD_tuple:
+      load >> parm;
+      type = Tupl::Get(parm);
       break;
 
    default:
