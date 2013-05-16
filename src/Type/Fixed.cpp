@@ -101,12 +101,14 @@ static constexpr KeywordIndex SaveObjectTable[2][2][2][4] =
    },
 };
 
-static constexpr int SizeBitsTable_ACS[2][4] = {{16, 32, 64, 64}, {8, 16, 32, 32}};
+static constexpr int SizeBitsFTable_ACS[2][4] = {{8, 16, 32, 32}, {8, 16, 32, 32}};
+static constexpr int SizeBitsITable_ACS[2][4] = {{8, 16, 32, 32}, {0,  0,  0,  0}};
 static constexpr int SizeBytesTable_ACS[2][4] = {{1, 1, 2, 2}, {1, 1, 1, 1}};
 static constexpr int SizePtrTable_ACS[2][4] = {{1, 1, 2, 2}, {1, 1, 1, 1}};
 static constexpr int SizeWordsTable_ACS[2][4] = {{1, 1, 2, 2}, {1, 1, 1, 1}};
 
-static constexpr int SizeBitsTable_MageCraft[2][4] = {{16, 32, 64, 64}, {8, 16, 32, 32}};
+static constexpr int SizeBitsFTable_MageCraft[2][4] = {{8, 16, 32, 32}, {8, 16, 32, 32}};
+static constexpr int SizeBitsITable_MageCraft[2][4] = {{8, 16, 32, 32}, {0,  0,  0,  0}};
 static constexpr int SizeBytesTable_MageCraft[2][4] = {{2, 4, 8, 8}, {1, 2, 4, 4}};
 static constexpr int SizePtrTable_MageCraft[2][4] = {{2, 1, 2, 2}, {1, 2, 1, 1}};
 static constexpr int SizeWordsTable_MageCraft[2][4] = {{1, 1, 2, 2}, {1, 1, 1, 1}};
@@ -239,13 +241,23 @@ void Type_Fixed::getNameMangleBase(std::ostream &out, NameMangleStyle) const
 }
 
 //
-// Type_Fixed::getSizeBits
+// Type_Fixed::getSizeBitsF
 //
-bigsint Type_Fixed::getSizeBits() const
+bigsint Type_Fixed::getSizeBitsF() const
 {
-   if(Target == TARGET_MageCraft) return SizeBitsTable_MageCraft[frac][size];
+   if(Target == TARGET_MageCraft) return SizeBitsFTable_MageCraft[frac][size] - (frac && sign);
 
-   return SizeBitsTable_ACS[frac][size];
+   return SizeBitsFTable_ACS[frac][size] - (frac && sign);
+}
+
+//
+// Type_Fixed::getSizeBitsI
+//
+bigsint Type_Fixed::getSizeBitsI() const
+{
+   if(Target == TARGET_MageCraft) return SizeBitsITable_MageCraft[frac][size] - sign;
+
+   return SizeBitsITable_ACS[frac][size] - sign;
 }
 
 //

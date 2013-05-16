@@ -143,13 +143,13 @@ void Type_Enumerated::getNameMangleName(std::ostream &out, NameMangleStyle mangl
 }
 
 //
-// Type_Enumerated::getSizeBits
+// Type_Enumerated::getSizeBitsI
 //
-bigsint Type_Enumerated::getSizeBits() const
+bigsint Type_Enumerated::getSizeBitsI() const
 {
    if(!data->complete) Error_Np("internal error: incomplete");
 
-   return data->baseType->getSizeBits();
+   return data->baseType->getSizeBitsI();
 }
 
 //

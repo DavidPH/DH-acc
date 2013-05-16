@@ -42,7 +42,8 @@ public:
    // Type information.
    virtual bigsint getAlignment() const {return base->getAlignment();}
    virtual TypeCR  getBase() const      {return base;}
-   virtual bigsint getSizeBits() const  {return sizeBits;}
+   virtual bigsint getSizeBitsF() const {return 0;}
+   virtual bigsint getSizeBitsI() const {return sizeBitsI;}
    virtual bigsint getSizeBytes() const {return sizeBytes;}
    virtual bigsint getSizePtr() const   {return sizePtr;}
    virtual bigsint getSizeWords() const {return sizeWords;}
@@ -63,13 +64,13 @@ protected:
    bigsint const bits;
    bigsint const offs;
 
-   bigsint const sizeBits;
+   bigsint const sizeBitsI;
    bigsint const sizeBytes;
    bigsint const sizePtr;
    bigsint const sizeWords;
 
 private:
-   bigsint calcSizeBits() const;
+   bigsint calcSizeBitsI() const;
    bigsint calcSizeBytes() const;
    bigsint calcSizePtr() const;
    bigsint calcSizeWords() const;

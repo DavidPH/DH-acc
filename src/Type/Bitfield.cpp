@@ -53,7 +53,7 @@ auto Type::getBitfieldType(bigsint bits, bigsint offs) const -> TypeCR
 // Type_Bitfield::Type_Bitfield
 //
 Type_Bitfield::Type_Bitfield(Type_Bitfield const &type) : Super{type},
-   bits{type.bits}, offs{type.offs}, sizeBits{type.sizeBits}, sizeBytes{type.sizeBytes},
+   bits{type.bits}, offs{type.offs}, sizeBitsI{type.sizeBitsI}, sizeBytes{type.sizeBytes},
    sizePtr{type.sizePtr}, sizeWords{type.sizeWords}, bitNext{this}, bitPrev{this}
 {
 }
@@ -62,7 +62,7 @@ Type_Bitfield::Type_Bitfield(Type_Bitfield const &type) : Super{type},
 // Type_Bitfield::Type_Bitfield
 //
 Type_Bitfield::Type_Bitfield(Type const *base_, bigsint bits_, bigsint offs_) :
-   Super{base_}, bits{bits_}, offs{offs_}, sizeBits{calcSizeBits()},
+   Super{base_}, bits{bits_}, offs{offs_}, sizeBitsI{calcSizeBitsI()},
    sizeBytes{calcSizeBytes()}, sizePtr{calcSizePtr()}, sizeWords{calcSizeWords()}
 {
    if(base->bitType)
@@ -109,12 +109,12 @@ Type_Bitfield::~Type_Bitfield()
 }
 
 //
-// Type_Bitfield::calcSizeBits
+// Type_Bitfield::calcSizeBitsI
 //
-bigsint Type_Bitfield::calcSizeBits() const
+bigsint Type_Bitfield::calcSizeBitsI() const
 {
-   bigsint baseBits = base->getSizeBits();
-   return baseBits < bits ? baseBits : bits;
+   bigsint baseBitsI = base->getSizeBitsI();
+   return baseBitsI < bits ? baseBitsI : bits;
 }
 
 //

@@ -42,7 +42,8 @@ public:
    // Type information.
    virtual bigsint getAlignment() const;
    virtual TypeCR  getBase() const;
-   virtual bigsint getSizeBits() const;
+   virtual bigsint getSizeBitsF() const;
+   virtual bigsint getSizeBitsI() const;
    virtual bigsint getSizeBytes() const;
    virtual bigsint getSizePtr() const;
    virtual bigsint getSizeWords() const;

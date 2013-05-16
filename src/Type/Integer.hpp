@@ -41,7 +41,8 @@ class Type_Integer final : public Type
 public:
    // Type information.
    virtual bigsint getAlignment() const;
-   virtual bigsint getSizeBits() const;
+   virtual bigsint getSizeBitsF() const {return 0;}
+   virtual bigsint getSizeBitsI() const;
    virtual bigsint getSizeBytes() const;
    virtual bigsint getSizePtr() const;
    virtual bigsint getSizeWords() const;

@@ -459,9 +459,17 @@ void Type::getNameMangle(std::ostream &out, NameMangleStyle mangle) const
 }
 
 //
-// Type::getSizeBits
+// Type::getSizeBitsF
 //
-bigsint Type::getSizeBits() const
+bigsint Type::getSizeBitsF() const
+{
+   Error_Np("internal error");
+}
+
+//
+// Type::getSizeBitsI
+//
+bigsint Type::getSizeBitsI() const
 {
    Error_Np("internal error");
 }

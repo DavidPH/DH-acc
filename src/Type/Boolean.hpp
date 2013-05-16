@@ -38,7 +38,8 @@ class Type_Boolean final : public Type
 public:
    // Type information.
    virtual bigsint getAlignment() const;
-   virtual bigsint getSizeBits() const;
+   virtual bigsint getSizeBitsF() const {return 0;}
+   virtual bigsint getSizeBitsI() const;
    virtual bigsint getSizeBytes() const;
    virtual bigsint getSizePtr() const   {return 1;}
    virtual bigsint getSizeWords() const {return 1;}

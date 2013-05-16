@@ -50,7 +50,7 @@ public:
    virtual bigsint getAlignment() const;
    virtual TypeCR  getBase() const;
    virtual Keyword getName() const {return data->name.getKeyword();}
-   virtual bigsint getSizeBits() const;
+   virtual bigsint getSizeBitsI() const;
    virtual bigsint getSizeBytes() const;
    virtual bigsint getSizePtr() const;
    virtual bigsint getSizeWords() const;

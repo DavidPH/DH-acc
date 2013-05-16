@@ -36,12 +36,12 @@ static constexpr KeywordIndex SaveObjectTable[2][4] =
    {KWRD_ShortInt, KWRD_Int, KWRD_LongInt, KWRD_LongLongInt},
 };
 
-static constexpr int SizeBitsTable_ACS[4] = {32, 32, 64, 64};
+static constexpr int SizeBitsITable_ACS[4] = {32, 32, 64, 64};
 static constexpr int SizeBytesTable_ACS[4] = {1, 1, 2, 2};
 static constexpr int SizePtrTable_ACS[4] = {1, 1, 2, 2};
 static constexpr int SizeWordsTable_ACS[4] = {1, 1, 2, 2};
 
-static constexpr int SizeBitsTable_MageCraft[4] = {16, 32, 64, 128};
+static constexpr int SizeBitsITable_MageCraft[4] = {16, 32, 64, 128};
 static constexpr int SizeBytesTable_MageCraft[4] = {2, 4, 8, 16};
 static constexpr int SizePtrTable_MageCraft[4] = {2, 1, 2, 4};
 static constexpr int SizeWordsTable_MageCraft[4] = {1, 1, 2, 4};
@@ -108,13 +108,13 @@ void Type_Integer::getNameMangleBase(std::ostream &out, NameMangleStyle) const
 }
 
 //
-// Type_Integer::getSizeBits
+// Type_Integer::getSizeBitsI
 //
-bigsint Type_Integer::getSizeBits() const
+bigsint Type_Integer::getSizeBitsI() const
 {
-   if(Target == TARGET_MageCraft) return SizeBitsTable_MageCraft[size];
+   if(Target == TARGET_MageCraft) return SizeBitsITable_MageCraft[size] - sign;
 
-   return SizeBitsTable_ACS[size];
+   return SizeBitsITable_ACS[size] - sign;
 }
 
 //

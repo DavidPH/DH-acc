@@ -66,9 +66,9 @@ void Type_Boolean::getNameMangleBase(std::ostream &out, NameMangleStyle) const
 }
 
 //
-// Type_Boolean::getSizeBits
+// Type_Boolean::getSizeBitsI
 //
-bigsint Type_Boolean::getSizeBits() const
+bigsint Type_Boolean::getSizeBitsI() const
 {
    if(hard) return 1;
 

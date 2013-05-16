@@ -228,7 +228,8 @@ public:
    virtual Keyword getName() const;
            void    getNameMangle(std::ostream &out, NameMangleStyle mangle) const;
            Qual    getQual() const {return quals;}
-   virtual bigsint getSizeBits() const;
+   virtual bigsint getSizeBitsF() const;
+   virtual bigsint getSizeBitsI() const;
    virtual bigsint getSizeBytes() const = 0;
    virtual SrcExpR getSizeBytesVM() const;
    virtual bigsint getSizePtr() const = 0;

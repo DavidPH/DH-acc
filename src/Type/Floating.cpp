@@ -44,12 +44,13 @@ static constexpr Type_Floating const *RealTable[4] =
    &Type_Floating::LongLongFloatObj,
 };
 
-static constexpr int SizeBitsTable_ACS[2][4] = {{16, 32, 64, 64}, {32, 64, 128, 128}};
+static constexpr int SizeBitsFTable[4] = { 5,  8, 11, 11};
+static constexpr int SizeBitsITable[4] = {10, 23, 52, 52};
+
 static constexpr int SizeBytesTable_ACS[2][4] = {{1, 1, 2, 2}, {1, 2, 4, 4}};
 static constexpr int SizePtrTable_ACS[2][4] = {{1, 1, 2, 2}, {1, 2, 4, 4}};
 static constexpr int SizeWordsTable_ACS[2][4] = {{1, 1, 2, 2}, {1, 2, 4, 4}};
 
-static constexpr int SizeBitsTable_MageCraft[2][4] = {{16, 32, 64, 64}, {32, 64, 128, 128}};
 static constexpr int SizeBytesTable_MageCraft[2][4] = {{2, 4, 8, 8}, {4, 8, 16, 16}};
 static constexpr int SizePtrTable_MageCraft[2][4] = {{2, 1, 2, 2}, {1, 2, 4, 4}};
 static constexpr int SizeWordsTable_MageCraft[2][4] = {{1, 1, 2, 2}, {1, 2, 4, 4}};
@@ -137,13 +138,19 @@ void Type_Floating::getNameMangleBase(std::ostream &out, NameMangleStyle) const
 }
 
 //
-// Type_Floating::getSizeBits
+// Type_Floating::getSizeBitsF
 //
-bigsint Type_Floating::getSizeBits() const
+bigsint Type_Floating::getSizeBitsF() const
 {
-   if(Target == TARGET_MageCraft) return SizeBitsTable_MageCraft[comp][size];
+   return SizeBitsFTable[size];
+}
 
-   return SizeBitsTable_ACS[comp][size];
+//
+// Type_Floating::getSizeBitsI
+//
+bigsint Type_Floating::getSizeBitsI() const
+{
+   return SizeBitsITable[size];
 }
 
 //

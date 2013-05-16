@@ -70,11 +70,11 @@ void Type_Char::getNameMangleBase(std::ostream &out, NameMangleStyle) const
 }
 
 //
-// Type_Char::getSizeBits
+// Type_Char::getSizeBitsI
 //
-bigsint Type_Char::getSizeBits() const
+bigsint Type_Char::getSizeBitsI() const
 {
-   return GetSizeByte();
+   return GetSizeByte() - isSigned();
 }
 
 //
@@ -130,11 +130,11 @@ void Type_WChar::getNameMangleBase(std::ostream &out, NameMangleStyle) const
 }
 
 //
-// Type_WChar::getSizeBits
+// Type_WChar::getSizeBitsI
 //
-bigsint Type_WChar::getSizeBits() const
+bigsint Type_WChar::getSizeBitsI() const
 {
-   return Type_WChar::getSizeBytes() * GetSizeByte();
+   return getSizeBytes() * GetSizeByte() - isSigned();
 }
 
 //
