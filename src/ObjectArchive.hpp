@@ -44,7 +44,7 @@
 class ObjectLoad
 {
 public:
-   explicit ObjectLoad(std::istream &load_) : load{load_} {}
+   explicit ObjectLoad(std::istream &load_) : load(load_) {}
 
    ObjectLoad &operator >> (bool &data)                   {return loadBool(data);}
    ObjectLoad &operator >> (char &data)                   {return loadChar(data);}
@@ -88,7 +88,7 @@ private:
 class ObjectSave
 {
 public:
-   explicit ObjectSave(std::ostream &save_) : save{save_} {}
+   explicit ObjectSave(std::ostream &save_) : save(save_) {}
 
    ObjectSave &operator << (bool const &data)                   {return saveBool(data);}
    ObjectSave &operator << (char const &data)                   {return saveChar(data);}
