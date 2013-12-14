@@ -484,8 +484,13 @@ __extfunc "C" void *bsearch(void const *key, void const *base, size_t nmemb, siz
 __extfunc "C" void qsort(void *base, size_t nmemb, size_t size,
                          __func_t int(void const *, void const *) compar)
 {
+   // Array must have at least two members to sort.
+   if(nmemb < 2) return;
+
    char *itr = (char *)base;
-   char *end = (char *)base + nmemb*size;
+   // Consider end to be one less than the actual end, for the purpose of the
+   // iterator condition.
+   char *end = (char *)base + (nmemb - 1) * size;
 
    // Gnome sort!
    while(itr != end)
