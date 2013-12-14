@@ -184,7 +184,7 @@ private:
          break;
 
       case 'S':
-         makeExpr(objects, VariableType::get_bt_int());
+         makeExpr(objects, VariableType::get_bt_str());
          objects->addToken(OCODE_ACSP_STR_LOCALIZED);
          break;
 
