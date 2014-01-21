@@ -73,6 +73,11 @@ bool SourceExpressionC::IsQualifier(SRCEXPC_PARSE_ARG1)
    if(tok->data == "__near")  return true;
    if(tok->data == "__local") return true;
 
+   if(tok->data == "__local_register")  return true;
+   if(tok->data == "__map_register")    return true;
+   if(tok->data == "__world_register")  return true;
+   if(tok->data == "__global_register") return true;
+
    if(context->isAddressSpace(tok->data)) return true;
 
    return false;
