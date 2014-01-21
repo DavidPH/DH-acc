@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2012, 2014 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include "SourcePosition.hpp"
 
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <vector>
 
@@ -278,7 +279,11 @@ SourceStream::SourceStream(std::string const &_filename, unsigned type)
          if((in = TryOpenFile(pathname = *dir + filename))) break;
    }
 
-   if(!in) throw std::exception();
+   if(!in)
+   {
+      std::cerr << "Failed to open '" << _filename << "' for reading.\n";
+      throw EXIT_FAILURE;
+   }
 
    NormalizePath(pathname);
    DirectoryPath(pathname);

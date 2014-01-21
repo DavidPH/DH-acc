@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2012, 2014 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -104,23 +104,26 @@ static SourceType divine_source_type(std::string const &name)
    std::string::size_type sufIndex;
 
 
-   // Read the first bytes. If there aren't enough, that's OK.
-   for (size_t i = 0; i < sizeof(buf); ++i)
-      buf[i] = in.get();
+   if(in)
+   {
+      // Read the first bytes. If there aren't enough, that's OK.
+      for (size_t i = 0; i < sizeof(buf); ++i)
+         buf[i] = in.get();
 
-   // DS source?
-   if (buf[0] == '/' && (buf[1] == '*' || buf[1] == '/') &&
-       buf[2] == 'D' && buf[3] == 'S')
-      return SOURCE_DS;
+      // DS source?
+      if (buf[0] == '/' && (buf[1] == '*' || buf[1] == '/') &&
+         buf[2] == 'D' && buf[3] == 'S')
+         return SOURCE_DS;
 
-   // ASM source?
-   if(buf[0] == 'A' && buf[1] == 'C' && buf[2] == 'S' && buf[3] == 'A')
-      return SOURCE_ASM;
+      // ASM source?
+      if(buf[0] == 'A' && buf[1] == 'C' && buf[2] == 'S' && buf[3] == 'A')
+         return SOURCE_ASM;
 
-   // object source?
-   if (buf[0] == 'o' && buf[1] == 'b' && buf[2] == 'j' &&
-       buf[3] == 'e' && buf[4] == 'c' && buf[5] == 't')
-      return SOURCE_object;
+      // object source?
+      if (buf[0] == 'o' && buf[1] == 'b' && buf[2] == 'j' &&
+         buf[3] == 'e' && buf[4] == 'c' && buf[5] == 't')
+         return SOURCE_object;
+   }
 
 
    // Look for a file extension.
@@ -247,6 +250,13 @@ static void read_source(std::string const &name, SourceType type,
    case SOURCE_object:
       {
          std::ifstream in(name.c_str(), std::ios_base::in|std::ios_base::binary);
+
+         if(!in)
+         {
+            std::cerr << "Failed to open '" << name << "' for reading.\n";
+            throw EXIT_FAILURE;
+         }
+
          ObjectLoad arc{in};
          ObjectExpression::Load(arc, *objects);
       }
@@ -384,6 +394,13 @@ static inline int _main()
    {
       std::ofstream out(option_out.data.c_str(),
                         std::ios_base::out|std::ios_base::binary);
+
+      if(!out)
+      {
+         std::cerr << "Failed to open '" << option_out.data << "' for writing.\n";
+         return EXIT_FAILURE;
+      }
+
       ObjectSave arc{out};
       ObjectExpression::Save(arc, objects);
 
@@ -467,6 +484,12 @@ static inline int _main()
    // Write output file.
    std::ofstream ofs(option_out.data.c_str(),
                      std::ios_base::out|std::ios_base::binary);
+
+   if(!ofs)
+   {
+      std::cerr << "Failed to open '" << option_out.data << "' for writing.\n";
+      return EXIT_FAILURE;
+   }
 
    switch(Target)
    {
