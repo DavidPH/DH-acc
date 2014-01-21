@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2012, 2014 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -252,6 +252,8 @@ __function size_t wcstombs(char *restrict s, wchar_t const *restrict pwcs, size_
 // Implementation extensions.
 //
 
+__function long _IrshL(long i, int v);
+
 __function int _Getptr(void const __far *p);
 __function void _Setptr(int v, void __far *p);
 
@@ -265,6 +267,8 @@ __function unsigned long _UrshL(unsigned long u, int v);
 
 __function struct _Udiv_t _Udiv(unsigned numer, unsigned denom);
 __function struct _UdivL_t _UdivL(unsigned long numer, unsigned long denom);
+
+__function long _Accum _XmulL(long _Accum l, long _Accum r);
 
 #if defined(__LANG_DS__) || defined(__cplusplus)
 };

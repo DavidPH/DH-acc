@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2013 David Hill
+// Copyright(C) 2011-2014 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -107,8 +107,6 @@ case VariableType::BT_CHR: objects->addToken(OCODE_##OP##_STK_I); break;    \
 case VariableType::BT_FIX_HH: objects->addToken(OCODE_##OP##_STK_X); break; \
 case VariableType::BT_FIX_H: objects->addToken(OCODE_##OP##_STK_X); break;  \
 case VariableType::BT_FIX: objects->addToken(OCODE_##OP##_STK_X); break;    \
-case VariableType::BT_FIX_L: objects->addToken(OCODE_##OP##_STK_X); break;  \
-case VariableType::BT_FIX_LL: objects->addToken(OCODE_##OP##_STK_X); break; \
                                                                             \
 case VariableType::BT_INT_HH: objects->addToken(OCODE_##OP##_STK_I); break; \
 case VariableType::BT_INT_H: objects->addToken(OCODE_##OP##_STK_I); break;  \
@@ -137,8 +135,6 @@ case VariableType::BT_CHR: objects->addToken(OCODE_##OP##_##MT##_I, data->addres
 case VariableType::BT_FIX_HH: objects->addToken(OCODE_##OP##_##MT##_X, data->address); break; \
 case VariableType::BT_FIX_H: objects->addToken(OCODE_##OP##_##MT##_X, data->address); break; \
 case VariableType::BT_FIX: objects->addToken(OCODE_##OP##_##MT##_X, data->address); break; \
-case VariableType::BT_FIX_L: objects->addToken(OCODE_##OP##_##MT##_X, data->address); break; \
-case VariableType::BT_FIX_LL: objects->addToken(OCODE_##OP##_##MT##_X, data->address); break; \
  \
 case VariableType::BT_INT_HH: objects->addToken(OCODE_##OP##_##MT##_I, data->address); break; \
 case VariableType::BT_INT_H: objects->addToken(OCODE_##OP##_##MT##_I, data->address); break; \
@@ -190,8 +186,8 @@ case VariableType::BT_CHR: return true; \
 case VariableType::BT_FIX_HH: return true; \
 case VariableType::BT_FIX_H: return true; \
 case VariableType::BT_FIX: return true; \
-case VariableType::BT_FIX_L: return true; \
-case VariableType::BT_FIX_LL: return true; \
+case VariableType::BT_FIX_L: return false; \
+case VariableType::BT_FIX_LL: return false; \
  \
 case VariableType::BT_INT_HH: return true; \
 case VariableType::BT_INT_H: return true; \

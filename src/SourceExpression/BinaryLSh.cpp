@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2013 David Hill
+// Copyright(C) 2011-2014 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -91,6 +91,8 @@ protected:
       {
          DO_GET_CASES(LSH);
 
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
       case VariableType::BT_INT_L:
       case VariableType::BT_INT_LL:
       case VariableType::BT_UNS_L:

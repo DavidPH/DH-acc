@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2013 David Hill
+// Copyright(C) 2011-2014 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -118,17 +118,23 @@ static ObjectExpression::ExpressionType GetET(VariableType const *type)
    case VariableType::BT_ANG:
    case VariableType::BT_ANG_L:
    case VariableType::BT_ANG_LL:
-   case VariableType::BT_FIX_HH:
-   case VariableType::BT_FIX_H:
-   case VariableType::BT_FIX:
-   case VariableType::BT_FIX_L:
-   case VariableType::BT_FIX_LL:
    case VariableType::BT_FRA_HH:
    case VariableType::BT_FRA_H:
    case VariableType::BT_FRA:
    case VariableType::BT_FRA_L:
    case VariableType::BT_FRA_LL:
       return ObjectExpression::ET_FIX;
+
+   case VariableType::BT_FIX_HH:
+      return ObjectExpression::ET_FIX_HH;
+   case VariableType::BT_FIX_H:
+      return ObjectExpression::ET_FIX_H;
+   case VariableType::BT_FIX:
+      return ObjectExpression::ET_FIX;
+   case VariableType::BT_FIX_L:
+      return ObjectExpression::ET_FIX_L;
+   case VariableType::BT_FIX_LL:
+      return ObjectExpression::ET_FIX_LL;
 
    case VariableType::BT_FLT_HH:
       return ObjectExpression::ET_FLT_HH;
@@ -780,6 +786,90 @@ void SourceExpression::make_objects_memcpy_cast
    {
       objects->addToken(OCODE_NOT_STK_I);
       objects->addToken(OCODE_NOT_STK_I);
+   }
+
+   // Casting to long fixed.
+   if(dstBT == VariableType::BT_FIX_L || dstBT == VariableType::BT_FIX_LL)
+   {
+      switch(srcBT)
+      {
+      case VariableType::BT_FIX:
+         ExtendSign(objects, dstSize, srcSize, context);
+         objects->addToken(OCODE_GET_IMM, objects->getValue(16));
+         objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__UlshL"));
+         objects->addToken(OCODE_GET_IMM,     objects->getValue(-1));
+         objects->addToken(OCODE_GET_WLDARR,  objects->getValue(option_auto_array));
+         goto cast_done;
+
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
+         goto cast_done;
+
+      case VariableType::BT_INT_HH:
+      case VariableType::BT_INT_H:
+      case VariableType::BT_INT:
+      case VariableType::BT_UNS_HH:
+      case VariableType::BT_UNS_H:
+      case VariableType::BT_UNS:
+         objects->addToken(OCODE_GET_IMM, objects->getValue(0));
+         objects->addToken(OCODE_STK_SWAP);
+         goto cast_done;
+
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+         objects->addToken(OCODE_GET_IMM, objects->getValue(32));
+         objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__UlshL"));
+         objects->addToken(OCODE_GET_IMM,     objects->getValue(-1));
+         objects->addToken(OCODE_GET_WLDARR,  objects->getValue(option_auto_array));
+         goto cast_done;
+
+      default: BAD_CAST();
+      }
+
+      goto cast_done;
+   }
+
+   // Casting from long fixed.
+   if(srcBT == VariableType::BT_FIX_L || srcBT == VariableType::BT_FIX_LL)
+   {
+      switch(dstBT)
+      {
+      case VariableType::BT_FIX:
+         objects->addToken(OCODE_GET_IMM, objects->getValue(16));
+         objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__IrshL"));
+         // Drop high word.
+         goto cast_done;
+
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
+         goto cast_done;
+
+      case VariableType::BT_INT_HH:
+      case VariableType::BT_INT_H:
+      case VariableType::BT_INT:
+      case VariableType::BT_UNS_HH:
+      case VariableType::BT_UNS_H:
+      case VariableType::BT_UNS:
+         objects->addToken(OCODE_STK_SWAP);
+         objects->addToken(OCODE_STK_DROP);
+         goto cast_done;
+
+      case VariableType::BT_INT_L:
+      case VariableType::BT_INT_LL:
+      case VariableType::BT_UNS_L:
+      case VariableType::BT_UNS_LL:
+         objects->addToken(OCODE_GET_IMM, objects->getValue(32));
+         objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__IrshL"));
+         objects->addToken(OCODE_GET_IMM,     objects->getValue(-1));
+         objects->addToken(OCODE_GET_WLDARR,  objects->getValue(option_auto_array));
+         goto cast_done;
+
+      default: BAD_CAST();
+      }
+
+      goto cast_done;
    }
 
    switch(GetSimpleET(srcET))

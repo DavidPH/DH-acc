@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011, 2012 David Hill
+// Copyright(C) 2011-2012, 2014 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU Lesser General Public License as published by
@@ -795,6 +795,31 @@ __extfunc "C" void _Setptr(int v, void __far *p)
 };
 
 //
+// _IrshL
+//
+__extfunc "C" long _IrshL(long i, int v)
+{
+   if(!v) return i;
+
+   constexpr   signed register *ip = (  signed register *)&i;
+   constexpr unsigned register *up = (unsigned register *)&i;
+
+   if(v < 32)
+   {
+      up[0] >>= v;
+      up[0] |= up[1] << (32 - v);
+      ip[1] >>= v;
+   }
+   else
+   {
+      ip[0] = ip[1] >> (v - 32);
+      ip[1] >>= 31;
+   };
+
+   return i;
+};
+
+//
 // _UlshL
 //
 __extfunc "C" unsigned long _UlshL(unsigned long u, int v)
@@ -1080,6 +1105,30 @@ __extfunc "C" _UdivL_t _UdivL(unsigned long numer, unsigned long denom)
    #undef DIVCHK
 
    return d;
+};
+
+//
+// _XmulL
+//
+__extfunc "C" long _Accum _XmulL(long _Accum l, long _Accum r)
+{
+   constexpr int register *lp = (int register *)&l;
+   constexpr int register *rp = (int register *)&r;
+
+   constexpr int register *i0 = lp+1;
+   constexpr int register *i1 = lp+0;
+   constexpr int register *i2 = rp+1;
+   constexpr int register *i3 = rp+0;
+
+   long l0, l1, l2, l3;
+
+   l0 = _Umul32(*i0, *i2);
+   l1 = _Umul32(*i0, *i3);
+   l2 = _Umul32(*i1, *i2);
+   l3 = _Umul32(*i1, *i3);
+
+   long res = (l0 << 32) + l1 + l2 + (l3 >> 32);
+   return *(long _Accum register *)&res;
 };
 
 // EOF

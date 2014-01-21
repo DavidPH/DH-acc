@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2013 David Hill
+// Copyright(C) 2011-2014 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -95,8 +95,15 @@ protected:
       {
          DO_GET_CASES(RSH);
 
+      case VariableType::BT_FIX_L:
+      case VariableType::BT_FIX_LL:
       case VariableType::BT_INT_L:
       case VariableType::BT_INT_LL:
+         objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__IrshL"));
+         objects->addToken(OCODE_GET_IMM,     objects->getValue(-1));
+         objects->addToken(OCODE_GET_WLDARR,  objects->getValue(option_auto_array));
+         break;
+
       case VariableType::BT_UNS_L:
       case VariableType::BT_UNS_LL:
          objects->addToken(OCODE_JMP_CAL_IMM, objects->getValue("__UrshL"));
