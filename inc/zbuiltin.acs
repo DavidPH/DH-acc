@@ -137,7 +137,6 @@ __asmfunc int      GameSkill(void) __asmcode(ACS_GAME_GET_SKILL);
 __asmfunc int      GameType(void) __asmcode(ACS_GAME_GET_TYPE);
 __asmfunc int      GetCVar(__string) __asmcode(ACSE_GAME_GET_CVAR);
 __asmfunc _Accum   GetCVarFixed(__string) __asmcode(ACSE_GAME_GET_CVAR);
-__asmfunc __string GetCVarString(__string) __asmcode(ACSE_GAME_GET_CVAR);
 __asmfunc int      GetLevelInfo(int) __asmcode(ACSE_GAME_GET_LEVELINFO);
 __asmfunc int      PlayerCount(void) __asmcode(ACS_GAME_GET_PLAYERCOUNT);
 __asmfunc void     ReplaceTextures(__string, __string, int _A(0)) __asmcode(ACSE_GAME_REPLACETEXTURES);

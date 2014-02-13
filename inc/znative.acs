@@ -159,7 +159,9 @@ __native int      StrCaseCmp(__string, __string) __addr(64);
 __native int      StrCaseCmp(__string, __string, int) __addr(64);
 __native int      StrICmp(__string, __string) __addr(64);
 __native int      StrICmp(__string, __string, int) __addr(64);
-
+__native __string StrLeft(__string, int) __addr(65);
+__native __string StrRight(__string, int) __addr(66);
+__native __string StrMid(__string, int, int) __addr(67);
 __native __string GetActorClass(int) __addr(68);
 __native __string GetWeapon() __addr(69);
 __native void     SoundVolume(int, int, _Accum) __addr(70);
@@ -174,6 +176,10 @@ __native int      SpawnDecal(int, __string, int, _Accum) __addr(72);
 __native int      SpawnDecal(int, __string, int, _Accum, _Accum) __addr(72);
 __native int      SpawnDecal(int, __string, int, _Accum, _Accum, _Accum) __addr(72);
 __native _Bool    CheckFont(__string) __addr(73);
+__native int      DropItem(int, __string, int, int) __addr(74);
+__native _Bool    CheckFlag(int, __string) __addr(75);
+__native void     SetLineActivation(int, int) __addr(76);
+__native int      GetLineActivation(int) __addr(77);
 
 __native int      ResetMap() __addr(100);
 __native int      PlayerIsSpectator(int player) __addr(101);

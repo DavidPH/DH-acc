@@ -405,6 +405,20 @@
 #define PTROP_UNSAFEMASTER 2
 #define PTROP_NOSAFEGUARDS PTROP_UNSAFETARGET |PTROP_UNSAFEMASTER
 
+// Line activation flags.
+#define SPAC_None       0x00000000
+#define SPAC_Cross      0x00000001
+#define SPAC_Use        0x00000002
+#define SPAC_MCross     0x00000004
+#define SPAC_Impact     0x00000008
+#define SPAC_Push       0x00000010
+#define SPAC_PCross     0x00000020
+#define SPAC_UseThrough 0x00000040
+#define SPAC_AnyCross   0x00000080
+#define SPAC_MUse       0x00000100
+#define SPAC_MPush      0x00000200
+#define SPAC_UseBack    0x00000400
+
 // Skulltag teams.
 #define TEAM_BLUE 0
 #define TEAM_RED  1
