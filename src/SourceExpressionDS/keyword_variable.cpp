@@ -357,6 +357,10 @@ static SourceExpression::Pointer make_var(SourceTokenizerC *in,
                         addr, externDef, var);
       }
 
+      // Cast initSrc to the new object's type.
+      initSrc = SourceExpression::
+         create_value_cast_implicit(initSrc, type, context, pos);
+
       // Generate initObj here in case one of the above rules alters initSrc.
       if(initSrc->canMakeObject())
          initObj = initSrc->makeObject();
