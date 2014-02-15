@@ -362,22 +362,31 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
    if(tmpA)
    {
       if(tmp->size == 1)
+      {
          objects->addToken(OCODE_STK_SWAP);
+         objects->addToken(OCODE_SET_TEMP, tmpA);
+      }
+      else if(tmp->size == 2)
+      {
+         auto tmpC = context->getTempVar(tmpBase);
+         objects->addToken(OCODE_SET_TEMP, tmpC);
+         objects->addToken(OCODE_STK_SWAP);
+         objects->addToken(OCODE_SET_TEMP, tmpA);
+         objects->addToken(OCODE_GET_TEMP, tmpC);
+      }
       else
          Error_NP("stub");
-
-      objects->addToken(OCODE_SET_TEMP, tmpA);
    }
 
    // Get address to set exprL.
-   if(src->type == VariableData::MT_ARRAY)
+   if(src->type == VariableData::MT_ARRAY && tmp->size == 1)
       objects->addToken(OCODE_GET_TEMP, tmpA);
 
    // Evaluate.
    doGet(objects, typeL, tmpBase);
 
    // Set exprL.
-   if(src->type == VariableData::MT_ARRAY)
+   if(src->type == VariableData::MT_ARRAY && tmp->size == 1)
       doSetBaseSet(objects, src, NULL, NULL);
    else
       doSetBaseSet(objects, src, tmpA, tmpB);
@@ -427,8 +436,22 @@ void SourceExpression_Binary::doSetBaseGet(ObjectVector *objects,
       break;
 
    case VariableData::MT_ARRAY:
-      if(i) Error_NP("stub");
-      if(tmpA) objects->addToken(OCODE_GET_TEMP, tmpA);
+      // Ready the address.
+      if(tmpA)
+      {
+         objects->addToken(OCODE_GET_TEMP, tmpA);
+
+         if(i)
+         {
+            objects->addToken(OCODE_GET_IMM, objects->getValue(i));
+            objects->addToken(OCODE_ADD_STK_I);
+         }
+      }
+      else
+      {
+         if(i) Error_NP("stub");
+      }
+
       switch (src->sectionA)
       {
       case VariableData::SA_MAP:
@@ -484,12 +507,24 @@ void SourceExpression_Binary::doSetBaseSet(ObjectVector *objects,
       break;
 
    case VariableData::MT_ARRAY:
-      if(i) Error_NP("stub");
+      // Ready the address.
       if(tmpA)
       {
          objects->addToken(OCODE_GET_TEMP, tmpA);
+
+         if(i)
+         {
+            objects->addToken(OCODE_GET_IMM, objects->getValue(i));
+            objects->addToken(OCODE_ADD_STK_I);
+         }
+
          objects->addToken(OCODE_STK_SWAP);
       }
+      else
+      {
+         if(i) Error_NP("stub");
+      }
+
       switch (src->sectionA)
       {
       case VariableData::SA_MAP:
