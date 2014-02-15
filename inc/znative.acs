@@ -146,6 +146,7 @@ __native void     LineAttack(int, _Accum, _Accum, int) __addr(60);
 __native void     LineAttack(int, _Accum, _Accum, int, __string) __addr(60);
 __native void     LineAttack(int, _Accum, _Accum, int, __string, __string) __addr(60);
 __native void     LineAttack(int, _Accum, _Accum, int, __string, __string, _Accum) __addr(60);
+__native void     LineAttack(int, _Accum, _Accum, int, __string, __string, _Accum, int) __addr(60);
 __native void     PlaySound(int, __string) __addr(61);
 __native void     PlaySound(int, __string, int) __addr(61);
 __native void     PlaySound(int, __string, int, _Accum) __addr(61);
