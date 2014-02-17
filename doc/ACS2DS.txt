@@ -28,8 +28,8 @@ ACS:
   global int 3:some_global_array[];
 
 DS:
-  __worldregister int some_world_var @ 1;
-  __globalarray(3) int[] some_global_array;
+  __world_register int some_world_var @ 1;
+  __global_array(3) int[] some_global_array;
 
 ===============================================================================
 Fixed Is A Real Type
@@ -70,7 +70,7 @@ ACS:
 
 DS:
   #define hudf __printf<__printf_hud>
-  hudf("an int: %i and a fixed: %X", 3, 4.5,
+  hudf("an int: %i and a fixed: %k", 3, 4.5,
        HUDMSG_PLAIN, 0, 0, 0.5, 0.5, 10);
 
 ===============================================================================
