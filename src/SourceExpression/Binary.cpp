@@ -378,18 +378,11 @@ void SourceExpression_Binary::doSetBaseEmulated(ObjectVector *objects,
          Error_NP("stub");
    }
 
-   // Get address to set exprL.
-   if(src->type == VariableData::MT_ARRAY && tmp->size == 1)
-      objects->addToken(OCODE_GET_TEMP, tmpA);
-
    // Evaluate.
    doGet(objects, typeL, tmpBase);
 
    // Set exprL.
-   if(src->type == VariableData::MT_ARRAY && tmp->size == 1)
-      doSetBaseSet(objects, src, NULL, NULL);
-   else
-      doSetBaseSet(objects, src, tmpA, tmpB);
+   doSetBaseSet(objects, src, tmpA, tmpB);
 
    if(dst->type != VariableData::MT_VOID)
    {
