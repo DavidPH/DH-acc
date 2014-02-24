@@ -318,7 +318,9 @@ SRCEXPDS_KEYWORD_DEFN(if)
 
    SourceContext::Reference contextBody =
       SourceContext::create(contextCond, SourceContext::CT_BLOCK);
-   SourceExpression::Pointer exprBody = make_expression(in, contextBody);
+   SourceExpression::Pointer exprBody = create_value_cast_implicit(
+      make_expression(in, contextBody), VariableType::get_bt_void(), context,
+      tok->pos);
 
    if (in->peekType(SourceTokenC::TT_NAM, "else"))
    {
