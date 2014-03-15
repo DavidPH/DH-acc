@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012-2013 David Hill
+// Copyright(C) 2012-2014 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -676,12 +676,17 @@ private:
             nextExpr(VariableType::get_bt_int())->makeObject();
          bigsint msgtype = msgtypeObj->resolveINT();
 
-         objects->addToken(OCODE_GET_IMM, msgtypeObj);  // type
-         makeExpr(objects, VariableType::get_bt_int()); // id
-         makeExpr(objects, VariableType::get_bt_int()); // color
-         makeExpr(objects, VariableType::get_bt_fix()); // x
-         makeExpr(objects, VariableType::get_bt_fix()); // y
-         makeExpr(objects, VariableType::get_bt_fix()); // holdTime
+         objects->addToken(OCODE_GET_IMM, msgtypeObj);     // type
+         makeExpr(objects, VariableType::get_bt_int());    // id
+
+         if(msgtype & 0x40000000) // HUDMSG_COLORSTRING
+            makeExpr(objects, VariableType::get_bt_str()); // color (str)
+         else
+            makeExpr(objects, VariableType::get_bt_int()); // color (int)
+
+         makeExpr(objects, VariableType::get_bt_fix());    // x
+         makeExpr(objects, VariableType::get_bt_fix());    // y
+         makeExpr(objects, VariableType::get_bt_fix());    // holdTime
 
          objects->addToken(OCODE_ACSP_END_OPT);
 
