@@ -165,6 +165,7 @@ __asmfunc _Accum   Sin(_Accum) __asmcode(TRIG_SIN_X);
 __asmfunc _Accum   VectorAngle(_Accum, _Accum) __asmcode(ACSE_TRIG_VECTORANGLE);
 
 // Miscellaneous
+__asmfunc void     ConsoleCommand(__string, int _A(0), int _A(0)) __asmcode_imm(ACSE_GAME_EXEC);
 __asmfunc void     CreateTranslationStart(int transnumber) __asmcode(ACSE_TRANSLATION_START);
 __asmfunc void     CreateTranslationDesat(int a, int b, _Accum r1, _Accum g1, _Accum b1, _Accum r2, _Accum g2, _Accum b2) __asmcode(ACSE_TRANSLATION_DESAT);
 __asmfunc void     CreateTranslationPalette(int a, int b, int c, int d) __asmcode(ACSE_TRANSLATION_PALETTE);
