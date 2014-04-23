@@ -127,6 +127,13 @@ void Function::GenerateSymbols()
    FunctionIter iter;
    bigsint number = 0;
 
+   // If not set yet, generate varCount.
+   for(iter = Table.begin(); iter != Table.end(); ++iter)
+   {
+      if(iter->second.context)
+         iter->second.varCount = iter->second.context->getLimit(STORE_REGISTER);
+   }
+
    for(iter = Table.begin(); iter != Table.end(); ++iter)
    {
       iter->second.number = number++;

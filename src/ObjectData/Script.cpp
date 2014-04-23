@@ -133,6 +133,7 @@ bool Script::Add(std::string const &name, std::string const &label,
    {
       data.string    = string;
       data.number    = number;
+      data.context   = context;
       data.externDef = false;
    }
 
@@ -172,6 +173,7 @@ bool Script::Add(std::string const &name, std::string const &label,
    {
       data.string    = string;
       data.number    = number;
+      data.varCount  = varCount;
       data.externDef = false;
    }
 
@@ -186,6 +188,13 @@ void ObjectData::Script::GenerateSymbols()
    ObjectExpression::Pointer obj;
    ScriptIter iter;
    bigsint number = 0;
+
+   // If not set yet, generate varCount.
+   for(iter = Table.begin(); iter != Table.end(); ++iter)
+   {
+      if(iter->second.context)
+         iter->second.varCount = iter->second.context->getLimit(STORE_REGISTER);
+   }
 
    // Generate numbers.
    for(iter = Table.begin(); iter != Table.end(); ++iter)
