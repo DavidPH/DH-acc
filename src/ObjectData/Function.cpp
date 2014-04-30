@@ -136,7 +136,7 @@ void Function::GenerateSymbols()
 
    for(iter = Table.begin(); iter != Table.end(); ++iter)
    {
-      iter->second.number = number++;
+      iter->second.number = ++number;
 
       obj = ObjectExpression::CreateValueUNS(iter->second.number, SourcePosition::none());
 
