@@ -272,6 +272,8 @@
 #define STYLE_Add                65 // Draw additive
 #define STYLE_Shaded             66
 #define STYLE_TranslucentStencil 67
+#define STYLE_Shadow             68
+#define STYLE_Subtract           69
 
 // Properties you can use with GetLevelInfo().
 #define LEVELINFO_PAR_TIME        0
