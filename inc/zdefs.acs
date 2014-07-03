@@ -223,43 +223,48 @@
 #define MARINEWEAPON_BFG            11
 
 // Actor properties.
-#define APROP_Health        0
-#define APROP_Speed         1
-#define APROP_Damage        2
-#define APROP_Alpha         3
-#define APROP_RenderStyle   4
-#define APROP_SeeSound      5
-#define APROP_AttackSound   6
-#define APROP_PainSound     7
-#define APROP_DeathSound    8
-#define APROP_ActiveSound   9
-#define APROP_Ambush       10
-#define APROP_Invulnerable 11
-#define APROP_JumpZ        12
-#define APROP_ChaseGoal    13
-#define APROP_Frightened   14
-#define APROP_Gravity      15
-#define APROP_Friendly     16
-#define APROP_SpawnHealth  17
-#define APROP_Dropped      18
-#define APROP_Notarget     19
-#define APROP_Species      20
-#define APROP_Nametag      21
-#define APROP_Score        22
-#define APROP_Notrigger    23
-#define APROP_DamageFactor 24
-#define APROP_MasterTID    25
-#define APROP_TargetTID    26
-#define APROP_TracerTID    27
-#define APROP_Waterlevel   28
-#define APROP_ScaleX       29
-#define APROP_ScaleY       30
-#define APROP_Dormant      31
-#define APROP_Mass         32
-#define APROP_Accuracy     33
-#define APROP_Stamina      34
-#define APROP_Height       35
-#define APROP_Radius       36
+#define APROP_Health         0
+#define APROP_Speed          1
+#define APROP_Damage         2
+#define APROP_Alpha          3
+#define APROP_RenderStyle    4
+#define APROP_SeeSound       5
+#define APROP_AttackSound    6
+#define APROP_PainSound      7
+#define APROP_DeathSound     8
+#define APROP_ActiveSound    9
+#define APROP_Ambush        10
+#define APROP_Invulnerable  11
+#define APROP_JumpZ         12
+#define APROP_ChaseGoal     13
+#define APROP_Frightened    14
+#define APROP_Gravity       15
+#define APROP_Friendly      16
+#define APROP_SpawnHealth   17
+#define APROP_Dropped       18
+#define APROP_Notarget      19
+#define APROP_Species       20
+#define APROP_Nametag       21
+#define APROP_Score         22
+#define APROP_Notrigger     23
+#define APROP_DamageFactor  24
+#define APROP_MasterTID     25
+#define APROP_TargetTID     26
+#define APROP_TracerTID     27
+#define APROP_Waterlevel    28
+#define APROP_ScaleX        29
+#define APROP_ScaleY        30
+#define APROP_Dormant       31
+#define APROP_Mass          32
+#define APROP_Accuracy      33
+#define APROP_Stamina       34
+#define APROP_Height        35
+#define APROP_Radius        36
+#define APROP_Reactiontime  37
+#define APROP_MeleeRange    38
+#define APROP_ViewHeight    39
+#define APROP_AttackZOffset 40
+#define APROP_StencilColor  41
 
 // Render styles.
 #define STYLE_None                0 // Do not draw
@@ -501,6 +506,7 @@
 #define CHANGELEVEL_CHANGESKILL     8
 #define CHANGELEVEL_NOINTERMISSION 16
 #define CHANGELEVEL_RESETHEALTH    32
+#define CHANGELEVEL_PRERAISEWEAPON 64
 
 #define NO_CHANGE 32767.0
 
@@ -518,6 +524,7 @@
 #define BLOCKF_RAILING      64
 #define BLOCKF_USE         128
 #define BLOCKF_SIGHT       256
+#define BLOCKF_HITSCAN     512
 
 #define FOGP_DENSITY        0
 #define FOGP_OUTSIDEDENSITY 1
@@ -529,6 +536,8 @@
 
 #define CSF_NOFAKEFLOORS 1
 #define CSF_NOBLOCKALL   2
+
+#define FHF_NORANDOMPUFFZ     1
 
 // Zandronum Team Property values.
 #define TPROP_Name           0
