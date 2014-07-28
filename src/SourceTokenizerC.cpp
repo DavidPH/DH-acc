@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2011-2012 David Hill
+// Copyright(C) 2011-2012, 2014 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 #include <cctype>
 #include <cstring>
 #include <sstream>
+#include <ctime>
 
 
 //----------------------------------------------------------------------------|
@@ -186,6 +187,29 @@ SourceTokenizerC::SourceTokenizerC(SourceStream *_in)
       addDefine("__NEAR_POINTERS__", "");
    else
       addDefine("__FAR_POINTERS__", "");
+
+   // __DATE__/__TIME__
+   {
+      std::time_t t = std::time(nullptr);
+      char str[21];
+
+      std::memcpy(str, std::asctime(std::gmtime(&t)) + 3, 21);
+
+      str[ 7] = '"';
+      str[16] = '"';
+
+      addDefine("__TIME__", std::string(str + 7, 10));
+
+      str[ 0] = '"';
+      str[ 7] = ' ';
+      str[ 8] = str[17];
+      str[ 9] = str[18];
+      str[10] = str[19];
+      str[11] = str[20];
+      str[12] = '"';
+
+      addDefine("__DATE__", std::string(str, 13));
+   }
 
    inStack.push_back(_in);
    ungetStack.push_back(static_cast<SourceTokenC::Reference>(
