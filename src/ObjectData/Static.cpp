@@ -126,7 +126,7 @@ void Static::Add(std::string const &name, VariableType const *type,
 
       ObjectExpression::add_symbol(name, ObjectExpression::ET_UNS);
    }
-   else if (data.externDef && externDef)
+   else if (data.externDef && !externDef)
    {
       data.number    = number;
       data.size      = type->getSize(SourcePosition::none());
