@@ -279,6 +279,10 @@ protected:
    virtual void doSet(ObjectVector *objects, VariableData *data,
                       VariableType *type, int tmpBase);
 
+   // isReturn
+   virtual bool isReturn() const
+      {return exprL->isReturn() || exprR->isReturn();}
+
    //
    // isSafe
    //

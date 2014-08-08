@@ -46,6 +46,9 @@ class SourceExpression_BranchReturn : public SourceExpression
 public:
    SourceExpression_BranchReturn(SRCEXP_EXPRUNA_ARGS);
 
+   // isReturn
+   virtual bool isReturn() const {return true;}
+
    //
    // isSideEffect
    //

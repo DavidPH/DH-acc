@@ -45,6 +45,9 @@ protected:
    SourceExpression_Unary(SRCEXP_EXPRUNA_ARGS);
    SourceExpression_Unary(VariableType *cast, SRCEXP_EXPRUNA_ARGS);
 
+   // isReturn
+   virtual bool isReturn() const {return expr->isReturn();}
+
    //
    // isSideEffect
    //

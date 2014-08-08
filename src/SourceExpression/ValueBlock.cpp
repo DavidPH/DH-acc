@@ -59,6 +59,17 @@ public:
    virtual VariableType::Reference getType() const;
 
    //
+   // isReturn
+   //
+   virtual bool isReturn() const
+   {
+      for(auto const &e : expressions)
+         if(e->isReturn()) return true;
+
+      return false;
+   }
+
+   //
    // isSideEffect
    //
    virtual bool isSideEffect() const

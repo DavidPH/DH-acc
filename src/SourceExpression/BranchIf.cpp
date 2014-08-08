@@ -54,6 +54,15 @@ public:
    virtual VariableType::Reference getType() const;
 
    //
+   // isReturn
+   //
+   virtual bool isReturn() const
+   {
+      return exprCond->isReturn() || exprBody->isReturn() ||
+         (exprElse && exprElse->isReturn());
+   }
+
+   //
    // isSideEffect
    //
    virtual bool isSideEffect() const

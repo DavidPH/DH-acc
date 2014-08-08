@@ -288,6 +288,16 @@ public:
    virtual CounterReference<VariableType> getType() const;
 
    //
+   // isReturn
+   //
+   // Returns true if this expression is or contains a return expression.
+   //
+   virtual bool isReturn() const
+   {
+      return false;
+   }
+
+   //
    // isSafe
    //
    // An expression is safe if it A, has no side effects and B, cannot trigger

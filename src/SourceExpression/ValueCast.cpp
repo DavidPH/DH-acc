@@ -99,6 +99,9 @@ public:
    //
    virtual VariableType::Reference getType() const {return type;}
 
+   // isReturn
+   virtual bool isReturn() const {return expr->isReturn();}
+
    //
    // isSideEffect
    //

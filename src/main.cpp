@@ -378,6 +378,9 @@ static inline int _main()
             create_value_data_garbage(type->getReturn(), context, pos);
          exprRetn = SourceExpression::create_branch_return(exprData, context, pos);
       }
+      // If non-void return, check that the function contains a return.
+      else if(!itr->second->body->isReturn())
+         Warn(itr->second->body->getPosition(), "no return in non-void function");
 
       // Do codegen.
       objects.addLabel(itr->second->var->getNameObject() + "::$label");

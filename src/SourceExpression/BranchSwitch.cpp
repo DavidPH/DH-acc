@@ -47,6 +47,10 @@ public:
    (SourceExpression *exprCond, SourceExpression *exprBody,
     SRCEXP_EXPR_ARGS);
 
+   // isReturn
+   virtual bool isReturn() const
+      {return exprCond->isReturn() || exprBody->isReturn();}
+
    //
    // isSideEffect
    //
