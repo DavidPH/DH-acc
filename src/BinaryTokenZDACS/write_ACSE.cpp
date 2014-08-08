@@ -272,6 +272,10 @@ void BinaryTokenZDACS::write_ACSE_function_FUNC(std::ostream *out,
    else
       addr = ObjectExpression::get_symbol(f.label, SourcePosition::none());
 
+   // If at start of stream, put null function.
+   if(!out->tellp())
+      out->write("\0\0\0\0\0\0\0", 8);
+
    BinaryTokenACS::write_ACS0_8 (out, f.argCount);
    BinaryTokenACS::write_ACS0_8 (out, f.varCount);
    BinaryTokenACS::write_ACS0_8 (out, !!f.retCount);

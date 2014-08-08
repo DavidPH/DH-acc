@@ -93,8 +93,6 @@ output_ACSE(std::ostream *out, std::vector<T> const &instructions)
    write_ACSE_chunk(out, &chunkout, "FNAM");
 
    // FUNC - Functions
-   BinaryTokenACS::write_ACS0_32(&chunkout, 0);
-   BinaryTokenACS::write_ACS0_32(&chunkout, 0);
    ObjectData::Function::Iterate(write_ACSE_function_FUNC, &chunkout);
    write_ACSE_chunk(out, &chunkout, "FUNC");
 
