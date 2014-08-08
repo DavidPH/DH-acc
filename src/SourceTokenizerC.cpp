@@ -802,7 +802,7 @@ SourceTokenC::Reference SourceTokenizerC::get()
       SourceTokenC::Reference tmpTok = get();
 
       if (tmpTok->type == SourceTokenC::TT_STR)
-         tok->data += tmpTok->data;
+         tok = SourceTokenC::create(tok->pos, tok->data + tmpTok->data, tok->type);
       else
          unget(tmpTok);
    }
