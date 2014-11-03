@@ -189,14 +189,28 @@ void BinaryTokenZDACS::write_ACSE_array_ATAG(std::ostream *out, ObjectData::Arra
 
    std::vector<unsigned char> buf; buf.reserve(a.init.type.size());
 
-   for(auto const &itr : a.init.type)
+   for(std::size_t idx = 0, e = a.init.type.size(); idx != e; ++idx)
    {
-      switch(itr)
+      switch(a.init.type[idx])
       {
       default:
-      case ObjectData::IT_INTEGER:  buf.push_back('\0'); break;
-      case ObjectData::IT_STRING:   buf.push_back('\1'); break;
-      case ObjectData::IT_FUNCTION: buf.push_back('\2'); break;
+      case ObjectData::IT_INTEGER:
+         buf.push_back('\0');
+         break;
+
+      case ObjectData::IT_STRING:
+         if(a.init.data[idx] && a.init.data[idx]->resolveUNS())
+            buf.push_back('\1');
+         else
+            buf.push_back('\0');
+         break;
+
+      case ObjectData::IT_FUNCTION:
+         if(a.init.data[idx] && a.init.data[idx]->resolveUNS())
+            buf.push_back('\2');
+         else
+            buf.push_back('\0');
+         break;
       }
    }
 

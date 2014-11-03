@@ -326,7 +326,17 @@ void BinaryTokenZDACS::make_tokens
       break;
 
    // Variable Get
-   CASE_REMAP(GET_FUNCP, GET_FUNCP);
+   case OCODE_GET_FUNCP:
+      // Don't tag nullptr.
+      if(object->getArg(0)->resolveUNS())
+      {
+         PUSH_TOKEN_ARGS1(BCODE_GET_FUNCP, 1);
+      }
+      else
+      {
+         PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1);
+      }
+      break;
 
    case OCODE_GET_STRING:
       PUSH_TOKEN_ARGS1(BCODE_GET_IMM, 1);
