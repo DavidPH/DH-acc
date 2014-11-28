@@ -51,6 +51,13 @@ public:
       CONSTRUCTOR_TYPE_VARS();
       CONSTRUCTOR_ARRAY_DECAY();
 
+      if(btL == VariableType::BT_BIT_HRD)
+      {
+         btL   = VariableType::BT_INT;
+         typeL = VariableType::get_bt_int();
+         exprL = create_value_cast_implicit(exprL, typeL, context, pos);
+      }
+
       CONSTRAINT_INTEGER("<<");
 
       docast = false;
