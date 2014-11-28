@@ -805,6 +805,8 @@ void SourceExpression::make_objects_memcpy_cast
       case VariableType::BT_FIX_LL:
          goto cast_done;
 
+      case VariableType::BT_BIT_HRD:
+      case VariableType::BT_BIT_SFT:
       case VariableType::BT_INT_HH:
       case VariableType::BT_INT_H:
       case VariableType::BT_INT:
