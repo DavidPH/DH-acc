@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------------
 //
-// Copyright(C) 2012-2014 David Hill
+// Copyright(C) 2012-2015 David Hill
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -203,8 +203,7 @@ private:
 
       case 'd':
       case 'i':
-         makeExpr(objects, VariableType::get_bt_int());
-         objects->addToken(OCODE_ACSP_NUM_DEC_I);
+         doFormat_i(objects, data);
          break;
 
       case 'k':
@@ -235,6 +234,37 @@ private:
 
       default:
          Error_NP("unrecognized format char: %c", data.fmt);
+      }
+   }
+
+   //
+   // ::doFormat_i
+   //
+   void doFormat_i(ObjectVector *objects, FormatData &data)
+   {
+      switch(data.len)
+      {
+      case FL_L:
+      case FL_LL:
+      case FL_MAX:
+         makeData(objects, data);
+         makeExpr(objects, VariableType::get_bt_int_ll());
+         objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Print_li"));
+         break;
+
+      default:
+         if(data.flags || data.width || data.prec)
+         {
+            makeData(objects, data);
+            makeExpr(objects, VariableType::get_bt_int());
+            objects->addToken(OCODE_JMP_CAL_NIL_IMM, objects->getValue("__Print_i"));
+         }
+         else
+         {
+            makeExpr(objects, VariableType::get_bt_int());
+            objects->addToken(OCODE_ACSP_NUM_DEC_I);
+         }
+         break;
       }
    }
 
